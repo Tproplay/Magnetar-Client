@@ -3,6 +3,12 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Ignore all files and folders starting with a dot
+.*
+
+# Exception: Do NOT ignore the .gitignore file itself
+!.gitignore
+
 # User-specific files
 *.rsuser
 *.suo

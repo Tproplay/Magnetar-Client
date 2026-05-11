@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Il2Cpp;
 using Il2CppRhythmGame;
+using MelonLoader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,7 +50,10 @@ namespace Magnetar_Client.Modules
             HelperPetSetting = new BoolSetting("Spawn Ice Queen Pet", HelperPet);
             Settings.Add( HelperPetSetting );
 
-            RandomBulletSetting = new BoolSetting("Random Bullets", RandomBullet);
+            RandomBulletSetting = new BoolSetting("Random Bullets", RandomBullet)
+            {
+
+            };
             Settings.Add( RandomBulletSetting );
 
             selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType));
@@ -170,6 +174,7 @@ namespace Magnetar_Client.Modules
                     newType = (BulletType)instance.selectBulletsSetting.SelectedValues.ElementAt(
                         UnityEngine.Random.RandomRangeInt(0, instance.selectBulletsSetting.SelectedValues.Count));
                 }
+                MelonLogger.Msg((int)newType);
                 if (instance.selectBulletsSetting.SelectedValues.Contains((int)newType))
                     theBulletType = newType;
             }

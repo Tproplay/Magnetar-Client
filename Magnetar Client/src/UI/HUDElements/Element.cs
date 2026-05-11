@@ -60,7 +60,6 @@ namespace Magnetar_Client.UI.HUDElements
 
         public void Render()
         {
-
             Event e = Event.current;
 
             if (HUDManager.forceShow)
@@ -71,9 +70,11 @@ namespace Magnetar_Client.UI.HUDElements
                     if (ActiveDragId == -1)
                     {
                         ActiveDragId = WindowId;
+
                         // Calculate where the mouse is relative to the top-left of the element
                         dragOffset = e.mousePosition - new Vector2(Bounds.x, Bounds.y);
-                        e.Use(); // Consume the click
+
+                        e.Use();
                     }
                 }
 
@@ -90,22 +91,35 @@ namespace Magnetar_Client.UI.HUDElements
                 if (ActiveDragId == WindowId)
                 {
                     Rect intendedBounds = new Rect(e.mousePosition.x - dragOffset.x, e.mousePosition.y - dragOffset.y, Bounds.width, Bounds.height);
-
                     Bounds = ApplySnapping(intendedBounds);
                 }
             }
 
-            // --- 2. RENDER THE WINDOW ---
+            // --- 2. RENDER THE ELEMENT ---
 
             GUIStyle windowStyle = (HUDManager.forceShow || HUDManager.showBackground) ? Magnetar_Default.ModuleOff : GUIStyle.none;
 
-            GUI.Window(
-                WindowId,
-                Bounds,
-                (GUI.WindowFunction)DrawWindowContext,
-                "",
-                windowStyle
-            );
+            if (HUDManager.forceShow)
+            {
+                GUI.Window(
+                    WindowId,
+                    Bounds,
+                    (GUI.WindowFunction)DrawWindowContext,
+                    "",
+                    windowStyle
+                );
+            }
+            else
+            {
+                if (windowStyle != GUIStyle.none)
+                {
+                    GUI.Box(Bounds, "", windowStyle);
+                }
+
+                GUI.BeginGroup(Bounds);
+                DrawWindowContext(WindowId);
+                GUI.EndGroup();
+            }
         }
 
         private Rect ApplySnapping(Rect rect)
@@ -117,12 +131,8 @@ namespace Magnetar_Client.UI.HUDElements
             // 1. GRID SNAPPING (Hold Ctrl)
             if (isCtrlHeld)
             {
-                // Change this value to make the grid squares larger or smaller! 
-                // 10f or 20f usually feels best for UI layouts.
                 float gridSize = 10f;
 
-                // Math trick: Divide by grid size, round to nearest whole number, then multiply back.
-                // This forces the coordinates to always be perfect multiples of the grid size.
                 float gridX = Mathf.Round(rect.x / gridSize) * gridSize;
                 float gridY = Mathf.Round(rect.y / gridSize) * gridSize;
 

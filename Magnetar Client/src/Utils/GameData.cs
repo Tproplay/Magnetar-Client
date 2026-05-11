@@ -29,15 +29,16 @@ namespace Magnetar_Client.Game
         {
             var ui = Il2Cpp.InGameUI.Instance;
 
-            if (ui != null && ui.LevelName1 != null)
-            {
-                var tmpro = ui.LevelName1.GetComponent<Il2CppTMPro.TextMeshProUGUI>();
-                string levelName = tmpro.text;
+            if (ui == null) return "Unknown";
 
-                // 1. Clean the string from game tags
+            var tmpro  = ui.LevelName1 != null ? ui.LevelName1 : (ui.LevelName2 != null ? ui.LevelName2 :ui.LevelName3); 
+
+            if (tmpro != null)
+            {
+                string levelName = tmpro.GetComponent<Il2CppTMPro.TextMeshProUGUI>().text;
+
                 string cleanName = Il2Cpp.InGameText.RemoveRichTextTags(levelName);
 
-                // 2. Apply the Regex Translation
                 return cleanName;
             }
 

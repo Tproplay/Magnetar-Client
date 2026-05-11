@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using MelonLoader;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.UI.WindowDrawing
 {
@@ -388,6 +389,9 @@ namespace Magnetar_Client.UI.WindowDrawing
             {
                 isShiftDragging = false;
                 draggedItemsSession.Clear();
+#if DEBUG
+                DebugLogger.Msg("Drag Complete");
+#endif
             }
 
             // --- THE LIST (CLIPPED) ---
@@ -451,13 +455,11 @@ namespace Magnetar_Client.UI.WindowDrawing
                             // Only process this item if we haven't already hit it during this drag session
                             if (!draggedItemsSession.Contains(intVal))
                             {
-                                // If it doesn't match our target drag state, toggle it
                                 if (isCurrentlySelected != dragTargetState)
                                 {
                                     activeMultiSelect.Toggle(intVal);
                                 }
 
-                                // Mark it as processed
                                 draggedItemsSession.Add(intVal);
                             }
                         }
@@ -521,18 +523,15 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             GUI.Box(rect, "");
 
-            // Blinking cursor logic (blinks every 0.5 seconds)
             string cursor = (isSearchFocused && (int)(Time.realtimeSinceStartup * 2) % 2 == 0) ? "|" : "";
 
             // Draw the text
             if (string.IsNullOrEmpty(text) && !isSearchFocused)
             {
-                // Placeholder text when empty and not clicked
                 GUI.Label(new Rect(rect.x + 5, rect.y, rect.width - 5, rect.height), defaultText, Magnetar_Default.DescriptionStyle);
             }
             else
             {
-                // Actual text with cursor
                 GUI.Label(new Rect(rect.x + 5, rect.y, rect.width - 5, rect.height), text + cursor);
             }
 

@@ -108,6 +108,7 @@ namespace Magnetar_Client.Modules
 
                         // Display the Level Name
                         string levelName = GetLevelName();
+                        
                         if (levelName.Length > 18) Line1Cycle.Add(levelName);
                         else Line1Cycle.Add($"Playing: {Translator.Translate(levelName)}");
 
@@ -137,6 +138,22 @@ namespace Magnetar_Client.Modules
                     
                         
                     }
+
+                case (GameStatus.BigGarden):
+                    {
+                        if (Board.Instance == null)
+                        {
+                            Line1Cycle.Add("Looking at the Main Menu");
+                            Line1Cycle.Add("Selecting a level to play");
+                            return;
+                        }
+
+                        Line1Cycle.Add("Roaming in BigGarden");
+                        Line1Cycle.Add("Growing Plants");
+                        
+                        break;
+                    }
+                
             }
         }
 

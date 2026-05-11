@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 using Magnetar_Client.UI.Themes;
-
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.TopBar
 {
@@ -16,7 +16,7 @@ namespace Magnetar_Client.TopBar
         public static void Init()
         {
 
-            foreach (TabType tab in (TabType[])Enum.GetValues(typeof(TabType))) // Iterates over Enum
+            foreach (TabType tab in (TabType[])Enum.GetValues(typeof(TabType)))
             {
                 string name = tab.ToString();
                 float btnWidth = name.Length * 12;
@@ -36,10 +36,8 @@ namespace Magnetar_Client.TopBar
             {
                 Rect barArea = new Rect((Screen.width / 2) - (windowWidth / 2), 0, windowWidth, 30);
 
-                // Check if the mouse is inside the bar
                 if (barArea.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y)))
                 {
-                    // This stops the game from seeing the mouse click this frame
                     if (Input.GetMouseButtonDown(0) | Input.GetMouseButtonDown(1) | Input.GetMouseButtonDown(2))
                     {
                         Input.ResetInputAxes();
@@ -61,7 +59,7 @@ namespace Magnetar_Client.TopBar
                     Event.current.Use();
                     UI.WindowDrawing.DrawSetting.isSearchFocused = false;
 #if DEBUG
-                    MelonLogger.Msg($"Changed Tab to : {name}");
+                    DebugLogger.Msg($"Changed Tab to : {name}");
 #endif
                 }
 

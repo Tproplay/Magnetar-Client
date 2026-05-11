@@ -195,7 +195,7 @@ namespace Magnetar_Client.Core
                         multiSelectWindowRect.height
                         );
                 }
-                
+
                 if (activeMultiSelect != null)
                 {
 
@@ -206,16 +206,7 @@ namespace Magnetar_Client.Core
                         "Select " + activeMultiSelect.Name,
                         Magnetar_Default.ModuleWindow
                     );
-
-                    // Block game input if clicking inside the popup
-                    Vector2 mousePos = new Vector2(Input.mousePosition.x, 1080 - Input.mousePosition.y);
-                    if (multiSelectWindowRect.Contains(mousePos))
-                    {
-                        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
-                        {
-                            Input.ResetInputAxes();
-                        }
-                    }
+                
                 }
             }
         }

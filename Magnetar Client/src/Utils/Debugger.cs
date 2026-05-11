@@ -14,7 +14,7 @@ namespace Magnetar_Client.Utils
             TranslatorLogger = new MelonLogger.Instance("Magnetar Translator");
 #if DEBUG
             DebugLogger = new MelonLogger.Instance("Magnetar Dubugger");
-            AutoSaveLogger = new MelonLogger.Instance("Magnetar AutoSaveLogger");
+            AutoSaveLogger = new MelonLogger.Instance("Magnetar AutoSave");
 #endif
         }
     }

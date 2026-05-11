@@ -1,8 +1,9 @@
-﻿using Il2Cpp;
+﻿using HarmonyLib;
+using Il2Cpp;
 using Magnetar_Client.Game;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
-
+using UnityEngine;
 
 namespace Magnetar_Client.Modules
 {
@@ -54,31 +55,20 @@ namespace Magnetar_Client.Modules
 
         // Mod Logic
 
-        private Dictionary<Plant, bool> originalValue = new Dictionary<Plant, bool>();
-        public override void OnUpdateActive()
+
+        [HarmonyPatch(typeof(Plant))]
+        public static class PlantShootablePatch
         {
-            foreach(Plant plant in GameData.plantList)
+            [HarmonyPatch(nameof(Plant.Shootable))]
+            [HarmonyPostfix]
+            public static void ShootablePostfix(Plant __instance, ref bool __result)
             {
-                if (!originalValue.ContainsKey(plant))
-                {
-                    originalValue[plant] = plant.keepShooting;
-                    plant.keepShooting = true;
-                }
+                if (instance == null || Board.Instance == null) return;
+                if (!instance.Active) return;
+
+                if (instance.PlantsSelectedSetting.IsSelected((int)__instance.thePlantType))
+                    __result = true;
             }
-        }
-
-        public override void OnDisable()
-        {
-            foreach (Plant plant in GameData.plantList)
-            {
-                if (originalValue.ContainsKey(plant))
-                {
-                    plant.keepShooting = originalValue[plant];
-                }
-            }
-
-            originalValue.Clear();
-
         }
     }
 }

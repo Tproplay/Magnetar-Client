@@ -16,7 +16,7 @@ namespace Magnetar_Client.UI.HUDElements
 
             TimeSpan upTime = DateTime.Now - currentProcess.StartTime;
 
-            string displayText = $"<color=white>{upTime.ToString(@"hh\:mm\:ss")}</color>";
+            string displayText = $"<color=white>  {upTime.ToString(@"hh\:mm\:ss")}</color>";
 
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }

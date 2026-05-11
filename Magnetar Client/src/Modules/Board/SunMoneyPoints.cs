@@ -1,5 +1,7 @@
-﻿using Il2Cpp;
-using HarmonyLib;
+﻿using HarmonyLib;
+using Il2Cpp;
+using MelonLoader;
+using static MelonLoader.MelonLogger;
 
 
 namespace Magnetar_Client.Modules
@@ -15,38 +17,35 @@ namespace Magnetar_Client.Modules
 
         // The mod data
 
-        private int sunAmount = 99999;
+        public static UnlimitedSun instance;
+
+        private readonly int sunAmount = 99999;
         private int originalSunAmount = -853721;
         private IntSetting sunSetting;
 
-        private bool preserveOriginl = true;
+        private readonly bool preserveOriginl = true;
         private BoolSetting preserveOriginalSetting;
 
 
-        public override bool Active { get; set; } = false;
-
         public UnlimitedSun()
         {
-            var setting = new IntSetting("Sun Amount", 0, 99999, sunAmount);
-            Settings.Add(setting);
-            sunSetting = setting;
+            instance = this;
 
-            var preserveSetting = new BoolSetting("Preserve Original", preserveOriginl);
-            Settings.Add(preserveSetting);
-            preserveOriginalSetting = preserveSetting;
+            sunSetting = new IntSetting("Sun Amount", 0, 99999, sunAmount);
+            Settings.Add(sunSetting);
+
+            preserveOriginalSetting = new BoolSetting("Preserve Original", preserveOriginl);
+            Settings.Add(preserveOriginalSetting);
+
         }
 
         // Mod Logic
-        public override void OnEnable() 
-        {
-            if (Board.Instance == null) return;
-            originalSunAmount = Board.Instance.theSun;
-        }
+
         public override void OnDisable() 
         { 
-            if (Board.Instance == null) return;
+            if (Board.Instance == null || instance==null) return;
 
-            if (preserveOriginalSetting.Value)
+            if (originalSunAmount >0 && instance.preserveOriginalSetting.Value)
             {
                 Board.Instance.theSun = originalSunAmount;
                 originalSunAmount = -853721;
@@ -55,12 +54,11 @@ namespace Magnetar_Client.Modules
 
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null) return;
+            if (Board.Instance == null || instance==null) return;
             if (originalSunAmount == -853721) originalSunAmount = Board.Instance.theSun;
 
 
-            sunAmount = sunSetting.Value;
-            Board.Instance.theSun = sunAmount;
+            Board.Instance.theSun = instance.sunSetting.Value;
         }
 
         
@@ -77,31 +75,44 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Board;
 
         // The mod data
-        public static SunMultiplier Instance;
 
-        private float sunMultiplier = 2;
+        private readonly float sunMultiplier = 2;
         private FloatSetting sunMultiplierSetting;
-        public override bool Active { get; set; } = false;
 
-        
         public SunMultiplier()
         {
-            Instance = this;
-            var setting = new FloatSetting("Multiplier", -100, 100, sunMultiplier);
-            Settings.Add(setting);
-            sunMultiplierSetting = setting;
+            sunMultiplierSetting = new FloatSetting("Multiplier", -100, 100, sunMultiplier);
+            Settings.Add(sunMultiplierSetting);
         }
 
         // Mod Logic
-
-        [HarmonyPatch(typeof(Board), nameof(Board.GetSun))]
-        [HarmonyPrefix]
-        public static bool Prefix(ref float count)
+        private static int _sunAmount = -947624;
+        public override void OnUpdateActive()
         {
-            if (Instance == null || !Instance.Active) return true;
-            count = count*Instance.sunMultiplierSetting.Value;
-            return true;
+            if (Board.Instance == null) { _sunAmount = -947624; return; }
+
+            int Sun = Board.Instance.theSun;
+
+            if (_sunAmount== -947624) _sunAmount = Sun;
+            
+            if (Sun != _sunAmount)
+            {
+                if ((Sun - _sunAmount)>0)
+                    Board.Instance.theSun += (int)((Sun - _sunAmount)*(sunMultiplierSetting.Value - 1));
+
+                _sunAmount = Board.Instance.theSun;
+            }
+
         }
+
+        public override void OnDisable()
+        {
+            _sunAmount = -947624;
+        }
+
+        
+
+
     }
 
     public class UnlimitedMoney : Module
@@ -115,11 +126,13 @@ namespace Magnetar_Client.Modules
 
         // mod data
 
-        private int moneyAmount = 9999999;
+        public static UnlimitedMoney instance;
+
+        private readonly int moneyAmount = 9999999;
         private int originalMoneyAmount = -853721;
         private IntSetting moneySetting;
 
-        private bool preserveOriginl = true;
+        private readonly bool preserveOriginl = true;
         private BoolSetting preserveOriginalSetting;
 
 
@@ -127,29 +140,21 @@ namespace Magnetar_Client.Modules
 
         public UnlimitedMoney()
         {
-            var setting = new IntSetting("Money Amount", 0, 99999, moneyAmount);
-            Settings.Add(setting);
-            moneySetting = setting;
-            var preserveSetting = new BoolSetting("Preserve Original", preserveOriginl);
-            Settings.Add(preserveSetting);
-            preserveOriginalSetting = preserveSetting;
+            instance = this;
+            moneySetting = new IntSetting("Money Amount", 0, 99999, moneyAmount);
+            Settings.Add(moneySetting);
+
+            preserveOriginalSetting = new BoolSetting("Preserve Original", preserveOriginl);
+            Settings.Add(preserveOriginalSetting);
         }
 
         // Mod Logic
-        public override void OnEnable()
-        {
-            if (Board.Instance == null) return;
-            originalMoneyAmount = Board.Instance.theMoney;
-        }
         public override void OnDisable()
         {
-            if (Board.Instance == null) return;
+            if (Board.Instance == null || !instance.preserveOriginalSetting.Value) return;
 
-            if (preserveOriginalSetting.Value)
-            {
-                Board.Instance.theMoney = originalMoneyAmount;
-                originalMoneyAmount = -853721;
-            }
+            Board.Instance.theMoney = originalMoneyAmount;
+            originalMoneyAmount = -853721;
         }
 
         public override void OnUpdateActive()
@@ -157,8 +162,7 @@ namespace Magnetar_Client.Modules
             if (Board.Instance == null) return;
             if (originalMoneyAmount == -853721) originalMoneyAmount = Board.Instance.theMoney;
 
-            moneyAmount = moneySetting.Value;
-            Board.Instance.theMoney = moneyAmount;
+            Board.Instance.theMoney = instance.moneySetting.Value;
         }
 
 
@@ -176,30 +180,42 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Board;
 
         // Mod data
-        public static MoneyMultiplier Instance;
-        private float moneyMultiplier = 2;
+
+        private readonly float moneyMultiplier = 2;
         private FloatSetting moneyMultiplierSetting;
         public override bool Active { get; set; } = false;
 
 
         public MoneyMultiplier()
         {
-            Instance = this; // Set the instance to this so we can access it in the Harmony patch
-            var setting = new FloatSetting("Multiplier", -100, 100, moneyMultiplier);
-            Settings.Add(setting);
-            moneyMultiplierSetting = setting;
+            moneyMultiplierSetting = new FloatSetting("Multiplier", -100, 100, moneyMultiplier);
+            Settings.Add(moneyMultiplierSetting);
         }
 
         // Mod Logic
 
-        [HarmonyPatch(typeof(Board), nameof(Board.GetMoney))]
-        [HarmonyPrefix]
-        public static bool Prefix(ref float count)
+        private static int _moneyAmount = -947624;
+        public override void OnUpdateActive()
         {
-            if (Instance == null || !Instance.Active) return true;
-            count = count * Instance.moneyMultiplierSetting.Value;
-            return true;
-            
+            if (Board.Instance == null) { _moneyAmount = -947624; return; }
+
+            int Money = Board.Instance.theMoney;
+
+            if (_moneyAmount == -947624) _moneyAmount = Money;
+
+            if (Money != _moneyAmount)
+            {
+                if ((Money - _moneyAmount) > 0)
+                    Board.Instance.theMoney += (int)((Money - _moneyAmount) * (moneyMultiplierSetting.Value -1));
+
+                _moneyAmount = Board.Instance.theMoney;
+            }
+
+        }
+
+        public override void OnDisable()
+        {
+            _moneyAmount = -947624;
         }
     }
 
@@ -214,41 +230,31 @@ namespace Magnetar_Client.Modules
 
         // Mod data
 
-        private float pointsAmount = 9999999;
+        private readonly float pointsAmount = 9999999;
         private float originalPointsAmount = -853721;
         private FloatSetting pointsSetting;
 
-        private bool preserveOriginl = true;
+        private readonly bool preserveOriginl = true;
         private BoolSetting preserveOriginalSetting;
 
         public override bool Active { get; set; } = false;
 
         public UnlimitedPoints()
         {
-            var setting = new FloatSetting("Points Amount", 0, 9999999, pointsAmount);
-            Settings.Add(setting);
-            pointsSetting = setting;
-            
-            var preserveSetting = new BoolSetting("Preserve Original", preserveOriginl);
-            Settings.Add(preserveSetting);
-            preserveOriginalSetting = preserveSetting;
+            pointsSetting = new FloatSetting("Points Amount", 0, 9999999, pointsAmount);
+            Settings.Add(pointsSetting);
+
+            preserveOriginalSetting = new BoolSetting("Preserve Original", preserveOriginl);
+            Settings.Add(preserveOriginalSetting);
         }
 
         // Mod Logic
-        public override void OnEnable()
-        {
-            if (Board.Instance == null) return;
-            originalPointsAmount = Board.Instance.thePoints;
-        }
         public override void OnDisable()
         {
-            if (Board.Instance == null) return;
+            if (Board.Instance == null || !preserveOriginalSetting.Value) return;
 
-            if (preserveOriginalSetting.Value)
-            {
-                Board.Instance.thePoints = originalPointsAmount;
-                originalPointsAmount = -853721;
-            }
+            Board.Instance.thePoints = originalPointsAmount;
+            originalPointsAmount = -853721;
         }
 
         public override void OnUpdateActive()
@@ -256,8 +262,7 @@ namespace Magnetar_Client.Modules
             if (Board.Instance == null) return;
             if (originalPointsAmount == -853721) originalPointsAmount = Board.Instance.thePoints;
 
-            pointsAmount = pointsSetting.Value;
-            Board.Instance.thePoints = pointsAmount;
+            Board.Instance.thePoints = pointsSetting.Value;
         }
 
 
@@ -275,30 +280,40 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Board;
 
         // Mod data
-        public static PointsMultiplier Instance;
-        private float pointsMultiplier = 2;
-        private FloatSetting pointsMultiplierSetting;
-        public override bool Active { get; set; } = false;
 
+        private readonly float pointsMultiplier = 2;
+        private FloatSetting pointsMultiplierSetting;
 
         public PointsMultiplier()
         {
-            Instance = this; // Set the instance to this so we can access it in the Harmony patch
-            var setting = new FloatSetting("Multiplier", -100, 100, pointsMultiplier);
-            Settings.Add(setting);
-            pointsMultiplierSetting = setting;
+            pointsMultiplierSetting = new FloatSetting("Multiplier", -100, 100, pointsMultiplier);
+            Settings.Add(pointsMultiplierSetting);
         }
 
         // Mod Logic
 
-        [HarmonyPatch(typeof(Board), nameof(Board.GetPoint))]
-        [HarmonyPrefix]
-        public static bool Prefix(ref float count)
+        private static float _pointsAmount = -947624.35f;
+        public override void OnUpdateActive()
         {
-            if (Instance == null || !Instance.Active) return true;
-            count = count * Instance.pointsMultiplierSetting.Value;
-            return true;
+            if (Board.Instance == null) { _pointsAmount = -947624.35f; return; }
 
+            float Points = Board.Instance.thePoints;
+
+            if (_pointsAmount == -947624.35f) _pointsAmount = Points;
+
+            if (Points != _pointsAmount)
+            {
+                if ((Points - _pointsAmount) > 0)
+                    Board.Instance.thePoints += (Points - _pointsAmount) * (pointsMultiplierSetting.Value - 1);
+
+                _pointsAmount = Board.Instance.thePoints;
+            }
+
+        }
+
+        public override void OnDisable()
+        {
+            _pointsAmount = -947624.35f;
         }
     }
 }

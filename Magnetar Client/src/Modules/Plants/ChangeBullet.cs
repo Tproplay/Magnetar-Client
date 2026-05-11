@@ -41,7 +41,11 @@ namespace Magnetar_Client.Modules
 
             selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
             {
-                CustomNames = overridenNames
+                CustomNames = overridenNames,
+                Blacklist = new HashSet<int>
+                {
+                    162,220
+                }
             };
             Settings.Add(selectBulletsSetting);
             selectBulletsSetting.SelectedValues.UnionWith(preselected);

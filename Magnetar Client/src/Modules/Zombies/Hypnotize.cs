@@ -26,12 +26,10 @@ namespace Magnetar_Client.Modules
         // Mod Data
         public MultiSelectSetting ZombiesSelectedSetting;
 
-        public bool TurnOffAfterUse = true;
+        public readonly bool TurnOffAfterUse = true;
         public BoolSetting AutoTurnOff;
-        public override bool Active { get; set; } = false;
+
         public static float deltaTime = 0;
-
-
 
         private static Dictionary<int, string> zombieNameOverriden = new Dictionary<int, string>();
 
@@ -50,7 +48,7 @@ namespace Magnetar_Client.Modules
                 CustomNames = zombieNameOverriden,
                 Blacklist = new HashSet<int> {
                     (int)ZombieType.Nothing,
-
+                    212,218,219,220,221,222,223,224,226,228,229,231,234,235,243,244
                 },
 
             };
@@ -82,7 +80,7 @@ namespace Magnetar_Client.Modules
             {
                 if (ZombiesSelectedSetting.IsSelected((int)zombie.theZombieType))
                 {
-                    zombie.isMindControlled = true;
+                    zombie.SetMindControl(1);
                 }
             }
             

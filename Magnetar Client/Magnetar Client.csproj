@@ -97,7 +97,6 @@
     <Compile Include="src\Core\AssemblyInfo.cs" />
     <Compile Include="src\Config\Config.cs" />
     <Compile Include="src\Modules\Board\NoGridItems.cs" />
-    <Compile Include="src\Modules\Board\UnlimiedTravelReroll.cs" />
     <Compile Include="src\Modules\Zombies\Hypnotize.cs" />
     <Compile Include="src\UI\HUDElements\App\Time.cs" />
     <Compile Include="src\UI\HUDElements\Game\Damage.cs" />

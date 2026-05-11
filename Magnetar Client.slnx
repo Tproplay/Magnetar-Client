@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="ANDROID" />
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Project Path="Magnetar Client/Magnetar Client.csproj" Id="432ac7a5-ce0b-4cbb-87e8-1bdc6887c091" />
+</Solution>

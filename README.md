@@ -10,3 +10,7 @@
   A high-performance utility mod for <span style="color:red">Plants Vs. Zombies Fusion</span> built with MelonLoader.<br>
 </p>
 
+## 🎮 Controls
+
+**`Right Shift`** Show/Hide the mod menu.
+**`Right Click`** Open Module settings.

@@ -10,7 +10,18 @@
   A high-performance utility mod for <span style="color:red">Plants Vs. Zombies Fusion</span> built with MelonLoader.<br>
 </p>
 
+---
+
+**Magnetar Client** is a mod for Plants Vs. Zombies Fusion that aims to provide better QoL Features, Game Modifications, Customizable UI display and many more features.
+
+## Features
+
+- Tons of Built-in Customizable Cheats
+- Clean User Interface
+- Customizable UI Display
+- Light weight, causes almost no performance difference
+
 ## 🎮 Controls
 
-**`Right Shift`** Show/Hide the mod menu.
-**`Right Click`** Open Module settings.
+- **`Right Shift`** Show/Hide the mod menu.
+- **`Right Click`** Open Module settings.

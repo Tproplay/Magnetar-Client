@@ -6,7 +6,7 @@ namespace Magnetar_Client.UI.HUDElements
 {
     public class TimeInLevel : HudElement
     {
-        public TimeInLevel() : base("Time In Current Level", HudElement.NewRect(200))
+        public TimeInLevel() : base("Time In Current Level", HudElement.NewRect(180))
         { }
 
         DateTime StartTime = DateTime.Now;

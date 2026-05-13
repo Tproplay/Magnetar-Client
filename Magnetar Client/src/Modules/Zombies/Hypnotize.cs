@@ -1,8 +1,6 @@
 ﻿using Il2Cpp;
 using Magnetar_Client.Utils;
-using MelonLoader;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 using static Magnetar_Client.Game.GameData;
@@ -13,7 +11,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Hypnotize All Zombies";
-        public override string Description { get; set; } = "Hypnorizes the selected zombie(s) while the module is active.";
+        public override string Description { get; set; } = "Hypnotizes the selected zombie(s) while the module is active.";
         public override string SearchHints { get; set; } = "hypnotizeallzombies hypnozombies zombieshypnotize hypnotisezombies" +
             " charmzombies zombiecharm mindcontrolzombies zombiesmindcontrol allyzombies zombiealliance brainwashzombies " +
             "turnzombies hypnotizezombie hypnozombie hipnotizezombies hipnozombies hypnatizezombies hypnotiseallzombies " +

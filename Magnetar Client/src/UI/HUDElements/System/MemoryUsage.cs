@@ -105,7 +105,7 @@ namespace Magnetar_Client.UI.HUDElements
         private float cpuUsage;
         private float nextUpdateTime;
 
-        public CPUUsageElement() : base("CPU Usage", HudElement.NewRect(100))
+        public CPUUsageElement() : base("CPU Usage", HudElement.NewRect(105))
         {
             currentProc = Process.GetCurrentProcess();
             lastCpuTime = currentProc.TotalProcessorTime;

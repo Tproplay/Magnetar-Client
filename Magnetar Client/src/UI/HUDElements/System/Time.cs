@@ -5,7 +5,7 @@ namespace Magnetar_Client.UI.HUDElements
 {
     public class CurrentTime : HudElement
     {
-        public CurrentTime() : base("Current Time", HudElement.NewRect(100))
+        public CurrentTime() : base("Current Time", HudElement.NewRect(80))
         { }
 
         protected override void DrawContent(float width, float height)

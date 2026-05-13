@@ -76,7 +76,7 @@ namespace Magnetar_Client.Modules
             {
                 if (PlantsSelectedSetting.IsSelected((int)plant.thePlantType))
                 {
-                    plant.Die();
+                    plant.Die(Plant.DieReason.BySelf);
                 }
             }
 

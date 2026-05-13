@@ -1,9 +1,7 @@
 ﻿using HarmonyLib;
 using Il2Cpp;
-using Magnetar_Client.Game;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Magnetar_Client.Modules
 {

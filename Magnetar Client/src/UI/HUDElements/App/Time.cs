@@ -7,7 +7,7 @@ namespace Magnetar_Client.UI.HUDElements
 {
     public class UpTime : HudElement
     {
-        public UpTime() : base("Up Time",HudElement.NewRect(100))
+        public UpTime() : base("Up Time",HudElement.NewRect(80))
         { }
 
         protected override void DrawContent(float width, float height)
@@ -16,7 +16,7 @@ namespace Magnetar_Client.UI.HUDElements
 
             TimeSpan upTime = DateTime.Now - currentProcess.StartTime;
 
-            string displayText = $"<color=white>  {upTime.ToString(@"hh\:mm\:ss")}</color>";
+            string displayText = $"<color=white>{upTime.ToString(@"hh\:mm\:ss")}</color>";
 
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }

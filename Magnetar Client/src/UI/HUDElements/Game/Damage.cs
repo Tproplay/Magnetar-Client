@@ -16,7 +16,7 @@ namespace Magnetar_Client.UI.HUDElements
         protected override void DrawContent(float width, float height)
         {
 
-            string displayText = $"Plant Damage: {FormatInternational(ZombieDamage)}";
+            string displayText = $"Plant Damage: {FormatInternational(TotalDamagedRecievedByZombies)}";
 
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }
@@ -25,7 +25,7 @@ namespace Magnetar_Client.UI.HUDElements
 
     public class AverageDamageStatsPlant : HudElement
     {
-        public AverageDamageStatsPlant() : base("Average Damage by Plants", HudElement.NewRect(200))
+        public AverageDamageStatsPlant() : base("Average Damage by Plants", HudElement.NewRect(175))
         { }
 
         private List<long> damageHistory = new List<long>();
@@ -41,7 +41,7 @@ namespace Magnetar_Client.UI.HUDElements
             {
                 timer = 0f;
 
-                damageHistory.Add(ZombieDamage);
+                damageHistory.Add(TotalDamagedRecievedByZombies);
 
                 // Keep only the last 10 snapshots (covering 2.5 second of gameplay)
                 if (damageHistory.Count > 10)

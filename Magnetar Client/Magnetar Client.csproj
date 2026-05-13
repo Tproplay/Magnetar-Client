@@ -91,12 +91,19 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6 manual translation\MelonLoader\Il2CppAssemblies\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6 manual translation\MelonLoader\Il2CppAssemblies\UnityEngine.UI.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Core\AssemblyInfo.cs" />
     <Compile Include="src\Config\Config.cs" />
     <Compile Include="src\Modules\Board\NoGridItems.cs" />
+    <Compile Include="src\Modules\Misc\BetterHealthDisplay.cs" />
+    <Compile Include="src\Modules\Plants\GodMode.cs" />
+    <Compile Include="src\Modules\Zombies\BuffZombies.cs" />
     <Compile Include="src\Modules\Zombies\Hypnotize.cs" />
     <Compile Include="src\UI\HUDElements\App\Time.cs" />
     <Compile Include="src\UI\HUDElements\Game\Damage.cs" />
@@ -105,7 +112,7 @@
     <Compile Include="src\UI\HUDElements\Game\Plants.cs" />
     <Compile Include="src\UI\HUDElements\System\Time.cs" />
     <Compile Include="src\Utils\Debugger.cs" />
-    <Compile Include="src\Utils\GameData.cs" />
+    <Compile Include="src\GameData.cs" />
     <Compile Include="src\Core\HUDManager.cs" />
     <Compile Include="src\Core\main.cs" />
     <Compile Include="src\Core\ModuleManager.cs" />

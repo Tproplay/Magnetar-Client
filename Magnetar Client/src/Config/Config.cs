@@ -13,11 +13,11 @@ namespace Magnetar_Client
         public readonly static float WindowHeight = 1080;
 
         public static bool showgui = true;
-        public static TabType CurrentTab = TabType.MODULES;
-        public readonly static float ModuleWindowWidth = 200f;
-
         public static bool dimBg = false;
+        public static TabType CurrentTab = TabType.MODULES;
 
+
+        public readonly static float ModuleWindowWidth = 200f;
         public readonly static float elementHeight = 22;
         public readonly static float indent = 10;
         public readonly static float spacing = 6;

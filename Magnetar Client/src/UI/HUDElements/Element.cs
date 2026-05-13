@@ -22,22 +22,23 @@ namespace Magnetar_Client.UI.HUDElements
         }
 
         /// <summary>
-        /// Runs once when the module is enabled
+        /// Runs once when the HUD element is enabled. Runs before OnUpdate.
         /// </summary>
         public virtual void OnEnable() { }
         /// <summary>
-        /// Runs once when the module is disabled
+        /// Runs once when the HUD element is disabled. Runs after OnUpdate.
         /// </summary>
         public virtual void OnDisable() { }
 
 
         /// <summary>
-        /// Runs every frame regardless of whether the module is active or not.
+        /// Runs every frame regardless of whether the HUD element is active or not.
         /// </summary>
         public virtual void OnUpdate() { if (_isCurrentlyEnabled) OnUpdateActive(); }
 
         /// <summary>
-        /// Runs every frame only when the module is active. Will not run if OnUpdate is overridden without calling base.OnUpdate().
+        /// Runs every frame only when the HUD element is active.
+        /// Will not run if OnUpdate is overridden without calling base.OnUpdate().
         /// </summary>
         public virtual void OnUpdateActive() { }
 

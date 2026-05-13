@@ -5,7 +5,7 @@ namespace Magnetar_Client.UI.HUDElements
 
     public class FpsElement : HudElement
     {
-        public FpsElement() : base("FPS Counter", HudElement.NewRect(100))
+        public FpsElement() : base("FPS Counter", HudElement.NewRect(90))
         { }
 
         float fps;
@@ -40,7 +40,7 @@ namespace Magnetar_Client.UI.HUDElements
 
     public class FrameTimeElement : HudElement
     {
-        public FrameTimeElement() : base("Frame Time", HudElement.NewRect(150))
+        public FrameTimeElement() : base("Frame Time", HudElement.NewRect(155))
         { }
 
         float currentFrameTime;

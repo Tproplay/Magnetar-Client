@@ -25,3 +25,12 @@
 
 - **`Right Shift`** Show/Hide the mod menu.
 - **`Right Click`** Open Module settings.
+
+## How to Install
+
+- Make sure you have MelonLoader Installed.
+- Download the latest release zip file.
+- Extract the downloaded archive.
+- Copy contents of `Magnetar\Mods` to `[Your Game folder]\Mods`.
+- Similarly, Copy contents of `Magnetar\UserLibs` to `[Your Game folder]\UserLibs`.
+- Launch your game to activate the client.

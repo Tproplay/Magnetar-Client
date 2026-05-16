@@ -42,7 +42,13 @@ namespace Magnetar_Client.Modules
 
         public override void OnUpdateActive()
         {
-            if (BoardInstanceIsNull || !board.boardTag.isColumn) { wasAlreadyEnabled = null; return; }
+            if (BoardInstanceIsNull) // Out of the game
+                { wasAlreadyEnabled = null; return; }
+            if 
+                (!board.boardTag.isColumn) // Reset Level
+            { 
+                wasAlreadyEnabled = null; 
+            }
 
 
             if (wasAlreadyEnabled != null) return;
@@ -106,7 +112,15 @@ namespace Magnetar_Client.Modules
         // Mod Logic
         public override void OnUpdateActive()
         {
-            if (BoardInstanceIsNull || !board.boardTag.enableAllTravelPlant) { wasAlreadyEnabled = null; return; }
+            if (BoardInstanceIsNull) // Out of the game
+            { wasAlreadyEnabled = null; return; }
+            if
+                (!board.boardTag.isColumn) // Reset Level
+            {
+                wasAlreadyEnabled = null;
+            }
+
+
             if (wasAlreadyEnabled != null) return;
 
             wasAlreadyEnabled = board.boardTag.enableAllTravelPlant ? "Yes" : "No";

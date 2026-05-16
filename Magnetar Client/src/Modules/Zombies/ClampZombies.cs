@@ -10,7 +10,8 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Clamp Zombies";
-        public override string Description { get; set; } = "Maintains stable FPS by merging the HP of nearby identical zombies when the spawn limit is exceeded.";
+        public override string Description { get; set; } = "Maintains stable FPS by merging the HP of nearby identical zombies when the spawn limit is exceeded." +
+            "\nMany Break the Damage Counter.";
         public override string SearchHints { get; set; } = "clampzombies clampzombie limitfps maxfps fpsoptimize fixlag mergezombies" +
             " combinezombies zombiehp healthmerge mergespawn performanceboost memoryfix stackzombies zombieclamp hpstack zombielimit" +
             " fpsboost lagfix clusterspawns clumpzombies mergehp optimizefps lowfps hpfusion zombiemerge lagprevent clampzomb";

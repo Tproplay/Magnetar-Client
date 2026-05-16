@@ -12,7 +12,7 @@ namespace Magnetar_Client.Modules
         // Mod Info
         public override string Name { get; set; } = "Anti-Lag Spawns";
         public override string Description { get; set; } = "Staggers mass zombie spawns over time to prevent lag spikes.\nMay " +
-            "break Game's logic and definitely break the Zombie Counter.";
+            "break Game's logic and the Zombie Counter.";
         public override string SearchHints { get; set; } = "antilag antilagspawns lagspawn fixlag lagfix countersmasher stagger spawns " +
             "staggerzombies staggeredspawns massspawn lagspike nolag spawnerlag zombielag lagprevent performanceboost spawnfix breakcounter" +
             " counterbreak zombiecounter smoothspawn logicbreak massspawnfix antilagmod lagspawns antispawnlag laglessspawns";

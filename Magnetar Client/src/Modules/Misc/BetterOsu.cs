@@ -7,8 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Magnetar_Client.Game;
 using static Magnetar_Client.Game.AppData;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Modules
 {
@@ -40,7 +40,10 @@ namespace Magnetar_Client.Modules
         public List<int> preselected = Enum.GetValues(typeof(BulletType)).Cast<int>().ToList();
         public MultiSelectSetting selectBulletsSetting;
 
-        
+#if DEBUG
+        BoolSetting DebugMode;
+#endif
+
 
         public BetterOsu()
         {
@@ -64,13 +67,19 @@ namespace Magnetar_Client.Modules
             };
             selectBulletsSetting.SelectedValues.UnionWith(preselected);
 
+#if DEBUG
+            DebugMode = new BoolSetting("DebugMode", false);
+#endif
 
             Settings.Add(BulletsDamageIncreaseSetting);
             Settings.Add(HelperPetSetting);
             Settings.Add(PetTypeSetting);
             Settings.Add(RandomBulletSetting);
             Settings.Add( selectBulletsSetting );
-            
+#if DEBUG
+            Settings.Add(DebugMode);
+#endif
+
         }
 
         float DamageBuff = 1;
@@ -80,11 +89,18 @@ namespace Magnetar_Client.Modules
         public override void OnUpdateActive()
         {
             RhythmGameManager rhythmGameManager = RhythmGameManager.Instance;
+
             if (rhythmGameManager == null || BoardInstanceIsNull)
             {
+                if (originalDamage.Count == 0 && currentCombo == 0 && SpawnedPets == 0) return;
+
                 originalDamage.Clear();
                 currentCombo = 0;
                 SpawnedPets = 0;
+#if DEBUG
+                if (DebugMode.Value)
+                    DebugLogger.Msg("Better Osu: Reset");
+#endif
                 return;
             }
 
@@ -93,18 +109,27 @@ namespace Magnetar_Client.Modules
                 originalDamage.Clear();
                 currentCombo = 0;
                 SpawnedPets = 0;
+#if DEBUG
+                if (DebugMode.Value)
+                    DebugLogger.Msg("Better Osu: Reset");
+#endif
                 return;
+
             }
 
             //MiniPet
 
             if (HelperPetSetting.Value)
             {
-                if (SpawnedPets <= 0)
+                if (SpawnedPets == 0)
                 {
                     Vector2 centerWorldPos = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.nearClipPlane));
                     MiniPet pet = MiniPet.SetPet(board, centerWorldPos, (PetType)PetTypeSetting.SelectedValues.First());
                     SpawnedPets++;
+#if DEBUG
+                    if (DebugMode.Value)
+                        DebugLogger.Msg("Better Osu: Spawned Pet");
+#endif
                 }
             }
 
@@ -116,6 +141,10 @@ namespace Magnetar_Client.Modules
                     UnityEngine.Object.Destroy(pet);
                     pet.gameObject.SetActive(false);
                     SpawnedPets--;
+#if DEBUG
+                    if (DebugMode.Value)
+                        DebugLogger.Msg("Better Osu: Removed Pet");
+#endif
                 }
             }
 
@@ -130,11 +159,28 @@ namespace Magnetar_Client.Modules
         {
             currentCombo = 0;
             originalDamage.Clear();
+
+            if (SpawnedPets > 0)
+            {
+                MiniPet pet = GameObject.FindObjectOfType<MiniPet>();
+                UnityEngine.Object.Destroy(pet);
+                pet.gameObject.SetActive(false);
+                SpawnedPets--;
+#if DEBUG
+                if (DebugMode.Value)
+                    DebugLogger.Msg("Better Osu: Removed Pet");
+#endif
+            }
+
+#if DEBUG
+            if (DebugMode.Value)
+            DebugLogger.Msg("Better Osu: Reset");
+#endif
         }
 
         static Dictionary<Bullet, int> originalDamage = new Dictionary<Bullet, int>();
 
-        [HarmonyPatch(typeof(Il2Cpp.Bullet))]
+        [HarmonyPatch(typeof(Bullet))]
         public static class BulletPatch
         {
 
@@ -203,13 +249,39 @@ namespace Magnetar_Client.Modules
             }
         }
 
-        [HarmonyPatch(typeof(Board),nameof(Board.Awake))]
-        public static void BoardAwakePatch()
+        [HarmonyPatch(typeof(Board))]
+        public static class BoardPatch
         {
-            if (instance == null) return;
-            instance.SpawnedPets = 0;
-            instance.currentCombo = 0;
+            [HarmonyPatch(nameof(Board.Awake))]
+            [HarmonyPostfix]
+            public static void AwakePatch()
+            {
+                if (instance == null) return;
+                instance.SpawnedPets = 0;
+                instance.currentCombo = 0;
+                originalDamage.Clear();
+#if DEBUG
+                if (instance.DebugMode.Value)
+                    DebugLogger.Msg("Better Osu: Reset");
+#endif
+            }
+
+            [HarmonyPatch(nameof(Board.OnDestroy))]
+            [HarmonyPostfix]
+            public static void OnDestroyPatch()
+            {
+                if (instance == null) return;
+                instance.SpawnedPets = 0;
+                instance.currentCombo = 0;
+                originalDamage.Clear();
+
+#if DEBUG
+                if (instance.DebugMode.Value)
+                    DebugLogger.Msg("Better Osu: Reset");
+#endif
+            }
         }
+        
 
     }
 }

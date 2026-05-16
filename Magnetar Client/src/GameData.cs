@@ -2,6 +2,7 @@
 using Il2Cpp;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Magnetar_Client.Game
 {
@@ -10,19 +11,32 @@ namespace Magnetar_Client.Game
     /// </summary>
     public static class AppData
     {
-        public static Board board; // Cached reference
-        public static bool BoardInstanceIsNull => board == null;
+        public static Board board;
+        public static bool BoardInstanceIsNull = true;
 
         [HarmonyPatch(typeof(Board), nameof(Board.Awake))]
-        public static class BoardStartPatch
+        public static class BoardAwakePatch
         {
-            public static void Postfix(Board __instance) => board = __instance;
+            [HarmonyPostfix]
+            public static void Postfix(Board __instance)
+            {
+                board = __instance;
+                BoardInstanceIsNull = false;
+            }
         }
 
         [HarmonyPatch(typeof(Board), nameof(Board.OnDestroy))]
         public static class BoardEndPatch
         {
-            public static void Postfix() => board = null;
+            [HarmonyPostfix]
+            public static void Postfix(Board __instance)
+            {
+                if (board != null && board.Pointer == __instance.Pointer)
+                {
+                    board = null;
+                    BoardInstanceIsNull = true;
+                }
+            }
         }
     }
 
@@ -197,6 +211,7 @@ namespace Magnetar_Client.Game
             [HarmonyPostfix]
             public static void SunUpdatePostFix()
             {
+                if (AppData.BoardInstanceIsNull) return;
                 if (lastSunAmount == AppData.board.theSun) return;
                 if (lastSunAmount < AppData.board.theSun)
                 {
@@ -226,15 +241,16 @@ namespace Magnetar_Client.Game
             [HarmonyPostfix]
             public static void UpdatePostFix()
             {
+                if (AppData.BoardInstanceIsNull) return;
                 if (lastMoneyAmount == AppData.board.theMoney) return;
                 if (lastMoneyAmount < AppData.board.theMoney)
                 {
-                    TotalAmountOfSunObtained += AppData.board.theMoney - lastMoneyAmount;
+                    TotalAmountOfMoneyObtained += AppData.board.theMoney - lastMoneyAmount;
                     lastMoneyAmount = AppData.board.theMoney;
                 }
                 else
                 {
-                    TotalAmountOfSunSpent += lastMoneyAmount - AppData.board.theMoney;
+                    TotalAmountOfMoneySpent += lastMoneyAmount - AppData.board.theMoney;
                     lastMoneyAmount = AppData.board.theMoney;
                 }
             }
@@ -258,8 +274,8 @@ namespace Magnetar_Client.Game
                 TotalNumberOfZombiesKilled = 0; TotalNumberOfPlantsKilled = 0;
                 TotalNumberOfZombiesSpawed = 0; TotalNumberOfPlantsSpawned = 0;
 
-                TotalAmountOfSunObtained = 0; TotalAmountOfSunSpent = 0; lastSunAmount = 0;
-                TotalAmountOfMoneyObtained = 0; TotalAmountOfMoneySpent = 0; lastMoneyAmount = 0;
+                TotalAmountOfSunObtained = 0; TotalAmountOfSunSpent = 0; lastSunAmount = AppData.board.theSun;
+                TotalAmountOfMoneyObtained = 0; TotalAmountOfMoneySpent = 0; lastMoneyAmount = AppData.board.theMoney;
             }
 
             [HarmonyPatch(nameof(Board.Die))]
@@ -272,6 +288,8 @@ namespace Magnetar_Client.Game
 
             }
         }
+
+        
         #endregion
 
         #region Get Level Name

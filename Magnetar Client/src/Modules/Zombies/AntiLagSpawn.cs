@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using static Magnetar_Client.Utils.Translator;
 using static Magnetar_Client.Game.AppData;
+using HarmonyLib;
 
 namespace Magnetar_Client.Modules
 {
@@ -17,9 +18,10 @@ namespace Magnetar_Client.Modules
             " counterbreak zombiecounter smoothspawn logicbreak massspawnfix antilagmod lagspawns antispawnlag laglessspawns";
         public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
 
+        // Mod Data
+
         public static AntiLagSpawns instance;
 
-        // Mod Data
         public IntSetting FrameDelaySetting;
 
         public static Queue<Zombie> staggerQueue = new Queue<Zombie>();
@@ -88,15 +90,17 @@ namespace Magnetar_Client.Modules
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(CreateZombie), nameof(CreateZombie.SetZombie))]
+        [HarmonyPatch(typeof(CreateZombie))]
         public static class CreateZombiePatch
         {
-            [HarmonyLib.HarmonyPostfix]
+            [HarmonyPatch(nameof(CreateZombie.SetZombie))]
+            [HarmonyPostfix]
             public static void Postfix(ref Zombie __result)
             {
                 if (instance == null || !instance.Active || __result == null) return;
 
-                if (__result.theZombieType == ZombieType.ImpKing)
+                if (instance.UnaffectedZombies.IsSelected((int)__result.theZombieType))
+                    return;
 
                 if (Time.frameCount != lastFrameCount)
                 {
@@ -111,6 +115,36 @@ namespace Magnetar_Client.Modules
                     __result.gameObject.SetActive(false);
                     staggerQueue.Enqueue(__result);
                 }
+            }
+        }
+
+        [HarmonyPatch(typeof(Board))]
+        public static class BoardPatch
+        {
+            [HarmonyPatch(nameof(Board.Awake))]
+            [HarmonyPrefix]
+            public static void Prefix()
+            {
+                if (instance == null) return;
+
+                staggerQueue.Clear();
+                spawnsThisFrame = 0;
+                lastFrameCount = Time.frameCount;
+            }
+        }
+
+        [HarmonyPatch(typeof(PauseMenu_Btn), nameof(PauseMenu_Btn.Restart))]
+        public static class PauseMenuRestartPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix()
+            {
+                if (staggerQueue == null) return;
+                staggerQueue.Clear();
+
+                spawnsThisFrame = 0;
+                lastFrameCount = Time.frameCount;
+
             }
         }
     }

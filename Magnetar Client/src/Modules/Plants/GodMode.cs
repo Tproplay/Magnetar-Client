@@ -1,9 +1,9 @@
 ﻿using HarmonyLib;
 using Il2Cpp;
 using Magnetar_Client.Utils;
-using MelonLoader;
 using System.Collections.Generic;
 using static Il2Cpp.Plant;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -77,7 +77,7 @@ namespace Magnetar_Client.Modules
             [HarmonyPrefix]
             public static bool RealTakeDamagePrefix(Plant __instance, int damage)
             {
-                if (instance == null || Board.Instance == null) return true;
+                if (instance == null || BoardInstanceIsNull) return true;
                 if (!instance.Active || !instance.ImmuneToDamage.Value) return true;
 
                 if (instance.PlantsSelectedSetting.IsSelected((int)__instance.thePlantType))
@@ -90,7 +90,7 @@ namespace Magnetar_Client.Modules
             [HarmonyPrefix]
             public static bool TakeDamagePrefix(Plant __instance, int damage, int damageType)
             {
-                if (instance == null || Board.Instance == null) return true;
+                if (instance == null || BoardInstanceIsNull) return true;
                 if (!instance.Active || !instance.ImmuneToDamage.Value) return true;
 
                 if (instance.PlantsSelectedSetting.IsSelected((int)__instance.thePlantType))
@@ -103,7 +103,7 @@ namespace Magnetar_Client.Modules
             [HarmonyPrefix]
             public static bool CrashedPatch(Plant __instance, int level, int soundID, Zombie zombie)
             {
-                if (instance == null || Board.Instance == null) return true;
+                if (instance == null || BoardInstanceIsNull) return true;
                 if (!instance.Active || !instance.ImmuneToVehicle.Value) return true;
 
                 if (instance.PlantsSelectedSetting.IsSelected((int)__instance.thePlantType))
@@ -116,7 +116,7 @@ namespace Magnetar_Client.Modules
             [HarmonyPrefix]
             public static bool DiePatch(Plant __instance, DieReason reason)
             {
-                if (instance == null || Board.Instance == null || !instance.Active) return true;
+                if (instance == null || BoardInstanceIsNull || !instance.Active) return true;
 
                 if (instance.PlantsSelectedSetting.IsSelected((int)__instance.thePlantType))
                 {

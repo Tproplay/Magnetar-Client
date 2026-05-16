@@ -12,7 +12,7 @@ namespace Magnetar_Client.UI.HUDElements
         public Rect Bounds;
         public int WindowId { get; set; }
 
-        public static int ActiveDragId = -1; 
+        public static int ActiveDragId = -1;
         private Vector2 dragOffset;
 
         public HudElement(string name, Rect defaultBounds)
@@ -20,7 +20,6 @@ namespace Magnetar_Client.UI.HUDElements
             Name = name;
             Bounds = defaultBounds;
         }
-
         /// <summary>
         /// Runs once when the HUD element is enabled. Runs before OnUpdate.
         /// </summary>
@@ -195,8 +194,8 @@ namespace Magnetar_Client.UI.HUDElements
             if (HUDManager.forceShow)
             {
                 Rect localBounds = new Rect(0, 0, width, height);
-                // Still highlight red only in Edit mode
-                if (localBounds.Contains(e.mousePosition) || ActiveDragId == WindowId)
+
+                if ((localBounds.Contains(e.mousePosition) || ActiveDragId == WindowId) && HUDManager.forceShow)
                 {
                     GUI.backgroundColor = new Color(1f, 0f, 0f, 0.3f);
                     GUI.Box(localBounds, "", Magnetar_Default.ModuleOn);
@@ -209,12 +208,23 @@ namespace Magnetar_Client.UI.HUDElements
 
         protected abstract void DrawContent(float width, float height);
 
-        private static Vector2 windowPos = new Vector2(10,10);
-        public static Rect NewRect(float width=250, float height=28)
+        protected void AdjustWidthToText(string text, GUIStyle style, float padding = 10f)
+        {
+            Vector2 textSize = style.CalcSize(new GUIContent(text));
+            float targetWidth = textSize.x + padding;
+
+            if (Mathf.Abs(Bounds.width - targetWidth) > 1f)
+            {
+                Bounds.width = targetWidth;
+            }
+        }
+
+        private static Vector2 windowPos = new Vector2(10, 10);
+        public static Rect NewRect(float width = 250, float height = 28)
         {
             Rect rect = new Rect(windowPos.x, windowPos.y, width, height);
 
-            if (windowPos.y>800) { windowPos.x += 300; windowPos.y = 10; }
+            if (windowPos.y > 800) { windowPos.x += 300; windowPos.y = 10; }
             else windowPos.y += height;
 
             return rect;

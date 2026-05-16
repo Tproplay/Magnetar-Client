@@ -3,6 +3,7 @@ using Magnetar_Client.Game;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using UnityEngine;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -19,6 +20,9 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
 
         // Mod Data
+
+        public static BuffZombies instance;
+
         public MultiSelectSetting ZombieSelectedSetting;
 
         public FloatSetting HpMultiplierSettig;
@@ -27,6 +31,8 @@ namespace Magnetar_Client.Modules
         private Dictionary<int, string> zombieNameOverriden = new Dictionary<int, string>();
         public BuffZombies()
         {
+            instance = this;
+
             zombieNameOverriden = Translator.TranslateEnum(typeof(ZombieType));
 
             foreach (var name in zombieNameOverriden)
@@ -58,7 +64,7 @@ namespace Magnetar_Client.Modules
         // Mod Logic
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null) return;
+            if (BoardInstanceIsNull) return;
 
             float multiplier = HpMultiplierSettig.Value;
 
@@ -67,7 +73,7 @@ namespace Magnetar_Client.Modules
                 if (zombie == null) continue;
 
                 // Only buff the zombie if it's selected in the UI
-                if (ZombieSelectedSetting.SelectedValues.Contains((int)zombie.theZombieType))
+                if (ZombieSelectedSetting.IsSelected((int)zombie.theZombieType))
                 {
                     if (!originalHpData.ContainsKey(zombie))
                     {

@@ -34,7 +34,7 @@ namespace Magnetar_Client.Core
         public override void OnApplicationQuit()
         {
             Save();
-            MelonLogger.Msg("Prefrences Saved");
+            MelonLogger.Msg("Magnetar Prefrences Saved!");
         }
 
         // Do not configure this or it will Scale the GUI

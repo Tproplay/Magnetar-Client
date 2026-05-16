@@ -2,6 +2,7 @@
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using UnityEngine;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -16,7 +17,7 @@ namespace Magnetar_Client.Modules
             "craterterminator groundfix repairground smoothground cratergone craterhide hidecraters craterdisappear " +
             "cratercancel craterbypass craternull";
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Board;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
         // Mod Data
 
@@ -49,11 +50,11 @@ namespace Magnetar_Client.Modules
                 }
             }
 
-            if (instance == null || !instance.Active || Board.Instance == null || Board.Instance.griditemArray == null) return;
+            if (BoardInstanceIsNull || board.griditemArray == null) return;
 
-            for (int i = Board.Instance.griditemArray.Count - 1; i >= 0; i--)
+            for (int i = board.griditemArray.Count - 1; i >= 0; i--)
             {
-                GridItem item = Board.Instance.griditemArray[i];
+                GridItem item = board.griditemArray[i];
                 if (item == null) continue;
                 if (item.theItemType == GridItemType.CraterDay || item.theItemType == GridItemType.CraterNight)
                     item.Die();
@@ -75,7 +76,7 @@ namespace Magnetar_Client.Modules
             "nogrititem nogriditme nogriditemz removegridobjects deletegridobjects";
 
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Board;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
         // Mod Data
 
@@ -108,13 +109,13 @@ namespace Magnetar_Client.Modules
         public static float deltaTime = 0;
         public override void OnUpdateActive()
         {
-            if (instance == null || !instance.Active || Board.Instance == null || Board.Instance.griditemArray == null) return;
+            if (BoardInstanceIsNull || board.griditemArray == null) return;
 
-            for (int i = Board.Instance.griditemArray.Count - 1; i >= 0; i--)
+            for (int i = board.griditemArray.Count - 1; i >= 0; i--)
             {
-                GridItem item = Board.Instance.griditemArray[i];
+                GridItem item = board.griditemArray[i];
                 if (item == null) continue;
-                if (selectedGridItems.SelectedValues.Contains((int)item.theItemType))
+                if (selectedGridItems.IsSelected((int)item.theItemType))
                     item.Die();
             }
 

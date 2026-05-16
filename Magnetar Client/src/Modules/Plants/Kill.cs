@@ -3,6 +3,7 @@ using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 using static Magnetar_Client.Game.GameData;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -21,6 +22,8 @@ namespace Magnetar_Client.Modules
 
         // Mod Data
 
+        public static KillPlants instance;
+
         public MultiSelectSetting PlantsSelectedSetting;
 
         public bool TurnOffAfterUse = true;
@@ -31,6 +34,8 @@ namespace Magnetar_Client.Modules
         private static Dictionary<int, string> plantNameOverriden = new Dictionary<int, string>();
         public KillPlants()
         {
+            instance = this;
+
             plantNameOverriden = Translator.TranslateEnum(typeof(PlantType));
 
             foreach (var name in plantNameOverriden)
@@ -70,7 +75,7 @@ namespace Magnetar_Client.Modules
                 }
             }
 
-            if (Board.Instance == null) return;
+            if (BoardInstanceIsNull) return;
 
             foreach (var plant in plantList)
             {

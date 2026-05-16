@@ -2,6 +2,7 @@
 using Il2Cpp;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -61,7 +62,7 @@ namespace Magnetar_Client.Modules
             [HarmonyPostfix]
             public static void ShootablePostfix(Plant __instance, ref bool __result)
             {
-                if (instance == null || Board.Instance == null) return;
+                if (instance == null || BoardInstanceIsNull) return;
                 if (!instance.Active) return;
 
                 if (instance.PlantsSelectedSetting.IsSelected((int)__instance.thePlantType))

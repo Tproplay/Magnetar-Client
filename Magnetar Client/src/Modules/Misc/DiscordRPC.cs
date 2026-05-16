@@ -4,10 +4,11 @@ using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 using static Magnetar_Client.Game.GameData;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
-    public class DiscordRPCModule : Module
+    public class DiscordRPC : Module
     {
         // Mod Info
         public override string Name { get; set; } = "Discord RPC";
@@ -18,8 +19,10 @@ namespace Magnetar_Client.Modules
             "discordrich discordpresance discordpresense discordconection discordintigration rpcbot rpcclient rpcactive";
 
         public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
-        
+
         // Mod Data
+
+        public static DiscordRPC instance;
 
         public FloatSetting SwitchSpeed = new FloatSetting("Switch Speed (s)", 1f, 30f, 5f);
 
@@ -33,8 +36,10 @@ namespace Magnetar_Client.Modules
         private int index1 = 0;
         private int index2 = 0;
 
-        public DiscordRPCModule()
+        public DiscordRPC()
         {
+            instance = this;
+
             AddSettings(SwitchSpeed);
         }
 
@@ -93,7 +98,7 @@ namespace Magnetar_Client.Modules
                     {
                         // Not In a Level
 
-                        if (Board.Instance == null)
+                        if (BoardInstanceIsNull)
                         {
                             Line1Cycle.Add("Looking at the Main Menu");
                             Line1Cycle.Add("Selecting a level to play");
@@ -104,7 +109,6 @@ namespace Magnetar_Client.Modules
                         // In a Level
 
                         GameStatus status = GameAPP.theGameStatus;
-                        Board board = Board.Instance;
 
                         // Display the Level Name
                         string levelName = GetLevelName();
@@ -141,7 +145,7 @@ namespace Magnetar_Client.Modules
 
                 case (GameStatus.BigGarden):
                     {
-                        if (Board.Instance == null)
+                        if (BoardInstanceIsNull)
                         {
                             Line1Cycle.Add("Looking at the Main Menu");
                             Line1Cycle.Add("Selecting a level to play");

@@ -7,7 +7,7 @@ namespace Magnetar_Client.Modules
 {
     public enum ModuleCategory
     {
-        Board,
+        Level,
         Tools,
         Plant,
         Zombie,
@@ -193,7 +193,7 @@ namespace Magnetar_Client.Modules
         /// Gets the collection of available options, where each key is an option identifier and each value is the
         /// option's display name.
         /// </summary>
-        public Dictionary<int, string> Options { get; private set; }
+        public Dictionary<int, string> Options { get; set; }
 
         /// <summary>
         /// Represents the set of currently selected values.
@@ -317,12 +317,16 @@ namespace Magnetar_Client.Modules
         /// <param name="id">The identifier of the item to toggle in the selection.</param>
         public void Toggle(int id)
         {
-            if (SelectedValues.Contains(id)) SelectedValues.Remove(id);
+            if (IsSelected(id)) SelectedValues.Remove(id);
             else if (MaxSelection == -1 || SelectedValues.Count < MaxSelection) SelectedValues.Add(id);
         }
 
         public void Select(int id) => SelectedValues.Add(id);
         public void Deselect(int id) => SelectedValues.Remove(id);
-        public bool IsSelected(int id) => SelectedValues.Contains(id);
+        public bool IsSelected(int id)
+        {
+            return SelectedValues.Contains(id);
+        }
+
     }
 }

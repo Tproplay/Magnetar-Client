@@ -17,7 +17,10 @@ namespace Magnetar_Client.Modules
 
         public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
 
-        static BetterHealthDisplay instance;
+        public override bool Active { get; set; } = true; // On by default
+
+        // Mod Data
+        public static BetterHealthDisplay instance;
 
         public BoolSetting ShowMaxHealth;
 
@@ -25,7 +28,7 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
-            ShowMaxHealth = new BoolSetting("Show Max Health", true);
+            ShowMaxHealth = new BoolSetting("Show Max Health", false);
             Settings.Add(ShowMaxHealth);
         }
 
@@ -56,7 +59,7 @@ namespace Magnetar_Client.Modules
             [HarmonyPostfix]
             public static void UpdateTextPostfix(Plant __instance)
             {
-                if (!instance.Active || __instance == null) return;
+                if (!instance.Active) return;
 
                 var textComponents = __instance.GetComponentsInChildren<Il2CppTMPro.TextMeshPro>();
 
@@ -66,7 +69,7 @@ namespace Magnetar_Client.Modules
 
                     if (textComp.text == rawHpString || textComp.text.Contains("/"))
                     {
-                        string formattedCurrent = (__instance.thePlantHealth).ToString();
+                        string formattedCurrent = FormatInternational(__instance.thePlantHealth);
 
                         if (instance.ShowMaxHealth.Value)
                         {
@@ -89,7 +92,7 @@ namespace Magnetar_Client.Modules
             [HarmonyLib.HarmonyPostfix]
             public static void UpdateHealthTextPostfix(Zombie __instance)
             {
-                if (instance == null || !instance.Active || __instance == null) return;
+                if (instance == null || !instance.Active) return;
 
                 if (__instance.healthText == null) return;
 

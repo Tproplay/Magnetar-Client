@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Magnetar_Client.Utils;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -63,7 +64,7 @@ namespace Magnetar_Client.Modules
             [HarmonyPrefix]
             public static void SetBulletPrefix(ref BulletType theBulletType, ref bool fromEnermy)
             {
-                if (instance == null || Board.Instance == null) return;
+                if (instance == null || BoardInstanceIsNull) return;
                 if (!instance.Active || fromEnermy) return;
 
                 BulletType newType = theBulletType;
@@ -76,7 +77,7 @@ namespace Magnetar_Client.Modules
                     newType = (BulletType)instance.selectBulletsSetting.SelectedValues.ElementAt(
                         UnityEngine.Random.RandomRangeInt(0, instance.selectBulletsSetting.SelectedValues.Count));
                 }
-                if (instance.selectBulletsSetting.SelectedValues.Contains((int)newType))
+                if (instance.selectBulletsSetting.IsSelected((int)newType))
                     theBulletType = newType;
             }
         }

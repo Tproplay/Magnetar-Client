@@ -41,7 +41,7 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
 
-            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), name);
+            GUI.Label(new Rect(Config.indent, y, width * 0.5f, Config.elementHeight), name);
 
             // --- LOGARITHMIC MAPPING HELPERS ---
             float LogConvert(float v) => Mathf.Sign(v) * Mathf.Log10(Mathf.Abs(v) + 1.0f);
@@ -54,9 +54,9 @@ namespace Magnetar_Client.UI.WindowDrawing
             float percentage = Mathf.Clamp01((logVal - logMin) / (logMax - logMin));
 
             // --- UI RENDERING ---
-            Rect sliderRect = new Rect(width * 0.35f, y + 10, width * 0.35f, 8);
+            Rect sliderRect = new Rect(width * 0.45f, y + 10, width * 0.35f, 8);
             Rect sliderHitBox = new Rect(sliderRect.x, y, sliderRect.width, 22);
-            Rect inputRect = new Rect(width * 0.72f, y, width * 0.23f, 22);
+            Rect inputRect = new Rect(width * 0.82f, y, width * 0.13f, 22);
             float fillWidth = sliderRect.width * percentage;
             Rect thumbRect = new Rect(sliderRect.x + fillWidth - 10, y + 1, 20, 20);
 
@@ -74,7 +74,7 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             if (e.type == EventType.ScrollWheel && (sliderHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition)))
             {
-                float scrollDirection = -Mathf.Sign(e.delta.y);
+                float scrollDirection = Mathf.Sign(e.delta.y);
 
                 // Move the slider by 4% per scroll wheel "tick".
                 float scrollStep = 0.04f;
@@ -83,9 +83,32 @@ namespace Magnetar_Client.UI.WindowDrawing
                 float newLogVal = logMin + (newPercentage * (logMax - logMin));
                 float newVal = ExpConvert(newLogVal);
 
-                // Apply the new value
-                if (isFloat) ((FloatSetting)setting).Value = (float)System.Math.Round(Mathf.Clamp(newVal, min, max), decPlaces);
-                else ((IntSetting)setting).Value = (int)Mathf.Clamp(newVal, min, max);
+                if (isFloat)
+                {
+                    float currentVal = ((FloatSetting)setting).Value;
+                    float finalVal = (float)System.Math.Round(Mathf.Clamp(newVal, min, max), decPlaces);
+
+                    if (finalVal == currentVal && scrollDirection != 0)
+                    {
+                        float minStep = Mathf.Pow(10, -decPlaces);
+                        finalVal = (float)System.Math.Round(Mathf.Clamp(currentVal + (scrollDirection * minStep), min, max), decPlaces);
+                    }
+
+                    ((FloatSetting)setting).Value = finalVal;
+                }
+                else
+                {
+                    int currentVal = ((IntSetting)setting).Value;
+                    int finalVal = (int)Mathf.Clamp(newVal, min, max);
+
+                    // If the 4% step was too small to bypass integer truncation, force a step of 1
+                    if (finalVal == currentVal && scrollDirection != 0)
+                    {
+                        finalVal = (int)Mathf.Clamp(currentVal + scrollDirection, min, max);
+                    }
+
+                    ((IntSetting)setting).Value = finalVal;
+                }
 
                 e.Use();
             }
@@ -233,6 +256,7 @@ namespace Magnetar_Client.UI.WindowDrawing
         public static float totalContentHeight = 0f;
         public static float lastSliderUpdateTime = 0f;
 
+        private static int lastHoveredIndex = -1;
         private static bool isShiftDragging = false;
         private static bool dragTargetState = false;
         private static HashSet<int> draggedItemsSession = new HashSet<int>();
@@ -267,7 +291,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                     continue;
 
                 visibleCount++;
-                calcTotalHeight += ROW_HEIGHT + 2;
+                calcTotalHeight += ROW_HEIGHT + 1;
             }
             totalContentHeight = calcTotalHeight;
 
@@ -314,8 +338,8 @@ namespace Magnetar_Client.UI.WindowDrawing
             }
 
             // --- HEADER: SEARCH & TOGGLE ---
-            float searchWidth = (multiSelectWindowRect.width - 50) * 0.65f;
-            float toggleWidth = (multiSelectWindowRect.width - 50) * 0.35f;
+            float searchWidth = (multiSelectWindowRect.width - 30) * 0.75f;
+            float toggleWidth = (multiSelectWindowRect.width - 30) * 0.25f;
             Rect searchRect = new Rect(10, 30, searchWidth, 22);
             GUI.Box(searchRect, "", Magnetar_Default.ModuleOff);
 
@@ -332,7 +356,13 @@ namespace Magnetar_Client.UI.WindowDrawing
             // Toggle Button
             int selectedCount = activeMultiSelect.SelectedValues.Count;
             bool allSelected = visibleCount > 0 && selectedCount >= visibleCount;
-            Rect toggleRect = new Rect(15 + searchWidth, 30, toggleWidth, 22);
+
+            if (activeMultiSelect.MaxSelection >= 0 && selectedCount >= activeMultiSelect.MaxSelection)
+            {
+                allSelected = true;
+            }
+
+            Rect toggleRect = new Rect(10 + searchWidth, 30, toggleWidth, 22);
 
             if (GUI.Button(toggleRect, allSelected ? "Deselect All" : "Select All", !allSelected ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff))
             {
@@ -346,9 +376,17 @@ namespace Magnetar_Client.UI.WindowDrawing
                     if (!string.IsNullOrEmpty(multiSelectSearchQuery) && !name.ToLower().Contains(multiSelectSearchQuery.ToLower())) continue;
 
                     if (allSelected)
+                    {
                         activeMultiSelect.Deselect(intVal);
+                    }
                     else
+                    {
+                        if (activeMultiSelect.MaxSelection >= 0 && activeMultiSelect.SelectedValues.Count >= activeMultiSelect.MaxSelection)
+                        {
+                            break;
+                        }
                         activeMultiSelect.Select(intVal);
+                    }
                 }
                 e.Use();
             }
@@ -383,12 +421,14 @@ namespace Magnetar_Client.UI.WindowDrawing
             {
                 isShiftDragging = false;
                 draggedItemsSession.Clear();
+                lastHoveredIndex = -1; // Reset tracking
             }
 
             if (isShiftDragging && !Input.GetMouseButton(0))
             {
                 isShiftDragging = false;
                 draggedItemsSession.Clear();
+                lastHoveredIndex = -1; // Reset tracking
 #if DEBUG
                 DebugLogger.Msg("Drag Complete");
 #endif
@@ -398,8 +438,11 @@ namespace Magnetar_Client.UI.WindowDrawing
             GUI.BeginGroup(new Rect(10, headerHeight, multiSelectWindowRect.width - 25, viewHeight));
             {
                 float currentY = 0;
-
                 string cleanQuery = multiSelectSearchQuery?.Replace(" ", "") ?? "";
+
+                // Frame-skip tracking variables
+                int hoveredIndexThisFrame = -1;
+                List<int> visibleItemsThisFrame = new List<int>();
 
                 foreach (var kvp in options)
                 {
@@ -415,15 +458,22 @@ namespace Magnetar_Client.UI.WindowDrawing
                         if (name.Replace(" ", "").IndexOf(cleanQuery, StringComparison.OrdinalIgnoreCase) < 0) continue;
                     }
 
+                    // Keep a linear index of visible items for math later
+                    visibleItemsThisFrame.Add(intVal);
+                    int currentIndex = visibleItemsThisFrame.Count - 1;
+
                     // --- RENDERING & LOGIC ---
                     float drawY = currentY - manualScrollY;
+                    Rect rowRect = new Rect(0, drawY, multiSelectWindowRect.width - 30, ROW_HEIGHT);
+
+                    bool isHovering = rowRect.Contains(e.mousePosition);
+                    bool isCurrentlySelected = activeMultiSelect.IsSelected(intVal);
+
+                    // Record hover even if it's slightly off-screen due to scroll jumping
+                    if (isHovering) hoveredIndexThisFrame = currentIndex;
 
                     if (drawY + ROW_HEIGHT > 0 && drawY < viewHeight)
                     {
-                        Rect rowRect = new Rect(0, drawY, multiSelectWindowRect.width - 30, ROW_HEIGHT);
-                        bool isHovering = rowRect.Contains(e.mousePosition);
-                        bool isCurrentlySelected = activeMultiSelect.IsSelected(intVal);
-
                         // A. START CLICK / START DRAG
                         if (e.type == EventType.MouseDown && e.button == 0 && isHovering)
                         {
@@ -434,8 +484,12 @@ namespace Magnetar_Client.UI.WindowDrawing
                                 draggedItemsSession.Clear();
 
                                 dragTargetState = !isCurrentlySelected;
+                                lastHoveredIndex = currentIndex; // Record start index
 
-                                activeMultiSelect.Toggle(intVal);
+                                // Toggle and enforce max selection logic
+                                if (dragTargetState) ToggleWithLimit(activeMultiSelect, intVal);
+                                else activeMultiSelect.Deselect(intVal);
+
                                 draggedItemsSession.Add(intVal);
 #if DEBUG
                                 MelonLogger.Msg("Drag Started");
@@ -444,32 +498,46 @@ namespace Magnetar_Client.UI.WindowDrawing
                             else
                             {
                                 // Standard single click
-                                activeMultiSelect.Toggle(intVal);
+                                if (isCurrentlySelected) activeMultiSelect.Deselect(intVal);
+                                else ToggleWithLimit(activeMultiSelect, intVal);
                             }
                             e.Use();
-                        }
-
-                        // B. CONTINUE DRAG (PAINT SELECT)
-                        if (isShiftDragging && isHovering && Input.GetMouseButton(0))
-                        {
-                            // Only process this item if we haven't already hit it during this drag session
-                            if (!draggedItemsSession.Contains(intVal))
-                            {
-                                if (isCurrentlySelected != dragTargetState)
-                                {
-                                    activeMultiSelect.Toggle(intVal);
-                                }
-
-                                draggedItemsSession.Add(intVal);
-                            }
                         }
 
                         // Draw the Box
                         GUI.Box(rowRect, name, activeMultiSelect.IsSelected(intVal) ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
                     }
-                    currentY += ROW_HEIGHT + 2;
+                    currentY += ROW_HEIGHT + 1;
+                }
+
+                // B. CONTINUE DRAG (PAINT SELECT - FRAME SKIP FIX)
+                if (isShiftDragging && hoveredIndexThisFrame != -1 && Input.GetMouseButton(0))
+                {
+                    if (lastHoveredIndex != -1)
+                    {
+                        // Loop from the last frame's index to the current frame's index
+                        int start = Mathf.Min(lastHoveredIndex, hoveredIndexThisFrame);
+                        int end = Mathf.Max(lastHoveredIndex, hoveredIndexThisFrame);
+
+                        for (int i = start; i <= end; i++)
+                        {
+                            int val = visibleItemsThisFrame[i];
+                            if (!draggedItemsSession.Contains(val))
+                            {
+                                // Apply the drag state, respecting the MaxSelection limit
+                                if (dragTargetState) ToggleWithLimit(activeMultiSelect, val);
+                                else activeMultiSelect.Deselect(val);
+
+                                draggedItemsSession.Add(val);
+                            }
+                        }
+                    }
+                    // Update the tracker for the next frame
+                    lastHoveredIndex = hoveredIndexThisFrame;
                 }
             }
+
+
             GUI.EndGroup();
 
             // --- RENDER SCROLLBAR VISUALS ---
@@ -482,6 +550,13 @@ namespace Magnetar_Client.UI.WindowDrawing
             GUI.Box(new Rect(scrollX, handleY, 12, handleSize), "", shouldHighlight ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
         }
 
+        private static void ToggleWithLimit(dynamic activeMultiSelect, int val)
+        {
+            if (activeMultiSelect.MaxSelection == -1 || activeMultiSelect.SelectedValues.Count < activeMultiSelect.MaxSelection)
+            {
+                activeMultiSelect.Select(val);
+            }
+        }
         public static string DrawManualTextField(Rect rect, string text, string defaultText = "")
         {
             Event e = Event.current;

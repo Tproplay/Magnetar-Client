@@ -1,11 +1,14 @@
 ﻿using HarmonyLib;
 using Il2Cpp;
 using Il2CppRhythmGame;
+using Magnetar_Client.Utils;
 using MelonLoader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Magnetar_Client.Game;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -25,12 +28,10 @@ namespace Magnetar_Client.Modules
 
         public static BetterOsu instance;
         
-        public static int currentCombo = 0;
-
-        private bool HelperPet = false;
+        public int currentCombo = 0;
         public BoolSetting HelperPetSetting;
+        public MultiSelectSetting PetTypeSetting;
 
-        private int MultiplyBullets = 200;
         public IntSetting BulletsDamageIncreaseSetting;
 
         private bool RandomBullet = false;
@@ -39,35 +40,55 @@ namespace Magnetar_Client.Modules
         public List<int> preselected = Enum.GetValues(typeof(BulletType)).Cast<int>().ToList();
         public MultiSelectSetting selectBulletsSetting;
 
+        
 
         public BetterOsu()
         {
             instance = this;
 
-            BulletsDamageIncreaseSetting = new IntSetting("Increase Damage", 10, 1000,MultiplyBullets);
-            Settings.Add( BulletsDamageIncreaseSetting );
-
-            HelperPetSetting = new BoolSetting("Spawn Ice Queen Pet", HelperPet);
-            Settings.Add( HelperPetSetting );
-
-            RandomBulletSetting = new BoolSetting("Random Bullets", RandomBullet)
+            BulletsDamageIncreaseSetting = new IntSetting("Increase Damage", 1, 500,50);
+            
+            HelperPetSetting = new BoolSetting("Spawn Helper Pet", false);
+            
+            PetTypeSetting = new MultiSelectSetting("Pet Type", typeof(PetType))
             {
-
+                MaxSelection = 1
             };
-            Settings.Add( RandomBulletSetting );
+            PetTypeSetting.Select((int)PetType.PetSnowBoss);
 
-            selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType));
+            RandomBulletSetting = new BoolSetting("Random Bullets", RandomBullet);
+            
+            selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
+            {
+                CustomNames = Translator.TranslateEnum(typeof(BulletType))
+            };
+            selectBulletsSetting.SelectedValues.UnionWith(preselected);
+
+
+            Settings.Add(BulletsDamageIncreaseSetting);
+            Settings.Add(HelperPetSetting);
+            Settings.Add(PetTypeSetting);
+            Settings.Add(RandomBulletSetting);
             Settings.Add( selectBulletsSetting );
-            selectBulletsSetting.SelectedValues.UnionWith( preselected );
+            
         }
 
-        static float DamageBuff = 1;
-        static int SpawnedPets = 0;
+        float DamageBuff = 1;
+        public int SpawnedPets = 0;
 
         // Mod Logic
         public override void OnUpdateActive()
         {
-            if (RhythmGameManager.Instance == null || Board.Instance == null)
+            RhythmGameManager rhythmGameManager = RhythmGameManager.Instance;
+            if (rhythmGameManager == null || BoardInstanceIsNull)
+            {
+                originalDamage.Clear();
+                currentCombo = 0;
+                SpawnedPets = 0;
+                return;
+            }
+
+            if (rhythmGameManager.CurrentTime == 0)
             {
                 originalDamage.Clear();
                 currentCombo = 0;
@@ -82,7 +103,7 @@ namespace Magnetar_Client.Modules
                 if (SpawnedPets <= 0)
                 {
                     Vector2 centerWorldPos = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.nearClipPlane));
-                    MiniPet pet = MiniPet.SetPet(Board.Instance, centerWorldPos, PetType.PetSnowBoss);
+                    MiniPet pet = MiniPet.SetPet(board, centerWorldPos, (PetType)PetTypeSetting.SelectedValues.First());
                     SpawnedPets++;
                 }
             }
@@ -99,7 +120,7 @@ namespace Magnetar_Client.Modules
             }
 
             // Bullet Damage
-            currentCombo = RhythmGameManager.Instance.comboManager.currentCombo;
+            currentCombo = rhythmGameManager.comboManager.currentCombo;
             DamageBuff = (float)currentCombo / (float)instance.BulletsDamageIncreaseSetting.Value;
 
 
@@ -121,10 +142,10 @@ namespace Magnetar_Client.Modules
             [HarmonyPrefix]
             public static void UpdatePatch(Bullet __instance)
             {
-                if (instance == null || Board.Instance == null || __instance == null) return;
-                if (!instance.Active || !Board.Instance.boardTag.rhythmGame) return;
+                if (BoardInstanceIsNull || instance == null) return;
+                if (!instance.Active || !board.boardTag.rhythmGame) return;
 
-                if (instance.BulletsDamageIncreaseSetting.Value <= currentCombo)
+                if (instance.BulletsDamageIncreaseSetting.Value <= instance.currentCombo)
                 {
 
                     if (!originalDamage.ContainsKey(__instance))
@@ -132,9 +153,9 @@ namespace Magnetar_Client.Modules
                         originalDamage.Add(__instance, __instance.Damage);
                     }
 
-                    if (DamageBuff > 1 && __instance.Damage != (int)(originalDamage[__instance] * DamageBuff))
+                    if (instance.DamageBuff > 1 && __instance.Damage != (int)(originalDamage[__instance] * instance.DamageBuff))
                     {
-                        __instance.Damage = (int)(originalDamage[__instance] * DamageBuff);
+                        __instance.Damage = (int)(originalDamage[__instance] * instance.DamageBuff);
                     }
                 }
             }
@@ -159,9 +180,11 @@ namespace Magnetar_Client.Modules
             [HarmonyPrefix]
             public static void SetBulletPrefix(ref BulletType theBulletType, ref bool fromEnermy)
             {
-                if (instance == null || Board.Instance == null) return;
-                if (!instance.Active || !Board.Instance.boardTag.rhythmGame) return;
+                if (instance == null || BoardInstanceIsNull) return;
+                if (!instance.Active || !board.boardTag.rhythmGame) return;
                 if (!instance.RandomBulletSetting.Value || fromEnermy) return;
+
+                // Ensure only change the cherry bullet
                 if (theBulletType != BulletType.Bullet_superCherry) return;
 
                 BulletType newType = theBulletType;
@@ -175,7 +198,7 @@ namespace Magnetar_Client.Modules
                         UnityEngine.Random.RandomRangeInt(0, instance.selectBulletsSetting.SelectedValues.Count));
                 }
                 MelonLogger.Msg((int)newType);
-                if (instance.selectBulletsSetting.SelectedValues.Contains((int)newType))
+                if (instance.selectBulletsSetting.IsSelected((int)newType))
                     theBulletType = newType;
             }
         }
@@ -183,9 +206,9 @@ namespace Magnetar_Client.Modules
         [HarmonyPatch(typeof(Board),nameof(Board.Awake))]
         public static void BoardAwakePatch()
         {
-            originalDamage.Clear();
-            SpawnedPets = 0;
-            currentCombo = 0;
+            if (instance == null) return;
+            instance.SpawnedPets = 0;
+            instance.currentCombo = 0;
         }
 
     }

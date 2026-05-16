@@ -22,11 +22,12 @@ namespace Magnetar_Client.Core
         public static float elementHeight = 25f;
 
         // Main HUDManager Menu Rect
-        public static Rect windowRect = new Rect((1920 - width) / 2, (1080 - 300) / 2, width, 300);
+        public static Rect windowRect = new Rect((Config.WindowWidth - width) / 2, (Config.WindowHeight - 300) / 2, width, 300);
 
-        static float selectorWidth = 400;
-        static float selectorHeight = 500;
-        public static Rect selectorRect = new Rect((1920 - selectorWidth) / 2, (1080 - selectorHeight) / 2, selectorWidth, selectorHeight);
+        static float selectorWidth = 500;
+        static float selectorHeight = 800;
+        public static Rect selectorRect = new Rect((Config.WindowWidth - selectorWidth) / 2, (Config.WindowHeight - selectorHeight) / 2,
+            selectorWidth, selectorHeight);
 
         public static void Render()
         {
@@ -99,7 +100,7 @@ namespace Magnetar_Client.Core
             Event e = Event.current;
 
             float startY = 35 + elementHeight + 10;
-            Rect multiSelectRect = new Rect(0, startY, selectorRect.width, selectorRect.height - startY);
+            Rect multiSelectRect = new Rect(0, startY, selectorRect.width, selectorRect.height);
 
             UI.WindowDrawing.DrawSetting.DrawMultiSelectWindow(multiSelectRect, UI.WindowDrawing.DrawSetting.activeMultiSelect);
 
@@ -265,6 +266,8 @@ namespace Magnetar_Client.Core
             {
                 isMasterVisible = false;
             }
+
+            if (!isMasterVisible) return;
 
             foreach (var element in Elements)
             {

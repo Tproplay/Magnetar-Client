@@ -3,6 +3,7 @@ using Il2Cpp;
 using Magnetar_Client.Game;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -20,6 +21,9 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Plant;
 
         // Mod Data
+
+        public static FasterPlants instance;
+
         public MultiSelectSetting PlantsSelectedSetting;
 
         public float AttackIntervalMultiplier = 50;
@@ -35,6 +39,7 @@ namespace Magnetar_Client.Modules
 
         public FasterPlants()
         {
+            instance = this;
 
             plantNameOverriden = Translator.TranslateEnum(typeof(PlantType));
 
@@ -74,7 +79,7 @@ namespace Magnetar_Client.Modules
         // Mod Logic
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null) return;
+            if (BoardInstanceIsNull) return;
 
             foreach (var plant in GameData.plantList)
             {

@@ -16,6 +16,8 @@ namespace Magnetar_Client.UI.HUDElements
 
             string displayText = $"<size=18>FPS: <color={colorName}>{(int)fps}</color></size>";
 
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
+
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }
 
@@ -50,6 +52,8 @@ namespace Magnetar_Client.UI.HUDElements
             string colorName = currentFrameTime < 1/55f ? "lime" : (currentFrameTime < 1/30f ? "yellow" : "red");
 
             string displayText = $"<size=18>FrameTime: <color={colorName}>{currentFrameTime*1000:f0}</color>ms</size>";
+
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }

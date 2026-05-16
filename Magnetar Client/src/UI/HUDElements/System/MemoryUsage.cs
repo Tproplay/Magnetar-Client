@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Profiling;
+using static Magnetar_Client.UI.Themes.Magnetar_Default;
 
 namespace Magnetar_Client.UI.HUDElements
 {
@@ -32,10 +33,12 @@ namespace Magnetar_Client.UI.HUDElements
             string color = "white";
             if (float.Parse(displayValue) > 1500) color = "red"; // Over 2GB turns red
 
-            string text = $"RAM: <color={color}>{displayValue} MB</color>";
+            string displayText = $"RAM: <color={color}>{displayValue} MB</color>";
+
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
 
             Magnetar_Default.HUDElementStyle.richText = true;
-            GUI.Label(new Rect(5, 5, width - 5, height - 5), text, Magnetar_Default.HUDElementStyle);
+            GUI.Label(new Rect(5, 5, width - 5, height - 5), displayText, HUDElementStyle);
         }
     }
 
@@ -86,10 +89,11 @@ namespace Magnetar_Client.UI.HUDElements
             }
 
 
-            string text = $"RAM: <color=white>{systemLoad}% of {totalInstalled.Substring(0,5)}GB</color>";
+            string displayText = $"RAM: <color=white>{systemLoad}% of {totalInstalled.Substring(0,5)}GB</color>";
 
-            Magnetar_Default.HUDElementStyle.richText = true;
-            GUI.Label(new Rect(5, 5, width - 5, height - 5), text, Magnetar_Default.HUDElementStyle);
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
+
+            GUI.Label(new Rect(5, 5, width - 5, height - 5), displayText, HUDElementStyle);
         }
     }
 
@@ -134,10 +138,11 @@ namespace Magnetar_Client.UI.HUDElements
             }
 
             string color = cpuUsage > 80 ? "red" : (cpuUsage > 40 ? "yellow" : "lime");
-            string text = $"CPU: <color={color}>{Mathf.Clamp(cpuUsage, 0, 100):F1}%</color>";
+            string displayText = $"CPU: <color={color}>{Mathf.Clamp(cpuUsage, 0, 100):F1}%</color>";
 
-            Magnetar_Default.HUDElementStyle.richText = true;
-            GUI.Label(new Rect(5, 5, width - 10, height - 10), text, Magnetar_Default.HUDElementStyle);
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
+
+            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
         }
     }
 
@@ -174,10 +179,11 @@ namespace Magnetar_Client.UI.HUDElements
 
             float displayVram = Mathf.Min(lastVramMb, totalVram);
 
-            string text = $"VRAM: <color=yellow>{displayVram:F0}</color> / <color=white>{totalVram} MB</color>";
+            string displayText = $"VRAM: <color=yellow>{displayVram:F0}</color> / <color=white>{totalVram} MB</color>";
 
-            Magnetar_Default.HUDElementStyle.richText = true;
-            GUI.Label(new Rect(5, 5, width - 10, height - 10), text, Magnetar_Default.HUDElementStyle);
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
+
+            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
         }
     }
 

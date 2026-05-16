@@ -1,5 +1,6 @@
 ﻿using Magnetar_Client.UI.Themes;
 using UnityEngine;
+using static Magnetar_Client.UI.Themes.Magnetar_Default;
 
 namespace Magnetar_Client.UI.HUDElements
 {
@@ -14,10 +15,11 @@ namespace Magnetar_Client.UI.HUDElements
 
         protected override void DrawContent(float width, float height)
         {
-            string text = $"<color=cyan>{gpuName}</color>";
+            string displayText = $"<color=cyan>{gpuName}</color>";
 
-            Magnetar_Default.HUDElementStyle.richText = true;
-            GUI.Label(new Rect(5, 5, width - 10, height - 10), text, Magnetar_Default.HUDElementStyle);
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
+
+            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
         }
     }
 
@@ -34,10 +36,11 @@ namespace Magnetar_Client.UI.HUDElements
 
         protected override void DrawContent(float width, float height)
         {
-            string text = $"<color=cyan>{cpuName}</color>\n";
+            string displayText = $"<color=cyan>{cpuName}</color>\n";
 
-            Magnetar_Default.HUDElementStyle.richText = true;
-            GUI.Label(new Rect(5, 5, width - 10, height - 10), text, Magnetar_Default.HUDElementStyle);
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
+
+            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
         }
     }
 }

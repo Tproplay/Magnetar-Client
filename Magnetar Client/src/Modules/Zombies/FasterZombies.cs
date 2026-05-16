@@ -4,6 +4,7 @@ using Magnetar_Client.Game;
 using Magnetar_Client.Utils;
 using System;
 using System.Collections.Generic;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -21,6 +22,9 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
 
         // Mod Data
+
+        public static FasterZombies instance;
+
         public MultiSelectSetting ZombieSelectedSetting;
         public FloatSetting theSpeedSettig;
         public override bool Active { get; set; } = false;
@@ -29,6 +33,8 @@ namespace Magnetar_Client.Modules
 
         public FasterZombies()
         {
+            instance = this;
+
             var zombieNameOverriden = Translator.TranslateEnum(typeof(ZombieType));
 
             foreach (var key in new List<int>(zombieNameOverriden.Keys))
@@ -53,7 +59,7 @@ namespace Magnetar_Client.Modules
         // Mod Logic
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null) return;
+            if (BoardInstanceIsNull) return;
 
             float currentMultiplier = theSpeedSettig.Value;
             var selectedZombies = ZombieSelectedSetting.SelectedValues;

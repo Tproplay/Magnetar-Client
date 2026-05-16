@@ -398,7 +398,7 @@ namespace Magnetar_Client.Core
                 mod.Toggle(); 
                 e.Use();
             }
-            y += Config.elementHeight + Config.spacing;
+            y += Config.elementHeight + Config.spacing/2;
 
             return y - startY; // Return height actually used
         }
@@ -489,6 +489,7 @@ namespace Magnetar_Client.Core
                             mod.Toggle();
                         }
                     }
+
                 }
             }
         }

@@ -1,9 +1,8 @@
 ﻿using Il2Cpp;
 using Magnetar_Client.Utils;
-using MelonLoader;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using static Magnetar_Client.Game.AppData;
 
 using static Magnetar_Client.Game.GameData;
 
@@ -23,6 +22,9 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
 
         // Mod Data
+
+        public static KillZombies instance;
+
         public MultiSelectSetting ZombiesSelectedSetting;
         public MultiSelectSetting HypnoZombiesSelectedSetting;
 
@@ -36,6 +38,7 @@ namespace Magnetar_Client.Modules
 
         public KillZombies()
         {
+            instance = this;
 
             zombieNameOverriden = Translator.TranslateEnum(typeof(ZombieType));
             foreach (var name in zombieNameOverriden)
@@ -88,7 +91,7 @@ namespace Magnetar_Client.Modules
                 }
             }
 
-            if (Board.Instance == null) return; 
+            if (BoardInstanceIsNull) return; 
 
             foreach (var zombie in zombieList)
             {

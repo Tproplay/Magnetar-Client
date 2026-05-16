@@ -2,6 +2,7 @@
 using Il2Cpp;
 using System.Collections.Generic;
 using Magnetar_Client.Utils;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -19,7 +20,7 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
 
         // Mod Data
-        public static CustomCDGlove Instance;
+        public static CustomCDGlove instance;
 
         public float CustomCD = 0;
         public FloatSetting CustomCDSetting;
@@ -95,7 +96,7 @@ namespace Magnetar_Client.Modules
 
         // Mod Data
 
-        public static CustomCDHammer Instance;
+        public static CustomCDHammer instance;
 
         public float CustomCD = 0;
         public FloatSetting CustomCDSetting;
@@ -112,7 +113,7 @@ namespace Magnetar_Client.Modules
 
         public CustomCDHammer()
         {
-            Instance = this;
+            instance = this;
 
             CustomCDSetting = new FloatSetting("Custom Hammer Cooldown", 0, 999, CustomCD);
             Settings.Add(CustomCDSetting);
@@ -190,6 +191,8 @@ namespace Magnetar_Client.Modules
 
         // Mod Data
 
+        public static CustomCDCards instance;
+
         public float customCD = 100;
         public FloatSetting CustomCDSetting;
 
@@ -199,6 +202,7 @@ namespace Magnetar_Client.Modules
         private Dictionary<int,string> plantNameOverriden = new Dictionary<int, string>();
         public CustomCDCards()
         {
+            instance = this;
 
             plantNameOverriden = Translator.TranslateEnum(typeof(PlantType));
 
@@ -245,7 +249,7 @@ namespace Magnetar_Client.Modules
         private Dictionary<CardUI,float> originalCD = new Dictionary<CardUI,float>();
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null || InGameUI.Instance == null || InGameUI.Instance.Cards.Count == 0)
+            if (BoardInstanceIsNull || InGameUI.Instance == null || InGameUI.Instance.Cards.Count == 0)
             {
                 originalCD.Clear();
                 return;
@@ -267,9 +271,9 @@ namespace Magnetar_Client.Modules
                 // If card is original
                 if (!card.isExtra)
                 {
-                    if (!selectedSeeds.SelectedValues.Contains((int)card.thePlantType)) continue;
+                    if (!selectedSeeds.IsSelected((int)card.thePlantType)) continue;
 
-                    if (!selectedSeeds.SelectedValues.Contains((int)card.thePlantType) &&
+                    if (!selectedSeeds.IsSelected((int)card.thePlantType) &&
                         originalCD.ContainsKey(card))
                     {
                         card.fullCD = originalCD[card];
@@ -280,9 +284,9 @@ namespace Magnetar_Client.Modules
                 // If card is duplicate
                 if (card.isExtra)
                 {
-                    if (!selectedSeeds_dup.SelectedValues.Contains((int)card.thePlantType)) continue;
+                    if (!selectedSeeds_dup.IsSelected((int)card.thePlantType)) continue;
 
-                    if (!selectedSeeds_dup.SelectedValues.Contains((int)card.thePlantType) &&
+                    if (!selectedSeeds_dup.IsSelected((int)card.thePlantType) &&
                         originalCD.ContainsKey(card))
                     {
                         card.fullCD = originalCD[card];

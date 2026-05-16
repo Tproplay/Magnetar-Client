@@ -2,8 +2,32 @@
 using Il2Cpp;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
+
 namespace Magnetar_Client.Game
 {
+    /// <summary>
+    /// Contains Useful App Stats, mainly used for code optimization
+    /// </summary>
+    public static class AppData
+    {
+        public static Board board; // Cached reference
+        public static bool BoardInstanceIsNull => board == null;
+
+        [HarmonyPatch(typeof(Board), nameof(Board.Awake))]
+        public static class BoardStartPatch
+        {
+            public static void Postfix(Board __instance) => board = __instance;
+        }
+
+        [HarmonyPatch(typeof(Board), nameof(Board.OnDestroy))]
+        public static class BoardEndPatch
+        {
+            public static void Postfix() => board = null;
+        }
+    }
+
+
+
     /// <summary>
     /// Contains useful Game Stats like the plants place, zombies in the lawn, etc.
     /// </summary>
@@ -18,13 +42,13 @@ namespace Magnetar_Client.Game
 
 
         [HarmonyPatch(typeof(Plant))]
-        public class plantListPatch
+        private class plantListPatch
         {
             [HarmonyPatch(nameof(Plant.Start))]
             [HarmonyPostfix]
             public static void StartPostFix(Plant __instance)
             {
-                if (Board.Instance == null || __instance == null) return;
+                if (AppData.BoardInstanceIsNull) return;
 
                 if (!plantList.Contains(__instance))
                     plantList.Add(__instance);
@@ -34,7 +58,7 @@ namespace Magnetar_Client.Game
             [HarmonyPostfix]
             public static void OnDestroyPostFix(Plant __instance)
             {
-                if (Board.Instance == null || __instance == null) return;
+                if (AppData.BoardInstanceIsNull) return;
 
                 if (plantList.Contains(__instance))
                     plantList.Remove(__instance);
@@ -51,13 +75,13 @@ namespace Magnetar_Client.Game
         public static List<Zombie> zombieList = new List<Zombie>();
 
         [HarmonyPatch(typeof(Zombie))]
-        public class ZombieListPatch
+        private class ZombieListPatch
         {
             [HarmonyPatch(nameof(Zombie.Start))]
             [HarmonyPostfix]
             public static void StartPostFix(Zombie __instance)
             {
-                if (Board.Instance == null || __instance == null || __instance.isIdle) return;
+                if (AppData.BoardInstanceIsNull || __instance.isIdle) return;
                 
                 if (!zombieList.Contains(__instance))
                     zombieList.Add(__instance);
@@ -67,7 +91,7 @@ namespace Magnetar_Client.Game
             [HarmonyPostfix]
             public static void DiePostFix(Zombie __instance)
             {
-                if (Board.Instance == null || __instance == null || __instance.isIdle) return;
+                if (AppData.BoardInstanceIsNull || __instance.isIdle) return;
 
                 if (zombieList.Contains(__instance))
                     zombieList.Remove(__instance);
@@ -76,15 +100,36 @@ namespace Magnetar_Client.Game
 
         #endregion
 
-        #region Zombie Damage
+        #region Zombie
+
+        public static int TotalNumberOfZombiesSpawed = 0;
+
+        public static int TotalNumberOfZombiesKilled = 0;
+
         /// <summary>
         /// Total Damage Recieved By Zombies. Resets on starting a new level.
         /// </summary>
         public static long TotalDamagedRecievedByZombies = 0;
 
         [HarmonyPatch(typeof(Zombie))]
-        public class ZombieDamagePatch
+        public class ZombiePatch
         {
+            [HarmonyPatch(nameof(Zombie.Start))]
+            [HarmonyPostfix]
+            public static void StartPostFix(Zombie __instance)
+            {
+                if (__instance == null || __instance.isIdle) return;
+
+                TotalNumberOfZombiesSpawed += 1;
+            }
+
+            [HarmonyPatch(nameof(Zombie.Die))]
+            [HarmonyPrefix]
+            static void DiePatch(Zombie __instance)
+            {
+                if (__instance == null || !zombieList.Contains(__instance)) return;
+                TotalNumberOfZombiesKilled += 1;
+            }
 
             [HarmonyPatch(nameof(Zombie.TakeDamage))]
             [HarmonyPrefix]
@@ -105,48 +150,20 @@ namespace Magnetar_Client.Game
                     TotalDamagedRecievedByZombies += (long)damageTaken;
                 }
             }
+
         }
 
         #endregion
 
-        #region Plants Killed
+        #region Plants
+        public static int TotalNumberOfPlantsSpawned = 0;
         public static int TotalNumberOfPlantsKilled = 0;
         
+
         [HarmonyPatch(typeof(Plant))]
         private class PlantsKilledPatch
         {
-            [HarmonyPatch(nameof(Plant.Die))]
-            [HarmonyPrefix]
-            static void DiePatch(Plant __instance)
-            {
-                if (__instance == null || !plantList.Contains(__instance)) return;
-                TotalNumberOfPlantsKilled += 1;
-            }
-        }
-        #endregion
 
-        #region Zombies Killed
-        public static int TotalNumberOfZombiesKilled = 0;
-
-        [HarmonyPatch(typeof(Zombie))]
-        private class ZombiesKilledPatch
-        {
-            [HarmonyPatch(nameof(Zombie.Die))]
-            [HarmonyPrefix]
-            static void DiePatch(Zombie __instance)
-            {
-                if (__instance == null || !zombieList.Contains(__instance)) return;
-                TotalNumberOfZombiesKilled += 1;
-            }
-        }
-        #endregion
-
-        #region Plants Spawned
-        public static int TotalNumberOfPlantsSpawned = 0;
-
-        [HarmonyPatch(typeof(Plant))]
-        private class PlantsSpawnedPatch
-        {
             [HarmonyPatch(nameof(Plant.Start))]
             [HarmonyPostfix]
             public static void StartPostFix(Plant __instance)
@@ -155,28 +172,75 @@ namespace Magnetar_Client.Game
 
                 TotalNumberOfPlantsSpawned += 1;
             }
+
+            [HarmonyPatch(nameof(Plant.Die))]
+            [HarmonyPrefix]
+            static void DiePatch(Plant __instance)
+            {
+                if (__instance == null || !plantList.Contains(__instance)) return;
+                TotalNumberOfPlantsKilled += 1;
+            }
+ 
         }
         #endregion
+        
+        #region Sun
 
-        #region Zombies Spawned
-        public static int TotalNumberOfZombiesSpawed = 0;
+        public static int TotalAmountOfSunObtained = 0;
+        public static int TotalAmountOfSunSpent = 0;
 
-        [HarmonyPatch(typeof(Zombie))]
-        private class ZombiesSpawedPatch
+        private static int lastSunAmount = 0;
+        [HarmonyPatch(typeof(Board))]
+        private class SunUpdatePatch
         {
-            [HarmonyPatch(nameof(Zombie.Start))]
+            [HarmonyPatch(nameof(Board.SunUpdate))]
             [HarmonyPostfix]
-            public static void StartPostFix(Zombie __instance)
+            public static void SunUpdatePostFix()
             {
-                if ( __instance == null || __instance.isIdle) return;
-                
-                TotalNumberOfZombiesSpawed += 1;
+                if (lastSunAmount == AppData.board.theSun) return;
+                if (lastSunAmount < AppData.board.theSun)
+                {
+                    TotalAmountOfSunObtained += AppData.board.theSun - lastSunAmount;
+                    lastSunAmount = AppData.board.theSun;
+                }
+                else
+                {
+                    TotalAmountOfSunSpent += lastSunAmount - AppData.board.theSun;
+                    lastSunAmount = AppData.board.theSun;
+                }
             }
         }
+
         #endregion
 
+        #region Money
 
+        public static int TotalAmountOfMoneyObtained = 0;
+        public static int TotalAmountOfMoneySpent = 0;
 
+        private static int lastMoneyAmount = 0;
+        [HarmonyPatch(typeof(Board))]
+        private class MoneyUpdatePatch
+        {
+            [HarmonyPatch(nameof(Board.Update))]
+            [HarmonyPostfix]
+            public static void UpdatePostFix()
+            {
+                if (lastMoneyAmount == AppData.board.theMoney) return;
+                if (lastMoneyAmount < AppData.board.theMoney)
+                {
+                    TotalAmountOfSunObtained += AppData.board.theMoney - lastMoneyAmount;
+                    lastMoneyAmount = AppData.board.theMoney;
+                }
+                else
+                {
+                    TotalAmountOfSunSpent += lastMoneyAmount - AppData.board.theMoney;
+                    lastMoneyAmount = AppData.board.theMoney;
+                }
+            }
+        }
+
+        #endregion
 
         #region Reset Values
         [HarmonyPatch(typeof(Board))]
@@ -186,18 +250,23 @@ namespace Magnetar_Client.Game
             [HarmonyPostfix]
             static void AwakePostFix(Board __instance)
             {
+                // Things to be reset at the start of a level
                 plantList.Clear();
                 zombieList.Clear();
 
                 TotalDamagedRecievedByZombies = 0;
                 TotalNumberOfZombiesKilled = 0; TotalNumberOfPlantsKilled = 0;
                 TotalNumberOfZombiesSpawed = 0; TotalNumberOfPlantsSpawned = 0;
+
+                TotalAmountOfSunObtained = 0; TotalAmountOfSunSpent = 0; lastSunAmount = 0;
+                TotalAmountOfMoneyObtained = 0; TotalAmountOfMoneySpent = 0; lastMoneyAmount = 0;
             }
 
             [HarmonyPatch(nameof(Board.Die))]
             [HarmonyPostfix]
             static void DiePostFix(Board __instance)
             {
+                // Things to be reset at the end of a level
                 plantList.Clear();
                 zombieList.Clear();
 

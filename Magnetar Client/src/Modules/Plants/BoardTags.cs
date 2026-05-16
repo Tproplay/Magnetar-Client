@@ -1,4 +1,6 @@
 ﻿using Il2Cpp;
+using static Magnetar_Client.Utils.Magnetar_Logger;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -15,44 +17,74 @@ namespace Magnetar_Client.Modules
             "areaofeffectplanting";
 
         public override ModuleCategory Category { get; set; } = ModuleCategory.Plant;
-        
+
         // Mod Data
 
+        public static MultiPlanting instance;
+
         private static string wasAlreadyEnabled;
+
+#if DEBUG
+        public BoolSetting DebugMode;
+#endif
+
+        public MultiPlanting()
+        {
+            instance = this;
+#if DEBUG
+            DebugMode = new BoolSetting("Debug Mode", false);
+            Settings.Add(DebugMode);
+#endif
+        }
+
 
         // Mod Logic
 
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null) { wasAlreadyEnabled = null; return; }
+            if (BoardInstanceIsNull || !board.boardTag.isColumn) { wasAlreadyEnabled = null; return; }
+
+
             if (wasAlreadyEnabled != null) return;
 
-            wasAlreadyEnabled = Board.Instance.boardTag.isColumn ? "Yes" : "No";
+#if DEBUG
+            if (instance.DebugMode.Value) DebugLogger.Msg("Triggered Multiplant Enable");
+#endif
 
-            Board.BoardTag boardTags = Board.Instance.boardTag;
+            wasAlreadyEnabled = board.boardTag.isColumn ? "Yes" : "No";
+
+#if DEBUG
+            DebugLogger.Msg("Level was found to have boardtag.isColumn" + wasAlreadyEnabled);
+#endif
+
+            Board.BoardTag boardTags = board.boardTag;
             boardTags.isColumn = true;
 
-            Board.Instance.boardTag = boardTags;
-
+            board.boardTag = boardTags;
+#if DEBUG
+            if (board.boardTag.isColumn) DebugLogger.Msg("Successfully Enabled Multiplanting");
+#endif
         }
 
         public override void OnDisable()
         {
-            if (wasAlreadyEnabled == null || wasAlreadyEnabled == "Yes") { wasAlreadyEnabled = null; return; }
+            if (BoardInstanceIsNull || wasAlreadyEnabled == null || wasAlreadyEnabled == "Yes") { wasAlreadyEnabled = null; return; }
 
-            Board.BoardTag boardTags = Board.Instance.boardTag;
+            Board.BoardTag boardTags = board.boardTag;
             boardTags.isColumn = false;
 
-            Board.Instance.boardTag = boardTags;
+            board.boardTag = boardTags;
             wasAlreadyEnabled = null;
 
         }
+
+
     }
 
-    public class TravelPlants : Module
+    public class OdysseyPlants : Module
     {
         // Mod Info
-        public override string Name { get; set; } = "Travel Plants";
+        public override string Name { get; set; } = "Odyssey Plants";
         public override string Description { get; set; } = "Allows you to fuse Travel/Odyssey Plants";
         public override string SearchHints { get; set; } = "travelplants odysseyplants travelplantfusion " +
             "odysseyplantfusion fuseplants fusionplants travelplantodyssey travelodyssey odysseyfuse travelfuse " +
@@ -61,34 +93,39 @@ namespace Magnetar_Client.Modules
             "travalplants travleplants odesseyplants odessyplants odyseyplants odyseeplants plantfusion travelodysseymod";
 
         public override ModuleCategory Category { get; set; } = ModuleCategory.Plant;
-        
+
         // Mod Data
 
+        public static OdysseyPlants instance;
+
         private static string wasAlreadyEnabled;
+
+        public OdysseyPlants() { instance = this; }
+
 
         // Mod Logic
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null) { wasAlreadyEnabled = null; return; }
+            if (BoardInstanceIsNull || !board.boardTag.enableAllTravelPlant) { wasAlreadyEnabled = null; return; }
             if (wasAlreadyEnabled != null) return;
 
-            wasAlreadyEnabled = Board.Instance.boardTag.enableAllTravelPlant ? "Yes" : "No";
+            wasAlreadyEnabled = board.boardTag.enableAllTravelPlant ? "Yes" : "No";
 
-            Board.BoardTag boardTags = Board.Instance.boardTag;
+            Board.BoardTag boardTags = board.boardTag;
             boardTags.enableAllTravelPlant = true;
 
-            Board.Instance.boardTag = boardTags;
+            board.boardTag = boardTags;
 
         }
 
         public override void OnDisable()
         {
-            if (wasAlreadyEnabled == null || wasAlreadyEnabled == "Yes") { wasAlreadyEnabled = null; return; }
+            if (BoardInstanceIsNull || wasAlreadyEnabled == null || wasAlreadyEnabled == "Yes") { wasAlreadyEnabled = null; return; }
 
-            Board.BoardTag boardTags = Board.Instance.boardTag;
+            Board.BoardTag boardTags = board.boardTag;
             boardTags.enableAllTravelPlant = false;
 
-            Board.Instance.boardTag = boardTags;
+            board.boardTag = boardTags;
             wasAlreadyEnabled = null;
         }
     }

@@ -4,12 +4,13 @@ using UnityEngine;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.UI.Themes.Magnetar_Default;
 using static Magnetar_Client.Utils.Maths;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.UI.HUDElements
 {
     public class DamageStatsPlant : HudElement
     {
-        public DamageStatsPlant() : base("Total Damage by Plants", HudElement.NewRect(200))
+        public DamageStatsPlant() : base("Total Damage by Plants", HudElement.NewRect(100))
         { }
 
         
@@ -18,6 +19,8 @@ namespace Magnetar_Client.UI.HUDElements
 
             string displayText = $"Plant Damage: {FormatInternational(TotalDamagedRecievedByZombies)}";
 
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
+
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }
     }
@@ -25,7 +28,7 @@ namespace Magnetar_Client.UI.HUDElements
 
     public class AverageDamageStatsPlant : HudElement
     {
-        public AverageDamageStatsPlant() : base("Average Damage by Plants", HudElement.NewRect(175))
+        public AverageDamageStatsPlant() : base("Average Damage by Plants", HudElement.NewRect(100))
         { }
 
         private List<long> damageHistory = new List<long>();
@@ -33,7 +36,7 @@ namespace Magnetar_Client.UI.HUDElements
         private float timer = 0;
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null) return;
+            if (BoardInstanceIsNull) return;
 
             timer += Time.deltaTime;
 
@@ -61,6 +64,8 @@ namespace Magnetar_Client.UI.HUDElements
             if (Dps < 0) Dps = 0;
 
             string displayText = $"Plant DPS: {FormatInternational(Dps)}";
+
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }

@@ -56,7 +56,7 @@ namespace Magnetar_Client.Modules
             public static void SetBulletPrefix(ref BulletType theBulletType,ref BulletMoveWay theMovingWay)
             {
                 if (instance == null || !instance.Active) return;
-                if (!instance.selectedBulletsSetting.SelectedValues.Contains((int)theBulletType)) return;
+                if (!instance.selectedBulletsSetting.IsSelected((int)theBulletType)) return;
 
                 theMovingWay = BulletMoveWay.Track;
             }

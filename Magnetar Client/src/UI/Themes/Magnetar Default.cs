@@ -29,11 +29,11 @@ namespace Magnetar_Client.UI.Themes
         private static Texture2D DimTex;
 
         #region Colors
-        public static readonly Color BackgroundColor = new Color(26 / 255f, 26 / 255f, 26 / 255f, 204 / 255f);
+        public static readonly Color BackgroundColor = new Color(26 / 255f, 26 / 255f, 26 / 255f, 220 / 255f);
         public static readonly Color AccentColor = new Color(255 / 255f, 61 / 255f, 61 / 255f, 255 / 255f);
-        public static readonly Color LightBackgroundColor = new Color(28 / 255f, 28 / 255f, 28 / 255f, 184 / 255f);
+        public static readonly Color LightBackgroundColor = new Color(28 / 255f, 28 / 255f, 28 / 255f, 214 / 255f);
         public static readonly Color TextWhite = new Color(230 / 255f, 230 / 255f, 230 / 255f, 255 / 255f);
-        public static readonly Color TextDim = new Color(153 / 255f, 153 / 255f, 153 / 255f, 255 / 255f);
+        public static readonly Color TextDim = new Color(174 / 255f, 174 / 255f, 174 / 255f, 255 / 255f);
         public static readonly Color HoverColor = new Color(28 / 255f, 28 / 255f, 28 / 255f, 255 / 255f);
         public static readonly Color ActiveColor = new Color(51 / 255f, 51 / 255f, 51 / 255f, 255 / 255f);
         public static readonly Color ActiveHoverColor = new Color(240 / 255f, 51 / 255f, 51 / 255f, 255 / 255f);

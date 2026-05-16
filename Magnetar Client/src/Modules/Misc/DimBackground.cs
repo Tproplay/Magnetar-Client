@@ -1,6 +1,6 @@
 ﻿namespace Magnetar_Client.Modules
 {
-    public class Dim : Module
+    public class DimBackground : Module
     {
         // Mod Info
         public override string Name { get; set; } = "Dim Background";
@@ -13,9 +13,15 @@
 
         public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
 
+        public override bool Active { get; set; } = true; // On by default
+
         // Mod Data
-        public  Dim()
+
+        public static DimBackground instance;
+
+        public  DimBackground()
         {
+            instance = this;
             Config.dimBg = Active;
         }
 

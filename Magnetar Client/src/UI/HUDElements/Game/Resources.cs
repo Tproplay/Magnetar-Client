@@ -1,20 +1,20 @@
 ﻿using static Magnetar_Client.UI.Themes.Magnetar_Default;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
+
 using UnityEngine;
-using Il2Cpp;
 namespace Magnetar_Client.UI.HUDElements
 {
-    public class NumberOfZombies : HudElement
+    public class SunObtained : HudElement
     {
-        public NumberOfZombies() : base("Zombies On Lawn", HudElement.NewRect(100))
+        public SunObtained() : base("Total Sun Obtained", HudElement.NewRect(100))
         { }
 
 
         protected override void DrawContent(float width, float height)
         {
 
-            string displayText = $"Zombies On Lawn: {zombieList.Count}";
+            string displayText = $"Sun Obtained: {FormatInternational(TotalAmountOfSunObtained)}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
@@ -22,16 +22,16 @@ namespace Magnetar_Client.UI.HUDElements
         }
     }
 
-    public class NumberOfZombiesSpawned : HudElement
+    public class SunSpent : HudElement
     {
-        public NumberOfZombiesSpawned() : base("Zombies Spawned", HudElement.NewRect(100))
+        public SunSpent() : base("Total Sun Spent", HudElement.NewRect(100))
         { }
 
 
         protected override void DrawContent(float width, float height)
         {
 
-            string displayText = $"Zombies Spawned: {TotalNumberOfZombiesSpawed}";
+            string displayText = $"Sun Spent: {FormatInternational(TotalAmountOfSunSpent)}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
@@ -39,16 +39,16 @@ namespace Magnetar_Client.UI.HUDElements
         }
     }
 
-    public class NumberOfZombiesKilled : HudElement
+    public class MoneyObtained : HudElement
     {
-        public NumberOfZombiesKilled() : base("Zombies Killed", HudElement.NewRect(220))
+        public MoneyObtained() : base("Total Money Obtained", HudElement.NewRect(100))
         { }
 
 
         protected override void DrawContent(float width, float height)
         {
 
-            string displayText = $"Zombies Killed: {TotalNumberOfZombiesKilled}";
+            string displayText = $"Money Obtained: {FormatInternational(TotalAmountOfMoneyObtained)}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
@@ -56,32 +56,20 @@ namespace Magnetar_Client.UI.HUDElements
         }
     }
 
-    public class TotalZombieHealth : HudElement
+    public class MoneySpent : HudElement
     {
-        public TotalZombieHealth() : base("Zombie Wave Health", HudElement.NewRect(235))
+        public MoneySpent() : base("Total Money Spent", HudElement.NewRect(100))
         { }
+
 
         protected override void DrawContent(float width, float height)
         {
 
-            string displayText = $"Wave Health: {FormatInternational(GetZombieHealth())}";
+            string displayText = $"Money Spent: {FormatInternational(TotalAmountOfMoneySpent)}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
-
-
-        int GetZombieHealth()
-        {
-            int health = 0;
-            foreach(Zombie zombie in zombieList)
-            {
-                if (zombie.isMindControlled) continue;
-                health += zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
-                
-            }
-            return health;
         }
     }
 }

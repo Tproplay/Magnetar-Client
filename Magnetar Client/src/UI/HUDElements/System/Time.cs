@@ -13,7 +13,9 @@ namespace Magnetar_Client.UI.HUDElements
 
             string displayText = $"<color=white>{SystemClock.now.ToString("HH:mm:ss")}</color>";
 
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
+
+            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
         }
     }
 }

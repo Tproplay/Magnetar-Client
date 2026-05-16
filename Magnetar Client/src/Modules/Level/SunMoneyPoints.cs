@@ -1,8 +1,4 @@
-﻿using HarmonyLib;
-using Il2Cpp;
-using MelonLoader;
-using static MelonLoader.MelonLogger;
-
+﻿using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -13,7 +9,7 @@ namespace Magnetar_Client.Modules
         public override string SearchHints { get; set; } = "unlimited sun infinite sun snu sum ifnite finite sun" +
             "ulimited sun limitless sun unrestricted sun endless sun";
         public override string Description { get; set; } = "Gives you unlimited sun.";
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Board;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
         // The mod data
 
@@ -43,22 +39,22 @@ namespace Magnetar_Client.Modules
 
         public override void OnDisable() 
         { 
-            if (Board.Instance == null || instance==null) return;
+            if (BoardInstanceIsNull) return;
 
             if (originalSunAmount >0 && instance.preserveOriginalSetting.Value)
             {
-                Board.Instance.theSun = originalSunAmount;
+                board.theSun = originalSunAmount;
                 originalSunAmount = -853721;
             }
         }
 
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null || instance==null) return;
-            if (originalSunAmount == -853721) originalSunAmount = Board.Instance.theSun;
+            if (BoardInstanceIsNull) return;
+            if (originalSunAmount == -853721) originalSunAmount = board.theSun;
 
 
-            Board.Instance.theSun = instance.sunSetting.Value;
+            board.theSun = instance.sunSetting.Value;
         }
 
         
@@ -72,7 +68,7 @@ namespace Magnetar_Client.Modules
         public override string SearchHints { get; set; } = "sunmultiplier solarmultiplier sunboostsunbonussunpowerupsonmultiplier" +
             " sunmultiplyer sunmultipliar sunmultipier sunmultyplier sunmulltiplier sunmultaplier lightmultiplier raymultiplier" +
             "sunfactor sunamplifier sunintensifier sunenhancer solmultiplier sunx2";
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Board;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
         // The mod data
 
@@ -89,18 +85,18 @@ namespace Magnetar_Client.Modules
         private static int _sunAmount = -947624;
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null) { _sunAmount = -947624; return; }
+            if (BoardInstanceIsNull) { _sunAmount = -947624; return; }
 
-            int Sun = Board.Instance.theSun;
+            int Sun = board.theSun;
 
             if (_sunAmount== -947624) _sunAmount = Sun;
             
             if (Sun != _sunAmount)
             {
                 if ((Sun - _sunAmount)>0)
-                    Board.Instance.theSun += (int)((Sun - _sunAmount)*(sunMultiplierSetting.Value - 1));
+                    board.theSun += (int)((Sun - _sunAmount)*(sunMultiplierSetting.Value - 1));
 
-                _sunAmount = Board.Instance.theSun;
+                _sunAmount = board.theSun;
             }
 
         }
@@ -122,7 +118,7 @@ namespace Magnetar_Client.Modules
         public override string Description { get; set; } = "Gives you unlimited money.";
         public override string SearchHints { get; set; } = "unlimited money infinite money mny mney ifnite finite" +
             "ulimited limitless unrestricted endless";
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Board;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
         // mod data
 
@@ -151,18 +147,18 @@ namespace Magnetar_Client.Modules
         // Mod Logic
         public override void OnDisable()
         {
-            if (Board.Instance == null || !instance.preserveOriginalSetting.Value) return;
+            if (BoardInstanceIsNull || !instance.preserveOriginalSetting.Value) return;
 
-            Board.Instance.theMoney = originalMoneyAmount;
+            board.theMoney = originalMoneyAmount;
             originalMoneyAmount = -853721;
         }
 
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null) return;
-            if (originalMoneyAmount == -853721) originalMoneyAmount = Board.Instance.theMoney;
+            if (BoardInstanceIsNull) return;
+            if (originalMoneyAmount == -853721) originalMoneyAmount = board.theMoney;
 
-            Board.Instance.theMoney = instance.moneySetting.Value;
+            board.theMoney = instance.moneySetting.Value;
         }
 
 
@@ -177,7 +173,7 @@ namespace Magnetar_Client.Modules
             "moneyincrease moneymultiplyer monymultiplier moenymultiplier moneymultipier moneymultaplier moneymulltiplier " +
             "moneymultipyler wealthmultiplier richesmultiplier coinmultiplier dollarmultiplier currencymultiplier " +
             "moneyfactor moneyx2 cashboost";
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Board;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
         // Mod data
 
@@ -197,18 +193,18 @@ namespace Magnetar_Client.Modules
         private static int _moneyAmount = -947624;
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null) { _moneyAmount = -947624; return; }
+            if (BoardInstanceIsNull) { _moneyAmount = -947624; return; }
 
-            int Money = Board.Instance.theMoney;
+            int Money = board.theMoney;
 
             if (_moneyAmount == -947624) _moneyAmount = Money;
 
             if (Money != _moneyAmount)
             {
                 if ((Money - _moneyAmount) > 0)
-                    Board.Instance.theMoney += (int)((Money - _moneyAmount) * (moneyMultiplierSetting.Value -1));
+                    board.theMoney += (int)((Money - _moneyAmount) * (moneyMultiplierSetting.Value -1));
 
-                _moneyAmount = Board.Instance.theMoney;
+                _moneyAmount = board.theMoney;
             }
 
         }
@@ -226,7 +222,7 @@ namespace Magnetar_Client.Modules
         public override string Description { get; set; } = "Gives you unlimited points.";
         public override string SearchHints { get; set; } = "unlimited points infinite points pts currency gold ifnite finite" +
             "ulimited limitless unrestricted endless";
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Board;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
         // Mod data
 
@@ -251,18 +247,18 @@ namespace Magnetar_Client.Modules
         // Mod Logic
         public override void OnDisable()
         {
-            if (Board.Instance == null || !preserveOriginalSetting.Value) return;
+            if (BoardInstanceIsNull || !preserveOriginalSetting.Value) return;
 
-            Board.Instance.thePoints = originalPointsAmount;
+            board.thePoints = originalPointsAmount;
             originalPointsAmount = -853721;
         }
 
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null) return;
-            if (originalPointsAmount == -853721) originalPointsAmount = Board.Instance.thePoints;
+            if (BoardInstanceIsNull) return;
+            if (originalPointsAmount == -853721) originalPointsAmount = board.thePoints;
 
-            Board.Instance.thePoints = pointsSetting.Value;
+            board.thePoints = pointsSetting.Value;
         }
 
 
@@ -277,7 +273,7 @@ namespace Magnetar_Client.Modules
             "scoremultiplier scoreboost pointsboost pointmultiplyer pointsmultiplyer pointmultipier pointsmultipier" +
             "pointsmultyplier pointmultyplier scoreincrease pointsbonus pointbonus pointx2 ptsbonus pointsfactor scorefactor";
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Board;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
         // Mod data
 
@@ -295,18 +291,18 @@ namespace Magnetar_Client.Modules
         private static float _pointsAmount = -947624.35f;
         public override void OnUpdateActive()
         {
-            if (Board.Instance == null) { _pointsAmount = -947624.35f; return; }
+            if (BoardInstanceIsNull) { _pointsAmount = -947624.35f; return; }
 
-            float Points = Board.Instance.thePoints;
+            float Points = board.thePoints;
 
             if (_pointsAmount == -947624.35f) _pointsAmount = Points;
 
             if (Points != _pointsAmount)
             {
                 if ((Points - _pointsAmount) > 0)
-                    Board.Instance.thePoints += (Points - _pointsAmount) * (pointsMultiplierSetting.Value - 1);
+                    board.thePoints += (Points - _pointsAmount) * (pointsMultiplierSetting.Value - 1);
 
-                _pointsAmount = Board.Instance.thePoints;
+                _pointsAmount = board.thePoints;
             }
 
         }

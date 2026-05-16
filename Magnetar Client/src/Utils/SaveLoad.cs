@@ -51,8 +51,6 @@ namespace Magnetar_Client.Utils
         public class MultiSelectSaveData
         {
             public List<int> SelectedValues;
-            public List<int> Blacklist;
-            public List<string> NameBlacklist;
         }
 
         #endregion
@@ -106,8 +104,6 @@ namespace Magnetar_Client.Utils
                         modData.Settings[ms.Name] = new MultiSelectSaveData
                         {
                             SelectedValues = new List<int>(ms.SelectedValues),
-                            Blacklist = new List<int>(ms.Blacklist),
-                            NameBlacklist = new List<string>(ms.NameBlacklist)
                         };
                     }
                 }
@@ -241,16 +237,6 @@ namespace Magnetar_Client.Utils
                         {
                             ms.SelectedValues.Clear();
                             foreach (var val in proxy.SelectedValues) ms.SelectedValues.Add(val);
-                        }
-                        if (proxy.Blacklist != null)
-                        {
-                            ms.Blacklist.Clear();
-                            foreach (var val in proxy.Blacklist) ms.Blacklist.Add(val);
-                        }
-                        if (proxy.NameBlacklist != null)
-                        {
-                            ms.NameBlacklist.Clear();
-                            foreach (var val in proxy.NameBlacklist) ms.NameBlacklist.Add(val);
                         }
                         
                     }

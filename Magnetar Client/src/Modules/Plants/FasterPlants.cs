@@ -35,17 +35,17 @@ namespace Magnetar_Client.Modules
         public float ProduceSpeedMultiplier = 50;
         public FloatSetting ProduceSpeedMultiplierSetting;
         public override bool Active { get; set; } = false;
-        private Dictionary<int, string> plantNameOverriden = new Dictionary<int, string>();
+        private Dictionary<int, string> plantNameOverridden = new Dictionary<int, string>();
 
         public FasterPlants()
         {
             instance = this;
 
-            plantNameOverriden = Translator.TranslateEnum(typeof(PlantType));
+            plantNameOverridden = Translator.TranslateEnum(typeof(PlantType));
 
-            foreach (var name in plantNameOverriden)
+            foreach (var name in plantNameOverridden)
             {
-                plantNameOverriden[name.Key] = $"{plantNameOverriden[name.Key]} ({name.Key})";
+                plantNameOverridden[name.Key] = $"{plantNameOverridden[name.Key]} ({name.Key})";
             }
             PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
             {
@@ -55,11 +55,11 @@ namespace Magnetar_Client.Modules
                     257,258,259,260,261,262,263,264,265,266,267,268,
                     246,247,
                 },
-                CustomNames = plantNameOverriden
+                CustomNames = plantNameOverridden
             };
 
             Settings.Add(PlantsSelectedSetting);
-            PlantsSelectedSetting.SelectedValues.UnionWith(plantNameOverriden.Keys);
+            PlantsSelectedSetting.SelectedValues.UnionWith(plantNameOverridden.Keys);
 
             AttackIntervalMultiplierSetting = new FloatSetting("Attack Interval", 0.01f, 50, AttackIntervalMultiplier);
             Settings.Add(AttackIntervalMultiplierSetting);

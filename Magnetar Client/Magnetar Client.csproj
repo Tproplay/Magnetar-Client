@@ -104,12 +104,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Core\AssemblyInfo.cs" />
     <Compile Include="src\Config\Config.cs" />
+    <Compile Include="src\Modules\Level\CustomConvyer.cs" />
     <Compile Include="src\Modules\Level\NoGridItems.cs" />
     <Compile Include="src\Modules\Level\NoLose.cs" />
     <Compile Include="src\Modules\Misc\AutoCollect.cs" />
     <Compile Include="src\Modules\Misc\BetterHealthDisplay.cs" />
     <Compile Include="src\Modules\Misc\FPSLimit.cs" />
     <Compile Include="src\Modules\Plants\GodMode.cs" />
+    <Compile Include="src\Modules\Level\RandomCardRoulette.cs" />
+    <Compile Include="src\Modules\Tools\ColumnGlove.cs" />
     <Compile Include="src\Modules\Visual\NoRender.cs" />
     <Compile Include="src\Modules\Visual\SmallerParticles.cs" />
     <Compile Include="src\Modules\Zombies\AntiLagSpawn.cs" />

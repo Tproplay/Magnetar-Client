@@ -37,11 +37,16 @@ namespace Magnetar_Client.Modules
             FrameDelaySetting = new IntSetting("Frames Between Spawns", 1, 10, 1);
             AddSettings(FrameDelaySetting);
 
-            var NamesOverriden = TranslateEnum(typeof(ZombieType));
+            var NamesOverridden = TranslateEnum(typeof(ZombieType));
 
-            UnaffectedZombies = new MultiSelectSetting("Unaffected Zombies", typeof(ZombieType))
+            foreach (var name in NamesOverridden)
             {
-                CustomNames = NamesOverriden,
+                NamesOverridden[name.Key] = $"{NamesOverridden[name.Key]} ({name.Key})";
+            }
+
+            UnaffectedZombies = new MultiSelectSetting("Unaffected Entities", typeof(ZombieType))
+            {
+                CustomNames = NamesOverridden,
                 SelectedValues = new HashSet<int>
                 {
                     (int)ZombieType.ImpKing,

@@ -37,7 +37,6 @@ namespace Magnetar_Client.Modules
         private bool RandomBullet = false;
         public BoolSetting RandomBulletSetting;
 
-        public List<int> preselected = Enum.GetValues(typeof(BulletType)).Cast<int>().ToList();
         public MultiSelectSetting selectBulletsSetting;
 
 #if DEBUG
@@ -60,12 +59,19 @@ namespace Magnetar_Client.Modules
             PetTypeSetting.Select((int)PetType.PetSnowBoss);
 
             RandomBulletSetting = new BoolSetting("Random Bullets", RandomBullet);
-            
+
+            var NamesOverridden = Translator.TranslateEnum(typeof(BulletType));
+
+            foreach (var name in NamesOverridden)
+            {
+                NamesOverridden[name.Key] = $"{NamesOverridden[name.Key]} ({name.Key})";
+            }
+
             selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
             {
-                CustomNames = Translator.TranslateEnum(typeof(BulletType))
+                CustomNames = NamesOverridden
             };
-            selectBulletsSetting.SelectedValues.UnionWith(preselected);
+            selectBulletsSetting.SelectedValues.UnionWith(NamesOverridden.Keys);
 
 #if DEBUG
             DebugMode = new BoolSetting("DebugMode", false);
@@ -243,7 +249,10 @@ namespace Magnetar_Client.Modules
                     newType = (BulletType)instance.selectBulletsSetting.SelectedValues.ElementAt(
                         UnityEngine.Random.RandomRangeInt(0, instance.selectBulletsSetting.SelectedValues.Count));
                 }
-                MelonLogger.Msg((int)newType);
+#if DEBUG
+                if (instance.DebugMode.Value)
+                    DebugLogger.Msg($"Spawned Bullet: {newType.ToString()} ({(int)newType}");
+#endif
                 if (instance.selectBulletsSetting.IsSelected((int)newType))
                     theBulletType = newType;
             }

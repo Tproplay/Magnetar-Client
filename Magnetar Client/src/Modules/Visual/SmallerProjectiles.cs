@@ -4,10 +4,11 @@ using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using Magnetar_Client.Utils;
 
 namespace Magnetar_Client.Modules
 {
-    public class SmallerParticles : Module
+    public class SmallerProjectiles : Module
     {
         // Mod Info
         public override string Name { get; set; } = "Smaller Projectiles";
@@ -18,7 +19,7 @@ namespace Magnetar_Client.Modules
             "lagclutter projectils";
         public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
 
-        public static SmallerParticles instance;
+        public static SmallerProjectiles instance;
 
         // Mod Data
         public MultiSelectSetting BulletTypeSetting;
@@ -26,13 +27,23 @@ namespace Magnetar_Client.Modules
 
         public static Dictionary<IntPtr, Vector3> originalScales = new Dictionary<IntPtr, Vector3>();
 
-        public SmallerParticles()
+        public SmallerProjectiles()
         {
             instance = this;
 
-            BulletTypeSetting = new MultiSelectSetting("Bullet Types", typeof(BulletType));
-            var allBulletTypes = Enum.GetValues(typeof(BulletType)).Cast<int>();
-            BulletTypeSetting.SelectedValues.UnionWith(allBulletTypes);
+            var NamesOverridden = Translator.TranslateEnum(typeof(BulletType));
+
+            foreach (var name in NamesOverridden)
+            {
+                NamesOverridden[name.Key] = $"{NamesOverridden[name.Key]} ({name.Key})";
+            }
+
+            BulletTypeSetting = new MultiSelectSetting("Bullet Types", typeof(BulletType))
+            {
+                CustomNames = NamesOverridden
+            };
+
+            BulletTypeSetting.SelectedValues.UnionWith(NamesOverridden.Keys);
             Settings.Add(BulletTypeSetting);
 
             ScaleSetting = new FloatSetting("Scale Multiplier", 0.1f, 1f, 0.5f, 2);

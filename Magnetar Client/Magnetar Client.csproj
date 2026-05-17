@@ -114,7 +114,7 @@
     <Compile Include="src\Modules\Level\RandomCardRoulette.cs" />
     <Compile Include="src\Modules\Tools\ColumnGlove.cs" />
     <Compile Include="src\Modules\Visual\NoRender.cs" />
-    <Compile Include="src\Modules\Visual\SmallerParticles.cs" />
+    <Compile Include="src\Modules\Visual\SmallerProjectiles.cs" />
     <Compile Include="src\Modules\Zombies\AntiLagSpawn.cs" />
     <Compile Include="src\Modules\Zombies\BuffZombies.cs" />
     <Compile Include="src\Modules\Zombies\ClampZombies.cs" />

@@ -34,3 +34,7 @@
 - Copy contents of `Magnetar\Mods` to `[Your Game folder]\Mods`.
 - Similarly, Copy contents of `Magnetar\UserLibs` to `[Your Game folder]\UserLibs`.
 - Launch your game to activate the client.
+
+## Special Thanks
+
+- **Infinite75** and **CareFreeSong** https://github.com/CarefreeSongs712/PVZRHTools/

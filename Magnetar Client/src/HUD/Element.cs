@@ -2,7 +2,7 @@
 using Magnetar_Client.UI.Themes;
 using UnityEngine;
 
-namespace Magnetar_Client.UI.HUDElements
+namespace Magnetar_Client.HUDElements
 {
     
     public abstract class HudElement

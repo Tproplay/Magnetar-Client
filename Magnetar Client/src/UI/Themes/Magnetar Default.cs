@@ -17,6 +17,8 @@ namespace Magnetar_Client.UI.Themes
         public static GUIStyle DimStyle;
         public static GUIStyle HUDElementStyle;
 
+        public static GUIStyle NEFLineStyle;
+        public static GUIStyle NEFNodeStyle;
 
         private static Texture2D BgTex;
         private static Texture2D BgLightTex;
@@ -190,6 +192,35 @@ namespace Magnetar_Client.UI.Themes
             HUDElementStyle.normal.textColor = new Color(1f, 1f, 1f);
 
 
+
+            #endregion
+
+            #region NEF Node Connection line
+
+            NEFLineStyle = new GUIStyle();
+            NEFLineStyle.normal.background = Texture2D.whiteTexture;
+
+            RectOffset offset = new RectOffset();
+            offset.left = 0; offset.right = 0; offset.top = 0; offset.bottom = 0;
+            NEFLineStyle.border = offset; NEFLineStyle.margin = offset;
+            NEFLineStyle.padding = offset; NEFLineStyle.overflow = offset;
+
+            #endregion
+
+            #region NEF Node Style
+            NEFNodeStyle = new GUIStyle();
+
+            NEFNodeStyle.normal.background = AccentTex;
+
+            NEFNodeStyle.font = Magnetar_Default.ModuleOn.font;
+            NEFNodeStyle.wordWrap = Magnetar_Default.ModuleOn.wordWrap;
+
+            NEFNodeStyle.alignment = TextAnchor.LowerCenter;
+            NEFNodeStyle.padding = new RectOffset();
+            NEFNodeStyle.padding.left = 2;
+            NEFNodeStyle.padding.right = 2;
+            NEFNodeStyle.padding.top = 2;
+            NEFNodeStyle.padding.bottom = 5;
             #endregion
 
         }

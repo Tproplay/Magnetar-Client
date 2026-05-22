@@ -21,6 +21,8 @@ namespace Magnetar_Client.Core
             TopBar.TopBar.Init();
             ModuleManager.Init();
             HUDRenderer.Init();
+            NEFManager.Init();
+            
 
             Load(); // Load Save to override default values
 
@@ -61,6 +63,7 @@ namespace Magnetar_Client.Core
             TopBar.TopBar.Render();
             if (Config.CurrentTab == TabType.MODULES) ModuleManager.Render();
 
+            if (Config.CurrentTab == TabType.NEF) NEFManager.Render();
 
             #region handle Escape Key
 
@@ -97,7 +100,7 @@ namespace Magnetar_Client.Core
                 }
             }
 
-            // Selection Window -> Settings Window
+            // Multi Select Window -> Settings Window
             else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape &&
                 !ModuleManager.showModules && !ModuleManager.showSettings && ModuleManager.showSelectionGui)
             {

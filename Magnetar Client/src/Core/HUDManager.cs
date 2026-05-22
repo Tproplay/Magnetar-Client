@@ -1,5 +1,5 @@
 ﻿using Magnetar_Client.Modules;
-using Magnetar_Client.UI.HUDElements;
+using Magnetar_Client.HUDElements;
 using Magnetar_Client.UI.Themes;
 using MelonLoader;
 using System;

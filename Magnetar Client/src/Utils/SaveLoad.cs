@@ -6,41 +6,40 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Utils
 {
-    
     public static class SaveLoad
     {
         #region Data Definition
         public class MagnetarSaveData
         {
-            // Config
             public bool ShowGui = false;
             public bool DimBg = true;
 
-            // HUDManager
             public bool HudEnabled = true;
             public bool ShowBackground = false;
             public List<int> SelectedHudElements = new List<int>();
             public Dictionary<string, SimpleRect> HudPositions = new Dictionary<string, SimpleRect>();
-            public Dictionary<ModuleCategory, SimpleRect> CategoryPositions = new Dictionary<ModuleCategory, SimpleRect>();
+            public Dictionary<string, SimpleRect> CategoryPositions = new Dictionary<string, SimpleRect>();
             public Dictionary<string, ModuleSaveData> Modules = new Dictionary<string, ModuleSaveData>();
         }
 
-        // Format of a Module Save Data
+        public class TextureSaveData
+        {
+            public Dictionary<int, string> PlantTextureOverrides = new Dictionary<int, string>();
+            public Dictionary<int, string> ZombieTextureOverrides = new Dictionary<int, string>();
+        }
+
         public class ModuleSaveData
         {
             public bool Active;
             public bool HoldMode;
             public List<KeyCode> KeyBinds = new List<KeyCode>();
-
             public Dictionary<string, object> Settings = new Dictionary<string, object>();
         }
 
-        // Simple Rect Store
         public class SimpleRect
         {
             public float x, y, w, h;
@@ -52,14 +51,16 @@ namespace Magnetar_Client.Utils
         {
             public List<int> SelectedValues;
         }
-
         #endregion
 
-        // --- CORE LOGIC ---
         private static string Path => System.IO.Path.Combine(MelonEnvironment.UserDataDirectory, "Magnetar_Config.json");
+        private static string TexturePath => System.IO.Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Data", "TextureData.json");
 
         public static void Save()
         {
+            // ==========================================
+            // 1. SAVE MAIN MAGNETAR CONFIG
+            // ==========================================
             MagnetarSaveData data = new MagnetarSaveData
             {
                 ShowGui = Config.showgui,
@@ -68,21 +69,18 @@ namespace Magnetar_Client.Utils
                 ShowBackground = HUDManager.showBackground,
                 SelectedHudElements = new List<int>(HUDRenderer.HudToggles.SelectedValues),
                 HudPositions = new Dictionary<string, SimpleRect>(),
-                CategoryPositions = new Dictionary<ModuleCategory, SimpleRect>(),
+                CategoryPositions = new Dictionary<string, SimpleRect>(),
                 Modules = new Dictionary<string, ModuleSaveData>()
             };
 
-            // 1. Capture HUDManager Elements
             foreach (var element in HUDRenderer.Elements)
             {
                 data.HudPositions[element.Name] = element.Bounds;
             }
 
-            // 2. Capture Category Windows
             foreach (var kvp in ModuleManager.windowPositions)
-                data.CategoryPositions[kvp.Key] = kvp.Value;
+                data.CategoryPositions[kvp.Key.ToString()] = kvp.Value;
 
-            // 3. Capture Modules & Settings
             foreach (var mod in ModuleManager.Modules)
             {
                 ModuleSaveData modData = new ModuleSaveData
@@ -98,117 +96,139 @@ namespace Magnetar_Client.Utils
                     else if (setting is FloatSetting f) modData.Settings[f.Name] = f.Value;
                     else if (setting is BoolSetting b) modData.Settings[b.Name] = b.Value;
                     else if (setting is BindSetting bind) modData.Settings[bind.Name] = bind.BindKeys;
-
                     else if (setting is MultiSelectSetting ms)
                     {
-                        modData.Settings[ms.Name] = new MultiSelectSaveData
-                        {
-                            SelectedValues = new List<int>(ms.SelectedValues),
-                        };
+                        modData.Settings[ms.Name] = new MultiSelectSaveData { SelectedValues = new List<int>(ms.SelectedValues) };
                     }
                 }
-
                 data.Modules[mod.Name] = modData;
             }
 
-            // 4. Write to Disk
             File.WriteAllText(Path, JsonConvert.SerializeObject(data, Formatting.Indented));
+
+            // ==========================================
+            // 2. SAVE TEXTURE LOADER DATA (WITH LIVE MERGE)
+            // ==========================================
+            try
+            {
+                // Pull active changes written manually to the disk while the game was running
+                if (File.Exists(TexturePath))
+                {
+                    try
+                    {
+                        string existingJson = File.ReadAllText(TexturePath);
+                        TextureSaveData existingData = JsonConvert.DeserializeObject<TextureSaveData>(existingJson);
+                        if (existingData != null)
+                        {
+                            if (existingData.PlantTextureOverrides != null)
+                            {
+                                foreach (var kvp in existingData.PlantTextureOverrides)
+                                    TextureLoader.PlantTextureOverrides[kvp.Key] = kvp.Value; // Manual edits overwrite memory
+                            }
+                            if (existingData.ZombieTextureOverrides != null)
+                            {
+                                foreach (var kvp in existingData.ZombieTextureOverrides)
+                                    TextureLoader.ZombieTextureOverrides[kvp.Key] = kvp.Value;
+                            }
+                        }
+                    }
+                    catch (Exception) { /* Avoid crash if JSON structural typos exist during editing */ }
+                }
+
+                TextureSaveData texData = new TextureSaveData
+                {
+                    PlantTextureOverrides = TextureLoader.PlantTextureOverrides ?? new Dictionary<int, string>(),
+                    ZombieTextureOverrides = TextureLoader.ZombieTextureOverrides ?? new Dictionary<int, string>()
+                };
+
+                string texDirectory = System.IO.Path.GetDirectoryName(TexturePath);
+                if (!Directory.Exists(texDirectory)) Directory.CreateDirectory(texDirectory);
+
+                File.WriteAllText(TexturePath, JsonConvert.SerializeObject(texData, Formatting.Indented));
+            }
+            catch (Exception e)
+            {
+                MelonLoader.MelonLogger.Error($"Failed to save TextureData: {e.Message}");
+            }
         }
 
         public static void Load()
         {
-
-            if (!File.Exists(Path))
+            if (File.Exists(Path))
             {
-#if DEBUG
-                AutoSaveLogger.Warning("Save file not found.");
-#endif
-                return;
-            }
-
-            try
-            {
-                string json = File.ReadAllText(Path);
-
-                MagnetarSaveData data = JsonConvert.DeserializeObject<MagnetarSaveData>(json);
-                if (data == null)
+                try
                 {
-                    return;
-                }
-                
-                Config.showgui = data.ShowGui;
-                Config.dimBg = data.DimBg;
-
-                foreach (var entry in data.CategoryPositions)
-                {
-                    ModuleManager.windowPositions[entry.Key] = new Rect(entry.Value.x, entry.Value.y,
-                        entry.Value.w, entry.Value.h);
-                }
-
-                HUDManager.Enabled = data.HudEnabled;
-                HUDManager.showBackground = data.ShowBackground;
-
-                // HUDManager Checks
-                if (data.HudPositions != null && HUDRenderer.Elements != null)
-                {
-#if DEBUG
-                    AutoSaveLogger.Msg($"Restoring {HUDRenderer.Elements.Count} HUDManager elements...");
-#endif
-                    HUDRenderer.HudToggles.SelectedValues = new HashSet<int>(data.SelectedHudElements);
-
-                    foreach (var element in HUDRenderer.Elements)
+                    string json = File.ReadAllText(Path);
+                    MagnetarSaveData data = JsonConvert.DeserializeObject<MagnetarSaveData>(json);
+                    if (data != null)
                     {
-                        if (data.HudPositions.TryGetValue(element.Name, out SimpleRect savedPos))
-                            element.Bounds = savedPos;
-                    }
-                }
+                        Config.showgui = data.ShowGui;
+                        Config.dimBg = data.DimBg;
 
-                // Module Checks
-                if (data.Modules != null && ModuleManager.Modules != null)
-                {
-#if DEBUG
-                    AutoSaveLogger.Msg($"Restoring {ModuleManager.Modules.Count} Modules...");
-#endif
-                    foreach (var mod in ModuleManager.Modules)
-                    {
-                        if (string.IsNullOrEmpty(mod.Name)) continue;
-
-                        if (data.Modules.TryGetValue(mod.Name, out ModuleSaveData modData))
+                        foreach (var entry in data.CategoryPositions)
                         {
-                            // Keybind
-                            if (modData.KeyBinds != null && mod.KeyBind != null)
-                                mod.KeyBind.BindKeys = modData.KeyBinds;
+                            if (Enum.TryParse(entry.Key, out ModuleCategory category))
+                                ModuleManager.windowPositions[category] = new Rect(entry.Value.x, entry.Value.y, entry.Value.w, entry.Value.h);
+                        }
 
-                            // Hold Mode
-                            mod.HoldMode = modData.HoldMode;
+                        HUDManager.Enabled = data.HudEnabled;
+                        HUDManager.showBackground = data.ShowBackground;
 
-                            if (modData.Settings != null && mod.Settings != null)
+                        if (data.HudPositions != null && HUDRenderer.Elements != null)
+                        {
+                            HUDRenderer.HudToggles.SelectedValues = new HashSet<int>(data.SelectedHudElements);
+                            foreach (var element in HUDRenderer.Elements)
                             {
-                                foreach (var setting in mod.Settings)
-                                {
-                                    if (string.IsNullOrEmpty(setting.Name)) continue;
-                                    if (modData.Settings.TryGetValue(setting.Name, out object rawValue))
-                                    {
-                                        RestoreSettingValue(setting, rawValue);
-                                    }
-                                }
+                                if (data.HudPositions.TryGetValue(element.Name, out SimpleRect savedPos))
+                                    element.Bounds = savedPos;
                             }
+                        }
 
-                            // Active
-                            if (mod.Active != modData.Active)
+                        if (data.Modules != null && ModuleManager.Modules != null)
+                        {
+                            foreach (var mod in ModuleManager.Modules)
                             {
-                                mod.Toggle();
+                                if (string.IsNullOrEmpty(mod.Name)) continue;
+                                if (data.Modules.TryGetValue(mod.Name, out ModuleSaveData modData))
+                                {
+                                    if (modData.KeyBinds != null && mod.KeyBind != null) mod.KeyBind.BindKeys = modData.KeyBinds;
+                                    mod.HoldMode = modData.HoldMode;
+
+                                    if (modData.Settings != null && mod.Settings != null)
+                                    {
+                                        foreach (var setting in mod.Settings)
+                                        {
+                                            if (string.IsNullOrEmpty(setting.Name)) continue;
+                                            if (modData.Settings.TryGetValue(setting.Name, out object rawValue)) RestoreSettingValue(setting, rawValue);
+                                        }
+                                    }
+                                    if (mod.Active != modData.Active) mod.Toggle();
+                                }
                             }
                         }
                     }
                 }
-#if DEBUG
-                AutoSaveLogger.Msg("Load Complete!");
-#endif
+                catch (Exception e) { MelonLoader.MelonLogger.Error($"Main SaveLoad Error: {e.Message}"); }
             }
-            catch (Exception e)
+
+            if (File.Exists(TexturePath))
             {
-                MelonLoader.MelonLogger.Error($"{e.Message}\n{e.StackTrace}");
+                try
+                {
+                    string texJson = File.ReadAllText(TexturePath);
+                    TextureSaveData texData = JsonConvert.DeserializeObject<TextureSaveData>(texJson);
+                    if (texData != null)
+                    {
+                        TextureLoader.PlantTextureOverrides = texData.PlantTextureOverrides ?? new Dictionary<int, string>();
+                        TextureLoader.ZombieTextureOverrides = texData.ZombieTextureOverrides ?? new Dictionary<int, string>();
+                    }
+                }
+                catch (Exception e) { MelonLoader.MelonLogger.Error($"Texture Load Error: {e.Message}"); }
+            }
+            else
+            {
+                string texDirectory = System.IO.Path.GetDirectoryName(TexturePath);
+                if (!Directory.Exists(texDirectory)) Directory.CreateDirectory(texDirectory);
             }
         }
 
@@ -216,11 +236,9 @@ namespace Magnetar_Client.Utils
         {
             try
             {
-
                 if (setting is IntSetting i) i.Value = Convert.ToInt32(rawValue);
                 else if (setting is FloatSetting f) f.Value = Convert.ToSingle(rawValue);
                 else if (setting is BoolSetting b) b.Value = Convert.ToBoolean(rawValue);
-
                 else if (setting is BindSetting bind)
                 {
                     string jsonStr = JsonConvert.SerializeObject(rawValue);
@@ -230,25 +248,14 @@ namespace Magnetar_Client.Utils
                 {
                     string jsonStr = JsonConvert.SerializeObject(rawValue);
                     var proxy = JsonConvert.DeserializeObject<MultiSelectSaveData>(jsonStr);
-
-                    if (proxy != null)
+                    if (proxy != null && proxy.SelectedValues != null)
                     {
-                        if (proxy.SelectedValues != null)
-                        {
-                            ms.SelectedValues.Clear();
-                            foreach (var val in proxy.SelectedValues) ms.SelectedValues.Add(val);
-                        }
-                        
-                    }
-                    else
-                    {
+                        ms.SelectedValues.Clear();
+                        foreach (var val in proxy.SelectedValues) ms.SelectedValues.Add(val);
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                MelonLoader.MelonLogger.Error($"CRASH ON SETTING '{setting.Name}': {ex.Message}\n{ex.StackTrace}");
-            }
+            catch (Exception ex) { MelonLoader.MelonLogger.Error($"Error setting '{setting.Name}': {ex.Message}"); }
         }
     }
 }

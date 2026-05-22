@@ -1,11 +1,15 @@
 ﻿
+using Il2Cpp;
+
 namespace Magnetar_Client
 {
     public enum TabType
     {
         MODULES,
-        HUD
+        HUD,
+        NEF
     }
+    
 
     public static class Config
     {
@@ -23,5 +27,6 @@ namespace Magnetar_Client
         public readonly static float spacing = 6;
 
         public readonly static float selectButtonWidth = 70;
+
     }
 }

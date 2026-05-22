@@ -6,7 +6,7 @@ using static Magnetar_Client.UI.Themes.Magnetar_Default;
 using static Magnetar_Client.Utils.Maths;
 using static Magnetar_Client.Game.AppData;
 
-namespace Magnetar_Client.UI.HUDElements
+namespace Magnetar_Client.HUDElements
 {
     public class DamageStatsPlant : HudElement
     {

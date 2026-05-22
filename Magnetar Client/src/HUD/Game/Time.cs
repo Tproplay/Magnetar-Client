@@ -4,7 +4,7 @@ using Il2Cpp;
 using System;
 using static Magnetar_Client.Game.AppData;
 
-namespace Magnetar_Client.UI.HUDElements
+namespace Magnetar_Client.HUDElements
 {
     public class TimeInLevel : HudElement
     {

@@ -2,7 +2,7 @@
 using UnityEngine;
 using static Magnetar_Client.UI.Themes.Magnetar_Default;
 
-namespace Magnetar_Client.UI.HUDElements
+namespace Magnetar_Client.HUDElements
 {
     public class GpuNameElement : HudElement
     {

@@ -3,7 +3,7 @@ using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
 
 using UnityEngine;
-namespace Magnetar_Client.UI.HUDElements
+namespace Magnetar_Client.HUDElements
 {
     public class SunObtained : HudElement
     {

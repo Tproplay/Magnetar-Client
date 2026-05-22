@@ -1,8 +1,10 @@
-﻿using Il2CppSystem.IO;
-using MelonLoader;
+﻿using MelonLoader;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Il2CppSystem.IO;
+using Il2Cpp;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Utils
 {
@@ -11,84 +13,377 @@ namespace Magnetar_Client.Utils
         private static AssetBundle _dataBundle = null;
         private static Dictionary<string, Texture2D> _textureCache = new Dictionary<string, Texture2D>();
 
-        private static bool _initAttempted = false;
+        private static Dictionary<string, Sprite> _spriteMemoryCache = new Dictionary<string, Sprite>();
+        private static Dictionary<string, Texture2D> _rawTexMemoryCache = new Dictionary<string, Texture2D>();
+        private static bool _hasScannedMemory = false;
+
+        public static Dictionary<int, string> PlantTextureOverrides = new Dictionary<int, string>();
+        public static Dictionary<int, string> ZombieTextureOverrides = new Dictionary<int, string>();
+
+        private static float _lastBundleCheckTime = -10f;
+        private static bool _bundleDiagnosticPrinted = false;
 
         public static void InitializeBundle()
         {
-            if (_initAttempted) return;
-            _initAttempted = true;
+            if (_dataBundle != null) return;
+
+            if (Time.realtimeSinceStartup - _lastBundleCheckTime < 2f) return;
+            _lastBundleCheckTime = Time.realtimeSinceStartup;
 
             var loadedBundles = AssetBundle.GetAllLoadedAssetBundles().ToArray();
 
             foreach (var bundle in loadedBundles)
             {
-                if (bundle != null && bundle.name.ToLower().Contains("data"))
+                if (bundle != null)
                 {
-                    _dataBundle = bundle;
-                    MelonLogger.Msg("Intercepted existing 'data' bundle from game memory!");
-                    return;
+                    if (!_bundleDiagnosticPrinted)
+                    {
+#if DEBUG
+                        DebugLogger.Msg($"Game has active bundle: '{bundle.name}'");
+#endif
+                    }
+
+                    string bName = bundle.name.ToLower();
+                    if (bName.Contains("data") || bName.Contains("main") || bName.Contains("plant") || bName.Contains("fusion"))
+                    {
+                        _dataBundle = bundle;
+#if DEBUG
+                        DebugLogger.Msg($"Successfully hooked AssetBundle: '{bundle.name}'");
+#endif
+                        return;
+                    }
+                }
+            }
+            _bundleDiagnosticPrinted = true;
+
+            string bundlePath = Path.Combine(Application.streamingAssetsPath, "data.Unity3d");
+            if (!File.Exists(bundlePath)) bundlePath = Path.Combine(Application.dataPath, "data.Unity3d");
+
+            if (File.Exists(bundlePath))
+            {
+                _dataBundle = AssetBundle.LoadFromFile(bundlePath);
+                MelonLogger.Msg("[Magnetar] Loaded AssetBundle from file disk.");
+            }
+        }
+
+        private static void RefreshMemoryCache()
+        {
+            _spriteMemoryCache.Clear();
+            _rawTexMemoryCache.Clear();
+
+            var allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
+            for (int i = 0; i < allSprites.Count; i++)
+            {
+                Sprite s = allSprites[i];
+                if (s != null && !string.IsNullOrEmpty(s.name))
+                {
+                    if (!_spriteMemoryCache.ContainsKey(s.name))
+                        _spriteMemoryCache[s.name] = s;
                 }
             }
 
-            string bundlePath = System.IO.Path.Combine(Application.streamingAssetsPath, "data.Unity3d");
-
-            if (!System.IO.File.Exists(bundlePath))
-                bundlePath = System.IO.Path.Combine(Application.dataPath, "data.Unity3d");
-
-            if (!System.IO.File.Exists(bundlePath))
-                { MelonLogger.Warning($"Could not find data.Unity3d at {bundlePath}"); return; }
-
-            try
+            var allTextures = Resources.FindObjectsOfTypeAll<Texture2D>();
+            for (int i = 0; i < allTextures.Count; i++)
             {
-                _dataBundle = AssetBundle.LoadFromFile(bundlePath);
-
-                if (_dataBundle == null)
-                    MelonLogger.Error("LoadFromFile returned null.");
+                Texture2D t = allTextures[i];
+                if (t != null && !string.IsNullOrEmpty(t.name))
+                {
+                    if (!_rawTexMemoryCache.ContainsKey(t.name))
+                        _rawTexMemoryCache[t.name] = t;
+                }
             }
-            catch (System.Exception ex)
-            {
-                MelonLogger.Error($"Failed to load bundle: {ex.Message}");
-            }
-                
+            _hasScannedMemory = true;
         }
 
         public static Texture2D GetTexture(string textureName)
         {
             if (string.IsNullOrEmpty(textureName)) return null;
 
-            // 1. Check Cache
             if (_textureCache.TryGetValue(textureName, out Texture2D cachedTex))
                 return cachedTex;
 
-            // 2. Search Active Memory for the Sprite
-            var allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
-            foreach (var sprite in allSprites)
+            if (_dataBundle == null) InitializeBundle();
+
+            bool isExplicitPath = textureName.Contains("/");
+
+            // ====================================================================
+            // STAGE 1: EXPLICIT PATH OVERRIDES
+            // ====================================================================
+            if (isExplicitPath)
             {
-                if (sprite != null && sprite.name.Equals(textureName, System.StringComparison.OrdinalIgnoreCase))
+                string cleanPath = textureName.ToLower();
+                int targetIndex = 0;
+                bool useSubAsset = false;
+
+                if (cleanPath.EndsWith("]"))
                 {
-                    Texture2D tex = sprite.texture;
-                    _textureCache[textureName] = tex; // Cache it so we never search memory for this one again
-                    return tex;
+                    int openBracket = cleanPath.LastIndexOf('[');
+                    if (openBracket != -1)
+                    {
+                        string idxStr = cleanPath.Substring(openBracket + 1, cleanPath.Length - openBracket - 2);
+                        if (int.TryParse(idxStr, out int parsedIdx))
+                        {
+                            targetIndex = parsedIdx;
+                            useSubAsset = true;
+                            cleanPath = cleanPath.Substring(0, openBracket);
+                        }
+                    }
+                }
+
+                string resPath = cleanPath.Replace(".png", "").Replace(".jpg", "");
+
+                if (useSubAsset)
+                {
+                    var subAssets = Resources.LoadAll<Sprite>(resPath);
+                    if (subAssets != null && subAssets.Length > 0)
+                    {
+                        int safeIndex = (targetIndex >= 0 && targetIndex < subAssets.Length) ? targetIndex : 0;
+                        Texture2D isolatedTex = CreateReadableCroppedTexture(subAssets[safeIndex]);
+                        if (isolatedTex != null)
+                        {
+                            _textureCache[textureName] = isolatedTex;
+                            return isolatedTex;
+                        }
+                    }
+                }
+                else
+                {
+                    Sprite resSprite = Resources.Load<Sprite>(resPath);
+                    if (resSprite != null)
+                    {
+                        Texture2D isolatedTex = CreateReadableCroppedTexture(resSprite);
+                        if (isolatedTex != null)
+                        {
+                            _textureCache[textureName] = isolatedTex;
+                            return isolatedTex;
+                        }
+                    }
+                }
+
+                if (_dataBundle != null)
+                {
+                    string exactInternalPath = null;
+                    string[] allBundlePaths = _dataBundle.GetAllAssetNames();
+
+                    foreach (string bPath in allBundlePaths)
+                    {
+                        if (bPath.Contains(cleanPath))
+                        {
+                            exactInternalPath = bPath;
+                            break;
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(exactInternalPath))
+                    {
+                        var subSprites = _dataBundle.LoadAssetWithSubAssets<Sprite>(exactInternalPath);
+                        if (subSprites != null && subSprites.Length > 0)
+                        {
+                            int safeIndex = (useSubAsset && targetIndex >= 0 && targetIndex < subSprites.Length) ? targetIndex : 0;
+                            Texture2D isolatedTex = CreateReadableCroppedTexture(subSprites[safeIndex]);
+                            if (isolatedTex != null)
+                            {
+                                _textureCache[textureName] = isolatedTex;
+                                return isolatedTex;
+                            }
+                        }
+
+                        Texture2D rawTex = _dataBundle.LoadAsset<Texture2D>(exactInternalPath);
+                        if (rawTex != null)
+                        {
+                            _textureCache[textureName] = rawTex;
+                            return rawTex;
+                        }
+                    }
+                }
+
+                _textureCache[textureName] = null;
+                return null;
+            }
+
+            // ====================================================================
+            // STAGE 2: STANDARD SHORT NAME FALLBACKS
+            // ====================================================================
+            if (_dataBundle != null)
+            {
+                Sprite bundleSprite = _dataBundle.LoadAsset<Sprite>(textureName);
+                if (bundleSprite != null && bundleSprite.name == textureName)
+                {
+                    Texture2D isolatedTex = CreateReadableCroppedTexture(bundleSprite);
+                    if (isolatedTex != null)
+                    {
+                        _textureCache[textureName] = isolatedTex;
+                        return isolatedTex;
+                    }
                 }
             }
 
-            // 3. Fallback: Search for raw Texture2D just in case it's not a Sprite
-            var allTextures = Resources.FindObjectsOfTypeAll<Texture2D>();
-            foreach (var tex in allTextures)
+            if (!_hasScannedMemory) RefreshMemoryCache();
+
+            if (_spriteMemoryCache.TryGetValue(textureName, out Sprite sprite))
             {
-                if (tex != null && tex.name.Equals(textureName, System.StringComparison.OrdinalIgnoreCase))
+                if (sprite != null)
+                {
+                    Texture2D isolatedTex = CreateReadableCroppedTexture(sprite);
+                    if (isolatedTex != null)
+                    {
+                        _textureCache[textureName] = isolatedTex;
+                        return isolatedTex;
+                    }
+                }
+                else
+                {
+                    _spriteMemoryCache.Remove(textureName);
+                }
+            }
+
+            if (_rawTexMemoryCache.TryGetValue(textureName, out Texture2D tex))
+            {
+                if (tex != null)
                 {
                     _textureCache[textureName] = tex;
                     return tex;
                 }
+                else
+                {
+                    _rawTexMemoryCache.Remove(textureName);
+                }
             }
 
-            // 4. Not found in memory. Cache null to prevent lag spikes from searching every frame.
-            MelonLogger.Warning($"Image '{textureName}' could not be found in active memory.");
             _textureCache[textureName] = null;
             return null;
         }
-    }
 
-    
+        private static Texture2D CreateReadableCroppedTexture(Sprite sprite)
+        {
+            if (sprite == null || sprite.texture == null) return null;
+
+            Texture2D sourceTex = sprite.texture;
+            Rect textureRect = sprite.textureRect;
+
+            int width = (int)textureRect.width;
+            int height = (int)textureRect.height;
+
+            // 1. Force the GPU temporary buffer to sRGB to fully un-crush gamma brightness
+            RenderTexture tempRT = RenderTexture.GetTemporary(
+                sourceTex.width,
+                sourceTex.height,
+                0,
+                RenderTextureFormat.ARGB32,
+                RenderTextureReadWrite.sRGB
+            );
+
+            RenderTexture previousActive = RenderTexture.active;
+            RenderTexture.active = tempRT;
+
+            // 2. Wipe the background completely clean transparent
+            GL.Clear(false, true, Color.clear);
+            Graphics.Blit(sourceTex, tempRT);
+
+            // 3. Construct our destination using a direct, non-linear format profile
+            Texture2D readableCopy = new Texture2D(sourceTex.width, sourceTex.height, TextureFormat.RGBA32, false);
+            readableCopy.ReadPixels(new Rect(0, 0, sourceTex.width, sourceTex.height), 0, 0);
+            readableCopy.Apply();
+
+            // Clean up the GPU render texture references immediately
+            RenderTexture.active = previousActive;
+            RenderTexture.ReleaseTemporary(tempRT);
+
+            // 4. HARD CROP ENGINE: Slice the exact micro-coordinates out of the un-darkened copy using direct pixel extraction
+            Texture2D readableCroppedTex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+
+            // Grab raw pixel block safely from memory buffer without any tint adjustments
+            Color[] pixels = readableCopy.GetPixels((int)textureRect.x, (int)textureRect.y, width, height);
+
+            readableCroppedTex.SetPixels(pixels);
+            readableCroppedTex.Apply();
+
+            // Destroy the temporary intermediate full-sheet copy to keep memory footprint at 0
+            Object.Destroy(readableCopy);
+
+            return readableCroppedTex;
+        }
+
+        public static Texture2D GetPlantTexture(int plantId)
+        {
+            if (PlantTextureOverrides.TryGetValue(plantId, out string texturePath))
+            {
+                Texture2D overrideTex = GetTexture(texturePath);
+                if (overrideTex != null) return overrideTex;
+            }
+
+            string rawName = ((PlantType)plantId).ToString();
+            string enumNameLower = rawName.ToLower();
+            string preferredPath = $"plants/{enumNameLower}/{enumNameLower}";
+
+            Texture2D tex = GetTexture(preferredPath);
+            string successfulPath = preferredPath;
+
+            if (tex == null)
+            {
+                tex = GetTexture(rawName);
+                successfulPath = rawName;
+            }
+#if DEBUG
+            if (tex == null)
+            {
+                if (!PlantTextureOverrides.ContainsKey(plantId))
+                {
+                    PlantTextureOverrides[plantId] = preferredPath;
+                    SaveLoad.Save();
+                }
+            }
+            else
+            {
+                if (!PlantTextureOverrides.ContainsKey(plantId))
+                {
+                    PlantTextureOverrides[plantId] = successfulPath;
+                    SaveLoad.Save();
+                }
+            }
+#endif
+            return tex;
+        }
+
+        public static Texture2D GetZombieTexture(int zombieId)
+        {
+            if (ZombieTextureOverrides.TryGetValue(zombieId, out string texturePath))
+            {
+                Texture2D overrideTex = GetTexture(texturePath);
+                if (overrideTex != null) return overrideTex;
+            }
+
+            string rawName = ((ZombieType)zombieId).ToString();
+            string enumNameLower = rawName.ToLower();
+            string preferredPath = $"zombies/{enumNameLower}/{enumNameLower}";
+
+            Texture2D tex = GetTexture(preferredPath);
+            string successfulPath = preferredPath;
+
+            if (tex == null)
+            {
+                tex = GetTexture(rawName);
+                successfulPath = rawName;
+            }
+#if DEBUG
+            if (tex == null)
+            {
+                if (!ZombieTextureOverrides.ContainsKey(zombieId))
+                {
+                    ZombieTextureOverrides[zombieId] = preferredPath;
+                    SaveLoad.Save();
+                }
+            }
+            else
+            {
+                if (!ZombieTextureOverrides.ContainsKey(zombieId))
+                {
+                    ZombieTextureOverrides[zombieId] = successfulPath;
+                    SaveLoad.Save();
+                }
+            }
+#endif
+            return tex;
+        }
+    }
 }

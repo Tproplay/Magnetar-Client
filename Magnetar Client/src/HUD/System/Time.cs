@@ -1,7 +1,7 @@
 ﻿using static Magnetar_Client.UI.Themes.Magnetar_Default;
 using UnityEngine;
 
-namespace Magnetar_Client.UI.HUDElements
+namespace Magnetar_Client.HUDElements
 {
     public class CurrentTime : HudElement
     {

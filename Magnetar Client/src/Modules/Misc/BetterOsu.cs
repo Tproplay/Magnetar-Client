@@ -2,8 +2,6 @@
 using Il2Cpp;
 using Il2CppRhythmGame;
 using Magnetar_Client.Utils;
-using MelonLoader;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;

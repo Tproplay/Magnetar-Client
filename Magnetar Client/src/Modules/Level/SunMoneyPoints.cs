@@ -36,7 +36,7 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
-            UnlimitedSun = new BoolSetting("Unlimited Money", true);
+            UnlimitedSun = new BoolSetting("Unlimited Sun", true);
             Settings.Add(UnlimitedSun);
 
             sunSetting = new IntSetting("Money Amount", 0, 99999, 99999);

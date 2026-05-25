@@ -3,6 +3,7 @@ using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
 using UnityEngine;
 using Il2Cpp;
+using System.Linq;
 namespace Magnetar_Client.HUDElements
 {
     public class NumberOfZombies : HudElement
@@ -14,7 +15,24 @@ namespace Magnetar_Client.HUDElements
         protected override void DrawContent(float width, float height)
         {
 
-            string displayText = $"Zombies On Lawn: {zombieList.Count}";
+            string displayText = $"Zombies On Lawn: {zombieList.Count(z => !z.isMindControlled)}";
+
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
+
+            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+    }
+
+    public class NumberOfHypnotizedZombies : HudElement
+    {
+        public NumberOfHypnotizedZombies() : base("Hypnotized Zombies On Lawn", HudElement.NewRect(100))
+        { }
+
+
+        protected override void DrawContent(float width, float height)
+        {
+
+            string displayText = $"Hypno Zombies On Lawn: {zombieList.Count(z => z.isMindControlled)}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 

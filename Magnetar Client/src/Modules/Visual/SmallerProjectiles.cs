@@ -25,8 +25,6 @@ namespace Magnetar_Client.Modules
         public MultiSelectSetting BulletTypeSetting;
         public FloatSetting ScaleSetting;
 
-        public static Dictionary<IntPtr, Vector3> originalScales = new Dictionary<IntPtr, Vector3>();
-
         public SmallerProjectiles()
         {
             instance = this;
@@ -46,7 +44,7 @@ namespace Magnetar_Client.Modules
             BulletTypeSetting.SelectedValues.UnionWith(NamesOverridden.Keys);
             Settings.Add(BulletTypeSetting);
 
-            ScaleSetting = new FloatSetting("Scale Multiplier", 0.1f, 1f, 0.5f, 2);
+            ScaleSetting = new FloatSetting("Scale Multiplier", 0.1f, 2f, 0.5f, 2);
             Settings.Add(ScaleSetting);
         }
 
@@ -54,7 +52,8 @@ namespace Magnetar_Client.Modules
 
         public override void OnDisable()
         {
-            var allBullets = UnityEngine.Object.FindObjectsOfType<Bullet>();
+            var allBullets = Resources.FindObjectsOfTypeAll<Bullet>();
+
             foreach (var bullet in allBullets)
             {
                 if (bullet != null && originalScales.TryGetValue(bullet.Pointer, out Vector3 origScale))
@@ -62,7 +61,10 @@ namespace Magnetar_Client.Modules
                     bullet.transform.localScale = origScale;
                 }
             }
+            originalScales.Clear();
         }
+
+        public static Dictionary<IntPtr, Vector3> originalScales = new Dictionary<IntPtr, Vector3>();
 
         [HarmonyPatch(typeof(Bullet))]
         public static class BulletSpawnPatch

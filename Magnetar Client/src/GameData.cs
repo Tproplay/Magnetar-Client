@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Il2Cpp;
 using Magnetar_Client.Utils;
+using MelonLoader;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -47,7 +48,6 @@ namespace Magnetar_Client.Game
     /// </summary>
     public static class GameData
     {
-
         #region PlantList
         /// <summary>
         /// Sorted List of the current active plants on the board.
@@ -117,16 +117,19 @@ namespace Magnetar_Client.Game
         #region Zombie
 
         public static int TotalNumberOfZombiesSpawed = 0;
+        public static int TotalNumberOfHypnotizedZombiesSpawed = 0;
 
         public static int TotalNumberOfZombiesKilled = 0;
+        public static int TotalNumberOfHypnotizedZombiesKilled = 0;
 
         /// <summary>
         /// Total Damage Recieved By Zombies. Resets on starting a new level.
         /// </summary>
         public static long TotalDamagedRecievedByZombies = 0;
+        public static long TotalDamagedRecievedByHypnotizedZombies = 0;
 
         [HarmonyPatch(typeof(Zombie))]
-        public class ZombiePatch
+        private class ZombiePatch
         {
             [HarmonyPatch(nameof(Zombie.Start))]
             [HarmonyPostfix]
@@ -134,7 +137,15 @@ namespace Magnetar_Client.Game
             {
                 if (__instance == null || __instance.isIdle) return;
 
-                TotalNumberOfZombiesSpawed += 1;
+                if (__instance.isMindControlled)
+                {
+                    TotalNumberOfHypnotizedZombiesSpawed++;
+                }
+                else
+                {
+                    TotalNumberOfZombiesSpawed++;
+                }
+                
             }
 
             [HarmonyPatch(nameof(Zombie.Die))]
@@ -142,13 +153,16 @@ namespace Magnetar_Client.Game
             static void DiePatch(Zombie __instance)
             {
                 if (__instance == null || !zombieList.Contains(__instance)) return;
-                TotalNumberOfZombiesKilled += 1;
+                if (__instance.isMindControlled)
+                    TotalNumberOfHypnotizedZombiesKilled++;
+                else TotalNumberOfZombiesKilled++;
             }
 
             [HarmonyPatch(nameof(Zombie.TakeDamage))]
             [HarmonyPrefix]
             public static void TakeDamagePrefix(Zombie __instance, out float __state)
             {
+
                 __state = __instance.CurrentAllHealth;
             }
 
@@ -161,8 +175,22 @@ namespace Magnetar_Client.Game
                 float damageTaken = __state - newHealth;
                 if (damageTaken > 0)
                 {
-                    TotalDamagedRecievedByZombies += (long)damageTaken;
+                    if (__instance.isMindControlled)
+                        TotalDamagedRecievedByZombies += (long)damageTaken;
+                    else
+                        TotalDamagedRecievedByHypnotizedZombies += (long)damageTaken;
                 }
+            }
+
+            [HarmonyPatch(nameof(Zombie.SetMindControl))]
+            [HarmonyPostfix]
+            public static void SetMindControlPostfix(Zombie __instance)
+            {
+                if (__instance == null) return;
+
+                TotalNumberOfHypnotizedZombiesSpawed++;
+                TotalNumberOfZombiesKilled++;
+
             }
 
         }
@@ -197,7 +225,27 @@ namespace Magnetar_Client.Game
  
         }
         #endregion
+
+        #region Bullets
+
+        public static long TotalNumberOfBulletsSpawned = 0;
+        [HarmonyPatch(typeof(Bullet))]
+        private class BulletPatch
+        {
+            [HarmonyPatch(nameof(Bullet.InitData))]
+            [HarmonyPostfix]
+            public static void InitDataPatch(Bullet __instance)
+            {
+                if (__instance == null) return;
+
+                TotalNumberOfBulletsSpawned++;
+            }
+        }
         
+
+
+        #endregion
+
         #region Sun
 
         public static int TotalAmountOfSunObtained = 0;
@@ -271,8 +319,10 @@ namespace Magnetar_Client.Game
                 zombieList.Clear();
 
                 TotalDamagedRecievedByZombies = 0;
-                TotalNumberOfZombiesKilled = 0; TotalNumberOfPlantsKilled = 0;
-                TotalNumberOfZombiesSpawed = 0; TotalNumberOfPlantsSpawned = 0;
+                TotalNumberOfZombiesKilled = 0; TotalNumberOfHypnotizedZombiesKilled = 0; TotalNumberOfPlantsKilled = 0;
+                TotalNumberOfZombiesSpawed = 0; TotalNumberOfHypnotizedZombiesSpawed = 0; TotalNumberOfPlantsSpawned = 0;
+
+                TotalNumberOfBulletsSpawned = 0;
 
                 TotalAmountOfSunObtained = 0; TotalAmountOfSunSpent = 0; lastSunAmount = AppData.board.theSun;
                 TotalAmountOfMoneyObtained = 0; TotalAmountOfMoneySpent = 0; lastMoneyAmount = AppData.board.theMoney;

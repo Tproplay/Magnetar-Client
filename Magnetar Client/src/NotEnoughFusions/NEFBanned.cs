@@ -21,13 +21,13 @@ namespace Magnetar_Client.NEF.Data
 
         public static void AddToList(int plantID)
         {
-            NEFManager.BannedPlants.Add(plantID);
+            NEFData.BannedPlants.Add(plantID);
         }
 
         public static void RemoveFromList(int plantID)
         {
-            if (NEFManager.BannedPlants.Contains(plantID))
-                NEFManager.BannedPlants.Remove(plantID);
+            if (NEFData.BannedPlants.Contains(plantID))
+                NEFData.BannedPlants.Remove(plantID);
         }
 
         public static void InitBan()

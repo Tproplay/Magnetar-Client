@@ -1,7 +1,10 @@
-﻿using Il2Cpp;
+﻿using HarmonyLib;
+using Il2Cpp;
 using Magnetar_Client.Utils;
+using MelonLoader;
 using System.Collections.Generic;
 using UnityEngine;
+using static Il2Cpp.Plant;
 using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules

@@ -39,6 +39,23 @@ namespace Magnetar_Client.HUDElements
         }
     }
 
+    public class NumberOfHypnotizedZombiesSpawned : HudElement
+    {
+        public NumberOfHypnotizedZombiesSpawned() : base("Hypnotized Zombies Spawned", HudElement.NewRect(100))
+        { }
+
+
+        protected override void DrawContent(float width, float height)
+        {
+
+            string displayText = $"Hypno Zombies Spawned: {TotalNumberOfHypnotizedZombiesSpawed}";
+
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
+
+            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+    }
+
     public class NumberOfZombiesKilled : HudElement
     {
         public NumberOfZombiesKilled() : base("Zombies Killed", HudElement.NewRect(220))
@@ -49,6 +66,23 @@ namespace Magnetar_Client.HUDElements
         {
 
             string displayText = $"Zombies Killed: {TotalNumberOfZombiesKilled}";
+
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
+
+            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+    }
+
+    public class NumberOfHypnotizedZombiesKilled : HudElement
+    {
+        public NumberOfHypnotizedZombiesKilled() : base("Hypnotized Zombies Killed", HudElement.NewRect(220))
+        { }
+
+
+        protected override void DrawContent(float width, float height)
+        {
+
+            string displayText = $"Hypno Zombies Killed: {TotalNumberOfHypnotizedZombiesKilled}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
@@ -72,14 +106,43 @@ namespace Magnetar_Client.HUDElements
         }
 
 
-        int GetZombieHealth()
+        long GetZombieHealth()
         {
-            int health = 0;
+            long health = 0;
             foreach(Zombie zombie in zombieList)
             {
                 if (zombie.isMindControlled) continue;
                 health += zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
                 
+            }
+            return health;
+        }
+    }
+
+    public class TotalHypnotizedZombieHealth : HudElement
+    {
+        public TotalHypnotizedZombieHealth() : base("Hypnotized Zombies Health", HudElement.NewRect(235))
+        { }
+
+        protected override void DrawContent(float width, float height)
+        {
+
+            string displayText = $"Hypno Zombies Health: {FormatInternational(GetZombieHealth())}";
+
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
+
+            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+
+
+        long GetZombieHealth()
+        {
+            long health = 0;
+            foreach (Zombie zombie in zombieList)
+            {
+                if (!zombie.isMindControlled) continue;
+                health += zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
+
             }
             return health;
         }

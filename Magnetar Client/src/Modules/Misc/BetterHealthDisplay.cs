@@ -1,7 +1,8 @@
 ﻿using HarmonyLib;
 using Il2Cpp;
-using static Magnetar_Client.Utils.Maths;
+using Magnetar_Client.Game;
 using static Magnetar_Client.Game.GameData;
+using static Magnetar_Client.Utils.Maths;
 
 namespace Magnetar_Client.Modules
 {
@@ -23,13 +24,19 @@ namespace Magnetar_Client.Modules
         public static BetterHealthDisplay instance;
 
         public BoolSetting ShowMaxHealth;
-
+        public BoolSetting AutoEnable_ShowHp_Plant;
+        public BoolSetting AutoEnable_ShowHp_Zombie;
         public BetterHealthDisplay()
         {
             instance = this;
 
             ShowMaxHealth = new BoolSetting("Show Max Health", false);
+            AutoEnable_ShowHp_Plant = new BoolSetting("Auto Enable Plant Hp", false);
+            AutoEnable_ShowHp_Zombie = new BoolSetting("Auto Enable Zombie Hp", false);
+
             Settings.Add(ShowMaxHealth);
+            Settings.Add(AutoEnable_ShowHp_Plant);
+            Settings.Add(AutoEnable_ShowHp_Zombie);
         }
 
         // Mod Logic
@@ -119,5 +126,18 @@ namespace Magnetar_Client.Modules
             }
         }
 
+
+        [HarmonyPatch(typeof(Board))]
+        public class BoardPatch
+        {
+            [HarmonyPatch(nameof(Board.Awake))]
+            [HarmonyPostfix]
+            static void AwakePostFix(Board __instance)
+            {
+                if (instance == null || !instance.Active) return;
+                if (instance.AutoEnable_ShowHp_Plant.Value) __instance.ShowPlantHealth();
+                if (instance.AutoEnable_ShowHp_Zombie.Value) __instance.ShowZombieHealth();
+            }
+        }
     }
 }

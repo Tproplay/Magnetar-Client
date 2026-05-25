@@ -17,7 +17,7 @@ namespace Magnetar_Client.NEF.Data
         }
 
 
-        public static List<CustomRecipe> InitCustomRecipes = new List<CustomRecipe>
+        public static List<CustomRecipe> TitanPlants = new List<CustomRecipe>
             {
                 new CustomRecipe
                 {
@@ -59,18 +59,18 @@ namespace Magnetar_Client.NEF.Data
 
         public static void AddToList(CustomRecipe plantRecipe)
         {
-            NEFManager.AddedRecipes.Add(plantRecipe);
+            NEFData.AddedRecipes.Add(plantRecipe);
         }
 
         public static void RemoveFromList(CustomRecipe plantRecipe)
         {
-            if (NEFManager.AddedRecipes.Contains(plantRecipe))
-                NEFManager.AddedRecipes.Remove(plantRecipe);
+            if (NEFData.AddedRecipes.Contains(plantRecipe))
+                NEFData.AddedRecipes.Remove(plantRecipe);
         }
 
         public static void InitRecipes()
         {
-            foreach (CustomRecipe plantRecipe in InitCustomRecipes)
+            foreach (CustomRecipe plantRecipe in TitanPlants)
             {
                 AddToList(plantRecipe);
             }

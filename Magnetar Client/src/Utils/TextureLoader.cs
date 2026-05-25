@@ -62,7 +62,9 @@ namespace Magnetar_Client.Utils
             if (File.Exists(bundlePath))
             {
                 _dataBundle = AssetBundle.LoadFromFile(bundlePath);
-                MelonLogger.Msg("[Magnetar] Loaded AssetBundle from file disk.");
+#if DEBUG
+                DebugLogger.Msg("Loaded AssetBundle from file disk.");
+#endif
             }
         }
 

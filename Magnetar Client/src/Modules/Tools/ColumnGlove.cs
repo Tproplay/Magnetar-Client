@@ -20,6 +20,7 @@ namespace Magnetar_Client.Modules
         public ColumnGlove()
         {
             instance = this;
+            
         }
 
         [HarmonyPatch(typeof(Mouse), nameof(Mouse.TryToSetPlantByGlove))]
@@ -52,7 +53,7 @@ namespace Magnetar_Client.Modules
                 {
                     Plant gameObject = CreatePlant.Instance.SetPlant(newCol, plant.thePlantRow, plant.thePlantType);
 
-                    if (Board.Instance.boardTag.isColumn && newCol == __instance.thePlantOnGlove.thePlantColumn)
+                    if (newCol == __instance.thePlantOnGlove.thePlantColumn)
                     {
                         CreatePlant.Instance.SetPlant(newCol, __instance.thePlantOnGlove.thePlantRow, plant.thePlantType);
                     }

@@ -26,5 +26,25 @@ namespace Magnetar_Client.UI.WindowDrawing
             GUI.backgroundColor = Color.white;
             y += spacing * 2;
         }
+
+        public static void DrawOrthogonalLine(Vector2 pointA, Vector2 pointB, float Zoom = 1)
+        {
+            Color oldColor = GUI.color;
+            GUI.color = Color.white;
+
+            float thickness = Mathf.Max(1f, 3f * Zoom);
+            float halfThick = thickness / 2f;
+            float midY = (pointA.y + pointB.y) / 2f;
+
+            GUI.Box(new Rect(pointA.x - halfThick, pointA.y, thickness, midY - pointA.y + halfThick), "", Magnetar_Default.NEFLineStyle);
+
+            float minX = Mathf.Min(pointA.x, pointB.x);
+            float maxX = Mathf.Max(pointA.x, pointB.x);
+            GUI.Box(new Rect(minX - halfThick, midY - halfThick, (maxX - minX) + thickness, thickness), "", Magnetar_Default.NEFLineStyle);
+
+            GUI.Box(new Rect(pointB.x - halfThick, midY - halfThick, thickness, pointB.y - midY + halfThick), "", Magnetar_Default.NEFLineStyle);
+
+            GUI.color = oldColor;
+        }
     }
 }

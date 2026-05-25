@@ -1,37 +1,55 @@
 ﻿using static Magnetar_Client.Game.AppData;
+using static MelonLoader.MelonLogger;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Modules
 {
-    public class UnlimitedSun : Module
+    public class SunHack : Module
     {
         // Mod Info
-        public override string Name { get; set; } = "Unlimited Sun";
-        public override string SearchHints { get; set; } = "unlimited sun infinite sun snu sum ifnite finite sun" +
-            "ulimited sun limitless sun unrestricted sun endless sun";
+        public override string Name { get; set; } = "Sun Hack";
         public override string Description { get; set; } = "Gives you unlimited sun.";
+        public override string SearchHints { get; set; } = "unlimited sun infinite sun snu sum ifnite finite sun" +
+            "ulimited sun limitless sun unrestricted sun endless sun sunmultiplier solarmultiplier Money Hack Money Cheat " +
+            "sunboost sunbonus sunpowerup sonmultiplier sunmultiplyer sunmultipliar sunmultipier sunmultyplier sunmulltiplier" +
+            " sunmultaplier lightmultiplier raymultiplier sunfactor sunamplifier sunintensifier sunenhancer solmultiplier sunx2";
+        
         public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
         // The mod data
 
-        public static UnlimitedSun instance;
+        public static SunHack instance;
 
-        private readonly int sunAmount = 99999;
+        public BoolSetting UnlimitedSun;
+
         private int originalSunAmount = -853721;
         private IntSetting sunSetting;
 
-        private readonly bool preserveOriginl = true;
         private BoolSetting preserveOriginalSetting;
 
+        public BoolSetting SunMultipier;
+        private FloatSetting sunMultiplierSetting;
 
-        public UnlimitedSun()
+        private static int _sunAmount = -947624;
+
+        public SunHack()
         {
             instance = this;
 
-            sunSetting = new IntSetting("Sun Amount", 0, 99999, sunAmount);
+            UnlimitedSun = new BoolSetting("Unlimited Money", true);
+            Settings.Add(UnlimitedSun);
+
+            sunSetting = new IntSetting("Money Amount", 0, 99999, 99999);
             Settings.Add(sunSetting);
 
-            preserveOriginalSetting = new BoolSetting("Preserve Original", preserveOriginl);
+            preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
+
+            SunMultipier = new BoolSetting("Money Multiplier", false);
+            Settings.Add(SunMultipier);
+
+            sunMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);
+            Settings.Add(sunMultiplierSetting);
 
         }
 
@@ -41,275 +59,237 @@ namespace Magnetar_Client.Modules
         { 
             if (BoardInstanceIsNull) return;
 
-            if (originalSunAmount >0 && instance.preserveOriginalSetting.Value)
+            if (UnlimitedSun.Value)
             {
-                board.theSun = originalSunAmount;
-                originalSunAmount = -853721;
-            }
-        }
-
-        public override void OnUpdateActive()
-        {
-            if (BoardInstanceIsNull) return;
-            if (originalSunAmount == -853721) originalSunAmount = board.theSun;
-
-
-            board.theSun = instance.sunSetting.Value;
-        }
-
-        
-    }
-    public class SunMultiplier : Module
-    {
-        
-        // Mod Info
-        public override string Name { get; set; } = "Sun Multiplier";
-        public override string Description { get; set; } = "Multiplies the sun you get by a certain amount.";
-        public override string SearchHints { get; set; } = "sunmultiplier solarmultiplier sunboostsunbonussunpowerupsonmultiplier" +
-            " sunmultiplyer sunmultipliar sunmultipier sunmultyplier sunmulltiplier sunmultaplier lightmultiplier raymultiplier" +
-            "sunfactor sunamplifier sunintensifier sunenhancer solmultiplier sunx2";
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
-
-        // The mod data
-
-        private readonly float sunMultiplier = 2;
-        private FloatSetting sunMultiplierSetting;
-
-        public SunMultiplier()
-        {
-            sunMultiplierSetting = new FloatSetting("Multiplier", -100, 100, sunMultiplier);
-            Settings.Add(sunMultiplierSetting);
-        }
-
-        // Mod Logic
-        private static int _sunAmount = -947624;
-        public override void OnUpdateActive()
-        {
-            if (BoardInstanceIsNull) { _sunAmount = -947624; return; }
-
-            int Sun = board.theSun;
-
-            if (_sunAmount== -947624) _sunAmount = Sun;
-            
-            if (Sun != _sunAmount)
-            {
-                if ((Sun - _sunAmount)>0)
-                    board.theSun += (int)((Sun - _sunAmount)*(sunMultiplierSetting.Value - 1));
-
-                _sunAmount = board.theSun;
+                if (originalSunAmount > 0 && preserveOriginalSetting.Value)
+                {
+                    board.theSun = originalSunAmount;
+                    originalSunAmount = -853721;
+                }
             }
 
-        }
-
-        public override void OnDisable()
-        {
             _sunAmount = -947624;
+
+        }
+
+        public override void OnUpdateActive()
+        {
+            if (BoardInstanceIsNull) {_sunAmount = -947624; return; }
+
+            if (UnlimitedSun.Value)
+            {
+                if (originalSunAmount == -853721) originalSunAmount = board.theSun;
+                board.theSun = sunSetting.Value;
+            }
+            
+            else if (SunMultipier.Value)
+            {
+                int Sun = board.theSun;
+
+                if (_sunAmount == -947624 || Sun == sunSetting.Value) _sunAmount = Sun;
+
+                if (Sun != _sunAmount)
+                {
+                    if ((Sun - _sunAmount) > 0)
+                        board.theSun += (int)((Sun - _sunAmount) * (sunMultiplierSetting.Value - 1));
+
+                    _sunAmount = board.theSun;
+
+                }
+            }
         }
 
         
-
-
     }
 
-    public class UnlimitedMoney : Module
+    public class MoneyHack : Module
     {
         // Mod Info
-        public override string Name { get; set; } = "Unlimited Money";
+        public override string Name { get; set; } = "Money Hack";
         public override string Description { get; set; } = "Gives you unlimited money.";
         public override string SearchHints { get; set; } = "unlimited money infinite money mny mney ifnite finite" +
-            "ulimited limitless unrestricted endless";
+            "ulimited limitless unrestricted endless moneymultiplier cashmultiplier moneyboost moneybonus moneyincrease" +
+            " moneymultiplyer monymultiplier moenymultiplier moneymultipier moneymultaplier moneymulltiplier moneymultipyler" +
+            " wealthmultiplier richesmultiplier coinmultiplier dollarmultiplier currencymultiplier moneyfactor moneyx2 cashboost";
         public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
         // mod data
 
-        public static UnlimitedMoney instance;
+        public static MoneyHack instance;
 
-        private readonly int moneyAmount = 9999999;
+        public BoolSetting UnlimitedMoney;
         private int originalMoneyAmount = -853721;
         private IntSetting moneySetting;
 
-        private readonly bool preserveOriginl = true;
         private BoolSetting preserveOriginalSetting;
 
+        public BoolSetting MoneyMultiplier;
 
+        public FloatSetting moneyMultiplierSetting;
+        private static int _moneyAmount = -947624;
         public override bool Active { get; set; } = false;
 
-        public UnlimitedMoney()
+        public MoneyHack()
         {
             instance = this;
-            moneySetting = new IntSetting("Money Amount", 0, 99999, moneyAmount);
+
+            UnlimitedMoney = new BoolSetting("Unlimited Money",true);
+            Settings.Add(UnlimitedMoney);
+
+            moneySetting = new IntSetting("Money Amount", 0, 99999, 9999999);
             Settings.Add(moneySetting);
 
-            preserveOriginalSetting = new BoolSetting("Preserve Original", preserveOriginl);
+            preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
-        }
 
-        // Mod Logic
-        public override void OnDisable()
-        {
-            if (BoardInstanceIsNull || !instance.preserveOriginalSetting.Value) return;
+            MoneyMultiplier = new BoolSetting("Unlimited Money", true);
+            Settings.Add(MoneyMultiplier);
 
-            board.theMoney = originalMoneyAmount;
-            originalMoneyAmount = -853721;
-        }
-
-        public override void OnUpdateActive()
-        {
-            if (BoardInstanceIsNull) return;
-            if (originalMoneyAmount == -853721) originalMoneyAmount = board.theMoney;
-
-            board.theMoney = instance.moneySetting.Value;
-        }
-
-
-    }
-    public class MoneyMultiplier : Module
-    {
-
-        // Mod Info
-        public override string Name { get; set; } = "Money Multiplier";
-        public override string Description { get; set; } = "Multiplies the money you get by a certain amount.";
-        public override string SearchHints { get; set; } = "moneymultiplier cashmultiplier moneyboost moneybonus " +
-            "moneyincrease moneymultiplyer monymultiplier moenymultiplier moneymultipier moneymultaplier moneymulltiplier " +
-            "moneymultipyler wealthmultiplier richesmultiplier coinmultiplier dollarmultiplier currencymultiplier " +
-            "moneyfactor moneyx2 cashboost";
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
-
-        // Mod data
-
-        private readonly float moneyMultiplier = 2;
-        private FloatSetting moneyMultiplierSetting;
-        public override bool Active { get; set; } = false;
-
-
-        public MoneyMultiplier()
-        {
-            moneyMultiplierSetting = new FloatSetting("Multiplier", -100, 100, moneyMultiplier);
+            moneyMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);
             Settings.Add(moneyMultiplierSetting);
         }
 
         // Mod Logic
+        public override void OnDisable()
+        {
+            if (BoardInstanceIsNull) return;
 
-        private static int _moneyAmount = -947624;
+            if (UnlimitedMoney.Value)
+            {
+                if (originalMoneyAmount > 0 && preserveOriginalSetting.Value)
+                {
+                    board.theSun = originalMoneyAmount;
+                    originalMoneyAmount = -853721;
+                }
+            }
+
+            _moneyAmount = -947624;
+
+        }
+
         public override void OnUpdateActive()
         {
             if (BoardInstanceIsNull) { _moneyAmount = -947624; return; }
 
-            int Money = board.theMoney;
-
-            if (_moneyAmount == -947624) _moneyAmount = Money;
-
-            if (Money != _moneyAmount)
+            if (UnlimitedMoney.Value)
             {
-                if ((Money - _moneyAmount) > 0)
-                    board.theMoney += (int)((Money - _moneyAmount) * (moneyMultiplierSetting.Value -1));
-
-                _moneyAmount = board.theMoney;
+                if (originalMoneyAmount == -853721) originalMoneyAmount = board.theMoney;
+                board.theMoney = moneySetting.Value;
             }
 
+            else if (MoneyMultiplier.Value)
+            {
+                int Sun = board.theMoney;
+
+                if (_moneyAmount == -947624 || Sun == moneySetting.Value) _moneyAmount = Sun;
+
+                if (Sun != _moneyAmount)
+                {
+                    if ((Sun - _moneyAmount) > 0)
+                        board.theMoney += (int)((Sun - _moneyAmount) * (moneyMultiplierSetting.Value - 1));
+
+                    _moneyAmount = board.theMoney;
+
+                }
+            }
         }
 
-        public override void OnDisable()
-        {
-            _moneyAmount = -947624;
-        }
+
     }
-
-    public class UnlimitedPoints : Module
+    
+    public class PointsHack : Module
     {
         // Mod Info
-        public override string Name { get; set; } = "Unlimited Points";
+        public override string Name { get; set; } = "Points Hack";
         public override string Description { get; set; } = "Gives you unlimited points.";
         public override string SearchHints { get; set; } = "unlimited points infinite points pts currency gold ifnite finite" +
-            "ulimited limitless unrestricted endless";
+            "ulimited limitless unrestricted endless pointsmultiplier pointmultiplier ptsmultiplier scoremultiplier scoreboost" +
+            " pointsboost pointmultiplyer pointsmultiplyer pointmultipier pointsmultipier pointsmultyplier pointmultyplier" +
+            " scoreincrease pointsbonus pointbonus pointx2 ptsbonus pointsfactor scorefactor";
         public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
         // Mod data
 
-        private readonly float pointsAmount = 9999999;
+        public static PointsHack instance;
+
+        public BoolSetting UnlimitedPoints;
+
         private float originalPointsAmount = -853721;
         private FloatSetting pointsSetting;
-
-        private readonly bool preserveOriginl = true;
         private BoolSetting preserveOriginalSetting;
 
+        public BoolSetting PointsMultiplier;
+
+        private FloatSetting pointsMultiplierSetting;
+        private static float _pointsAmount = -947624.35f;
         public override bool Active { get; set; } = false;
 
-        public UnlimitedPoints()
+        public PointsHack()
         {
-            pointsSetting = new FloatSetting("Points Amount", 0, 9999999, pointsAmount);
+            instance = this;
+
+            UnlimitedPoints = new BoolSetting("Unlimited Points", true);
+            Settings.Add(UnlimitedPoints);
+
+            pointsSetting = new FloatSetting("Points Amount", 0, 9999999, 9999999);
             Settings.Add(pointsSetting);
 
-            preserveOriginalSetting = new BoolSetting("Preserve Original", preserveOriginl);
+            preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
-        }
 
-        // Mod Logic
-        public override void OnDisable()
-        {
-            if (BoardInstanceIsNull || !preserveOriginalSetting.Value) return;
+            PointsMultiplier = new BoolSetting("Points Multiplier", false);
+            Settings.Add(PointsMultiplier);
 
-            board.thePoints = originalPointsAmount;
-            originalPointsAmount = -853721;
-        }
-
-        public override void OnUpdateActive()
-        {
-            if (BoardInstanceIsNull) return;
-            if (originalPointsAmount == -853721) originalPointsAmount = board.thePoints;
-
-            board.thePoints = pointsSetting.Value;
-        }
-
-
-    }
-    public class PointsMultiplier : Module
-    {
-
-        // Mod Info
-        public override string Name { get; set; } = "Points Multiplier";
-        public override string Description { get; set; } = "Multiplies the points you get by a certain amount.";
-        public override string SearchHints { get; set; } = "pointsmultiplier pointmultiplier ptsmultiplier " +
-            "scoremultiplier scoreboost pointsboost pointmultiplyer pointsmultiplyer pointmultipier pointsmultipier" +
-            "pointsmultyplier pointmultyplier scoreincrease pointsbonus pointbonus pointx2 ptsbonus pointsfactor scorefactor";
-
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
-
-        // Mod data
-
-        private readonly float pointsMultiplier = 2;
-        private FloatSetting pointsMultiplierSetting;
-
-        public PointsMultiplier()
-        {
-            pointsMultiplierSetting = new FloatSetting("Multiplier", -100, 100, pointsMultiplier);
+            pointsMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);
             Settings.Add(pointsMultiplierSetting);
         }
 
         // Mod Logic
+        public override void OnDisable()
+        {
+            if (BoardInstanceIsNull) return;
 
-        private static float _pointsAmount = -947624.35f;
+            if (UnlimitedPoints.Value)
+            {
+                if (originalPointsAmount > 0 && preserveOriginalSetting.Value)
+                {
+                    board.thePoints = originalPointsAmount;
+                    originalPointsAmount = -853721;
+                }
+            }
+
+            _pointsAmount = -947624.35f;
+
+        }
+
         public override void OnUpdateActive()
         {
             if (BoardInstanceIsNull) { _pointsAmount = -947624.35f; return; }
 
-            float Points = board.thePoints;
-
-            if (_pointsAmount == -947624.35f) _pointsAmount = Points;
-
-            if (Points != _pointsAmount)
+            if (UnlimitedPoints.Value)
             {
-                if ((Points - _pointsAmount) > 0)
-                    board.thePoints += (Points - _pointsAmount) * (pointsMultiplierSetting.Value - 1);
-
-                _pointsAmount = board.thePoints;
+                if (originalPointsAmount == -853721) originalPointsAmount = board.theMoney;
+                board.thePoints = pointsSetting.Value;
             }
 
+            else if (PointsMultiplier.Value)
+            {
+                float Money = board.thePoints;
+
+                if (_pointsAmount == -947624.35f || Money == pointsSetting.Value) _pointsAmount = Money;
+
+                if (Money != _pointsAmount)
+                {
+                    if ((Money - _pointsAmount) > 0)
+                        board.thePoints += (int)((Money - _pointsAmount) * (pointsMultiplierSetting.Value - 1));
+
+                    _pointsAmount = board.thePoints;
+
+                }
+            }
         }
 
-        public override void OnDisable()
-        {
-            _pointsAmount = -947624.35f;
-        }
+
     }
+    
 }

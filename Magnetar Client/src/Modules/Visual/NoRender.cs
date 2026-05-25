@@ -1,7 +1,10 @@
-﻿using UnityEngine;
+﻿using HarmonyLib;
+using Il2Cpp;
+using Il2CppSystem;
+using MelonLoader.Utils;
 using System.Collections.Generic;
 using System.IO;
-using MelonLoader.Utils;
+using UnityEngine;
 
 namespace Magnetar_Client.Modules
 {
@@ -16,16 +19,21 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
 
         public static NoRender instance;
-        public MultiSelectSetting NoRenderParticlesSetting;
+        public MultiSelectSetting ParticlesSetting;
+
+        public MultiSelectSetting GameObjectsSetting;
+        public static HashSet<Bucket> Buckets = new HashSet<Bucket>();
 
         private Dictionary<int, string> fxDatabase = new Dictionary<int, string>();
         private string filePath;
         private int nextId = 0;
 
+        public enum ParticleTypes { Empty }
         public NoRender()
         {
             instance = this;
 
+            #region Particle
             // 1. Setup Path & Ensure Directory Exists
             string dirPath = Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Data");
             if (!Directory.Exists(dirPath))
@@ -58,20 +66,27 @@ namespace Magnetar_Client.Modules
             }
 
             // 3. Menu
-            NoRenderParticlesSetting = new MultiSelectSetting("Particles", typeof(ParticleTypes))
+            ParticlesSetting = new MultiSelectSetting("Particles", typeof(ParticleTypes))
             {
                 CustomNames = menuNames
             };
 
-            AddSettings(NoRenderParticlesSetting);
+            AddSettings(ParticlesSetting);
+            #endregion
+
+            GameObjectsSetting = new MultiSelectSetting("Game Objects",typeof(BucketType));
+            AddSettings(GameObjectsSetting);
+
         }
+
 
         public override void OnUpdateActive()
         {
             if (Game.AppData.BoardInstanceIsNull) return;
 
+            // Particles
             bool isFileDirty = false;
-            var allParticleSystems = Object.FindObjectsOfType<ParticleSystem>();
+            var allParticleSystems = UnityEngine.Object.FindObjectsOfType<ParticleSystem>();
 
             foreach (var ps in allParticleSystems)
             {
@@ -83,7 +98,7 @@ namespace Magnetar_Client.Modules
                 // Fetch the ID, and automatically register it if it is new
                 int effectId = GetOrRegisterEffect(name, ref isFileDirty);
 
-                if (NoRenderParticlesSetting.IsSelected(effectId))
+                if (ParticlesSetting.IsSelected(effectId))
                 {
                     ps.emission.enabled = false;
                     ps.Clear();
@@ -117,15 +132,85 @@ namespace Magnetar_Client.Modules
             File.WriteAllText(filePath, json);
         }
 
+
+
         public override void OnDisable()
         {
-            var allParticleSystems = Object.FindObjectsOfType<ParticleSystem>();
+            // Particles
+            var allParticleSystems = UnityEngine.Object.FindObjectsOfType<ParticleSystem>();
             foreach (var ps in allParticleSystems)
             {
                 if (ps != null) ps.emission.enabled = true;
             }
+
+            // Buckets
+            Buckets.RemoveWhere(b => b == null || b.Pointer == IntPtr.Zero || b.gameObject == null);
+
+            // Buckets
+            foreach (var bucket in Buckets)
+            {
+                var renderers = bucket.GetComponentsInChildren<Renderer>(true);
+                foreach (var renderer in renderers)
+                {
+                    if (renderer != null && renderer.Pointer != IntPtr.Zero)
+                    {
+                        renderer.enabled = true;
+                    }
+                }
+            }
         }
 
-        public enum ParticleTypes { Empty }
+        public override void OnEnable()
+        {
+            // Buckets
+            Buckets.RemoveWhere(b => b == null || b.Pointer == IntPtr.Zero || b.gameObject == null);
+
+            foreach (var bucket in Buckets)
+            {
+                if (GameObjectsSetting.IsSelected((int)bucket.theBucketType))
+                {
+                    var renderers = bucket.GetComponentsInChildren<Renderer>(true);
+                    foreach (var renderer in renderers)
+                    {
+                        if (renderer != null && renderer.Pointer != IntPtr.Zero)
+                        {
+                            renderer.enabled = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Bucket))]
+        public class BucketPatch
+        {
+            [HarmonyPatch(nameof(Bucket.Start))]
+            [HarmonyPostfix]
+            public static void StartPatch(Bucket __instance)
+            {
+                Buckets.Add(__instance);
+
+
+                if (instance == null || !instance.Active ||
+                    !instance.GameObjectsSetting.IsSelected((int)__instance.theBucketType)) return;
+
+                var renderers = __instance.GetComponentsInChildren<Renderer>();
+
+                foreach (var renderer in renderers)
+                {
+                    renderer.enabled = false;
+                }
+            }
+
+            [HarmonyPatch(nameof(Bucket.Die))]
+            [HarmonyPostfix]
+            public static void DiePatch(Bucket __instance)
+            {
+                if (__instance!=null && Buckets.Contains(__instance))
+                {
+                    Buckets.Remove(__instance);
+                }
+            }
+        }
     }
 }

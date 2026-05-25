@@ -149,6 +149,7 @@ namespace Magnetar_Client.Modules
                 HammerMgr.Instance.CD = CustomCDSetting.Value;
                 HammerMgr.Instance.CDUpdate();
             }
+
             HammerMgr.Instance.fullCD = CustomCDSetting.Value;
 
 

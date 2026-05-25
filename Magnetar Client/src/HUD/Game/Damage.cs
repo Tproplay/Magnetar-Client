@@ -1,5 +1,4 @@
-﻿using Il2Cpp;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.UI.Themes.Magnetar_Default;
@@ -10,7 +9,7 @@ namespace Magnetar_Client.HUDElements
 {
     public class DamageStatsPlant : HudElement
     {
-        public DamageStatsPlant() : base("Total Damage by Plants", HudElement.NewRect(100))
+        public DamageStatsPlant() : base("Total Damage by Plants (Zombie HP Loss)", HudElement.NewRect(100))
         { }
 
         
@@ -28,7 +27,7 @@ namespace Magnetar_Client.HUDElements
 
     public class AverageDamageStatsPlant : HudElement
     {
-        public AverageDamageStatsPlant() : base("Average Damage by Plants", HudElement.NewRect(100))
+        public AverageDamageStatsPlant() : base("Average Damage by Plants (Zombie HP Loss)", HudElement.NewRect(100))
         { }
 
         private List<long> damageHistory = new List<long>();

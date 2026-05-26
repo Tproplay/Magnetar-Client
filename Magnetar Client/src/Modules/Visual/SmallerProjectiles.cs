@@ -1,10 +1,11 @@
-﻿using Il2Cpp;
-using HarmonyLib;
-using UnityEngine;
-using System.Linq;
-using System.Collections.Generic;
-using System;
+﻿using HarmonyLib;
+using Il2Cpp;
 using Magnetar_Client.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using static MelonLoader.MelonLogger;
 
 namespace Magnetar_Client.Modules
 {
@@ -49,6 +50,34 @@ namespace Magnetar_Client.Modules
         }
 
         // Mod Logic
+
+        public override void OnEnable()
+        {
+            var Bullets = UnityEngine.Object.FindObjectsOfType<Bullet>();
+
+            foreach (var __instance in Bullets)
+            {
+                IntPtr ptr = __instance.Pointer;
+
+                if (!originalScales.ContainsKey(ptr))
+                {
+                    originalScales[ptr] = __instance.transform.localScale;
+                }
+
+                if (instance != null && instance.Active && instance.BulletTypeSetting.IsSelected((int)__instance.theBulletType))
+                {
+                    Vector3 orig = originalScales[ptr];
+                    float mult = instance.ScaleSetting.Value;
+
+                    __instance.transform.localScale = new Vector3(orig.x * mult, orig.y * mult, orig.z);
+                }
+                else
+                {
+                    __instance.transform.localScale = originalScales[ptr];
+                }
+            }
+
+        }
 
         public override void OnDisable()
         {

@@ -40,6 +40,8 @@ namespace Magnetar_Client.Modules
                     { 1, "Trophy" }
                 }
             };
+
+            Settings.Add(selectedItems);
         }
 
         // Mod Logic

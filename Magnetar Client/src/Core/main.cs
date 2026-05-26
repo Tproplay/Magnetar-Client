@@ -25,10 +25,7 @@ namespace Magnetar_Client.Core
             
 
             Load(); // Load Save to override default values
-
-#if DEBUG
-            MelonLogger.Msg("Initialized all the Modules");
-#endif
+            MelonLogger.Msg("Magnetar Client Loaded!");
             
         }
 

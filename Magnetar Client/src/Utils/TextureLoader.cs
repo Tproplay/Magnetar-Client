@@ -266,41 +266,35 @@ namespace Magnetar_Client.Utils
             int width = (int)textureRect.width;
             int height = (int)textureRect.height;
 
-            // 1. Force the GPU temporary buffer to sRGB to fully un-crush gamma brightness
             RenderTexture tempRT = RenderTexture.GetTemporary(
                 sourceTex.width,
                 sourceTex.height,
                 0,
                 RenderTextureFormat.ARGB32,
-                RenderTextureReadWrite.sRGB
+                RenderTextureReadWrite.Default
             );
 
             RenderTexture previousActive = RenderTexture.active;
             RenderTexture.active = tempRT;
 
-            // 2. Wipe the background completely clean transparent
-            GL.Clear(false, true, Color.clear);
+            GL.Clear(false, true, new Color(1f, 1f, 1f, 0f));
+
             Graphics.Blit(sourceTex, tempRT);
 
-            // 3. Construct our destination using a direct, non-linear format profile
             Texture2D readableCopy = new Texture2D(sourceTex.width, sourceTex.height, TextureFormat.RGBA32, false);
             readableCopy.ReadPixels(new Rect(0, 0, sourceTex.width, sourceTex.height), 0, 0);
             readableCopy.Apply();
 
-            // Clean up the GPU render texture references immediately
             RenderTexture.active = previousActive;
             RenderTexture.ReleaseTemporary(tempRT);
 
-            // 4. HARD CROP ENGINE: Slice the exact micro-coordinates out of the un-darkened copy using direct pixel extraction
             Texture2D readableCroppedTex = new Texture2D(width, height, TextureFormat.RGBA32, false);
 
-            // Grab raw pixel block safely from memory buffer without any tint adjustments
             Color[] pixels = readableCopy.GetPixels((int)textureRect.x, (int)textureRect.y, width, height);
 
             readableCroppedTex.SetPixels(pixels);
             readableCroppedTex.Apply();
 
-            // Destroy the temporary intermediate full-sheet copy to keep memory footprint at 0
             Object.Destroy(readableCopy);
 
             return readableCroppedTex;

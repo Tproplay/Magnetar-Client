@@ -35,8 +35,11 @@ namespace Magnetar_Client.NEF
 
         public static void Init()
         {
+#if !DEBUG
             CustomNames = Translator.TranslateEnum(typeof(PlantType));
+#endif
             Magnetar_Client.NEF.Data.NEFBanned.InitBan();
+            Magnetar_Client.NEF.Data.NEFBanned.InitHidden();
             Magnetar_Client.NEF.Data.NEFRecipes.InitRecipes();
             PerformSearch();
         }

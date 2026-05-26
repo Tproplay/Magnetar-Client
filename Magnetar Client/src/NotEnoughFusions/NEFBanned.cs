@@ -1,8 +1,5 @@
 ﻿using Il2Cpp;
-using Magnetar_Client.Core;
 using System.Collections.Generic;
-using HarmonyLib;
-using MelonLoader;
 
 namespace Magnetar_Client.NEF.Data
 {
@@ -15,16 +12,22 @@ namespace Magnetar_Client.NEF.Data
             246,257,258,259,260,261,262,263,264,265,266,267,268,350,351,352,353,354,
             355,356,357,358,359,360,361,362,363,364,365,366,367,368,219,220,221,230,231,232,-1,
             (int)PlantType.ZombieEndoFlame,(int)PlantType.UltimateRedLunar,
+            (int)PlantType.TorchFireNut
+            
         };
 
+        public static HashSet<int> InitHiddenIDs = new HashSet<int>
+        {
+            (int)PlantType.SpreadFume,(int)PlantType.SpreadScaredyShroom,
+        };
 
-
-        public static void AddToList(int plantID)
+        
+        public static void AddToBanList(int plantID)
         {
             NEFData.BannedPlants.Add(plantID);
         }
 
-        public static void RemoveFromList(int plantID)
+        public static void RemoveFromBanList(int plantID)
         {
             if (NEFData.BannedPlants.Contains(plantID))
                 NEFData.BannedPlants.Remove(plantID);
@@ -34,7 +37,26 @@ namespace Magnetar_Client.NEF.Data
         {
             foreach (int id in InitBannedIDs)
             {
-                AddToList(id);
+                AddToBanList(id);
+            }
+        }
+
+        public static void AddToHiddenList(int plantID)
+        {
+            NEFData.SearchHiddenPlants.Add(plantID);
+        }
+
+        public static void RemoveFromHiddenList(int plantID)
+        {
+            if (NEFData.SearchHiddenPlants.Contains(plantID))
+                NEFData.SearchHiddenPlants.Remove(plantID);
+        }
+
+        public static void InitHidden()
+        {
+            foreach (int id in InitHiddenIDs)
+            {
+                AddToBanList(id);
             }
         }
 

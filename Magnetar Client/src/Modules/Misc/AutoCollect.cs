@@ -86,6 +86,7 @@ namespace Magnetar_Client.Modules
                     }
                     catch (Exception ex)
                     {
+                        MelonLogger.Msg(ex);
                         trophyInstance.isClicked = true;
                     }
                 }

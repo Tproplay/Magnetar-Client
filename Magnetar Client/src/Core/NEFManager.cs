@@ -13,6 +13,8 @@ namespace Magnetar_Client.Core
         public static void Init()
         {
             NEFData.Init();
+
+            MelonLoader.MelonLogger.Msg("Initialized Not Enough Fusions");
         }
 
         public static void Render()

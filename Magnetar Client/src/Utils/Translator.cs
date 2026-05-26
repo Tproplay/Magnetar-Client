@@ -31,9 +31,7 @@ namespace Magnetar_Client.Utils
             if (!Directory.Exists(baseDir))
             {
                 Directory.CreateDirectory(baseDir);
-#if DEBUG
                 TranslatorLogger.Msg("Created Magnetar Translation directory.");
-#endif
             }
 
             // 1. Load Exact Strings
@@ -44,9 +42,7 @@ namespace Magnetar_Client.Utils
                 {
                     string jsonContent = File.ReadAllText(stringsPath);
                     _exactTranslations = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent) ?? new Dictionary<string, string>();
-#if DEBUG
                     TranslatorLogger.Msg($"Loaded {_exactTranslations.Count} exact strings.");
-#endif
                 }
                 catch (Exception ex)
                 {
@@ -55,9 +51,7 @@ namespace Magnetar_Client.Utils
             }
             else
             {
-#if DEBUG
                 TranslatorLogger.Warning($"Translation file not found: {stringsPath}");
-#endif
             }
 
             // 2. Load Regex Strings
@@ -74,9 +68,7 @@ namespace Magnetar_Client.Utils
                     {
                         _regexTranslations.Add(new Regex(entry.Key, RegexOptions.Compiled), entry.Value);
                     }
-#if DEBUG
                     TranslatorLogger.Msg($"Loaded {_regexTranslations.Count} regex rules.");
-#endif
                 }
                 catch (Exception ex)
                 {
@@ -85,9 +77,7 @@ namespace Magnetar_Client.Utils
             }
             else
             {
-#if DEBUG
                 TranslatorLogger.Warning($"Translation file not found: {regexPath}");
-#endif
             }
 
             _isLoaded = true;
@@ -182,9 +172,7 @@ namespace Magnetar_Client.Utils
                         {
                             parsedNames[kvp.Key] = CleanText(kvp.Value);
                         }
-#if DEBUG
                         TranslatorLogger.Msg($"Loaded {parsedNames.Count} entries from {enumType.Name}.json");
-#endif
                     }
                 }
                 catch (Exception ex)
@@ -212,9 +200,7 @@ namespace Magnetar_Client.Utils
                                 {
                                     parsedNames[(int)p["seedType"]] = CleanText((string)p["name"]);
                                 }
-#if DEBUG
                                 TranslatorLogger.Msg($"Imported {parsedNames.Count} Plant names from Pvz Fusion Translator.");
-#endif
                             }
                         }
                     }
@@ -231,9 +217,7 @@ namespace Magnetar_Client.Utils
                                 {
                                     parsedNames[(int)z["theZombieType"]] = CleanText((string)z["name"]);
                                 }
-#if DEBUG
                                 TranslatorLogger.Msg($"Imported {parsedNames.Count} Zombie names from Pvz Fusion Translator.");
-#endif
                             }
                         }
                     }
@@ -255,9 +239,7 @@ namespace Magnetar_Client.Utils
                     string dumpJson = JsonConvert.SerializeObject(parsedNames, Formatting.Indented);
                     File.WriteAllText(targetFile, dumpJson);
 
-#if DEBUG
                     TranslatorLogger.Warning($"Successfully generated {enumType.Name}.json with {parsedNames.Count} total entries.");
-#endif
                 }
                 catch (Exception ex)
                 {

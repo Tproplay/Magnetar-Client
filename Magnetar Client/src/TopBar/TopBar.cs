@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 
 using Magnetar_Client.UI.Themes;
-using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.TopBar
 {
@@ -25,6 +24,8 @@ namespace Magnetar_Client.TopBar
                 Buttons[tab] = new Rect(0, 0, btnWidth, 30);
                 windowWidth += btnWidth;
             }
+
+            MelonLogger.Msg("Initialized the TopBar");
         }
 
         public static void Render()
@@ -58,9 +59,6 @@ namespace Magnetar_Client.TopBar
                     Config.CurrentTab = tab;
                     Event.current.Use();
                     UI.WindowDrawing.DrawSetting.isSearchFocused = false;
-#if DEBUG
-                    DebugLogger.Msg($"Changed Tab to : {name}");
-#endif
                 }
 
                 GUI.EndGroup();

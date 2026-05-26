@@ -25,6 +25,7 @@ namespace Magnetar_Client.Core
             
 
             Load(); // Load Save to override default values
+
             MelonLogger.Msg("Magnetar Client Loaded!");
             
         }
@@ -32,7 +33,7 @@ namespace Magnetar_Client.Core
 
         public override void OnApplicationQuit()
         {
-            Save();
+            Save(true);
             MelonLogger.Msg("Magnetar Prefrences Saved!");
         }
 

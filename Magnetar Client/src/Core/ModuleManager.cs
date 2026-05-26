@@ -87,8 +87,12 @@ namespace Magnetar_Client.Core
                         );
 
             showModules = true; showSettings = false; showSelectionGui = false;
-            
             IsInitialized = true;
+
+
+            MelonLogger.Msg($"Loaded {Modules.Count} modules");
+
+
         }
 
         public static void RegisterModule(Type type)

@@ -1,5 +1,6 @@
 ﻿using Magnetar_Client.Core;
 using Magnetar_Client.Modules;
+using MelonLoader;
 using MelonLoader.Utils;
 using Newtonsoft.Json;
 using System;
@@ -56,8 +57,26 @@ namespace Magnetar_Client.Utils
         private static string Path => System.IO.Path.Combine(MelonEnvironment.UserDataDirectory, "Magnetar_Config.json");
         private static string TexturePath => System.IO.Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Data", "TextureData.json");
 
-        public static void Save()
+
+        static float LastSaved;
+
+        public static void Save(bool force = false)
         {
+
+            // Ensure that it only save after some time to reduce lag
+            if (!force)
+            {
+                if (LastSaved == 0)
+                {
+                    LastSaved = Time.realtimeSinceStartup;
+                }
+
+                else if (LastSaved + Config.MinTimeBetweenSaves >= Time.realtimeSinceStartup)
+                    return;
+            }
+
+            LastSaved = Time.realtimeSinceStartup;
+
             // ==========================================
             // 1. SAVE MAIN MAGNETAR CONFIG
             // ==========================================
@@ -148,8 +167,11 @@ namespace Magnetar_Client.Utils
             }
             catch (Exception e)
             {
-                MelonLoader.MelonLogger.Error($"Failed to save TextureData: {e.Message}");
+                AutoSaveLogger.Error($"Failed to save TextureData: {e.Message}");
             }
+
+            if (!force)
+                AutoSaveLogger.Msg("Saved the current current Config Data");
         }
 
         public static void Load()
@@ -206,6 +228,8 @@ namespace Magnetar_Client.Utils
                                 }
                             }
                         }
+
+                        MelonLogger.Msg("Loaded Magnetar Profile 'Magnetar_Config'");
                     }
                 }
                 catch (Exception e) { MelonLoader.MelonLogger.Error($"Main SaveLoad Error: {e.Message}"); }

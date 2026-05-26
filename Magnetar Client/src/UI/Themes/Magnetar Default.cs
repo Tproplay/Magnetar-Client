@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using MelonLoader;
+using UnityEngine;
 
 namespace Magnetar_Client.UI.Themes
 {
@@ -222,6 +223,8 @@ namespace Magnetar_Client.UI.Themes
             NEFNodeStyle.padding.top = 2;
             NEFNodeStyle.padding.bottom = 5;
             #endregion
+
+            MelonLogger.Msg("Initialized the Theme 'Magnetar_Default'");
 
         }
 

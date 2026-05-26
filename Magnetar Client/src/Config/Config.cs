@@ -1,6 +1,4 @@
 ﻿
-using Il2Cpp;
-
 namespace Magnetar_Client
 {
     public enum TabType
@@ -20,6 +18,7 @@ namespace Magnetar_Client
         public static bool dimBg = false;
         public static TabType CurrentTab = TabType.MODULES;
 
+        public static float MinTimeBetweenSaves = 120;
 
         public readonly static float ModuleWindowWidth = 200f;
         public readonly static float elementHeight = 22;

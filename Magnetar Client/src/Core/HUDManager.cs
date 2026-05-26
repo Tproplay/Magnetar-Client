@@ -250,6 +250,8 @@ namespace Magnetar_Client.Core
                 currentWindowId++;
             }
 
+            MelonLogger.Msg($"Registered {Elements.Count} HUD elements");
+
         }
 
         public static void RegisterElement(HudElement element)

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static MelonLoader.MelonLogger;
 
 namespace Magnetar_Client.Modules
 {

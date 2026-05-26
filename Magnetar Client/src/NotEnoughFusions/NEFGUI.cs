@@ -5,6 +5,8 @@ using Magnetar_Client.UI.Themes;
 using Magnetar_Client.Utils;
 using Magnetar_Client.Core;
 using static Magnetar_Client.UI.WindowDrawing.MiscDrawing;
+using static Magnetar_Client.NEF.Data.NEFRecipes;
+
 namespace Magnetar_Client.NEF
 {
     public static class NEFGUI
@@ -45,7 +47,7 @@ namespace Magnetar_Client.NEF
             {
                 if (NEFData.currentPyramidRoots.Count == 0)
                 {
-                    GUI.Label(new Rect(pyramidBoxRect.x + 10f, pyramidBoxRect.y + 10f, 400f, NEFManager.elementHeight), "Select a plant to view its recipes.");
+                    GUI.Label(new Rect(pyramidBoxRect.x + 10f, pyramidBoxRect.y + 10f, 400f, NEFManager.elementHeight), "Select an entity to view its recipes.");
                 }
                 else
                 {
@@ -174,7 +176,7 @@ namespace Magnetar_Client.NEF
 
                     if (btnY + itemSize < 0 || btnY > scrollRect.height) continue;
 
-                    PlantType plant = NEFData.searchResults[i];
+                    RecipeEntity entity = NEFData.searchResults[i];
                     Rect plantBtnRect = new Rect(btnX, btnY, itemSize, itemSize);
 
                     if (plantBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseUp)
@@ -182,16 +184,16 @@ namespace Magnetar_Client.NEF
                         if (e.button == 0)
                         {
                             showUsagesView = false;
-                            NEFData.GeneratePyramid(plant);
+                            NEFData.GeneratePyramid(entity);
                         }
                         else if (e.button == 1)
                         {
-                            NEFData.GenerateUsagesView(plant);
+                            NEFData.GenerateUsagesView(entity);
                         }
                         e.Use();
                     }
 
-                    DrawSquareNodeBox(plantBtnRect, plant, 1.5f);
+                    DrawSquareNodeBox(plantBtnRect, entity, 1.5f);
                     GUI.backgroundColor = Color.white;
                 }
             }
@@ -200,7 +202,7 @@ namespace Magnetar_Client.NEF
 
         private static void DrawUsagesView(Rect viewRect, Event e)
         {
-            GUI.Label(new Rect(viewRect.x + 10f, viewRect.y + 10f, viewRect.width - 150f, 30f), $"Fusions requiring: {NEFData.GetPlantName(NEFData.usageViewTarget)} ({NEFData.currentUsages.Count} found)");
+            GUI.Label(new Rect(viewRect.x + 10f, viewRect.y + 10f, viewRect.width - 150f, 30f), $"Fusions requiring: {NEFData.GetEntityName(NEFData.usageViewTarget)} ({NEFData.currentUsages.Count} found)");
 
             Rect backBtnRect = new Rect(viewRect.x + viewRect.width - 110f, viewRect.y + 10f, 100f, 30f);
             if (backBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
@@ -214,13 +216,12 @@ namespace Magnetar_Client.NEF
 
             if (NEFData.currentUsages.Count == 0)
             {
-                GUI.Label(new Rect(viewRect.x + 10f, viewRect.y + 50f, 400f, 30f), "This plant is not used as an ingredient in any fusion.");
+                GUI.Label(new Rect(viewRect.x + 10f, viewRect.y + 50f, 400f, 30f), "This entity is not used as an ingredient in any fusion.");
                 return;
             }
 
             Rect scrollAreaRect = new Rect(viewRect.x + 10f, viewRect.y + 50f, viewRect.width - 20f, viewRect.height - 60f);
 
-            // Square grid shape layout formulation
             int columns = Mathf.Max(3, Mathf.FloorToInt(scrollAreaRect.width / 115f));
             float padding = 10f;
             float itemSize = (scrollAreaRect.width - (padding * (columns - 1))) / columns;
@@ -246,7 +247,7 @@ namespace Magnetar_Client.NEF
 
                 if (btnY + itemSize < 0 || btnY > scrollAreaRect.height) continue;
 
-                PlantType resultPlant = NEFData.currentUsages[i].Result;
+                RecipeEntity resultEntity = NEFData.currentUsages[i].Result;
                 Rect plantBtnRect = new Rect(btnX, btnY, itemSize, itemSize);
 
                 if (plantBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseUp)
@@ -254,16 +255,16 @@ namespace Magnetar_Client.NEF
                     if (e.button == 0)
                     {
                         showUsagesView = false;
-                        NEFData.GeneratePyramid(resultPlant);
+                        NEFData.GeneratePyramid(resultEntity);
                     }
                     else if (e.button == 1)
                     {
-                        NEFData.GenerateUsagesView(resultPlant);
+                        NEFData.GenerateUsagesView(resultEntity);
                     }
                     e.Use();
                 }
 
-                DrawSquareNodeBox(plantBtnRect, resultPlant, 1f);
+                DrawSquareNodeBox(plantBtnRect, resultEntity, 1f);
             }
             GUI.EndGroup();
         }
@@ -286,8 +287,14 @@ namespace Magnetar_Client.NEF
             Vector2 pos = GetProjectedPosition(node.RenderX, node.RenderY, canvasRect, centerOfAllTrees);
             Rect nodeRect = new Rect(pos.x - (scaledSize / 2f), pos.y, scaledSize, scaledSize);
 
-            // Connect lines depending on binary or ternary tree sizes
-            if (node.ParentA != null && node.ParentB != null)
+            // Connection Lines
+            if (node.IsSingle)
+            {
+                Vector2 childPosA = GetProjectedPosition(node.ParentA.RenderX, node.ParentA.RenderY, canvasRect, centerOfAllTrees);
+                DrawOrthogonalLine(new Vector2(pos.x, pos.y + scaledSize), new Vector2(childPosA.x, childPosA.y), pyramidZoom);
+                DrawTree(node.ParentA, canvasRect, centerOfAllTrees, e);
+            }
+            else if (node.ParentA != null && node.ParentB != null)
             {
                 Vector2 childPosA = GetProjectedPosition(node.ParentA.RenderX, node.ParentA.RenderY, canvasRect, centerOfAllTrees);
                 Vector2 childPosB = GetProjectedPosition(node.ParentB.RenderX, node.ParentB.RenderY, canvasRect, centerOfAllTrees);
@@ -306,32 +313,47 @@ namespace Magnetar_Client.NEF
                 }
             }
 
+            // Draw Edge Message (Centered above the node)
+            if (!string.IsNullOrEmpty(node.EdgeMessage))
+            {
+                Color oldColor = GUI.contentColor;
+                GUI.contentColor = node.EdgeMessageColor;
+                GUIStyle msgStyle = new GUIStyle() { alignment = TextAnchor.LowerCenter, fontSize = Mathf.Max(1, (int)(16 * pyramidZoom)) };
+
+                Rect msgRect = new Rect(pos.x - (100f * pyramidZoom), pos.y - (30f * pyramidZoom), 200f * pyramidZoom, 30f * pyramidZoom);
+                GUI.Label(msgRect, node.EdgeMessage, msgStyle);
+                GUI.contentColor = oldColor;
+            }
+
             if (nodeRect.Contains(e.mousePosition) && e.type == EventType.MouseUp)
             {
-                if (e.button == 0) NEFData.GeneratePyramid(node.Plant);
-                else if (e.button == 1) NEFData.GenerateUsagesView(node.Plant);
+                if (e.button == 0) NEFData.GeneratePyramid(node.Entity);
+                else if (e.button == 1) NEFData.GenerateUsagesView(node.Entity);
                 e.Use();
             }
 
-            DrawSquareNodeBox(nodeRect, node.Plant, pyramidZoom);
+            DrawSquareNodeBox(nodeRect, node.Entity, pyramidZoom);
             GUI.backgroundColor = Color.white;
         }
 
-        private static void DrawSquareNodeBox(Rect rect, PlantType plant, float scale)
+        private static void DrawSquareNodeBox(Rect rect, RecipeEntity entity, float scale)
         {
             Magnetar_Default.NEFNodeStyle.fontSize = Mathf.Max(1, (int)(8f * scale));
-            string displayName = NEFData.GetPlantName(plant);
+            string displayName = NEFData.GetEntityName(entity);
             GUI.Box(rect, displayName, Magnetar_Default.NEFNodeStyle);
 
-            Texture2D plantTex = Utils.TextureLoader.GetPlantTexture((int)plant);
-            if (plantTex != null)
+            Texture2D tex = entity.IsZombie
+                ? Utils.TextureLoader.GetZombieTexture(entity.Id)
+                : Utils.TextureLoader.GetPlantTexture(entity.Id);
+
+            if (tex != null)
             {
-                if (!cachedImageStyles.TryGetValue(plantTex, out GUIStyle imgStyle))
+                if (!cachedImageStyles.TryGetValue(tex, out GUIStyle imgStyle))
                 {
-                    imgStyle = new GUIStyle { normal = { background = plantTex } };
+                    imgStyle = new GUIStyle { normal = { background = tex } };
                     RectOffset offset = new RectOffset();
                     imgStyle.border = offset; imgStyle.margin = offset; imgStyle.padding = offset;
-                    cachedImageStyles[plantTex] = imgStyle;
+                    cachedImageStyles[tex] = imgStyle;
                 }
 
                 float pad = 10f * scale;
@@ -340,7 +362,7 @@ namespace Magnetar_Client.NEF
                 float availWidth = rect.width - (pad * 2f);
                 float availHeight = rect.height - pad - bottomTextSpace;
 
-                float texAspect = (float)plantTex.width / (float)Mathf.Max(1, plantTex.height);
+                float texAspect = (float)tex.width / (float)Mathf.Max(1, tex.height);
                 float availAspect = availWidth / availHeight;
 
                 float drawWidth = availWidth;

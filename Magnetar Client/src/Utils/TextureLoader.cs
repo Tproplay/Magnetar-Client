@@ -266,6 +266,7 @@ namespace Magnetar_Client.Utils
             int width = (int)textureRect.width;
             int height = (int)textureRect.height;
 
+            // FIX 1: Use 'Default' read/write to prevent random gamma-crush darkening.
             RenderTexture tempRT = RenderTexture.GetTemporary(
                 sourceTex.width,
                 sourceTex.height,
@@ -277,6 +278,7 @@ namespace Magnetar_Client.Utils
             RenderTexture previousActive = RenderTexture.active;
             RenderTexture.active = tempRT;
 
+            // FIX 2: Clear with Transparent White instead of Color.clear (Transparent Black).
             GL.Clear(false, true, new Color(1f, 1f, 1f, 0f));
 
             Graphics.Blit(sourceTex, tempRT);

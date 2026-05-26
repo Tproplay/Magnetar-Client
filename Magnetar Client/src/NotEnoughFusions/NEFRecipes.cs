@@ -2,58 +2,86 @@
 using Il2Cpp;
 using Magnetar_Client.Core;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Magnetar_Client.NEF.Data
 {
     public static class NEFRecipes
     {
-        public class CustomRecipe
+        // UNIFIED ENTITY WRAPPER
+        public struct RecipeEntity : System.IEquatable<RecipeEntity>
         {
-            public PlantType Result;
-            public PlantType ParentA;
-            public PlantType ParentB;
-            public PlantType ParentC = PlantType.Nothing; // Default to Nothing for standard 2-plant fusions
-            public bool IsTriple => ParentC != PlantType.Nothing;
+            public int Id;
+            public bool IsZombie;
+
+            public static RecipeEntity Plant(PlantType pt) => new RecipeEntity { Id = (int)pt, IsZombie = false };
+            public static RecipeEntity Zombie(ZombieType zt) => new RecipeEntity { Id = (int)zt, IsZombie = true };
+            public static RecipeEntity Custom(int customId) => new RecipeEntity { Id = customId, IsZombie = false };
+            public static RecipeEntity Nothing() => new RecipeEntity { Id = -1, IsZombie = false };
+
+            public bool IsNothing => Id == -1 && !IsZombie;
+
+            public bool Equals(RecipeEntity other) => Id == other.Id && IsZombie == other.IsZombie;
+            public override int GetHashCode() => Id.GetHashCode() ^ IsZombie.GetHashCode();
+            public static bool operator ==(RecipeEntity a, RecipeEntity b) => a.Equals(b);
+            public static bool operator !=(RecipeEntity a, RecipeEntity b) => !a.Equals(b);
         }
 
+        public class CustomRecipe
+        {
+            public RecipeEntity Result;
+            public RecipeEntity ParentA;
+            public RecipeEntity ParentB = RecipeEntity.Nothing(); // If Nothing, it's a single parent
+            public RecipeEntity ParentC = RecipeEntity.Nothing();
+
+            public bool IsTriple => !ParentC.IsNothing;
+            public bool IsSingle => ParentB.IsNothing && ParentC.IsNothing;
+
+            // Optional Edge Messages
+            public string EdgeMessage = "";
+            public Color EdgeMessageColor = Color.white;
+        }
 
         public static List<CustomRecipe> TitanPlants = new List<CustomRecipe>
+        {
+            new CustomRecipe
             {
-                new CustomRecipe
-                {
-                    Result = PlantType.BigGatling,
-                    ParentA = PlantType.DoubleShooter,
-                    ParentB = PlantType.ThreePeater,
-                    ParentC = PlantType.DoubleShooter,
-                },
+                Result = RecipeEntity.Plant(PlantType.BigGatling),
+                ParentA = RecipeEntity.Plant(PlantType.DoubleShooter),
+                ParentB = RecipeEntity.Plant(PlantType.ThreePeater),
+                ParentC = RecipeEntity.Plant(PlantType.DoubleShooter),
+            },
+            new CustomRecipe
+            {
+                Result = RecipeEntity.Plant(PlantType.BigChomper),
+                ParentA = RecipeEntity.Plant(PlantType.Chomper),
+                ParentB = RecipeEntity.Plant(PlantType.Chomper),
+                ParentC = RecipeEntity.Plant(PlantType.Chomper),
+            },
+            new CustomRecipe
+            {
+                Result = RecipeEntity.Plant(PlantType.BigPumpkin),
+                ParentA = RecipeEntity.Plant(PlantType.MagnetPumpkin),
+                ParentB = RecipeEntity.Plant(PlantType.Magnetshroom),
+                ParentC = RecipeEntity.Plant(PlantType.CherryPumpkin),
+            },
+        };
 
-                new CustomRecipe
-                {
-                    Result = PlantType.BigChomper,
-                    ParentA = PlantType.Chomper,
-                    ParentB= PlantType.Chomper,
-                    ParentC= PlantType.Chomper,
-                },
+        public static List<CustomRecipe> SpawnedPlants = new List<CustomRecipe>
+        {
+            new CustomRecipe
+            {
+                Result = RecipeEntity.Plant(PlantType.BigSunNut),
+                ParentA = RecipeEntity.Plant(PlantType.UltimateSunNut),
+                EdgeMessage = "On Click",
+                EdgeMessageColor = Color.white
+            }
+        };
 
-                new CustomRecipe
-                {
-                    Result = PlantType.BigPumpkin,
-                    ParentA = PlantType.JackboxPumpkin,
-                    ParentB = PlantType.Magnetshroom,
-                    ParentC = PlantType.CherryPumpkin
-                },
+        public static List<CustomRecipe> ZombieItemPlants = new List<CustomRecipe>
+        {
 
-                new CustomRecipe
-                {
-                    Result = PlantType.BigWallNut,
-                    ParentA = PlantType.WallNut,
-                    ParentB = PlantType.TallNut,
-                    ParentC = PlantType.WallNut
-                },
-
-
-
-            };
+        };
 
 
 
@@ -71,6 +99,11 @@ namespace Magnetar_Client.NEF.Data
         public static void InitRecipes()
         {
             foreach (CustomRecipe plantRecipe in TitanPlants)
+            {
+                AddToList(plantRecipe);
+            }
+
+            foreach (CustomRecipe plantRecipe in SpawnedPlants)
             {
                 AddToList(plantRecipe);
             }

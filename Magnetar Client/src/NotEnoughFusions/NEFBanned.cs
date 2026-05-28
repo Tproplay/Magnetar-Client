@@ -18,7 +18,8 @@ namespace Magnetar_Client.NEF.Data
 
         public static HashSet<int> InitHiddenIDs = new HashSet<int>
         {
-            (int)PlantType.SpreadFume,(int)PlantType.SpreadScaredyShroom,
+            (int)PlantType.SpreadFume,(int)PlantType.SpreadScaredyShroom,(int)PlantType.DiamondImitater,
+            (int)PlantType.DiamondPotatoNut,(int)PlantType.LuckyBlover,(int)PlantType.XXSPot
         };
 
         

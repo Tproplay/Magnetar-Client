@@ -113,6 +113,7 @@
     <Compile Include="src\Modules\Misc\AutoCollect.cs" />
     <Compile Include="src\Modules\Misc\BetterHealthDisplay.cs" />
     <Compile Include="src\Modules\Misc\FPSLimit.cs" />
+    <Compile Include="src\Modules\Plants\BanPlant.cs" />
     <Compile Include="src\Modules\Plants\GodMode.cs" />
     <Compile Include="src\Modules\Level\RandomCardRoulette.cs" />
     <Compile Include="src\Modules\Tools\ColumnPlanting.cs" />

@@ -142,7 +142,7 @@ namespace Magnetar_Client.Modules
             preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
 
-            MoneyMultiplier = new BoolSetting("Unlimited Money", true);
+            MoneyMultiplier = new BoolSetting("Money Multiplier", false);
             Settings.Add(MoneyMultiplier);
 
             moneyMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);

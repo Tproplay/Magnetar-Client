@@ -65,6 +65,41 @@ namespace Magnetar_Client.NEF.Data
                 ParentB = RecipeEntity.Plant(PlantType.Magnetshroom),
                 ParentC = RecipeEntity.Plant(PlantType.CherryPumpkin),
             },
+            new CustomRecipe
+            {
+                Result = RecipeEntity.Plant(PlantType.HugeWallNut),
+                ParentA = RecipeEntity.Plant(PlantType.WallNut),
+                ParentB = RecipeEntity.Plant(PlantType.TallNut),
+                ParentC = RecipeEntity.Plant(PlantType.WallNut),
+            },
+            new CustomRecipe
+            {
+                Result = RecipeEntity.Plant(PlantType.BigGloom),
+                ParentA = RecipeEntity.Plant(PlantType.SmallPuff),
+                ParentB = RecipeEntity.Plant(PlantType.FumeShroom),
+                ParentC = RecipeEntity.Plant(PlantType.SmallPuff),
+            },
+            new CustomRecipe
+            {
+                Result = RecipeEntity.Plant(PlantType.CabbageCannon),
+                ParentA = RecipeEntity.Plant(PlantType.Cabbagepult),
+                ParentB = RecipeEntity.Plant(PlantType.Cabbagepult),
+                ParentC = RecipeEntity.Plant(PlantType.Cabbagepult),
+            },
+            new CustomRecipe
+            {
+                Result = RecipeEntity.Plant(PlantType.BigSeaShroom),
+                ParentA = RecipeEntity.Plant(PlantType.Tanglekelp),
+                ParentB = RecipeEntity.Plant(PlantType.SeaShroom),
+                ParentC = RecipeEntity.Plant(PlantType.Tanglekelp),
+            },
+            new CustomRecipe
+            {
+                Result = RecipeEntity.Plant(PlantType.MelonCannon),
+                ParentA = RecipeEntity.Plant(PlantType.Melonpult),
+                ParentB = RecipeEntity.Plant(PlantType.Cornpult),
+                ParentC = RecipeEntity.Plant(PlantType.Melonpult),
+            }
         };
 
         public static List<CustomRecipe> SpawnedPlants = new List<CustomRecipe>

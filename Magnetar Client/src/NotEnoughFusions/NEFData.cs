@@ -1,8 +1,10 @@
 ﻿using Il2Cpp;
+using Il2CppGameLevel.EventNodes;
 using Magnetar_Client.Core;
 using Magnetar_Client.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.NEF.Data.NEFRecipes;
 
@@ -42,7 +44,7 @@ namespace Magnetar_Client.NEF
 
         public static void Init()
         {
-#if !DEBUG
+#if DEBUG
             // Cache native names
             foreach (PlantType pt in Enum.GetValues(typeof(PlantType)))
             {
@@ -51,6 +53,11 @@ namespace Magnetar_Client.NEF
             foreach (ZombieType zt in Enum.GetValues(typeof(ZombieType)))
             {
                 if (!CustomNames.ContainsKey((int)zt)) CustomNames[(int)zt] = zt.ToString();
+            }
+#else
+            foreach ( var Entry in Translator.TranslateEnum(typeof(PlantType)))
+            {
+                CustomNames[Entry.Key] = Entry.Value;
             }
 #endif
             Magnetar_Client.NEF.Data.NEFBanned.InitBan();

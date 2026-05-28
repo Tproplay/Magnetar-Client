@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -92,6 +93,11 @@ namespace Magnetar_Client.Modules
             originalScales.Clear();
         }
 
+        public override void OnUpdateActive()
+        {
+            if (BoardInstanceIsNull) originalScales.Clear();
+        }
+
         public static Dictionary<IntPtr, Vector3> originalScales = new Dictionary<IntPtr, Vector3>();
 
         [HarmonyPatch(typeof(Bullet))]
@@ -102,6 +108,7 @@ namespace Magnetar_Client.Modules
             public static void Postfix(Bullet __instance)
             {
                 if (__instance == null) return;
+
 
                 IntPtr ptr = __instance.Pointer;
 

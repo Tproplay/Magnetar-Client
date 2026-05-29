@@ -128,6 +128,25 @@ namespace Magnetar_Client.Modules
                 {
                     __instance.transform.localScale = originalScales[ptr];
                 }
+         
+            }
+        }
+
+        [HarmonyPatch(typeof(Board))]
+        public static class BoardAwakePatch
+        {
+            [HarmonyPatch(nameof(Board.Awake))]
+            [HarmonyPostfix]
+            public static void AwakePostfix()
+            {
+                originalScales.Clear();
+            }
+
+            [HarmonyPatch(nameof(Board.OnDestroy))]
+            [HarmonyPostfix]
+            public static void OnDestroyPostfix()
+            {
+                originalScales.Clear();
             }
         }
     }

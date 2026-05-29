@@ -105,6 +105,7 @@
     <Compile Include="src\Core\AssemblyInfo.cs" />
     <Compile Include="src\Config\Config.cs" />
     <Compile Include="src\Core\NEFManager.cs" />
+    <Compile Include="src\HUD\App\Info.cs" />
     <Compile Include="src\HUD\Game\Bullets.cs" />
     <Compile Include="src\Modules\Level\CustomConvyer.cs" />
     <Compile Include="src\Modules\Level\NoGridItems.cs" />

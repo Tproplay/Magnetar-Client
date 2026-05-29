@@ -35,6 +35,30 @@
 - Similarly, Copy contents of `Magnetar\UserLibs` to `[Your Game folder]\UserLibs`.
 - Launch your game to activate the client.
 
+After installing the files, your folder structure should look like this - 
+
+```
+
+Game-Files/
+|
+├── MelonLoader
+├── Mods/
+|   ├── Magnetar Data
+|   ├── Magnetar Translation
+|   ├── Magnetar Client.dll
+├── PlantsVsZombiesRH_Data
+├── UserData
+├── UserLibs/
+|   ├── DiscordRPC.dll
+├── baselib.dll
+├── GameAssembly.dll
+├── PlantsVsZombiesRH.exe (your game exe file)
+├── UnityCrashHandler64.exe
+├── UnityPlayer.dll
+├── version.dll
+
+```
+
 ## Special Thanks
 
 - **Infinite75** and **CareFreeSong** https://github.com/CarefreeSongs712/PVZRHTools/

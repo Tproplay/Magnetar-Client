@@ -36,7 +36,7 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
-            UnlimitedSun = new BoolSetting("Unlimited Sun", true);
+            UnlimitedSun = new BoolSetting("Unlimited Money", true);
             Settings.Add(UnlimitedSun);
 
             sunSetting = new IntSetting("Money Amount", 0, 99999, 99999);
@@ -158,7 +158,7 @@ namespace Magnetar_Client.Modules
             {
                 if (originalMoneyAmount > 0 && preserveOriginalSetting.Value)
                 {
-                    board.theSun = originalMoneyAmount;
+                    board.theMoney = originalMoneyAmount;
                     originalMoneyAmount = -853721;
                 }
             }
@@ -179,14 +179,14 @@ namespace Magnetar_Client.Modules
 
             else if (MoneyMultiplier.Value)
             {
-                int Sun = board.theMoney;
+                int Money = board.theMoney;
 
-                if (_moneyAmount == -947624 || Sun == moneySetting.Value) _moneyAmount = Sun;
+                if (_moneyAmount == -947624 || Money == moneySetting.Value) _moneyAmount = Money;
 
-                if (Sun != _moneyAmount)
+                if (Money != _moneyAmount)
                 {
-                    if ((Sun - _moneyAmount) > 0)
-                        board.theMoney += (int)((Sun - _moneyAmount) * (moneyMultiplierSetting.Value - 1));
+                    if ((Money - _moneyAmount) > 0)
+                        board.theMoney += (int)((Money - _moneyAmount) * (moneyMultiplierSetting.Value - 1));
 
                     _moneyAmount = board.theMoney;
 

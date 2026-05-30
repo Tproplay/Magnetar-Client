@@ -53,9 +53,9 @@ namespace Magnetar_Client.Modules
         {
             [HarmonyPatch(nameof(CreateBullet.SetBullet))]
             [HarmonyPrefix]
-            public static void SetBulletPrefix(ref BulletType theBulletType,ref BulletMoveWay theMovingWay)
+            public static void SetBulletPrefix(ref BulletType theBulletType,ref BulletMoveWay theMovingWay, bool fromEnermy = false)
             {
-                if (instance == null || !instance.Active) return;
+                if (instance == null || !instance.Active || fromEnermy) return;
                 if (!instance.selectedBulletsSetting.IsSelected((int)theBulletType)) return;
 
                 theMovingWay = BulletMoveWay.Track;

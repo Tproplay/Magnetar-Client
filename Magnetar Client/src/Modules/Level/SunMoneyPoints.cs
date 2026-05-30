@@ -36,16 +36,16 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
-            UnlimitedSun = new BoolSetting("Unlimited Money", true);
+            UnlimitedSun = new BoolSetting("Unlimited Sun", true);
             Settings.Add(UnlimitedSun);
 
-            sunSetting = new IntSetting("Money Amount", 0, 99999, 99999);
+            sunSetting = new IntSetting("Sun Amount", 0, 99999, 99999);
             Settings.Add(sunSetting);
 
             preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
 
-            SunMultipier = new BoolSetting("Money Multiplier", false);
+            SunMultipier = new BoolSetting("Sun Multiplier", false);
             Settings.Add(SunMultipier);
 
             sunMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);

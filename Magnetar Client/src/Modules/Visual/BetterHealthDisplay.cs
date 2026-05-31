@@ -16,7 +16,7 @@ namespace Magnetar_Client.Modules
             " shorthealth healthform shorthp clearhp healthconverter texthp hpconverter shorttext healthui hpui hpvisual healthvisual " +
             "betterhp displayhealth healthshortener hp-display health-display texthp health-txt hptxt healthtxt";
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
 
         public override bool Active { get; set; } = true; // On by default
 

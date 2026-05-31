@@ -10,7 +10,7 @@ namespace Magnetar_Client.Modules
         public override string SearchHints { get; set; } = "fpslimit fpscap limitfps framespersecond fpsbreaker unlockfps capfps customfps " +
             "maxfps fpsfix fpsunlocked framecap framepersecond fpslimiter fpxlimit fpaslimit fps-limit fpsbypass bypassfps nofpslimit " +
             "unlimitedfps fpsset setfps fps-cap morefps fpsboost lagfix frameslimit";
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
 
         // Mod Data
 

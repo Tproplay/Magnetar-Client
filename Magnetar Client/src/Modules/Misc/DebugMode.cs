@@ -8,7 +8,7 @@ namespace Magnetar_Client.Modules
     public class DebugMode : Module
     {
         // Mod Info
-        public override string Name { get; set; } = "Debug Mode";
+        public override string Name { get; set; } = "Debug Mode (for devs)";
         public override string Description { get; set; } = "Logs debug info onto the console.";
         public override string SearchHints { get; set; } = "debugmode debuginfo consolelog loginfo debuglog " +
             "debugconsole logger debugshow debugdata logs debugtools debugconsolelog devlog devmode debugprint " +

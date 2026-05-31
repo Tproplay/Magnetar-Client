@@ -114,6 +114,7 @@
     <Compile Include="src\Modules\Level\UltimitedModifierReroll.cs" />
     <Compile Include="src\Modules\Misc\AutoCollect.cs" />
     <Compile Include="src\Modules\Misc\BetterHealthDisplay.cs" />
+    <Compile Include="src\Modules\Misc\DebugMode.cs" />
     <Compile Include="src\Modules\Misc\FPSLimit.cs" />
     <Compile Include="src\Modules\Plants\BanPlant.cs" />
     <Compile Include="src\Modules\Plants\GodMode.cs" />

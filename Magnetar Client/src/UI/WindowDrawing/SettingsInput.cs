@@ -21,6 +21,8 @@ namespace Magnetar_Client.UI.WindowDrawing
             int myId = setting.GetHashCode();
             int decPlaces = 0;
 
+            int intMin = 0, intMax = 0;
+
             if (isFloat)
             {
                 var s = (FloatSetting)setting;
@@ -37,6 +39,10 @@ namespace Magnetar_Client.UI.WindowDrawing
                 min = (float)s.Min;
                 max = (float)s.Max;
                 name = s.Name;
+
+                // Cache the true integer bounds
+                intMin = s.Min;
+                intMax = s.Max;
             }
 
             string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
@@ -75,8 +81,6 @@ namespace Magnetar_Client.UI.WindowDrawing
             if (e.type == EventType.ScrollWheel && (sliderHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition)))
             {
                 float scrollDirection = Mathf.Sign(e.delta.y);
-
-                // Move the slider by 4% per scroll wheel "tick".
                 float scrollStep = 0.04f;
                 float newPercentage = Mathf.Clamp01(percentage + (scrollDirection * scrollStep));
 
@@ -99,12 +103,12 @@ namespace Magnetar_Client.UI.WindowDrawing
                 else
                 {
                     int currentVal = ((IntSetting)setting).Value;
-                    int finalVal = (int)Mathf.Clamp(newVal, min, max);
 
-                    // If the 4% step was too small to bypass integer truncation, force a step of 1
+                    int finalVal = (int)System.Math.Max(intMin, System.Math.Min((long)newVal, intMax));
+
                     if (finalVal == currentVal && scrollDirection != 0)
                     {
-                        finalVal = (int)Mathf.Clamp(currentVal + scrollDirection, min, max);
+                        finalVal = (int)System.Math.Max(intMin, System.Math.Min((long)currentVal + (long)scrollDirection, intMax));
                     }
 
                     ((IntSetting)setting).Value = finalVal;
@@ -128,11 +132,10 @@ namespace Magnetar_Client.UI.WindowDrawing
                 else if (e.character != '\0' && (char.IsDigit(e.character) || e.character == '.' || e.character == '-'))
                     currentInputBuffer += e.character;
 
-                if (float.TryParse(currentInputBuffer, out float parsed))
+                if (double.TryParse(currentInputBuffer, out double parsed))
                 {
-                    float final = Mathf.Clamp(parsed, min, max);
-                    if (isFloat) ((FloatSetting)setting).Value = final;
-                    else ((IntSetting)setting).Value = (int)final;
+                    if (isFloat) ((FloatSetting)setting).Value = Mathf.Clamp((float)parsed, min, max);
+                    else ((IntSetting)setting).Value = (int)System.Math.Max(intMin, System.Math.Min((long)parsed, intMax));
                 }
 
                 if (e.keyCode == KeyCode.Escape || e.keyCode == KeyCode.Return) focusedControlId = -1;
@@ -159,8 +162,14 @@ namespace Magnetar_Client.UI.WindowDrawing
                     float newLogVal = logMin + (mousePct * (logMax - logMin));
                     float newVal = ExpConvert(newLogVal);
 
-                    if (isFloat) ((FloatSetting)setting).Value = (float)System.Math.Round(Mathf.Clamp(newVal, min, max), decPlaces);
-                    else ((IntSetting)setting).Value = (int)Mathf.Clamp(newVal, min, max);
+                    if (isFloat)
+                    {
+                        ((FloatSetting)setting).Value = (float)System.Math.Round(Mathf.Clamp(newVal, min, max), decPlaces);
+                    }
+                    else
+                    {
+                        ((IntSetting)setting).Value = (int)System.Math.Max(intMin, System.Math.Min((long)newVal, intMax));
+                    }
 
                     e.Use();
                 }
@@ -171,7 +180,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                 }
             }
         }
-
         public static void HandleBindSetting(BindSetting bSet, ref float y, float width)
         {
             Event e = Event.current;

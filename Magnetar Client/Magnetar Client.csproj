@@ -111,6 +111,7 @@
     <Compile Include="src\Modules\Level\NoGridItems.cs" />
     <Compile Include="src\Modules\Level\NoLose.cs" />
     <Compile Include="src\Modules\Level\Buttons.cs" />
+    <Compile Include="src\Modules\Level\NoCap.cs" />
     <Compile Include="src\Modules\Level\UltimitedModifierReroll.cs" />
     <Compile Include="src\Modules\Misc\AutoCollect.cs" />
     <Compile Include="src\Modules\Visual\BetterHealthDisplay.cs" />

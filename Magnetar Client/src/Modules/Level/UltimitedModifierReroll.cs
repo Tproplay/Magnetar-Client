@@ -20,6 +20,7 @@ namespace Magnetar_Client.Modules
 
         public static UnlimitedModifierReroll instance;
         public static MultipleChoiceMenu multipleChoiceMenu;
+        public static TravelRefresh travelRefresh;
 
         public IntSetting rerollCount;
         private int originalRerollCount = -1;
@@ -42,16 +43,31 @@ namespace Magnetar_Client.Modules
 
         public override void OnUpdateActive()
         {
-            if (multipleChoiceMenu == null) return;
-
-            if (originalRerollCount == -1)
+            if (multipleChoiceMenu != null)
             {
-                originalRerollCount = multipleChoiceMenu.refreshCount;
+                if (originalRerollCount == -1)
+                {
+                    originalRerollCount = multipleChoiceMenu.refreshCount;
+                }
+
+                if (multipleChoiceMenu.refreshCount != rerollCount.Value - 1)
+                {
+                    multipleChoiceMenu.refreshCount = rerollCount.Value;
+                }
             }
 
-            if (multipleChoiceMenu.refreshCount != rerollCount.Value-1)
+            if (travelRefresh != null)
             {
-                multipleChoiceMenu.refreshCount = rerollCount.Value;
+
+                if (originalRerollCount == -1)
+                {
+                    originalRerollCount = travelRefresh.refreshTimes;
+                }
+
+                if (travelRefresh.refreshTimes != rerollCount.Value)
+                {
+                    travelRefresh.SetRefrashTimes(rerollCount.Value);
+                }
             }
 
         }
@@ -100,6 +116,28 @@ namespace Magnetar_Client.Modules
                 refreshCount = instance.rerollCount.Value;
             }
 
+        }
+
+        [HarmonyPatch(typeof(TravelRefresh))]
+        public static class TravelRefreshPatch
+        {
+            [HarmonyPatch(nameof(TravelRefresh.Awake))]
+            [HarmonyPostfix]
+            public static void RefreshPostfix(TravelRefresh __instance)
+            {
+                travelRefresh = __instance;
+            }
+
+            [HarmonyPatch(nameof(TravelRefresh.ModifyRefrashTimes))]
+            [HarmonyPrefix]
+            public static bool ModifyRefreshTimesPrefix()
+            {
+                if (instance != null && instance.Active)
+                {
+                    return false;
+                }
+                return true;
+            }
         }
     }
 }

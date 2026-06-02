@@ -34,13 +34,13 @@ namespace Magnetar_Client.Utils
                         EnvironmentVariableTarget.Process);
                 }
 #if DEBUG
-                DebugLogger.Msg($"Successfully linked Discord library at: {userLibsPath}");
+                DebugLogger.Msg($"[Discord RPC] Successfully linked Discord library at: {userLibsPath}");
 #endif
             }
             catch (Exception ex)
             {
 #if DEBUG
-                DebugLogger.Error($"Failed to set Environment PATH: {ex.Message}");
+                DebugLogger.Error($"[Discord RPC] Failed to set Environment PATH: {ex.Message}");
 #endif
             }
             

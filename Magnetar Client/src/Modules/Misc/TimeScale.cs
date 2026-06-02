@@ -51,7 +51,7 @@ namespace Magnetar_Client.Modules
         [HarmonyPatch(typeof(SlowTrigger),nameof(SlowTrigger.Clicking))]
         public static bool SlowTriggerPatch()
         {
-            if (Instance == null) return true; ;
+            if (Instance == null) return true;
             return !Instance.Active;
         }
     }

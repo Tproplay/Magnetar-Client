@@ -54,13 +54,13 @@ namespace Magnetar_Client.Modules
             if (wasAlreadyEnabled != null) return;
 
 #if DEBUG
-            if (DebugMode.Value) DebugLogger.Msg("Triggered Multiplant Enable");
+            if (DebugMode.Value) DebugLogger.Msg("[Column Planting] Triggered Multiplant Enable");
 #endif
 
             wasAlreadyEnabled = board.boardTag.isColumn ? "Yes" : "No";
 
 #if DEBUG
-            if (DebugMode.Value) DebugLogger.Msg("Level was found to have boardtag.isColumn" + wasAlreadyEnabled);
+            if (DebugMode.Value) DebugLogger.Msg("[Column Planting] Level was found to have boardtag.isColumn" + wasAlreadyEnabled);
 #endif
 
             Board.BoardTag boardTags = board.boardTag;
@@ -68,7 +68,7 @@ namespace Magnetar_Client.Modules
 
             board.boardTag = boardTags;
 #if DEBUG
-            if (board.boardTag.isColumn) DebugLogger.Msg("Successfully Enabled Multiplanting");
+            if (board.boardTag.isColumn) DebugLogger.Msg("[Column Planting] Successfully Enabled Multiplanting");
 #endif
         }
 

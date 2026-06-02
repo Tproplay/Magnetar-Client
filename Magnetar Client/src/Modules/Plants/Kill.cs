@@ -43,7 +43,6 @@ namespace Magnetar_Client.Modules
                 plantNameOverriden[name.Key] = $"{plantNameOverriden[name.Key]} ({name.Key})";
             }
 
-            // Use Il2CppType.Of to satisfy the Il2CppSystem.Type requirement in the constructor
             PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
             {
                 MaxSelection = -1,

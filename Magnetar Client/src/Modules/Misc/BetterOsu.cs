@@ -90,6 +90,14 @@ namespace Magnetar_Client.Modules
         public int SpawnedPets = 0;
 
         // Mod Logic
+
+        public void ResetData()
+        {
+            originalDamage.Clear();
+            currentCombo = 0;
+            SpawnedPets = 0;
+        }
+
         public override void OnUpdateActive()
         {
             RhythmGameManager rhythmGameManager = RhythmGameManager.Instance;
@@ -98,24 +106,20 @@ namespace Magnetar_Client.Modules
             {
                 if (originalDamage.Count == 0 && currentCombo == 0 && SpawnedPets == 0) return;
 
-                originalDamage.Clear();
-                currentCombo = 0;
-                SpawnedPets = 0;
+                ResetData();
 #if DEBUG
                 if (DebugMode.Value)
-                    DebugLogger.Msg("Better Osu: Reset");
+                    DebugLogger.Msg("[Better Osu] Reset");
 #endif
                 return;
             }
 
             if (rhythmGameManager.CurrentTime == 0)
             {
-                originalDamage.Clear();
-                currentCombo = 0;
-                SpawnedPets = 0;
+                ResetData();
 #if DEBUG
                 if (DebugMode.Value)
-                    DebugLogger.Msg("Better Osu: Reset");
+                    DebugLogger.Msg("[Better Osu] Reset");
 #endif
                 return;
 
@@ -130,10 +134,8 @@ namespace Magnetar_Client.Modules
                     Vector2 centerWorldPos = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.nearClipPlane));
                     MiniPet pet = MiniPet.SetPet(board, centerWorldPos, (PetType)PetTypeSetting.SelectedValues.First());
                     SpawnedPets++;
-#if DEBUG
-                    if (DebugMode.Value)
-                        DebugLogger.Msg("Better Osu: Spawned Pet");
-#endif
+
+                    DebugLogger.Msg("[Better Osu] Spawned Pet");
                 }
             }
 
@@ -147,23 +149,20 @@ namespace Magnetar_Client.Modules
                     SpawnedPets--;
 #if DEBUG
                     if (DebugMode.Value)
-                        DebugLogger.Msg("Better Osu: Removed Pet");
+                        DebugLogger.Msg("[Better Osu] Removed Pet");
 #endif
                 }
             }
 
             // Bullet Damage
             currentCombo = rhythmGameManager.comboManager.currentCombo;
-            DamageBuff = (float)currentCombo / (float)instance.BulletsDamageIncreaseSetting.Value;
+            DamageBuff = (float)currentCombo / instance.BulletsDamageIncreaseSetting.Value;
 
 
         }
 
         public override void OnDisable()
         {
-            currentCombo = 0;
-            originalDamage.Clear();
-
             if (SpawnedPets > 0)
             {
                 MiniPet pet = GameObject.FindObjectOfType<MiniPet>();
@@ -172,14 +171,16 @@ namespace Magnetar_Client.Modules
                 SpawnedPets--;
 #if DEBUG
                 if (DebugMode.Value)
-                    DebugLogger.Msg("Better Osu: Removed Pet");
+                    DebugLogger.Msg("[Better Osu] Removed Pet");
 #endif
             }
 
+            ResetData();
 #if DEBUG
             if (DebugMode.Value)
-            DebugLogger.Msg("Better Osu: Reset");
+            DebugLogger.Msg("[Better Osu] Reset");
 #endif
+            
         }
 
         static Dictionary<Bullet, int> originalDamage = new Dictionary<Bullet, int>();
@@ -249,7 +250,7 @@ namespace Magnetar_Client.Modules
                 }
 #if DEBUG
                 if (instance.DebugMode.Value)
-                    DebugLogger.Msg($"Spawned Bullet: {newType.ToString()} ({(int)newType}");
+                    DebugLogger.Msg($"[Better Osu] Spawned Bullet: {newType.ToString()} ({(int)newType}");
 #endif
                 if (instance.selectBulletsSetting.IsSelected((int)newType))
                     theBulletType = newType;
@@ -264,12 +265,10 @@ namespace Magnetar_Client.Modules
             public static void AwakePatch()
             {
                 if (instance == null) return;
-                instance.SpawnedPets = 0;
-                instance.currentCombo = 0;
-                originalDamage.Clear();
+                instance.ResetData();
 #if DEBUG
                 if (instance.DebugMode.Value)
-                    DebugLogger.Msg("Better Osu: Reset");
+                    DebugLogger.Msg("[Better Osu] Reset");
 #endif
             }
 
@@ -278,13 +277,11 @@ namespace Magnetar_Client.Modules
             public static void OnDestroyPatch()
             {
                 if (instance == null) return;
-                instance.SpawnedPets = 0;
-                instance.currentCombo = 0;
-                originalDamage.Clear();
+                instance.ResetData();
 
 #if DEBUG
                 if (instance.DebugMode.Value)
-                    DebugLogger.Msg("Better Osu: Reset");
+                    DebugLogger.Msg("[Better Osu] Reset");
 #endif
             }
         }

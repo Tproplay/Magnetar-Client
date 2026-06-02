@@ -137,5 +137,18 @@ namespace Magnetar_Client.Modules
             }
         }
 
+        [HarmonyPatch(typeof(FallingNote))]
+        public static class FallingNotePatch
+        {
+            [HarmonyPatch(nameof(FallingNote.hasMissed),(MethodType.Setter))]
+            public static void HasMissedPatch(ref bool __bool)
+            {
+                if (instance == null || !instance.Active) return;
+                __bool = false;
+            }
+
+
+        }
+
     }
 }

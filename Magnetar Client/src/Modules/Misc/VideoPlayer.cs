@@ -101,7 +101,7 @@ namespace Magnetar_Client.Modules
 
             if (!File.Exists(path))
             {
-                Magnetar_Logger.DebugLogger.Msg("[Bad Apple] ERROR: bad_apple_frames.json not found in Mods folder!");
+                Magnetar_Logger.DebugLogger.Msg("[Video Player] ERROR: bad_apple_frames.json not found in Mods folder!");
                 Active = false;
                 return;
             }
@@ -110,11 +110,11 @@ namespace Magnetar_Client.Modules
             {
                 string json = File.ReadAllText(path);
                 frames = JsonConvert.DeserializeObject<List<List<List<int>>>>(json);
-                Magnetar_Logger.DebugLogger.Msg($"[Bad Apple] Successfully loaded {frames.Count} frames!");
+                Magnetar_Logger.DebugLogger.Msg($"[Video Player] Successfully loaded {frames.Count} frames!");
             }
             catch (Exception ex)
             {
-                Magnetar_Logger.DebugLogger.Msg($"[Bad Apple] JSON Parsing Error: {ex.Message}");
+                Magnetar_Logger.DebugLogger.Msg($"[Video Player] JSON Parsing Error: {ex.Message}");
                 Active = false;
                 return;
             }
@@ -183,7 +183,7 @@ namespace Magnetar_Client.Modules
 
                     catch (Exception e)
                     {
-                        MelonLoader.MelonLogger.Error($"[Bad Apple] Error Occured: {e}");
+                        MelonLoader.MelonLogger.Error($"[Video Player] Error Occured: {e}");
                     }
 
                     gridState[col, row] = pixel;

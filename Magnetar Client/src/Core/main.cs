@@ -2,6 +2,7 @@
 using UnityEngine;
 using HarmonyLib;
 using static Magnetar_Client.Utils.SaveLoad;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Core
 {
@@ -26,7 +27,7 @@ namespace Magnetar_Client.Core
 
             Load(); // Load Save to override default values
 
-            MelonLogger.Msg("Magnetar Client Loaded!");
+            DebugLogger.Msg("Magnetar Client Loaded!");
             
         }
 
@@ -34,7 +35,7 @@ namespace Magnetar_Client.Core
         public override void OnApplicationQuit()
         {
             Save(true);
-            MelonLogger.Msg("Magnetar Prefrences Saved!");
+            DebugLogger.Msg("Magnetar Prefrences Saved!");
         }
 
         // Do not configure this or it will Scale the GUI
@@ -43,7 +44,7 @@ namespace Magnetar_Client.Core
 
 
         
-        
+        bool hasWarmedUp = false;
 
         public override void OnGUI()
         {
@@ -54,6 +55,8 @@ namespace Magnetar_Client.Core
 
             // Render The HUDManager
             HUDManager.Render();
+
+            if (!hasWarmedUp) { WarmUp(); hasWarmedUp = true; DebugLogger.Msg("Warmed Up the Menu!"); }
 
             // If the menu is hidden, we stop here
             if (!Config.showgui) return;
@@ -72,7 +75,7 @@ namespace Magnetar_Client.Core
                 Event.current.Use();
                 Save();
 #if DEBUG
-                MelonLogger.Msg("Escape Triggerd : Modules Window -> None");
+                DebugLogger.Msg("Escape Triggerd : Modules Window -> None");
 #endif
             }
 
@@ -92,7 +95,7 @@ namespace Magnetar_Client.Core
                         m.ShowSettings = false;
                     }
 #if DEBUG
-                    MelonLogger.Msg("Escape Triggerd : Settings Window -> Modules Window");
+                    DebugLogger.Msg("Escape Triggerd : Settings Window -> Modules Window");
 #endif
                     Event.current.Use();
                 }
@@ -109,13 +112,20 @@ namespace Magnetar_Client.Core
 
                     Event.current.Use();
 #if DEBUG
-                    MelonLogger.Msg("Escape Triggerd : Selection Window -> Settings Window");
+                    DebugLogger.Msg("Escape Triggerd : Selection Window -> Settings Window");
 #endif
                 }
             }
 
             #endregion
         }
+
+        public static void WarmUp()
+        {
+            ModuleManager.Render();
+            NEFManager.Render();
+        }
+
 
         public override void OnUpdate()
         {
@@ -127,7 +137,7 @@ namespace Magnetar_Client.Core
                 Config.showgui = !Config.showgui;
                 Save();
 #if DEBUG
-                MelonLogger.Msg("RightShift Triggerd : Toggle GUI");
+                DebugLogger.Msg("RightShift Triggerd : Toggle GUI");
 #endif
             }
 

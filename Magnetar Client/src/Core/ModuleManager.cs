@@ -102,8 +102,6 @@ namespace Magnetar_Client.Core
 
         public static void Render()
         {
-            if (!Config.showgui) return;
-
             if (showModules)
             {
                 resetWindowPos = true;

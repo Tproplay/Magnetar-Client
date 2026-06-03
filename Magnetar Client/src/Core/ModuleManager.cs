@@ -297,7 +297,7 @@ namespace Magnetar_Client.Core
             {
                 showSettings = false;
                 showModules = true;
-                showSectionsGui = false;
+                showSelectionGui = false;
                 e.Use();
                 return;
             }

@@ -47,7 +47,8 @@ namespace Magnetar_Client.NEF
             {
                 if (NEFData.currentPyramidRoots.Count == 0)
                 {
-                    GUI.Label(new Rect(pyramidBoxRect.x + 10f, pyramidBoxRect.y + 10f, 400f, NEFManager.elementHeight), "Select an entity to view its recipes.");
+                    GUI.Label(new Rect(pyramidBoxRect.x + 10f, pyramidBoxRect.y + 10f, 400f, NEFManager.elementHeight),
+                        Translator.Translate("Select an entity to view its recipes."));
                 }
                 else
                 {
@@ -111,7 +112,7 @@ namespace Magnetar_Client.NEF
             float rx = rightPanelRect.x;
             float ry = rightPanelRect.y;
 
-            GUI.Label(new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight), "Search:");
+            GUI.Label(new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight), Translator.Translate("Search:"));
             string newQuery = Magnetar_Client.UI.WindowDrawing.DrawSetting.DrawManualTextField(new Rect(rx + 65f, ry, rightPanelWidth - 65f, NEFManager.elementHeight), searchQuery, "Search...");
 
             if (newQuery != searchQuery)
@@ -126,7 +127,7 @@ namespace Magnetar_Client.NEF
             Rect clearBtnRect = new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight);
             bool clearHover = clearBtnRect.Contains(e.mousePosition);
 
-            GUI.Box(clearBtnRect, "Clear Search", Magnetar_Default.ModuleOff);
+            GUI.Box(clearBtnRect, Translator.Translate("Clear Search"), Magnetar_Default.ModuleOff);
             GUI.backgroundColor = Color.white;
 
             if (clearHover && e.type == EventType.MouseDown && e.button == 0)
@@ -139,7 +140,9 @@ namespace Magnetar_Client.NEF
 
             ry += NEFManager.elementHeight + 15f;
 
-            GUI.Label(new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight), $"Results ({NEFData.searchResults.Count}) | L-Click: Recipe | R-Click: Usages");
+            GUI.Label(new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight),
+                Translator.Translate($"Results") + " ("+NEFData.searchResults.Count+ ") "+
+                Translator.Translate("| L-Click: Recipe | R-Click: Usages"));
             ry += NEFManager.elementHeight;
 
             float scrollHeight = rightPanelRect.height - (ry - rightPanelRect.y);
@@ -162,7 +165,7 @@ namespace Magnetar_Client.NEF
             GUI.BeginGroup(scrollRect);
             if (!PlantMixTreeManager.IsInitialized)
             {
-                GUI.Label(new Rect(5, 5, rightPanelWidth, 30), "Loading data...");
+                GUI.Label(new Rect(5, 5, rightPanelWidth, 30), Translator.Translate("Loading data..."));
             }
             else
             {
@@ -202,7 +205,12 @@ namespace Magnetar_Client.NEF
 
         private static void DrawUsagesView(Rect viewRect, Event e)
         {
-            GUI.Label(new Rect(viewRect.x + 10f, viewRect.y + 10f, viewRect.width - 150f, 30f), $"Fusions requiring: {NEFData.GetEntityName(NEFData.usageViewTarget)} ({NEFData.currentUsages.Count} found)");
+            GUI.Label(new Rect(viewRect.x + 10f, viewRect.y + 10f, viewRect.width - 150f, 30f), 
+                Translator.Translate(Translator.Translate("Fusions requiring:") + 
+                Translator.Translate($"{NEFData.GetEntityName(NEFData.usageViewTarget)}" + " (" + 
+                Translator.Translate($"{NEFData.currentUsages.Count}") + " " +
+                Translator.Translate(" found)")))
+                );
 
             Rect backBtnRect = new Rect(viewRect.x + viewRect.width - 110f, viewRect.y + 10f, 100f, 30f);
             if (backBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
@@ -211,12 +219,12 @@ namespace Magnetar_Client.NEF
                 e.Use();
             }
 
-            GUI.Box(backBtnRect, "Back to Tree", Magnetar_Default.ModuleOff);
+            GUI.Box(backBtnRect, Translator.Translate("Back to Tree"), Magnetar_Default.ModuleOff);
             GUI.backgroundColor = Color.white;
 
             if (NEFData.currentUsages.Count == 0)
             {
-                GUI.Label(new Rect(viewRect.x + 10f, viewRect.y + 50f, 400f, 30f), "This entity is not used as an ingredient in any fusion.");
+                GUI.Label(new Rect(viewRect.x + 10f, viewRect.y + 50f, 400f, 30f), Translator.Translate("This entity is not used as an ingredient in any fusion."));
                 return;
             }
 
@@ -339,7 +347,7 @@ namespace Magnetar_Client.NEF
         private static void DrawSquareNodeBox(Rect rect, RecipeEntity entity, float scale)
         {
             Magnetar_Default.NEFNodeStyle.fontSize = Mathf.Max(1, (int)(8f * scale));
-            string displayName = NEFData.GetEntityName(entity);
+            string displayName = Translator.Translate(NEFData.GetEntityName(entity));
             GUI.Box(rect, displayName, Magnetar_Default.NEFNodeStyle);
 
             Texture2D tex = entity.IsZombie

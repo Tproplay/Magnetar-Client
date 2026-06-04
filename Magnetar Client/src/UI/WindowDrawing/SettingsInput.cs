@@ -518,8 +518,8 @@ namespace Magnetar_Client.UI.WindowDrawing
                             e.Use();
                         }
 
-                        // Draw the Box
-                        GUI.Box(rowRect, Translator.Translate(name), activeMultiSelect.IsSelected(intVal) ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
+                        // Draw the Box, Names are stored pre translated
+                        GUI.Box(rowRect, name, activeMultiSelect.IsSelected(intVal) ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
                     }
                     currentY += ROW_HEIGHT + 1;
                 }

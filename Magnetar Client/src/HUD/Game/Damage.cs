@@ -4,6 +4,7 @@ using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.UI.Themes.Magnetar_Default;
 using static Magnetar_Client.Utils.Maths;
 using static Magnetar_Client.Game.AppData;
+using Magnetar_Client.Utils;
 
 namespace Magnetar_Client.HUDElements
 {

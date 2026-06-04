@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using Magnetar_Client.Utils;
 
 namespace Magnetar_Client.Core
 {
@@ -75,7 +76,7 @@ namespace Magnetar_Client.Core
                         2001,
                         selectorRect,
                         (GUI.WindowFunction)DrawElementSelector,
-                        "Select HUD Elements",
+                        Translator.Translate("Select HUD Elements"),
                         Magnetar_Default.ModuleWindow
                     );
                 }
@@ -85,7 +86,7 @@ namespace Magnetar_Client.Core
                         2000,
                         windowRect,
                         (GUI.WindowFunction)DrawHUDControls,
-                        "Customize HUD",
+                        Translator.Translate("Customize HUD"),
                         Magnetar_Default.ModuleWindow
                     );
                 }
@@ -123,7 +124,7 @@ namespace Magnetar_Client.Core
 
             // 1. SELECT ELEMENTS BUTTON
             int activeCount = HUDRenderer.HudToggles != null ? HUDRenderer.HudToggles.SelectedValues.Count : 0;
-            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), $"Elements ({activeCount})");
+            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Elements")+$" ({activeCount})");
 
             Rect selectBtnRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
 
@@ -144,13 +145,13 @@ namespace Magnetar_Client.Core
                 isSelectingElements = true;
             }
 
-            GUI.Box(selectBtnRect, "Select", Magnetar_Default.ModuleOff);
+            GUI.Box(selectBtnRect, Translator.Translate("Select"), Magnetar_Default.ModuleOff);
             GUI.backgroundColor = Color.white;
 
             y += elementHeight + 5;
 
             // 2. CONFIGURE HUDManager
-            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), "Layout");
+            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Layout"));
 
             Rect configBtnRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
 
@@ -168,18 +169,19 @@ namespace Magnetar_Client.Core
 #endif
             }
 
-            GUI.Box(configBtnRect, "Edit", Magnetar_Default.ModuleOff);
+            GUI.Box(configBtnRect, Translator.Translate("Edit"), Magnetar_Default.ModuleOff);
             GUI.backgroundColor = Color.white;
 
             y += elementHeight + 5;
 
             // 3. SHOW BACKGROUND TOGGLE
-            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), "Background");
+            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Background"));
             Rect bgRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
             bool bgHover = bgRect.Contains(e.mousePosition);
 
             if (bgHover) GUI.backgroundColor = Magnetar_Default.AccentColor;
-            GUI.Box(bgRect, showBackground ? "ON" : "OFF", showBackground ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
+            GUI.Box(bgRect, showBackground ? Translator.Translate("ON") : Translator.Translate("OFF"),
+                showBackground ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
             GUI.backgroundColor = Color.white;
 
             if (bgHover && e.type == EventType.MouseDown && e.button == 0)
@@ -190,12 +192,12 @@ namespace Magnetar_Client.Core
 
             y += elementHeight + 5;
             // 4. ENABLED TOGGLE
-            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), "Enabled");
+            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Enabled"));
             Rect enabledRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
             bool enabledHover = enabledRect.Contains(e.mousePosition);
 
             if (enabledHover) GUI.backgroundColor = Magnetar_Default.AccentColor;
-            GUI.Box(enabledRect, Enabled ? "ON" : "OFF", Enabled ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
+            GUI.Box(enabledRect, Enabled ? Translator.Translate("ON") : Translator.Translate("OFF"), Enabled ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
             GUI.backgroundColor = Color.white;
 
             if (enabledHover && e.type == EventType.MouseDown && e.button == 0)
@@ -219,14 +221,23 @@ namespace Magnetar_Client.Core
                 e = null;
             }
         }
+
+        public static void OnLanguageChange()
+        {
+            for (int i=0; i<HUDRenderer.TranslatedElements.Count; i++)
+            {
+                HUDRenderer.Elements[i].Name = Translator.Translate(HUDRenderer.TranslatedElements[i].Name);
+            }
+        }
     }
 
     public static class HUDRenderer
     {
+        public static List<HudElement> Elements = new List<HudElement>();
         /// <summary>
         /// Gets the collection of HUD elements currently managed by the client.
         /// </summary>
-        public static List<HudElement> Elements = new List<HudElement>();
+        public static List<HudElement> TranslatedElements = new List<HudElement>();
 
         /// <summary>
         /// Gets or sets the collection of HUD toggle options available/Selected.
@@ -257,6 +268,7 @@ namespace Magnetar_Client.Core
         public static void RegisterElement(HudElement element)
         {
             Elements.Add(element);
+            TranslatedElements.Add(element);
             HudToggles.AddOption(element.WindowId, element.Name);
         }
 

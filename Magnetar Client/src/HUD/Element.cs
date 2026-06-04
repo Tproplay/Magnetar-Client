@@ -8,7 +8,7 @@ namespace Magnetar_Client.HUDElements
     public abstract class HudElement
     {
         private bool _isCurrentlyEnabled = false;
-        public string Name { get; private set; }
+        public string Name { get; set; }
         public Rect Bounds;
         public int WindowId { get; set; }
 

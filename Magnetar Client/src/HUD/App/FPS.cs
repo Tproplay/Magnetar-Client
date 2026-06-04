@@ -1,5 +1,6 @@
 ﻿using static Magnetar_Client.UI.Themes.Magnetar_Default;
 using UnityEngine;
+using Magnetar_Client.Utils;
 namespace Magnetar_Client.HUDElements
 {
 

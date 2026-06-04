@@ -1,6 +1,8 @@
 ﻿using Il2CppSystem;
+using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Magnetar_Client.Modules
@@ -81,8 +83,19 @@ namespace Magnetar_Client.Modules
         /// <summary>
         /// Runs When a the mod's language is changed
         /// </summary>
-        public virtual void OnLanguageChanged()
+        public virtual void OnLanguageChanged() { }
+
+        public static Dictionary<int,string> TranslatedNames(System.Type enumType)
         {
+            var names = Translator.TranslateEnum(enumType);
+
+            foreach(var name in names)
+            {
+                names[name.Key] = name.Value + $" ({name.Key})";
+            }
+
+            return names;
+
         }
     }
 

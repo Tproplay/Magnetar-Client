@@ -2,7 +2,8 @@
 using Magnetar_Client.UI.Themes;
 using System.Linq;
 using UnityEngine;
-
+using System.IO;
+using Magnetar_Client.Utils;
 namespace Magnetar_Client.Core
 {
     public static class GUIManager
@@ -25,15 +26,25 @@ namespace Magnetar_Client.Core
             LanguageSetting = new MultiSelectSetting("Language")
             {
                 MaxSelection = 1,
-                Options = new System.Collections.Generic.Dictionary<int, string>
-                {
-                    {0,"English" },
-                    {1,"Vietnamese" }
-                }
+                Options = new System.Collections.Generic.Dictionary<int, string>()
+                
             };
 
-            // Default to English
-            LanguageSetting.SelectedValues.Add(0);
+            string path = Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "Magnetar Translation");
+
+            var lanuages = System.IO.Directory.GetDirectories(path);
+
+            var i = 0;
+
+            foreach ( var language in lanuages)
+            {
+                string _language = Path.GetFileName(language);
+
+                LanguageSetting.AddOption(i, _language);
+                // Default to english
+                if (_language == "English") LanguageSetting.SelectedValues.Add(i);
+                i++;
+            }
         }
 
         public static void Render()
@@ -56,7 +67,7 @@ namespace Magnetar_Client.Core
                     4001,
                     selectorRect,
                     (GUI.WindowFunction)DrawLanguageSelector,
-                    "Select Language",
+                    Translator.Translate("Select Language"),
                     Magnetar_Default.ModuleWindow
                 );
             }
@@ -66,7 +77,7 @@ namespace Magnetar_Client.Core
                     4000,
                     windowRect,
                     (GUI.WindowFunction)DrawGUIControls,
-                    "GUI Configuration",
+                    Translator.Translate("GUI Configuration"),
                     Magnetar_Default.ModuleWindow
                 );
             }
@@ -124,6 +135,8 @@ namespace Magnetar_Client.Core
                         mod.OnLanguageChanged();
                     }
                 }
+
+                HUDManager.OnLanguageChange();
             }
 
             GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), $"Language: {currentLangName}");

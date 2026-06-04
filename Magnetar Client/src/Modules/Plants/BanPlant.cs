@@ -28,16 +28,9 @@ namespace Magnetar_Client.Modules
         { 
             instance = this;
 
-            var namesOverridden = Translator.TranslateEnum(typeof(PlantType));
-
-            foreach (var name in namesOverridden)
-            {
-                namesOverridden[name.Key] = $"{name.Value} ({name.Key})"; 
-            }
-
             selectedPlants = new MultiSelectSetting("Entities", typeof(PlantType))
             {
-                CustomNames = namesOverridden,
+                CustomNames = TranslatedNames(typeof(PlantType)),
                 Blacklist = new HashSet<int> {
                     (int)PlantType.Nothing,
                     257,258,259,260,261,262,263,264,265,266,267,268,
@@ -51,14 +44,7 @@ namespace Magnetar_Client.Modules
 
         public override void OnLanguageChanged()
         {
-            var namesOverridden = Translator.TranslateEnum(typeof(PlantType));
-
-            foreach (var name in namesOverridden)
-            {
-                namesOverridden[name.Key] = $"{name.Value} ({name.Key})";
-            }
-
-            selectedPlants.CustomNames = namesOverridden;
+            selectedPlants.CustomNames = TranslatedNames(typeof(PlantType));
         }
 
         // Mod Logic

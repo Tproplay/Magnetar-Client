@@ -42,6 +42,18 @@ namespace Magnetar_Client.Modules
             AddSettings(ConveyorPlantsSetting);
         }
 
+        public override void OnLanguageChanged()
+        {
+            var PlantNamesOverridden = TranslateEnum(typeof(PlantType));
+
+            foreach (var name in PlantNamesOverridden)
+            {
+                PlantNamesOverridden[name.Key] = $"{PlantNamesOverridden[name.Key]} ({name.Key})";
+            }
+
+            ConveyorPlantsSetting.CustomNames = PlantNamesOverridden;
+        }
+
         [HarmonyPatch(typeof(ConveyManager))]
         public static class ConveyBeltMgrPatch
         {

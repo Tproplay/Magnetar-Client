@@ -237,7 +237,7 @@ namespace Magnetar_Client.Core
         {
             HudToggles = new MultiSelectSetting("Active HUDManager Elements");
                 
-            int currentWindowId = 3000;
+            int currentWindowId = 4000;
 
             var types = Assembly.GetExecutingAssembly().GetTypes()
                 .Where(t => t.IsSubclassOf(typeof(HudElement)) && !t.IsAbstract);

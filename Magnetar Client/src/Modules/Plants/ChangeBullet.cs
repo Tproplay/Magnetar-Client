@@ -53,6 +53,17 @@ namespace Magnetar_Client.Modules
 
         }
 
+        public override void OnLanguageChanged()
+        {
+            var overridenNames = Translator.TranslateEnum(typeof(BulletType));
+
+            foreach (var name in overridenNames)
+            {
+                overridenNames[name.Key] = $"{name.Value} ({name.Key})";
+            }
+
+            selectBulletsSetting.CustomNames = overridenNames;
+        }
 
         // Mod Logic
 

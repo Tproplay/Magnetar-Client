@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
@@ -18,6 +19,7 @@ namespace Magnetar_Client.Utils
         {
             public bool ShowGui = false;
             public bool DimBg = true;
+            public int Language;
 
             public bool HudEnabled = true;
             public bool ShowBackground = false;
@@ -89,7 +91,8 @@ namespace Magnetar_Client.Utils
                 SelectedHudElements = new List<int>(HUDRenderer.HudToggles.SelectedValues),
                 HudPositions = new Dictionary<string, SimpleRect>(),
                 CategoryPositions = new Dictionary<string, SimpleRect>(),
-                Modules = new Dictionary<string, ModuleSaveData>()
+                Modules = new Dictionary<string, ModuleSaveData>(),
+                Language = GUIManager.LanguageSetting.SelectedValues.First(),
             };
 
             foreach (var element in HUDRenderer.Elements)
@@ -126,7 +129,7 @@ namespace Magnetar_Client.Utils
             File.WriteAllText(Path, JsonConvert.SerializeObject(data, Formatting.Indented));
 
             // ==========================================
-            // 2. SAVE TEXTURE LOADER DATA (WITH LIVE MERGE)
+            // 2. SAVE TEXTURE LOADER DATA
             // ==========================================
             try
             {
@@ -142,7 +145,7 @@ namespace Magnetar_Client.Utils
                             if (existingData.PlantTextureOverrides != null)
                             {
                                 foreach (var kvp in existingData.PlantTextureOverrides)
-                                    TextureLoader.PlantTextureOverrides[kvp.Key] = kvp.Value; // Manual edits overwrite memory
+                                    TextureLoader.PlantTextureOverrides[kvp.Key] = kvp.Value;
                             }
                             if (existingData.ZombieTextureOverrides != null)
                             {
@@ -151,7 +154,7 @@ namespace Magnetar_Client.Utils
                             }
                         }
                     }
-                    catch (Exception) { /* Avoid crash if JSON structural typos exist during editing */ }
+                    catch (Exception e) { TranslatorLogger.Error("Failed to read Texture Data: " + e);  }
                 }
 
                 TextureSaveData texData = new TextureSaveData
@@ -186,6 +189,8 @@ namespace Magnetar_Client.Utils
                     {
                         Config.showgui = data.ShowGui;
                         Config.dimBg = data.DimBg;
+                        GUIManager.LanguageSetting.Deselect(0);
+                        GUIManager.LanguageSetting.Select(data.Language);
 
                         foreach (var entry in data.CategoryPositions)
                         {

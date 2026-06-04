@@ -56,6 +56,17 @@ namespace Magnetar_Client.Modules
             Settings.Add(theSpeedSettig);
         }
 
+        public override void OnLanguageChanged()
+        {
+            var zombieNameOverriden = Translator.TranslateEnum(typeof(ZombieType));
+
+            foreach (var key in new List<int>(zombieNameOverriden.Keys))
+            {
+                zombieNameOverriden[key] = $"{zombieNameOverriden[key]} ({key})";
+            }
+            ZombieSelectedSetting.CustomNames = zombieNameOverriden;
+        }
+
         // Mod Logic
         public override void OnUpdateActive()
         {

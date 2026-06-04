@@ -1,8 +1,9 @@
-﻿using Il2Cpp;
+﻿using HarmonyLib;
+using Il2Cpp;
 using Magnetar_Client.Utils;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
-using HarmonyLib;
 
 namespace Magnetar_Client.Modules
 {
@@ -29,13 +30,35 @@ namespace Magnetar_Client.Modules
 
             var namesOverridden = Translator.TranslateEnum(typeof(PlantType));
 
+            foreach (var name in namesOverridden)
+            {
+                namesOverridden[name.Key] = $"{name.Value} ({name.Key})"; 
+            }
+
             selectedPlants = new MultiSelectSetting("Entities", typeof(PlantType))
             {
                 CustomNames = namesOverridden,
+                Blacklist = new HashSet<int> {
+                    (int)PlantType.Nothing,
+                    257,258,259,260,261,262,263,264,265,266,267,268,
+                    246,247,
+                }
             };
 
             Settings.Add(selectedPlants);
 
+        }
+
+        public override void OnLanguageChanged()
+        {
+            var namesOverridden = Translator.TranslateEnum(typeof(PlantType));
+
+            foreach (var name in namesOverridden)
+            {
+                namesOverridden[name.Key] = $"{name.Value} ({name.Key})";
+            }
+
+            selectedPlants.CustomNames = namesOverridden;
         }
 
         // Mod Logic

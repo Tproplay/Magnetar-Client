@@ -49,27 +49,35 @@ namespace Magnetar_Client.Modules
             BulletsDamageIncreaseSetting = new IntSetting("Increase Damage", 1, 500,50);
             
             HelperPetSetting = new BoolSetting("Spawn Helper Pet", false);
-            
+
+            var namesPets = Translator.TranslateEnum(typeof(PetType));
+
+            foreach (var name in namesPets)
+            {
+                namesPets[name.Key] = $"{name.Value} ({name.Key})";
+            }
+
             PetTypeSetting = new MultiSelectSetting("Pet Type", typeof(PetType))
             {
-                MaxSelection = 1
+                MaxSelection = 1,
+                CustomNames = namesPets
             };
             PetTypeSetting.Select((int)PetType.PetSnowBoss);
 
             RandomBulletSetting = new BoolSetting("Random Bullets", RandomBullet);
 
-            var NamesOverridden = Translator.TranslateEnum(typeof(BulletType));
+            var bulletNames = Translator.TranslateEnum(typeof(BulletType));
 
-            foreach (var name in NamesOverridden)
+            foreach (var name in bulletNames)
             {
-                NamesOverridden[name.Key] = $"{NamesOverridden[name.Key]} ({name.Key})";
+                bulletNames[name.Key] = $"{bulletNames[name.Key]} ({name.Key})";
             }
 
             selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
             {
-                CustomNames = NamesOverridden
+                CustomNames = bulletNames
             };
-            selectBulletsSetting.SelectedValues.UnionWith(NamesOverridden.Keys);
+            selectBulletsSetting.SelectedValues.UnionWith(bulletNames.Keys);
 
 #if DEBUG
             DebugMode = new BoolSetting("DebugMode", false);
@@ -84,6 +92,27 @@ namespace Magnetar_Client.Modules
             Settings.Add(DebugMode);
 #endif
 
+        }
+
+        public override void OnLanguageChanged()
+        {
+            var namesPets = Translator.TranslateEnum(typeof(PetType));
+
+            foreach (var name in namesPets)
+            {
+                namesPets[name.Key] = $"{name.Value} ({name.Key})";
+            }
+
+            PetTypeSetting.CustomNames = namesPets;
+
+            var bulletNames = Translator.TranslateEnum(typeof(BulletType));
+
+            foreach (var name in bulletNames)
+            {
+                bulletNames[name.Key] = $"{bulletNames[name.Key]} ({name.Key})";
+            }
+
+            selectBulletsSetting.CustomNames = bulletNames;
         }
 
         float DamageBuff = 1;

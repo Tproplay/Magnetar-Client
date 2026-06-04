@@ -77,6 +77,13 @@ namespace Magnetar_Client.Modules
             Settings.AddRange(settings);
         }
         public virtual bool Initialized { get; set; } = false;
+
+        /// <summary>
+        /// Runs When a the mod's language is changed
+        /// </summary>
+        public virtual void OnLanguageChanged()
+        {
+        }
     }
 
     public abstract class Setting

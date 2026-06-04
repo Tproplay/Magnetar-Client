@@ -1,11 +1,9 @@
-﻿using HarmonyLib;
-using Il2Cpp;
+﻿using Il2Cpp;
 using Magnetar_Client.Utils;
-using MelonLoader;
 using System.Collections.Generic;
 using UnityEngine;
-using static Il2Cpp.Plant;
 using static Magnetar_Client.Game.AppData;
+using static Magnetar_Client.Utils.Translator;
 
 namespace Magnetar_Client.Modules
 {
@@ -95,7 +93,12 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
-            gridItemsNameOverriden = Translator.TranslateEnum(typeof(GridItemType));
+            gridItemsNameOverriden = TranslateEnum(typeof(GridItemType));
+
+            foreach (var name in gridItemsNameOverriden)
+            {
+                gridItemsNameOverriden[name.Key] = $"{gridItemsNameOverriden[name.Key]} ({name.Key})";
+            }
 
             selectedGridItems = new MultiSelectSetting("Grid Items")
             {
@@ -105,6 +108,18 @@ namespace Magnetar_Client.Modules
 
             AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
             Settings.Add(AutoTurnOff);
+        }
+
+        public override void OnLanguageChanged()
+        {
+            var GridNamesOverridden = TranslateEnum(typeof(GridItemType));
+
+            foreach (var name in GridNamesOverridden)
+            {
+                GridNamesOverridden[name.Key] = $"{GridNamesOverridden[name.Key]} ({name.Key})";
+            }
+
+            selectedGridItems.CustomNames = GridNamesOverridden;
         }
 
         // Mod Logic

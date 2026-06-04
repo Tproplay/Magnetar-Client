@@ -72,9 +72,23 @@ namespace Magnetar_Client.Modules
         }
 
 
+        public override void OnLanguageChanged()
+        {
+            plantNameOverridden = Translator.TranslateEnum(typeof(PlantType));
+
+            foreach (var name in plantNameOverridden)
+            {
+                plantNameOverridden[name.Key] = $"{plantNameOverridden[name.Key]} ({name.Key})";
+            }
+
+            PlantsSelectedSetting.CustomNames = plantNameOverridden;
+        }
+        
         Dictionary<Plant, float> originalthePlantAttackInterval = new Dictionary<Plant, float>();
         Dictionary<Plant, float> originalAnimationSpeeds = new Dictionary<Plant, float>();
         Dictionary<Plant, float> originalthePlantProduceInterval = new Dictionary<Plant, float>();
+
+
 
         // Mod Logic
         public override void OnUpdateActive()

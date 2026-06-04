@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using static Magnetar_Client.UI.WindowDrawing.DrawSetting;
+using static Magnetar_Client.Utils.Translator;
 
 namespace Magnetar_Client.Core
 {
@@ -89,7 +90,6 @@ namespace Magnetar_Client.Core
             showModules = true; showSettings = false; showSelectionGui = false;
             IsInitialized = true;
 
-
             MelonLogger.Msg($"Loaded {Modules.Count} modules");
 
 
@@ -97,7 +97,16 @@ namespace Magnetar_Client.Core
 
         public static void RegisterModule(Type type)
         {
-            Modules.Add((Magnetar_Client.Modules.Module)Activator.CreateInstance(type));
+            try
+            {
+                Modules.Add((Magnetar_Client.Modules.Module)Activator.CreateInstance(type));
+            }
+
+            catch (Exception ex)
+            {
+                Utils.Magnetar_Logger.DebugLogger.Error("Failed to load Module: " + ex);
+            }
+            
         }
 
         public static void Render()
@@ -111,7 +120,7 @@ namespace Magnetar_Client.Core
                     999, // Unique ID so it doesn't conflict with categories
                     searchWindowRect,
                     (GUI.WindowFunction)new Action<int>(DrawSearchWindow),
-                    "Search Modules",
+                    Translate("Search Modules"),
                     Magnetar_Default.ModuleWindow
                 );
 
@@ -123,7 +132,7 @@ namespace Magnetar_Client.Core
                         id,
                         windowPositions[cat],
                         (GUI.WindowFunction)new Action<int>(DrawCategoryWindow),
-                        cat.ToString(),
+                        Translate(cat.ToString()),
                         Magnetar_Default.ModuleWindow
                     );
 
@@ -168,7 +177,7 @@ namespace Magnetar_Client.Core
                             settingsId,
                             settingsPositions[mod],
                             (GUI.WindowFunction)new Action<int>(id => DrawSettingsWindow(id, mod)),
-                            $"{mod.Name}",
+                            Translate($"{mod.Name}"),
                             Magnetar_Default.ModuleWindow
                         );
 
@@ -205,7 +214,7 @@ namespace Magnetar_Client.Core
                         1000,
                         multiSelectWindowRect,
                         (GUI.WindowFunction)MultiSelectBridge,
-                        "Select " + activeMultiSelect.Name,
+                        Translate("Select ") + Translate(activeMultiSelect.Name),
                         Magnetar_Default.ModuleWindow
                     );
                 
@@ -269,7 +278,8 @@ namespace Magnetar_Client.Core
                     }
                 }
 
-                GUI.Box(btnRect, mod.Name, currentStyle);
+                string translatedModName = Magnetar_Client.Utils.Translator.Translate(mod.Name);
+                GUI.Box(btnRect, translatedModName, currentStyle);
                 yOffset += buttonHeight;
             }
 
@@ -322,10 +332,10 @@ namespace Magnetar_Client.Core
 
             // 1. TOP SECTION: Info
             float descriptionWidth = width - (Config.indent * 2);
-            float calculatedHeight = Magnetar_Default.DescriptionStyle.CalcHeight(new GUIContent(mod.Description), descriptionWidth);
+            string translatedDescription = Translate(mod.Description);
 
-            GUI.Label(new Rect(Config.indent, y, descriptionWidth, calculatedHeight), mod.Description, Magnetar_Default.DescriptionStyle);
-
+            float calculatedHeight = Magnetar_Default.DescriptionStyle.CalcHeight(new GUIContent(translatedDescription), descriptionWidth);
+            GUI.Label(new Rect(Config.indent, y, descriptionWidth, calculatedHeight), translatedDescription, Magnetar_Default.DescriptionStyle);
             y += calculatedHeight + Config.spacing;
 
             // Author (if provided)
@@ -371,12 +381,15 @@ namespace Magnetar_Client.Core
             y += Config.elementHeight + Config.spacing;
 
             // --- Hold Mode ---
-            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), "Hold Mode");
+            string holdModeLabel = Translate("Hold Mode");
+            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), holdModeLabel);
+
             Rect holdRect = new Rect(width * 0.5f, y, width * 0.45f, Config.elementHeight);
             bool holdHover = holdRect.Contains(e.mousePosition);
 
             if (holdHover) GUI.backgroundColor = Magnetar_Default.AccentColor;
-            GUI.Box(holdRect, mod.HoldMode ? "ON" : "OFF", mod.HoldMode ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
+            GUI.Box(holdRect, mod.HoldMode ? Translate("ON") : Translate("OFF"),
+                mod.HoldMode ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
             GUI.backgroundColor = Color.white;
 
             if (holdHover && isLeftClick)
@@ -386,23 +399,24 @@ namespace Magnetar_Client.Core
             }
             y += Config.elementHeight + Config.spacing;
 
-            // --- Active State (Enabled) ---
-            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), "Enabled");
+            // --- Active State ---
+            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), Translate("Enabled"));
+
             Rect enabledRect = new Rect(width * 0.5f, y, width * 0.45f, Config.elementHeight);
             bool enabledHover = enabledRect.Contains(e.mousePosition);
 
             if (enabledHover) GUI.backgroundColor = Magnetar_Default.AccentColor;
-            GUI.Box(enabledRect, mod.Active ? "ON" : "OFF", mod.Active ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
+            GUI.Box(enabledRect, mod.Active ? Translate("ON") : Translate("OFF"), mod.Active ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
             GUI.backgroundColor = Color.white;
 
             if (enabledHover && isLeftClick)
             {
-                mod.Toggle(); 
+                mod.Toggle();
                 e.Use();
             }
-            y += Config.elementHeight + Config.spacing/2;
+            y += Config.elementHeight + Config.spacing / 2;
 
-            return y - startY; // Return height actually used
+            return y - startY;
         }
 
         private static void MultiSelectBridge(int id)
@@ -418,7 +432,7 @@ namespace Magnetar_Client.Core
             Event e = Event.current;
 
             // Setting Name
-            GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), set.Name);
+            GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), Translate(set.Name));
 
             // "Select" Button Rect
             Rect btnRect = new Rect(width * 0.58f, y, Config.selectButtonWidth, Config.elementHeight);
@@ -440,13 +454,13 @@ namespace Magnetar_Client.Core
                 showModules = false;
             }
 
-            GUI.Box(btnRect, "Select", Magnetar_Default.ModuleOff);
+            GUI.Box(btnRect, Translate("Select"), Magnetar_Default.ModuleOff);
             GUI.backgroundColor = Color.white;
 
             // Selection Count Text
             Color originalColor = GUI.contentColor;
             GUI.contentColor = Magnetar_Default.TextDim;
-            GUI.Label(new Rect(btnRect.x + Config.selectButtonWidth + 5, y, width * 0.4f, Config.elementHeight), $"({set.SelectedValues.Count} selected)");
+            GUI.Label(new Rect(btnRect.x + Config.selectButtonWidth + 5, y, width * 0.4f, Config.elementHeight), '('+Translate($"{set.SelectedValues.Count} selected") + ")");
             GUI.contentColor = originalColor;
 
         }
@@ -506,7 +520,7 @@ namespace Magnetar_Client.Core
 
             ModuleSearchQuery = DrawManualTextField(
                 new Rect(Config.indent, y, searchWindowRect.width - (Config.indent * 2), 20), 
-                ModuleSearchQuery,"Search..."
+                ModuleSearchQuery, Translate("Search...")
             );
         }
 

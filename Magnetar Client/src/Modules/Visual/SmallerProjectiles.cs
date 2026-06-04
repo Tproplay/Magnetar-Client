@@ -49,6 +49,19 @@ namespace Magnetar_Client.Modules
             Settings.Add(ScaleSetting);
         }
 
+        public override void OnLanguageChanged()
+        {
+            var NamesOverridden = Translator.TranslateEnum(typeof(BulletType));
+
+            foreach (var name in NamesOverridden)
+            {
+                NamesOverridden[name.Key] = $"{NamesOverridden[name.Key]} ({name.Key})";
+            }
+
+            BulletTypeSetting.CustomNames = NamesOverridden;
+        }
+
+
         // Mod Logic
 
         public override void OnEnable()

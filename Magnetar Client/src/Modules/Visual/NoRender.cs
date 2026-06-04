@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Il2Cpp;
 using Il2CppSystem;
+using Magnetar_Client.Utils;
 using MelonLoader.Utils;
 using System.Collections.Generic;
 using System.IO;
@@ -79,6 +80,10 @@ namespace Magnetar_Client.Modules
 
         }
 
+        public override void OnLanguageChanged()
+        {
+            GameObjectsSetting.CustomNames = Translator.TranslateEnum(typeof(BucketType));
+        }
 
         public override void OnUpdateActive()
         {

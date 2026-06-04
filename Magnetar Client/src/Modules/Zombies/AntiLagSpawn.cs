@@ -62,6 +62,18 @@ namespace Magnetar_Client.Modules
             AddSettings(UnaffectedZombies);
         }
 
+        public override void OnLanguageChanged()
+        {
+            var NamesOverridden = TranslateEnum(typeof(ZombieType));
+
+            foreach (var name in NamesOverridden)
+            {
+                NamesOverridden[name.Key] = $"{NamesOverridden[name.Key]} ({name.Key})";
+            }
+
+            UnaffectedZombies.CustomNames = NamesOverridden;
+        }
+
         // Mod Logic
         public override void OnUpdateActive()
         {

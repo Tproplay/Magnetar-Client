@@ -3,8 +3,8 @@ using Magnetar_Client.UI.Themes;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using MelonLoader;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using Magnetar_Client.Utils;
 
 namespace Magnetar_Client.UI.WindowDrawing
 {
@@ -47,7 +47,8 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
 
-            GUI.Label(new Rect(Config.indent, y, width * 0.5f, Config.elementHeight), name);
+            string translatedName = Magnetar_Client.Utils.Translator.Translate(name);
+            GUI.Label(new Rect(Config.indent, y, width * 0.5f, Config.elementHeight), translatedName);
 
             // --- LOGARITHMIC MAPPING HELPERS ---
             float LogConvert(float v) => Mathf.Sign(v) * Mathf.Log10(Mathf.Abs(v) + 1.0f);
@@ -185,7 +186,8 @@ namespace Magnetar_Client.UI.WindowDrawing
             Event e = Event.current;
             bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
 
-            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), bSet.Name);
+            string translatedName = Magnetar_Client.Utils.Translator.Translate(bSet.Name);
+            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), translatedName);
 
             // --- UI DISPLAY ---
             string bindText = bSet.IsBinding ? "[...]" : bSet.GetBindString();
@@ -245,11 +247,13 @@ namespace Magnetar_Client.UI.WindowDrawing
         {
             Event e = Event.current;
 
-            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), boolSet.Name);
+            string translatedName = Magnetar_Client.Utils.Translator.Translate(boolSet.Name);
+            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), translatedName);
 
             Rect btnRect = new Rect(width * 0.5f, y, width * 0.45f, Config.elementHeight);
 
-            GUI.Box(btnRect, boolSet.Value ? "ON" : "OFF", boolSet.Value ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
+            GUI.Box(btnRect, boolSet.Value ?  Translator.Translate("ON") : Translator.Translate("OFF")
+                , boolSet.Value ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
 
             if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
             {
@@ -372,7 +376,9 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             Rect toggleRect = new Rect(10 + searchWidth, 30, toggleWidth, 22);
 
-            if (GUI.Button(toggleRect, allSelected ? "Deselect All" : "Select All", !allSelected ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff))
+            if (GUI.Button(toggleRect,
+                allSelected ? Translator.Translate("Deselect All") : Translator.Translate("Select All"),
+                !allSelected ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff))
             {
                 foreach (var kvp in options)
                 {
@@ -414,7 +420,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             }
 
             string cursor = (isSearchFocused && Time.time % 1.0f < 0.5f) ? "|" : "";
-            GUI.Label(searchRect, " Search: " + multiSelectSearchQuery + cursor, Magnetar_Default.DescriptionStyle);
+            GUI.Label(searchRect, Translator.Translate(" Search: ") + multiSelectSearchQuery + cursor, Magnetar_Default.DescriptionStyle);
 
             // --- SCROLL WHEEL ---
             if (e.type == EventType.ScrollWheel && new Rect(0, 0, multiSelectWindowRect.width, multiSelectWindowRect.height).Contains(e.mousePosition))
@@ -500,7 +506,7 @@ namespace Magnetar_Client.UI.WindowDrawing
 
                                 draggedItemsSession.Add(intVal);
 #if DEBUG
-                                MelonLogger.Msg("Drag Started");
+                                DebugLogger.Msg("Drag Started");
 #endif
                             }
                             else
@@ -513,7 +519,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                         }
 
                         // Draw the Box
-                        GUI.Box(rowRect, name, activeMultiSelect.IsSelected(intVal) ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
+                        GUI.Box(rowRect, Translator.Translate(name), activeMultiSelect.IsSelected(intVal) ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
                     }
                     currentY += ROW_HEIGHT + 1;
                 }

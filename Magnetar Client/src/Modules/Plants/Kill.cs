@@ -60,6 +60,18 @@ namespace Magnetar_Client.Modules
             Settings.Add(AutoTurnOff);
         }
 
+        public override void OnLanguageChanged()
+        {
+            plantNameOverriden = Translator.TranslateEnum(typeof(PlantType));
+
+            foreach (var name in plantNameOverriden)
+            {
+                plantNameOverriden[name.Key] = $"{plantNameOverriden[name.Key]} ({name.Key})";
+            }
+
+            PlantsSelectedSetting.CustomNames = plantNameOverriden;
+        }
+
         // Mod Logic
         public override void OnUpdateActive()
         {

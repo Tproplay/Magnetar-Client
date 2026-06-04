@@ -77,6 +77,17 @@ namespace Magnetar_Client.Modules
 
         }
 
+        public override void OnLanguageChanged()
+        {
+            zombieNameOverriden = Translator.TranslateEnum(typeof(ZombieType));
+            foreach (var name in zombieNameOverriden)
+            {
+                zombieNameOverriden[name.Key] = $"{zombieNameOverriden[name.Key]} ({name.Key})";
+            }
+            HypnoZombiesSelectedSetting.CustomNames = zombieNameOverriden;
+            ZombiesSelectedSetting.CustomNames = zombieNameOverriden;
+        }
+
         // Mod Logic
         public override void OnUpdateActive()
         {

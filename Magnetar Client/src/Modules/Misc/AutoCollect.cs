@@ -5,6 +5,7 @@ using Il2CppZenGarden;
 using MelonLoader;
 using System.Collections.Generic;
 using UnityEngine;
+using Magnetar_Client.Utils;
 
 namespace Magnetar_Client.Modules
 {

@@ -58,6 +58,18 @@ namespace Magnetar_Client.Modules
             Settings.Add(HpMultiplierSettig);
         }
 
+        public override void OnLanguageChanged()
+        {
+            zombieNameOverriden = Translator.TranslateEnum(typeof(ZombieType));
+
+            foreach (var name in zombieNameOverriden)
+            {
+                zombieNameOverriden[name.Key] = $"{zombieNameOverriden[name.Key]} ({name.Key})";
+            }
+
+            ZombieSelectedSetting.CustomNames = zombieNameOverriden;
+        }
+
         // Tracks the original max healths: [0] = Base, [1] = Armor1, [2] = Armor2
         public static Dictionary<Zombie, List<int>> originalHpData = new Dictionary<Zombie, List<int>>();
 

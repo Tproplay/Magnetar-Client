@@ -23,6 +23,7 @@ namespace Magnetar_Client.Core
             ModuleManager.Init();
             HUDRenderer.Init();
             NEFManager.Init();
+            GUIManager.Init();
             
 
             Load(); // Load Save to override default values
@@ -65,6 +66,8 @@ namespace Magnetar_Client.Core
             if (Config.CurrentTab == TabType.MODULES) ModuleManager.Render();
 
             if (Config.CurrentTab == TabType.NEF) NEFManager.Render();
+
+            if (Config.CurrentTab == TabType.GUI) GUIManager.Render();
 
             #region handle Escape Key
 
@@ -124,6 +127,7 @@ namespace Magnetar_Client.Core
         {
             ModuleManager.Render();
             NEFManager.Render();
+            GUIManager.Render();
         }
 
 

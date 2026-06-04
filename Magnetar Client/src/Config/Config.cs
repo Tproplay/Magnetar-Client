@@ -5,6 +5,7 @@ namespace Magnetar_Client
     {
         MODULES,
         HUD,
+        GUI,
         NEF
     }
     
@@ -26,6 +27,8 @@ namespace Magnetar_Client
         public readonly static float spacing = 6;
 
         public readonly static float selectButtonWidth = 70;
+
+        public static string Language = "English";
 
     }
 }

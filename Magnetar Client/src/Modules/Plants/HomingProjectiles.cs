@@ -46,6 +46,19 @@ namespace Magnetar_Client.Modules
             selectedBulletsSetting.SelectedValues.UnionWith(preselected);
         }
 
+        public override void OnLanguageChanged()
+        {
+            var overridenNames = Translator.TranslateEnum(typeof(BulletType));
+
+            foreach (var name in overridenNames)
+            {
+                overridenNames[name.Key] = $"{name.Value} ({name.Key})";
+            }
+
+            selectedBulletsSetting.CustomNames = overridenNames;
+        }
+
+
         // Mod Logic
 
         [HarmonyPatch(typeof(CreateBullet))]

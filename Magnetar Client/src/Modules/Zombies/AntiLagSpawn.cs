@@ -37,16 +37,10 @@ namespace Magnetar_Client.Modules
             FrameDelaySetting = new IntSetting("Frames Between Spawns", 1, 10, 1);
             AddSettings(FrameDelaySetting);
 
-            var NamesOverridden = TranslateEnum(typeof(ZombieType));
-
-            foreach (var name in NamesOverridden)
-            {
-                NamesOverridden[name.Key] = $"{NamesOverridden[name.Key]} ({name.Key})";
-            }
 
             UnaffectedZombies = new MultiSelectSetting("Unaffected Entities", typeof(ZombieType))
             {
-                CustomNames = NamesOverridden,
+                CustomNames = TranslatedNames(typeof(ZombieType)),
                 SelectedValues = new HashSet<int>
                 {
                     (int)ZombieType.ImpKing,
@@ -64,14 +58,7 @@ namespace Magnetar_Client.Modules
 
         public override void OnLanguageChanged()
         {
-            var NamesOverridden = TranslateEnum(typeof(ZombieType));
-
-            foreach (var name in NamesOverridden)
-            {
-                NamesOverridden[name.Key] = $"{NamesOverridden[name.Key]} ({name.Key})";
-            }
-
-            UnaffectedZombies.CustomNames = NamesOverridden;
+            UnaffectedZombies.CustomNames = TranslatedNames(typeof(ZombieType));
         }
 
         // Mod Logic

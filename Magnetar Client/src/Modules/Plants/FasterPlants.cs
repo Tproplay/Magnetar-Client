@@ -3,6 +3,7 @@ using Il2Cpp;
 using Magnetar_Client.Game;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
+using System.Linq;
 using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
@@ -35,18 +36,11 @@ namespace Magnetar_Client.Modules
         public float ProduceSpeedMultiplier = 50;
         public FloatSetting ProduceSpeedMultiplierSetting;
         public override bool Active { get; set; } = false;
-        private Dictionary<int, string> plantNameOverridden = new Dictionary<int, string>();
 
         public FasterPlants()
         {
             instance = this;
 
-            plantNameOverridden = Translator.TranslateEnum(typeof(PlantType));
-
-            foreach (var name in plantNameOverridden)
-            {
-                plantNameOverridden[name.Key] = $"{plantNameOverridden[name.Key]} ({name.Key})";
-            }
             PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
             {
                 MaxSelection = -1,
@@ -55,11 +49,13 @@ namespace Magnetar_Client.Modules
                     257,258,259,260,261,262,263,264,265,266,267,268,
                     246,247,
                 },
-                CustomNames = plantNameOverridden
+                CustomNames = TranslatedNames(typeof(PlantType))
             };
 
+            PlantsSelectedSetting.Options.Keys.ToList().ForEach(PlantsSelectedSetting.Select);
+
             Settings.Add(PlantsSelectedSetting);
-            PlantsSelectedSetting.SelectedValues.UnionWith(plantNameOverridden.Keys);
+            
 
             AttackIntervalMultiplierSetting = new FloatSetting("Attack Interval", 0.01f, 50, AttackIntervalMultiplier);
             Settings.Add(AttackIntervalMultiplierSetting);
@@ -74,14 +70,7 @@ namespace Magnetar_Client.Modules
 
         public override void OnLanguageChanged()
         {
-            plantNameOverridden = Translator.TranslateEnum(typeof(PlantType));
-
-            foreach (var name in plantNameOverridden)
-            {
-                plantNameOverridden[name.Key] = $"{plantNameOverridden[name.Key]} ({name.Key})";
-            }
-
-            PlantsSelectedSetting.CustomNames = plantNameOverridden;
+            PlantsSelectedSetting.CustomNames = TranslatedNames(typeof(PlantType));
         }
         
         Dictionary<Plant, float> originalthePlantAttackInterval = new Dictionary<Plant, float>();

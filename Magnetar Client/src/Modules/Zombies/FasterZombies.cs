@@ -3,6 +3,7 @@ using Il2Cpp;
 using Magnetar_Client.Game;
 using Magnetar_Client.Utils;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using static Magnetar_Client.Game.AppData;
 
@@ -35,21 +36,14 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
-            var zombieNameOverriden = Translator.TranslateEnum(typeof(ZombieType));
-
-            foreach (var key in new List<int>(zombieNameOverriden.Keys))
-            {
-                zombieNameOverriden[key] = $"{zombieNameOverriden[key]} ({key})";
-            }
-
             ZombieSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
             {
                 MaxSelection = -1,
-                CustomNames = zombieNameOverriden,
+                CustomNames = TranslatedNames(typeof(ZombieType)),
                 Blacklist = new HashSet<int> { (int)ZombieType.Nothing }
             };
 
-            ZombieSelectedSetting.SelectedValues.UnionWith(ZombieSelectedSetting.Options.Keys);
+            ZombieSelectedSetting.Options.Keys.ToList().ForEach(ZombieSelectedSetting.Select);
             Settings.Add(ZombieSelectedSetting);
 
             theSpeedSettig = new FloatSetting("Speed", 0.1f, 10f, 2f);
@@ -58,13 +52,7 @@ namespace Magnetar_Client.Modules
 
         public override void OnLanguageChanged()
         {
-            var zombieNameOverriden = Translator.TranslateEnum(typeof(ZombieType));
-
-            foreach (var key in new List<int>(zombieNameOverriden.Keys))
-            {
-                zombieNameOverriden[key] = $"{zombieNameOverriden[key]} ({key})";
-            }
-            ZombieSelectedSetting.CustomNames = zombieNameOverriden;
+            ZombieSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
         }
 
         // Mod Logic

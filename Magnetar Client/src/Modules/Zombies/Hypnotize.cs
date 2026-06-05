@@ -2,6 +2,7 @@
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 using static Magnetar_Client.Game.AppData;
 
 using static Magnetar_Client.Game.GameData;
@@ -33,29 +34,22 @@ namespace Magnetar_Client.Modules
 
         public static float deltaTime = 0;
 
-        private static Dictionary<int, string> zombieNameOverriden = new Dictionary<int, string>();
 
         public HypnotizeZombies()
         {
             instance = this;
 
-            zombieNameOverriden = Translator.TranslateEnum(typeof(ZombieType));
-            foreach (var name in zombieNameOverriden)
-            {
-                zombieNameOverriden[name.Key] = $"{zombieNameOverriden[name.Key]} ({name.Key})";
-            }
-
             ZombiesSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
             {
                 MaxSelection = -1,
-                CustomNames = zombieNameOverriden,
+                CustomNames = TranslatedNames(typeof(ZombieType)),
                 Blacklist = new HashSet<int> {
                     (int)ZombieType.Nothing,
                     212,218,219,220,221,222,223,224,226,228,229,231,234,235,243,244
                 },
 
             };
-            ZombiesSelectedSetting.SelectedValues.UnionWith(ZombiesSelectedSetting.Options.Keys);
+            ZombiesSelectedSetting.Options.Keys.ToList().ForEach(ZombiesSelectedSetting.Select);
             Settings.Add(ZombiesSelectedSetting);
 
             AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
@@ -65,13 +59,7 @@ namespace Magnetar_Client.Modules
 
         public override void OnLanguageChanged()
         {
-            zombieNameOverriden = Translator.TranslateEnum(typeof(ZombieType));
-            foreach (var name in zombieNameOverriden)
-            {
-                zombieNameOverriden[name.Key] = $"{zombieNameOverriden[name.Key]} ({name.Key})";
-            }
-
-            ZombiesSelectedSetting.CustomNames = zombieNameOverriden;
+            ZombiesSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
         }
 
         // Mod Logic

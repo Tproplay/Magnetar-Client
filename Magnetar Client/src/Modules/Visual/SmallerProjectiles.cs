@@ -30,19 +30,12 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
-            var NamesOverridden = Translator.TranslateEnum(typeof(BulletType));
-
-            foreach (var name in NamesOverridden)
-            {
-                NamesOverridden[name.Key] = $"{NamesOverridden[name.Key]} ({name.Key})";
-            }
-
             BulletTypeSetting = new MultiSelectSetting("Bullet Types", typeof(BulletType))
             {
-                CustomNames = NamesOverridden
+                CustomNames = TranslatedNames(typeof(BulletType)),
             };
 
-            BulletTypeSetting.SelectedValues.UnionWith(NamesOverridden.Keys);
+            BulletTypeSetting.Options.Keys.ToList().ForEach(BulletTypeSetting.Select);
             Settings.Add(BulletTypeSetting);
 
             ScaleSetting = new FloatSetting("Scale Multiplier", 0.1f, 2f, 0.5f, 2);
@@ -51,14 +44,7 @@ namespace Magnetar_Client.Modules
 
         public override void OnLanguageChanged()
         {
-            var NamesOverridden = Translator.TranslateEnum(typeof(BulletType));
-
-            foreach (var name in NamesOverridden)
-            {
-                NamesOverridden[name.Key] = $"{NamesOverridden[name.Key]} ({name.Key})";
-            }
-
-            BulletTypeSetting.CustomNames = NamesOverridden;
+            BulletTypeSetting.CustomNames = TranslatedNames(typeof(BulletType));
         }
 
 

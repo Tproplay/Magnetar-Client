@@ -1,6 +1,7 @@
 ﻿using Il2Cpp;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 
@@ -33,43 +34,34 @@ namespace Magnetar_Client.Modules
         public override bool Active { get; set; } = false;
         public static float deltaTime = 0;
 
-
-        private static Dictionary<int,string> zombieNameOverriden = new Dictionary<int, string>();
-
         public KillZombies()
         {
             instance = this;
 
-            zombieNameOverriden = Translator.TranslateEnum(typeof(ZombieType));
-            foreach (var name in zombieNameOverriden)
-            {
-                zombieNameOverriden[name.Key] = $"{zombieNameOverriden[name.Key]} ({name.Key})";
-            }
-
             ZombiesSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
             {
                 MaxSelection = -1,
-                CustomNames = zombieNameOverriden,
+                CustomNames = TranslatedNames(typeof(ZombieType)),
                 Blacklist = new HashSet<int> {
                     (int)ZombieType.Nothing,
 
                 },
 
             };
-            ZombiesSelectedSetting.SelectedValues.UnionWith(ZombiesSelectedSetting.Options.Keys);
+            ZombiesSelectedSetting.Options.Keys.ToList().ForEach(ZombiesSelectedSetting.Select);
             Settings.Add(ZombiesSelectedSetting);
 
             HypnoZombiesSelectedSetting = new MultiSelectSetting("Hypnotized Entities", typeof(ZombieType))
             {
                 MaxSelection = -1,
-                CustomNames = zombieNameOverriden,
+                CustomNames = TranslatedNames(typeof(ZombieType)),
                 Blacklist = new HashSet<int> {
                     (int)ZombieType.Nothing,
 
                 },
 
             };
-            HypnoZombiesSelectedSetting.SelectedValues.UnionWith(HypnoZombiesSelectedSetting.Options.Keys);
+            HypnoZombiesSelectedSetting.Options.Keys.ToList().ForEach(HypnoZombiesSelectedSetting.Select);
             Settings.Add(HypnoZombiesSelectedSetting);
 
             AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
@@ -79,13 +71,8 @@ namespace Magnetar_Client.Modules
 
         public override void OnLanguageChanged()
         {
-            zombieNameOverriden = Translator.TranslateEnum(typeof(ZombieType));
-            foreach (var name in zombieNameOverriden)
-            {
-                zombieNameOverriden[name.Key] = $"{zombieNameOverriden[name.Key]} ({name.Key})";
-            }
-            HypnoZombiesSelectedSetting.CustomNames = zombieNameOverriden;
-            ZombiesSelectedSetting.CustomNames = zombieNameOverriden;
+            HypnoZombiesSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
+            ZombiesSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
         }
 
         // Mod Logic

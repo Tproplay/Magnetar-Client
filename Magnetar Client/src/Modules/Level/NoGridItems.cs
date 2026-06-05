@@ -88,21 +88,14 @@ namespace Magnetar_Client.Modules
         public bool TurnOffAfterUse = true;
         public BoolSetting AutoTurnOff;
 
-        private static Dictionary<int, string> gridItemsNameOverriden = new Dictionary<int, string>();
         public NoGridItem()
         {
             instance = this;
 
-            gridItemsNameOverriden = TranslateEnum(typeof(GridItemType));
-
-            foreach (var name in gridItemsNameOverriden)
-            {
-                gridItemsNameOverriden[name.Key] = $"{gridItemsNameOverriden[name.Key]} ({name.Key})";
-            }
 
             selectedGridItems = new MultiSelectSetting("Grid Items")
             {
-                CustomNames = gridItemsNameOverriden
+                CustomNames = TranslatedNames(typeof(GridItemType))
             };
             Settings.Add(selectedGridItems);
 
@@ -112,14 +105,7 @@ namespace Magnetar_Client.Modules
 
         public override void OnLanguageChanged()
         {
-            var GridNamesOverridden = TranslateEnum(typeof(GridItemType));
-
-            foreach (var name in GridNamesOverridden)
-            {
-                GridNamesOverridden[name.Key] = $"{GridNamesOverridden[name.Key]} ({name.Key})";
-            }
-
-            selectedGridItems.CustomNames = GridNamesOverridden;
+            selectedGridItems.CustomNames = TranslatedNames(typeof(GridItemType));
         }
 
         // Mod Logic

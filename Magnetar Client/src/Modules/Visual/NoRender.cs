@@ -75,14 +75,17 @@ namespace Magnetar_Client.Modules
             AddSettings(ParticlesSetting);
             #endregion
 
-            GameObjectsSetting = new MultiSelectSetting("Game Objects",typeof(BucketType));
+            GameObjectsSetting = new MultiSelectSetting("Game Objects", typeof(BucketType))
+            {
+                CustomNames = TranslatedNames(typeof(BucketType))
+            };
             AddSettings(GameObjectsSetting);
 
         }
 
         public override void OnLanguageChanged()
         {
-            GameObjectsSetting.CustomNames = Translator.TranslateEnum(typeof(BucketType));
+            GameObjectsSetting.CustomNames = TranslatedNames(typeof(BucketType));
         }
 
         public override void OnUpdateActive()

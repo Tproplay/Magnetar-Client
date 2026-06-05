@@ -2,6 +2,7 @@
 using Il2Cpp;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
+using System.Linq;
 using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
@@ -24,19 +25,11 @@ namespace Magnetar_Client.Modules
         public static KeepShooting instance;
 
         public MultiSelectSetting PlantsSelectedSetting;
-        public override bool Active { get; set; } = false;
-        private Dictionary<int, string> plantNameOverriden = new Dictionary<int, string>();
 
         public KeepShooting()
         {
             instance = this;
 
-            plantNameOverriden = Translator.TranslateEnum(typeof(PlantType));
-
-            foreach (var plant in plantNameOverriden)
-            {
-                plantNameOverriden[plant.Key] = $"{plant.Value} ({plant.Key})";
-            }
             PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
             {
                 MaxSelection = -1,
@@ -45,23 +38,17 @@ namespace Magnetar_Client.Modules
                     257,258,259,260,261,262,263,264,265,266,267,268,
                     246,247,
                 },
-                CustomNames = plantNameOverriden
+                CustomNames = TranslatedNames(typeof(PlantType))
             };
 
+            PlantsSelectedSetting.Options.Keys.ToList().ForEach(PlantsSelectedSetting.Select);
+
             Settings.Add(PlantsSelectedSetting);
-            PlantsSelectedSetting.SelectedValues.UnionWith(plantNameOverriden.Keys);
         }
 
         public override void OnLanguageChanged()
         {
-            plantNameOverriden = Translator.TranslateEnum(typeof(PlantType));
-
-            foreach (var plant in plantNameOverriden)
-            {
-                plantNameOverriden[plant.Key] = $"{plant.Value} ({plant.Key})";
-            }
-
-            PlantsSelectedSetting.CustomNames = plantNameOverriden;
+            PlantsSelectedSetting.CustomNames = TranslatedNames(typeof(PlantType));
         }
 
         // Mod Logic

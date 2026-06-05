@@ -25,7 +25,6 @@ namespace Magnetar_Client.Modules
 
         public static ChangeBullet instance;
 
-        public List<int> preselected = Enum.GetValues(typeof(BulletType)).Cast<int>().ToList();
         public MultiSelectSetting selectBulletsSetting;
 
 
@@ -33,36 +32,25 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
-            var overridenNames = Translator.TranslateEnum(typeof(BulletType));
-
-            foreach (var name in overridenNames)
-            {
-                overridenNames[name.Key] = $"{name.Value} ({name.Key})";
-            }
-
             selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
             {
-                CustomNames = overridenNames,
+                CustomNames = TranslatedNames(typeof(BulletType)),
                 Blacklist = new HashSet<int>
                 {
                     162,220
                 }
             };
+
+            selectBulletsSetting.Options.Keys.ToList().ForEach(selectBulletsSetting.Select);
+
             Settings.Add(selectBulletsSetting);
-            selectBulletsSetting.SelectedValues.UnionWith(preselected);
+            
 
         }
 
         public override void OnLanguageChanged()
         {
-            var overridenNames = Translator.TranslateEnum(typeof(BulletType));
-
-            foreach (var name in overridenNames)
-            {
-                overridenNames[name.Key] = $"{name.Value} ({name.Key})";
-            }
-
-            selectBulletsSetting.CustomNames = overridenNames;
+            selectBulletsSetting.CustomNames = TranslatedNames(typeof(BulletType));
         }
 
         // Mod Logic

@@ -22,16 +22,9 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
-            var PlantNamesOverridden = TranslateEnum(typeof(PlantType));
-
-            foreach (var name in PlantNamesOverridden)
-            {
-                PlantNamesOverridden[name.Key] = $"{PlantNamesOverridden[name.Key]} ({name.Key})";
-            }
-
             ConveyorPlantsSetting = new MultiSelectSetting("Allowed Plants", typeof(PlantType))
             {
-                CustomNames = PlantNamesOverridden,
+                CustomNames = TranslatedNames(typeof(PlantType)),
                 Blacklist = new System.Collections.Generic.HashSet<int>
                 {
                     (int)PlantType.Nothing,

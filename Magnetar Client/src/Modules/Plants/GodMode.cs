@@ -2,6 +2,7 @@
 using Il2Cpp;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
+using System.Linq;
 using static Il2Cpp.Plant;
 using static Magnetar_Client.Game.AppData;
 
@@ -28,19 +29,10 @@ namespace Magnetar_Client.Modules
         public BoolSetting ImmuneToShovel;
 
 
-
-        private Dictionary<int, string> plantNameOverriden = new Dictionary<int, string>();
-
         public GodMode()
         {
             instance = this;
 
-            plantNameOverriden = Translator.TranslateEnum(typeof(PlantType));
-
-            foreach (var plant in plantNameOverriden)
-            {
-                plantNameOverriden[plant.Key] = $"{plant.Value} ({plant.Key})";
-            }
 
             PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
             {
@@ -50,17 +42,16 @@ namespace Magnetar_Client.Modules
                     257,258,259,260,261,262,263,264,265,266,267,268,
                     246,247,
                 },
-                CustomNames = plantNameOverriden
+                CustomNames = TranslatedNames(typeof(PlantType))
             };
 
+            PlantsSelectedSetting.Options.Keys.ToList().ForEach(PlantsSelectedSetting.Select);
 
             ImmuneToDamage = new BoolSetting("Immune To Damage", true);
             ImmuneToVehicle = new BoolSetting("Immune To Vehicle", true);
             ImmuneToShovel = new BoolSetting("Immune To Shovel", true);
 
             Settings.Add(PlantsSelectedSetting);
-            PlantsSelectedSetting.SelectedValues.UnionWith(plantNameOverriden.Keys);
-
             Settings.Add(ImmuneToDamage);
             Settings.Add(ImmuneToVehicle);
             Settings.Add(ImmuneToShovel);
@@ -69,14 +60,7 @@ namespace Magnetar_Client.Modules
 
         public override void OnLanguageChanged()
         {
-            plantNameOverriden = Translator.TranslateEnum(typeof(PlantType));
-
-            foreach (var plant in plantNameOverriden)
-            {
-                plantNameOverriden[plant.Key] = $"{plant.Value} ({plant.Key})";
-            }
-
-            PlantsSelectedSetting.CustomNames = plantNameOverriden;
+            PlantsSelectedSetting.CustomNames = TranslatedNames(typeof(PlantType));
         }
 
 

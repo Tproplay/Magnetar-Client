@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Game.AppData;
+using System.Linq;
 
 namespace Magnetar_Client.Modules
 {
@@ -31,17 +32,9 @@ namespace Magnetar_Client.Modules
         public override bool Active { get; set; } = false;
         public static float deltaTime = 0;
 
-        private static Dictionary<int, string> plantNameOverriden = new Dictionary<int, string>();
         public KillPlants()
         {
             instance = this;
-
-            plantNameOverriden = Translator.TranslateEnum(typeof(PlantType));
-
-            foreach (var name in plantNameOverriden)
-            {
-                plantNameOverriden[name.Key] = $"{plantNameOverriden[name.Key]} ({name.Key})";
-            }
 
             PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
             {
@@ -51,10 +44,12 @@ namespace Magnetar_Client.Modules
                     257,258,259,260,261,262,263,264,265,266,267,268,
                     246,247,
                 },
-                CustomNames = plantNameOverriden
+                CustomNames = TranslatedNames(typeof(PlantType))
             };
+
+            PlantsSelectedSetting.Options.Keys.ToList().ForEach(PlantsSelectedSetting.Select);
+
             Settings.Add(PlantsSelectedSetting);
-            PlantsSelectedSetting.SelectedValues.UnionWith(plantNameOverriden.Keys);
 
             AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
             Settings.Add(AutoTurnOff);
@@ -62,14 +57,7 @@ namespace Magnetar_Client.Modules
 
         public override void OnLanguageChanged()
         {
-            plantNameOverriden = Translator.TranslateEnum(typeof(PlantType));
-
-            foreach (var name in plantNameOverriden)
-            {
-                plantNameOverriden[name.Key] = $"{plantNameOverriden[name.Key]} ({name.Key})";
-            }
-
-            PlantsSelectedSetting.CustomNames = plantNameOverriden;
+            PlantsSelectedSetting.CustomNames = TranslatedNames(typeof(PlantType));
         }
 
         // Mod Logic

@@ -31,31 +31,19 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
-            var overridenNames = Translator.TranslateEnum(typeof(BulletType));
-
-            foreach (var name in overridenNames)
-            {
-                overridenNames[name.Key] = $"{name.Value} ({name.Key})";
-            }
-
             selectedBulletsSetting = new MultiSelectSetting("Projectiles", typeof(BulletType))
             {
-                CustomNames = overridenNames
+                CustomNames = TranslatedNames(typeof(BulletType)),
             };
+
+            selectedBulletsSetting.Options.Keys.ToList().ForEach(selectedBulletsSetting.Select);
+
             Settings.Add(selectedBulletsSetting);
-            selectedBulletsSetting.SelectedValues.UnionWith(preselected);
         }
 
         public override void OnLanguageChanged()
         {
-            var overridenNames = Translator.TranslateEnum(typeof(BulletType));
-
-            foreach (var name in overridenNames)
-            {
-                overridenNames[name.Key] = $"{name.Value} ({name.Key})";
-            }
-
-            selectedBulletsSetting.CustomNames = overridenNames;
+            selectedBulletsSetting.CustomNames = TranslatedNames(typeof(BulletType));
         }
 
 

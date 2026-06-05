@@ -1,10 +1,11 @@
 ﻿using Magnetar_Client.Modules;
 using Magnetar_Client.UI.Themes;
+using Magnetar_Client.Utils;
+using MelonLoader;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 using static Magnetar_Client.Utils.Magnetar_Logger;
-using Magnetar_Client.Utils;
 
 namespace Magnetar_Client.UI.WindowDrawing
 {
@@ -461,15 +462,24 @@ namespace Magnetar_Client.UI.WindowDrawing
                 foreach (var kvp in options)
                 {
                     int intVal = kvp.Key;
-                    string name = kvp.Value;
+                    string internalName = kvp.Value;
+
+                    // Grab the pre-translated name from CustomNames, fallback to internal if missing
+                    string displayName = internalName;
+                    if (activeMultiSelect.CustomNames != null && activeMultiSelect.CustomNames.ContainsKey(intVal))
+                    {
+                        displayName = activeMultiSelect.CustomNames[intVal];
+                    }
 
                     // --- FILTERING ---
+                    // 1. Blacklists MUST check the internal/English values to avoid breaking!
                     if (activeMultiSelect.Blacklist != null && activeMultiSelect.Blacklist.Contains(intVal)) continue;
-                    if (activeMultiSelect.NameBlacklist != null && activeMultiSelect.NameBlacklist.Contains(name)) continue;
+                    if (activeMultiSelect.NameBlacklist != null && activeMultiSelect.NameBlacklist.Contains(internalName)) continue;
 
+                    // 2. Search MUST check the translated Display Name so users can search in their native language!
                     if (!string.IsNullOrEmpty(cleanQuery))
                     {
-                        if (name.Replace(" ", "").IndexOf(cleanQuery, StringComparison.OrdinalIgnoreCase) < 0) continue;
+                        if (displayName.Replace(" ", "").IndexOf(cleanQuery, StringComparison.OrdinalIgnoreCase) < 0) continue;
                     }
 
                     // Keep a linear index of visible items for math later
@@ -506,7 +516,7 @@ namespace Magnetar_Client.UI.WindowDrawing
 
                                 draggedItemsSession.Add(intVal);
 #if DEBUG
-                                DebugLogger.Msg("Drag Started");
+                                MelonLogger.Msg("Drag Started");
 #endif
                             }
                             else
@@ -518,9 +528,9 @@ namespace Magnetar_Client.UI.WindowDrawing
                             e.Use();
                         }
 
-                        // Draw the Box, Names are stored pre translated
-                        GUI.Box(rowRect, name, activeMultiSelect.IsSelected(intVal) ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
+                        GUI.Box(rowRect, displayName, activeMultiSelect.IsSelected(intVal) ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
                     }
+
                     currentY += ROW_HEIGHT + 1;
                 }
 

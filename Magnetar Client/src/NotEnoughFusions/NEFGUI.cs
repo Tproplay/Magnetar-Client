@@ -206,10 +206,10 @@ namespace Magnetar_Client.NEF
         private static void DrawUsagesView(Rect viewRect, Event e)
         {
             GUI.Label(new Rect(viewRect.x + 10f, viewRect.y + 10f, viewRect.width - 150f, 30f), 
-                Translator.Translate(Translator.Translate("Fusions requiring:") + 
-                Translator.Translate($"{NEFData.GetEntityName(NEFData.usageViewTarget)}" + " (" + 
-                Translator.Translate($"{NEFData.currentUsages.Count}") + " " +
-                Translator.Translate(" found)")))
+                Translator.Translate(Translator.Translate("Fusions requiring") + ":" + 
+                NEFData.GetEntityName(NEFData.usageViewTarget) + " (" + 
+                NEFData.currentUsages.Count + ") " +
+                Translator.Translate("found)"))
                 );
 
             Rect backBtnRect = new Rect(viewRect.x + viewRect.width - 110f, viewRect.y + 10f, 100f, 30f);
@@ -347,7 +347,7 @@ namespace Magnetar_Client.NEF
         private static void DrawSquareNodeBox(Rect rect, RecipeEntity entity, float scale)
         {
             Magnetar_Default.NEFNodeStyle.fontSize = Mathf.Max(1, (int)(8f * scale));
-            string displayName = Translator.Translate(NEFData.GetEntityName(entity));
+            string displayName = NEFData.GetEntityName(entity);
             GUI.Box(rect, displayName, Magnetar_Default.NEFNodeStyle);
 
             Texture2D tex = entity.IsZombie

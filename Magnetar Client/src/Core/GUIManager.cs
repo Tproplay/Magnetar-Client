@@ -4,6 +4,8 @@ using System.Linq;
 using UnityEngine;
 using System.IO;
 using Magnetar_Client.Utils;
+using static Magnetar_Client.Utils.Magnetar_Logger;
+
 namespace Magnetar_Client.Core
 {
     public static class GUIManager
@@ -26,8 +28,8 @@ namespace Magnetar_Client.Core
             LanguageSetting = new MultiSelectSetting("Language")
             {
                 MaxSelection = 1,
-                Options = new System.Collections.Generic.Dictionary<int, string>()
-                
+                Options = new System.Collections.Generic.Dictionary<int, string>(),
+                CustomNames = new System.Collections.Generic.Dictionary<int, string>()
             };
 
             string path = Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "Magnetar Translation");
@@ -38,6 +40,9 @@ namespace Magnetar_Client.Core
 
             foreach ( var language in lanuages)
             {
+#if DEBUG
+                DebugLogger.Msg("Found Language: " + language);
+#endif
                 string _language = Path.GetFileName(language);
 
                 LanguageSetting.AddOption(i, _language);
@@ -127,6 +132,7 @@ namespace Magnetar_Client.Core
                 Magnetar_Client.Utils.Magnetar_Logger.TranslatorLogger.Msg($"Language changed to {Config.Language}. Reloading translations...");
                 Magnetar_Client.Utils.Translator.LoadTranslations();
                 Magnetar_Client.Utils.Translator.DumpMissingStrings();
+                
 
                 if (ModuleManager.Modules != null)
                 {
@@ -137,6 +143,7 @@ namespace Magnetar_Client.Core
                 }
 
                 HUDManager.OnLanguageChange();
+                Magnetar_Client.NEF.NEFData.OnLanguageChanged();
             }
 
             GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), $"Language: {currentLangName}");

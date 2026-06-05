@@ -224,20 +224,22 @@ namespace Magnetar_Client.Core
 
         public static void OnLanguageChange()
         {
-            for (int i=0; i<HUDRenderer.TranslatedElements.Count; i++)
+
+            foreach (var keypair in HUDRenderer.HudToggles.Options)
             {
-                HUDRenderer.Elements[i].Name = Translator.Translate(HUDRenderer.TranslatedElements[i].Name);
+                HUDRenderer.HudToggles.CustomNames[keypair.Key] = Translator.Translate(
+                    keypair.Value);
             }
         }
     }
 
     public static class HUDRenderer
     {
-        public static List<HudElement> Elements = new List<HudElement>();
         /// <summary>
         /// Gets the collection of HUD elements currently managed by the client.
         /// </summary>
-        public static List<HudElement> TranslatedElements = new List<HudElement>();
+        public static List<HudElement> Elements = new List<HudElement>();
+        
 
         /// <summary>
         /// Gets or sets the collection of HUD toggle options available/Selected.
@@ -246,7 +248,10 @@ namespace Magnetar_Client.Core
 
         public static void Init()
         {
-            HudToggles = new MultiSelectSetting("Active HUDManager Elements");
+            HudToggles = new MultiSelectSetting("Active HUDManager Elements")
+            {
+                CustomNames = new Dictionary<int, string>()
+            };
                 
             int currentWindowId = 4000;
 
@@ -268,8 +273,8 @@ namespace Magnetar_Client.Core
         public static void RegisterElement(HudElement element)
         {
             Elements.Add(element);
-            TranslatedElements.Add(element);
             HudToggles.AddOption(element.WindowId, element.Name);
+            HudToggles.CustomNames[element.WindowId] = element.Name;
         }
 
         public static void RenderOverlay()

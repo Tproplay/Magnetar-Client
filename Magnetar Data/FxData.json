@@ -190,5 +190,12 @@
   "particle_fire",
   "particle_fire_1",
   "Fume_helmet",
-  "SunBombCloud"
+  "SunBombCloud",
+  "BombStarCloud",
+  "FumeColorful",
+  "Fume_magnet",
+  "ElectricSplat",
+  "IceParticle",
+  "Gloom",
+  "MagnetLight"
 ]

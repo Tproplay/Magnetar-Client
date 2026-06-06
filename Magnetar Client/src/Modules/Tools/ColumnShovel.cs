@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
 using Il2Cpp;
-using System.Collections.Generic;
 using static Il2Cpp.Plant;
-using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 
 namespace Magnetar_Client.Modules
@@ -48,7 +46,18 @@ namespace Magnetar_Client.Modules
                 if (shovel.m.theMouseColumn != __instance.thePlantColumn ||
                     shovel.m.theMouseRow != __instance.thePlantRow) return;
 
+                // BugFix: Disable Plant GodMode for smooth execution
+                bool _disabledGodMode = false;
+                if (GodMode.instance!=null && GodMode.instance.Active)
+                {
+                    GodMode.instance.Active = false;
+                    _disabledGodMode = true;
+                }
+
+                // Kill All the Plants
+
                 DieByMod = true;
+
                 foreach (Plant plant in plantList)
                 {
                     if (plant == __instance) continue;
@@ -58,7 +67,15 @@ namespace Magnetar_Client.Modules
                         plant.Die(DieReason.ByShovel);
                     }
                 }
+
                 DieByMod = false;
+
+                // Re enable Plant GodMode
+                if (_disabledGodMode)
+                {
+                    GodMode.instance.Active = true;
+                }
+                
 
 
             }

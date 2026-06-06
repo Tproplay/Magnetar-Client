@@ -37,12 +37,15 @@ namespace Magnetar_Client.Core
         /// window's position and size. This allows the application to remember and restore window layouts for
         /// individual modules.</remarks>
         private static Dictionary<Modules.Module, Rect> settingsPositions = new Dictionary<Modules.Module, Rect>();
+        private static Dictionary<Modules.Module, Vector2> settingsScrollPositions = new Dictionary<Modules.Module, Vector2>();
+        private static Dictionary<Modules.Module, float> moduleContentHeights = new Dictionary<Modules.Module, float>();
 
         public static bool showModules = true;
         public static bool showSettings = false;
         public static bool showSelectionGui = false;
 
         public static bool resetWindowPos = false;
+
 
         public static int bindingModuleId = -1;
         public static int activeSliderId = -1;
@@ -156,13 +159,16 @@ namespace Magnetar_Client.Core
                     {
                         int settingsId = Mathf.Abs(mod.GetHashCode()) + 1000;
 
-                        float popupWidth = 500;
-                        float popupHeight = Screen.height*0.5f;
-
                         // Re-Center the window
                         if (!settingsPositions.ContainsKey(mod) || resetWindowPos)
                         {
                             resetWindowPos = false;
+
+                            float popupWidth = mod.SettingsWidth; // Custom Module Width!
+
+                            // Estimate height initially, bound it to 70% of screen
+                            float contentH = moduleContentHeights.ContainsKey(mod) ? moduleContentHeights[mod] : 300f;
+                            float popupHeight = Mathf.Min(contentH + 25f, Screen.height * 0.7f);
 
                             settingsPositions[mod] = new Rect(
                                 (Config.WindowWidth / 2f) - (popupWidth / 2f),
@@ -236,7 +242,6 @@ namespace Magnetar_Client.Core
                 string cleanHints = m.SearchHints.Replace(" ", "").ToLower();
                 string cleanName = m.Name.Replace(" ", "").ToLower();
 
-                // Check if category matches AND (Name contains search OR Hints contain search)
                 return m.Category == category &&
                        (cleanName.Contains(cleanSearch) || cleanHints.Contains(cleanSearch));
             }).ToList();
@@ -292,14 +297,26 @@ namespace Magnetar_Client.Core
         private static void DrawSettingsWindow(int id, Magnetar_Client.Modules.Module mod)
         {
             float windowWidth = settingsPositions[mod].width;
-            float y = 28;
+            float headerHeight = 25f;
+            float maxWindowHeight = Screen.height * 0.7f;
 
-            float heightNeeded = DrawModuleSettings(mod, y, windowWidth);
+            if (!moduleContentHeights.ContainsKey(mod)) moduleContentHeights[mod] = 300f;
+            if (!settingsScrollPositions.ContainsKey(mod)) settingsScrollPositions[mod] = Vector2.zero;
+
+            float contentHeight = moduleContentHeights[mod];
+
+            // Safely expand virtual space so dropdown menus don't get clipped by the scroll boundary
+            if (DrawSetting.activeDropdownId != -1 || DrawSetting.focusedControlId != -1)
+                contentHeight += 150f;
+
+            float windowHeight = Mathf.Min(contentHeight + headerHeight, maxWindowHeight);
+            float viewHeight = windowHeight - headerHeight;
 
             Event e = Event.current;
+
 #if ANDROID
             // --- CLOSE Button ---
-            Rect closeButtonRect = new Rect(multiSelectWindowRect.width - 26, 4, 22, 22);
+            Rect closeButtonRect = new Rect(windowWidth - 26, 4, 22, 22);
             GUI.Box(closeButtonRect, "X", Magnetar_Default.ModuleOff);
             if (e.type == EventType.MouseDown && closeButtonRect.Contains(e.mousePosition))
             {
@@ -314,11 +331,59 @@ namespace Magnetar_Client.Core
             if (e.type == EventType.Layout)
             {
                 Rect r = settingsPositions[mod];
-                r.height = y + heightNeeded + 20f; 
+                r.height = windowHeight;
                 settingsPositions[mod] = r;
             }
 
-            GUI.DragWindow(new Rect(0, 0, windowWidth, 25));
+            Rect outRect = new Rect(0, headerHeight, windowWidth, viewHeight);
+
+            float maxScroll = Mathf.Max(0, contentHeight - viewHeight);
+            float currentScroll = settingsScrollPositions[mod].y;
+
+            // Handle Mouse Wheel Scrolling
+            if (outRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
+            {
+                currentScroll = Mathf.Clamp(currentScroll + e.delta.y * 25f, 0, maxScroll);
+                settingsScrollPositions[mod] = new Vector2(0, currentScroll);
+                e.Use();
+            }
+            GUI.BeginGroup(outRect);
+
+            float startY = -currentScroll;
+            float contentWidth = maxScroll > 0 ? windowWidth - 16 : windowWidth;
+
+            float actualHeightDrawn = DrawModuleSettings(mod, startY, contentWidth);
+
+            if (e.type == EventType.Repaint)
+            {
+                moduleContentHeights[mod] = actualHeightDrawn;
+            }
+
+            // Drop Bar
+            if (DrawSetting.OnPostDraw != null)
+            {
+                DrawSetting.OnPostDraw.Invoke();
+                DrawSetting.OnPostDraw = null;
+            }
+
+            GUI.EndGroup();
+
+            if (maxScroll > 0)
+            {
+                float trackX = windowWidth - 14;
+                float trackY = headerHeight + 5;
+                float trackHeight = viewHeight - 10;
+
+                float handleHeight = Mathf.Max(20f, (viewHeight / contentHeight) * trackHeight);
+                float scrollPct = currentScroll / maxScroll;
+                float handleY = trackY + (scrollPct * (trackHeight - handleHeight));
+
+                GUI.Box(new Rect(trackX + 5, trackY, 2, trackHeight), "", Magnetar_Default.SeparatorStyle);
+
+                GUI.Box(new Rect(trackX, handleY, 12, handleHeight), "", Magnetar_Default.ModuleOff);
+            }
+
+            GUI.DragWindow(new Rect(0, 0, windowWidth, headerHeight));
         }
 
         private static float DrawModuleSettings(Magnetar_Client.Modules.Module mod, float y, float width)
@@ -351,18 +416,36 @@ namespace Magnetar_Client.Core
 
             if (mod.Settings.Count > 0)
             {
-                MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing,Color.white);
-                
+                MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Color.white);
             }
-            
+
+            bool skipSettings = false;
+
             foreach (var setting in mod.Settings)
             {
+                // --- Category Logic ---
+                if (setting is CategorySetting catSet)
+                {
+                    catSet.IsExpanded = MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Color.white, Translate(catSet.Name), true, catSet.IsExpanded);
+                    skipSettings = !catSet.IsExpanded; // If collapsed, skip drawing!
+                    continue;
+                }
+                else if (setting is EndCategorySetting)
+                {
+                    skipSettings = false; // Reset out of category
+                    y += Config.spacing;
+                    continue;
+                }
+
+                if (skipSettings) continue; // Skip settings if parent category is closed
 
                 if (setting is FloatSetting floatSet) HandleNumericSetting(floatSet, ref y, width, true);
                 else if (setting is IntSetting intSet) HandleNumericSetting(intSet, ref y, width, false);
                 else if (setting is BoolSetting boolSet) HandleBoolSetting(boolSet, ref y, width);
                 else if (setting is BindSetting bindSet) HandleBindSetting(bindSet, ref y, width);
                 else if (setting is MultiSelectSetting multiSet) HandleMultiSelectSetting(multiSet, ref y, width);
+                else if (setting is StringSetting strSet) HandleStringSetting(strSet, ref y, width);
+                else if (setting is SelectSetting selSet) HandleSelectSetting(selSet, ref y, width);
 
                 y += Config.elementHeight + Config.spacing;
             }

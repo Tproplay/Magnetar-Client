@@ -14,6 +14,8 @@ namespace Magnetar_Client.UI.Themes
         public static GUIStyle DescriptionStyle;
         public static GUIStyle AuthorStyle;
         public static GUIStyle SeparatorStyle;
+        public static GUIStyle TextStyle;
+        public static GUIStyle TextHighlightedStyle;
 
         public static GUIStyle DimStyle;
         public static GUIStyle HUDElementStyle;
@@ -222,6 +224,31 @@ namespace Magnetar_Client.UI.Themes
             NEFNodeStyle.padding.right = 2;
             NEFNodeStyle.padding.top = 2;
             NEFNodeStyle.padding.bottom = 5;
+            #endregion
+
+            #region TextStyle Normal
+
+            TextStyle = new GUIStyle();
+            TextStyle.wordWrap = false;
+            TextStyle.alignment = TextAnchor.MiddleLeft;
+            TextStyle.richText = false;
+            TextStyle.clipping = TextClipping.Clip;
+
+            TextStyle.normal.textColor = Color.white;
+
+            #endregion
+
+            #region TextStyle Highlighted
+
+            TextHighlightedStyle = new GUIStyle();
+            TextHighlightedStyle.wordWrap = false;
+            TextHighlightedStyle.alignment = TextAnchor.MiddleLeft;
+            TextHighlightedStyle.richText = false;
+            TextHighlightedStyle.clipping = TextClipping.Clip;
+
+            TextHighlightedStyle.normal.textColor = Color.white;
+            TextHighlightedStyle.normal.background = AccentTex;
+
             #endregion
 
             MelonLogger.Msg("Initialized the Theme 'Magnetar_Default'");

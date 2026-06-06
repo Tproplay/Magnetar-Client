@@ -85,11 +85,11 @@ namespace Magnetar_Client.Modules
         /// </summary>
         public virtual void OnLanguageChanged() { }
 
-        public static Dictionary<int,string> TranslatedNames(System.Type enumType)
+        public static Dictionary<int, string> TranslatedNames(System.Type enumType)
         {
             var names = Translator.TranslateEnum(enumType);
 
-            foreach(var name in names)
+            foreach (var name in names)
             {
                 names[name.Key] = name.Value + $" ({name.Key})";
             }
@@ -97,11 +97,47 @@ namespace Magnetar_Client.Modules
             return names;
 
         }
+
+        public virtual float SettingsWidth { get; set; } = 500f;
+
+        // Add these category helper methods anywhere inside the Module class
+        public void CreateCategory(string name, bool defaultExpanded = true)
+        {
+            Settings.Add(new CategorySetting(name, defaultExpanded));
+        }
+
+        public void EndCategory()
+        {
+            Settings.Add(new EndCategorySetting());
+        }
     }
 
     public abstract class Setting
     {
         public string Name;
+    }
+
+    public class StringSetting : Setting
+    {
+        public string Value;
+        public string DefaultValue;
+
+        public List<string> AutocompleteVars;
+
+        /// <summary>
+        /// Initializes a new instance of the StringSetting class with the specified name and default value, 
+        /// with an optional list of autocomplete variables.
+        /// </summary>
+        /// <param name="name">The unique name that identifies the setting.</param>
+        /// <param name="defaultValue">The default string value assigned to the setting.</param>
+        /// <param name="autocompleteVars">Optional list of variables for the rich-text autocomplete dropdown.</param>
+        public StringSetting(string name, string defaultValue, List<string> autocompleteVars = null)
+        {
+            Name = name;
+            Value = defaultValue;
+            DefaultValue = defaultValue;
+            AutocompleteVars = autocompleteVars;
+        }
     }
 
     public class IntSetting : Setting
@@ -158,6 +194,7 @@ namespace Magnetar_Client.Modules
         }
     }
 
+
     public class BoolSetting : Setting
     {
         public bool Value;
@@ -175,6 +212,7 @@ namespace Magnetar_Client.Modules
             DefaultValue = defaultValue;
         }
     }
+
 
     public class BindSetting : Setting
     {
@@ -202,6 +240,7 @@ namespace Magnetar_Client.Modules
             return string.Join(" + ", BindKeys.Select(k => k.ToString()).ToArray());
         }
     }
+
 
     public class MultiSelectSetting : Setting
     {
@@ -350,4 +389,82 @@ namespace Magnetar_Client.Modules
         }
 
     }
+
+    public class SelectSetting : Setting
+    {
+        public int Value;
+        public int DefaultValue;
+
+        public Dictionary<int, string> Options { get; set; }
+        public System.Type EnumType { get; private set; }
+
+        private Dictionary<int, string> _customNames;
+        public Dictionary<int, string> CustomNames
+        {
+            get => _customNames;
+            set
+            {
+                _customNames = value;
+                if (_customNames != null)
+                {
+                    foreach (var kvp in _customNames)
+                    {
+                        Options[kvp.Key] = kvp.Value;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initializes an empty SelectSetting.
+        /// </summary>
+        public SelectSetting(string name, int defaultValue)
+        {
+            Name = name;
+            Value = defaultValue;
+            DefaultValue = defaultValue;
+            Options = new Dictionary<int, string>();
+            EnumType = null;
+        }
+
+        /// <summary>
+        /// Initializes a SelectSetting populated by an Enum.
+        /// </summary>
+        public SelectSetting(string name, System.Type enumType, int defaultValue)
+        {
+            Name = name;
+            Value = defaultValue;
+            DefaultValue = defaultValue;
+            EnumType = enumType;
+            Options = new Dictionary<int, string>();
+
+            if (enumType != null && enumType.IsEnum)
+            {
+                var values = System.Enum.GetValues(enumType);
+                foreach (var val in values)
+                {
+                    int intVal = System.Convert.ToInt32(val);
+                    string displayName = val.ToString();
+                    Options[intVal] = displayName;
+                }
+            }
+        }
+
+        public void AddOption(int id, string displayName)
+        {
+            Options[id] = displayName;
+        }
+    }
+
+    public class CategorySetting : Setting
+    {
+        public bool IsExpanded;
+        public CategorySetting(string name, bool defaultExpanded = true)
+        {
+            Name = name;
+            IsExpanded = defaultExpanded;
+        }
+    }
+
+    public class EndCategorySetting : Setting { }
 }

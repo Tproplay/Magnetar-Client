@@ -266,7 +266,6 @@ namespace Magnetar_Client.Core
                 // Manual Input Check
                 if (Event.current.type == EventType.MouseDown && btnRect.Contains(Event.current.mousePosition))
                 {
-                    isSearchFocused = false;
                     if (Event.current.button == 0)
                     {
                         mod.Toggle();

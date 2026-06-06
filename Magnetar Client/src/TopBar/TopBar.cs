@@ -58,7 +58,6 @@ namespace Magnetar_Client.TopBar
                 {
                     Config.CurrentTab = tab;
                     Event.current.Use();
-                    UI.WindowDrawing.DrawSetting.isSearchFocused = false;
                 }
 
                 GUI.EndGroup();

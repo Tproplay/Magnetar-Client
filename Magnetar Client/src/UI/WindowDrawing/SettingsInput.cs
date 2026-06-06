@@ -273,7 +273,6 @@ namespace Magnetar_Client.UI.WindowDrawing
         private static bool dragTargetState = false;
         private static HashSet<int> draggedItemsSession = new HashSet<int>();
 
-        public static bool isSearchFocused = false;
 
         public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, dynamic activeMultiSelect)
         {
@@ -808,7 +807,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     if (activeTextFieldId != controlId)
                     {
                         activeTextFieldId = controlId;
-                        isSearchFocused = true;
                     }
                     cursorIndex = GetIndexFromMouse(e.mousePosition.x - rect.x);
                     if (!e.shift) selectIndex = cursorIndex;
@@ -817,7 +815,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                 else if (activeTextFieldId == controlId && !clickingDropdown)
                 {
                     activeTextFieldId = -1;
-                    isSearchFocused = false;
                 }
             }
             else if (e.type == EventType.MouseDrag && e.button == 0 && activeTextFieldId == controlId)
@@ -1006,7 +1003,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                     // DEFOCUS
                     else if (k == KeyCode.Return || k == KeyCode.Escape)
                     {
-                        activeTextFieldId = -1; isSearchFocused = false; e.Use();
+                        activeTextFieldId = -1; e.Use();
                     }
                     // TYPING
                     else if (c != '\0' && !char.IsControl(c))

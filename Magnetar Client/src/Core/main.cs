@@ -77,6 +77,7 @@ namespace Magnetar_Client.Core
                 Config.showgui = false;
                 Event.current.Use();
                 Save();
+                ResetInputBind();
 #if DEBUG
                 DebugLogger.Msg("Escape Triggerd : Modules Window -> None");
 #endif
@@ -97,6 +98,8 @@ namespace Magnetar_Client.Core
                     {
                         m.ShowSettings = false;
                     }
+
+                    ResetInputBind();
 #if DEBUG
                     DebugLogger.Msg("Escape Triggerd : Settings Window -> Modules Window");
 #endif
@@ -113,6 +116,8 @@ namespace Magnetar_Client.Core
                     ModuleManager.showSettings = true;
                     ModuleManager.showSelectionGui = false;
 
+                    ResetInputBind();
+
                     Event.current.Use();
 #if DEBUG
                     DebugLogger.Msg("Escape Triggerd : Selection Window -> Settings Window");
@@ -121,6 +126,15 @@ namespace Magnetar_Client.Core
             }
 
             #endregion
+        }
+
+        public static void ResetInputBind()
+        {
+            Magnetar_Client.UI.WindowDrawing.DrawSetting.activeDropdownId = -1;
+            Magnetar_Client.UI.WindowDrawing.DrawSetting.activeSliderId = -1;
+            Magnetar_Client.UI.WindowDrawing.DrawSetting.activeTextFieldId = -1;
+            ModuleManager.bindingModuleId = -1;
+            ModuleManager.activeSliderId = -1;
         }
 
         public static void WarmUp()

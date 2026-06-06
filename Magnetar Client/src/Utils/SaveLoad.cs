@@ -64,7 +64,6 @@ namespace Magnetar_Client.Utils
 
         public static void Save(bool force = false)
         {
-
             // Ensure that it only save after some time to reduce lag
             if (!force)
             {
@@ -72,12 +71,19 @@ namespace Magnetar_Client.Utils
                 {
                     LastSaved = Time.realtimeSinceStartup;
                 }
-
                 else if (LastSaved + Config.MinTimeBetweenSaves >= Time.realtimeSinceStartup)
                     return;
             }
 
             LastSaved = Time.realtimeSinceStartup;
+
+            List<int> safeHudElements = new List<int>();
+            if (HUDRenderer.HudToggles != null && HUDRenderer.HudToggles.SelectedValues != null)
+                safeHudElements = new List<int>(HUDRenderer.HudToggles.SelectedValues);
+
+            int safeLanguage = 0;
+            if (GUIManager.LanguageSetting != null && GUIManager.LanguageSetting.SelectedValues != null && GUIManager.LanguageSetting.SelectedValues.Count > 0)
+                safeLanguage = GUIManager.LanguageSetting.SelectedValues.First();
 
             // ==========================================
             // 1. SAVE MAIN MAGNETAR CONFIG
@@ -88,42 +94,56 @@ namespace Magnetar_Client.Utils
                 DimBg = Config.dimBg,
                 HudEnabled = HUDManager.Enabled,
                 ShowBackground = HUDManager.showBackground,
-                SelectedHudElements = new List<int>(HUDRenderer.HudToggles.SelectedValues),
+                SelectedHudElements = safeHudElements,
                 HudPositions = new Dictionary<string, SimpleRect>(),
                 CategoryPositions = new Dictionary<string, SimpleRect>(),
                 Modules = new Dictionary<string, ModuleSaveData>(),
-                Language = GUIManager.LanguageSetting.SelectedValues.First(),
+                Language = safeLanguage,
             };
 
-            foreach (var element in HUDRenderer.Elements)
+            if (HUDRenderer.Elements != null)
             {
-                data.HudPositions[element.Name] = element.Bounds;
+                foreach (var element in HUDRenderer.Elements)
+                    data.HudPositions[element.Name] = element.Bounds;
             }
 
-            foreach (var kvp in ModuleManager.windowPositions)
-                data.CategoryPositions[kvp.Key.ToString()] = kvp.Value;
-
-            foreach (var mod in ModuleManager.Modules)
+            if (ModuleManager.windowPositions != null)
             {
-                ModuleSaveData modData = new ModuleSaveData
-                {
-                    Active = mod.Active,
-                    HoldMode = mod.HoldMode,
-                    KeyBinds = new List<KeyCode>(mod.BindKeys)
-                };
+                foreach (var kvp in ModuleManager.windowPositions)
+                    data.CategoryPositions[kvp.Key.ToString()] = kvp.Value;
+            }
 
-                foreach (var setting in mod.Settings)
+            if (ModuleManager.Modules != null)
+            {
+                foreach (var mod in ModuleManager.Modules)
                 {
-                    if (setting is IntSetting i) modData.Settings[i.Name] = i.Value;
-                    else if (setting is FloatSetting f) modData.Settings[f.Name] = f.Value;
-                    else if (setting is BoolSetting b) modData.Settings[b.Name] = b.Value;
-                    else if (setting is BindSetting bind) modData.Settings[bind.Name] = bind.BindKeys;
-                    else if (setting is MultiSelectSetting ms)
+                    ModuleSaveData modData = new ModuleSaveData
                     {
-                        modData.Settings[ms.Name] = new MultiSelectSaveData { SelectedValues = new List<int>(ms.SelectedValues) };
+                        Active = mod.Active,
+                        HoldMode = mod.HoldMode,
+                        KeyBinds = mod.BindKeys != null ? new List<KeyCode>(mod.BindKeys) : new List<KeyCode>()
+                    };
+
+                    if (mod.Settings != null)
+                    {
+                        foreach (var setting in mod.Settings)
+                        {
+                            if (setting is IntSetting i) modData.Settings[i.Name] = i.Value;
+                            else if (setting is FloatSetting f) modData.Settings[f.Name] = f.Value;
+                            else if (setting is BoolSetting b) modData.Settings[b.Name] = b.Value;
+                            else if (setting is BindSetting bind) modData.Settings[bind.Name] = bind.BindKeys;
+                            else if (setting is StringSetting str) modData.Settings[str.Name] = str.Value;
+                            else if (setting is SelectSetting sel) modData.Settings[sel.Name] = sel.Value;
+                            else if (setting is CategorySetting cat) modData.Settings[cat.Name] = cat.IsExpanded;
+
+                            else if (setting is MultiSelectSetting ms)
+                            {
+                                modData.Settings[ms.Name] = new MultiSelectSaveData { SelectedValues = new List<int>(ms.SelectedValues) };
+                            }
+                        }
                     }
+                    data.Modules[mod.Name] = modData;
                 }
-                data.Modules[mod.Name] = modData;
             }
 
             File.WriteAllText(Path, JsonConvert.SerializeObject(data, Formatting.Indented));
@@ -133,7 +153,6 @@ namespace Magnetar_Client.Utils
             // ==========================================
             try
             {
-                // Pull active changes written manually to the disk while the game was running
                 if (File.Exists(TexturePath))
                 {
                     try
@@ -154,7 +173,7 @@ namespace Magnetar_Client.Utils
                             }
                         }
                     }
-                    catch (Exception e) { TranslatorLogger.Error("Failed to read Texture Data: " + e);  }
+                    catch (Exception e) { TranslatorLogger.Error("Failed to read Texture Data: " + e); }
                 }
 
                 TextureSaveData texData = new TextureSaveData
@@ -173,8 +192,7 @@ namespace Magnetar_Client.Utils
                 AutoSaveLogger.Error($"Failed to save TextureData: {e.Message}");
             }
 
-            if (!force)
-                AutoSaveLogger.Msg("Saved the current current Config Data");
+            if (!force) AutoSaveLogger.Msg("Saved the current Config Data");
         }
 
         public static void Load()
@@ -189,8 +207,12 @@ namespace Magnetar_Client.Utils
                     {
                         Config.showgui = data.ShowGui;
                         Config.dimBg = data.DimBg;
-                        GUIManager.LanguageSetting.Deselect(0);
-                        GUIManager.LanguageSetting.Select(data.Language);
+
+                        if (GUIManager.LanguageSetting != null)
+                        {
+                            GUIManager.LanguageSetting.Deselect(0);
+                            GUIManager.LanguageSetting.Select(data.Language);
+                        }
 
                         foreach (var entry in data.CategoryPositions)
                         {
@@ -203,7 +225,9 @@ namespace Magnetar_Client.Utils
 
                         if (data.HudPositions != null && HUDRenderer.Elements != null)
                         {
-                            HUDRenderer.HudToggles.SelectedValues = new HashSet<int>(data.SelectedHudElements);
+                            if (HUDRenderer.HudToggles != null)
+                                HUDRenderer.HudToggles.SelectedValues = new HashSet<int>(data.SelectedHudElements);
+
                             foreach (var element in HUDRenderer.Elements)
                             {
                                 if (data.HudPositions.TryGetValue(element.Name, out SimpleRect savedPos))
@@ -226,7 +250,8 @@ namespace Magnetar_Client.Utils
                                         foreach (var setting in mod.Settings)
                                         {
                                             if (string.IsNullOrEmpty(setting.Name)) continue;
-                                            if (modData.Settings.TryGetValue(setting.Name, out object rawValue)) RestoreSettingValue(setting, rawValue);
+                                            if (modData.Settings.TryGetValue(setting.Name, out object rawValue))
+                                                RestoreSettingValue(setting, rawValue);
                                         }
                                     }
                                     if (mod.Active != modData.Active) mod.Toggle();
@@ -268,6 +293,10 @@ namespace Magnetar_Client.Utils
                 if (setting is IntSetting i) i.Value = Convert.ToInt32(rawValue);
                 else if (setting is FloatSetting f) f.Value = Convert.ToSingle(rawValue);
                 else if (setting is BoolSetting b) b.Value = Convert.ToBoolean(rawValue);
+                else if (setting is StringSetting str) str.Value = rawValue.ToString();
+                else if (setting is SelectSetting sel) sel.Value = Convert.ToInt32(rawValue);
+                else if (setting is CategorySetting cat) cat.IsExpanded = Convert.ToBoolean(rawValue);
+
                 else if (setting is BindSetting bind)
                 {
                     string jsonStr = JsonConvert.SerializeObject(rawValue);
@@ -284,7 +313,7 @@ namespace Magnetar_Client.Utils
                     }
                 }
             }
-            catch (Exception ex) { MelonLoader.MelonLogger.Error($"Error setting '{setting.Name}': {ex.Message}"); }
+            catch (Exception ex) { DebugLogger.Error($"Error setting '{setting.Name}': {ex.Message}"); }
         }
     }
 }

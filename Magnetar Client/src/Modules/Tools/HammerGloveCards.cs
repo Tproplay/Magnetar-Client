@@ -132,25 +132,25 @@ namespace Magnetar_Client.Modules
 
         public override void OnUpdateActive()
         {
-            if (HammerMgr.Instance == null)
+            if (Hammer.Instance == null)
             {
                 originalCD = -1f;
                 return;
             }
 
             // Save Original CD
-            if (originalCD == -1f) originalCD = HammerMgr.Instance.fullCD;
+            if (originalCD == -1f) originalCD = Hammer.Instance.fullCD;
 
             // BugFix: If the player has a higher CD than the one we set, we set it to our custom CD so
             // it doesn't take longer than intended to use the hammer again. This can happen if the player
             // has a CD increasing item and they enable this mod while the CD is still active.
-            if (HammerMgr.Instance.CD > CustomCDSetting.Value)
+            if (Hammer.Instance.CD > CustomCDSetting.Value)
             {
-                HammerMgr.Instance.CD = CustomCDSetting.Value;
-                HammerMgr.Instance.CDUpdate();
+                Hammer.Instance.CD = CustomCDSetting.Value;
+                Hammer.Instance.CDUpdate();
             }
 
-            HammerMgr.Instance.fullCD = CustomCDSetting.Value;
+            Hammer.Instance.fullCD = CustomCDSetting.Value;
 
 
         }
@@ -158,21 +158,21 @@ namespace Magnetar_Client.Modules
         public override void OnDisable()
         {
 
-            if (HammerMgr.Instance == null) return;
+            if (Hammer.Instance == null) return;
 
             if (originalCD >= 0 && preserveOriginalSetting.Value)
             {
-                HammerMgr.Instance.fullCD = originalCD;
+                Hammer.Instance.fullCD = originalCD;
             }
             originalCD = -1f;
         }
 
         public override void OnEnable()
         {
-            if (HammerMgr.Instance == null) return;
+            if (Hammer.Instance == null) return;
             if (resetCDonEnableSetting.Value)
             {
-                HammerMgr.Instance.CD = CustomCDSetting.Value;
+                Hammer.Instance.CD = CustomCDSetting.Value;
             }
         }
     }

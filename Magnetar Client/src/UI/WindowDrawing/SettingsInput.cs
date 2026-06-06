@@ -364,7 +364,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             multiSelectSearchQuery = DrawManualTextField(
                 searchRect,
                 multiSelectSearchQuery ?? "",
-                ""
+                Translator.Translate("Search...")
             );
 
             if (oldQuery != multiSelectSearchQuery)

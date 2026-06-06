@@ -118,11 +118,6 @@ namespace Magnetar_Client.Modules
                 }
 
                 __instance.healthText.text = finalText;
-
-                if (__instance.healthTextShadow != null)
-                {
-                    __instance.healthTextShadow.text = finalText;
-                }
             }
         }
 

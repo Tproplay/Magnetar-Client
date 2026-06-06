@@ -16,7 +16,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Discord RPC";
-        public override string Description { get; set; } = "Shows rolling status updates on Discord.";
+        public override string Description { get; set; } = "Shows rolling Gamestatus updates on Discord.";
         public override string SearchHints { get; set; } = "discordrpc discordrichpresence discordpresence discordactivity " +
             "discordstatus discordintegration rpcstatus richpresence discordconnect discordlink discordinfo discorddisplay " +
             "rpcpresence discordrp discordstat discordlive discordsync discordgame discordapi discrodrpc discordrcp discordrps " +
@@ -28,15 +28,36 @@ namespace Magnetar_Client.Modules
 
         public FloatSetting SwitchSpeed;
 
-        public StringSetting Line1_1;
-        public StringSetting Line1_2;
-        public StringSetting Line1_3;
-        public StringSetting Line1_4;
+        #region Lines
 
-        public StringSetting Line2_1;
-        public StringSetting Line2_2;
-        public StringSetting Line2_3;
-        public StringSetting Line2_4;
+        public StringSetting InGame_Line1_1;
+        public StringSetting InGame_Line1_2;
+        public StringSetting InGame_Line1_3;
+        public StringSetting InGame_Line1_4;
+
+        public StringSetting InGame_Line2_1;
+        public StringSetting InGame_Line2_2;
+        public StringSetting InGame_Line2_3;
+        public StringSetting InGame_Line2_4;
+
+        public StringSetting Menu_Line1_1;
+        public StringSetting Menu_Line1_2;
+        public StringSetting Menu_Line1_3;
+        public StringSetting Menu_Line1_4;
+
+        public StringSetting Menu_Line2_1;
+        public StringSetting Menu_Line2_2;
+        public StringSetting Menu_Line2_3;
+        public StringSetting Menu_Line2_4;
+
+        #endregion
+
+        public enum Status
+        {
+            InGame, Menu, Transition
+        }
+
+        public static Status status = Status.Menu;
 
         public List<string> Line1Cycle = new List<string>();
         public List<string> Line2Cycle = new List<string>();
@@ -57,18 +78,18 @@ namespace Magnetar_Client.Modules
             AddSettings(SwitchSpeed);
 
             CreateCategory("In Game",true);
-            Line1_1 = new StringSetting("Line1 Message 1", "Magnetar Client v{Magnetar_Version}", AutoCompleteArgs);
-            Line1_2 = new StringSetting("Line1 Message 2", "Playing: {Level_Name}", AutoCompleteArgs);
-            Line1_3 = new StringSetting("Line1 Message 3", "", AutoCompleteArgs);
-            Line1_4 = new StringSetting("Line1 Message 4", "", AutoCompleteArgs);
+            InGame_Line1_1 = new StringSetting("Line1 Message 1", "Magnetar Client v{Magnetar_Version}", In_Game_AutoCompleteArgs);
+            InGame_Line1_2 = new StringSetting("Line1 Message 2", "Playing: {Level_Name}", In_Game_AutoCompleteArgs);
+            InGame_Line1_3 = new StringSetting("Line1 Message 3", "", In_Game_AutoCompleteArgs);
+            InGame_Line1_4 = new StringSetting("Line1 Message 4", "", In_Game_AutoCompleteArgs);
 
-            Line2_1 = new StringSetting("Line2 Message 1", "Sun: {Sun} | Money: {Money}", AutoCompleteArgs);
-            Line2_2 = new StringSetting("Line2 Message 2", "Wave: {Current_Wave}/{Max_Wave}", AutoCompleteArgs);
-            Line2_3 = new StringSetting("Line2 Message 3", "", AutoCompleteArgs);
-            Line2_4 = new StringSetting("Line2 Message 4", "", AutoCompleteArgs);
+            InGame_Line2_1 = new StringSetting("Line2 Message 1", "Sun: {Sun} | Money: {Money}", In_Game_AutoCompleteArgs);
+            InGame_Line2_2 = new StringSetting("Line2 Message 2", "Wave: {Current_Wave}/{Max_Wave}", In_Game_AutoCompleteArgs);
+            InGame_Line2_3 = new StringSetting("Line2 Message 3", "", In_Game_AutoCompleteArgs);
+            InGame_Line2_4 = new StringSetting("Line2 Message 4", "", In_Game_AutoCompleteArgs);
 
-            AddSettings(Line1_1, Line1_2, Line1_3, Line1_4);
-            AddSettings(Line2_1, Line2_2, Line2_3, Line2_4);
+            AddSettings(InGame_Line1_1, InGame_Line1_2, InGame_Line1_3, InGame_Line1_4);
+            AddSettings(InGame_Line2_1, InGame_Line2_2, InGame_Line2_3, InGame_Line2_4);
             EndCategory();
         }
 
@@ -116,52 +137,61 @@ namespace Magnetar_Client.Modules
             Line1Cycle.Clear();
             Line2Cycle.Clear();
 
-            GameStatus status = GameAPP.theGameStatus;
+            GameStatus Gamestatus = GameAPP.theGameStatus;
 
-            if (status == GameStatus.InGame && !BoardInstanceIsNull)
+            if (Gamestatus == GameStatus.InGame && !BoardInstanceIsNull) // In Game
             {
-                if (!string.IsNullOrWhiteSpace(Line1_1.Value)) Line1Cycle.Add(FormatString(Line1_1.Value));
-                if (!string.IsNullOrWhiteSpace(Line1_2.Value)) Line1Cycle.Add(FormatString(Line1_2.Value));
-                if (!string.IsNullOrWhiteSpace(Line1_3.Value)) Line1Cycle.Add(FormatString(Line1_1.Value));
-                if (!string.IsNullOrWhiteSpace(Line1_4.Value)) Line1Cycle.Add(FormatString(Line1_2.Value));
-
-                if (!string.IsNullOrWhiteSpace(Line2_1.Value)) Line2Cycle.Add(FormatString(Line2_1.Value));
-                if (!string.IsNullOrWhiteSpace(Line2_2.Value)) Line2Cycle.Add(FormatString(Line2_2.Value));
-                if (!string.IsNullOrWhiteSpace(Line2_3.Value)) Line2Cycle.Add(FormatString(Line2_3.Value));
-                if (!string.IsNullOrWhiteSpace(Line2_4.Value)) Line2Cycle.Add(FormatString(Line2_4.Value));
+                status = Status.InGame; 
             }
 
-            else if ((status == GameStatus.InGame) || (status == GameStatus.OutGame) && BoardInstanceIsNull)
+            else if ((Gamestatus == GameStatus.InGame) || (Gamestatus == GameStatus.OutGame) && BoardInstanceIsNull)
             {
-
+                status = Status.Menu;
             }
 
-            else if ((status == GameStatus.InInterlude) && BoardInstanceIsNull)
+            else if (Gamestatus == GameStatus.InInterlude)
             {
-
+                status = Status.Transition;
             }
 
-            else if (status == GameStatus.Selecting)
+            else if (Gamestatus == GameStatus.Selecting)
             {
                 Line1Cycle.Add("Picking Seeds");
             }
 
-                UpdatePresence();
+            switch (status)
+            {
+                case Status.InGame:
+                    {
+                        if (!string.IsNullOrWhiteSpace(InGame_Line1_1.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_1.Value));
+                        if (!string.IsNullOrWhiteSpace(InGame_Line1_2.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_2.Value));
+                        if (!string.IsNullOrWhiteSpace(InGame_Line1_3.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_3.Value));
+                        if (!string.IsNullOrWhiteSpace(InGame_Line1_4.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_4.Value));
+
+                        if (!string.IsNullOrWhiteSpace(InGame_Line2_1.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_1.Value));
+                        if (!string.IsNullOrWhiteSpace(InGame_Line2_2.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_2.Value));
+                        if (!string.IsNullOrWhiteSpace(InGame_Line2_3.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_3.Value));
+                        if (!string.IsNullOrWhiteSpace(InGame_Line2_4.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_4.Value));
+                        break;
+                    }
+            }
+
+
+            UpdatePresence();
         }
 
-        public static List<string> AutoCompleteArgs = new List<string>
+        public static List<string> In_Game_AutoCompleteArgs = new List<string>
         {
             "Magnetar_Version","Level_Name","Sun","Money","Current_Wave","Max_Wave"
         };
 
-        private string FormatString(string input)
+        private string In_Game_FormatString(string input)
         {
             if (string.IsNullOrEmpty(input)) return input;
             string result = input;
 
             result = result.Replace("{Magnetar_Version}", 
                 System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttribute<MelonInfoAttribute>().Version);
-
             result = result.Replace("{Level_Name}", GetLevelName());
             result = result.Replace("{Sun}", FormatInternational(board.theSun));
             result = result.Replace("{Money}", FormatInternational(board.theMoney));

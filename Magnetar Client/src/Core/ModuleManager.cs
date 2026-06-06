@@ -39,6 +39,7 @@ namespace Magnetar_Client.Core
         private static Dictionary<Modules.Module, Rect> settingsPositions = new Dictionary<Modules.Module, Rect>();
         private static Dictionary<Modules.Module, Vector2> settingsScrollPositions = new Dictionary<Modules.Module, Vector2>();
         private static Dictionary<Modules.Module, float> moduleContentHeights = new Dictionary<Modules.Module, float>();
+        private static Dictionary<Modules.Module, float> targetContentHeights = new Dictionary<Modules.Module, float>();
 
         public static bool showModules = true;
         public static bool showSettings = false;
@@ -164,11 +165,8 @@ namespace Magnetar_Client.Core
                         {
                             resetWindowPos = false;
 
-                            float popupWidth = mod.SettingsWidth; // Custom Module Width!
-
-                            // Estimate height initially, bound it to 70% of screen
-                            float contentH = moduleContentHeights.ContainsKey(mod) ? moduleContentHeights[mod] : 300f;
-                            float popupHeight = Mathf.Min(contentH + 25f, Screen.height * 0.7f);
+                            float popupWidth = mod.SettingsWidth;
+                            float popupHeight = 25f; // Start collapsed to just the header!
 
                             settingsPositions[mod] = new Rect(
                                 (Config.WindowWidth / 2f) - (popupWidth / 2f),
@@ -176,6 +174,10 @@ namespace Magnetar_Client.Core
                                 popupWidth,
                                 popupHeight
                             );
+
+                            // Reset animation states so it springs open!
+                            moduleContentHeights[mod] = 0f;
+                            targetContentHeights[mod] = 0f;
                         }
 
 
@@ -298,17 +300,31 @@ namespace Magnetar_Client.Core
             float windowWidth = settingsPositions[mod].width;
             float headerHeight = 25f;
             float maxWindowHeight = Screen.height * 0.7f;
+            float maxViewHeight = maxWindowHeight - headerHeight;
 
-            if (!moduleContentHeights.ContainsKey(mod)) moduleContentHeights[mod] = 300f;
+            if (!moduleContentHeights.ContainsKey(mod)) moduleContentHeights[mod] = 0f;
+            if (!targetContentHeights.ContainsKey(mod)) targetContentHeights[mod] = 0f;
             if (!settingsScrollPositions.ContainsKey(mod)) settingsScrollPositions[mod] = Vector2.zero;
+
+            Rect headerBgRect = new Rect(0, 0, windowWidth, headerHeight);
+            GUI.Box(headerBgRect, Translate(mod.Name), Magnetar_Default.SettingsWindow);
+
+
+            // ==========================================
+            // 1. METEOR SMOOTH ANIMATION LOGIC
+            // ==========================================
+            moduleContentHeights[mod] = Mathf.Lerp(moduleContentHeights[mod], targetContentHeights[mod], Time.deltaTime * 15f);
+
+            if (Mathf.Abs(moduleContentHeights[mod] - targetContentHeights[mod]) < 0.5f)
+                moduleContentHeights[mod] = targetContentHeights[mod];
 
             float contentHeight = moduleContentHeights[mod];
 
-            // Safely expand virtual space so dropdown menus don't get clipped by the scroll boundary
+            float virtualHeight = contentHeight;
             if (DrawSetting.activeDropdownId != -1 || DrawSetting.focusedControlId != -1)
-                contentHeight += 150f;
+                virtualHeight += 150f;
 
-            float windowHeight = Mathf.Min(contentHeight + headerHeight, maxWindowHeight);
+            float windowHeight = Mathf.Min(virtualHeight + headerHeight, maxWindowHeight);
             float viewHeight = windowHeight - headerHeight;
 
             Event e = Event.current;
@@ -327,38 +343,55 @@ namespace Magnetar_Client.Core
             }
 #endif
 
+            // ==========================================
+            // 2. CENTER-ANCHOR EXPANSION MATH
+            // ==========================================
             if (e.type == EventType.Layout)
             {
                 Rect r = settingsPositions[mod];
+                float prevHeight = r.height;
+
                 r.height = windowHeight;
+
+                // Shift the Y position by half the height difference to expand from both top and bottom!
+                if (prevHeight > 0 && Mathf.Abs(windowHeight - prevHeight) > 0.1f)
+                {
+                    r.y -= (windowHeight - prevHeight) / 2f;
+                }
+
                 settingsPositions[mod] = r;
             }
 
-            Rect outRect = new Rect(0, headerHeight, windowWidth, viewHeight);
+            // ==========================================
+            // 3. SCROLL VIEW & RENDERING
+            // ==========================================
 
-            float maxScroll = Mathf.Max(0, contentHeight - viewHeight);
+            bool needsScrollbar = targetContentHeights[mod] > maxViewHeight;
+            float maxScroll = needsScrollbar ? (targetContentHeights[mod] - maxViewHeight) : 0f;
+            float contentWidth = needsScrollbar ? windowWidth - 16 : windowWidth;
             float currentScroll = settingsScrollPositions[mod].y;
 
-            // Handle Mouse Wheel Scrolling
+            Rect outRect = new Rect(0, headerHeight, windowWidth, viewHeight);
+
             if (outRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
             {
                 currentScroll = Mathf.Clamp(currentScroll + e.delta.y * 25f, 0, maxScroll);
                 settingsScrollPositions[mod] = new Vector2(0, currentScroll);
                 e.Use();
             }
+
             GUI.BeginGroup(outRect);
 
             float startY = -currentScroll;
-            float contentWidth = maxScroll > 0 ? windowWidth - 16 : windowWidth;
 
             float actualHeightDrawn = DrawModuleSettings(mod, startY, contentWidth);
 
             if (e.type == EventType.Repaint)
             {
-                moduleContentHeights[mod] = actualHeightDrawn;
+                targetContentHeights[mod] = actualHeightDrawn;
             }
 
-            // Drop Bar
+            // Deferred Dropdowns overlay
             if (DrawSetting.OnPostDraw != null)
             {
                 DrawSetting.OnPostDraw.Invoke();
@@ -367,18 +400,18 @@ namespace Magnetar_Client.Core
 
             GUI.EndGroup();
 
-            if (maxScroll > 0)
+            // --- Custom Visual Scrollbar ---
+            if (needsScrollbar)
             {
                 float trackX = windowWidth - 14;
                 float trackY = headerHeight + 5;
                 float trackHeight = viewHeight - 10;
 
-                float handleHeight = Mathf.Max(20f, (viewHeight / contentHeight) * trackHeight);
-                float scrollPct = currentScroll / maxScroll;
+                float handleHeight = Mathf.Max(20f, (maxViewHeight / targetContentHeights[mod]) * trackHeight);
+                float scrollPct = maxScroll > 0 ? currentScroll / maxScroll : 0f;
                 float handleY = trackY + (scrollPct * (trackHeight - handleHeight));
 
                 GUI.Box(new Rect(trackX + 5, trackY, 2, trackHeight), "", Magnetar_Default.SeparatorStyle);
-
                 GUI.Box(new Rect(trackX, handleY, 12, handleHeight), "", Magnetar_Default.ModuleOff);
             }
 
@@ -431,7 +464,7 @@ namespace Magnetar_Client.Core
                 }
                 else if (setting is EndCategorySetting)
                 {
-                    skipSettings = false; // Reset out of category
+                    skipSettings = false;
                     y += Config.spacing;
                     continue;
                 }
@@ -449,10 +482,11 @@ namespace Magnetar_Client.Core
                 y += Config.elementHeight + Config.spacing;
             }
 
-            y += Config.spacing;
+            y-= Config.elementHeight/2;
+
             // 3. BOTTOM SECTION: Core Configuration
 
-            MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Color.white);
+            MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Color.white, Translate("KeyBind"));
 
             Event e = Event.current;
 

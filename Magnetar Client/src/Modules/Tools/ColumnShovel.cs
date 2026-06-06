@@ -37,14 +37,14 @@ namespace Magnetar_Client.Modules
 
                 if (reason != DieReason.ByShovel) return;
 
-                ShovelMgr shovel = ShovelMgr.Instance;
+                Shovel shovel = Shovel.Instance;
 
                 if (shovel == null) return;
                 if (!shovel.isActiveAndEnabled || shovel.isPickUp) return;
 
                 // Only works if the shovel is used by Player
-                if (shovel.m.theMouseColumn != __instance.thePlantColumn ||
-                    shovel.m.theMouseRow != __instance.thePlantRow) return;
+                if (shovel.mouse.theMouseColumn != __instance.thePlantColumn ||
+                    shovel.mouse.theMouseRow != __instance.thePlantRow) return;
 
                 // BugFix: Disable Plant GodMode for smooth execution
                 bool _disabledGodMode = false;

@@ -1,190 +1,75 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{432AC7A5-CE0B-4CBB-87E8-1BDC6887C091}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Magnetar_Client</RootNamespace>
     <AssemblyName>Magnetar Client</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
+    
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ANDROID|AnyCPU'">
-    <OutputPath>bin\ANDROID\</OutputPath>
-    <DefineConstants>ANDROID</DefineConstants>
-  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DiscordRichPresence" Version="1.6.1.70" />
+  </ItemGroup>
+
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\net6\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="DiscordRPC, Version=1.6.1.70, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DiscordRichPresence.1.6.1.70\lib\net45\DiscordRPC.dll</HintPath>
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\net6\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppInterop.Common">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\net6\Il2CppInterop.Common.dll</HintPath>
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\net6\Il2CppInterop.Common.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppInterop.Runtime">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\net6\Il2CppInterop.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2Cppmscorlib">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll</HintPath>
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\net6\Il2CppInterop.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="MelonLoader">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\net6\MelonLoader.dll</HintPath>
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\net6\MelonLoader.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\net6\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\Il2CppAssemblies\Unity.TextMeshPro.dll</HintPath>
+
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\Il2CppAssemblies\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\Il2CppAssemblies\UnityEngine.AssetBundleModule.dll</HintPath>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\Il2CppAssemblies\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\Il2CppAssemblies\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\Il2CppAssemblies\UnityEngine.ParticleSystemModule.dll</HintPath>
+    <Reference Include="UnityEngine.ParticleSystemModule">
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.Physics2DModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\Il2CppAssemblies\UnityEngine.Physics2DModule.dll</HintPath>
+    <Reference Include="UnityEngine.Physics2DModule">
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.Physics2DModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\Il2CppAssemblies\UnityEngine.TextRenderingModule.dll</HintPath>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.6\MelonLoader\Il2CppAssemblies\UnityEngine.UI.dll</HintPath>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.UIModule.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\Core\AssemblyInfo.cs" />
-    <Compile Include="src\Config\Config.cs" />
-    <Compile Include="src\Core\GUIManager.cs" />
-    <Compile Include="src\Core\NEFManager.cs" />
-    <Compile Include="src\HUD\App\Info.cs" />
-    <Compile Include="src\HUD\Game\Bullets.cs" />
-    <Compile Include="src\Modules\Level\CustomConvyer.cs" />
-    <Compile Include="src\Modules\Level\NoGridItems.cs" />
-    <Compile Include="src\Modules\Level\NoLose.cs" />
-    <Compile Include="src\Modules\Level\Buttons.cs" />
-    <Compile Include="src\Modules\Level\NoCap.cs" />
-    <Compile Include="src\Modules\Level\UltimitedModifierReroll.cs" />
-    <Compile Include="src\Modules\Misc\AutoCollect.cs" />
-    <Compile Include="src\Modules\Misc\VideoPlayer.cs" />
-    <Compile Include="src\Modules\Visual\BetterHealthDisplay.cs" />
-    <Compile Include="src\Modules\Misc\DebugMode.cs" />
-    <Compile Include="src\Modules\Visual\FPSLimit.cs" />
-    <Compile Include="src\Modules\Plants\BanPlant.cs" />
-    <Compile Include="src\Modules\Plants\GodMode.cs" />
-    <Compile Include="src\Modules\Level\RandomCardRoulette.cs" />
-    <Compile Include="src\Modules\Tools\ColumnPlanting.cs" />
-    <Compile Include="src\Modules\Tools\PlantAnywhere.cs" />
-    <Compile Include="src\Modules\Tools\ColumnShovel.cs" />
-    <Compile Include="src\Modules\Tools\ColumnGlove.cs" />
-    <Compile Include="src\Modules\Visual\NoRender.cs" />
-    <Compile Include="src\Modules\Visual\SmallerProjectiles.cs" />
-    <Compile Include="src\Modules\Zombies\AntiLagSpawn.cs" />
-    <Compile Include="src\Modules\Zombies\BuffZombies.cs" />
-    <Compile Include="src\Modules\Zombies\ClampZombies.cs" />
-    <Compile Include="src\Modules\Zombies\Hypnotize.cs" />
-    <Compile Include="src\HUD\App\Time.cs" />
-    <Compile Include="src\HUD\Game\Damage.cs" />
-    <Compile Include="src\HUD\Game\Resources.cs" />
-    <Compile Include="src\HUD\Game\Time.cs" />
-    <Compile Include="src\HUD\Game\Zombies.cs" />
-    <Compile Include="src\HUD\Game\Plants.cs" />
-    <Compile Include="src\HUD\System\Time.cs" />
-    <Compile Include="src\NotEnoughFusions\NEFBanned.cs" />
-    <Compile Include="src\NotEnoughFusions\NEFData.cs" />
-    <Compile Include="src\NotEnoughFusions\NEFGUI.cs" />
-    <Compile Include="src\NotEnoughFusions\NEFRecipes.cs" />
-    <Compile Include="src\Utils\Debugger.cs" />
-    <Compile Include="src\GameData.cs" />
-    <Compile Include="src\Core\HUDManager.cs" />
-    <Compile Include="src\Core\main.cs" />
-    <Compile Include="src\Core\ModuleManager.cs" />
-    <Compile Include="src\Modules\Level\SunMoneyPoints.cs" />
-    <Compile Include="src\Modules\Misc\AutoOsu.cs" />
-    <Compile Include="src\Modules\Misc\BetterOsu.cs" />
-    <Compile Include="src\Modules\Misc\DimBackground.cs" />
-    <Compile Include="src\Modules\Misc\DiscordRPC.cs" />
-    <Compile Include="src\Modules\Misc\TimeScale.cs" />
-    <Compile Include="src\Modules\Module.cs" />
-    <Compile Include="src\Modules\Plants\BoardTags.cs" />
-    <Compile Include="src\Modules\Plants\ChangeBullet.cs" />
-    <Compile Include="src\Modules\Plants\FasterPlants.cs" />
-    <Compile Include="src\Modules\Plants\HomingProjectiles.cs" />
-    <Compile Include="src\Modules\Plants\KeepShooting.cs" />
-    <Compile Include="src\Modules\Plants\Kill.cs" />
-    <Compile Include="src\Modules\Tools\HammerGloveCards.cs" />
-    <Compile Include="src\Modules\Zombies\FasterZombies.cs" />
-    <Compile Include="src\Modules\Zombies\kill.cs" />
-    <Compile Include="src\HUD\App\FPS.cs" />
-    <Compile Include="src\HUD\Element.cs" />
-    <Compile Include="src\HUD\System\MemoryUsage.cs" />
-    <Compile Include="src\HUD\System\SystemInfo.cs" />
-    <Compile Include="src\UI\Themes\Magnetar Default.cs" />
-    <Compile Include="src\TopBar\TopBar.cs" />
-    <Compile Include="src\UI\WindowDrawing\MiscDrawing.cs" />
-    <Compile Include="src\UI\WindowDrawing\SettingsInput.cs" />
-    <Compile Include="src\Utils\DiscordRPC.cs" />
-    <Compile Include="src\Utils\MathUtils.cs" />
-    <Compile Include="src\Utils\SaveLoad.cs" />
-    <Compile Include="src\Utils\TextureLoader.cs" />
-    <Compile Include="src\Utils\Translator.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

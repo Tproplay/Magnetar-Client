@@ -260,7 +260,7 @@ namespace Magnetar_Client.Utils
             string CleanText(string input)
             {
                 if (string.IsNullOrEmpty(input)) return input;
-                return Il2Cpp.InGameText.RemoveRichTextTags(input);
+                return Regex.Replace(input, "<.*?>", string.Empty);
             }
 
             if (File.Exists(targetFile))

@@ -9,6 +9,7 @@ namespace Magnetar_Client.UI.Themes
         public static GUIStyle TopBar;
         public static GUIStyle TopBarActive;
         public static GUIStyle ModuleWindow;
+        public static GUIStyle SettingsWindow;
         public static GUIStyle ModuleOn;
         public static GUIStyle ModuleOff;
         public static GUIStyle DescriptionStyle;
@@ -110,6 +111,22 @@ namespace Magnetar_Client.UI.Themes
             ModuleWindow.padding.bottom = 0;
             ModuleWindow.padding.left = 0;
             ModuleWindow.padding.right = 0;
+            #endregion
+
+            #region SettingsWindow
+            SettingsWindow = new GUIStyle();
+            SettingsWindow.normal.background = AccentTex;
+            SettingsWindow.normal.textColor = Color.black;
+
+            SettingsWindow.alignment = TextAnchor.UpperCenter;
+            SettingsWindow.fontSize = 20;
+            SettingsWindow.fontStyle = FontStyle.Bold;
+
+            SettingsWindow.padding = new RectOffset();
+            SettingsWindow.padding.top = 3;
+            SettingsWindow.padding.bottom = 0;
+            SettingsWindow.padding.left = 0;
+            SettingsWindow.padding.right = 0;
             #endregion
 
             #region ModuleOn

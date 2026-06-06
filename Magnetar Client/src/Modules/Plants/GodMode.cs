@@ -120,14 +120,14 @@ namespace Magnetar_Client.Modules
                     if (reason == DieReason.ByShovel)
                     {
                         if (!instance.ImmuneToShovel.Value) return true;
-                        ShovelMgr shovel = ShovelMgr.Instance;
+                        Shovel shovel = Shovel.Instance;
 
                         if (shovel == null) return false;
                         if (!shovel.isActiveAndEnabled || shovel.isPickUp) return false;
 
                         // Only works if the shovel is used by Player
-                        if (shovel.m.theMouseColumn == __instance.thePlantColumn &&
-                            shovel.m.theMouseRow == __instance.thePlantRow) return true;
+                        if (shovel.mouse.theMouseColumn == __instance.thePlantColumn &&
+                            shovel.mouse.theMouseRow == __instance.thePlantRow) return true;
 
                         return false;
                     }

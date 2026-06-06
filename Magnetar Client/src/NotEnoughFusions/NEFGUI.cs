@@ -113,7 +113,9 @@ namespace Magnetar_Client.NEF
             float ry = rightPanelRect.y;
 
             GUI.Label(new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight), Translator.Translate("Search:"));
-            string newQuery = Magnetar_Client.UI.WindowDrawing.DrawSetting.DrawManualTextField(new Rect(rx + 65f, ry, rightPanelWidth - 65f, NEFManager.elementHeight), searchQuery, "Search...");
+            string newQuery = UI.WindowDrawing.DrawSetting.DrawManualTextField(
+                new Rect(rx + 65f, ry, rightPanelWidth - 65f, NEFManager.elementHeight), 
+                searchQuery, Translator.Translate("Search..."));
 
             if (newQuery != searchQuery)
             {

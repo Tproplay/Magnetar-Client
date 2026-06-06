@@ -68,9 +68,9 @@ namespace Magnetar_Client.Game
                     plantList.Add(__instance);
             }
 
-            [HarmonyPatch(nameof(Plant.OnDestroy))]
+            [HarmonyPatch(nameof(Plant.Die))]
             [HarmonyPostfix]
-            public static void OnDestroyPostFix(Plant __instance)
+            public static void DiePostFix(Plant __instance)
             {
                 if (AppData.BoardInstanceIsNull) return;
 
@@ -356,11 +356,9 @@ namespace Magnetar_Client.Game
 
             if (tmpro != null)
             {
-                string levelName = tmpro.GetComponent<Il2CppTMPro.TextMeshProUGUI>().text;
+                var textComponent = tmpro.GetComponent<Il2CppTMPro.TextMeshProUGUI>();
 
-                string cleanName = Il2Cpp.InGameText.RemoveRichTextTags(levelName);
-
-                return cleanName;
+                return textComponent.GetParsedText();
             }
 
             return "Unknown";

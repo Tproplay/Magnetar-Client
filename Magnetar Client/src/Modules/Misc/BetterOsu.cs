@@ -231,11 +231,15 @@ namespace Magnetar_Client.Modules
 
             [HarmonyPatch(nameof(CreateBullet.SetBullet))]
             [HarmonyPrefix]
-            public static void SetBulletPrefix(ref BulletType theBulletType, ref bool fromEnermy)
+            public static void SetBulletPrefix(ref BulletType theBulletType, bool fromEnermy)
             {
-                if (instance == null || BoardInstanceIsNull) return;
-                if (!instance.Active || !board.boardTag.rhythmGame) return;
-                if (!instance.RandomBulletSetting.Value || fromEnermy) return;
+                if (instance == null || BoardInstanceIsNull || !instance.Active ||
+                    RhythmGameManager.Instance == null || !instance.RandomBulletSetting.Value|| 
+                    fromEnermy) return;
+#if DEBUG
+                if (instance.DebugMode.Value)
+                    DebugLogger.Msg($"Original Bullet Type: {theBulletType}");
+#endif
 
                 // Ensure only change the cherry bullet
                 if (theBulletType != BulletType.Bullet_superCherry) return;
@@ -252,7 +256,7 @@ namespace Magnetar_Client.Modules
                 }
 #if DEBUG
                 if (instance.DebugMode.Value)
-                    DebugLogger.Msg($"[Better Osu] Spawned Bullet: {newType.ToString()} ({(int)newType}");
+                    DebugLogger.Msg($"[Better Osu] Spawned Bullet: {newType.ToString()} ({(int)newType})");
 #endif
                 if (instance.selectBulletsSetting.IsSelected((int)newType))
                     theBulletType = newType;

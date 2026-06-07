@@ -1,7 +1,10 @@
 ﻿using Il2Cpp;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Text;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using static Magnetar_Client.Game.AppData;
 
 namespace Magnetar_Client.Modules
 {
@@ -28,7 +31,7 @@ namespace Magnetar_Client.Modules
         public enum Options
         {
             TheGameStatus = 1,
-
+            BoardTag = 2,
         }
 
         public DebugMode()
@@ -39,7 +42,7 @@ namespace Magnetar_Client.Modules
                 Options = new Dictionary<int, string>
                 {
                     { (int)Options.TheGameStatus, "GameStatus" },
-
+                    { (int)Options.BoardTag, "BoardTag" },
                 }
             };
             Settings.Add(selected);
@@ -57,21 +60,39 @@ namespace Magnetar_Client.Modules
         private static float _time = 0;
         public override void OnUpdateActive()
         {
-            _time += Time.deltaTime;
-
-            if (_time < speed.Value) return;
+            if (Time.realtimeSinceStartup < _time+speed.Value) return;
 
             if (selected.IsSelected((int)Options.TheGameStatus))
             {
                 DebugLogger.Msg("[Debug Mode] GameStatus: " + GameAPP.theGameStatus);
             }
 
-            _time = 0;
+            if (selected.IsSelected((int)Options.BoardTag))
+            {
+                if (!BoardInstanceIsNull)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendLine("[Debug Mode] Dumping boardTag Fields:");
+
+                    // Grab all public, instance fields from the boardTag object
+                    FieldInfo[] fields = board.boardTag.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+
+                    foreach (FieldInfo field in fields)
+                    {
+                        object value = field.GetValue(board.boardTag);
+
+                        sb.AppendLine($"   -> {field.Name}: {value}");
+                    }
+                    DebugLogger.Msg(sb.ToString());
+                }
+            }
+
+            _time = Time.realtimeSinceStartup;
         }
 
         public override void OnEnable()
         {
-            _time = speed.Value;
+            _time = Time.realtimeSinceStartup;
         }
 
 

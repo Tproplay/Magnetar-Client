@@ -44,6 +44,7 @@ namespace Magnetar_Client.NEF
 
         public static void Init()
         {
+#if RELEASE
             // Cache native names
             foreach (PlantType pt in Enum.GetValues(typeof(PlantType)))
             {
@@ -57,6 +58,7 @@ namespace Magnetar_Client.NEF
             {
                 CustomNames[Entry.Key] = Entry.Value;
             }
+#endif
             Magnetar_Client.NEF.Data.NEFBanned.InitBan();
             Magnetar_Client.NEF.Data.NEFBanned.InitHidden();
             Magnetar_Client.NEF.Data.NEFRecipes.InitRecipes();

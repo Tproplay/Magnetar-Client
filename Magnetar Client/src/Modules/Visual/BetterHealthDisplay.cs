@@ -66,27 +66,30 @@ namespace Magnetar_Client.Modules
             [HarmonyPostfix]
             public static void UpdateTextPostfix(Plant __instance)
             {
-                if (!instance.Active) return;
+                if (instance == null || !instance.Active) return;
+                if (__instance.healthSlider == null) return;
 
-                var textComponents = __instance.GetComponentsInChildren<Il2CppTMPro.TextMeshPro>();
+                var textComponents = __instance.healthSlider.GetComponentsInChildren<Il2CppTMPro.TMP_Text>(true);
+
+                string rawHpString = __instance.thePlantHealth.ToString();
 
                 foreach (var textComp in textComponents)
                 {
-                    string rawHpString = __instance.thePlantHealth.ToString();
+                    string rawText = textComp.text ?? string.Empty;
+                    string cleanText = System.Text.RegularExpressions.Regex.Replace(rawText, "<.*?>", string.Empty);
 
-                    if (textComp.text == rawHpString || textComp.text.Contains("/"))
+                    if (cleanText == rawHpString || cleanText.Contains("/"))
                     {
                         string formattedCurrent = FormatInternational(__instance.thePlantHealth);
+                        string finalText = formattedCurrent;
 
                         if (instance.ShowMaxHealth.Value)
                         {
                             string formattedMax = FormatInternational(__instance.thePlantMaxHealth);
-                            textComp.text = $"{formattedCurrent} / {formattedMax}";
+                            finalText = $"{formattedCurrent} / {formattedMax}";
                         }
-                        else
-                        {
-                            textComp.text = formattedCurrent;
-                        }
+
+                        textComp.text = finalText;
                     }
                 }
             }

@@ -1,6 +1,8 @@
-﻿using UnityEngine;
-using HarmonyLib;
+﻿using HarmonyLib;
 using Il2Cpp;
+using MelonLoader;
+using UnityEngine;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Modules
 {
@@ -20,7 +22,11 @@ namespace Magnetar_Client.Modules
         public static RePickPlants instance;
 
         public GameObject showCardsObj;
-        public GameObject menuBtnObj;
+        public GameObject referenceBtnObj;
+
+#if DEBUG
+        public BoolSetting DebugMode;
+#endif
 
         public bool isDefaultEnabled = false;
         public bool enabledByMod = false;
@@ -28,12 +34,22 @@ namespace Magnetar_Client.Modules
         public RePickPlants()
         {
             instance = this;
+
+#if DEBUG
+            DebugMode = new BoolSetting("Debug Mode", false);
+            AddSettings(DebugMode);
+#endif
+
         }
 
         public void ResetState()
         {
+#if DEBUG
+            if (DebugMode.Value)
+                DebugLogger.Msg("[RePickPlants] Resetting state (Level ended or restarted).");
+#endif
             showCardsObj = null;
-            menuBtnObj = null;
+            referenceBtnObj = null;
             isDefaultEnabled = false;
             enabledByMod = false;
         }
@@ -45,7 +61,7 @@ namespace Magnetar_Client.Modules
                 var bags = UnityEngine.Resources.FindObjectsOfTypeAll<InGame_openBag>();
                 foreach (var bag in bags)
                 {
-                    if (bag.gameObject.transform.parent != null)
+                    if (bag.gameObject.transform.parent != null && bag.gameObject.transform.parent.name == "LeftButtons")
                     {
                         showCardsObj = bag.gameObject;
                         isDefaultEnabled = showCardsObj.activeSelf;
@@ -53,16 +69,21 @@ namespace Magnetar_Client.Modules
                     }
                 }
             }
-            if (menuBtnObj == null)
+
+            if (referenceBtnObj == null && showCardsObj != null)
             {
-                var btns = UnityEngine.Resources.FindObjectsOfTypeAll<InGameBtn>();
-                foreach (var btn in btns)
+                Transform parent = showCardsObj.transform.parent;
+
+                Transform siblingBtn = parent.Find("BackToMainMenu");
+                if (siblingBtn == null) siblingBtn = parent.Find("SlowTrigger");
+
+                if (siblingBtn != null)
                 {
-                    if (btn.gameObject.name == "Menu" && btn.gameObject.transform.parent != null)
-                    {
-                        menuBtnObj = btn.gameObject;
-                        break;
-                    }
+                    referenceBtnObj = siblingBtn.gameObject;
+#if DEBUG
+                    if (DebugMode.Value)
+                        DebugLogger.Msg($"[RePickPlants] Turned on the ShowCards button!");
+#endif
                 }
             }
         }
@@ -70,15 +91,20 @@ namespace Magnetar_Client.Modules
         // --- Mod Logic ---
         public override void OnUpdateActive()
         {
-            if (showCardsObj == null || menuBtnObj == null)
+            if (showCardsObj == null || referenceBtnObj == null)
             {
                 CaptureReferences();
-                if (showCardsObj == null || menuBtnObj == null) return;
+                if (showCardsObj == null || referenceBtnObj == null) return;
             }
-            if (menuBtnObj.activeInHierarchy)
+
+            if (referenceBtnObj.activeInHierarchy)
             {
                 if (!showCardsObj.activeSelf)
                 {
+#if DEBUG
+                    if (DebugMode.Value)
+                        DebugLogger.Msg("[RePickPlants] Other buttons appeared. Activating ShowCards button.");
+#endif
                     showCardsObj.SetActive(true);
                     enabledByMod = true;
                 }
@@ -87,6 +113,10 @@ namespace Magnetar_Client.Modules
             {
                 if (enabledByMod && showCardsObj.activeSelf)
                 {
+#if DEBUG
+                    if (DebugMode.Value)
+                        DebugLogger.Msg("[RePickPlants] Other buttons hid. Hiding ShowCards button.");
+#endif
                     showCardsObj.SetActive(false);
                     enabledByMod = false;
                 }
@@ -95,6 +125,10 @@ namespace Magnetar_Client.Modules
 
         public override void OnDisable()
         {
+#if DEBUG
+            if (DebugMode.Value)
+                DebugLogger.Msg("[RePickPlants] Mod disabled");
+#endif
             if (enabledByMod && showCardsObj != null && !isDefaultEnabled)
             {
                 showCardsObj.SetActive(false);

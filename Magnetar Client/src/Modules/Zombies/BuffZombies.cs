@@ -82,15 +82,17 @@ namespace Magnetar_Client.Modules
                             zombie.theSecondArmorMaxHealth
                         };
 
-                        // 2. Multiply Max Healths
-                        zombie.theMaxHealth = Mathf.RoundToInt(zombie.theMaxHealth * multiplier);
-                        zombie.theFirstArmorMaxHealth = Mathf.RoundToInt(zombie.theFirstArmorMaxHealth * multiplier);
-                        zombie.theSecondArmorMaxHealth = Mathf.RoundToInt(zombie.theSecondArmorMaxHealth * multiplier);
+                    // 2. Multiply Max Healths
+                    zombie.theMaxHealth = Mathf.RoundToInt(zombie.theMaxHealth * multiplier);
+                    zombie.theFirstArmorMaxHealth = Mathf.RoundToInt(zombie.theFirstArmorMaxHealth * multiplier);
+                    zombie.theSecondArmorMaxHealth = Mathf.RoundToInt(zombie.theSecondArmorMaxHealth * multiplier);
 
-                        // 3. Multiply Current Healths
-                        zombie.theHealth = Mathf.RoundToInt(zombie.theHealth * multiplier);
-                        zombie.theFirstArmorHealth = Mathf.RoundToInt(zombie.theFirstArmorHealth * multiplier);
-                        zombie.theSecondArmorHealth = Mathf.RoundToInt(zombie.theSecondArmorHealth * multiplier);
+                    // 3. Multiply Current Healths
+                    zombie.theHealth = Mathf.RoundToInt(zombie.theHealth * multiplier);
+                    zombie.theFirstArmorHealth = Mathf.RoundToInt(zombie.theFirstArmorHealth * multiplier);
+                    zombie.theSecondArmorHealth = Mathf.RoundToInt(zombie.theSecondArmorHealth * multiplier);
+
+                    zombie.UpdateHealthText();
                     }
                 }
             }

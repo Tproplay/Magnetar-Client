@@ -1,5 +1,5 @@
 {
   "----------------Magnetar Client":"Magnetar Client ---------------",
-  "(\\d+) selected": "đã chọn {0}"
-
+  "(\\d+) selected": "đã chọn {0}",
+  "Line(\\d+) Message (\\d+)": "Line{0} Message {1}"
 }

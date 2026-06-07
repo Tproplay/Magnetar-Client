@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Utils.Translator;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Modules
 {
@@ -88,6 +89,10 @@ namespace Magnetar_Client.Modules
         public bool TurnOffAfterUse = true;
         public BoolSetting AutoTurnOff;
 
+#if DEBUG
+        public BoolSetting DebugMode;
+#endif
+
         public NoGridItem()
         {
             instance = this;
@@ -101,6 +106,10 @@ namespace Magnetar_Client.Modules
 
             AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
             Settings.Add(AutoTurnOff);
+#if DEBUG
+            DebugMode = new BoolSetting("Debug Mode", false);
+            Settings.Add(DebugMode);
+#endif
         }
 
         public override void OnLanguageChanged()
@@ -115,12 +124,27 @@ namespace Magnetar_Client.Modules
         {
             if (BoardInstanceIsNull || board.griditemArray == null) return;
 
+#if DEBUG
+            if (DebugMode.Value)
+            {
+                DebugLogger.Msg("Found " + board.griditemArray.Count + " grid items.");
+            }
+#endif
+
             for (int i = board.griditemArray.Count - 1; i >= 0; i--)
             {
+#if DEBUG
+                if (DebugMode.Value) DebugLogger.Msg($"Checking Grid Item at index {i}");
+#endif
                 GridItem item = board.griditemArray[i];
                 if (item == null) continue;
                 if (selectedGridItems.IsSelected((int)item.theItemType))
+                { 
                     item.Die();
+#if DEBUG
+                    if (DebugMode.Value) DebugLogger.Msg($"Removed Grid Item of type {item.theItemType} at index {i}");
+#endif
+                }
             }
 
             // Handle auto turn off

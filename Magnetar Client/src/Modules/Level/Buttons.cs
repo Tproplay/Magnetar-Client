@@ -45,7 +45,7 @@ namespace Magnetar_Client.Modules
         public void ResetState()
         {
 #if DEBUG
-            if (DebugMode.Value)
+            if (DebugMode.Value && Active)
                 DebugLogger.Msg("[RePickPlants] Resetting state (Level ended or restarted).");
 #endif
             showCardsObj = null;

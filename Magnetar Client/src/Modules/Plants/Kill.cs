@@ -1,10 +1,12 @@
 ﻿using Il2Cpp;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
-using UnityEngine;
-using static Magnetar_Client.Game.GameData;
-using static Magnetar_Client.Game.AppData;
 using System.Linq;
+using UnityEngine;
+using static Il2Cpp.Plant;
+using static Magnetar_Client.Game.AppData;
+using static Magnetar_Client.Game.GameData;
+using static MelonLoader.MelonLogger;
 
 namespace Magnetar_Client.Modules
 {
@@ -76,12 +78,10 @@ namespace Magnetar_Client.Modules
 
             if (BoardInstanceIsNull) return;
 
-            foreach (var plant in plantList)
+            for (int i = plantList.Count - 1; i >= 0; i--)
             {
-                if (PlantsSelectedSetting.IsSelected((int)plant.thePlantType))
-                {
-                    plant.Die(Plant.DieReason.BySelf);
-                }
+                Plant plant = plantList[i];
+                plant.Die(DieReason.BySelf);
             }
 
         }

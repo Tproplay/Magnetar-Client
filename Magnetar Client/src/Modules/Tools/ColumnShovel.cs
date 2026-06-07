@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Il2Cpp;
+using System.Linq;
 using static Il2Cpp.Plant;
 using static Magnetar_Client.Game.GameData;
 
@@ -58,9 +59,11 @@ namespace Magnetar_Client.Modules
 
                 DieByMod = true;
 
-                foreach (Plant plant in plantList)
+                for (int i = plantList.Count - 1; i >= 0; i--)
                 {
+                    Plant plant = plantList[i];
                     if (plant == __instance) continue;
+
                     if (plant.thePlantType == __instance.thePlantType &&
                         plant.thePlantColumn == __instance.thePlantColumn)
                     {

@@ -449,7 +449,6 @@ namespace Magnetar_Client.Core
                 else if (setting is EndCategorySetting)
                 {
                     skipSettings = false;
-                    y -= Config.spacing;
                     continue;
                 }
 

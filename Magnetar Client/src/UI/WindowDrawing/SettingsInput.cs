@@ -565,7 +565,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             int controlId = selSet.GetHashCode();
 
             // 1. Translate and Draw Label
-            string translatedName = Magnetar_Client.Utils.Translator.Translate(selSet.Name);
+            string translatedName = Translator.Translate(selSet.Name);
             GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), translatedName);
 
             // 2. Resolve the currently selected display name safely
@@ -578,7 +578,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                     currentValName = selSet.CustomNames[selSet.Value];
                 }
             }
-            string translatedCurrentVal = Magnetar_Client.Utils.Translator.Translate(currentValName);
+            string translatedCurrentVal = Translator.Translate(currentValName);
 
             // 3. Draw the Main Button
             Rect btnRect = new Rect(width * 0.5f, y, width * 0.45f, Config.elementHeight);
@@ -592,12 +592,9 @@ namespace Magnetar_Client.UI.WindowDrawing
                 }
                 else
                 {
-                    activeDropdownId = controlId; // Open dropdown
+                    activeDropdownId = controlId;
                     dropdownScrollY = 0f;
-                    focusedControlId = -1; // Defocus any text fields
-
-                    // If you added activeTextFieldId earlier, uncomment this:
-                    // activeTextFieldId = -1; 
+                    focusedControlId = -1;
                 }
                 e.Use();
             }
@@ -625,7 +622,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                     e.Use();
                 }
 
-                // --- Click Logic (Runs immediately so it registers!) ---
+                // --- Click Logic ---
                 if (dropRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
                 {
                     float localY = e.mousePosition.y - dropRect.y + dropdownScrollY;
@@ -652,12 +649,11 @@ namespace Magnetar_Client.UI.WindowDrawing
                 }
 
                 // --- Deferred Drawing (Runs at the very end of the window) ---
-                float _dropdownScrollY = dropdownScrollY; // Capture state for the lambda!
+                float _dropdownScrollY = dropdownScrollY;
 
                 OnPostDraw += () =>
                 {
                     // Draw Dropdown Background
-                    // Note: You can use a solid dark texture here if ModuleOff is too transparent
                     GUI.Box(dropRect, "", Magnetar_Default.ModuleOff);
                     GUI.BeginGroup(dropRect);
 

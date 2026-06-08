@@ -1,9 +1,11 @@
 ﻿using DiscordRPC;
 using Il2Cpp;
+using Il2CppSystem;
 using Magnetar_Client.Utils;
 using MelonLoader;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using static Magnetar_Client.Game.AppData;
@@ -40,21 +42,14 @@ namespace Magnetar_Client.Modules
         public StringSetting InGame_Line2_3;
         public StringSetting InGame_Line2_4;
 
-        public StringSetting Menu_Line1_1;
-        public StringSetting Menu_Line1_2;
-        public StringSetting Menu_Line1_3;
-        public StringSetting Menu_Line1_4;
-
-        public StringSetting Menu_Line2_1;
-        public StringSetting Menu_Line2_2;
-        public StringSetting Menu_Line2_3;
-        public StringSetting Menu_Line2_4;
+        public SelectSetting InGame_Randomizer_mode;
 
         #endregion
 
         public enum Status
         {
-            InGame, Menu, Transition
+            InGame, Menu, Transition, Selecting, Big_Garden,
+            Magnetar_GUI
         }
 
         public static Status status = Status.Menu;
@@ -74,13 +69,18 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
+
             SwitchSpeed = new FloatSetting("Switch Speed (s)", 1f, 30f, 5f);
             AddSettings(SwitchSpeed);
 
+            EndCategory();
+
             CreateCategory("In Game",true);
+
             InGame_Line1_1 = new StringSetting("Line1 Message 1", "Magnetar Client v{Magnetar_Version}", In_Game_AutoCompleteArgs);
             InGame_Line1_2 = new StringSetting("Line1 Message 2", "Playing: {Level_Name}", In_Game_AutoCompleteArgs);
-            InGame_Line1_3 = new StringSetting("Line1 Message 3", "", In_Game_AutoCompleteArgs);
+            InGame_Line1_3 = new StringSetting("Line1 Message 3", "Plants: {number_of_plants} | Zombies: {number_of_zombies}", In_Game_AutoCompleteArgs);
             InGame_Line1_4 = new StringSetting("Line1 Message 4", "", In_Game_AutoCompleteArgs);
 
             InGame_Line2_1 = new StringSetting("Line2 Message 1", "Sun: {Sun} | Money: {Money}", In_Game_AutoCompleteArgs);
@@ -90,7 +90,24 @@ namespace Magnetar_Client.Modules
 
             AddSettings(InGame_Line1_1, InGame_Line1_2, InGame_Line1_3, InGame_Line1_4);
             AddSettings(InGame_Line2_1, InGame_Line2_2, InGame_Line2_3, InGame_Line2_4);
+
+            InGame_Randomizer_mode = new SelectSetting("Iteration Mode", 0)
+            {
+                Options = new Dictionary<int, string>
+                {
+                    { 0, "Sequential" },
+                    { 1, "Random" }
+                }
+            };
+
+            AddSettings(InGame_Randomizer_mode);
             EndCategory();
+        }
+
+        public override void OnLanguageChanged()
+        {
+            InGame_Randomizer_mode.CustomNames = InGame_Randomizer_mode.Options
+                .ToDictionary(kvp => kvp.Key, kvp => Translator.Translate(kvp.Value));
         }
 
         public override void OnEnable()
@@ -144,19 +161,40 @@ namespace Magnetar_Client.Modules
                 status = Status.InGame; 
             }
 
-            else if ((Gamestatus == GameStatus.InGame) || (Gamestatus == GameStatus.OutGame) && BoardInstanceIsNull)
+            else if ((Gamestatus == GameStatus.InGame) || (Gamestatus == GameStatus.OutGame)
+                && BoardInstanceIsNull && Config.showgui) // Menu & Magnetar GUI
+            {
+                status = Status.Magnetar_GUI;
+                Line1Cycle.Add(Translator.Translate("Browsing Magnetar's GUI"));
+            }
+
+            else if ((Gamestatus == GameStatus.InGame) || (Gamestatus == GameStatus.OutGame)
+                && BoardInstanceIsNull) // Menu
             {
                 status = Status.Menu;
+
+                Line1Cycle.Add("Browsing levels to play");
+                Line1Cycle.Add("Looking at the Main Menu");
             }
 
-            else if (Gamestatus == GameStatus.InInterlude)
+            else if (Gamestatus == GameStatus.InInterlude) // In Transition
             {
                 status = Status.Transition;
+                Line1Cycle.Add(Translator.Translate("Started a level"));
             }
 
-            else if (Gamestatus == GameStatus.Selecting)
+            else if (Gamestatus == GameStatus.Selecting) // Picking seeds
             {
-                Line1Cycle.Add("Picking Seeds");
+                status = Status.Selecting;
+                Line1Cycle.Add(Translator.Translate("Picking Seeds"));
+            }
+
+            else if (Gamestatus == GameStatus.BigGarden)
+            {
+                status = Status.Big_Garden;
+                Line1Cycle.Add(Translator.Translate("Roaming in the Garden"));
+                Line2Cycle.Add(Translator.Translate("Growing Seeds"));
+                Line2Cycle.Add(Translator.Translate("Waterning plants"));
             }
 
             switch (status)
@@ -182,7 +220,9 @@ namespace Magnetar_Client.Modules
 
         public static List<string> In_Game_AutoCompleteArgs = new List<string>
         {
-            "Magnetar_Version","Level_Name","Sun","Money","Current_Wave","Max_Wave"
+            "Magnetar_Version","Game_Version",
+            "Level_Name","Sun","Money","Current_Wave","Max_Wave",
+            "number_of_plants","number_of_zombies"
         };
 
         private string In_Game_FormatString(string input)
@@ -192,18 +232,33 @@ namespace Magnetar_Client.Modules
 
             result = result.Replace("{Magnetar_Version}", 
                 System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttribute<MelonInfoAttribute>().Version);
+            result = result.Replace("{Game_Version}", Application.version);
             result = result.Replace("{Level_Name}", GetLevelName());
             result = result.Replace("{Sun}", FormatInternational(board.theSun));
             result = result.Replace("{Money}", FormatInternational(board.theMoney));
             result = result.Replace("{Current_Wave}", board.theWave.ToString());
             result = result.Replace("{Max_Wave}", board.theMaxWave.ToString());
+            result = result.Replace("{number_of_plants}", plantList.Count.ToString());
+            result = result.Replace("{number_of_zombies}", zombieList.Count.ToString());
             return result;
         }
 
+        private static readonly System.Random _random = new System.Random();
+
         private void RotateIndices()
         {
-            if (Line1Cycle.Count > 0) index1 = (index1 + 1) % Line1Cycle.Count;
-            if (Line2Cycle.Count > 0) index2 = (index2 + 1) % Line2Cycle.Count;
+            if (InGame_Randomizer_mode.Value == 0) // Sequential
+            {
+                index1 = (index1 + 1) % Line1Cycle.Count;
+                index2 = (index2 + 1) % Line2Cycle.Count;
+            }
+            else if (InGame_Randomizer_mode.Value == 1) // Random
+            {
+                if (Line1Cycle.Count > 0)
+                    index1 = _random.Next(Line1Cycle.Count);
+                if (Line2Cycle.Count > 0)
+                    index2 = _random.Next(Line2Cycle.Count);
+            }
         }
 
         private void UpdatePresence()

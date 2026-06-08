@@ -318,11 +318,7 @@ namespace Magnetar_Client.Core
 
             float contentHeight = moduleContentHeights[mod];
 
-            float virtualHeight = contentHeight;
-            if (DrawSetting.activeDropdownId != -1 || DrawSetting.focusedControlId != -1)
-                virtualHeight += 150f;
-
-            float windowHeight = Mathf.Min(virtualHeight + headerHeight, maxWindowHeight);
+            float windowHeight = Mathf.Min(contentHeight + headerHeight, maxWindowHeight);
             float viewHeight = windowHeight - headerHeight;
 
             Event e = Event.current;
@@ -435,8 +431,6 @@ namespace Magnetar_Client.Core
                 GUI.Label(new Rect(Config.indent, y, width - (Config.indent * 2), 18), "by " + mod.Author, Magnetar_Default.AuthorStyle);
                 y += 18 + Config.spacing;
             }
-
-            else y+= 10;
 
             // 2. MIDDLE SECTION: Custom Settings (Sliders, etc.)
 

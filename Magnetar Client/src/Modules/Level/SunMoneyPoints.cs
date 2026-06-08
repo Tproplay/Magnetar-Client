@@ -113,7 +113,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Money Hack";
-        public override string Description { get; set; } = "Gives you unlimited money.";
+        public override string Description { get; set; } = "Dave will become rich with this one.";
         public override string SearchHints { get; set; } = "unlimited money infinite money mny mney ifnite finite" +
             "ulimited limitless unrestricted endless moneymultiplier cashmultiplier moneyboost moneybonus moneyincrease" +
             " moneymultiplyer monymultiplier moenymultiplier moneymultipier moneymultaplier moneymulltiplier moneymultipyler" +
@@ -215,7 +215,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Points Hack";
-        public override string Description { get; set; } = "Gives you unlimited points.";
+        public override string Description { get; set; } = "Now you can purchase any modifier.";
         public override string SearchHints { get; set; } = "unlimited points infinite points pts currency gold ifnite finite" +
             "ulimited limitless unrestricted endless pointsmultiplier pointmultiplier ptsmultiplier scoremultiplier scoreboost" +
             " pointsboost pointmultiplyer pointsmultiplyer pointmultipier pointsmultipier pointsmultyplier pointmultyplier" +

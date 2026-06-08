@@ -13,7 +13,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Smaller Projectiles";
-        public override string Description { get; set; } = "Reduces the visual size of selected Projectiles to reduce screen clutter.";
+        public override string Description { get; set; } = "Reduces the visual size of selected Projectile(s) to reduce screen clutter.";
         public override string SearchHints { get; set; } = "smallerprojectiles smallprojectiles projectile size visual reduce screen clutter " +
             "tiny peas bullet bulletsize smallpea lessclutter screenclutter projectile size visualreduce projectileclutter shrinking " +
             "projectilesize projectil smallbullet clear screen projectilevisual smallammo ammoclutter pea size hitclutter tinyprojectiles " +

@@ -1,11 +1,12 @@
 ﻿using HarmonyLib;
-using System;
 using Il2Cpp;
 using Il2CppZenGarden;
+using Magnetar_Client.Utils;
 using MelonLoader;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Magnetar_Client.Utils;
+using static MelonLoader.MelonLogger;
 
 namespace Magnetar_Client.Modules
 {
@@ -51,6 +52,28 @@ namespace Magnetar_Client.Modules
 
         // Mod Logic
 
+        public override void OnEnable()
+        {
+            if (selectedItems.IsSelected(0))
+            {
+                var objects = UnityEngine.Object.FindObjectsOfType<GardenPrize>();
+                foreach (GardenPrize obj in objects)
+                {
+                    obj.Active();
+                }
+            }
+
+            if (selectedItems.IsSelected(1))
+            {
+                var objects = UnityEngine.Object.FindObjectsOfType<PrizeMgr>();
+                foreach (PrizeMgr obj in objects)
+                {
+                    MelonCoroutines.Start(AutoTrophyCollector.WaitAndCollectTrophy(obj));
+                }
+            }
+        }
+
+
         [HarmonyPatch(typeof(GardenPrize))]
         public static class GardenPrizeCollectPatch
         {
@@ -76,7 +99,7 @@ namespace Magnetar_Client.Modules
                     MelonCoroutines.Start(WaitAndCollectTrophy(__instance));
             }
 
-            private static System.Collections.IEnumerator WaitAndCollectTrophy(PrizeMgr trophyInstance)
+            public static System.Collections.IEnumerator WaitAndCollectTrophy(PrizeMgr trophyInstance)
             {
                 while (trophyInstance != null && !trophyInstance.isLand)
                 {

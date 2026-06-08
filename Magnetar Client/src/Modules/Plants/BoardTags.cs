@@ -9,7 +9,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Odyssey Plants";
-        public override string Description { get; set; } = "Allows you to fuse Travel/Odyssey Plants";
+        public override string Description { get; set; } = "Allows you to fuse Travel/Odyssey Plants.";
         public override string SearchHints { get; set; } = "travelplants odysseyplants travelplantfusion " +
             "odysseyplantfusion fuseplants fusionplants travelplantodyssey travelodyssey odysseyfuse travelfuse " +
             "plantmerging plantcombine travelplantcombine odysseyplantcombine travelplantmix odysseyplantmix " +

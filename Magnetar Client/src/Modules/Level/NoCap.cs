@@ -6,7 +6,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "No Cap";
-        public override string Description { get; set; } = "Bypasses the ingame sun/money cap";
+        public override string Description { get; set; } = "Bypasses the ingame sun/money cap.";
         public override string SearchHints { get; set; } = "nocap suncap moneycap bypasscap capremove infinite " +
             "sun money unlimitedsun unlimitedmoney capbreak nosuncap nomoneycap caplimit moneyfix sunfix capoverride" +
             " unlimitedcurrency nosunlimit nomoneylimit capbypass maxsun maxmoney currencycap removecap moneycheat" +

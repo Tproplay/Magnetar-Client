@@ -11,7 +11,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Ban Plants";
-        public override string Description { get; set; } = "Bans the selected Plant(s) in the seed selection phase";
+        public override string Description { get; set; } = "Bans the selected Plant(s) in the seed selection phase.";
         public override string SearchHints { get; set; } = "banplants plantban seedban banseed disableplants " +
             "removeplants plantremoval plantblock blockplants seedblock banplant plantbanmod seedfilter" +
             " filterplants disableseed blockseed plantselectionban banlist plantblacklist banselections " +

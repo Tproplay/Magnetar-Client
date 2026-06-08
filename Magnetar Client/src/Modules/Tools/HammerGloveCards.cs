@@ -11,7 +11,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "No Glove CD";
-        public override string Description { get; set; } = "Set Custom Glove Cooldown.";
+        public override string Description { get; set; } = "Modifies the Ingame Glove's Cooldown.";
         public override string SearchHints { get; set; } = "noglovecd glovecooldown customglovecd " +
             "glovecd zeroglovecd noglovecoolndown glovecooldownreset fastglove instantglove glovebuff " +
             "glovecdmod glovecdchanger glovecdremover glovecolldown glovecooldon glovecooldwn glovcd " +
@@ -93,7 +93,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "No Hammer CD";
-        public override string Description { get; set; } = "Set Custom Hammer Cooldown.";
+        public override string Description { get; set; } = "Modifies the Ingame Hammer's Cooldown.";
         public override string SearchHints { get; set; } = "nohammercd hammercooldown customhammercd hammercd" +
             " zerohammercd nohammercoolndown hammercooldownreset fasthammer instanthammer hammerbuff hammercdmod " +
             "hammercdchanger hammercdremover hammercolldown hammercooldon hammercooldwn hamrcd hammercooldoun " +
@@ -197,7 +197,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "No Cards CD";
-        public override string Description { get; set; } = "Set Custom Cards Cooldown.";
+        public override string Description { get; set; } = "Modifies the Ingame SeedSlot Cards's Cooldown.";
         public override string SearchHints { get; set; } = "nocardscd cardscooldown customcardscd cardscd " +
             "zerocardscd nocardcoolndown cardcooldownreset fastcards instantcards cardbuff cardcdmod cardcdchanger " +
             "cardcdremover cardcolldown cardcooldon cardcooldwn cardcd cardcooldoun cardcdtimer cardcdreducion " +

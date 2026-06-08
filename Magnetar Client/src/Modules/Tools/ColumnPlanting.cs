@@ -8,7 +8,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Column Planting";
-        public override string Description { get; set; } = "Columns' Like you See 'Em";
+        public override string Description { get; set; } = "Columns' Like you See 'Em.";
         public override string SearchHints { get; set; } = "multiplanting columnplanting multiplant " +
             "columnplant multiplants columnplants multiplantingmod columnplantingmod multiplantingplugin " +
             "multiplantingtool multiplantinghack multiplantingcheat multiplaning multiplantin multiplantting " +

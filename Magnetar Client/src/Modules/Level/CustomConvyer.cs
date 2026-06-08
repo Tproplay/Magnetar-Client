@@ -7,7 +7,7 @@ namespace Magnetar_Client.Modules
     public class CustomConveyor : Module
     {
         public override string Name { get; set; } = "Custom Conveyor";
-        public override string Description { get; set; } = "Forces specific plants into the conveyor belt. If none are selected, injects every plant.";
+        public override string Description { get; set; } = "Forces specific plants into the conveyor belt.\nIf none are selected, injects every plant.";
         public override string SearchHints { get; set; } = "customconveyor conveyor belt customplants forceplants conveyorforce" +
             " plantconveyor selectconveyor editconveyor conveyorinjector injectplants conveyoroverride customconveyer" +
             " conveyerbelt plantinject injectevery plantspawn custombelt forceconveyer converyor conveyorcustom conveyerbelt" +

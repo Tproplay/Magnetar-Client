@@ -4,7 +4,7 @@
     {
         // Mod Info
         public override string Name { get; set; } = "Dim Background";
-        public override string Description { get; set; } = "Dims the background while the modules window is open";
+        public override string Description { get; set; } = "Dims the background while the module window is open.";
         public override string SearchHints { get; set; } = "dimbackground transparentbackground backgrounddim " +
             "backgroundtransparent dimmedbackground bgdim bgtransparent dimbg transparentbg darkerbackground " +
             "lowopacitybackground glassbackground clearbackground seethroughbackground dimbackround dimbackgound " +

@@ -10,7 +10,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Repick Plants";
-        public override string Description { get; set; } = "Allows you to repick you plants mid-game.";
+        public override string Description { get; set; } = "Allows you to repick your plants mid-game.";
         public override string SearchHints { get; set; } = "repickplants reselectplants changeplants midgameplants" +
             " plantswitch plantrepick reselect seedbankreset pickagain repickseed re-pick changeseed midgameselector " +
             "plantchange plantmenu seedreselect selectagain reselectseeds plantselection repickmode changeplant" +

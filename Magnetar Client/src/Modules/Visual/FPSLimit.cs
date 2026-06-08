@@ -6,7 +6,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "FPS Limit";
-        public override string Description { get; set; } = "Set a custom FPS limit or break the current fps limit";
+        public override string Description { get; set; } = "Set a custom FPS limit or break the current fps limit.";
         public override string SearchHints { get; set; } = "fpslimit fpscap limitfps framespersecond fpsbreaker unlockfps capfps customfps " +
             "maxfps fpsfix fpsunlocked framecap framepersecond fpslimiter fpxlimit fpaslimit fps-limit fpsbypass bypassfps nofpslimit " +
             "unlimitedfps fpsset setfps fps-cap morefps fpsboost lagfix frameslimit";

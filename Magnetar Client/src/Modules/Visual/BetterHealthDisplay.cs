@@ -11,7 +11,7 @@ namespace Magnetar_Client.Modules
         // Mod Info
 
         public override string Name { get; set; } = "Better Health Display";
-        public override string Description { get; set; } = "Converts Long health texts to a clear shorter form";
+        public override string Description { get; set; } = "Converts long health texts to a much more clear shorter form.";
         public override string SearchHints { get; set; } = "healthdisplay healthtext healthshow hpdisplay hptext betterhealth clearhealth" +
             " shorthealth healthform shorthp clearhp healthconverter texthp hpconverter shorttext healthui hpui hpvisual healthvisual " +
             "betterhp displayhealth healthshortener hp-display health-display texthp health-txt hptxt healthtxt";

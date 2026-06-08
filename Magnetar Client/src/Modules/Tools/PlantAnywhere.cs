@@ -7,7 +7,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Plant Anywhere";
-        public override string Description { get; set; } = "Allows you to place plants in illegal Positions.";
+        public override string Description { get; set; } = "Allows you to place plants in illegal positions.";
         public override string SearchHints { get; set; } = "plantanywhere placeanywhere illegalplacement ignoreposition " +
             "anywheremode freeplant plantcheat placeeverywhere plantfreedom freeplacement placementfix ignoregrid " +
             "plantlimit overridegrid nodistriction placeanygrid anygrid plantgrid ignoreplacerules freebuild plantany " +

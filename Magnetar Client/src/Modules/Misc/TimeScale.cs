@@ -8,7 +8,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Time Scale";
-        public override string Description { get; set; } = "Changes the Time Scale.";
+        public override string Description { get; set; } = "Changes the Time scale.";
         public override string SearchHints { get; set; } = "timescale slowmo slowmotion slow-mo speedmultiplier " +
             "gamespeed timespeed slowmoion slowmoshun slowmow slomo slomotion slomow timesclae timescael timescal" +
             " timesclae speedfactor timescaleup timescaleslow timescalebot speedcontrol fastforward speedchange" +

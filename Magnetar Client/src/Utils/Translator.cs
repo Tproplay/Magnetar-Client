@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 using static Magnetar_Client.Utils.Magnetar_Logger;
@@ -263,6 +264,9 @@ namespace Magnetar_Client.Utils
                 return Regex.Replace(input, "<.*?>", string.Empty);
             }
 
+            bool requiresSave = false; // Flag to track if we need to write to disk
+
+            // 1. Load existing data if available
             if (File.Exists(targetFile))
             {
                 try
@@ -283,7 +287,10 @@ namespace Magnetar_Client.Utils
             }
             else
             {
+                // 2. If file doesn't exist, try loading fallbacks from PvZ_Fusion_Translator
                 TranslatorLogger.Warning($"{enumType.Name}.json not found. Generating new file...");
+                requiresSave = true; // Force save since the file doesn't exist
+
                 try
                 {
                     if (enumType.Name == "PlantType")
@@ -310,22 +317,51 @@ namespace Magnetar_Client.Utils
                             }
                         }
                     }
-
-                    Array values = Enum.GetValues(enumType);
-                    foreach (object val in values)
-                    {
-                        int intVal = (int)val;
-                        if (!parsedNames.ContainsKey(intVal)) parsedNames[intVal] = val.ToString();
-                    }
-
-                    string dumpJson = JsonConvert.SerializeObject(parsedNames, Formatting.Indented);
-                    File.WriteAllText(targetFile, dumpJson);
-
-                    TranslatorLogger.Warning($"Successfully generated {enumType.Name}.json with {parsedNames.Count} total entries.");
                 }
                 catch (Exception ex)
                 {
-                    TranslatorLogger.Error($"Failed to generate template for {enumType.Name}: {ex.Message}");
+                    TranslatorLogger.Error($"Failed to parse fallback for {enumType.Name}: {ex.Message}");
+                }
+            }
+
+            // 3. UNIVERSAL CHECK: Verify all enum values exist in parsedNames
+            Array values = Enum.GetValues(enumType);
+            int missingCount = 0;
+
+            foreach (object val in values)
+            {
+                int intVal = (int)val;
+                if (!parsedNames.ContainsKey(intVal))
+                {
+                    parsedNames[intVal] = val.ToString();
+                    missingCount++;
+                    requiresSave = true; // Flag that we modified the dictionary and need to save
+                }
+            }
+
+            // 4. Save to disk if it's a new file OR if missing keys were appended
+            if (requiresSave)
+            {
+                try
+                {
+                    // Sort the dictionary by key so the JSON is always perfectly ordered
+                    var sortedNames = parsedNames.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+                    string dumpJson = JsonConvert.SerializeObject(sortedNames, Formatting.Indented);
+
+                    File.WriteAllText(targetFile, dumpJson);
+
+                    if (missingCount > 0 && File.Exists(targetFile) && parsedNames.Count > missingCount)
+                    {
+                        TranslatorLogger.Warning($"Appended {missingCount} missing entries to existing {enumType.Name}.json");
+                    }
+                    else
+                    {
+                        TranslatorLogger.Warning($"Successfully generated {enumType.Name}.json with {parsedNames.Count} total entries.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    TranslatorLogger.Error($"Failed to save {enumType.Name}.json: {ex.Message}");
                 }
             }
 

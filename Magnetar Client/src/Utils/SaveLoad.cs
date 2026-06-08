@@ -128,18 +128,20 @@ namespace Magnetar_Client.Utils
                     {
                         foreach (var setting in mod.Settings)
                         {
-                            if (setting is IntSetting i) modData.Settings[i.Name] = i.Value;
-                            else if (setting is FloatSetting f) modData.Settings[f.Name] = f.Value;
-                            else if (setting is BoolSetting b) modData.Settings[b.Name] = b.Value;
-                            else if (setting is BindSetting bind) modData.Settings[bind.Name] = bind.BindKeys;
-                            else if (setting is StringSetting str) modData.Settings[str.Name] = str.Value;
-                            else if (setting is SelectSetting sel) modData.Settings[sel.Name] = sel.Value;
-                            else if (setting is CategorySetting cat) modData.Settings[cat.Name] = cat.IsExpanded;
+                            if (string.IsNullOrEmpty(setting.Name)) continue;
+                            string saveKey = setting is CategorySetting ? setting.Name + "_Category" : setting.Name;
 
+                            if (setting is CategorySetting cat) modData.Settings[saveKey] = cat.IsExpanded;
                             else if (setting is MultiSelectSetting ms)
                             {
-                                modData.Settings[ms.Name] = new MultiSelectSaveData { SelectedValues = new List<int>(ms.SelectedValues) };
-                            }
+                                modData.Settings[saveKey] = new MultiSelectSaveData { SelectedValues = new List<int>(ms.SelectedValues) };
+                            }   
+                            else if (setting is BindSetting bind) modData.Settings[bind.Name] = bind.BindKeys;
+                            else if (setting is SelectSetting sel) modData.Settings[sel.Name] = sel.Value;
+                            else if (setting is StringSetting str) modData.Settings[str.Name] = str.Value;
+                            else if (setting is BoolSetting b) modData.Settings[b.Name] = b.Value;
+                            else if (setting is FloatSetting f) modData.Settings[f.Name] = f.Value;
+                            else if (setting is IntSetting i) modData.Settings[i.Name] = i.Value;
                         }
                     }
                     data.Modules[mod.Name] = modData;
@@ -250,8 +252,12 @@ namespace Magnetar_Client.Utils
                                         foreach (var setting in mod.Settings)
                                         {
                                             if (string.IsNullOrEmpty(setting.Name)) continue;
-                                            if (modData.Settings.TryGetValue(setting.Name, out object rawValue))
+                                            string loadKey = setting is CategorySetting ? setting.Name + "_Category" : setting.Name;
+                                            if (modData.Settings.TryGetValue(loadKey, out object rawValue) ||
+                                                modData.Settings.TryGetValue(setting.Name, out rawValue))
+                                            {
                                                 RestoreSettingValue(setting, rawValue);
+                                            }
                                         }
                                     }
                                     if (mod.Active != modData.Active) mod.Toggle();
@@ -259,10 +265,10 @@ namespace Magnetar_Client.Utils
                             }
                         }
 
-                        MelonLogger.Msg("Loaded Magnetar Profile 'Magnetar_Config'");
+                        AutoSaveLogger.Msg("Loaded Magnetar Profile 'Magnetar_Config'");
                     }
                 }
-                catch (Exception e) { MelonLoader.MelonLogger.Error($"Main SaveLoad Error: {e.Message}"); }
+                catch (Exception e) { AutoSaveLogger.Error($"Main SaveLoad Error: {e.Message}"); }
             }
 
             if (File.Exists(TexturePath))
@@ -277,7 +283,7 @@ namespace Magnetar_Client.Utils
                         TextureLoader.ZombieTextureOverrides = texData.ZombieTextureOverrides ?? new Dictionary<int, string>();
                     }
                 }
-                catch (Exception e) { MelonLoader.MelonLogger.Error($"Texture Load Error: {e.Message}"); }
+                catch (Exception e) { AutoSaveLogger.Error($"Texture Load Error: {e.Message}"); }
             }
             else
             {
@@ -290,18 +296,7 @@ namespace Magnetar_Client.Utils
         {
             try
             {
-                if (setting is IntSetting i) i.Value = Convert.ToInt32(rawValue);
-                else if (setting is FloatSetting f) f.Value = Convert.ToSingle(rawValue);
-                else if (setting is BoolSetting b) b.Value = Convert.ToBoolean(rawValue);
-                else if (setting is StringSetting str) str.Value = rawValue.ToString();
-                else if (setting is SelectSetting sel) sel.Value = Convert.ToInt32(rawValue);
-                else if (setting is CategorySetting cat) cat.IsExpanded = Convert.ToBoolean(rawValue);
-
-                else if (setting is BindSetting bind)
-                {
-                    string jsonStr = JsonConvert.SerializeObject(rawValue);
-                    bind.BindKeys = JsonConvert.DeserializeObject<List<KeyCode>>(jsonStr);
-                }
+                if (setting is CategorySetting cat) cat.IsExpanded = Convert.ToBoolean(rawValue);
                 else if (setting is MultiSelectSetting ms)
                 {
                     string jsonStr = JsonConvert.SerializeObject(rawValue);
@@ -312,8 +307,18 @@ namespace Magnetar_Client.Utils
                         foreach (var val in proxy.SelectedValues) ms.SelectedValues.Add(val);
                     }
                 }
+                else if (setting is BindSetting bind)
+                {
+                    string jsonStr = JsonConvert.SerializeObject(rawValue);
+                    bind.BindKeys = JsonConvert.DeserializeObject<List<KeyCode>>(jsonStr);
+                }
+                else if (setting is SelectSetting sel) sel.Value = Convert.ToInt32(rawValue);
+                else if (setting is StringSetting str) str.Value = rawValue.ToString();
+                else if (setting is BoolSetting b) b.Value = Convert.ToBoolean(rawValue);
+                else if (setting is FloatSetting f) f.Value = Convert.ToSingle(rawValue);
+                else if (setting is IntSetting i) i.Value = Convert.ToInt32(rawValue);
             }
-            catch (Exception ex) { DebugLogger.Error($"Error setting '{setting.Name}': {ex.Message}"); }
+            catch (Exception ex) { AutoSaveLogger.Error($"Error setting '{setting.Name}': {ex.Message}"); }
         }
     }
 }

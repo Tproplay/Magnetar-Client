@@ -101,6 +101,7 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
 
             selectedGridItems = new MultiSelectSetting("Grid Items")
             {
@@ -108,8 +109,13 @@ namespace Magnetar_Client.Modules
             };
             Settings.Add(selectedGridItems);
 
+            EndCategory();
+            CreateCategory("Extra");
+
             AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
             Settings.Add(AutoTurnOff);
+
+            EndCategory();
 #if DEBUG
             DebugMode = new BoolSetting("Debug Mode", false);
             Settings.Add(DebugMode);

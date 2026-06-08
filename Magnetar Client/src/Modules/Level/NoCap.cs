@@ -28,12 +28,15 @@ namespace Magnetar_Client.Modules
         { 
             instance = this;
 
+            CreateCategory("General");
+
             SunLimit = new IntSetting("Sun Cap", 0, 2147483647, 2147483647);
             AddSettings(SunLimit);
 
             MoneyLimit = new IntSetting("Money Cap", 0, 2147483647, 2147483647);
             AddSettings(MoneyLimit);
 
+            EndCategory();
         }
 
         // Mod Logic

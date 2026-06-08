@@ -34,6 +34,8 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
+
             #region Particle
             // 1. Setup Path & Ensure Directory Exists
             string dirPath = Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Data");
@@ -80,6 +82,8 @@ namespace Magnetar_Client.Modules
                 CustomNames = TranslatedNames(typeof(BucketType))
             };
             AddSettings(GameObjectsSetting);
+
+            EndCategory();
 
         }
 

@@ -31,6 +31,8 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
+
             selectedBulletsSetting = new MultiSelectSetting("Projectiles", typeof(BulletType))
             {
                 CustomNames = TranslatedNames(typeof(BulletType)),
@@ -39,6 +41,9 @@ namespace Magnetar_Client.Modules
             selectedBulletsSetting.Options.Keys.ToList().ForEach(selectedBulletsSetting.Select);
 
             Settings.Add(selectedBulletsSetting);
+
+            EndCategory();
+
         }
 
         public override void OnLanguageChanged()

@@ -32,6 +32,8 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
+
             selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
             {
                 CustomNames = TranslatedNames(typeof(BulletType)),
@@ -44,7 +46,9 @@ namespace Magnetar_Client.Modules
             selectBulletsSetting.Options.Keys.ToList().ForEach(selectBulletsSetting.Select);
 
             Settings.Add(selectBulletsSetting);
-            
+
+            EndCategory();
+
 
         }
 

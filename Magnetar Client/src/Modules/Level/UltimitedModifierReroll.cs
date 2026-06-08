@@ -31,11 +31,15 @@ namespace Magnetar_Client.Modules
         { 
             instance = this;
 
+            CreateCategory("General");
+
             rerollCount = new IntSetting("Reroll Count", 0, 99, 99);
             preserveOriginal = new BoolSetting("Preserve Original Count", true);
 
             Settings.Add(rerollCount);
             Settings.Add(preserveOriginal);
+
+            EndCategory();
 
         }
 

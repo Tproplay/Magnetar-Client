@@ -70,7 +70,7 @@ namespace Magnetar_Client.Modules
 #if DEBUG
             DebugMode = new BoolSetting("DebugMode", false);
 #endif
-
+            CreateCategory("General");
             Settings.Add(BulletsDamageIncreaseSetting);
             Settings.Add(HelperPetSetting);
             Settings.Add(PetTypeSetting);
@@ -79,6 +79,7 @@ namespace Magnetar_Client.Modules
 #if DEBUG
             Settings.Add(DebugMode);
 #endif
+            EndCategory();
 
         }
 

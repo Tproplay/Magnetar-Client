@@ -34,6 +34,9 @@ namespace Magnetar_Client.Modules
         public AntiLagSpawns()
         {
             instance = this;
+
+            CreateCategory("General");
+
             FrameDelaySetting = new IntSetting("Frames Between Spawns", 1, 10, 1);
             AddSettings(FrameDelaySetting);
 
@@ -54,6 +57,9 @@ namespace Magnetar_Client.Modules
             };
 
             AddSettings(UnaffectedZombies);
+
+            EndCategory();
+
         }
 
         public override void OnLanguageChanged()

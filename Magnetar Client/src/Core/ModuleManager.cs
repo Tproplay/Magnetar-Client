@@ -310,9 +310,7 @@ namespace Magnetar_Client.Core
             GUI.Box(headerBgRect, Translate(mod.Name), Magnetar_Default.SettingsWindow);
 
 
-            // ==========================================
-            // 1. METEOR SMOOTH ANIMATION LOGIC
-            // ==========================================
+            // 1. SMOOTH ANIMATION LOGIC
             moduleContentHeights[mod] = Mathf.Lerp(moduleContentHeights[mod], targetContentHeights[mod], Time.deltaTime * 15f);
 
             if (Mathf.Abs(moduleContentHeights[mod] - targetContentHeights[mod]) < 0.5f)
@@ -343,9 +341,7 @@ namespace Magnetar_Client.Core
             }
 #endif
 
-            // ==========================================
-            // 2. CENTER-ANCHOR EXPANSION MATH
-            // ==========================================
+            // 2. CENTER-ANCHOR EXPANSION
             if (e.type == EventType.Layout)
             {
                 Rect r = settingsPositions[mod];
@@ -362,9 +358,7 @@ namespace Magnetar_Client.Core
                 settingsPositions[mod] = r;
             }
 
-            // ==========================================
             // 3. SCROLL VIEW & RENDERING
-            // ==========================================
 
             bool needsScrollbar = targetContentHeights[mod] > maxViewHeight;
             float maxScroll = needsScrollbar ? (targetContentHeights[mod] - maxViewHeight) : 0f;
@@ -446,11 +440,6 @@ namespace Magnetar_Client.Core
 
             // 2. MIDDLE SECTION: Custom Settings (Sliders, etc.)
 
-            if (mod.Settings.Count > 0)
-            {
-                MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Color.white);
-            }
-
             bool skipSettings = false;
 
             foreach (var setting in mod.Settings)
@@ -460,12 +449,13 @@ namespace Magnetar_Client.Core
                 {
                     catSet.IsExpanded = MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Color.white, Translate(catSet.Name), true, catSet.IsExpanded);
                     skipSettings = !catSet.IsExpanded; // If collapsed, skip drawing!
+                    if (skipSettings) y -= Config.spacing / 2;
                     continue;
                 }
                 else if (setting is EndCategorySetting)
                 {
                     skipSettings = false;
-                    y += Config.spacing;
+                    y -= Config.spacing;
                     continue;
                 }
 
@@ -482,7 +472,7 @@ namespace Magnetar_Client.Core
                 y += Config.elementHeight + Config.spacing;
             }
 
-            y-= Config.elementHeight/2;
+            //y+= Config.elementHeight/2;
 
             // 3. BOTTOM SECTION: Core Configuration
 

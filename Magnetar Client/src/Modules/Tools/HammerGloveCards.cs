@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Il2Cpp;
+using System.Linq;
 using System.Collections.Generic;
 using Magnetar_Client.Utils;
 using static Magnetar_Client.Game.AppData;
@@ -37,9 +38,14 @@ namespace Magnetar_Client.Modules
 
         public CustomCDGlove()
         {
+            CreateCategory("General");
+
             CustomCDSetting = new FloatSetting("Custom Glove Cooldown", 0, 999, CustomCD);
             Settings.Add(CustomCDSetting);
             CustomCD = CustomCDSetting.Value;
+
+            EndCategory();
+            CreateCategory("Extra");
 
             preserveOriginalSetting = new BoolSetting("Preserve Original", preserveOriginal);
             Settings.Add(preserveOriginalSetting);
@@ -48,6 +54,8 @@ namespace Magnetar_Client.Modules
             resetCDonEnableSetting = new BoolSetting("Reset CD on Enable", resetCDonEnable);
             Settings.Add(resetCDonEnableSetting);
             resetCDonEnable = resetCDonEnableSetting.Value;
+
+            EndCategory();
         }
 
         // Mod Logic
@@ -115,9 +123,14 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
+
             CustomCDSetting = new FloatSetting("Custom Hammer Cooldown", 0, 999, CustomCD);
             Settings.Add(CustomCDSetting);
             CustomCD = CustomCDSetting.Value;
+
+            EndCategory();
+            CreateCategory("Extra");
 
             preserveOriginalSetting = new BoolSetting("Preserve Original", preserveOriginal);
             Settings.Add(preserveOriginalSetting);
@@ -126,6 +139,9 @@ namespace Magnetar_Client.Modules
             resetCDonEnableSetting = new BoolSetting("Reset CD on Enable", resetCDonEnable);
             Settings.Add(resetCDonEnableSetting);
             resetCDonEnable = resetCDonEnableSetting.Value;
+
+            EndCategory();
+
         }
 
         // Mod Logic
@@ -200,17 +216,11 @@ namespace Magnetar_Client.Modules
         public MultiSelectSetting selectedSeeds;
         public MultiSelectSetting selectedSeeds_dup;
 
-        private Dictionary<int,string> plantNameOverriden = new Dictionary<int, string>();
         public CustomCDCards()
         {
             instance = this;
 
-            plantNameOverriden = Translator.TranslateEnum(typeof(PlantType));
-
-            foreach (var name in plantNameOverriden)
-            {
-                plantNameOverriden[name.Key] = $"{plantNameOverriden[name.Key]} ({name.Key})";
-            }
+            CreateCategory("General");
 
             selectedSeeds = new MultiSelectSetting(
                 "Cards", typeof(PlantType))
@@ -220,11 +230,11 @@ namespace Magnetar_Client.Modules
                     257,258,259,260,261,262,263,264,265,266,267,268,
                     246,247,
                 },
-                CustomNames = plantNameOverriden
+                CustomNames = TranslatedNames(typeof(PlantType))
             };
 
             Settings.Add(selectedSeeds);
-            selectedSeeds.SelectedValues.UnionWith(plantNameOverriden.Keys);
+            selectedSeeds.Options.Keys.ToList().ForEach(selectedSeeds.Select);
 
             selectedSeeds_dup = new MultiSelectSetting(
                 "Duplicate Cards", typeof(PlantType))
@@ -234,14 +244,16 @@ namespace Magnetar_Client.Modules
                     257,258,259,260,261,262,263,264,265,266,267,268,
                     246,247,
                 },
-                CustomNames = plantNameOverriden
+                CustomNames = TranslatedNames(typeof(PlantType))
             };
 
             Settings.Add(selectedSeeds_dup);
-            selectedSeeds_dup.SelectedValues.UnionWith(plantNameOverriden.Keys);
+            selectedSeeds_dup.Options.Keys.ToList().ForEach(selectedSeeds_dup.Select);
 
             CustomCDSetting = new FloatSetting("Custom CD Multiplier", 0.01f, 100, customCD,2);
             Settings.Add(CustomCDSetting);
+
+            EndCategory();
 
         }
 

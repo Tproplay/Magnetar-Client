@@ -37,6 +37,9 @@ namespace Magnetar_Client.Modules
         public DebugMode()
         {
             instance = this;
+
+            CreateCategory("General");
+
             selected = new MultiSelectSetting("elements")
             {
                 Options = new Dictionary<int, string>
@@ -50,6 +53,8 @@ namespace Magnetar_Client.Modules
             speed = new FloatSetting("Time between Logs", 0.1f, 10, 1, 1);
 
             Settings.Add(speed);
+
+            EndCategory();
         }
 
 

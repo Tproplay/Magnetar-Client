@@ -36,6 +36,8 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
+
             ZombieSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
             {
                 MaxSelection = -1,
@@ -48,6 +50,8 @@ namespace Magnetar_Client.Modules
 
             theSpeedSettig = new FloatSetting("Speed", 0.1f, 10f, 2f);
             Settings.Add(theSpeedSettig);
+
+            EndCategory();
         }
 
         public override void OnLanguageChanged()

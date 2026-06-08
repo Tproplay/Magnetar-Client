@@ -30,6 +30,8 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
+
             BulletTypeSetting = new MultiSelectSetting("Bullet Types", typeof(BulletType))
             {
                 CustomNames = TranslatedNames(typeof(BulletType)),
@@ -40,6 +42,9 @@ namespace Magnetar_Client.Modules
 
             ScaleSetting = new FloatSetting("Scale Multiplier", 0.1f, 2f, 0.5f, 2);
             Settings.Add(ScaleSetting);
+
+            EndCategory();
+
         }
 
         public override void OnLanguageChanged()

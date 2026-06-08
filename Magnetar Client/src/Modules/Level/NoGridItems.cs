@@ -32,8 +32,12 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("Extra");
+
             AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
             Settings.Add(AutoTurnOff);
+
+            EndCategory();
         }
 
         // Mod Logic

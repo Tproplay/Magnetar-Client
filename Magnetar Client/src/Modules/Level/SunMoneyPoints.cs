@@ -36,6 +36,8 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("Unlimited Sun");
+
             UnlimitedSun = new BoolSetting("Unlimited Sun", true);
             Settings.Add(UnlimitedSun);
 
@@ -45,11 +47,16 @@ namespace Magnetar_Client.Modules
             preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
 
+            EndCategory();
+            CreateCategory("Sun Multiplier");
+
             SunMultipier = new BoolSetting("Sun Multiplier", false);
             Settings.Add(SunMultipier);
 
             sunMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);
             Settings.Add(sunMultiplierSetting);
+
+            EndCategory();
 
         }
 
@@ -133,6 +140,8 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("Unlimited Money");
+
             UnlimitedMoney = new BoolSetting("Unlimited Money",true);
             Settings.Add(UnlimitedMoney);
 
@@ -142,11 +151,16 @@ namespace Magnetar_Client.Modules
             preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
 
+            EndCategory();
+            CreateCategory("Money Multiplier");
+
             MoneyMultiplier = new BoolSetting("Money Multiplier", false);
             Settings.Add(MoneyMultiplier);
 
             moneyMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);
             Settings.Add(moneyMultiplierSetting);
+
+            EndCategory();
         }
 
         // Mod Logic
@@ -228,6 +242,8 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("Unlimited Points");
+
             UnlimitedPoints = new BoolSetting("Unlimited Points", true);
             Settings.Add(UnlimitedPoints);
 
@@ -237,11 +253,16 @@ namespace Magnetar_Client.Modules
             preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
 
+            EndCategory();
+            CreateCategory("Points Multiplier");
+
             PointsMultiplier = new BoolSetting("Points Multiplier", false);
             Settings.Add(PointsMultiplier);
 
             pointsMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);
             Settings.Add(pointsMultiplierSetting);
+
+            EndCategory();
         }
 
         // Mod Logic

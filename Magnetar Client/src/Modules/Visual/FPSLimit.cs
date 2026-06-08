@@ -24,8 +24,13 @@ namespace Magnetar_Client.Modules
         public FPSLimit()
         {
             instance = this;
+
+            CreateCategory("General");
+
             FpsSetting = new IntSetting("Max FPS", 1, 400, 60);
             AddSettings(FpsSetting);
+
+            EndCategory();
         }
 
         public override void OnEnable()

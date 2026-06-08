@@ -38,6 +38,8 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
+
             ZombiesSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
             {
                 MaxSelection = -1,
@@ -64,8 +66,13 @@ namespace Magnetar_Client.Modules
             HypnoZombiesSelectedSetting.Options.Keys.ToList().ForEach(HypnoZombiesSelectedSetting.Select);
             Settings.Add(HypnoZombiesSelectedSetting);
 
+            EndCategory();
+            CreateCategory("Extra");
+
             AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
             Settings.Add(AutoTurnOff);
+
+            EndCategory();
 
         }
 

@@ -30,6 +30,8 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
+
             ShowMaxHealth = new BoolSetting("Show Max Health", false);
             AutoEnable_ShowHp_Plant = new BoolSetting("Auto Enable Plant Hp", false);
             AutoEnable_ShowHp_Zombie = new BoolSetting("Auto Enable Zombie Hp", false);
@@ -37,6 +39,8 @@ namespace Magnetar_Client.Modules
             Settings.Add(ShowMaxHealth);
             Settings.Add(AutoEnable_ShowHp_Plant);
             Settings.Add(AutoEnable_ShowHp_Zombie);
+
+            EndCategory();
         }
 
         // Mod Logic

@@ -31,6 +31,8 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
+
             MaxZombiesSetting = new IntSetting("Max Zombies", 10, 1000, 60);
             AddSettings(MaxZombiesSetting);
 
@@ -40,8 +42,13 @@ namespace Magnetar_Client.Modules
             HpAdditionPercentageSetting = new FloatSetting("Add % of Hp", 0.1f, 100, 100, 1);
             AddSettings(HpAdditionPercentageSetting);
 
+            EndCategory();
+            CreateCategory("Extra");
+
             VisualScaleSetting = new FloatSetting("Visual Scale", 0.01f, 1, 0.03f, 2);
             AddSettings(VisualScaleSetting);
+
+            EndCategory();
         }
 
         // Mod Logic

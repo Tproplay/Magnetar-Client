@@ -38,13 +38,15 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
+
             PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
             {
                 MaxSelection = -1,
                 Blacklist = new HashSet<int> {
                     (int)PlantType.Nothing,
                     257,258,259,260,261,262,263,264,265,266,267,268,
-                    246,247,
+                    246,247,3000,
                 },
                 CustomNames = TranslatedNames(typeof(PlantType))
             };
@@ -53,8 +55,14 @@ namespace Magnetar_Client.Modules
 
             Settings.Add(PlantsSelectedSetting);
 
+            EndCategory();
+            CreateCategory("Extra");
+
             AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
             Settings.Add(AutoTurnOff);
+
+            EndCategory();
+
         }
 
         public override void OnLanguageChanged()

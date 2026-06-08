@@ -26,8 +26,13 @@ namespace Magnetar_Client.Modules
         public TimeScale()
         {
             Instance = this;
+
+            CreateCategory("General");
+
             TimeScaleValueSetting = new FloatSetting("Time Scale", 0f, 200, TimeScaleValue);
             Settings.Add(TimeScaleValueSetting);
+
+            EndCategory();
         }
 
         public float originalTimeScale = 1;

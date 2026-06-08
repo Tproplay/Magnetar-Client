@@ -22,6 +22,8 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
+
             ConveyorPlantsSetting = new MultiSelectSetting("Allowed Plants", typeof(PlantType))
             {
                 CustomNames = TranslatedNames(typeof(PlantType)),
@@ -33,6 +35,8 @@ namespace Magnetar_Client.Modules
                 }
             };
             AddSettings(ConveyorPlantsSetting);
+
+            EndCategory();
         }
 
         public override void OnLanguageChanged()

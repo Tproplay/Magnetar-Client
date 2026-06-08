@@ -33,6 +33,8 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
+            CreateCategory("General");
+
             ZombieSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
             {
                 MaxSelection = -1,
@@ -49,6 +51,9 @@ namespace Magnetar_Client.Modules
 
             HpMultiplierSettig = new FloatSetting("Hp Multiply", 0.1f, 100, 2);
             Settings.Add(HpMultiplierSettig);
+
+            EndCategory();
+
         }
 
         public override void OnLanguageChanged()

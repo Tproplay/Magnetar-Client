@@ -33,6 +33,8 @@ namespace Magnetar_Client.Modules
         { 
             instance = this;
 
+            CreateCategory("General");
+
             selectedItems = new MultiSelectSetting("Items")
             {
                 Options = new Dictionary<int, string>
@@ -43,6 +45,8 @@ namespace Magnetar_Client.Modules
             };
 
             Settings.Add(selectedItems);
+
+            EndCategory();
         }
 
         // Mod Logic

@@ -1,8 +1,8 @@
 {
-  "0": "LevelName",
-  "1": "Sun",
-  "2": "Wave",
-  "3": "SurvivalRound",
-  "4": "PlantCount",
-  "5": "ZombieCount"
+  "0": "TênMànChơi",
+  "1": "MặtTrời",
+  "2": "ĐợtTấnCông",
+  "3": "VòngSinhTồn",
+  "4": "SốLượngCây",
+  "5": "SốLượngZombie"
 }

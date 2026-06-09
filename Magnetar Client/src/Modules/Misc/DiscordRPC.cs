@@ -80,12 +80,12 @@ namespace Magnetar_Client.Modules
 
             InGame_Line1_1 = new StringSetting("Line1 Message 1", "Magnetar Client v{Magnetar_Version}", In_Game_AutoCompleteArgs);
             InGame_Line1_2 = new StringSetting("Line1 Message 2", "Playing: {Level_Name}", In_Game_AutoCompleteArgs);
-            InGame_Line1_3 = new StringSetting("Line1 Message 3", "Plants: {number_of_plants} | Zombies: {number_of_zombies}", In_Game_AutoCompleteArgs);
+            InGame_Line1_3 = new StringSetting("Line1 Message 3", "", In_Game_AutoCompleteArgs);
             InGame_Line1_4 = new StringSetting("Line1 Message 4", "", In_Game_AutoCompleteArgs);
 
             InGame_Line2_1 = new StringSetting("Line2 Message 1", "Sun: {Sun} | Money: {Money}", In_Game_AutoCompleteArgs);
             InGame_Line2_2 = new StringSetting("Line2 Message 2", "Wave: {Current_Wave}/{Max_Wave}", In_Game_AutoCompleteArgs);
-            InGame_Line2_3 = new StringSetting("Line2 Message 3", "", In_Game_AutoCompleteArgs);
+            InGame_Line2_3 = new StringSetting("Line2 Message 3", "Plants: {number_of_plants} | Zombies: {number_of_zombies}", In_Game_AutoCompleteArgs);
             InGame_Line2_4 = new StringSetting("Line2 Message 4", "", In_Game_AutoCompleteArgs);
 
             AddSettings(InGame_Line1_1, InGame_Line1_2, InGame_Line1_3, InGame_Line1_4);
@@ -214,8 +214,6 @@ namespace Magnetar_Client.Modules
                     }
             }
 
-
-            UpdatePresence();
         }
 
         public static List<string> In_Game_AutoCompleteArgs = new List<string>
@@ -249,21 +247,43 @@ namespace Magnetar_Client.Modules
         {
             if (InGame_Randomizer_mode.Value == 0) // Sequential
             {
-                index1 = (index1 + 1) % Line1Cycle.Count;
-                index2 = (index2 + 1) % Line2Cycle.Count;
+                // Line 1
+                if (Line1Cycle != null && Line1Cycle.Count > 0)
+                    index1 = (index1 + 1) % Line1Cycle.Count;
+                else index1 = 0;
+
+                // Line 2
+                if (Line2Cycle != null && Line2Cycle.Count > 0)
+                    index2 = (index2 + 1) % Line2Cycle.Count;
+                else index2 = 0;
             }
             else if (InGame_Randomizer_mode.Value == 1) // Random
             {
-                if (Line1Cycle.Count > 0)
+                //Line 1
+                if (Line1Cycle != null && Line1Cycle.Count > 0)
                     index1 = _random.Next(Line1Cycle.Count);
-                if (Line2Cycle.Count > 0)
+                else index1 = 0;
+
+                // Line 2
+                if (Line2Cycle != null && Line2Cycle.Count > 0)
                     index2 = _random.Next(Line2Cycle.Count);
+                else index2 = 0;
             }
         }
 
         private void UpdatePresence()
         {
             if (client == null || !client.IsInitialized) return;
+
+            if (Line1Cycle == null || Line1Cycle.Count == 0)
+                index1 = 0;
+            else if (index1 >= Line1Cycle.Count)
+                index1 = 0;
+
+            if (Line2Cycle == null || Line2Cycle.Count == 0)
+                index2 = 0;
+            else if (index2 >= Line2Cycle.Count)
+                index2 = 0; 
 
             string currentLine1 = Line1Cycle.Count > 0 ? Line1Cycle[index1] : "Made By Tproplay";
             string currentLine2 = Line2Cycle.Count > 0 ? Line2Cycle[index2] : $"Pvz Fusion v{Application.version}";

@@ -1,64 +1,74 @@
-<p align="center">
-  <img src="assets/MagnetarClientLogo.png" width="170">
-</p>
-
-<div class="container" align = "center">
+<div align="center">
+  <img src="assets/MagnetarClientLogo.png" width="170" alt="Magnetar Client Logo">
   <h1 class="smooth-gradient">Magnetar Client</h1>
+  <p><b>A high-performance utility mod for Plants Vs. Zombies Fusion built with MelonLoader.</b></p>
+
+  <img src="https://img.shields.io/github/v/release/Tproplay/Magnetar-Client?style=flat-square&color=blue" alt="Latest Release">
+  <img src="https://img.shields.io/github/downloads/Tproplay/Magnetar-Client/total?style=flat-square&color=success" alt="Downloads">
+  
 </div>
 
-<p align="center">
-  A high-performance utility mod for <span style="color:red">Plants Vs. Zombies Fusion</span> built with MelonLoader.<br>
-</p>
+<br/>
+
+**Magnetar Client** is a feature-rich mod for *Plants Vs. Zombies Fusion* designed to enhance your gameplay experience. It provides comprehensive QoL improvements, advanced game modifications, and a fully customizable UI display—all while maintaining peak performance.
 
 ---
 
-**Magnetar Client** is a mod for Plants Vs. Zombies Fusion that aims to provide better QoL Features, Game Modifications, Customizable UI display and many more features.
+## ✨ Features
 
-## Features
-
-- Tons of Built-in Customizable Cheats
-- Clean User Interface
-- Customizable UI Display
-- Light weight, causes almost no performance difference
+* 🛠️ **Built-in Cheats:** Tons of customizable options to tailor your gameplay.
+* 🖥️ **Clean Interface:** A modern, intuitive, and distraction-free user interface.
+* 🎨 **Customizable Display:** Personalize the UI to fit your aesthetic preferences.
+* ⚡ **Lightweight:** Highly optimized code ensures almost zero performance impact.
 
 ## 🎮 Controls
 
-- **`Right Shift`** Show/Hide the mod menu.
-- **`Right Click`** Open Module settings.
+| Action | Shortcut |
+| :--- | :--- |
+| **Show/Hide Mod Menu** | <kbd>Right Shift</kbd> |
+| **Open Module Settings** | <kbd>Right Click</kbd> |
 
-## How to Install
+## 🚀 How to Install
 
-- Make sure you have MelonLoader Installed.
-- Download the latest release zip file.
-- Extract the downloaded archive.
-- Copy contents of `Magnetar\Mods` to `[Your Game folder]\Mods`.
-- Similarly, Copy contents of `Magnetar\UserLibs` to `[Your Game folder]\UserLibs`.
-- Launch your game to activate the client.
+> **Note:** Ensure you have [MelonLoader](https://melonwiki.xyz/) installed before proceeding.
 
-After installing the files, your folder structure should look like this - 
+1. **Download** the [latest release](https://github.com/Tproplay/Magnetar-Client/releases) `.zip` file.
+2. **Extract** the downloaded archive to a convenient location.
+3. **Copy** the contents of the `MagnetarBeta\Mods` folder into `[Your Game Folder]\Mods`.
+4. **Copy** the contents of the `MagnetarBeta\UserLibs` folder into `[Your Game Folder]\UserLibs`.
+5. **Launch** your game to activate the client!
 
-```
+### 📂 Folder Structure
+After installing the files, your game directory structure should look like this:
 
-Game-Files/
-|
-├── MelonLoader
-├── Mods/
-|   ├── Magnetar Data
-|   ├── Magnetar Translation
-|   ├── Magnetar Client.dll
-├── PlantsVsZombiesRH_Data
-├── UserData
-├── UserLibs/
-|   ├── DiscordRPC.dll
-├── baselib.dll
-├── GameAssembly.dll
-├── PlantsVsZombiesRH.exe (your game exe file)
-├── UnityCrashHandler64.exe
-├── UnityPlayer.dll
-├── version.dll
+    Game-Files/
+    ├── MelonLoader/
+    ├── Mods/
+    │   ├── Magnetar Data/
+    │   ├── Magnetar Translation/
+    │   └── Magnetar Client.dll
+    ├── PlantsVsZombiesRH_Data/
+    ├── UserData/
+    ├── UserLibs/
+    │   └── DiscordRPC.dll
+    ├── baselib.dll
+    ├── GameAssembly.dll
+    ├── PlantsVsZombiesRH.exe    <-- (Your game executable)
+    ├── UnityCrashHandler64.exe
+    ├── UnityPlayer.dll
+    └── version.dll
 
-```
+## 👥 Credits
 
-## Special Thanks
+* 👑 **Tproplay** — Main Developer
+* 🇻🇳 **Kyzerin9999** — Playtester & Vietnamese Translator
+* 🧪 **Qwwwww** — Playtester
+* 🧪 **Gosu** — Playtester
+* 🧪 **D2013I** — Playtester
+* 🧪 **gaotmaster** — Playtester
+* 🦇 **The Dark Knight** — Playtester
 
-- **Infinite75** and **CareFreeSong** https://github.com/CarefreeSongs712/PVZRHTools/
+## 🙏 Special Thanks
+
+* **Infinite75** & **CareFreeSong**: For their incredible work on [PVZRHTools](https://github.com/CarefreeSongs712/PVZRHTools/).
+* **Blooms Community**: Join the discussion on their [Discord Server](https://discord.gg/DPAC5ZVJ8T).

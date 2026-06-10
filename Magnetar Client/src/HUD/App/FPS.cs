@@ -15,7 +15,7 @@ namespace Magnetar_Client.HUDElements
         {
             string colorName = fps > 55 ? "lime" : (fps > 30 ? "yellow" : "red");
 
-            string displayText = $"<size=18>FPS: <color={colorName}>{(int)fps}</color></size>";
+            string displayText = $"FPS: <color={colorName}>{(int)fps}</color>";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
@@ -52,7 +52,7 @@ namespace Magnetar_Client.HUDElements
         {
             string colorName = currentFrameTime < 1/55f ? "lime" : (currentFrameTime < 1/30f ? "yellow" : "red");
 
-            string displayText = $"<size=18>FrameTime: <color={colorName}>{currentFrameTime*1000:f0}</color>ms</size>";
+            string displayText = $"FrameTime: <color={colorName}>{currentFrameTime*1000:f0}</color>ms";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 

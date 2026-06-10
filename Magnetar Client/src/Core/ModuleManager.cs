@@ -550,13 +550,14 @@ namespace Magnetar_Client.Core
                 showModules = false;
             }
 
-            GUI.Box(btnRect, Translate("Select"), Magnetar_Default.ModuleOff);
+            GUI.Box(btnRect, Translate("Select"), Magnetar_Default.SettingOff);
             GUI.backgroundColor = Color.white;
 
             // Selection Count Text
             Color originalColor = GUI.contentColor;
             GUI.contentColor = Magnetar_Default.TextDim;
-            GUI.Label(new Rect(btnRect.x + Config.selectButtonWidth + 5, y, width * 0.4f, Config.elementHeight), '('+Translate($"{set.SelectedValues.Count} selected") + ")");
+            GUI.Label(new Rect(btnRect.x + Config.selectButtonWidth + 5, y, width * 0.4f, Config.elementHeight), 
+                '('+Translate($"{set.SelectedValues.Count} selected") + ")", Magnetar_Default.SettingDescriptionStyle);
             GUI.contentColor = originalColor;
 
         }

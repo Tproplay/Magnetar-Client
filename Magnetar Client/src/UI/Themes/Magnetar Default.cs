@@ -255,13 +255,13 @@ namespace Magnetar_Client.UI.Themes
             #region HudElement
             HUDElementStyle = new GUIStyle();
 
-            HUDElementStyle.fontSize = 14;
+            HUDElementStyle.fontSize = 18;
             HUDElementStyle.alignment = TextAnchor.UpperLeft;
             HUDElementStyle.wordWrap = false;
             HUDElementStyle.richText = true;
 
             HUDElementStyle.normal = new GUIStyleState();
-            HUDElementStyle.normal.textColor = new Color(1f, 1f, 1f);
+            HUDElementStyle.normal.textColor = Color.white;
 
 
 

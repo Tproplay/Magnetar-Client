@@ -82,7 +82,7 @@ namespace Magnetar_Client.Core
                     4000,
                     windowRect,
                     (GUI.WindowFunction)DrawGUIControls,
-                    Translator.Translate("GUI Configuration"),
+                    "",
                     Magnetar_Default.ModuleWindow
                 );
             }
@@ -112,6 +112,11 @@ namespace Magnetar_Client.Core
             float indent = 10;
             Event e = Event.current;
             float y = 35;
+
+            Rect headerBgRect = new Rect(0, 0, w, y-indent);
+            GUI.Box(headerBgRect, Translator.Translate("GUI Configuration"), Magnetar_Default.SettingsWindow);
+
+            
 
             string currentLangName = "English";
 
@@ -146,7 +151,7 @@ namespace Magnetar_Client.Core
                 Magnetar_Client.NEF.NEFData.OnLanguageChanged();
             }
 
-            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), $"Language: {currentLangName}");
+            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), $"Language: <color=yellow>{currentLangName}</color>",Magnetar_Default.SettingDescriptionStyle);
 
             Rect selectBtnRect = new Rect(w * 0.5f, y, w * 0.45f, elementHeight);
 
@@ -167,7 +172,7 @@ namespace Magnetar_Client.Core
                 isSelectingLanguage = true;
             }
 
-            GUI.Box(selectBtnRect, "Change", Magnetar_Default.ModuleOff);
+            GUI.Box(selectBtnRect, "Change", Magnetar_Default.SettingOff);
             GUI.backgroundColor = Color.white;
 
             y += elementHeight + 10;

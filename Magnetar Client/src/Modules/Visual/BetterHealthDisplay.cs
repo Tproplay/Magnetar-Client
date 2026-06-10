@@ -26,19 +26,21 @@ namespace Magnetar_Client.Modules
         public BoolSetting ShowMaxHealth;
         public BoolSetting AutoEnable_ShowHp_Plant;
         public BoolSetting AutoEnable_ShowHp_Zombie;
+
+        public BoolSetting SumHpSetting;
+
         public BetterHealthDisplay()
         {
             instance = this;
 
             CreateCategory("General");
 
+            SumHpSetting = new BoolSetting("Combine HP and Shield", true);
             ShowMaxHealth = new BoolSetting("Show Max Health", false);
             AutoEnable_ShowHp_Plant = new BoolSetting("Auto Enable Plant Hp", false);
             AutoEnable_ShowHp_Zombie = new BoolSetting("Auto Enable Zombie Hp", false);
 
-            Settings.Add(ShowMaxHealth);
-            Settings.Add(AutoEnable_ShowHp_Plant);
-            Settings.Add(AutoEnable_ShowHp_Zombie);
+            AddSettings(SumHpSetting, ShowMaxHealth,AutoEnable_ShowHp_Plant,AutoEnable_ShowHp_Zombie);
 
             EndCategory();
         }
@@ -82,9 +84,42 @@ namespace Magnetar_Client.Modules
                     string rawText = textComp.text ?? string.Empty;
                     string cleanText = System.Text.RegularExpressions.Regex.Replace(rawText, "<.*?>", string.Empty);
 
-                    if (cleanText == rawHpString || cleanText.Contains("/"))
+                    if (cleanText == rawHpString || cleanText.Contains("/") || cleanText.Contains("+"))
                     {
-                        string formattedCurrent = FormatInternational(__instance.thePlantHealth);
+                        string leftSide = cleanText.Split('/')[0].Trim();
+
+                        string[] plusParts = leftSide.Split('+');
+                        string formattedCurrent;
+
+                        if (instance.SumHpSetting.Value && plusParts.Length > 1)
+                        {
+                            int sum = 0;
+                            foreach (var part in plusParts)
+                            {
+                                if (int.TryParse(part.Trim(), out int val))
+                                {
+                                    sum += val;
+                                }
+                            }
+                            formattedCurrent = FormatInternational(sum);
+                        }
+                        else
+                        {
+                            var formattedList = new System.Collections.Generic.List<string>();
+                            foreach (var part in plusParts)
+                            {
+                                if (int.TryParse(part.Trim(), out int val))
+                                {
+                                    formattedList.Add(FormatInternational(val));
+                                }
+                                else
+                                {
+                                    formattedList.Add(part.Trim());
+                                }
+                            }
+                            formattedCurrent = string.Join("+", formattedList);
+                        }
+
                         string finalText = formattedCurrent;
 
                         if (instance.ShowMaxHealth.Value)

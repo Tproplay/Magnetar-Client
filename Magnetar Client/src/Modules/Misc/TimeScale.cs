@@ -20,7 +20,6 @@ namespace Magnetar_Client.Modules
 
         public static TimeScale Instance;
 
-        public float TimeScaleValue = 2f;
         public FloatSetting TimeScaleValueSetting;
 
         public BoolSetting StopWhenPaused;
@@ -34,7 +33,7 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            TimeScaleValueSetting = new FloatSetting("Time Scale", 0f, 200, TimeScaleValue);
+            TimeScaleValueSetting = new FloatSetting("Time Scale", 0f, 200, 2);
             AddSettings(TimeScaleValueSetting);
 
             EndCategory();
@@ -55,7 +54,7 @@ namespace Magnetar_Client.Modules
         // Mod Logic
         public override void OnEnable()
         {
-            originalTimeScale = UnityEngine.Time.timeScale;
+            originalTimeScale = UnityEngine.Time.timeScale == 0 ? 1 : UnityEngine.Time.timeScale;
         }
         public override void OnDisable()
         {

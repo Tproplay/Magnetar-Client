@@ -133,7 +133,7 @@ namespace Magnetar_Client.HUDElements
                 health += zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
                 
             }
-            return health;
+            return health>0?health:0;
         }
     }
 
@@ -162,7 +162,7 @@ namespace Magnetar_Client.HUDElements
                 health += zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
 
             }
-            return health;
+            return health > 0 ? health : 0;
         }
     }
 }

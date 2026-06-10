@@ -8,12 +8,20 @@ namespace Magnetar_Client.UI.Themes
     {
         public static GUIStyle TopBar;
         public static GUIStyle TopBarActive;
+
         public static GUIStyle ModuleWindow;
-        public static GUIStyle SettingsWindow;
         public static GUIStyle ModuleOn;
         public static GUIStyle ModuleOff;
+
+        public static GUIStyle SettingsWindow;
+        public static GUIStyle SettingsText;
         public static GUIStyle DescriptionStyle;
         public static GUIStyle AuthorStyle;
+
+        public static GUIStyle SettingOn;
+        public static GUIStyle SettingOff;
+        public static GUIStyle SettingDescriptionStyle;
+
         public static GUIStyle SeparatorStyle;
         public static GUIStyle TextStyle;
         public static GUIStyle TextHighlightedStyle;
@@ -70,7 +78,7 @@ namespace Magnetar_Client.UI.Themes
             TopBar.hover.background = HoverTex;
             TopBar.active.background = ActiveTex;
             TopBar.alignment = TextAnchor.MiddleCenter;
-            TopBar.fontSize = 12;
+            TopBar.fontSize = 14;
 
             TopBar.padding = new RectOffset();
             TopBar.padding.left = 10;
@@ -87,7 +95,7 @@ namespace Magnetar_Client.UI.Themes
             TopBarActive.hover.background = AccentTex;
             TopBarActive.active.background = AccentTex;
             TopBarActive.alignment = TextAnchor.MiddleCenter;
-            TopBarActive.fontSize = 12;
+            TopBarActive.fontSize = 14;
 
             TopBarActive.padding = new RectOffset();
             TopBarActive.padding.left = 10;
@@ -97,13 +105,37 @@ namespace Magnetar_Client.UI.Themes
 
             #endregion
 
+            #region ModuleOn
+            ModuleOn = new GUIStyle();
+            ModuleOn.normal.background = AccentTex;
+            ModuleOn.normal.textColor = Color.black;
+            ModuleOn.fontSize = 12;
+            ModuleOn.alignment = TextAnchor.MiddleLeft;
+            ModuleOn.hover.background = ActiveHoverTex;
+            ModuleOn.padding = new RectOffset();
+            ModuleOn.padding.left = 10;
+            #endregion
+
+            #region ModuleOff
+            ModuleOff = new GUIStyle();
+            ModuleOff.normal.background = BgLightTex;
+            ModuleOff.normal.textColor = TextDim;
+            ModuleOff.fontSize = 12;
+            ModuleOff.hover.background = HoverTex;
+            ModuleOff.hover.textColor = Color.white;
+
+            ModuleOff.alignment = TextAnchor.MiddleLeft;
+            ModuleOff.padding = new RectOffset();
+            ModuleOff.padding.left = 10;
+            #endregion
+
             #region ModuleWindow
             ModuleWindow = new GUIStyle();
             ModuleWindow.normal.background = BgTex;
             ModuleWindow.normal.textColor = Color.white;
 
             ModuleWindow.alignment = TextAnchor.UpperCenter;
-            ModuleWindow.fontSize = 20;
+            ModuleWindow.fontSize = 21;
             ModuleWindow.fontStyle = FontStyle.Bold;
 
             ModuleWindow.padding = new RectOffset();
@@ -119,41 +151,43 @@ namespace Magnetar_Client.UI.Themes
             SettingsWindow.normal.textColor = Color.black;
 
             SettingsWindow.alignment = TextAnchor.UpperCenter;
-            SettingsWindow.fontSize = 20;
+            SettingsWindow.fontSize = 21;
             SettingsWindow.fontStyle = FontStyle.Bold;
 
             SettingsWindow.padding = new RectOffset();
-            SettingsWindow.padding.top = 3;
+            SettingsWindow.padding.top = 1;
             SettingsWindow.padding.bottom = 0;
             SettingsWindow.padding.left = 0;
             SettingsWindow.padding.right = 0;
             #endregion
 
-            #region ModuleOn
-            ModuleOn = new GUIStyle();
-            ModuleOn.normal.background = AccentTex;
-            ModuleOn.normal.textColor = Color.black;
-            ModuleOn.alignment = TextAnchor.MiddleLeft;
-            ModuleOn.hover.background = ActiveHoverTex;
-            ModuleOn.padding = new RectOffset();
-            ModuleOn.padding.left = 10;
+            #region SettingOn
+            SettingOn = new GUIStyle();
+            SettingOn.normal.background = AccentTex;
+            SettingOn.normal.textColor = Color.black;
+            SettingOn.fontSize = 12;
+            SettingOn.alignment = TextAnchor.MiddleLeft;
+            SettingOn.hover.background = ActiveHoverTex;
+            SettingOn.padding = new RectOffset();
+            SettingOn.padding.left = 10;
             #endregion
 
-            #region ModuleOff
-            ModuleOff = new GUIStyle();
-            ModuleOff.normal.background = BgLightTex;
-            ModuleOff.normal.textColor = TextDim;
-            ModuleOff.hover.background = HoverTex;
-            ModuleOff.hover.textColor = Color.white;
+            #region SettingOff
+            SettingOff = new GUIStyle();
+            SettingOff.normal.background = BgLightTex;
+            SettingOff.normal.textColor = TextDim;
+            SettingOff.fontSize = 12;
+            SettingOff.hover.background = HoverTex;
+            SettingOff.hover.textColor = Color.white;
 
-            ModuleOff.alignment = TextAnchor.MiddleLeft;
-            ModuleOff.padding = new RectOffset();
-            ModuleOff.padding.left = 10;
+            SettingOff.alignment = TextAnchor.MiddleLeft;
+            SettingOff.padding = new RectOffset();
+            SettingOff.padding.left = 10;
             #endregion
 
             #region Description
             DescriptionStyle = new GUIStyle();
-            DescriptionStyle.fontSize = 16;
+            DescriptionStyle.fontSize = 18;
             DescriptionStyle.wordWrap = true;
             DescriptionStyle.alignment = TextAnchor.UpperLeft;
             DescriptionStyle.richText = true;
@@ -166,6 +200,24 @@ namespace Magnetar_Client.UI.Themes
             DescriptionStyle.padding.right = 5;
             DescriptionStyle.padding.top = 2;
             DescriptionStyle.padding.bottom = 2;
+
+            #endregion
+
+            #region SettingDescriptionStyle
+            SettingDescriptionStyle = new GUIStyle();
+            SettingDescriptionStyle.fontSize = 14;
+            SettingDescriptionStyle.wordWrap = true;
+            SettingDescriptionStyle.alignment = TextAnchor.UpperLeft;
+            SettingDescriptionStyle.richText = true;
+
+            SettingDescriptionStyle.normal = new GUIStyleState();
+            SettingDescriptionStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f);
+
+            SettingDescriptionStyle.padding = new RectOffset();
+            SettingDescriptionStyle.padding.left = 5;
+            SettingDescriptionStyle.padding.right = 5;
+            SettingDescriptionStyle.padding.top = 2;
+            SettingDescriptionStyle.padding.bottom = 2;
 
             #endregion
 
@@ -203,7 +255,7 @@ namespace Magnetar_Client.UI.Themes
             #region HudElement
             HUDElementStyle = new GUIStyle();
 
-            HUDElementStyle.fontSize = 18;
+            HUDElementStyle.fontSize = 14;
             HUDElementStyle.alignment = TextAnchor.UpperLeft;
             HUDElementStyle.wordWrap = false;
             HUDElementStyle.richText = true;
@@ -232,8 +284,8 @@ namespace Magnetar_Client.UI.Themes
 
             NEFNodeStyle.normal.background = AccentTex;
 
-            NEFNodeStyle.font = Magnetar_Default.ModuleOn.font;
-            NEFNodeStyle.wordWrap = Magnetar_Default.ModuleOn.wordWrap;
+            NEFNodeStyle.font = Magnetar_Default.SettingOn.font;
+            NEFNodeStyle.wordWrap = Magnetar_Default.SettingOn.wordWrap;
 
             NEFNodeStyle.alignment = TextAnchor.LowerCenter;
             NEFNodeStyle.padding = new RectOffset();
@@ -250,6 +302,7 @@ namespace Magnetar_Client.UI.Themes
             TextStyle.alignment = TextAnchor.MiddleLeft;
             TextStyle.richText = false;
             TextStyle.clipping = TextClipping.Clip;
+            TextStyle.fontSize = 13;
 
             TextStyle.normal.textColor = Color.white;
 
@@ -258,12 +311,13 @@ namespace Magnetar_Client.UI.Themes
             #region TextStyle Highlighted
 
             TextHighlightedStyle = new GUIStyle();
-            TextHighlightedStyle.wordWrap = false;
-            TextHighlightedStyle.alignment = TextAnchor.MiddleLeft;
-            TextHighlightedStyle.richText = false;
-            TextHighlightedStyle.clipping = TextClipping.Clip;
+            TextHighlightedStyle.wordWrap = TextStyle.wordWrap;
+            TextHighlightedStyle.alignment = TextStyle.alignment;
+            TextHighlightedStyle.richText = TextStyle.richText;
+            TextHighlightedStyle.clipping = TextStyle.clipping;
+            TextHighlightedStyle.fontSize = TextStyle.fontSize;
+            TextHighlightedStyle.normal.textColor = TextStyle.normal.textColor;
 
-            TextHighlightedStyle.normal.textColor = Color.white;
             TextHighlightedStyle.normal.background = AccentTex;
 
             #endregion

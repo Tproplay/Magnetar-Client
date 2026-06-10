@@ -49,6 +49,8 @@ namespace Magnetar_Client.Core
 
         public override void OnGUI()
         {
+            
+
             // Calculate the ratio for scaling
             float rx = (float)(Screen.width) / nativeWidth;
             float ry = (float)(Screen.height) / nativeHeight;
@@ -139,6 +141,7 @@ namespace Magnetar_Client.Core
 
         public static void WarmUp()
         {
+            Magnetar_Client.Utils.LoadFont.Init();
             ModuleManager.Render();
             NEFManager.Render();
             GUIManager.Render();

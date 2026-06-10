@@ -23,6 +23,7 @@ namespace Magnetar_Client.Utils
                 return;
             }
 
+#pragma warning disable CS0168 // Variable is declared but never used
             try
             {
                 string currentPath = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
@@ -43,7 +44,8 @@ namespace Magnetar_Client.Utils
                 DebugLogger.Error($"[Discord RPC] Failed to set Environment PATH: {ex.Message}");
 #endif
             }
-            
+#pragma warning restore CS0168 // Variable is declared but never used
+
         }
     }
 }

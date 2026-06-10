@@ -185,7 +185,7 @@ namespace Magnetar_Client.Core
                             settingsId,
                             settingsPositions[mod],
                             (GUI.WindowFunction)new Action<int>(id => DrawSettingsWindow(id, mod)),
-                            Translate($"{mod.Name}"),
+                            "",
                             Magnetar_Default.ModuleWindow
                         );
 
@@ -481,15 +481,13 @@ namespace Magnetar_Client.Core
 
             // --- Hold Mode ---
             string holdModeLabel = Translate("Hold Mode");
-            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), holdModeLabel);
+            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), holdModeLabel, Magnetar_Default.SettingDescriptionStyle);
 
             Rect holdRect = new Rect(width * 0.5f, y, width * 0.45f, Config.elementHeight);
             bool holdHover = holdRect.Contains(e.mousePosition);
 
-            if (holdHover) GUI.backgroundColor = Magnetar_Default.AccentColor;
             GUI.Box(holdRect, mod.HoldMode ? Translate("ON") : Translate("OFF"),
-                mod.HoldMode ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
-            GUI.backgroundColor = Color.white;
+                mod.HoldMode ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
 
             if (holdHover && isLeftClick)
             {
@@ -499,14 +497,13 @@ namespace Magnetar_Client.Core
             y += Config.elementHeight + Config.spacing;
 
             // --- Active State ---
-            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), Translate("Enabled"));
+            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), Translate("Enabled"),Magnetar_Default.SettingDescriptionStyle);
 
             Rect enabledRect = new Rect(width * 0.5f, y, width * 0.45f, Config.elementHeight);
             bool enabledHover = enabledRect.Contains(e.mousePosition);
 
-            if (enabledHover) GUI.backgroundColor = Magnetar_Default.AccentColor;
-            GUI.Box(enabledRect, mod.Active ? Translate("ON") : Translate("OFF"), mod.Active ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff);
-            GUI.backgroundColor = Color.white;
+            GUI.Box(enabledRect, mod.Active ? Translate("ON") : Translate("OFF"), 
+                mod.Active ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
 
             if (enabledHover && isLeftClick)
             {
@@ -531,7 +528,7 @@ namespace Magnetar_Client.Core
             Event e = Event.current;
 
             // Setting Name
-            GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), Translate(set.Name));
+            GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), Translate(set.Name),Magnetar_Default.SettingDescriptionStyle);
 
             // "Select" Button Rect
             Rect btnRect = new Rect(width * 0.58f, y, Config.selectButtonWidth, Config.elementHeight);

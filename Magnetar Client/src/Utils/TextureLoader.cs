@@ -1,9 +1,10 @@
-﻿using MelonLoader;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
+﻿using Il2Cpp;
 using Il2CppSystem.IO;
-using Il2Cpp;
+using MelonLoader;
+using MelonLoader.Utils;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Utils
@@ -380,6 +381,52 @@ namespace Magnetar_Client.Utils
             }
 #endif
             return tex;
+        }
+    }
+
+    public static class LoadFont
+    {
+        private static Font customWineFont;
+
+        public static void Init()
+        {
+            if (GUI.skin != null && GUI.skin.font == customWineFont) return;
+
+            string bundlePath = Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Data", "magnetar_ui");
+
+            if (File.Exists(bundlePath))
+            {
+                AssetBundle fontBundle = AssetBundle.LoadFromFile(bundlePath);
+
+                if (fontBundle != null)
+                {
+                    customWineFont = fontBundle.LoadAsset<Font>("Magnetar_font");
+
+                    if (customWineFont != null)
+                    {
+                        GUI.skin.font = customWineFont;
+                        GUI.skin.box.font = customWineFont;
+                        GUI.skin.label.font = customWineFont;
+                        GUI.skin.button.font = customWineFont;
+                        GUI.skin.textField.font = customWineFont;
+                        GUI.skin.textArea.font = customWineFont;
+                        GUI.skin.toggle.font = customWineFont;
+                        GUI.skin.window.font = customWineFont;
+
+                        DebugLogger.Msg("[Texture Loader] Successfully loaded and applied font!");
+                    }
+                    else
+                    {
+                        DebugLogger.Error("[Texture Loader] Found bundle, but 'Magnetar_font' asset was missing inside it.");
+                    }
+
+                    fontBundle.Unload(false);
+                }
+            }
+            else
+            {
+                DebugLogger.Warning("[Texture Loader] Font AssetBundle not found!");
+            }
         }
     }
 }

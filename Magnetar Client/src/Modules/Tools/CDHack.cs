@@ -193,6 +193,113 @@ namespace Magnetar_Client.Modules
         }
     }
 
+    /*
+    public class CustomCDWheel : Module
+    {
+        // Mod Info
+        public override string Name { get; set; } = "No Wheel Barrow CD";
+        public override string Description { get; set; } = "Modifies the Ingame Wheel Barrow's Cooldown.";
+        public override string SearchHints { get; set; } = "nohammercd hammercooldown customhammercd hammercd" +
+            " zerohammercd nohammercoolndown hammercooldownreset fasthammer instanthammer hammerbuff hammercdmod " +
+            "hammercdchanger hammercdremover hammercolldown hammercooldon hammercooldwn hamrcd hammercooldoun " +
+            "hammercdtimer hammercdreducion hammercooldownreduction hammerfast hammerready hammerunlimited hammerinfinite " +
+            "hammerinterval hammerperiod hammerspeed hammerspam hammerfrequency";
+
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
+
+        // Mod Data
+
+        public static CustomCDWheel instance;
+
+        public float CustomCD = 0;
+        public FloatSetting CustomCDSetting;
+
+        private static float originalCD = -1f;
+
+        public bool preserveOriginal = true;
+        public BoolSetting preserveOriginalSetting;
+
+        public bool resetCDonEnable = false;
+        public BoolSetting resetCDonEnableSetting;
+
+        public override bool Active { get; set; } = false;
+
+        public CustomCDWheel()
+        {
+            instance = this;
+
+            CreateCategory("General");
+
+            CustomCDSetting = new FloatSetting("Custom Wheel Barrow Cooldown", 0, 999, CustomCD);
+            Settings.Add(CustomCDSetting);
+            CustomCD = CustomCDSetting.Value;
+
+            EndCategory();
+            CreateCategory("Extra");
+
+            preserveOriginalSetting = new BoolSetting("Preserve Original", preserveOriginal);
+            Settings.Add(preserveOriginalSetting);
+            preserveOriginal = preserveOriginalSetting.Value;
+
+            resetCDonEnableSetting = new BoolSetting("Reset CD on Enable", resetCDonEnable);
+            Settings.Add(resetCDonEnableSetting);
+            resetCDonEnable = resetCDonEnableSetting.Value;
+
+            EndCategory();
+
+        }
+
+        // Mod Logic
+
+        public override void OnUpdateActive()
+        {
+            if (wheel==null)
+            {
+                originalCD = -1f;
+                return;
+            }
+            
+
+            // Save Original CD
+            if (originalCD == -1f) originalCD = wheel.fullCD;
+
+            // BugFix: If the player has a higher CD than the one we set, we set it to our custom CD so
+            // it doesn't take longer than intended to use the hammer again. This can happen if the player
+            // has a CD increasing item and they enable this mod while the CD is still active.
+            if (wheel.CD > CustomCDSetting.Value)
+            {
+                wheel.CD = CustomCDSetting.Value;
+                wheel.CDUpdate();
+            }
+
+            wheel.fullCD = CustomCDSetting.Value;
+
+
+        }
+
+        public override void OnDisable()
+        {
+
+            if (wheel == null) return;
+
+            if (originalCD >= 0 && preserveOriginalSetting.Value)
+            {
+                wheel.fullCD = originalCD;
+            }
+            originalCD = -1f;
+        }
+
+        public override void OnEnable()
+        {
+            if (wheel == null) return;
+            if (resetCDonEnableSetting.Value)
+            {
+                wheel.CD = CustomCDSetting.Value;
+            }
+        }
+    }
+    */
+
     public class CustomCDCards : Module
     {
         // Mod Info

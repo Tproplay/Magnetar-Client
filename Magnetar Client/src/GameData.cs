@@ -15,22 +15,20 @@ namespace Magnetar_Client.Game
         public static Board board;
         public static bool BoardInstanceIsNull = true;
 
-        [HarmonyPatch(typeof(Board), nameof(Board.Awake))]
-        public static class BoardAwakePatch
+        [HarmonyPatch(typeof(Board))]
+        private static class BoardPatch
         {
+            [HarmonyPatch(nameof(Board.Awake))]
             [HarmonyPostfix]
-            public static void Postfix(Board __instance)
+            public static void AwakePostfix(Board __instance)
             {
                 board = __instance;
                 BoardInstanceIsNull = false;
             }
-        }
 
-        [HarmonyPatch(typeof(Board), nameof(Board.OnDestroy))]
-        public static class BoardEndPatch
-        {
+            [HarmonyPatch(nameof(Board.OnDestroy))]
             [HarmonyPostfix]
-            public static void Postfix(Board __instance)
+            public static void OnDestroyPostfix(Board __instance)
             {
                 if (board != null && board.Pointer == __instance.Pointer)
                 {
@@ -39,6 +37,28 @@ namespace Magnetar_Client.Game
                 }
             }
         }
+
+        /*
+        public static Wheel wheel;
+
+        [HarmonyPatch(typeof(InGameTool))]
+        public static class WheelPatch
+        {
+            [HarmonyPatch("Start")]
+            [HarmonyPostfix]
+            public static void StartPostfix(InGameTool __instance)
+            {
+                if (__instance == null) return;
+
+                // We safely cast it to Wheel inside the method instead
+                var wheelInstance = __instance.TryCast<Wheel>();
+                if (wheelInstance != null)
+                {
+                    wheel = wheelInstance;
+                }
+            }
+        }
+        */
     }
 
 

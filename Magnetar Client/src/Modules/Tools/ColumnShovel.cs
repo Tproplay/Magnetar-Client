@@ -1,5 +1,8 @@
 ﻿using HarmonyLib;
 using Il2Cpp;
+using Magnetar_Client.Utils;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using static Il2Cpp.Plant;
 using static Magnetar_Client.Game.GameData;
@@ -8,6 +11,7 @@ namespace Magnetar_Client.Modules
 {
     public class ColumnShovel : Module
     {
+        // Mod Info
         public override string Name { get; set; } = "Column Shovel";
         public override string Description { get; set; } = "Shoveling a plant, also shovel all identical plants in that column simultaneously.";
         public override string SearchHints { get; set; } = "columnshovel shovelcolumn columnremove massshovel shovelall " +
@@ -16,13 +20,44 @@ namespace Magnetar_Client.Modules
             "plantshovel column-shovel shovelidenticalplants massremove shovelgroup shovelmulti shovelsync colshovel";
         public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
 
+        // Mod Data
         public static ColumnShovel instance;
+
+        public SelectSetting Mode;
+        public BoolSetting OnlySame;
 
         public ColumnShovel()
         {
             instance = this;
+
+            CreateCategory("General");
+
+            Mode = new SelectSetting("Mode", 0)
+            {
+                Options = new Dictionary<int, string>
+                {
+                    { 0 , "Column" },
+                    { 1 , "Row" },
+                    { 2 , "Rook" },
+                    { 3 , "3x3" },
+                    { 4 , "Full Lawn" },
+                }
+            };
+
+            OnlySame = new BoolSetting("Only Similar Plants", true);
+
+            AddSettings(Mode,OnlySame);
+
+            EndCategory();
         }
 
+        public override void OnLanguageChanged()
+        {
+            Mode.CustomNames = Mode.Options
+                .ToDictionary(kvp => kvp.Key, kvp => Translator.Translate(kvp.Value));
+        }
+
+        // Mod Logic
 
         private static bool DieByMod = false;
 
@@ -59,17 +94,61 @@ namespace Magnetar_Client.Modules
 
                 DieByMod = true;
 
+                
                 for (int i = plantList.Count - 1; i >= 0; i--)
                 {
                     Plant plant = plantList[i];
-                    if (plant == __instance) continue;
+                    if (plant == __instance || (plant.thePlantType != __instance.thePlantType && 
+                        instance.OnlySame.Value)) continue;
 
-                    if (plant.thePlantType == __instance.thePlantType &&
-                        plant.thePlantColumn == __instance.thePlantColumn)
+                    // Column
+                    if (instance.Mode.Value == 0)
+                    {
+                        if (plant.thePlantColumn == __instance.thePlantColumn)
+                        {
+                            plant.Die(DieReason.ByShovel);
+                        }
+                    }
+
+                    // Row
+                    else if (instance.Mode.Value == 1)
+                    {
+                        if (plant.thePlantRow == __instance.thePlantRow)
+                        {
+                            plant.Die(DieReason.ByShovel);
+                        }
+                    }
+
+                    // Rook
+                    else if (instance.Mode.Value == 2)
+                    {
+                        if (plant.thePlantColumn == __instance.thePlantColumn
+                            || plant.thePlantRow == __instance.thePlantRow)
+                        {
+                            plant.Die(DieReason.ByShovel);
+                        }
+                    }
+
+                    // 3x3
+                    else if (instance.Mode.Value == 3)
+                    {
+                        int colDiff = Math.Abs(plant.thePlantColumn - __instance.thePlantColumn);
+                        int rowDiff = Math.Abs(plant.thePlantRow - __instance.thePlantRow);
+
+                        if (colDiff <= 1 && rowDiff <= 1)
+                        {
+                            plant.Die(DieReason.ByShovel);
+                        }
+                    }
+
+                    // Full Lawn
+                    else if (instance.Mode.Value == 4)
                     {
                         plant.Die(DieReason.ByShovel);
                     }
                 }
+
+                
 
                 DieByMod = false;
 

@@ -37,11 +37,17 @@
     <Reference Include="Il2Cppmscorlib">
       <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.2D.Animation.Runtime">
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\Unity.2D.Animation.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.AssetBundleModule.dll</HintPath>

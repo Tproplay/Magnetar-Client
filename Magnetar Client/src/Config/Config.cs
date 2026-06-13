@@ -30,5 +30,8 @@ namespace Magnetar_Client
 
         public static string Language = "English";
 
+        public static float SettingWidth = 220;
+
+
     }
 }

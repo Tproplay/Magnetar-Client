@@ -151,7 +151,7 @@ namespace Magnetar_Client.Core
                 }
             }
 
-            else if (showSettings) 
+            else if (showSettings)
             {
                 // 3. Render Settings Popups
                 foreach (var mod in Modules)
@@ -160,26 +160,72 @@ namespace Magnetar_Client.Core
                     {
                         int settingsId = Mathf.Abs(mod.GetHashCode()) + 1000;
 
-                        // Re-Center the window
+                        float maxNameWidth = 0f;
+                        if (mod.Settings != null)
+                        {
+                            foreach (var setting in mod.Settings)
+                            {
+                                string name = "";
+                                if (setting is FloatSetting fSet) name = fSet.Name;
+                                else if (setting is IntSetting iSet) name = iSet.Name;
+                                else if (setting is BoolSetting bSet) name = bSet.Name;
+                                else if (setting is BindSetting bindSet) name = bindSet.Name;
+                                else if (setting is MultiSelectSetting msSet) name = msSet.Name;
+                                else if (setting is StringSetting strSet) name = strSet.Name;
+                                else if (setting is SelectSetting selSet) name = selSet.Name;
+                                else if (setting is CategorySetting catSet) name = catSet.Name;
+
+                                if (!string.IsNullOrEmpty(name))
+                                {
+                                    float w = Magnetar_Default.SettingDescriptionStyle.CalcSize(new GUIContent(Translate(name))).x;
+                                    if (w > maxNameWidth) maxNameWidth = w;
+                                }
+                            }
+                        }
+
+                        string[] builtIns = { "Hold Mode", "Enabled", "KeyBind" };
+                        foreach (var b in builtIns)
+                        {
+                            float w = Magnetar_Default.SettingDescriptionStyle.CalcSize(new GUIContent(Translate(b))).x;
+                            if (w > maxNameWidth) maxNameWidth = w;
+                        }
+
+                        
+                        float fixedControlWidth = 140f;
+                        float calculatedWidth = Config.indent + maxNameWidth + 20f + fixedControlWidth + Config.indent;
+
+                        float targetWidth = Mathf.Max(mod.SettingsWidth, calculatedWidth);
+
                         if (!settingsPositions.ContainsKey(mod) || resetWindowPos)
                         {
                             resetWindowPos = false;
 
-                            float popupWidth = mod.SettingsWidth;
-                            float popupHeight = 25f; // Start collapsed to just the header!
+                            float popupHeight = 25f;
 
                             settingsPositions[mod] = new Rect(
-                                (Config.WindowWidth / 2f) - (popupWidth / 2f),
+                                (Config.WindowWidth / 2f) - (targetWidth / 2f),
                                 (Config.WindowHeight / 2f) - (popupHeight / 2f),
-                                popupWidth,
+                                targetWidth,
                                 popupHeight
                             );
 
-                            // Reset animation states so it springs open!
                             moduleContentHeights[mod] = 0f;
                             targetContentHeights[mod] = 0f;
                         }
+                        else
+                        {
+                            
+                            Rect currentRect = settingsPositions[mod];
+                            if (Mathf.Abs(currentRect.width - targetWidth) > 0.5f)
+                            {
+                                float newWidth = Mathf.Lerp(currentRect.width, targetWidth, Time.deltaTime * 15f);
+                                float widthDiff = newWidth - currentRect.width;
 
+                                currentRect.width = newWidth;
+                                currentRect.x -= widthDiff / 2f; 
+                                settingsPositions[mod] = currentRect;
+                            }
+                        }
 
                         settingsPositions[mod] = GUI.Window(
                             settingsId,
@@ -191,13 +237,11 @@ namespace Magnetar_Client.Core
 
                         if (settingsPositions[mod].Contains(new Vector2(Input.mousePosition.x, 1080 - Input.mousePosition.y)))
                         {
-                            // This stops the game from seeing the mouse click
                             if (Input.GetMouseButtonDown(0) | Input.GetMouseButtonDown(1) | Input.GetMouseButtonDown(2))
                             {
                                 Input.ResetInputAxes();
                             }
                         }
-
                     }
                 }
             }
@@ -472,7 +516,6 @@ namespace Magnetar_Client.Core
             MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Color.white, Translate("KeyBind"));
 
             Event e = Event.current;
-
             bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
 
             // --- Keybind ---
@@ -481,9 +524,9 @@ namespace Magnetar_Client.Core
 
             // --- Hold Mode ---
             string holdModeLabel = Translate("Hold Mode");
-            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), holdModeLabel, Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), holdModeLabel, Magnetar_Default.SettingDescriptionStyle);
 
-            Rect holdRect = new Rect(width * 0.5f, y, width * 0.45f, Config.elementHeight);
+            Rect holdRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
             bool holdHover = holdRect.Contains(e.mousePosition);
 
             GUI.Box(holdRect, mod.HoldMode ? Translate("ON") : Translate("OFF"),
@@ -497,12 +540,12 @@ namespace Magnetar_Client.Core
             y += Config.elementHeight + Config.spacing;
 
             // --- Active State ---
-            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), Translate("Enabled"),Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), Translate("Enabled"), Magnetar_Default.SettingDescriptionStyle);
 
-            Rect enabledRect = new Rect(width * 0.5f, y, width * 0.45f, Config.elementHeight);
+            Rect enabledRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
             bool enabledHover = enabledRect.Contains(e.mousePosition);
 
-            GUI.Box(enabledRect, mod.Active ? Translate("ON") : Translate("OFF"), 
+            GUI.Box(enabledRect, mod.Active ? Translate("ON") : Translate("OFF"),
                 mod.Active ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
 
             if (enabledHover && isLeftClick)

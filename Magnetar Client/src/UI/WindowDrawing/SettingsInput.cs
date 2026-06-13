@@ -18,12 +18,14 @@ namespace Magnetar_Client.UI.WindowDrawing
         public static void HandleStringSetting(Magnetar_Client.Modules.StringSetting strSet, ref float y, float width)
         {
             string translatedName = Magnetar_Client.Utils.Translator.Translate(strSet.Name);
-            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, 
+                Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
 
-            Rect inputRect = new Rect(width * 0.5f, y, width * 0.45f, Config.elementHeight);
+            Rect inputRect = new Rect(width - Config.indent - Config.SettingWidth*1.3f, y, Config.SettingWidth*1.3f, Config.elementHeight);
 
             strSet.Value = DrawManualTextField(inputRect, strSet.Value, "", strSet.AutocompleteVars);
         }
+
         public static void HandleNumericSetting(object setting, ref float y, float width, bool isFloat)
         {
             float val, min, max;
@@ -50,7 +52,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                 max = (float)s.Max;
                 name = s.Name;
 
-                // Cache the true integer bounds
                 intMin = s.Min;
                 intMax = s.Max;
             }
@@ -58,9 +59,8 @@ namespace Magnetar_Client.UI.WindowDrawing
             string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
 
             string translatedName = Magnetar_Client.Utils.Translator.Translate(name);
-            GUI.Label(new Rect(Config.indent, y, width * 0.5f, Config.elementHeight), translatedName,Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
 
-            // --- LOGARITHMIC MAPPING HELPERS ---
             float LogConvert(float v) => Mathf.Sign(v) * Mathf.Log10(Mathf.Abs(v) + 1.0f);
             float ExpConvert(float l) => Mathf.Sign(l) * (Mathf.Pow(10.0f, Mathf.Abs(l)) - 1.0f);
 
@@ -70,10 +70,13 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             float percentage = Mathf.Clamp01((logVal - logMin) / (logMax - logMin));
 
-            // --- UI RENDERING (SLIDER) ---
-            Rect sliderRect = new Rect(width * 0.45f, y + 10, width * 0.35f, 8);
+            // --- UI RENDERING (SLIDER CONSTANT BOUNDS) ---
+            float inputW = 45f;
+            float sliderW = Config.SettingWidth - inputW - 10f; // 85px for slider track
+
+            Rect sliderRect = new Rect(width - Config.indent - Config.SettingWidth, y + 10, sliderW, 8);
             Rect sliderHitBox = new Rect(sliderRect.x, y, sliderRect.width, 22);
-            Rect inputRect = new Rect(width * 0.82f, y, width * 0.13f, 22);
+            Rect inputRect = new Rect(width - Config.indent - inputW, y, inputW, 22);
             float fillWidth = sliderRect.width * percentage;
             Rect thumbRect = new Rect(sliderRect.x + fillWidth - 10, y + 1, 20, 20);
 
@@ -87,7 +90,6 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             Event e = Event.current;
 
-            // --- SCROLL WHEEL LOGIC ---
             if (e.type == EventType.ScrollWheel && (sliderHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition)))
             {
                 float scrollDirection = Mathf.Sign(e.delta.y);
@@ -123,7 +125,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                 e.Use();
             }
 
-            // --- LOGARITHMIC DRAG LOGIC ---
             if (e.type == EventType.MouseDown && (sliderHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition)))
             {
                 activeSliderId = myId;
@@ -151,14 +152,13 @@ namespace Magnetar_Client.UI.WindowDrawing
                 }
             }
 
-            // Manual Input via Text
             int controlId = inputRect.GetHashCode();
             bool isFocused = (activeTextFieldId == controlId);
 
             string displayValue = isFocused ? currentInputBuffer : val.ToString(formatString);
             string newText = DrawManualTextField(inputRect, displayValue, "0");
 
-            if (activeTextFieldId == controlId) // Update values while typing
+            if (activeTextFieldId == controlId)
             {
                 currentInputBuffer = newText;
 
@@ -182,34 +182,28 @@ namespace Magnetar_Client.UI.WindowDrawing
             bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
 
             string translatedName = Magnetar_Client.Utils.Translator.Translate(bSet.Name);
-            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), translatedName,Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
 
-            // --- UI DISPLAY ---
             string bindText = bSet.IsBinding ? "[...]" : bSet.GetBindString();
-            Rect bindRect = new Rect(width * 0.5f, y, width * 0.45f, Config.elementHeight);
+            Rect bindRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
             bool bindHover = bindRect.Contains(e.mousePosition);
 
             if (bindHover) GUI.backgroundColor = Magnetar_Default.AccentColor;
             GUI.Box(bindRect, bindText, bSet.IsBinding ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
             GUI.backgroundColor = Color.white;
 
-            // --- CLICK LOGIC ---
             if (bindHover && isLeftClick)
             {
                 bSet.IsBinding = !bSet.IsBinding;
                 if (bSet.IsBinding)
                 {
                     bSet.BindKeys.Clear();
-
-                    // Release text field focus if they click a keybind!
                     activeTextFieldId = -1;
                     focusedControlId = -1;
                 }
                 e.Use();
             }
 
-            // --- KEY LISTENING LOGIC ---
-            // (Must remain event-based to capture raw hardware keys like Shift/Alt)
             if (bSet.IsBinding && e.isKey)
             {
                 KeyCode key = e.keyCode;
@@ -217,7 +211,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                 {
                     if (e.type == EventType.KeyDown)
                     {
-                        // Escape or RightShift cancels the bind
                         if (key == KeyCode.Escape || key == KeyCode.RightShift)
                         {
                             bSet.BindKeys.Clear();
@@ -231,7 +224,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     }
                     else if (e.type == EventType.KeyUp)
                     {
-                        // Finalize the bind once keys are released
                         if (bSet.BindKeys.Count > 0)
                         {
                             bSet.IsBinding = false;
@@ -245,13 +237,14 @@ namespace Magnetar_Client.UI.WindowDrawing
         public static void HandleBoolSetting(BoolSetting boolSet, ref float y, float width)
         {
             Event e = Event.current;
+            float controlWidth = 140f;
 
             string translatedName = Magnetar_Client.Utils.Translator.Translate(boolSet.Name);
-            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
 
-            Rect btnRect = new Rect(width * 0.5f, y, width * 0.45f, Config.elementHeight);
+            Rect btnRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
 
-            GUI.Box(btnRect, boolSet.Value ?  Translator.Translate("ON") : Translator.Translate("OFF")
+            GUI.Box(btnRect, boolSet.Value ? Translator.Translate("ON") : Translator.Translate("OFF")
                 , boolSet.Value ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
 
             if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
@@ -271,8 +264,7 @@ namespace Magnetar_Client.UI.WindowDrawing
         private static bool isShiftDragging = false;
         private static bool dragTargetState = false;
         private static HashSet<int> draggedItemsSession = new HashSet<int>();
-
-
+             
         public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, dynamic activeMultiSelect)
         {
             if (activeMultiSelect == null) return;
@@ -563,11 +555,9 @@ namespace Magnetar_Client.UI.WindowDrawing
             Event e = Event.current;
             int controlId = selSet.GetHashCode();
 
-            // 1. Translate and Draw Label
             string translatedName = Translator.Translate(selSet.Name);
-            GUI.Label(new Rect(Config.indent, y, width * 0.45f, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
 
-            // 2. Resolve the currently selected display name safely
             string currentValName = "Unknown";
             if (selSet.Options.ContainsKey(selSet.Value))
             {
@@ -579,15 +569,14 @@ namespace Magnetar_Client.UI.WindowDrawing
             }
             string translatedCurrentVal = Translator.Translate(currentValName);
 
-            // 3. Draw the Main Button
-            Rect btnRect = new Rect(width * 0.5f, y, width * 0.45f, Config.elementHeight);
+            Rect btnRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
             bool isHovered = btnRect.Contains(e.mousePosition);
 
             if (isHovered && e.type == EventType.MouseDown && e.button == 0)
             {
                 if (activeDropdownId == controlId)
                 {
-                    activeDropdownId = -1; // Close if already open
+                    activeDropdownId = -1;
                 }
                 else
                 {
@@ -598,13 +587,9 @@ namespace Magnetar_Client.UI.WindowDrawing
                 e.Use();
             }
 
-            // Draw Button with Arrow Indicator
             string arrow = (activeDropdownId == controlId) ? " ▲" : " ▼";
             GUI.Box(btnRect, translatedCurrentVal + arrow, Magnetar_Default.SettingOff);
 
-            // ==========================================
-            // 4. DEFERRED DROPDOWN RENDERING
-            // ==========================================
             if (activeDropdownId == controlId)
             {
                 float rowHeight = 22f;
@@ -614,14 +599,12 @@ namespace Magnetar_Client.UI.WindowDrawing
 
                 Rect dropRect = new Rect(btnRect.x, btnRect.y + btnRect.height, btnRect.width, dropHeight);
 
-                // --- Scroll Logic ---
                 if (dropRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
                 {
                     dropdownScrollY = Mathf.Clamp(dropdownScrollY + e.delta.y * 15f, 0, Mathf.Max(0, (itemCount * rowHeight) - dropHeight));
                     e.Use();
                 }
 
-                // --- Click Logic ---
                 if (dropRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
                 {
                     float localY = e.mousePosition.y - dropRect.y + dropdownScrollY;
@@ -633,7 +616,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                         if (i == clickedIndex)
                         {
                             selSet.Value = kvp.Key;
-                            activeDropdownId = -1; // Close on selection
+                            activeDropdownId = -1;
                             e.Use();
                             break;
                         }
@@ -641,18 +624,15 @@ namespace Magnetar_Client.UI.WindowDrawing
                     }
                 }
 
-                // --- Auto-Close if clicked outside ---
                 if (e.type == EventType.MouseDown && !btnRect.Contains(e.mousePosition) && !dropRect.Contains(e.mousePosition))
                 {
                     activeDropdownId = -1;
                 }
 
-                // --- Deferred Drawing (Runs at the very end of the window) ---
                 float _dropdownScrollY = dropdownScrollY;
 
                 OnPostDraw += () =>
                 {
-                    // Draw Dropdown Background
                     GUI.Box(dropRect, "", Magnetar_Default.SettingOff);
                     GUI.BeginGroup(dropRect);
 
@@ -661,7 +641,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     {
                         float drawY = (i * rowHeight) - _dropdownScrollY;
 
-                        // Only draw visible rows
                         if (drawY + rowHeight > 0 && drawY < dropHeight)
                         {
                             Rect rowRect = new Rect(0, drawY, dropRect.width, rowHeight);
@@ -677,7 +656,6 @@ namespace Magnetar_Client.UI.WindowDrawing
 
                             GUIStyle style = isSelected ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff;
 
-                            // Highlight background if hovering over an unselected item
                             if (isRowHovered && !isSelected) GUI.backgroundColor = Magnetar_Default.AccentColor;
 
                             GUI.Box(rowRect, displayName, style);
@@ -687,7 +665,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     }
                     GUI.EndGroup();
 
-                    // Draw Scrollbar Line if list exceeds max height
                     if (itemCount * rowHeight > dropHeight)
                     {
                         float maxScroll = (itemCount * rowHeight) - dropHeight;

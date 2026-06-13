@@ -12,9 +12,14 @@ namespace Magnetar_Client.Modules
     public class AutoPlant : Module
     {
         // Mod Info
-        public override string Name { get; set; } = "Auto Plant";
-        public override string Description { get; set; } = "Smart queues plants during cooldowns. Supports fusion, extra seeds, multi-planting, and projected spread fusions.";
-        public override string SearchHints { get; set; } = "autoplant ghostplant ghostplanting auto-plant queue fusion mix ghostfusion multi spread projection";
+        public override string Name { get; set; } = "Auto Plant"; 
+        public override string Description { get; set; } = "Allows you to plant ghost version of " +
+            "plants which will be replaced overtime.\nUse Right Click to delete Ghost Plants";
+        public override string SearchHints { get; set; } = "autoplant ghostplant ghostplanting auto-plant" +
+            " plantghost ghostspawn ghostautoplant ghostbuild ghostplacer ghostplacement ghost-plant" +
+            " autoplanter ghostplantmod ghost-planting autofill ghostseeds ghostgrowth ghost-build " +
+            "ghostingplant autoplantmod ghostauto ghosting ghostseeds ghosttimer ghost-spawn ghostplacer" +
+            " ghostplacing ghostplantingtool";
         public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
 
         // Mod Data

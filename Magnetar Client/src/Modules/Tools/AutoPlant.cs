@@ -13,8 +13,8 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Auto Plant"; 
-        public override string Description { get; set; } = "Allows you to plant ghost version of " +
-            "plants which will be replaced overtime.\nUse Right Click to delete Ghost Plants";
+        public override string Description { get; set; } = "Allows you to place ghost version of " +
+            "plants which will be replaced with the actual plants overtime.\nUse Right Click to delete Ghost Plants";
         public override string SearchHints { get; set; } = "autoplant ghostplant ghostplanting auto-plant" +
             " plantghost ghostspawn ghostautoplant ghostbuild ghostplacer ghostplacement ghost-plant" +
             " autoplanter ghostplantmod ghost-planting autofill ghostseeds ghostgrowth ghost-build " +

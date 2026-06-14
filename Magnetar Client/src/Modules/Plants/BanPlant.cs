@@ -52,21 +52,6 @@ namespace Magnetar_Client.Modules
         }
 
         // Mod Logic
-        [HarmonyPatch(typeof(SeedLibrary), nameof(SeedLibrary.CreateCard))]
-        public static class SeedLibraryLockoutPatch
-        {
-            public static bool Prefix(PlantType thePlantType, ref CardUI __result)
-            {
-                if (instance == null || !instance.Active) return true;
-
-                if (instance.selectedPlants.IsSelected((int)thePlantType))
-                {
-                    __result = null;
-                    return false;
-                }
-                return true;
-            }
-        }
 
         [HarmonyPatch(typeof(CardUI), nameof(CardUI.OnMouseDown))]
         public static class CardUIClickPatch
@@ -88,7 +73,7 @@ namespace Magnetar_Client.Modules
 
         private static readonly Color BannedColor = new Color(0.2f, 0.2f, 0.2f, 0.7f);
 
-        [HarmonyPatch(typeof(CardUI), nameof(CardUI.Update))]
+        [HarmonyPatch(typeof(CardUI), nameof(CardUI.Awake))]
         public static class CardUIVisualLockout
         {
             public static void Postfix(CardUI __instance)

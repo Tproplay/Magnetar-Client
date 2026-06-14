@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Magnetar_Client.Utils
 {
@@ -24,6 +25,23 @@ namespace Magnetar_Client.Utils
             return number.ToString();
         }
 
+        public static string FormatTime(long totalSeconds)
+        {
+            if (totalSeconds == 0) return "0s";
+
+            string prefix = totalSeconds < 0 ? "-" : "";
+            TimeSpan t = TimeSpan.FromSeconds(Math.Abs(totalSeconds));
+
+            List<string> parts = new List<string>();
+
+            int totalHours = (t.Days * 24) + t.Hours;
+
+            if (totalHours > 0) parts.Add($"{totalHours}h");
+            if (t.Minutes > 0) parts.Add($"{t.Minutes}m");
+            if (t.Seconds > 0) parts.Add($"{t.Seconds}s");
+
+            return prefix + string.Join(" ", parts);
+        }
     }
     
 }

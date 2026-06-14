@@ -3,6 +3,7 @@ using UnityEngine;
 using Il2Cpp;
 using System;
 using static Magnetar_Client.Game.AppData;
+using static Magnetar_Client.Utils.Maths;
 
 namespace Magnetar_Client.HUDElements
 {
@@ -29,6 +30,25 @@ namespace Magnetar_Client.HUDElements
 
             AdjustWidthToText(displayText, HUDElementStyle, 10);
 
+            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+    }
+
+    public class WaveTimer : HudElement
+    {
+        public WaveTimer() : base("Next wave arrival time", HudElement.NewRect(180))
+        { }
+
+        string displayText;
+        protected override void DrawContent(float width, float height)
+        {
+            
+            if (!BoardInstanceIsNull && GameAPP.theGameStatus == GameStatus.InGame 
+                && board.timeUntilNextWave>0)
+                displayText = $"Next Wave arrival: {FormatTime((int)board.timeUntilNextWave)}";
+            else
+                displayText = "Next Wave arrival: 0s";
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }
     }

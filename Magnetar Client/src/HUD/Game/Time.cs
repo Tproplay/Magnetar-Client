@@ -52,4 +52,44 @@ namespace Magnetar_Client.HUDElements
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }
     }
+
+    public class ActiveStarTimer : HudElement
+    {
+        public ActiveStarTimer() : base("Active Star drop Cooldown", HudElement.NewRect(180))
+        { }
+
+        string displayText;
+        protected override void DrawContent(float width, float height)
+        {
+
+            if (!BoardInstanceIsNull && (GameAPP.theGameStatus == GameStatus.InGame 
+                || GameAPP.theGameStatus == GameStatus.Pause)
+                && board.bigStarActiveCountDown > 0)
+                displayText = $"Active Star drop: {FormatTime((int)board.bigStarActiveCountDown)}";
+            else
+                displayText = "Active Star drop: NA";
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
+            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+    }
+
+    public class PassiveStarTimer : HudElement
+    {
+        public PassiveStarTimer() : base("Passive Star drop Cooldown", HudElement.NewRect(180))
+        { }
+
+        string displayText;
+        protected override void DrawContent(float width, float height)
+        {
+
+            if (!BoardInstanceIsNull && (GameAPP.theGameStatus == GameStatus.InGame
+                || GameAPP.theGameStatus == GameStatus.Pause)
+                && board.bigStarPassiveCountDown > 0)
+                displayText = $"Passive Star drop: {FormatTime((int)board.bigStarPassiveCountDown)}";
+            else
+                displayText = "Passive Star drop: NA";
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
+            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+    }
 }

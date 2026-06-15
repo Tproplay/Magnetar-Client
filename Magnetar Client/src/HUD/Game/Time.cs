@@ -92,4 +92,17 @@ namespace Magnetar_Client.HUDElements
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }
     }
+
+    public class TimeScale : HudElement
+    {
+        public TimeScale() : base("Game Speed", HudElement.NewRect(180))
+        { }
+        string format = "0.##";
+        protected override void DrawContent(float width, float height)
+        {
+            string displayText = $"TimeScale: {(UnityEngine.Time.timeScale).ToString(format)}";
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
+            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+    }
 }

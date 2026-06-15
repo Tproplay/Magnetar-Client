@@ -111,9 +111,9 @@ namespace Magnetar_Client.HUDElements
             }
             else
             {
-                if (windowStyle != GUIStyle.none)
+                if (windowStyle != GUIStyle.none && Event.current.type == EventType.Repaint)
                 {
-                    GUI.Box(Bounds, "", windowStyle);
+                    windowStyle.Draw(Bounds, false, false, false, false);
                 }
 
                 GUI.BeginGroup(Bounds);

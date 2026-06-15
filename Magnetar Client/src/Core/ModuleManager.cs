@@ -355,7 +355,7 @@ namespace Magnetar_Client.Core
 
 
             // 1. SMOOTH ANIMATION LOGIC
-            moduleContentHeights[mod] = Mathf.Lerp(moduleContentHeights[mod], targetContentHeights[mod], Time.deltaTime * 15f);
+            moduleContentHeights[mod] = Mathf.Lerp(moduleContentHeights[mod], targetContentHeights[mod], Time.unscaledDeltaTime * 15f);
 
             if (Mathf.Abs(moduleContentHeights[mod] - targetContentHeights[mod]) < 0.5f)
                 moduleContentHeights[mod] = targetContentHeights[mod];

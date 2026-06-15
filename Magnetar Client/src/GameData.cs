@@ -106,7 +106,29 @@ namespace Magnetar_Client.Game
         /// <summary>
         /// Sorted List of the current active (non-idle) zombies on the board.
         /// </summary>
-        public static List<Zombie> zombieList = new List<Zombie>();
+        public static List<Zombie> zombieList => GetZombies();
+        private static List<Zombie> _zombieList = new List<Zombie>();
+        static int _currentFrame;
+        static List<Zombie> GetZombies()
+        {
+            if (_currentFrame == UnityEngine.Time.frameCount) return _zombieList;
+            else
+            {
+                _currentFrame = UnityEngine.Time.frameCount;
+
+                for (int i = _zombieList.Count - 1; i >= 0; i--)
+                {
+                    Zombie zombie = _zombieList[i];
+
+                    if (zombie == null || zombie.gameObject == null)
+                    {
+                        _zombieList.RemoveAt(i);
+                    }
+                }
+                return _zombieList;
+            }
+        }
+
 
         [HarmonyPatch(typeof(Zombie))]
         private class ZombieListPatch
@@ -115,22 +137,30 @@ namespace Magnetar_Client.Game
             [HarmonyPostfix]
             public static void StartPostFix(Zombie __instance)
             {
-                if (AppData.BoardInstanceIsNull || __instance.isIdle) return;
+                if (AppData.BoardInstanceIsNull || __instance.gameObject==null|| __instance.isIdle ||
+                    __instance.theZombieType==ZombieType.Nothing) return;
                 
-                if (!zombieList.Contains(__instance))
-                    zombieList.Add(__instance);
+                if (!_zombieList.Contains(__instance))
+                    _zombieList.Add(__instance);
             }
 
             [HarmonyPatch(nameof(Zombie.Die))]
-            [HarmonyPostfix]
-            public static void DiePostFix(Zombie __instance)
+            [HarmonyPrefix]
+            public static void DiePreFix(Zombie __instance)
             {
-                if (AppData.BoardInstanceIsNull || __instance.isIdle) return;
+                if (_zombieList.Contains(__instance))
+                    _zombieList.Remove(__instance);
+            }
 
-                if (zombieList.Contains(__instance))
-                    zombieList.Remove(__instance);
+            [HarmonyPatch(nameof(Zombie.DestoryZombie))]
+            [HarmonyPrefix]
+            public static void DestoryZombiePreFix(Zombie __instance)
+            {
+                if (_zombieList.Contains(__instance))
+                    _zombieList.Remove(__instance);
             }
         }
+
 
         #endregion
 
@@ -336,7 +366,7 @@ namespace Magnetar_Client.Game
             {
                 // Things to be reset at the start of a level
                 plantList.Clear();
-                zombieList.Clear();
+                _zombieList.Clear();
 
                 TotalDamagedRecievedByZombies = 0;
                 TotalNumberOfZombiesKilled = 0; TotalNumberOfHypnotizedZombiesKilled = 0; TotalNumberOfPlantsKilled = 0;

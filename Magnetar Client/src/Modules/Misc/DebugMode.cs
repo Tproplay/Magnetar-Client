@@ -1,10 +1,14 @@
 ﻿using Il2Cpp;
 using UnityEngine;
+using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Game.AppData;
+using Magnetar_Client.Game;
+using System;
+using Magnetar_Client.Utils;
 
 namespace Magnetar_Client.Modules
 {
@@ -32,6 +36,8 @@ namespace Magnetar_Client.Modules
         {
             TheGameStatus = 1,
             BoardTag = 2,
+            ZombieList,
+            PlantList
         }
 
         public DebugMode()
@@ -46,6 +52,8 @@ namespace Magnetar_Client.Modules
                 {
                     { (int)Options.TheGameStatus, "GameStatus" },
                     { (int)Options.BoardTag, "BoardTag" },
+                    { (int)Options.ZombieList, "ZombieList" },
+                    { (int)Options.PlantList, "PlantList" },
                 }
             };
             Settings.Add(selected);
@@ -91,6 +99,35 @@ namespace Magnetar_Client.Modules
                     DebugLogger.Msg(sb.ToString());
                 }
             }
+
+            if (selected.IsSelected((int)Options.PlantList))
+            {
+                DebugLogger.Msg("[Debug Mode]\n"+
+                    string.Join(
+                        Environment.NewLine,
+                        GameData.plantList.Select(kvp=>
+                            $"PlantType: {kvp.thePlantType}  " +
+                            $"Tile: ({kvp.thePlantColumn},{kvp.thePlantRow})  " +
+                            $"Health: {kvp.thePlantHealth}"
+                        )
+                        )
+                    );
+            }
+
+            if (selected.IsSelected((int)Options.ZombieList))
+            {
+                DebugLogger.Msg("[Debug Mode]\n"+
+                    string.Join(
+                        Environment.NewLine,
+                        GameData.zombieList.Select(kvp =>
+                            $"ZombieType: {kvp.theZombieType}  " +
+                            $"Coordinate: ({kvp.theZombieRow},{kvp.transform.position.x})  " +
+                            $"Health: {kvp.CurrentAllHealth}"
+                        )
+                        )
+                    );
+            }
+
 
             _time = Time.realtimeSinceStartup;
         }

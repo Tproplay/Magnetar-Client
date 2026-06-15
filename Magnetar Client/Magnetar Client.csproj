@@ -78,4 +78,8 @@
     </Reference>
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if &quot;$(ConfigurationName)&quot; == &quot;Debug&quot; (&#xD;&#xA;    copy /Y &quot;C:\Users\Tproplay\Desktop\Visual studio\Magnetar Client\Magnetar Client\bin\Debug\Magnetar Client.dll&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.7\Mods\Magnetar Client.dll&quot;&#xD;&#xA;    start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.7\PlantsVsZombiesRH.exe&quot;&#xD;&#xA;)" />
+  </Target>
+
 </Project>

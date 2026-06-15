@@ -1,23 +1,31 @@
-﻿using System.Collections.Generic;
+﻿using Magnetar_Client.Game;
+using Magnetar_Client.Utils;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using UnityEngine;
+using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.UI.Themes.Magnetar_Default;
 using static Magnetar_Client.Utils.Maths;
-using static Magnetar_Client.Game.AppData;
-using Magnetar_Client.Utils;
 
 namespace Magnetar_Client.HUDElements
 {
     public class DamageStatsPlant : HudElement
     {
-        public DamageStatsPlant() : base("Total Damage by Plants (Zombie HP Loss)", HudElement.NewRect(100))
+        public DamageStatsPlant() : base("Total Damage by Plants", HudElement.NewRect(100))
         { }
 
-        
+        float value;
+        string displayText;
         protected override void DrawContent(float width, float height)
         {
 
-            string displayText = $"Plant Damage: {FormatInternational(TotalDamagedRecievedByZombies)}";
+            if (!AppData.BoardInstanceIsNull)
+            {
+                value = AppData.board.boardStatistics.totalZombieDamage;
+            }
+
+            displayText = $"Plant Damage: {FormatInternational((long)value)}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
@@ -28,7 +36,7 @@ namespace Magnetar_Client.HUDElements
 
     public class AverageDamageStatsPlant : HudElement
     {
-        public AverageDamageStatsPlant() : base("Average Damage by Plants (Zombie HP Loss)", HudElement.NewRect(100))
+        public AverageDamageStatsPlant() : base("Average Damage by Plants", HudElement.NewRect(100))
         { }
 
         private List<long> damageHistory = new List<long>();
@@ -40,13 +48,13 @@ namespace Magnetar_Client.HUDElements
 
             timer += Time.deltaTime;
 
-            if (timer >= 0.25f)
+            if (timer >= 0.5f)
             {
                 timer = 0f;
 
-                damageHistory.Add(TotalDamagedRecievedByZombies);
+                damageHistory.Add((long)AppData.board.boardStatistics.totalZombieDamage);
 
-                // Keep only the last 10 snapshots (covering 2.5 second of gameplay)
+                // Keep only the last 10 snapshots (covering 5 second of gameplay)
                 if (damageHistory.Count > 10)
                 {
                     damageHistory.RemoveAt(0);

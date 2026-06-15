@@ -4,6 +4,7 @@ using static Magnetar_Client.Utils.Maths;
 using UnityEngine;
 using Il2Cpp;
 using System.Linq;
+using Magnetar_Client.Game;
 namespace Magnetar_Client.HUDElements
 {
     public class NumberOfZombies : HudElement
@@ -45,11 +46,17 @@ namespace Magnetar_Client.HUDElements
         public NumberOfZombiesSpawned() : base("Zombies Spawned", HudElement.NewRect(100))
         { }
 
+        string displayText;
+        int value;
 
         protected override void DrawContent(float width, float height)
         {
+            if (!AppData.BoardInstanceIsNull)
+            {
+                value = AppData.board.boardStatistics.zombiesKilled + GameData.zombieList.Count;
+            }
 
-            string displayText = $"Zombies Spawned: {TotalNumberOfZombiesSpawed}";
+            displayText = $"Zombies Spawned: {value}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
@@ -62,11 +69,9 @@ namespace Magnetar_Client.HUDElements
         public NumberOfHypnotizedZombiesSpawned() : base("Hypnotized Zombies Spawned", HudElement.NewRect(100))
         { }
 
-
         protected override void DrawContent(float width, float height)
         {
-
-            string displayText = $"Hypno Zombies Spawned: {TotalNumberOfHypnotizedZombiesSpawed}";
+            string displayText = $"Hypno Zombies Spawned: {GameData.Hypno_Zombies_Spawned}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
@@ -79,11 +84,17 @@ namespace Magnetar_Client.HUDElements
         public NumberOfZombiesKilled() : base("Zombies Killed", HudElement.NewRect(220))
         { }
 
+        string displayText;
+        int value;
 
         protected override void DrawContent(float width, float height)
         {
+            if (!AppData.BoardInstanceIsNull)
+            {
+                value = AppData.board.boardStatistics.zombiesKilled;
+            }
 
-            string displayText = $"Zombies Killed: {TotalNumberOfZombiesKilled}";
+            displayText = $"Zombies Killed: {value}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
@@ -96,11 +107,9 @@ namespace Magnetar_Client.HUDElements
         public NumberOfHypnotizedZombiesKilled() : base("Hypnotized Zombies Killed", HudElement.NewRect(220))
         { }
 
-
         protected override void DrawContent(float width, float height)
         {
-
-            string displayText = $"Hypno Zombies Killed: {TotalNumberOfHypnotizedZombiesKilled}";
+            string displayText = $"Hypno Zombies Killed: {GameData.Hypno_Zombies_Killed}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 

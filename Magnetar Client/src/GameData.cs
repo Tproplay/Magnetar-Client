@@ -3,6 +3,7 @@ using Il2Cpp;
 using Magnetar_Client.Utils;
 using MelonLoader;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace Magnetar_Client.Game
@@ -164,89 +165,6 @@ namespace Magnetar_Client.Game
 
         #endregion
 
-        #region Zombie
-
-        public static int TotalNumberOfZombiesSpawed = 0;
-        public static int TotalNumberOfHypnotizedZombiesSpawed = 0;
-
-        public static int TotalNumberOfZombiesKilled = 0;
-        public static int TotalNumberOfHypnotizedZombiesKilled = 0;
-
-        /// <summary>
-        /// Total Damage Recieved By Zombies. Resets on starting a new level.
-        /// </summary>
-        public static long TotalDamagedRecievedByZombies = 0;
-        public static long TotalDamagedRecievedByHypnotizedZombies = 0;
-
-        [HarmonyPatch(typeof(Zombie))]
-        private class ZombiePatch
-        {
-            [HarmonyPatch(nameof(Zombie.Start))]
-            [HarmonyPostfix]
-            public static void StartPostFix(Zombie __instance)
-            {
-                if (__instance == null || __instance.isIdle) return;
-
-                if (__instance.isMindControlled)
-                {
-                    TotalNumberOfHypnotizedZombiesSpawed++;
-                }
-                else
-                {
-                    TotalNumberOfZombiesSpawed++;
-                }
-                
-            }
-
-            [HarmonyPatch(nameof(Zombie.Die))]
-            [HarmonyPrefix]
-            static void DiePatch(Zombie __instance)
-            {
-                if (__instance == null || !zombieList.Contains(__instance)) return;
-                if (__instance.isMindControlled)
-                    TotalNumberOfHypnotizedZombiesKilled++;
-                else TotalNumberOfZombiesKilled++;
-            }
-
-            [HarmonyPatch(nameof(Zombie.TakeDamage))]
-            [HarmonyPrefix]
-            public static void TakeDamagePrefix(Zombie __instance, out float __state)
-            {
-
-                __state = __instance.CurrentAllHealth;
-            }
-
-            [HarmonyPatch(nameof(Zombie.TakeDamage))]
-            [HarmonyPostfix]
-            public static void TakeDamagePostfix(Zombie __instance, ref float __state)
-            {
-                float newHealth = __instance.CurrentAllHealth;
-
-                float damageTaken = __state - newHealth;
-                if (damageTaken > 0)
-                {
-                    if (__instance.isMindControlled)
-                        TotalDamagedRecievedByZombies += (long)damageTaken;
-                    else
-                        TotalDamagedRecievedByHypnotizedZombies += (long)damageTaken;
-                }
-            }
-
-            [HarmonyPatch(nameof(Zombie.SetMindControl))]
-            [HarmonyPostfix]
-            public static void SetMindControlPostfix(Zombie __instance)
-            {
-                if (__instance == null) return;
-
-                TotalNumberOfHypnotizedZombiesSpawed++;
-                TotalNumberOfZombiesKilled++;
-
-            }
-
-        }
-
-        #endregion
-
         #region Plants
         public static int TotalNumberOfPlantsSpawned = 0;
         public static int TotalNumberOfPlantsKilled = 0;
@@ -276,6 +194,41 @@ namespace Magnetar_Client.Game
         }
         #endregion
 
+        #region Zombies
+
+        public static int Hypno_Zombies_Spawned = 0;
+        public static int Hypno_Zombies_Killed = 0;
+
+        [HarmonyPatch(typeof(Zombie))]
+        private static class ZombieStatsPatch
+        {
+            [HarmonyPatch(nameof(Zombie.Start))]
+            [HarmonyPostfix]
+            public static void StartPostfix(Zombie __instance)
+            {
+                if (__instance == null || !__instance.isMindControlled) return;
+                Hypno_Zombies_Spawned++;
+            }
+
+            [HarmonyPatch(nameof(Zombie.Die))]
+            [HarmonyPrefix]
+            public static void DiePrefix(Zombie __instance)
+            {
+                if (__instance == null || !__instance.isMindControlled) return;
+                Hypno_Zombies_Killed++;
+            }
+
+            [HarmonyPatch(nameof(Zombie.SetMindControl))]
+            [HarmonyPostfix]
+            public static void SetMindControlPostfix(Zombie __instance)
+            {
+                if (__instance == null) return;
+                Hypno_Zombies_Spawned++;
+            }
+        }
+
+        #endregion
+
         #region Bullets
 
         public static long TotalNumberOfBulletsSpawned = 0;
@@ -296,66 +249,6 @@ namespace Magnetar_Client.Game
 
         #endregion
 
-        #region Sun
-
-        public static int TotalAmountOfSunObtained = 0;
-        public static int TotalAmountOfSunSpent = 0;
-
-        private static int lastSunAmount = 0;
-        [HarmonyPatch(typeof(Board))]
-        private class SunUpdatePatch
-        {
-            [HarmonyPatch(nameof(Board.SunUpdate))]
-            [HarmonyPostfix]
-            public static void SunUpdatePostFix()
-            {
-                if (AppData.BoardInstanceIsNull) return;
-                if (lastSunAmount == AppData.board.theSun) return;
-                if (lastSunAmount < AppData.board.theSun)
-                {
-                    TotalAmountOfSunObtained += AppData.board.theSun - lastSunAmount;
-                    lastSunAmount = AppData.board.theSun;
-                }
-                else
-                {
-                    TotalAmountOfSunSpent += lastSunAmount - AppData.board.theSun;
-                    lastSunAmount = AppData.board.theSun;
-                }
-            }
-        }
-
-        #endregion
-
-        #region Money
-
-        public static int TotalAmountOfMoneyObtained = 0;
-        public static int TotalAmountOfMoneySpent = 0;
-
-        private static int lastMoneyAmount = 0;
-        [HarmonyPatch(typeof(Board))]
-        private class MoneyUpdatePatch
-        {
-            [HarmonyPatch(nameof(Board.Update))]
-            [HarmonyPostfix]
-            public static void UpdatePostFix()
-            {
-                if (AppData.BoardInstanceIsNull) return;
-                if (lastMoneyAmount == AppData.board.theMoney) return;
-                if (lastMoneyAmount < AppData.board.theMoney)
-                {
-                    TotalAmountOfMoneyObtained += AppData.board.theMoney - lastMoneyAmount;
-                    lastMoneyAmount = AppData.board.theMoney;
-                }
-                else
-                {
-                    TotalAmountOfMoneySpent += lastMoneyAmount - AppData.board.theMoney;
-                    lastMoneyAmount = AppData.board.theMoney;
-                }
-            }
-        }
-
-        #endregion
-
         #region Reset Values
         [HarmonyPatch(typeof(Board))]
         public class BoardPatch
@@ -368,14 +261,10 @@ namespace Magnetar_Client.Game
                 plantList.Clear();
                 _zombieList.Clear();
 
-                TotalDamagedRecievedByZombies = 0;
-                TotalNumberOfZombiesKilled = 0; TotalNumberOfHypnotizedZombiesKilled = 0; TotalNumberOfPlantsKilled = 0;
-                TotalNumberOfZombiesSpawed = 0; TotalNumberOfHypnotizedZombiesSpawed = 0; TotalNumberOfPlantsSpawned = 0;
-
                 TotalNumberOfBulletsSpawned = 0;
 
-                TotalAmountOfSunObtained = 0; TotalAmountOfSunSpent = 0; lastSunAmount = AppData.board.theSun;
-                TotalAmountOfMoneyObtained = 0; TotalAmountOfMoneySpent = 0; lastMoneyAmount = AppData.board.theMoney;
+                Hypno_Zombies_Spawned = 0; Hypno_Zombies_Killed = 0;
+                
             }
 
             [HarmonyPatch(nameof(Board.Die))]
@@ -384,7 +273,7 @@ namespace Magnetar_Client.Game
             {
                 // Things to be reset at the end of a level
                 plantList.Clear();
-                zombieList.Clear();
+                _zombieList.Clear();
 
             }
         }

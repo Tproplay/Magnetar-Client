@@ -3,6 +3,7 @@ using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
 
 using UnityEngine;
+using Magnetar_Client.Game;
 namespace Magnetar_Client.HUDElements
 {
     public class SunObtained : HudElement
@@ -10,11 +11,18 @@ namespace Magnetar_Client.HUDElements
         public SunObtained() : base("Total Sun Obtained", HudElement.NewRect(100))
         { }
 
+        int value;
+        string displayText;
 
         protected override void DrawContent(float width, float height)
         {
 
-            string displayText = $"Sun Obtained: {FormatInternational(TotalAmountOfSunObtained)}";
+            if (!AppData.BoardInstanceIsNull)
+            {
+                value = AppData.board.boardStatistics.sunProduced;
+            }
+
+            displayText = $"Sun Obtained: {FormatInternational(value)}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
@@ -27,11 +35,17 @@ namespace Magnetar_Client.HUDElements
         public SunSpent() : base("Total Sun Spent", HudElement.NewRect(100))
         { }
 
+        int value;
+        string displayText;
 
         protected override void DrawContent(float width, float height)
         {
 
-            string displayText = $"Sun Spent: {FormatInternational(TotalAmountOfSunSpent)}";
+            if (!AppData.BoardInstanceIsNull)
+            {
+                value = AppData.board.boardStatistics.sunConsumed;
+            }
+            displayText = $"Sun Spent: {FormatInternational(value)}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
@@ -44,11 +58,17 @@ namespace Magnetar_Client.HUDElements
         public MoneyObtained() : base("Total Money Obtained", HudElement.NewRect(100))
         { }
 
-
+        int value;
+        string displayText;
         protected override void DrawContent(float width, float height)
         {
 
-            string displayText = $"Money Obtained: {FormatInternational(TotalAmountOfMoneyObtained)}";
+            if (!AppData.BoardInstanceIsNull)
+            {
+                value = AppData.board.boardStatistics.moneyEarned;
+            }
+
+            displayText = $"Money Obtained: {FormatInternational(value)}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
@@ -61,11 +81,17 @@ namespace Magnetar_Client.HUDElements
         public MoneySpent() : base("Total Money Spent", HudElement.NewRect(100))
         { }
 
-
+        int value;
+        string displayText;
         protected override void DrawContent(float width, float height)
         {
 
-            string displayText = $"Money Spent: {FormatInternational(TotalAmountOfMoneySpent)}";
+            if (!AppData.BoardInstanceIsNull)
+            {
+                value = AppData.board.boardStatistics.moneyConsumed;
+            }
+
+            displayText = $"Money Spent: {FormatInternational(value)}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 

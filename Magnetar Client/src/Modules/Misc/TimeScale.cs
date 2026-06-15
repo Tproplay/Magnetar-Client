@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Il2Cpp;
+using UnityEngine;
 
 
 namespace Magnetar_Client.Modules
@@ -22,7 +23,6 @@ namespace Magnetar_Client.Modules
 
         public FloatSetting TimeScaleValueSetting;
 
-        public BoolSetting StopWhenPaused;
         public BoolSetting ResumeAfterPaused;
 
         private bool paused = false;
@@ -38,9 +38,6 @@ namespace Magnetar_Client.Modules
 
             EndCategory();
             CreateCategory("Extra");
-
-            StopWhenPaused = new BoolSetting("Stop When Game Paused",true);
-            AddSettings(StopWhenPaused);
 
             ResumeAfterPaused = new BoolSetting("Auto Resume After Game Pause", true);
             AddSettings(ResumeAfterPaused);
@@ -58,7 +55,9 @@ namespace Magnetar_Client.Modules
         }
         public override void OnDisable()
         {
-            UnityEngine.Time.timeScale = originalTimeScale;
+            paused = false;
+            if (GameAPP.theGameStatus!=GameStatus.Pause)
+                UnityEngine.Time.timeScale = originalTimeScale;
             originalTimeScale = 1;
         }
 
@@ -78,10 +77,21 @@ namespace Magnetar_Client.Modules
 
         public override void OnUpdateActive()
         {
+            if (HoldMode)
+            {
+                bool allKeysHeld = true;
+
+                foreach (KeyCode key in BindKeys)
+                {
+                    if (!Input.GetKey(key)) allKeysHeld = false; // Is this key currently down?
+                }
+
+                if (!allKeysHeld) { Active = false; OnDisable(); return; }
+            }
             float timeScale = UnityEngine.Time.timeScale;
             if (timeScale != TimeScaleValueSetting.Value)
             {
-                if ((timeScale == 0) && (StopWhenPaused.Value))
+                if (GameAPP.theGameStatus == GameStatus.Pause)
                     { Active = false; paused = true; return; }
                 UnityEngine.Time.timeScale = TimeScaleValueSetting.Value; 
             }

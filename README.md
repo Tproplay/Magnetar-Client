@@ -58,6 +58,11 @@ After installing the files, your game directory structure should look like this:
     ├── UnityPlayer.dll
     └── version.dll
 
+## Frequently Asked Questions
+
+> * **My plants are Invincible even though I have God Mode Plants off** <br>
+> **Solution:** Ensure You are using the correct version of the mod (3.6.x versions are compatible with game versions 3.6.x)
+
 ## 👥 Credits
 
 * 👑 **Tproplay** — Main Developer

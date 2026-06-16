@@ -60,7 +60,7 @@ After installing the files, your game directory structure should look like this:
 
 ## Frequently Asked Questions
 
-> * **My plants are Invincible even though I have God Mode Plants off** <br>
+> * **My plants are Invincible even though I have God Mode Plants off** <br> **My Plants are Stacking even when I don't have Plant Anywhere enabled**<br>
 > **Solution:** Ensure You are using the correct version of the mod (3.6.x versions are compatible with game versions 3.6.x)
 
 ## 👥 Credits

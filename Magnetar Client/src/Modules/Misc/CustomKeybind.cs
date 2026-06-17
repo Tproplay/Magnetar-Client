@@ -7,6 +7,7 @@ using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using static MelonLoader.MelonLogger;
 
 namespace Magnetar_Client.Modules
 {
@@ -142,8 +143,14 @@ namespace Magnetar_Client.Modules
 
                 if (GetKeyComboDown(SlowMode.BindKeys)) 
                 {
-                    if (slowTrigger != null) slowTrigger.TriggerSlow();
                     if (inGameBtn != null) inGameBtn.SpeedTrigger();
+                    else
+                    {
+                        var slowTrigger = UnityEngine.Object.FindAnyObjectByType<SlowTrigger>();
+                        if (slowTrigger != null) slowTrigger.TriggerSlow();
+                    }
+
+                    
                 }  
                 if (GetKeyComboDown(ShowPlantHP.BindKeys)) board.ShowPlantHealth();
                 if (GetKeyComboDown(ShowZombieHP.BindKeys)) board.ShowZombieHealth();
@@ -163,8 +170,26 @@ namespace Magnetar_Client.Modules
 
             if (targetCard != null && Mouse.Instance != null)
             {
-                Mouse.Instance.ClickOnCard(targetCard);
+                if (AutoPlant.instance == null || !AutoPlant.instance.Active)
+                {
+                    Mouse.Instance.ClickOnCard(targetCard);
+                }
+                else
+                {
+                    var originalAvailable = targetCard.isAvailable;
+                    var originalSun = targetCard.theSeedCost;
+
+                    targetCard.isAvailable = true;
+                    targetCard.theSeedCost = 0;
+
+                    Mouse.Instance.ClickOnCard(targetCard);
+                    
+                    targetCard.isAvailable = originalAvailable;
+                    targetCard.theSeedCost = originalSun;
+
+                }
             }
+
         }
 
 
@@ -173,18 +198,9 @@ namespace Magnetar_Client.Modules
 
         #region UI Buttons
 
-        public static SlowTrigger slowTrigger;
-
         [HarmonyPatch(typeof(SlowTrigger))]
         public static class SlowTriggerPatch
         {
-            [HarmonyPatch(nameof(SlowTrigger.Awake))]
-            [HarmonyPostfix]
-            public static void AwakePostfix(SlowTrigger __instance)
-            {
-                if (__instance!=null)
-                    slowTrigger = __instance;
-            }
 
             [HarmonyPatch(nameof(SlowTrigger.Update))]
             [HarmonyPrefix]
@@ -243,7 +259,6 @@ namespace Magnetar_Client.Modules
             [HarmonyPostfix]
             public static void DiePostfix()
             {
-                slowTrigger = null;
                 inGameBtn = null;
                 itemBtn = null;
             }

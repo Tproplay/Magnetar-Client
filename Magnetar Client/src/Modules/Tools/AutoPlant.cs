@@ -209,18 +209,18 @@ namespace Magnetar_Client.Modules
                         card.CD = 0f;
                         card.isAvailable = false;
                         AppData.board.UseSun(card.theSeedCost);
-
-                        chosen.targetPlantTypes.RemoveAt(0);
-
-                        if (chosen.targetPlantTypes.Count == 0)
-                        {
-                            if (chosen.ghostVisual != null) UnityEngine.Object.Destroy(chosen.ghostVisual);
-                            PendingPlants.Remove(chosen);
-                            activeGhostsByTile.Remove(new Vector2Int(chosen.column, chosen.row));
-                        }
-
-                        availableCards.RemoveAt(i);
                     }
+
+                    chosen.targetPlantTypes.RemoveAt(0);
+
+                    if (chosen.targetPlantTypes.Count == 0)
+                    {
+                        if (chosen.ghostVisual != null) UnityEngine.Object.Destroy(chosen.ghostVisual);
+                        PendingPlants.Remove(chosen);
+                        activeGhostsByTile.Remove(new Vector2Int(chosen.column, chosen.row));
+                    }
+
+                    availableCards.RemoveAt(i);
                 }
             }
         }

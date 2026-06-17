@@ -398,22 +398,7 @@ namespace Magnetar_Client.Modules
         public Dictionary<int, string> Options { get; set; }
         public System.Type EnumType { get; private set; }
 
-        private Dictionary<int, string> _customNames;
-        public Dictionary<int, string> CustomNames
-        {
-            get => _customNames;
-            set
-            {
-                _customNames = value;
-                if (_customNames != null)
-                {
-                    foreach (var kvp in _customNames)
-                    {
-                        Options[kvp.Key] = kvp.Value;
-                    }
-                }
-            }
-        }
+        public Dictionary<int, string> CustomNames { get; set; }
 
         /// <summary>
         /// Initializes an empty SelectSetting.
@@ -424,6 +409,7 @@ namespace Magnetar_Client.Modules
             Value = defaultValue;
             DefaultValue = defaultValue;
             Options = new Dictionary<int, string>();
+            CustomNames = new Dictionary<int, string>();
             EnumType = null;
         }
 
@@ -437,6 +423,7 @@ namespace Magnetar_Client.Modules
             DefaultValue = defaultValue;
             EnumType = enumType;
             Options = new Dictionary<int, string>();
+            CustomNames = new Dictionary<int, string>();
 
             if (enumType != null && enumType.IsEnum)
             {

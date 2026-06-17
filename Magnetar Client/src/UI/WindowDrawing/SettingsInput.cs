@@ -566,7 +566,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     currentValName = selSet.CustomNames[selSet.Value];
                 }
             }
-            string translatedCurrentVal = Translator.Translate(currentValName);
 
             Rect btnRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
             bool isHovered = btnRect.Contains(e.mousePosition);
@@ -587,7 +586,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             }
 
             string arrow = (activeDropdownId == controlId) ? " ▲" : " ▼";
-            GUI.Box(btnRect, translatedCurrentVal + arrow, Magnetar_Default.SettingOff);
+            GUI.Box(btnRect, currentValName + arrow, Magnetar_Default.SettingOff);
 
             if (activeDropdownId == controlId)
             {
@@ -645,10 +644,11 @@ namespace Magnetar_Client.UI.WindowDrawing
                             Rect rowRect = new Rect(0, drawY, dropRect.width, rowHeight);
 
                             string displayName = kvp.Value;
-                            if (selSet.CustomNames != null && selSet.CustomNames.ContainsKey(kvp.Key))
-                                displayName = selSet.CustomNames[kvp.Key];
 
-                            displayName = Magnetar_Client.Utils.Translator.Translate(displayName);
+                            if (selSet.CustomNames != null && selSet.CustomNames.ContainsKey(kvp.Key))
+                            {
+                                displayName = selSet.CustomNames[kvp.Key];
+                            }
 
                             bool isSelected = (selSet.Value == kvp.Key);
                             bool isRowHovered = rowRect.Contains(Event.current.mousePosition);

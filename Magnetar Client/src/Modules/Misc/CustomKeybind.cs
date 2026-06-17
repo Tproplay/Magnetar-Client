@@ -56,7 +56,7 @@ namespace Magnetar_Client.Modules
 
             EndCategory();
 
-            CreateCategory("Seed Slot");
+            CreateCategory("Seed Slot",false);
 
             SeedSlot = new List<BindSetting>();
             for (int i=1; i<=14; i++)

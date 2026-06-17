@@ -248,7 +248,7 @@ namespace Magnetar_Client.Core
 
             else if (showSelectionGui)
             {
-                if (multiSelectWindowRect == null || resetWindowPos)
+                if (resetWindowPos)
                 {
                     // Re-Center the window
                     multiSelectWindowRect = new Rect(

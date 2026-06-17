@@ -26,6 +26,8 @@ namespace Magnetar_Client.NEF
         public static RecipeEntity usageViewTarget;
         public static List<CustomRecipe> currentUsages = new List<CustomRecipe>();
 
+        public static HashSet<int> LegacyLoadEntities = new HashSet<int>();
+
         public class RecipeNode
         {
             public RecipeEntity Entity;
@@ -44,6 +46,13 @@ namespace Magnetar_Client.NEF
 
         public static void Init()
         {
+
+            LegacyLoadEntities.UnionWith(new HashSet<int>
+            {
+                (int)PlantType.HelmetPlant, (int)PlantType.DoomSeed,
+                (int)PlantType.IceNut
+            });
+
 #if RELEASE
             // Cache native names
             foreach (PlantType pt in Enum.GetValues(typeof(PlantType)))
@@ -62,7 +71,6 @@ namespace Magnetar_Client.NEF
             Magnetar_Client.NEF.Data.NEFBanned.InitBan();
             Magnetar_Client.NEF.Data.NEFBanned.InitHidden();
             Magnetar_Client.NEF.Data.NEFRecipes.InitRecipes();
-            PerformSearch();
         }
         
         public static void OnLanguageChanged()
@@ -73,12 +81,17 @@ namespace Magnetar_Client.NEF
             }
         }
 
-        // Registers a custom plant, assigning an ID >= 3000 and linking its texture
-        public static RecipeEntity RegisterCustomEntity(string displayName, string texturePath)
+        public static RecipeEntity RegisterCustomEntity(string displayName, string texturePath, bool legacyLoad = false)
         {
             int id = NextCustomPlantId++;
             CustomNames[id] = displayName;
             TextureLoader.PlantTextureOverrides[id] = texturePath;
+
+            if (legacyLoad)
+            {
+                LegacyLoadEntities.Add(id);
+            }
+
             return RecipeEntity.Custom(id);
         }
 
@@ -125,7 +138,6 @@ namespace Magnetar_Client.NEF
             List<CustomRecipe> recipes = new List<CustomRecipe>();
             HashSet<string> seenKeys = new HashSet<string>();
 
-            // Convert native game recipes to our RecipeEntity format
             if (!target.IsZombie && target.Id < 3000 && PlantMixTreeManager.ChildToParents != null)
             {
                 PlantType nativeTarget = (PlantType)target.Id;
@@ -196,7 +208,6 @@ namespace Magnetar_Client.NEF
                         root.ParentC = BuildRecipeTree(recipe.ParentC, new HashSet<RecipeEntity>(tracker), target);
                     }
 
-                    // Apply optional edge messages to the root
                     root.EdgeMessage = recipe.EdgeMessage;
                     root.EdgeMessageColor = recipe.EdgeMessageColor;
 

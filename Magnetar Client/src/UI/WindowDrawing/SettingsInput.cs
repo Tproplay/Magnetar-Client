@@ -237,7 +237,6 @@ namespace Magnetar_Client.UI.WindowDrawing
         public static void HandleBoolSetting(BoolSetting boolSet, ref float y, float width)
         {
             Event e = Event.current;
-            float controlWidth = 140f;
 
             string translatedName = Magnetar_Client.Utils.Translator.Translate(boolSet.Name);
             GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);

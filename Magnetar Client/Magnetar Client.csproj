@@ -16,65 +16,61 @@
 
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\net6\0Harmony.dll</HintPath>
+      <HintPath>References\Melonloader\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>References\Il2Cpp\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppInterop.Common">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\net6\Il2CppInterop.Common.dll</HintPath>
+      <HintPath>References\Melonloader\Il2CppInterop.Common.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppInterop.Runtime">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\net6\Il2CppInterop.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="MelonLoader">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\net6\MelonLoader.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\net6\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll</HintPath>
+      <HintPath>References\Melonloader\Il2CppInterop.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Il2Cppmscorlib">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll</HintPath>
+      <HintPath>References\Il2Cpp\Il2Cppmscorlib.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.2D.Animation.Runtime">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\Unity.2D.Animation.Runtime.dll</HintPath>
+    <Reference Include="MelonLoader">
+      <HintPath>References\Melonloader\MelonLoader.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>References\Melonloader\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\Unity.TextMeshPro.dll</HintPath>
+      <HintPath>References\Il2Cpp\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.dll</HintPath>
+      <HintPath>References\Il2Cpp\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>References\Il2Cpp\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>References\Il2Cpp\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>References\Il2Cpp\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>References\Il2Cpp\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>References\Il2Cpp\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>References\Il2Cpp\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Physics2DModule">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.Physics2DModule.dll</HintPath>
+      <HintPath>References\Il2Cpp\UnityEngine.Physics2DModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>References\Il2Cpp\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.UI.dll</HintPath>
+      <HintPath>References\Il2Cpp\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>..\..\..\..\Games\Pvz\Fusion RH\English 3.7\MelonLoader\Il2CppAssemblies\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>References\Il2Cpp\UnityEngine.UIModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 

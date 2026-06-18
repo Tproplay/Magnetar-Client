@@ -145,7 +145,7 @@ namespace Magnetar_Client.Modules
             UnlimitedMoney = new BoolSetting("Unlimited Money",true);
             Settings.Add(UnlimitedMoney);
 
-            moneySetting = new IntSetting("Money Amount", 0, 99999, 9999999);
+            moneySetting = new IntSetting("Money Amount", 0, 9999999, 9999999);
             Settings.Add(moneySetting);
 
             preserveOriginalSetting = new BoolSetting("Preserve Original", true);

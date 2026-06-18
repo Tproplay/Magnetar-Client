@@ -1,11 +1,13 @@
 ﻿using HarmonyLib;
-using Il2Cpp;
 using Magnetar_Client.Game;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {
@@ -91,7 +93,7 @@ namespace Magnetar_Client.Modules
                 }
             }
             PendingPlants.Clear();
-#if DEBUG
+#if MELONLOADER || BEPINEX
             DebugLogger.Msg("[AutoPlant] All Ghost Plants Destroyed!");
 #endif
         }

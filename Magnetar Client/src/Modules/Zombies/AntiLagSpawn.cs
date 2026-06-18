@@ -1,4 +1,6 @@
-﻿using Il2Cpp;
+﻿#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 using UnityEngine;
 using System.Collections.Generic;
 using static Magnetar_Client.Utils.Translator;

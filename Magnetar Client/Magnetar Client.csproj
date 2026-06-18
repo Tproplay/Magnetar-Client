@@ -1,81 +1,156 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>Magnetar_Client</RootNamespace>
-    <AssemblyName>Magnetar Client</AssemblyName>
-    
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<RootNamespace>Magnetar_Client</RootNamespace>
+		<AssemblyName>Magnetar Client</AssemblyName>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<Configurations>melonloader;Release_melon;Bepinex;Release_bepinex</Configurations>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="DiscordRichPresence" Version="1.6.1.70" />
-  </ItemGroup>
+	<PropertyGroup Condition="$(Configuration.Contains('melon'))">
+		<DefineConstants>MELONLOADER</DefineConstants>
+		<OutputPath>bin\Melonloader\$(Configuration)\</OutputPath>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>References\Melonloader\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>References\Il2Cpp\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppInterop.Common">
-      <HintPath>References\Melonloader\Il2CppInterop.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppInterop.Runtime">
-      <HintPath>References\Melonloader\Il2CppInterop.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2Cppmscorlib">
-      <HintPath>References\Il2Cpp\Il2Cppmscorlib.dll</HintPath>
-    </Reference>
-    <Reference Include="MelonLoader">
-      <HintPath>References\Melonloader\MelonLoader.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>References\Melonloader\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>References\Il2Cpp\Unity.TextMeshPro.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>References\Il2Cpp\UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>References\Il2Cpp\UnityEngine.AnimationModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>References\Il2Cpp\UnityEngine.AssetBundleModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>References\Il2Cpp\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>References\Il2Cpp\UnityEngine.IMGUIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>References\Il2Cpp\UnityEngine.InputLegacyModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.ParticleSystemModule">
-      <HintPath>References\Il2Cpp\UnityEngine.ParticleSystemModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.Physics2DModule">
-      <HintPath>References\Il2Cpp\UnityEngine.Physics2DModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>References\Il2Cpp\UnityEngine.TextRenderingModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>References\Il2Cpp\UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UIModule">
-      <HintPath>References\Il2Cpp\UnityEngine.UIModule.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+	<PropertyGroup Condition="$(Configuration.Contains('Bepinex')) or $(Configuration.Contains('bepinex'))">
+		<DefineConstants>BEPINEX</DefineConstants>
+		<OutputPath>bin\Bepinex\$(Configuration)\</OutputPath>
+	</PropertyGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if &quot;$(ConfigurationName)&quot; == &quot;Debug&quot; (&#xD;&#xA;    copy /Y &quot;C:\Users\Tproplay\Desktop\Visual studio\Magnetar Client\Magnetar Client\bin\Debug\Magnetar Client.dll&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.7\Mods\Magnetar Client.dll&quot;&#xD;&#xA;    start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.7\PlantsVsZombiesRH.exe&quot;&#xD;&#xA;)" />
-  </Target>
+	<ItemGroup>
+		<Compile Remove="References\**" />
+		<EmbeddedResource Remove="References\**" />
+		<None Remove="References\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="DiscordRichPresence" Version="1.6.1.70" />
+		<Reference Include="0Harmony">
+			<HintPath>References\Melonloader\0Harmony.dll</HintPath>
+		</Reference>
+		<Reference Include="Newtonsoft.Json">
+			<HintPath>References\Melonloader\Newtonsoft.Json.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup Condition="$(Configuration.Contains('melon'))">
+		<Reference Include="MelonLoader">
+			<HintPath>References\Melonloader\MelonLoader.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppInterop.Common">
+			<HintPath>References\Melonloader\Il2CppInterop.Common.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppInterop.Runtime">
+			<HintPath>References\Melonloader\Il2CppInterop.Runtime.dll</HintPath>
+		</Reference>
+
+		<Reference Include="Assembly-CSharp">
+			<HintPath>References\Melonloader\Il2Cpp\Assembly-CSharp.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2Cppmscorlib">
+			<HintPath>References\Melonloader\Il2Cpp\Il2Cppmscorlib.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine">
+			<HintPath>References\Melonloader\Il2Cpp\UnityEngine.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.TextMeshPro">
+			<HintPath>References\Melonloader\Il2Cpp\Unity.TextMeshPro.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.AnimationModule">
+			<HintPath>References\Melonloader\Il2Cpp\UnityEngine.AnimationModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.AssetBundleModule">
+			<HintPath>References\Melonloader\Il2Cpp\UnityEngine.AssetBundleModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>References\Melonloader\Il2Cpp\UnityEngine.CoreModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.IMGUIModule">
+			<HintPath>References\Melonloader\Il2Cpp\UnityEngine.IMGUIModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.InputLegacyModule">
+			<HintPath>References\Melonloader\Il2Cpp\UnityEngine.InputLegacyModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.ParticleSystemModule">
+			<HintPath>References\Melonloader\Il2Cpp\UnityEngine.ParticleSystemModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.Physics2DModule">
+			<HintPath>References\Melonloader\Il2Cpp\UnityEngine.Physics2DModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.TextRenderingModule">
+			<HintPath>References\Melonloader\Il2Cpp\UnityEngine.TextRenderingModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UI">
+			<HintPath>References\Melonloader\Il2Cpp\UnityEngine.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UIModule">
+			<HintPath>References\Melonloader\Il2Cpp\UnityEngine.UIModule.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup Condition="$(Configuration.Contains('Bepinex')) or $(Configuration.Contains('bepinex'))">
+		<Reference Include="BepInEx.Core">
+			<HintPath>References\Bepinex\BepInEx.Core.dll</HintPath>
+		</Reference>
+		<Reference Include="BepInEx.Unity.IL2CPP">
+			<HintPath>References\Bepinex\BepInEx.Unity.IL2CPP.dll</HintPath>
+		</Reference>
+		<Reference Include="Assembly-CSharp">
+			<HintPath>References\Bepinex\Il2Cpp\Assembly-CSharp.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2Cppmscorlib">
+			<HintPath>References\Bepinex\Il2Cpp\Il2Cppmscorlib.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine">
+			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.TextMeshPro">
+			<HintPath>References\Bepinex\Il2Cpp\Unity.TextMeshPro.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.AnimationModule">
+			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.AnimationModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.AssetBundleModule">
+			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.AssetBundleModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.CoreModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.IMGUIModule">
+			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.IMGUIModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.InputLegacyModule">
+			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.InputLegacyModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.ParticleSystemModule">
+			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.ParticleSystemModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.Physics2DModule">
+			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.Physics2DModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.TextRenderingModule">
+			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.TextRenderingModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UI">
+			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UIModule">
+			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.UIModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UIModule">
+			<HintPath>References\Bepinex\Il2Cpp\Il2CppInterop.Runtime.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+
+		<Exec Condition="$(Configuration) == 'melonloader'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.7\Mods\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.7\PlantsVsZombiesRH.exe&quot;" />
+
+		<Exec Condition="$(Configuration) == 'Bepinex'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\3.7 UnityExploror\BepInEx\plugins\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\3.7 UnityExploror\PlantsVsZombiesRH.exe&quot;" />
+
+	</Target>
 
 </Project>

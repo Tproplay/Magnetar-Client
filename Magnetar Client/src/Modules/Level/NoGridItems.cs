@@ -1,10 +1,12 @@
-﻿using Il2Cpp;
-using Magnetar_Client.Utils;
+﻿using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Utils.Translator;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {
@@ -93,7 +95,7 @@ namespace Magnetar_Client.Modules
         public bool TurnOffAfterUse = true;
         public BoolSetting AutoTurnOff;
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
         public BoolSetting DebugMode;
 #endif
 
@@ -116,7 +118,7 @@ namespace Magnetar_Client.Modules
             Settings.Add(AutoTurnOff);
 
             EndCategory();
-#if DEBUG
+#if MELONLOADER || BEPINEX
             DebugMode = new BoolSetting("Debug Mode", false);
             Settings.Add(DebugMode);
 #endif
@@ -134,7 +136,7 @@ namespace Magnetar_Client.Modules
         {
             if (BoardInstanceIsNull || board.griditemArray == null) return;
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
             if (DebugMode.Value)
             {
                 DebugLogger.Msg("Found " + board.griditemArray.Count + " grid items.");
@@ -143,7 +145,7 @@ namespace Magnetar_Client.Modules
 
             for (int i = board.griditemArray.Count - 1; i >= 0; i--)
             {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (DebugMode.Value) DebugLogger.Msg($"Checking Grid Item at index {i}");
 #endif
                 GridItem item = board.griditemArray[i];
@@ -151,7 +153,7 @@ namespace Magnetar_Client.Modules
                 if (selectedGridItems.IsSelected((int)item.theItemType))
                 { 
                     item.Die();
-#if DEBUG
+#if MELONLOADER || BEPINEX
                     if (DebugMode.Value) DebugLogger.Msg($"Removed Grid Item of type {item.theItemType} at index {i}");
 #endif
                 }

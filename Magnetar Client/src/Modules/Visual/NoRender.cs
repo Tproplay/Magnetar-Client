@@ -1,11 +1,12 @@
 ﻿using HarmonyLib;
-using Il2Cpp;
 using Il2CppSystem;
 using Magnetar_Client.Utils;
-using MelonLoader.Utils;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {
@@ -38,7 +39,7 @@ namespace Magnetar_Client.Modules
 
             #region Particle
             // 1. Setup Path & Ensure Directory Exists
-            string dirPath = Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Data");
+            string dirPath = Path.Combine(Magnetar_Client.Core.main.ModsDirectory, "Magnetar Data");
             if (!Directory.Exists(dirPath))
             {
                 Directory.CreateDirectory(dirPath);

@@ -1,12 +1,15 @@
-﻿using Il2Cpp;
-using Magnetar_Client.Utils;
+﻿#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+using static Il2Cpp.Plant;
+#elif BEPINEX || RELEASE_BEPINEX
+using static global::Plant;
+#endif
+
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static Il2Cpp.Plant;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
-using static MelonLoader.MelonLogger;
 
 namespace Magnetar_Client.Modules
 {
@@ -89,10 +92,11 @@ namespace Magnetar_Client.Modules
             for (int i = plantList.Count - 1; i >= 0; i--)
             {
                 Plant plant = plantList[i];
-                plant.Die(DieReason.BySelf);
+                if (plant != null)
+                {
+                    plant.Die(DieReason.BySelf);
+                }
             }
-
         }
-
     }
 }

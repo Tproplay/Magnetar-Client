@@ -1,6 +1,8 @@
 ﻿using HarmonyLib;
-using Il2Cpp;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {
@@ -28,7 +30,7 @@ namespace Magnetar_Client.Modules
         private int originalRerollCount = -1;
         public BoolSetting preserveOriginal;
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
         public BoolSetting DebugMode;
 #endif
 
@@ -46,7 +48,7 @@ namespace Magnetar_Client.Modules
 
             EndCategory();
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
             DebugMode = new BoolSetting("Debug Mode", false);
             AddSettings(DebugMode);
 #endif
@@ -62,7 +64,7 @@ namespace Magnetar_Client.Modules
                 if (originalRerollCount == -1)
                 {
                     originalRerollCount = multipleChoiceMenu.refreshCount;
-#if DEBUG
+#if MELONLOADER || BEPINEX
                     if (DebugMode.Value)
                         DebugLogger.Msg("[Unlimited Modifier] OriginalRerollCount (MultipleChoiceMenu) set to " + originalRerollCount);
 #endif
@@ -70,7 +72,7 @@ namespace Magnetar_Client.Modules
 
                 if (multipleChoiceMenu.refreshCount != rerollCount.Value - 1)
                 {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                     if (DebugMode.Value)
                         DebugLogger.Msg($"[Unlimited Modifier] Forcing MultipleChoiceMenu count from {multipleChoiceMenu.refreshCount} to {rerollCount.Value - 1}");
 #endif
@@ -83,7 +85,7 @@ namespace Magnetar_Client.Modules
                 if (originalRerollCount == -1)
                 {
                     originalRerollCount = travelRefresh.refreshTimes;
-#if DEBUG
+#if MELONLOADER || BEPINEX
                     if (DebugMode.Value)
                         DebugLogger.Msg("[Unlimited Modifier] OriginalRerollCount (TravelRefresh) set to " + originalRerollCount);
 #endif
@@ -91,7 +93,7 @@ namespace Magnetar_Client.Modules
 
                 if (travelRefresh.refreshTimes != rerollCount.Value)
                 {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                     if (DebugMode.Value)
                         DebugLogger.Msg($"[Unlimited Modifier] Forcing TravelRefresh count from {travelRefresh.refreshTimes} to {rerollCount.Value}");
 #endif
@@ -105,7 +107,7 @@ namespace Magnetar_Client.Modules
                 if (originalRerollCount == -1)
                 {
                     originalRerollCount = travelStore.refreshCount;
-#if DEBUG
+#if MELONLOADER || BEPINEX
                     if (DebugMode.Value)
                         DebugLogger.Msg("[Unlimited Modifier] OriginalRerollCount (TravelStore) set to " + originalRerollCount);
 #endif
@@ -113,7 +115,7 @@ namespace Magnetar_Client.Modules
 
                 if (travelStore.refreshCount > 0)
                 {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                     if (DebugMode.Value)
                         DebugLogger.Msg($"[Unlimited Modifier] Forcing TravelStore count from {travelStore.refreshCount} to 0 to prevent cost scaling.");
 #endif
@@ -124,12 +126,12 @@ namespace Magnetar_Client.Modules
 
         public override void OnDisable()
         {
-#if DEBUG
+#if MELONLOADER || BEPINEX
             if (DebugMode.Value) DebugLogger.Msg("[Unlimited Modifier] Mod disabled.");
 #endif
             if (preserveOriginal.Value && originalRerollCount != -1)
             {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (DebugMode.Value) DebugLogger.Msg($"[Unlimited Modifier] Restoring original reroll count: {originalRerollCount}");
 #endif
                 if (multipleChoiceMenu != null)
@@ -152,7 +154,7 @@ namespace Magnetar_Client.Modules
             {
                 if (__instance == null) return;
                 multipleChoiceMenu = __instance;
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance == null || !instance.DebugMode.Value) return;
                 DebugLogger.Msg("[Unlimited Modifier] Found and registered MultipleChoiceMenu instance");
 #endif
@@ -162,7 +164,7 @@ namespace Magnetar_Client.Modules
             [HarmonyPostfix]
             public static void OnSelectPostfix()
             {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance != null && instance.DebugMode.Value) DebugLogger.Msg("[Unlimited Modifier] MultipleChoiceMenu selection made. Clearing instance.");
 #endif
                 multipleChoiceMenu = null;
@@ -172,7 +174,7 @@ namespace Magnetar_Client.Modules
             [HarmonyPostfix]
             public static void CancelPostfix()
             {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance != null && instance.DebugMode.Value) DebugLogger.Msg("[Unlimited Modifier] MultipleChoiceMenu cancelled. Clearing instance.");
 #endif
                 multipleChoiceMenu = null;
@@ -184,7 +186,7 @@ namespace Magnetar_Client.Modules
             {
                 if (instance == null || !instance.Active) return;
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance.DebugMode.Value) DebugLogger.Msg($"[Unlimited Modifier] Intercepting SetRefreshable. Changing {refreshCount} to {instance.rerollCount.Value}");
 #endif
                 refreshCount = instance.rerollCount.Value;
@@ -198,7 +200,7 @@ namespace Magnetar_Client.Modules
             [HarmonyPostfix]
             public static void RefreshPostfix(TravelRefresh __instance)
             {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance != null && instance.DebugMode.Value) DebugLogger.Msg("[Unlimited Modifier] Found and registered TravelRefresh instance.");
 #endif
                 travelRefresh = __instance;
@@ -210,7 +212,7 @@ namespace Magnetar_Client.Modules
             {
                 if (instance != null && instance.Active)
                 {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                     if (instance.DebugMode.Value) DebugLogger.Msg("[Unlimited Modifier] Blocked game from manually modifying TravelRefresh times.");
 #endif
                     return false;
@@ -226,7 +228,7 @@ namespace Magnetar_Client.Modules
             [HarmonyPostfix]
             public static void AwakePostfix(TravelStore __instance)
             {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance != null && instance.DebugMode.Value) DebugLogger.Msg("[Unlimited Modifier] Found and registered TravelStore instance (Awake).");
 #endif
                 travelStore = __instance;
@@ -236,7 +238,7 @@ namespace Magnetar_Client.Modules
             [HarmonyPostfix]
             public static void StartPostfix(TravelStore __instance)
             {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance != null && instance.DebugMode.Value && travelStore == null) DebugLogger.Msg("[Unlimited Modifier] Found and registered TravelStore instance (Start).");
 #endif
                 travelStore = __instance;
@@ -246,7 +248,7 @@ namespace Magnetar_Client.Modules
             [HarmonyPostfix]
             public static void ExitPostfix()
             {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance != null && instance.DebugMode.Value) DebugLogger.Msg("[Unlimited Modifier] TravelStore exited. Clearing instance.");
 #endif
                 travelStore = null;

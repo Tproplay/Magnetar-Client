@@ -1,5 +1,4 @@
-﻿using MelonLoader;
-using System.Reflection;
+﻿using System.Reflection;
 using UnityEngine;
 using static Magnetar_Client.UI.Themes.Magnetar_Default;
 
@@ -25,7 +24,7 @@ namespace Magnetar_Client.HUDElements
 
     public class MagnetarVersion : HudElement
     {
-        private static readonly string DisplayText = $"Magnetar Client v{System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttribute<MelonInfoAttribute>().Version}";
+        private static readonly string DisplayText = $"Magnetar Client v{Assembly.GetExecutingAssembly().GetName().Version.ToString(3)}";
 
         public MagnetarVersion() : base("Magnetar Name and Version", HudElement.NewRect(90))
         { }

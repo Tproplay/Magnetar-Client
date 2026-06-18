@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
-using Il2Cpp;
-using Il2CppRhythmGame;
+
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +7,12 @@ using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+using Il2CppRhythmGame;
+#elif BEPINEX || RELEASE_BEPINEX
+using RhythmGame;
+#endif
 namespace Magnetar_Client.Modules
 {
     public class BetterOsu : Module
@@ -37,7 +42,7 @@ namespace Magnetar_Client.Modules
 
         public MultiSelectSetting selectBulletsSetting;
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
         BoolSetting DebugMode;
 #endif
 
@@ -67,7 +72,7 @@ namespace Magnetar_Client.Modules
 
             selectBulletsSetting.Options.Keys.ToList().ForEach(selectBulletsSetting.Select);
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
             DebugMode = new BoolSetting("DebugMode", false);
 #endif
             CreateCategory("General");
@@ -76,7 +81,7 @@ namespace Magnetar_Client.Modules
             Settings.Add(PetTypeSetting);
             Settings.Add(RandomBulletSetting);
             Settings.Add( selectBulletsSetting );
-#if DEBUG
+#if MELONLOADER || BEPINEX
             Settings.Add(DebugMode);
 #endif
             EndCategory();
@@ -110,7 +115,7 @@ namespace Magnetar_Client.Modules
                 if (originalDamage.Count == 0 && currentCombo == 0 && SpawnedPets == 0) return;
 
                 ResetData();
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (DebugMode.Value)
                     DebugLogger.Msg("[Better Osu] Reset");
 #endif
@@ -120,7 +125,7 @@ namespace Magnetar_Client.Modules
             if (rhythmGameManager.CurrentTime == 0)
             {
                 ResetData();
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (DebugMode.Value)
                     DebugLogger.Msg("[Better Osu] Reset");
 #endif
@@ -150,7 +155,7 @@ namespace Magnetar_Client.Modules
                     UnityEngine.Object.Destroy(pet);
                     pet.gameObject.SetActive(false);
                     SpawnedPets--;
-#if DEBUG
+#if MELONLOADER || BEPINEX
                     if (DebugMode.Value)
                         DebugLogger.Msg("[Better Osu] Removed Pet");
 #endif
@@ -172,14 +177,14 @@ namespace Magnetar_Client.Modules
                 UnityEngine.Object.Destroy(pet);
                 pet.gameObject.SetActive(false);
                 SpawnedPets--;
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (DebugMode.Value)
                     DebugLogger.Msg("[Better Osu] Removed Pet");
 #endif
             }
 
             ResetData();
-#if DEBUG
+#if MELONLOADER || BEPINEX
             if (DebugMode.Value)
             DebugLogger.Msg("[Better Osu] Reset");
 #endif
@@ -237,7 +242,7 @@ namespace Magnetar_Client.Modules
                 if (instance == null || BoardInstanceIsNull || !instance.Active ||
                     RhythmGameManager.Instance == null || !instance.RandomBulletSetting.Value|| 
                     fromEnermy) return;
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance.DebugMode.Value)
                     DebugLogger.Msg($"Original Bullet Type: {theBulletType}");
 #endif
@@ -255,7 +260,7 @@ namespace Magnetar_Client.Modules
                     newType = (BulletType)instance.selectBulletsSetting.SelectedValues.ElementAt(
                         UnityEngine.Random.RandomRangeInt(0, instance.selectBulletsSetting.SelectedValues.Count));
                 }
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance.DebugMode.Value)
                     DebugLogger.Msg($"[Better Osu] Spawned Bullet: {newType.ToString()} ({(int)newType})");
 #endif
@@ -273,7 +278,7 @@ namespace Magnetar_Client.Modules
             {
                 if (instance == null) return;
                 instance.ResetData();
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance.DebugMode.Value)
                     DebugLogger.Msg("[Better Osu] Reset");
 #endif
@@ -286,7 +291,7 @@ namespace Magnetar_Client.Modules
                 if (instance == null) return;
                 instance.ResetData();
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance.DebugMode.Value)
                     DebugLogger.Msg("[Better Osu] Reset");
 #endif

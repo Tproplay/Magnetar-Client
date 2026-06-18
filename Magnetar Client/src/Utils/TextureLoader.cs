@@ -1,11 +1,18 @@
-﻿using Il2Cpp;
-using Il2CppSystem.IO;
-using MelonLoader;
-using MelonLoader.Utils;
+﻿using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using Il2CppSystem.IO;
+using Il2CppInterop.Runtime;
+
+#if MELONLOADER || RELEASE_MELON
+using MelonLoader;
+using MelonLoader.Utils;
+using Il2Cpp;
+#elif BEPINEX || RELEASE_BEPINEX
+using BepInEx;
+#endif
 
 namespace Magnetar_Client.Utils
 {
@@ -39,7 +46,7 @@ namespace Magnetar_Client.Utils
                 {
                     if (!_bundleDiagnosticPrinted)
                     {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                         DebugLogger.Msg($"Game has active bundle: '{bundle.name}'");
 #endif
                     }
@@ -48,7 +55,7 @@ namespace Magnetar_Client.Utils
                     if (bName.Contains("data") || bName.Contains("main") || bName.Contains("plant") || bName.Contains("fusion"))
                     {
                         _dataBundle = bundle;
-#if DEBUG
+#if MELONLOADER || BEPINEX
                         DebugLogger.Msg($"Successfully hooked AssetBundle: '{bundle.name}'");
 #endif
                         return;
@@ -57,13 +64,14 @@ namespace Magnetar_Client.Utils
             }
             _bundleDiagnosticPrinted = true;
 
-            string bundlePath = Path.Combine(Application.streamingAssetsPath, "data.Unity3d");
-            if (!File.Exists(bundlePath)) bundlePath = Path.Combine(Application.dataPath, "data.Unity3d");
+            string bundlePath = System.IO.Path.Combine(Application.streamingAssetsPath, "data.Unity3d");
+            if (!System.IO.File.Exists(bundlePath)) bundlePath = 
+                    System.IO.Path.Combine(Application.dataPath, "data.Unity3d");
 
-            if (File.Exists(bundlePath))
+            if (System.IO.File.Exists(bundlePath))
             {
                 _dataBundle = AssetBundle.LoadFromFile(bundlePath);
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 DebugLogger.Msg("Loaded AssetBundle from file disk.");
 #endif
             }
@@ -179,6 +187,7 @@ namespace Magnetar_Client.Utils
 
                     if (!string.IsNullOrEmpty(exactInternalPath))
                     {
+#if MELONLOADER || RELEASE_MELON
                         var subSprites = _dataBundle.LoadAssetWithSubAssets<Sprite>(exactInternalPath);
                         if (subSprites != null && subSprites.Length > 0)
                         {
@@ -197,6 +206,39 @@ namespace Magnetar_Client.Utils
                             _textureCache[textureName] = rawTex;
                             return rawTex;
                         }
+#elif BEPINEX || RELEASE_BEPINEX
+                        // 1. Handle Sub-Assets non-generically
+                        var rawSubAssets = _dataBundle.LoadAssetWithSubAssets(exactInternalPath, Il2CppInterop.Runtime.Il2CppType.Of<Sprite>());
+                        if (rawSubAssets != null && rawSubAssets.Length > 0)
+                        {
+                            int safeIndex = (useSubAsset && targetIndex >= 0 && targetIndex < rawSubAssets.Length) ? targetIndex : 0;
+
+                            // Cast the specific indexed element from base Object to Sprite
+                            Sprite targetSprite = rawSubAssets[safeIndex].TryCast<Sprite>();
+
+                            if (targetSprite != null)
+                            {
+                                Texture2D isolatedTex = CreateReadableCroppedTexture(targetSprite);
+                                if (isolatedTex != null)
+                                {
+                                    _textureCache[textureName] = isolatedTex;
+                                    return isolatedTex;
+                                }
+                            }
+                        }
+
+                        // 2. Handle Main Asset non-generically
+                        var rawMainAsset = _dataBundle.LoadAsset(exactInternalPath, Il2CppInterop.Runtime.Il2CppType.Of<Texture2D>());
+                        if (rawMainAsset != null)
+                        {
+                            Texture2D rawTex = rawMainAsset.TryCast<Texture2D>();
+                            if (rawTex != null)
+                            {
+                                _textureCache[textureName] = rawTex;
+                                return rawTex;
+                            }
+                        }
+#endif
                     }
                 }
 
@@ -209,6 +251,7 @@ namespace Magnetar_Client.Utils
             // ====================================================================
             if (_dataBundle != null)
             {
+#if MELONLOADER || RELEASE_MELON
                 Sprite bundleSprite = _dataBundle.LoadAsset<Sprite>(textureName);
                 if (bundleSprite != null && bundleSprite.name == textureName)
                 {
@@ -219,6 +262,21 @@ namespace Magnetar_Client.Utils
                         return isolatedTex;
                     }
                 }
+#elif BEPINEX || RELEASE_BEPINEX
+                // Call the non-generic signature passing the C++ class identifier pointer
+                var rawSpriteAsset = _dataBundle.LoadAsset(textureName, Il2CppInterop.Runtime.Il2CppType.Of<Sprite>());
+                Sprite bundleSprite = rawSpriteAsset != null ? rawSpriteAsset.TryCast<Sprite>() : null;
+
+                if (bundleSprite != null && bundleSprite.name == textureName)
+                {
+                    Texture2D isolatedTex = CreateReadableCroppedTexture(bundleSprite);
+                    if (isolatedTex != null)
+                    {
+                        _textureCache[textureName] = isolatedTex;
+                        return isolatedTex;
+                    }
+                }
+#endif
             }
 
             if (!_hasScannedMemory) RefreshMemoryCache();
@@ -321,7 +379,7 @@ namespace Magnetar_Client.Utils
                 tex = GetTexture(rawName);
                 successfulPath = rawName;
             }
-#if DEBUG
+#if MELONLOADER || BEPINEX
             if (tex == null)
             {
                 if (!PlantTextureOverrides.ContainsKey(plantId))
@@ -362,7 +420,7 @@ namespace Magnetar_Client.Utils
                 tex = GetTexture(rawName);
                 successfulPath = rawName;
             }
-#if DEBUG
+#if MELONLOADER || BEPINEX
             if (tex == null)
             {
                 if (!ZombieTextureOverrides.ContainsKey(zombieId))
@@ -388,19 +446,31 @@ namespace Magnetar_Client.Utils
     {
         private static Font customWineFont;
 
+        private static string ModsDir =>
+#if MELONLOADER || RELEASE_MELON
+            MelonEnvironment.ModsDirectory;
+#elif BEPINEX || RELEASE_BEPINEX
+            Paths.PluginPath;
+#endif
+
         public static void Init()
         {
             if (GUI.skin != null && GUI.skin.font == customWineFont) return;
 
-            string bundlePath = Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Data", "magnetar_ui");
+            string bundlePath = System.IO.Path.Combine(ModsDir, "Magnetar Data", "magnetar_ui");
 
-            if (File.Exists(bundlePath))
+            if (System.IO.File.Exists(bundlePath))
             {
                 AssetBundle fontBundle = AssetBundle.LoadFromFile(bundlePath);
 
                 if (fontBundle != null)
                 {
-                    customWineFont = fontBundle.LoadAsset<Font>("Magnetar_font");
+                    
+                    UnityEngine.Object assetObj = fontBundle.LoadAsset("Magnetar_font", Il2CppType.Of<Font>());
+                    if (assetObj != null)
+                    {
+                        customWineFont = assetObj.TryCast<Font>();
+                    }
 
                     if (customWineFont != null)
                     {

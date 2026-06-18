@@ -1,5 +1,5 @@
-﻿using MelonLoader;
-using UnityEngine;
+﻿using UnityEngine;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.UI.Themes
 {
@@ -322,7 +322,7 @@ namespace Magnetar_Client.UI.Themes
 
             #endregion
 
-            MelonLogger.Msg("Initialized the Theme 'Magnetar_Default'");
+            DebugLogger.Msg("Initialized the Theme 'Magnetar_Default'");
 
         }
 

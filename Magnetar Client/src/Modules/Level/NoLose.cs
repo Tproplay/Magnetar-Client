@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
+#if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
-
+#endif
 namespace Magnetar_Client.Modules
 {
     public class NoLose : Module

@@ -1,11 +1,12 @@
 ﻿using HarmonyLib;
-using Il2Cpp;
 using Magnetar_Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Il2Cpp.Plant;
 using static Magnetar_Client.Game.GameData;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {
@@ -66,12 +67,12 @@ namespace Magnetar_Client.Modules
         {
             [HarmonyPatch(nameof(Plant.Die))]
             [HarmonyPrefix]
-            public static void Prefix(Plant __instance, DieReason reason)
+            public static void Prefix(Plant __instance, Plant.DieReason reason)
             {
                 if (DieByMod) return;
                 if (instance == null || !instance.Active) return;
 
-                if (reason != DieReason.ByShovel) return;
+                if (reason != Plant.DieReason.ByShovel) return;
 
                 Shovel shovel = Shovel.Instance;
 
@@ -106,7 +107,7 @@ namespace Magnetar_Client.Modules
                     {
                         if (plant.thePlantColumn == __instance.thePlantColumn)
                         {
-                            plant.Die(DieReason.ByShovel);
+                            plant.Die(Plant.DieReason.ByShovel);
                         }
                     }
 
@@ -115,7 +116,7 @@ namespace Magnetar_Client.Modules
                     {
                         if (plant.thePlantRow == __instance.thePlantRow)
                         {
-                            plant.Die(DieReason.ByShovel);
+                            plant.Die(Plant.DieReason.ByShovel);
                         }
                     }
 
@@ -125,7 +126,7 @@ namespace Magnetar_Client.Modules
                         if (plant.thePlantColumn == __instance.thePlantColumn
                             || plant.thePlantRow == __instance.thePlantRow)
                         {
-                            plant.Die(DieReason.ByShovel);
+                            plant.Die(Plant.DieReason.ByShovel);
                         }
                     }
 
@@ -137,14 +138,14 @@ namespace Magnetar_Client.Modules
 
                         if (colDiff <= 1 && rowDiff <= 1)
                         {
-                            plant.Die(DieReason.ByShovel);
+                            plant.Die(Plant.DieReason.ByShovel);
                         }
                     }
 
                     // Full Lawn
                     else if (instance.Mode.Value == 4)
                     {
-                        plant.Die(DieReason.ByShovel);
+                        plant.Die(Plant.DieReason.ByShovel);
                     }
                 }
 

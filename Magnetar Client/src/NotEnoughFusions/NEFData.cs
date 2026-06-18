@@ -1,12 +1,14 @@
-﻿using Il2Cpp;
-using Il2CppGameLevel.EventNodes;
-using Magnetar_Client.Core;
+﻿using Magnetar_Client.Core;
 using Magnetar_Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.NEF.Data.NEFRecipes;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+using Il2CppGameLevel.EventNodes;
+#endif
 
 namespace Magnetar_Client.NEF
 {

@@ -1,4 +1,6 @@
-﻿using Il2Cpp;
+﻿#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {

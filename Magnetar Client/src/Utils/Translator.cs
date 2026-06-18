@@ -1,13 +1,18 @@
-﻿using MelonLoader.Utils;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-
 using static Magnetar_Client.Utils.Magnetar_Logger;
+
+#if MELONLOADER || RELEASE_MELON
+using MelonLoader.Utils;
+#elif BEPINEX || RELEASE_BEPINEX
+using BepInEx;
+#endif
+
 
 namespace Magnetar_Client.Utils
 {
@@ -18,6 +23,13 @@ namespace Magnetar_Client.Utils
         private static Dictionary<Regex, string> _regexTranslations = new Dictionary<Regex, string>();
         private static Dictionary<System.Type, Dictionary<int, string>> _nameCache = new Dictionary<System.Type, Dictionary<int, string>>();
 
+        private static string ModsDir =>
+#if MELONLOADER || RELEASE_MELON
+            MelonEnvironment.ModsDirectory;
+#elif BEPINEX || RELEASE_BEPINEX
+            Paths.PluginPath;
+#endif
+
         public static void LoadTranslations()
         {
             string targetLanguage = Config.Language;
@@ -25,7 +37,7 @@ namespace Magnetar_Client.Utils
             // 1. Sync files from the English master template first
             SyncWithEnglishTemplate(targetLanguage);
 
-            string baseDir = Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Translation", targetLanguage);
+            string baseDir = Path.Combine(ModsDir, "Magnetar Translation", targetLanguage);
 
             if (!Directory.Exists(baseDir))
             {
@@ -86,8 +98,8 @@ namespace Magnetar_Client.Utils
             // Do not try to sync English to English
             if (string.Equals(targetLanguage, "English", StringComparison.OrdinalIgnoreCase)) return;
 
-            string englishDir = Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Translation", "English");
-            string targetDir = Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Translation", targetLanguage);
+            string englishDir = Path.Combine(ModsDir, "Magnetar Translation", "English");
+            string targetDir = Path.Combine(ModsDir, "Magnetar Translation", targetLanguage);
 
             if (!Directory.Exists(englishDir)) return; // Cannot copy if English master is missing
 
@@ -124,7 +136,7 @@ namespace Magnetar_Client.Utils
             if (Core.ModuleManager.Modules == null || Core.ModuleManager.Modules.Count == 0) return;
 
             bool isDirty = false;
-            string baseDir = Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Translation", Config.Language);
+            string baseDir = Path.Combine(ModsDir, "Magnetar Translation", Config.Language);
             if (!Directory.Exists(baseDir)) Directory.CreateDirectory(baseDir);
 
             string stringsPath = Path.Combine(baseDir, "translation_strings.json");
@@ -225,7 +237,7 @@ namespace Magnetar_Client.Utils
         {
             try
             {
-                string baseDir = Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Translation", Config.Language);
+                string baseDir = Path.Combine(ModsDir, "Magnetar Translation", Config.Language);
                 if (!Directory.Exists(baseDir)) Directory.CreateDirectory(baseDir);
 
                 string stringsPath = Path.Combine(baseDir, "translation_strings.json");
@@ -250,10 +262,10 @@ namespace Magnetar_Client.Utils
 
             Dictionary<int, string> parsedNames = new Dictionary<int, string>();
 
-            string magnetarDir = Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Translation", Config.Language);
+            string magnetarDir = Path.Combine(ModsDir, "Magnetar Translation", Config.Language);
             if (!Directory.Exists(magnetarDir)) Directory.CreateDirectory(magnetarDir);
 
-            string translatorAlmanacDir = Path.Combine(MelonEnvironment.ModsDirectory,
+            string translatorAlmanacDir = Path.Combine(ModsDir,
                 "PvZ_Fusion_Translator", "Localization", Config.Language, "Almanac");
 
             string targetFile = Path.Combine(magnetarDir, $"{enumType.Name}.json");
@@ -287,6 +299,7 @@ namespace Magnetar_Client.Utils
             }
             else
             {
+#if MELONLOADER
                 // 2. If file doesn't exist, try loading fallbacks from PvZ_Fusion_Translator
                 TranslatorLogger.Warning($"{enumType.Name}.json not found. Generating new file...");
                 requiresSave = true; // Force save since the file doesn't exist
@@ -322,6 +335,7 @@ namespace Magnetar_Client.Utils
                 {
                     TranslatorLogger.Error($"Failed to parse fallback for {enumType.Name}: {ex.Message}");
                 }
+#endif
             }
 
             // 3. UNIVERSAL CHECK: Verify all enum values exist in parsedNames

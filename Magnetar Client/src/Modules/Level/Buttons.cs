@@ -1,8 +1,9 @@
 ﻿using HarmonyLib;
-using Il2Cpp;
-using MelonLoader;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {
@@ -24,7 +25,7 @@ namespace Magnetar_Client.Modules
         public GameObject showCardsObj;
         public GameObject referenceBtnObj;
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
         public BoolSetting DebugMode;
 #endif
 
@@ -35,7 +36,7 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
             DebugMode = new BoolSetting("Debug Mode", false);
             AddSettings(DebugMode);
 #endif
@@ -44,7 +45,7 @@ namespace Magnetar_Client.Modules
 
         public void ResetState()
         {
-#if DEBUG
+#if MELONLOADER || BEPINEX
             if (DebugMode.Value && Active)
                 DebugLogger.Msg("[RePickPlants] Resetting state (Level ended or restarted).");
 #endif
@@ -80,7 +81,7 @@ namespace Magnetar_Client.Modules
                 if (siblingBtn != null)
                 {
                     referenceBtnObj = siblingBtn.gameObject;
-#if DEBUG
+#if MELONLOADER || BEPINEX
                     if (DebugMode.Value)
                         DebugLogger.Msg($"[RePickPlants] Turned on the ShowCards button!");
 #endif
@@ -101,7 +102,7 @@ namespace Magnetar_Client.Modules
             {
                 if (!showCardsObj.activeSelf)
                 {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                     if (DebugMode.Value)
                         DebugLogger.Msg("[RePickPlants] Other buttons appeared. Activating ShowCards button.");
 #endif
@@ -113,7 +114,7 @@ namespace Magnetar_Client.Modules
             {
                 if (enabledByMod && showCardsObj.activeSelf)
                 {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                     if (DebugMode.Value)
                         DebugLogger.Msg("[RePickPlants] Other buttons hid. Hiding ShowCards button.");
 #endif
@@ -125,7 +126,7 @@ namespace Magnetar_Client.Modules
 
         public override void OnDisable()
         {
-#if DEBUG
+#if MELONLOADER || BEPINEX
             if (DebugMode.Value)
                 DebugLogger.Msg("[RePickPlants] Mod disabled");
 #endif

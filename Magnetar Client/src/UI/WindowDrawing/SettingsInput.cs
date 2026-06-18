@@ -427,7 +427,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                 isShiftDragging = false;
                 draggedItemsSession.Clear();
                 lastHoveredIndex = -1;
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 Magnetar_Client.Utils.Magnetar_Logger.DebugLogger.Msg("Drag Complete");
 #endif
             }

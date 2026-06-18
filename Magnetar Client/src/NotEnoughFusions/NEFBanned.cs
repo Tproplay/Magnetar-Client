@@ -1,5 +1,7 @@
-﻿using Il2Cpp;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.NEF.Data
 {

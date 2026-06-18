@@ -1,8 +1,13 @@
 ﻿using HarmonyLib;
-using Il2Cpp;
 using Magnetar_Client.Game;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+using Il2CppTMPro;
+#elif BEPINEX || RELEASE_BEPINEX
+using TMPro;
+#endif
 
 namespace Magnetar_Client.Modules
 {
@@ -75,7 +80,7 @@ namespace Magnetar_Client.Modules
                 if (instance == null || !instance.Active) return;
                 if (__instance.healthSlider == null) return;
 
-                var textComponents = __instance.healthSlider.GetComponentsInChildren<Il2CppTMPro.TMP_Text>(true);
+                var textComponents = __instance.healthSlider.GetComponentsInChildren<TMP_Text>(true);
 
                 string rawHpString = __instance.thePlantHealth.ToString();
 

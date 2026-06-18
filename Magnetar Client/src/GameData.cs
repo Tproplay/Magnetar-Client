@@ -1,10 +1,15 @@
 ﻿using HarmonyLib;
-using Il2Cpp;
 using Magnetar_Client.Utils;
-using MelonLoader;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+using Il2CppTMPro;
+#elif BEPINEX || RELEASE_BEPINEX
+using TMPro;
+#endif
 
 namespace Magnetar_Client.Game
 {
@@ -287,7 +292,7 @@ namespace Magnetar_Client.Game
         /// </summary>
         public static string GetLevelName()
         {
-            var ui = Il2Cpp.InGameUI.Instance;
+            var ui = InGameUI.Instance;
 
             if (ui == null) return "Unknown";
 
@@ -295,7 +300,7 @@ namespace Magnetar_Client.Game
 
             if (tmpro != null)
             {
-                var textComponent = tmpro.GetComponent<Il2CppTMPro.TextMeshProUGUI>();
+                var textComponent = tmpro.GetComponent<TextMeshProUGUI>();
 
                 return textComponent.GetParsedText();
             }

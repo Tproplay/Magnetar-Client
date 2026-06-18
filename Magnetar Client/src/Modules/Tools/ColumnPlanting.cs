@@ -1,6 +1,8 @@
-﻿using Il2Cpp;
-using static Magnetar_Client.Utils.Magnetar_Logger;
+﻿using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Game.AppData;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {
@@ -24,14 +26,14 @@ namespace Magnetar_Client.Modules
 
         private static string wasAlreadyEnabled;
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
         public BoolSetting DebugMode;
 #endif
 
         public MultiPlanting()
         {
             instance = this;
-#if DEBUG
+#if MELONLOADER || BEPINEX
             DebugMode = new BoolSetting("Debug Mode", false);
             Settings.Add(DebugMode);
 #endif
@@ -53,13 +55,13 @@ namespace Magnetar_Client.Modules
 
             if (wasAlreadyEnabled != null) return;
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
             if (DebugMode.Value) DebugLogger.Msg("[Column Planting] Triggered Multiplant Enable");
 #endif
 
             wasAlreadyEnabled = board.boardTag.isColumn ? "Yes" : "No";
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
             if (DebugMode.Value) DebugLogger.Msg("[Column Planting] Level was found to have boardtag.isColumn" + wasAlreadyEnabled);
 #endif
 
@@ -67,7 +69,7 @@ namespace Magnetar_Client.Modules
             boardTags.isColumn = true;
 
             board.boardTag = boardTags;
-#if DEBUG
+#if MELONLOADER || BEPINEX
             if (board.boardTag.isColumn) DebugLogger.Msg("[Column Planting] Successfully Enabled Multiplanting");
 #endif
         }

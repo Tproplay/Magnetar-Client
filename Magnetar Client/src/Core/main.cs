@@ -1,91 +1,106 @@
-﻿using MelonLoader;
-using UnityEngine;
+﻿using UnityEngine;
 using HarmonyLib;
+using System;
 using static Magnetar_Client.Utils.SaveLoad;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using Magnetar_Client.Utils;
+
+
+#if MELONLOADER || RELEASE_MELON
+using MelonLoader;
+[assembly: MelonInfo(typeof(Magnetar_Client.Core.main), "Magnetar Client", "3.7.0", "Tproplay")]
+[assembly: MelonGame("LanPiaoPiao", "PlantsVsZombiesRH")]
+#elif BEPINEX || RELEASE_BEPINEX
+using BepInEx;
+using BepInEx.Unity.IL2CPP;
+#endif
 
 namespace Magnetar_Client.Core
 {
-
-
+#if MELONLOADER || RELEASE_MELON
     public class main : MelonMod
+#elif BEPINEX || RELEASE_BEPINEX
+    [BepInPlugin("com.tproplay.magnetar", "Magnetar Client", "3.7.0")]
+    public class main : BasePlugin
+#endif
     {
+        public static main Instance;
+        public static HarmonyLib.Harmony HarmonyInstance;
 
+        private readonly float nativeWidth = 1920f;
+        private readonly float nativeHeight = 1080f;
+        bool hasWarmedUp = false;
+
+#if MELONLOADER || RELEASE_MELON
         public override void OnInitializeMelon()
         {
-            // Init
+            Instance = this;
             Utils.Magnetar_Logger.Init();
+            HarmonyInstance = new HarmonyLib.Harmony("com.tproplay.magnetar");
+            SafePatchAll();
+            InitializeCore();
+        }
+#elif BEPINEX || RELEASE_BEPINEX
+        public override void Load()
+        {
+            Instance = this;
 
+            Utils.Magnetar_Logger.Init();
+            HarmonyInstance = new HarmonyLib.Harmony("com.tproplay.magnetar");
+
+            SafePatchAll();
+            InitializeCore();
+            AddComponent<MagnetarHooks>();
+        }
+#endif
+
+        private void InitializeCore()
+        {
             Utils.Translator.LoadTranslations();
 
-            UI.Themes.Magnetar_Default.Init();
             TopBar.TopBar.Init();
             ModuleManager.Init();
             HUDRenderer.Init();
             NEFManager.Init();
             GUIManager.Init();
-            
 
-            Load(); // Load Save to override default values
-
+            SaveLoad.Load();
             DebugLogger.Msg("Magnetar Client Loaded!");
-            
         }
 
-
-        public override void OnApplicationQuit()
+        public void CoreApplicationQuit()
         {
             Save(true);
             DebugLogger.Msg("Magnetar Prefrences Saved!");
         }
 
-        // Do not configure this or it will Scale the GUI
-        private readonly float nativeWidth = 1920f;
-        private readonly float nativeHeight = 1080f;
-
-
-        
-        bool hasWarmedUp = false;
-
-        public override void OnGUI()
+        public void CoreGUI()
         {
-            
+            if (!ModuleManager.IsInitialized) return;
 
-            // Calculate the ratio for scaling
             float rx = (float)(Screen.width) / nativeWidth;
             float ry = (float)(Screen.height) / nativeHeight;
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(rx, ry, 1));
 
-            // Render The HUDManager
-            HUDManager.Render();
-
             if (!hasWarmedUp) { WarmUp(); hasWarmedUp = true; DebugLogger.Msg("Warmed Up the Menu!"); }
 
-            // If the menu is hidden, we stop here
-            if (!Config.showgui) return;
+            HUDManager.Render();
+
+            if (!Magnetar_Client.Config.showgui) return;
 
             TopBar.TopBar.Render();
-            if (Config.CurrentTab == TabType.MODULES) ModuleManager.Render();
-
-            if (Config.CurrentTab == TabType.NEF) NEFManager.Render();
-
-            if (Config.CurrentTab == TabType.GUI) GUIManager.Render();
+            if (Magnetar_Client.Config.CurrentTab == TabType.MODULES) ModuleManager.Render();
+            if (Magnetar_Client.Config.CurrentTab == TabType.NEF) NEFManager.Render();
+            if (Magnetar_Client.Config.CurrentTab == TabType.GUI) GUIManager.Render();
 
             #region handle Escape Key
-
-            // Modules Window -> None
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape && ModuleManager.showModules)
-            { 
-                Config.showgui = false;
+            {
+                Magnetar_Client.Config.showgui = false;
                 Event.current.Use();
                 Save();
                 ResetInputBind();
-#if DEBUG
-                DebugLogger.Msg("Escape Triggerd : Modules Window -> None");
-#endif
             }
-
-            // Settings Window -> Modules Window
             else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape &&
                 !ModuleManager.showModules && ModuleManager.showSettings)
             {
@@ -94,22 +109,11 @@ namespace Magnetar_Client.Core
                     ModuleManager.showModules = true;
                     ModuleManager.showSettings = false;
                     ModuleManager.showSelectionGui = false;
-
-                    // Reset all ShowSettings flags so windows actually close
-                    foreach (var m in ModuleManager.Modules)
-                    {
-                        m.ShowSettings = false;
-                    }
-
+                    foreach (var m in ModuleManager.Modules) { m.ShowSettings = false; }
                     ResetInputBind();
-#if DEBUG
-                    DebugLogger.Msg("Escape Triggerd : Settings Window -> Modules Window");
-#endif
                     Event.current.Use();
                 }
             }
-
-            // Multi Select Window -> Settings Window
             else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape &&
                 !ModuleManager.showModules && !ModuleManager.showSettings && ModuleManager.showSelectionGui)
             {
@@ -117,17 +121,32 @@ namespace Magnetar_Client.Core
                 {
                     ModuleManager.showSettings = true;
                     ModuleManager.showSelectionGui = false;
-
                     ResetInputBind();
-
                     Event.current.Use();
-#if DEBUG
-                    DebugLogger.Msg("Escape Triggerd : Selection Window -> Settings Window");
-#endif
                 }
             }
-
             #endregion
+        }
+
+        public void CoreUpdate()
+        {
+            if (!ModuleManager.IsInitialized) return;
+
+            if (Input.GetKeyDown(KeyCode.RightShift) && !HUDManager.forceShow)
+            {
+                Magnetar_Client.Config.showgui = !Magnetar_Client.Config.showgui;
+                Save();
+            }
+
+            if (!Magnetar_Client.Config.showgui && !HUDManager.forceShow)
+            {
+                ModuleManager.HandleHotkeys();
+            }
+
+            foreach (var mod in ModuleManager.Modules)
+            {
+                if (mod != null) mod.OnUpdate();
+            }
         }
 
         public static void ResetInputBind()
@@ -142,52 +161,59 @@ namespace Magnetar_Client.Core
         public static void WarmUp()
         {
             Magnetar_Client.Utils.LoadFont.Init();
+
+            // Themes initialized here so GUI.skin exists in IL2CPP
+            UI.Themes.Magnetar_Default.Init();
+
             ModuleManager.Render();
             NEFManager.Render();
             GUIManager.Render();
         }
 
-
-        public override void OnUpdate()
+        public void SafePatchAll()
         {
-            if (!ModuleManager.IsInitialized) return;
+            var assembly = typeof(main).Assembly;
+            Type[] types;
 
-            // Toggle GUI
-            if (Input.GetKeyDown(KeyCode.RightShift) && !HUDManager.forceShow)
+            try { types = assembly.GetTypes(); }
+            catch (System.Reflection.ReflectionTypeLoadException e)
             {
-                Config.showgui = !Config.showgui;
-                Save();
-#if DEBUG
-                DebugLogger.Msg("RightShift Triggerd : Toggle GUI");
-#endif
+                types = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Where(e.Types, t => t != null));
             }
 
+            int successCount = 0;
+            int failCount = 0;
 
-            // Only run hotkeys when the menu is hidden
-            if (!Config.showgui && !HUDManager.forceShow)
+            foreach (var type in types)
             {
-                ModuleManager.HandleHotkeys();
+                if (type == null) continue;
+                try
+                {
+                    var patchedMethods = HarmonyInstance.CreateClassProcessor(type).Patch();
+                    if (patchedMethods != null && patchedMethods.Count > 0) successCount++;
+                }
+                catch (Exception ex)
+                {
+                    DebugLogger.Error($"[Harmony] Failed to apply patch '{type.Name}'. Reason: {ex.Message}");
+                    failCount++;
+                }
             }
 
-            foreach (var mod in ModuleManager.Modules)
-            {
-                if (mod != null) mod.OnUpdate();
-            }
-
+            DebugLogger.Msg($"[Harmony] Successfully applied {successCount} patch classes! Failed patches: {failCount}");
         }
 
+#if MELONLOADER || RELEASE_MELON
+        public override void OnApplicationQuit() => CoreApplicationQuit();
+        public override void OnGUI() => CoreGUI();
+        public override void OnUpdate() => CoreUpdate();
+#endif
 
-
-
-
-        // Patch the Input method of the game doesn't sees the Input
         [HarmonyPatch(typeof(Input), "GetKeyDown", new[] { typeof(KeyCode) })]
         public static class BlockSKeysPatch
         {
             public static bool Prefix(KeyCode key, ref bool __result)
             {
-
-                if ((Config.showgui || HUDManager.forceShow) && key != KeyCode.RightShift)
+                if ((Magnetar_Client.Config.showgui || HUDManager.forceShow) && key != KeyCode.RightShift)
                 {
                     __result = false;
                     return false;
@@ -196,8 +222,27 @@ namespace Magnetar_Client.Core
             }
         }
 
-        
+        public static string ModsDirectory
+        {
+            get
+            {
+#if MELONLOADER || RELEASE_MELON
+                return MelonLoader.Utils.MelonEnvironment.ModsDirectory;
+#elif BEPINEX || RELEASE_BEPINEX
+                return BepInEx.Paths.PluginPath;
+#endif
+            }
+        }
     }
+
+#if BEPINEX || RELEASE_BEPINEX
+    public class MagnetarHooks : MonoBehaviour
+    {
+        void Update() { if (main.Instance != null) main.Instance.CoreUpdate(); }
+        void OnGUI() { if (main.Instance != null) main.Instance.CoreGUI(); }
+        void OnApplicationQuit() { if (main.Instance != null) main.Instance.CoreApplicationQuit(); }
+    }
+#endif
 
 
 }

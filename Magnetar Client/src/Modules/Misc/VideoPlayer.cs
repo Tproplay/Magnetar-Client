@@ -3,11 +3,13 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Il2Cpp;
 using Newtonsoft.Json;
 using Magnetar_Client.Utils;
 using Magnetar_Client.Game;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {

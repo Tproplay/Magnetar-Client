@@ -1,7 +1,5 @@
 ﻿using Magnetar_Client.Core;
 using Magnetar_Client.Modules;
-using MelonLoader;
-using MelonLoader.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,6 +7,13 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+
+#if MELONLOADER || RELEASE_MELON
+using MelonLoader;
+using MelonLoader.Utils;
+#elif BEPINEX || RELEASE_BEPINEX
+using BepInEx;
+#endif
 
 namespace Magnetar_Client.Utils
 {
@@ -56,9 +61,22 @@ namespace Magnetar_Client.Utils
         }
         #endregion
 
-        private static string Path => System.IO.Path.Combine(MelonEnvironment.UserDataDirectory, "Magnetar_Config.json");
-        private static string TexturePath => System.IO.Path.Combine(MelonEnvironment.ModsDirectory, "Magnetar Data", "TextureData.json");
+        private static string ConfigDir =>
+#if MELONLOADER || RELEASE_MELON
+            MelonEnvironment.UserDataDirectory;
+#elif BEPINEX || RELEASE_BEPINEX
+            Paths.ConfigPath;
+#endif
 
+        private static string ModsDir =>
+#if MELONLOADER || RELEASE_MELON
+            MelonEnvironment.ModsDirectory;
+#elif BEPINEX || RELEASE_BEPINEX
+            Paths.PluginPath;
+#endif
+
+        private static string Path => System.IO.Path.Combine(ConfigDir, "Magnetar_Config.json");
+        private static string TexturePath => System.IO.Path.Combine(ModsDir, "Magnetar Data", "TextureData.json");
 
         static float LastSaved;
 

@@ -1,6 +1,8 @@
-﻿using static Magnetar_Client.UI.Themes.Magnetar_Default;
-using UnityEngine;
+﻿#if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
+#endif
+using static Magnetar_Client.UI.Themes.Magnetar_Default;
+using UnityEngine;
 using System;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Utils.Maths;

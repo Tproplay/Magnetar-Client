@@ -1,7 +1,6 @@
 ﻿using Magnetar_Client.Modules;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
-using MelonLoader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -94,7 +93,7 @@ namespace Magnetar_Client.Core
             showModules = true; showSettings = false; showSelectionGui = false;
             IsInitialized = true;
 
-            MelonLogger.Msg($"Loaded {Modules.Count} modules");
+            Utils.Magnetar_Logger.DebugLogger.Msg($"Loaded {Modules.Count} modules");
 
 
         }
@@ -123,7 +122,7 @@ namespace Magnetar_Client.Core
                 searchWindowRect = GUI.Window(
                     999, // Unique ID so it doesn't conflict with categories
                     searchWindowRect,
-                    (GUI.WindowFunction)new Action<int>(DrawSearchWindow),
+                    Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawSearchWindow),
                     Translate("Search Modules"),
                     Magnetar_Default.ModuleWindow
                 );
@@ -135,7 +134,7 @@ namespace Magnetar_Client.Core
                     windowPositions[cat] = GUI.Window(
                         id,
                         windowPositions[cat],
-                        (GUI.WindowFunction)new Action<int>(DrawCategoryWindow),
+                        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawCategoryWindow),
                         Translate(cat.ToString()),
                         Magnetar_Default.ModuleWindow
                     );
@@ -230,7 +229,7 @@ namespace Magnetar_Client.Core
                         settingsPositions[mod] = GUI.Window(
                             settingsId,
                             settingsPositions[mod],
-                            (GUI.WindowFunction)new Action<int>(id => DrawSettingsWindow(id, mod)),
+                            Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)(id => DrawSettingsWindow(id, mod))),
                             "",
                             Magnetar_Default.ModuleWindow
                         );
@@ -261,15 +260,13 @@ namespace Magnetar_Client.Core
 
                 if (activeMultiSelect != null)
                 {
-
                     multiSelectWindowRect = GUI.Window(
                         1000,
                         multiSelectWindowRect,
-                        (GUI.WindowFunction)MultiSelectBridge,
+                        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)MultiSelectBridge),
                         Translate("Select ") + Translate(activeMultiSelect.Name),
                         Magnetar_Default.ModuleWindow
                     );
-                
                 }
             }
         }

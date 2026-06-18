@@ -1,11 +1,11 @@
 ﻿using HarmonyLib;
-using Il2Cpp;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using System.Linq;
-using static Il2Cpp.Plant;
 using static Magnetar_Client.Game.AppData;
-
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 namespace Magnetar_Client.Modules
 {
     public class GodMode : Module
@@ -114,13 +114,13 @@ namespace Magnetar_Client.Modules
 
             [HarmonyPatch(nameof(Plant.Die))]
             [HarmonyPrefix]
-            public static bool DiePatch(Plant __instance, DieReason reason)
+            public static bool DiePatch(Plant __instance, Plant.DieReason reason)
             {
                 if (instance == null || BoardInstanceIsNull || !instance.Active) return true;
 
                 if (instance.PlantsSelectedSetting.IsSelected((int)__instance.thePlantType))
                 {
-                    if (reason == DieReason.ByShovel)
+                    if (reason == Plant.DieReason.ByShovel)
                     {
                         if (!instance.ImmuneToShovel.Value) return true;
                         Shovel shovel = Shovel.Instance;

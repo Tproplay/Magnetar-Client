@@ -1,9 +1,8 @@
-﻿using DiscordRPC;
+﻿#if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
-using Il2CppSystem;
+#endif
+using DiscordRPC;
 using Magnetar_Client.Utils;
-using MelonLoader;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,6 +10,7 @@ using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
+
 
 namespace Magnetar_Client.Modules
 {
@@ -228,8 +228,8 @@ namespace Magnetar_Client.Modules
             if (string.IsNullOrEmpty(input)) return input;
             string result = input;
 
-            result = result.Replace("{Magnetar_Version}", 
-                System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttribute<MelonInfoAttribute>().Version);
+            result = result.Replace("{Magnetar_Version}",
+                Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
             result = result.Replace("{Game_Version}", Application.version);
             result = result.Replace("{Level_Name}", GetLevelName());
             result = result.Replace("{Sun}", FormatInternational(board.theSun));

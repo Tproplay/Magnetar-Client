@@ -1,5 +1,4 @@
 ﻿using static Magnetar_Client.Game.AppData;
-using static MelonLoader.MelonLogger;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Modules

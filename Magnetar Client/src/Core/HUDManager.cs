@@ -1,13 +1,13 @@
 ﻿using Magnetar_Client.Modules;
 using Magnetar_Client.HUDElements;
 using Magnetar_Client.UI.Themes;
-using MelonLoader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using Magnetar_Client.Utils;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Core
 {
@@ -46,8 +46,8 @@ namespace Magnetar_Client.Core
                 forceShow = false;
                 Config.showgui = true;
                 e.Use();
-#if DEBUG
-                MelonLogger.Msg("Escape Triggerd : Layout Editing -> HUDManager Window");
+#if MELONLOADER || BEPINEX
+                DebugLogger.Msg("Escape Triggerd : Layout Editing -> HUDManager Window");
 #endif
                 return;
 
@@ -58,8 +58,8 @@ namespace Magnetar_Client.Core
             {
                 isSelectingElements = false;
                 e.Use();
-#if DEBUG
-                MelonLogger.Msg("Escape Triggerd : Select Elemets -> HUDManager Window");
+#if MELONLOADER || BEPINEX
+                DebugLogger.Msg("Escape Triggerd : Select Elemets -> HUDManager Window");
 #endif
                 return;
             }
@@ -170,8 +170,8 @@ namespace Magnetar_Client.Core
                 e.Use();
                 forceShow = true;
                 Config.showgui = false;
-#if DEBUG
-                MelonLogger.Msg("Escape Triggerd : Hud Window -> Edit Layout");
+#if MELONLOADER || BEPINEX
+                DebugLogger.Msg("Escape Triggerd : Hud Window -> Edit Layout");
 #endif
             }
 
@@ -275,7 +275,7 @@ namespace Magnetar_Client.Core
                 currentWindowId++;
             }
 
-            MelonLogger.Msg($"Registered {Elements.Count} HUD elements");
+            DebugLogger .Msg($"Registered {Elements.Count} HUD elements");
 
         }
 

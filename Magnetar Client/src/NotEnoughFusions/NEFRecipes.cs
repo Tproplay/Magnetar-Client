@@ -1,8 +1,10 @@
 ﻿using HarmonyLib;
-using Il2Cpp;
 using Magnetar_Client.Core;
 using System.Collections.Generic;
 using UnityEngine;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.NEF.Data
 {
@@ -22,6 +24,11 @@ namespace Magnetar_Client.NEF.Data
             public bool IsNothing => Id == -1 && !IsZombie;
 
             public bool Equals(RecipeEntity other) => Id == other.Id && IsZombie == other.IsZombie;
+
+            public override bool Equals(object obj)
+            {
+                return obj is RecipeEntity other && Equals(other);
+            }
             public override int GetHashCode() => Id.GetHashCode() ^ IsZombie.GetHashCode();
             public static bool operator ==(RecipeEntity a, RecipeEntity b) => a.Equals(b);
             public static bool operator !=(RecipeEntity a, RecipeEntity b) => !a.Equals(b);

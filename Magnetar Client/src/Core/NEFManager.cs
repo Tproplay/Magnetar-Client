@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.NEF;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Core
 {
@@ -14,7 +15,7 @@ namespace Magnetar_Client.Core
         {
             NEFData.Init();
 
-            MelonLoader.MelonLogger.Msg("Initialized Not Enough Fusions");
+            DebugLogger.Msg("Initialized Not Enough Fusions");
         }
 
         public static void Render()

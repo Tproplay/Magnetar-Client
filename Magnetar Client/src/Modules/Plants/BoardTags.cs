@@ -1,6 +1,8 @@
-﻿using Il2Cpp;
-using static Magnetar_Client.Utils.Magnetar_Logger;
+﻿using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Game.AppData;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {

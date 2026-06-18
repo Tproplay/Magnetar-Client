@@ -32,7 +32,7 @@ namespace Magnetar_Client.Core
                 CustomNames = new System.Collections.Generic.Dictionary<int, string>()
             };
 
-            string path = Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "Magnetar Translation");
+            string path = Path.Combine(Magnetar_Client.Core.main.ModsDirectory, "Magnetar Translation");
 
             var lanuages = System.IO.Directory.GetDirectories(path);
 
@@ -40,7 +40,7 @@ namespace Magnetar_Client.Core
 
             foreach ( var language in lanuages)
             {
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 DebugLogger.Msg("Found Language: " + language);
 #endif
                 string _language = Path.GetFileName(language);

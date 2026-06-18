@@ -1,6 +1,8 @@
-﻿using Il2Cpp;
-using HarmonyLib;
+﻿using HarmonyLib;
 using static Magnetar_Client.Utils.Translator;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {

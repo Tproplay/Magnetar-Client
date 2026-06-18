@@ -1,12 +1,21 @@
 ﻿using HarmonyLib;
+
+#if MELONLOADER || RELEASE_MELON
+
 using Il2Cpp;
 using Il2CppZenGarden;
-using Magnetar_Client.Utils;
 using MelonLoader;
+
+#elif BEPINEX || RELEASE_BEPINEX
+
+using BepInEx.Unity.IL2CPP.Utils;
+using ZenGarden;
+
+#endif
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static MelonLoader.MelonLogger;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Modules
 {
@@ -30,8 +39,8 @@ namespace Magnetar_Client.Modules
         public MultiSelectSetting selectedItems;
 
 
-        public AutoCollect() 
-        { 
+        public AutoCollect()
+        {
             instance = this;
 
             CreateCategory("General");
@@ -59,7 +68,7 @@ namespace Magnetar_Client.Modules
                 var objects = UnityEngine.Object.FindObjectsOfType<GardenPrize>();
                 foreach (GardenPrize obj in objects)
                 {
-                    obj.Active();
+                    if (obj != null) obj.Active();
                 }
             }
 
@@ -68,7 +77,14 @@ namespace Magnetar_Client.Modules
                 var objects = UnityEngine.Object.FindObjectsOfType<PrizeMgr>();
                 foreach (PrizeMgr obj in objects)
                 {
-                    MelonCoroutines.Start(AutoTrophyCollector.WaitAndCollectTrophy(obj));
+                    if (obj != null)
+                    {
+#if MELONLOADER || RELEASE_MELON
+                        MelonCoroutines.Start(AutoTrophyCollector.WaitAndCollectTrophy(obj));
+#elif BEPINEX || RELEASE_BEPINEX
+                        MonoBehaviourExtensions.StartCoroutine(obj, AutoTrophyCollector.WaitAndCollectTrophy(obj));
+#endif
+                    }
                 }
             }
         }
@@ -95,8 +111,15 @@ namespace Magnetar_Client.Modules
             public static void Postfix(PrizeMgr __instance)
             {
                 if (instance == null || !instance.Active) return;
+
                 if (instance.selectedItems.IsSelected(1))
+                {
+#if MELONLOADER || RELEASE_MELON
                     MelonCoroutines.Start(WaitAndCollectTrophy(__instance));
+#elif BEPINEX || RELEASE_BEPINEX
+                    MonoBehaviourExtensions.StartCoroutine(__instance, WaitAndCollectTrophy(__instance));
+#endif
+                }
             }
 
             public static System.Collections.IEnumerator WaitAndCollectTrophy(PrizeMgr trophyInstance)
@@ -116,7 +139,7 @@ namespace Magnetar_Client.Modules
                     }
                     catch (Exception ex)
                     {
-                        MelonLogger.Msg(ex);
+                        DebugLogger.Error($"[AutoCollect] Failed to auto-click Trophy: {ex}");
                         trophyInstance.isClicked = true;
                     }
                 }

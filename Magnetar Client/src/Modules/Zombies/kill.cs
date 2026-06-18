@@ -1,11 +1,12 @@
-﻿using Il2Cpp;
-using Magnetar_Client.Utils;
+﻿using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.Game.AppData;
-
 using static Magnetar_Client.Game.GameData;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {

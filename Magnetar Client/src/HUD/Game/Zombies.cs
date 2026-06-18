@@ -2,9 +2,12 @@
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
 using UnityEngine;
-using Il2Cpp;
 using System.Linq;
 using Magnetar_Client.Game;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
+
 namespace Magnetar_Client.HUDElements
 {
     public class NumberOfZombies : HudElement

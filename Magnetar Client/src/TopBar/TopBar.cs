@@ -1,7 +1,7 @@
-﻿using MelonLoader;
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 using Magnetar_Client.UI.Themes;
 
@@ -25,7 +25,7 @@ namespace Magnetar_Client.TopBar
                 windowWidth += btnWidth;
             }
 
-            MelonLogger.Msg("Initialized the TopBar");
+            DebugLogger.Msg("Initialized the TopBar");
         }
 
         public static void Render()

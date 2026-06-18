@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using Il2Cpp;
 using Magnetar_Client.Game;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,9 @@ using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Utils.Magnetar_Logger;
-using static MelonLoader.MelonLogger;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {
@@ -38,7 +39,7 @@ namespace Magnetar_Client.Modules
         public BindSetting PickUpHammer;
         public BindSetting CoffeeBean;
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
         public BoolSetting DebugMode;
 #endif
         public CustomKeybind()
@@ -77,7 +78,7 @@ namespace Magnetar_Client.Modules
 
             AddSettings(SlowMode, ShowPlantHP,ShowZombieHP);
 
-#if DEBUG
+#if MELONLOADER || BEPINEX
             DebugMode = new BoolSetting("Debug Mode", false);
             AddSettings(DebugMode);
 #endif
@@ -101,7 +102,7 @@ namespace Magnetar_Client.Modules
                     return false;
                 }
             }
-#if DEBUG
+#if MELONLOADER || BEPINEX
             if (DebugMode.Value)
                 DebugLogger.Msg($"[Custom Keybind] Keys Down: " + string.Join(
                         Environment.NewLine,
@@ -146,11 +147,19 @@ namespace Magnetar_Client.Modules
                     if (inGameBtn != null) inGameBtn.SpeedTrigger();
                     else
                     {
+#if MELONLOADER || RELEASE_MELON
                         var slowTrigger = UnityEngine.Object.FindAnyObjectByType<SlowTrigger>();
                         if (slowTrigger != null) slowTrigger.TriggerSlow();
+#elif BEPINEX || RELEASE_BEPINEX
+                        // Call the non-generic signature passing the C++ class identifier pointer
+                        var rawSlowTrigger = UnityEngine.Object.FindAnyObjectByType(Il2CppInterop.Runtime.Il2CppType.Of<SlowTrigger>());
+                        var slowTrigger = rawSlowTrigger != null ? rawSlowTrigger.TryCast<SlowTrigger>() : null;
+
+                        if (slowTrigger != null) slowTrigger.TriggerSlow();
+#endif
                     }
 
-                    
+
                 }  
                 if (GetKeyComboDown(ShowPlantHP.BindKeys)) board.ShowPlantHealth();
                 if (GetKeyComboDown(ShowZombieHP.BindKeys)) board.ShowZombieHealth();
@@ -277,7 +286,7 @@ namespace Magnetar_Client.Modules
             public static bool ShowPlantHealthPatch()
             {
                 if (instance==null || !instance.Active || RanbyMod) return true;
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance.DebugMode.Value)
                     DebugLogger.Msg("[Custom Keybind] Patched ShowPlantHealth");
 #endif
@@ -289,7 +298,7 @@ namespace Magnetar_Client.Modules
             public static bool ShowZombieHealthPatch()
             {
                 if (instance == null || !instance.Active || RanbyMod) return true;
-#if DEBUG
+#if MELONLOADER || BEPINEX
                 if (instance.DebugMode.Value)
                     DebugLogger.Msg("[Custom Keybind] Patched ShowZombieHealth");
 #endif

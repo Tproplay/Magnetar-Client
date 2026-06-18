@@ -1,6 +1,13 @@
 ﻿using HarmonyLib;
-using Il2CppRhythmGame;
+
 using UnityEngine;
+
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+using Il2CppRhythmGame;
+#elif BEPINEX || RELEASE_BEPINEX
+using RhythmGame;
+#endif
 
 namespace Magnetar_Client.Modules
 {

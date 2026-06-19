@@ -40,6 +40,8 @@ namespace Magnetar_Client.Core
         private static Dictionary<Modules.Module, float> moduleContentHeights = new Dictionary<Modules.Module, float>();
         private static Dictionary<Modules.Module, float> targetContentHeights = new Dictionary<Modules.Module, float>();
 
+        public static bool showAddonCategory = false;
+
         public static bool showModules = true;
         public static bool showSettings = false;
         public static bool showSelectionGui = false;
@@ -62,17 +64,7 @@ namespace Magnetar_Client.Core
         #endregion
         public static void Init()
         {
-            int index = 0;
-            foreach (ModuleCategory cat in System.Enum.GetValues(typeof(ModuleCategory)))
-            {
-                // Default category window positions
-                windowPositions[cat] = new Rect(20 + (index * (Config.ModuleWindowWidth + 10)), 50, Config.ModuleWindowWidth, 50);
-                index++;
-            }
-
-            // Init Search window rect
-            searchWindowRect = new Rect(20 + (index * (Config.ModuleWindowWidth + 10)), 50, Config.ModuleWindowWidth, 55);
-
+            
             // load all the modules
             var types = Assembly.GetExecutingAssembly().GetTypes()
                 .Where(t => t.Namespace != null && t.Namespace.StartsWith("Magnetar_Client.Modules")
@@ -82,6 +74,18 @@ namespace Magnetar_Client.Core
             {
                 RegisterModule(type);
             }
+
+            int index = 0;
+            foreach (ModuleCategory cat in System.Enum.GetValues(typeof(ModuleCategory)))
+            {
+                // Default category window positions
+                windowPositions[cat] = new Rect(20 + (index * (Config.ModuleWindowWidth + 10)), 50, Config.ModuleWindowWidth, 50);
+                index++;
+            }
+            index--;
+            // Init Search window rect
+            searchWindowRect = new Rect(20 + (index * (Config.ModuleWindowWidth + 10)), 50, Config.ModuleWindowWidth, 55);
+
 
             multiSelectWindowRect = new Rect(
                         1920 / 2f - multiSelectWindowRect.width / 2f,
@@ -130,6 +134,7 @@ namespace Magnetar_Client.Core
                 // 2. Render Category Windows
                 foreach (ModuleCategory cat in System.Enum.GetValues(typeof(ModuleCategory)))
                 {
+                    if (cat == ModuleCategory.Addon && !showAddonCategory) continue;
                     int id = (int)cat;
                     windowPositions[cat] = GUI.Window(
                         id,

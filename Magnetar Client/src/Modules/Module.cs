@@ -14,7 +14,8 @@ namespace Magnetar_Client.Modules
         Plant,
         Zombie,
         Misc,
-        Visual
+        Visual,
+        Addon
     }
 
 

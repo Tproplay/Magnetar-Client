@@ -7,7 +7,6 @@ using UnityEngine;
 using static Magnetar_Client.NEF.Data.NEFRecipes;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
-using Il2CppGameLevel.EventNodes;
 #endif
 
 namespace Magnetar_Client.NEF
@@ -23,6 +22,9 @@ namespace Magnetar_Client.NEF
         public static int NextCustomPlantId = 3000;
 
         // Internal Data State
+
+        public static bool hasSyncedCustomizeLib = false;
+
         public static List<RecipeEntity> searchResults = new List<RecipeEntity>();
         public static List<RecipeNode> currentPyramidRoots = new List<RecipeNode>();
         public static RecipeEntity usageViewTarget;
@@ -55,16 +57,13 @@ namespace Magnetar_Client.NEF
                 (int)PlantType.IceNut
             });
 
-#if RELEASE
+
             // Cache native names
             foreach (PlantType pt in Enum.GetValues(typeof(PlantType)))
             {
                 if (!CustomNames.ContainsKey((int)pt)) CustomNames[(int)pt] = pt.ToString();
             }
-            foreach (ZombieType zt in Enum.GetValues(typeof(ZombieType)))
-            {
-                if (!CustomNames.ContainsKey((int)zt)) CustomNames[(int)zt] = zt.ToString();
-            }
+#if RELEASE_MELON || RELEASE_BEPINEX
             foreach ( var Entry in Translator.TranslateEnum(typeof(PlantType)))
             {
                 CustomNames[Entry.Key] = Entry.Value;
@@ -74,7 +73,74 @@ namespace Magnetar_Client.NEF
             Magnetar_Client.NEF.Data.NEFBanned.InitHidden();
             Magnetar_Client.NEF.Data.NEFRecipes.InitRecipes();
         }
-        
+
+        public static void SyncCustomizeLib()
+        {
+            try
+            {
+                // Check if CustomizeLib is installed
+                var customizeLib = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(a => a.GetName().Name == "PVZCustomization" || a.FullName.Contains("CustomizeLib"));
+
+                if (customizeLib == null) return;
+
+                Type customCoreType = customizeLib.GetType("CustomizeLib.BepInEx.CustomCore");
+                if (customCoreType == null) return;
+
+                Magnetar_Client.Utils.Magnetar_Logger.DebugLogger.Msg("[NEF] Scaping recipies from CustomizeLib");
+
+                var plantNamesProp = customCoreType.GetProperty("CustomPlantNames", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (plantNamesProp?.GetValue(null) is System.Collections.IDictionary customPlantNames)
+                {
+                    foreach (System.Collections.DictionaryEntry entry in customPlantNames)
+                        CustomNames[Convert.ToInt32(entry.Key)] = entry.Value.ToString();
+                }
+
+                var plantTypesProp = customCoreType.GetProperty("CustomPlantTypes", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (plantTypesProp?.GetValue(null) is System.Collections.IEnumerable customPlantTypes)
+                {
+                    foreach (var pt in customPlantTypes)
+                    {
+                        int id = Convert.ToInt32(pt);
+                        if (!CustomNames.ContainsKey(id))
+                        {
+                            string translated = Utils.Translator.Translate(((PlantType)id).ToString());
+                            CustomNames[id] = (translated != ((PlantType)id).ToString()) ? translated : $"Custom Plant #{id}";
+                        }
+                    }
+                }
+
+                var fusionsProp = customCoreType.GetProperty("CustomFusions", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (fusionsProp?.GetValue(null) is System.Collections.IEnumerable customFusions)
+                {
+                    foreach (var fusion in customFusions)
+                    {
+                        Type type = fusion.GetType();
+                        int target = Convert.ToInt32(type.GetField("Item1").GetValue(fusion));
+                        int item1 = Convert.ToInt32(type.GetField("Item2").GetValue(fusion));
+                        int item2 = Convert.ToInt32(type.GetField("Item3").GetValue(fusion));
+
+                        if (!CustomNames.ContainsKey(target)) CustomNames[target] = $"Unknown Target #{target}";
+                        if (!CustomNames.ContainsKey(item1)) CustomNames[item1] = $"Unknown Ingredient #{item1}";
+                        if (!CustomNames.ContainsKey(item2)) CustomNames[item2] = $"Unknown Ingredient #{item2}";
+
+                        AddedRecipes.Add(new CustomRecipe
+                        {
+                            Result = RecipeEntity.Custom(target),
+                            ParentA = RecipeEntity.Custom(item1),
+                            ParentB = RecipeEntity.Custom(item2)
+                        });
+                    }
+                }
+
+                Magnetar_Client.Utils.Magnetar_Logger.DebugLogger.Msg($"[NEF] Scrape Complete! Synced {CustomNames.Count(k => k.Key >= 3000)} entities and {AddedRecipes.Count} recipes.");
+            }
+            catch (Exception ex)
+            {
+                Magnetar_Client.Utils.Magnetar_Logger.DebugLogger.Error($"[NEF] Failed to sync with CustomizeLib: {ex.Message}");
+            }
+        }
+
         public static void OnLanguageChanged()
         {
             foreach (var Entry in Translator.TranslateEnum(typeof(PlantType)))
@@ -105,12 +171,17 @@ namespace Magnetar_Client.NEF
 
         public static void PerformSearch()
         {
+            if (!hasSyncedCustomizeLib)
+            {
+                SyncCustomizeLib();
+                hasSyncedCustomizeLib = true;
+            }
+
             searchResults.Clear();
             if (!PlantMixTreeManager.IsInitialized) return;
 
             string query = NEFGUI.searchQuery.ToLower();
 
-            // Search standard plants
             foreach (PlantType pt in Enum.GetValues(typeof(PlantType)))
             {
                 if (BannedPlants.Contains((int)pt) || SearchHiddenPlants.Contains((int)pt)) continue;
@@ -121,11 +192,12 @@ namespace Magnetar_Client.NEF
                 }
             }
 
-            // Search custom plants (ID >= 3000)
             foreach (var kvp in CustomNames)
             {
-                if (kvp.Key >= 3000 && !BannedPlants.Contains(kvp.Key) && !SearchHiddenPlants.Contains(kvp.Key))
+                if (!Enum.IsDefined(typeof(PlantType), kvp.Key) || kvp.Key >= 3000)
                 {
+                    if (BannedPlants.Contains(kvp.Key) || SearchHiddenPlants.Contains(kvp.Key)) continue;
+
                     RecipeEntity customEnt = RecipeEntity.Custom(kvp.Key);
                     if (string.IsNullOrEmpty(query) || kvp.Value.ToLower().Contains(query))
                     {
@@ -176,7 +248,19 @@ namespace Magnetar_Client.NEF
                         (!custom.ParentB.IsNothing && BannedPlants.Contains(custom.ParentB.Id)) ||
                         (custom.IsTriple && BannedPlants.Contains(custom.ParentC.Id))) continue;
 
-                    string key = $"{custom.ParentA.Id}_{custom.ParentA.IsZombie}_{custom.ParentB.Id}_{custom.ParentB.IsZombie}_{custom.ParentC.Id}";
+                    // 1. Create a unique string for each ingredient
+                    string aString = $"{custom.ParentA.Id}_{(custom.ParentA.IsZombie ? "Z" : "P")}";
+                    string bString = $"{custom.ParentB.Id}_{(custom.ParentB.IsZombie ? "Z" : "P")}";
+                    string cString = custom.IsTriple ? $"{custom.ParentC.Id}_{(custom.ParentC.IsZombie ? "Z" : "P")}" : "NONE";
+
+                    // 2. Sort Parent A and Parent B alphabetically so order doesn't matter
+                    string sortedParents = string.Compare(aString, bString) < 0
+                        ? $"{aString}_{bString}"
+                        : $"{bString}_{aString}";
+
+                    // 3. Generate the final deduplication key
+                    string key = $"{sortedParents}_{cString}";
+
                     if (!seenKeys.Contains(key))
                     {
                         seenKeys.Add(key);

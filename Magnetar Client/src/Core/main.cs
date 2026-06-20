@@ -78,9 +78,18 @@ namespace Magnetar_Client.Core
         {
             if (!ModuleManager.IsInitialized) return;
 
-            float rx = (float)(Screen.width) / nativeWidth;
-            float ry = (float)(Screen.height) / nativeHeight;
-            GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(rx, ry, 1));
+            float scaleX = (float)Screen.width / nativeWidth;
+            float scaleY = (float)Screen.height / nativeHeight;
+            float uniformScale = Mathf.Min(scaleX, scaleY);
+
+            float offsetX = (Screen.width - (nativeWidth * uniformScale)) * 0.5f;
+            float offsetY = (Screen.height - (nativeHeight * uniformScale)) * 0.5f;
+
+            GUI.matrix = Matrix4x4.TRS(
+                new Vector3(offsetX, offsetY, 0),
+                Quaternion.identity,
+                new Vector3(uniformScale, uniformScale, 1)
+            );
 
             if (!hasWarmedUp) { WarmUp(); hasWarmedUp = true; DebugLogger.Msg("Warmed Up the Menu!"); }
 

@@ -228,6 +228,7 @@ namespace Magnetar_Client.UI.Themes
             AuthorStyle.alignment = TextAnchor.MiddleLeft;
             AuthorStyle.padding = new RectOffset();
             AuthorStyle.padding.left = 10;
+            AuthorStyle.richText = true;
 
             AuthorStyle.normal = new GUIStyleState();
             AuthorStyle.normal.textColor = new Color(0.5f, 0.5f, 0.5f);

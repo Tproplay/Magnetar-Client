@@ -46,7 +46,6 @@
 		<Reference Include="Il2CppInterop.Runtime">
 			<HintPath>References\Melonloader\Il2CppInterop.Runtime.dll</HintPath>
 		</Reference>
-
 		<Reference Include="Assembly-CSharp">
 			<HintPath>References\Melonloader\Il2Cpp\Assembly-CSharp.dll</HintPath>
 		</Reference>

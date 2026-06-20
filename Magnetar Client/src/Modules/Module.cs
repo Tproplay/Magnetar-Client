@@ -21,11 +21,25 @@ namespace Magnetar_Client.Modules
 
     public abstract class Module
     {
+        /// <summary>
+        /// Name to be displayed
+        /// </summary>
         public abstract string Name { get; set; }
-
+        /// <summary>
+        /// Search hints to be used when searching for the module
+        /// </summary>
         public abstract string SearchHints { get; set; }
+        /// <summary>
+        /// Optional name for mod author. Supports rich text.
+        /// </summary>
         public virtual string Author { get; set; } = "";
+        /// <summary>
+        /// Description for the module. Supports rich text.
+        /// </summary>
         public abstract string Description { get; set; }
+        /// <summary>
+        /// The category to put the module in.
+        /// </summary>
         public abstract ModuleCategory Category { get; set; }
 
         // These will be in Every Module.
@@ -38,11 +52,15 @@ namespace Magnetar_Client.Modules
         public List<KeyCode> BindKeys => KeyBind.BindKeys;
         public virtual bool HoldMode { get; set; } = false;
         public virtual bool Active { get; set; } = false;
-
+        /// <summary>
+        /// Used to determine whether the setting window of the module is opened.
+        /// </summary>
         public virtual bool ShowSettings { get; set; } = false;
 
 
-        // List to store settings like Sun Amount, etc.
+        /// <summary>
+        /// Used to store all the settings for the module.
+        /// </summary>
         public List<Setting> Settings = new List<Setting>();
 
         public void Toggle()

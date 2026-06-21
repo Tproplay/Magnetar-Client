@@ -34,6 +34,11 @@ namespace Magnetar_Client.Core
         {
             if (Config.dimBg && (Config.showgui || forceShow))
             {
+                if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2))
+                {
+                    Input.ResetInputAxes();
+                }
+
                 Matrix4x4 backupMatrix = GUI.matrix;
                 GUI.matrix = Matrix4x4.identity;
                 GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "", Magnetar_Default.DimStyle);
@@ -41,6 +46,8 @@ namespace Magnetar_Client.Core
             }
 
             Event e = Event.current;
+
+
 
             #region Handle Escape
             // Layout Editing -> HUDManager Window

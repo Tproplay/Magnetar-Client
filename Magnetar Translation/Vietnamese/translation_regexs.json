@@ -1,6 +1,6 @@
 {
   "----------------Magnetar Client":"Magnetar Client ---------------",
   "(\\d+) selected": "đã chọn {0}",
-  "Line(\\d+) Message (\\d+)": "Dòng{0} Thông báo {1}",
+  "Line (\\d+) Message (\\d+)": "Dòng{0} Thông báo {1}",
   "Seed Slot (\\d+)": "Khe hạt giống {0}"
 }

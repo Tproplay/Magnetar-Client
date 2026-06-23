@@ -78,15 +78,15 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("In Game",true);
 
-            InGame_Line1_1 = new StringSetting("Line1 Message 1", "Magnetar Client v{Magnetar_Version}", In_Game_AutoCompleteArgs);
-            InGame_Line1_2 = new StringSetting("Line1 Message 2", "Playing: {Level_Name}", In_Game_AutoCompleteArgs);
-            InGame_Line1_3 = new StringSetting("Line1 Message 3", "", In_Game_AutoCompleteArgs);
-            InGame_Line1_4 = new StringSetting("Line1 Message 4", "", In_Game_AutoCompleteArgs);
+            InGame_Line1_1 = new StringSetting("Line 1 Message 1", "Magnetar Client v{Magnetar_Version}", In_Game_AutoCompleteArgs);
+            InGame_Line1_2 = new StringSetting("Line 1 Message 2", "Playing: {Level_Name}", In_Game_AutoCompleteArgs);
+            InGame_Line1_3 = new StringSetting("Line 1 Message 3", "", In_Game_AutoCompleteArgs);
+            InGame_Line1_4 = new StringSetting("Line 1 Message 4", "", In_Game_AutoCompleteArgs);
 
-            InGame_Line2_1 = new StringSetting("Line2 Message 1", "Sun: {Sun} | Money: {Money}", In_Game_AutoCompleteArgs);
-            InGame_Line2_2 = new StringSetting("Line2 Message 2", "Wave: {Current_Wave}/{Max_Wave}", In_Game_AutoCompleteArgs);
-            InGame_Line2_3 = new StringSetting("Line2 Message 3", "Plants: {number_of_plants} | Zombies: {number_of_zombies}", In_Game_AutoCompleteArgs);
-            InGame_Line2_4 = new StringSetting("Line2 Message 4", "", In_Game_AutoCompleteArgs);
+            InGame_Line2_1 = new StringSetting("Line 2 Message 1", "Sun: {Sun} | Money: {Money}", In_Game_AutoCompleteArgs);
+            InGame_Line2_2 = new StringSetting("Line 2 Message 2", "Wave: {Current_Wave}/{Max_Wave}", In_Game_AutoCompleteArgs);
+            InGame_Line2_3 = new StringSetting("Line 2 Message 3", "Plants: {number_of_plants} | Zombies: {number_of_zombies}", In_Game_AutoCompleteArgs);
+            InGame_Line2_4 = new StringSetting("Line 2 Message 4", "", In_Game_AutoCompleteArgs);
 
             AddSettings(InGame_Line1_1, InGame_Line1_2, InGame_Line1_3, InGame_Line1_4);
             AddSettings(InGame_Line2_1, InGame_Line2_2, InGame_Line2_3, InGame_Line2_4);

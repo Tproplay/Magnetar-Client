@@ -182,7 +182,11 @@ namespace Magnetar_Client.Utils
             {
                 try
                 {
-                    string jsonDump = JsonConvert.SerializeObject(_exactTranslations, Formatting.Indented);
+                    var cleanDict = _exactTranslations
+                        .Where(kvp => !_regexMatchedInputs.Contains(kvp.Key))
+                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+                    string jsonDump = JsonConvert.SerializeObject(cleanDict, Formatting.Indented);
                     File.WriteAllText(stringsPath, jsonDump);
                     TranslatorLogger.Warning($"Auto-dumped missing translation strings into {Config.Language}/translation_strings.json");
                 }
@@ -193,6 +197,7 @@ namespace Magnetar_Client.Utils
             }
         }
 
+        private static HashSet<string> _regexMatchedInputs = new HashSet<string>();
         public static string Translate(string input)
         {
             if (!_isLoaded) LoadTranslations();
@@ -241,7 +246,10 @@ namespace Magnetar_Client.Utils
                         template = template.Replace(placeholder, finalWord);
                     }
 
+                    _regexMatchedInputs.Add(input);
+
                     _exactTranslations[input] = template;
+
                     return template;
                 }
             }
@@ -264,10 +272,12 @@ namespace Magnetar_Client.Utils
 
                 string stringsPath = Path.Combine(baseDir, "translation_strings.json");
 
-                string jsonDump = JsonConvert.SerializeObject(_exactTranslations, Formatting.Indented);
-                File.WriteAllText(stringsPath, jsonDump);
+                var cleanDict = _exactTranslations
+                    .Where(kvp => !_regexMatchedInputs.Contains(kvp.Key))
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-                TranslatorLogger.Msg("Caught and auto-dumped a new missing string.");
+                string jsonDump = JsonConvert.SerializeObject(cleanDict, Formatting.Indented);
+                File.WriteAllText(stringsPath, jsonDump);
             }
             catch (Exception ex)
             {

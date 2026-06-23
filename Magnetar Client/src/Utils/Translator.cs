@@ -143,7 +143,20 @@ namespace Magnetar_Client.Utils
 
             void AddIfMissing(string text)
             {
-                if (!string.IsNullOrWhiteSpace(text) && !_exactTranslations.ContainsKey(text))
+                if (string.IsNullOrWhiteSpace(text)) return;
+
+                if (_exactTranslations.ContainsKey(text)) return;
+                bool matchedByRegex = false;
+                foreach (var rule in _regexTranslations)
+                {
+                    if (rule.Key.IsMatch(text))
+                    {
+                        matchedByRegex = true;
+                        break;
+                    }
+                }
+
+                if (!matchedByRegex)
                 {
                     _exactTranslations[text] = text;
                     isDirty = true;
@@ -186,11 +199,16 @@ namespace Magnetar_Client.Utils
 
             if (string.IsNullOrWhiteSpace(input)) return input;
 
+            // 1. Check exact matches first
             if (_exactTranslations.TryGetValue(input, out string exactMatch))
             {
-                return exactMatch;
+                if (exactMatch != input)
+                {
+                    return exactMatch;
+                }
             }
 
+            // 2. Check regex rules
             foreach (var rule in _regexTranslations)
             {
                 Match match = rule.Key.Match(input);
@@ -222,13 +240,17 @@ namespace Magnetar_Client.Utils
                         }
                         template = template.Replace(placeholder, finalWord);
                     }
+
+                    _exactTranslations[input] = template;
                     return template;
                 }
             }
 
-            _exactTranslations[input] = input;
-
-            SaveMissingStringToDisk();
+            if (!_exactTranslations.ContainsKey(input))
+            {
+                _exactTranslations[input] = input;
+                SaveMissingStringToDisk();
+            }
 
             return input;
         }

@@ -259,14 +259,6 @@
   "Shows rolling Gamestatus updates on Discord.": "Hiện thị cập nhật trạng thái chơi game liên tục trên Discord.",
   "General": "Cài đặt chung",
   "Extra": "Mở rộng",
-  "Line1 Message 1": "Dòng 1 Tin nhắn 1",
-  "Line1 Message 2": "Dòng 1 Tin nhắn 2",
-  "Line1 Message 3": "Dòng 1 Tin nhắn 3",
-  "Line1 Message 4": "Dòng 1 Tin nhắn 4",
-  "Line2 Message 1": "Dòng 2 Tin nhắn 1",
-  "Line2 Message 2": "Dòng 2 Tin nhắn 2",
-  "Line2 Message 3": "Dòng 2 Tin nhắn 3",
-  "Line2 Message 4": "Dòng 2 Tin nhắn 4",
   "Sequential": "Tuần tự",
   "Random": "Ngẫu nhiên",
   "Iteration Mode": "Chế độ lặp",
@@ -308,7 +300,6 @@
   "Active Star drop Cooldown": "Thời Gian Hồi Chiêu Kích Hoạt Rơi Sao",
   "Passive Star drop Cooldown": "Thời Gian Hồi Chiêu Nội Tại Rơi Sao",
   "Game Speed": "Tốc Độ Trò Chơi",
-  "Game Speed": "Tốc Độ Trò Chơi",
   "Simple Spawner": "Bộ gọi cây/quái đơn giản",
   "A <color=red>simple spawner</color> mod for Pvz fusion.\n<b>Note:</b> Multi keybinds like (alt+ctrl+a) is not supported.": "Một bản mod <color=red>gọi cây/quái đơn giản</color> cho PvZ Fusion.\n<b>Lưu ý:</b> Không hỗ trợ tổ hợp nhiều phím như (alt+ctrl+a).",
   "simplespawner spawnmod pvzfusion spawner spawnmenu spawnitems unitspawner spawnzombies spawnplants entityspawner spawncheat itemspawner spawntool summoner summonsummon simple-spawner fusion-spawner spawnpvz entitysummon spawnmanager summonmod spawnconfig spawnsettings spawncontroller": "simplespawner spawnmod pvzfusion spawner spawnmenu spawnitems unitspawner spawnzombies spawnplants entityspawner spawncheat itemspawner spawntool summoner summonsummon simple-spawner fusion-spawner spawnpvz entitysummon spawnmanager summonmod spawnconfig spawnsettings spawncontroller",
@@ -340,5 +331,8 @@
   "Spawn super machine": "Tạo siêu máy móc",
   "Spawn portal heart": "Tạo lõi cổng dịch chuyển (Portal Heart)",
   "Spawn sprout pot prize": "Tạo chậu mầm thưởng",
-  "Addon": "Tiện ích mở rộng (Addon)"
+  "Addon": "Tiện ích mở rộng (Addon)",
+  "Developer Mode": "Chế độ nhà phát triển",
+  "Developer Mode is used by game devs during game testing": "Chế độ nhà phát triển được nhà phát triển dùng khi test game",
+  "developermode devmode devmod developer devtools developmentmode debugmode debugdev devtesting gametesting dev-tools devfeatures adminmode devconsole cheatsdev devsettings testingmode developeroptions devtoolsenabled devaccess devmenu developeraccess devbuild testingtool": "developermode devmode devmod developer devtools developmentmode debugmode debugdev devtesting gametesting dev-tools devfeatures adminmode devconsole cheatsdev devsettings testingmode developeroptions devtoolsenabled devaccess devmenu developeraccess devbuild testingtool"
 }

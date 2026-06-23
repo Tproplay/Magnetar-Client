@@ -31,7 +31,7 @@ namespace Magnetar_Client.Modules
             "giftbux";
 
         public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
-
+        public override bool Active { get; set; } = true;
         // Mod Data
 
         public static AutoCollect instance;
@@ -53,7 +53,7 @@ namespace Magnetar_Client.Modules
                     { 1, "Trophy" }
                 }
             };
-
+            selectedItems.Select(0);
             Settings.Add(selectedItems);
 
             EndCategory();

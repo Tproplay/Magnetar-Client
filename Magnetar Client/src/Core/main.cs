@@ -8,7 +8,7 @@ using Magnetar_Client.Utils;
 
 #if MELONLOADER || RELEASE_MELON
 using MelonLoader;
-[assembly: MelonInfo(typeof(Magnetar_Client.Core.main), "Magnetar Client", "3.7.0", "Tproplay")]
+[assembly: MelonInfo(typeof(Magnetar_Client.Core.main), "Magnetar Client", "3.7.1", "Tproplay")]
 [assembly: MelonGame("LanPiaoPiao", "PlantsVsZombiesRH")]
 #elif BEPINEX || RELEASE_BEPINEX
 using BepInEx;
@@ -20,7 +20,7 @@ namespace Magnetar_Client.Core
 #if MELONLOADER || RELEASE_MELON
     public class main : MelonMod
 #elif BEPINEX || RELEASE_BEPINEX
-    [BepInPlugin("com.tproplay.magnetar", "Magnetar Client", "3.7.0")]
+    [BepInPlugin("com.tproplay.magnetar", "Magnetar Client", "3.7.1")]
     public class main : BasePlugin
 #endif
     {

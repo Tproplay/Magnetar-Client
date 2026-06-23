@@ -4,6 +4,8 @@ using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using System.Linq;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -133,6 +135,7 @@ namespace Magnetar_Client.Modules
 
             int newId = nextId++;
             fxDatabase.Add(newId, effectName);
+            ParticlesSetting.Options.Add(newId, effectName);
 
             isFileDirty = true;
             return newId;
@@ -153,7 +156,11 @@ namespace Magnetar_Client.Modules
             var allParticleSystems = UnityEngine.Object.FindObjectsOfType<ParticleSystem>();
             foreach (var ps in allParticleSystems)
             {
-                if (ps != null) ps.emission.enabled = true;
+                if (ps != null && 
+                    ParticlesSetting.IsSelected(
+                        ParticlesSetting.Options.FirstOrDefault(key=>key.Value==ps.gameObject.name).Key
+                        )
+                    ) ps.emission.enabled = true;
             }
 
             // Buckets

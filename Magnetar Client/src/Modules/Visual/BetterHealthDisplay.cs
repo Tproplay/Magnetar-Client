@@ -177,8 +177,8 @@ namespace Magnetar_Client.Modules
             static void AwakePostFix(Board __instance)
             {
                 if (instance == null || !instance.Active) return;
-                if (instance.AutoEnable_ShowHp_Plant.Value) __instance.ShowPlantHealth();
-                if (instance.AutoEnable_ShowHp_Zombie.Value) __instance.ShowZombieHealth();
+                if (instance.AutoEnable_ShowHp_Plant.Value) __instance.showPlantHealth = 1;
+                if (instance.AutoEnable_ShowHp_Zombie.Value) __instance.showZombieHealth = true;
             }
         }
     }

@@ -7,6 +7,7 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Game.AppData;
 using Magnetar_Client.Game;
 using System;
+using HarmonyLib;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -38,7 +39,8 @@ namespace Magnetar_Client.Modules
             TheGameStatus = 1,
             BoardTag = 2,
             ZombieList,
-            PlantList
+            PlantList,
+            SoundPlayed,
         }
 
         public DebugMode()
@@ -55,6 +57,7 @@ namespace Magnetar_Client.Modules
                     { (int)Options.BoardTag, "BoardTag" },
                     { (int)Options.ZombieList, "ZombieList" },
                     { (int)Options.PlantList, "PlantList" },
+                    { (int)Options.SoundPlayed, "Sound Played" },
                 }
             };
             Settings.Add(selected);
@@ -138,7 +141,32 @@ namespace Magnetar_Client.Modules
             _time = Time.realtimeSinceStartup;
         }
 
+        public override void OnUpdate()
+        {
+            base.OnUpdate();
+            GameAPPPatch.logged = false;
+        }
 
+
+        [HarmonyPatch(typeof(GameAPP))]
+        public static class GameAPPPatch
+        {
+            public static bool logged = false;
+
+            [HarmonyPatch(nameof(GameAPP.PlaySound), new Type[] { typeof(int), typeof(float), typeof(float) })]
+            [HarmonyPostfix]
+            public static void PlaySoundIntPatch(int theSoundID, float theVolume, float pitch)
+            {
+                if (instance == null || !instance.Active || logged ||
+                    !instance.selected.IsSelected((int)Options.SoundPlayed)) return;
+
+                SoundType soundType = (SoundType)theSoundID;
+
+                DebugLogger.Msg($"[Debug Mode] Sound Played: SoundType={soundType} ({theSoundID})," +
+                    $" Volume={theVolume}, Pitch={pitch}");
+                logged = true;
+            }
+        }
 
 
 

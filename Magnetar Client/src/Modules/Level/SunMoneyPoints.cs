@@ -12,100 +12,116 @@ namespace Magnetar_Client.Modules
             "ulimited sun limitless sun unrestricted sun endless sun sunmultiplier solarmultiplier Money Hack Money Cheat " +
             "sunboost sunbonus sunpowerup sonmultiplier sunmultiplyer sunmultipliar sunmultipier sunmultyplier sunmulltiplier" +
             " sunmultaplier lightmultiplier raymultiplier sunfactor sunamplifier sunintensifier sunenhancer solmultiplier sunx2";
-        
+
         public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
-        // The mod data
-
+        // Mod data
         public static SunHack instance;
 
         public BoolSetting UnlimitedSun;
-
         private int originalSunAmount = -853721;
         private IntSetting sunSetting;
-
         private BoolSetting preserveOriginalSetting;
 
         public BoolSetting SunMultipier;
         private FloatSetting sunMultiplierSetting;
 
-        private static int _sunAmount = -947624;
+        // State trackers for live toggling
+        private bool _lastUnlimitedState = false;
+        private bool _lastMultiplierState = false;
+        private float _originalSunEfficiency = 1f;
 
         public SunHack()
         {
             instance = this;
 
             CreateCategory("Unlimited Sun");
-
             UnlimitedSun = new BoolSetting("Unlimited Sun", true);
             Settings.Add(UnlimitedSun);
-
             sunSetting = new IntSetting("Sun Amount", 0, 99999, 99999);
             Settings.Add(sunSetting);
-
             preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
-
             EndCategory();
-            CreateCategory("Sun Multiplier");
 
+            CreateCategory("Sun Multiplier");
             SunMultipier = new BoolSetting("Sun Multiplier", false);
             Settings.Add(SunMultipier);
-
             sunMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);
             Settings.Add(sunMultiplierSetting);
-
             EndCategory();
-
         }
 
         // Mod Logic
-
-        public override void OnDisable() 
-        { 
+        public override void OnDisable()
+        {
             if (BoardInstanceIsNull) return;
 
-            if (UnlimitedSun.Value)
+            // Clean up Unlimited Sun
+            if (_lastUnlimitedState)
             {
-                if (originalSunAmount > 0 && preserveOriginalSetting.Value)
-                {
+                if (originalSunAmount >= 0 && preserveOriginalSetting.Value)
                     board.theSun = originalSunAmount;
-                    originalSunAmount = -853721;
-                }
+
+                originalSunAmount = -853721;
+                _lastUnlimitedState = false;
             }
 
-            _sunAmount = -947624;
-
+            // Clean up Multiplier
+            if (_lastMultiplierState)
+            {
+                board.sunEfficiency = _originalSunEfficiency;
+                _lastMultiplierState = false;
+            }
         }
 
         public override void OnUpdateActive()
         {
-            if (BoardInstanceIsNull) {_sunAmount = -947624; return; }
+            if (BoardInstanceIsNull) return;
 
+            // --- Unlimited Sun ---
+            if (UnlimitedSun.Value != _lastUnlimitedState)
+            {
+                if (UnlimitedSun.Value) // Just turned ON
+                {
+                    originalSunAmount = board.theSun;
+                }
+                else // Just turned OFF
+                {
+                    if (originalSunAmount >= 0 && preserveOriginalSetting.Value)
+                        board.theSun = originalSunAmount;
+
+                    originalSunAmount = -853721;
+                }
+                _lastUnlimitedState = UnlimitedSun.Value;
+            }
+
+            // Execution
             if (UnlimitedSun.Value)
             {
-                if (originalSunAmount == -853721) originalSunAmount = board.theSun;
                 board.theSun = sunSetting.Value;
             }
-            
-            else if (SunMultipier.Value)
+
+            // --- Sun Multiplier ---
+            if (SunMultipier.Value != _lastMultiplierState)
             {
-                int Sun = board.theSun;
-
-                if (_sunAmount == -947624 || Sun == sunSetting.Value) _sunAmount = Sun;
-
-                if (Sun != _sunAmount)
+                if (SunMultipier.Value) // Just turned ON
                 {
-                    if ((Sun - _sunAmount) > 0)
-                        board.theSun += (int)((Sun - _sunAmount) * (sunMultiplierSetting.Value - 1));
-
-                    _sunAmount = board.theSun;
-
+                    _originalSunEfficiency = board.sunEfficiency;
                 }
+                else // Just turned OFF
+                {
+                    board.sunEfficiency = _originalSunEfficiency;
+                }
+                _lastMultiplierState = SunMultipier.Value;
+            }
+
+            // Execution
+            if (SunMultipier.Value)
+            {
+                board.sunEfficiency = sunMultiplierSetting.Value;
             }
         }
-
-        
     }
 
     public class MoneyHack : Module
@@ -119,20 +135,22 @@ namespace Magnetar_Client.Modules
             " wealthmultiplier richesmultiplier coinmultiplier dollarmultiplier currencymultiplier moneyfactor moneyx2 cashboost";
         public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
-        // mod data
-
+        // Mod data
         public static MoneyHack instance;
 
         public BoolSetting UnlimitedMoney;
         private int originalMoneyAmount = -853721;
         private IntSetting moneySetting;
-
         private BoolSetting preserveOriginalSetting;
 
         public BoolSetting MoneyMultiplier;
-
         public FloatSetting moneyMultiplierSetting;
-        private static int _moneyAmount = -947624;
+
+        // State trackers for live toggling
+        private bool _lastUnlimitedState = false;
+        private bool _lastMultiplierState = false;
+        private float _originalMoneyEfficiency = 1f;
+
         public override bool Active { get; set; } = false;
 
         public MoneyHack()
@@ -140,25 +158,19 @@ namespace Magnetar_Client.Modules
             instance = this;
 
             CreateCategory("Unlimited Money");
-
-            UnlimitedMoney = new BoolSetting("Unlimited Money",true);
+            UnlimitedMoney = new BoolSetting("Unlimited Money", true);
             Settings.Add(UnlimitedMoney);
-
             moneySetting = new IntSetting("Money Amount", 0, 9999999, 9999999);
             Settings.Add(moneySetting);
-
             preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
-
             EndCategory();
-            CreateCategory("Money Multiplier");
 
+            CreateCategory("Money Multiplier");
             MoneyMultiplier = new BoolSetting("Money Multiplier", false);
             Settings.Add(MoneyMultiplier);
-
             moneyMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);
             Settings.Add(moneyMultiplierSetting);
-
             EndCategory();
         }
 
@@ -167,49 +179,73 @@ namespace Magnetar_Client.Modules
         {
             if (BoardInstanceIsNull) return;
 
-            if (UnlimitedMoney.Value)
+            // Clean up Unlimited Money
+            if (_lastUnlimitedState)
             {
-                if (originalMoneyAmount > 0 && preserveOriginalSetting.Value)
-                {
+                if (originalMoneyAmount >= 0 && preserveOriginalSetting.Value)
                     board.theMoney = originalMoneyAmount;
-                    originalMoneyAmount = -853721;
-                }
+
+                originalMoneyAmount = -853721;
+                _lastUnlimitedState = false;
             }
 
-            _moneyAmount = -947624;
-
+            // Clean up Multiplier
+            if (_lastMultiplierState)
+            {
+                board.moneyEfficiency = _originalMoneyEfficiency;
+                _lastMultiplierState = false;
+            }
         }
 
         public override void OnUpdateActive()
         {
-            if (BoardInstanceIsNull) { _moneyAmount = -947624; return; }
+            if (BoardInstanceIsNull) return;
 
+            // --- Unlimited Money ---
+            if (UnlimitedMoney.Value != _lastUnlimitedState)
+            {
+                if (UnlimitedMoney.Value) // Just turned ON
+                {
+                    originalMoneyAmount = board.theMoney;
+                }
+                else // Just turned OFF
+                {
+                    if (originalMoneyAmount >= 0 && preserveOriginalSetting.Value)
+                        board.theMoney = originalMoneyAmount;
+
+                    originalMoneyAmount = -853721;
+                }
+                _lastUnlimitedState = UnlimitedMoney.Value;
+            }
+
+            // Execution
             if (UnlimitedMoney.Value)
             {
-                if (originalMoneyAmount == -853721) originalMoneyAmount = board.theMoney;
                 board.theMoney = moneySetting.Value;
             }
 
-            else if (MoneyMultiplier.Value)
+            // --- Money Multiplier ---
+            if (MoneyMultiplier.Value != _lastMultiplierState)
             {
-                int Money = board.theMoney;
-
-                if (_moneyAmount == -947624 || Money == moneySetting.Value) _moneyAmount = Money;
-
-                if (Money != _moneyAmount)
+                if (MoneyMultiplier.Value) // Just turned ON
                 {
-                    if ((Money - _moneyAmount) > 0)
-                        board.theMoney += (int)((Money - _moneyAmount) * (moneyMultiplierSetting.Value - 1));
-
-                    _moneyAmount = board.theMoney;
-
+                    _originalMoneyEfficiency = board.moneyEfficiency;
                 }
+                else // Just turned OFF
+                {
+                    board.moneyEfficiency = _originalMoneyEfficiency;
+                }
+                _lastMultiplierState = MoneyMultiplier.Value;
+            }
+
+            // Execution
+            if (MoneyMultiplier.Value)
+            {
+                board.moneyEfficiency = moneyMultiplierSetting.Value;
             }
         }
-
-
     }
-    
+
     public class PointsHack : Module
     {
         // Mod Info
@@ -222,19 +258,21 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
         // Mod data
-
         public static PointsHack instance;
 
         public BoolSetting UnlimitedPoints;
-
         private float originalPointsAmount = -853721;
         private FloatSetting pointsSetting;
         private BoolSetting preserveOriginalSetting;
 
         public BoolSetting PointsMultiplier;
-
         private FloatSetting pointsMultiplierSetting;
-        private static float _pointsAmount = -947624.35f;
+        private float _pointsAmount = -947624.35f;
+
+        // State trackers for live toggling
+        private bool _lastUnlimitedState = false;
+        private bool _lastMultiplierState = false;
+
         public override bool Active { get; set; } = false;
 
         public PointsHack()
@@ -242,25 +280,19 @@ namespace Magnetar_Client.Modules
             instance = this;
 
             CreateCategory("Unlimited Points");
-
             UnlimitedPoints = new BoolSetting("Unlimited Points", true);
             Settings.Add(UnlimitedPoints);
-
             pointsSetting = new FloatSetting("Points Amount", 0, 9999999, 9999999);
             Settings.Add(pointsSetting);
-
             preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
-
             EndCategory();
-            CreateCategory("Points Multiplier");
 
+            CreateCategory("Points Multiplier");
             PointsMultiplier = new BoolSetting("Points Multiplier", false);
             Settings.Add(PointsMultiplier);
-
             pointsMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);
             Settings.Add(pointsMultiplierSetting);
-
             EndCategory();
         }
 
@@ -269,47 +301,78 @@ namespace Magnetar_Client.Modules
         {
             if (BoardInstanceIsNull) return;
 
-            if (UnlimitedPoints.Value)
+            // Clean up Unlimited Points
+            if (_lastUnlimitedState)
             {
-                if (originalPointsAmount > 0 && preserveOriginalSetting.Value)
-                {
+                if (originalPointsAmount >= 0 && preserveOriginalSetting.Value)
                     board.thePoints = originalPointsAmount;
-                    originalPointsAmount = -853721;
-                }
+
+                originalPointsAmount = -853721;
+                _lastUnlimitedState = false;
             }
 
+            // Clean up Multiplier Tracker
             _pointsAmount = -947624.35f;
-
+            _lastMultiplierState = false;
         }
 
         public override void OnUpdateActive()
         {
-            if (BoardInstanceIsNull) { _pointsAmount = -947624.35f; return; }
+            if (BoardInstanceIsNull) return;
 
+            // --- Unlimited Points ---
+            if (UnlimitedPoints.Value != _lastUnlimitedState)
+            {
+                if (UnlimitedPoints.Value) // Just turned ON
+                {
+                    originalPointsAmount = board.thePoints;
+                }
+                else // Just turned OFF
+                {
+                    if (originalPointsAmount >= 0 && preserveOriginalSetting.Value)
+                        board.thePoints = originalPointsAmount;
+
+                    originalPointsAmount = -853721;
+                }
+                _lastUnlimitedState = UnlimitedPoints.Value;
+            }
+
+            // Execution
             if (UnlimitedPoints.Value)
             {
-                if (originalPointsAmount == -853721) originalPointsAmount = board.theMoney;
                 board.thePoints = pointsSetting.Value;
             }
 
-            else if (PointsMultiplier.Value)
+            // --- Points Multiplier ---
+            if (PointsMultiplier.Value != _lastMultiplierState)
             {
-                float Money = board.thePoints;
-
-                if (_pointsAmount == -947624.35f || Money == pointsSetting.Value) _pointsAmount = Money;
-
-                if (Money != _pointsAmount)
+                if (PointsMultiplier.Value) // Just turned ON
                 {
-                    if ((Money - _pointsAmount) > 0)
-                        board.thePoints += (int)((Money - _pointsAmount) * (pointsMultiplierSetting.Value - 1));
+                    _pointsAmount = board.thePoints;
+                }
+                else // Just turned OFF
+                {
+                    _pointsAmount = -947624.35f;
+                }
+                _lastMultiplierState = PointsMultiplier.Value;
+            }
+
+            // Execution (Since Points don't have an efficiency field)
+            if (PointsMultiplier.Value)
+            {
+                float points = board.thePoints;
+
+                if (_pointsAmount == -947624.35f || points == pointsSetting.Value)
+                    _pointsAmount = points;
+
+                if (points != _pointsAmount)
+                {
+                    if ((points - _pointsAmount) > 0)
+                        board.thePoints += (points - _pointsAmount) * (pointsMultiplierSetting.Value - 1);
 
                     _pointsAmount = board.thePoints;
-
                 }
             }
         }
-
-
     }
-    
 }

@@ -39,6 +39,9 @@ namespace Magnetar_Client.Modules
         public BindSetting PickUpHammer;
         public BindSetting CoffeeBean;
 
+        public BindSetting Fullscreen;
+        public BindSetting SmallWindow;
+
 #if MELONLOADER || BEPINEX
         public BoolSetting DebugMode;
 #endif
@@ -78,11 +81,18 @@ namespace Magnetar_Client.Modules
 
             AddSettings(SlowMode, ShowPlantHP,ShowZombieHP);
 
+            CreateCategory("Application");
+
+            Fullscreen = new BindSetting("Fulscreen",new List<KeyCode>{ KeyCode.F });
+            SmallWindow = new BindSetting("Small Window", new List<KeyCode> { KeyCode.G });
+
+            AddSettings(Fullscreen, SmallWindow);
+            EndCategory();
 #if MELONLOADER || BEPINEX
             DebugMode = new BoolSetting("Debug Mode", false);
             AddSettings(DebugMode);
 #endif
-            EndCategory();
+            
         }
 
 
@@ -118,8 +128,7 @@ namespace Magnetar_Client.Modules
         {
             RanbyMod = true;
             
-            if (BoardInstanceIsNull) return;
-            if (GameAPP.theGameStatus == GameStatus.InGame)
+            if (!BoardInstanceIsNull && GameAPP.theGameStatus == GameStatus.InGame)
             {
                 // In Game
 
@@ -163,6 +172,27 @@ namespace Magnetar_Client.Modules
                 }  
                 if (GetKeyComboDown(ShowPlantHP.BindKeys)) board.ShowPlantHealth();
                 if (GetKeyComboDown(ShowZombieHP.BindKeys)) board.ShowZombieHealth();
+
+            }
+
+            // Application
+
+            if (GetKeyComboDown(Fullscreen.BindKeys))
+            {
+                if (GameAPP.isFullScreen)
+                {
+                    Screen.SetResolution(1920, 1080, fullscreen: false);
+                }
+                else
+                {
+                    Screen.SetResolution(1920, 1080, fullscreen: true);
+                }
+                GameAPP.isFullScreen = !GameAPP.isFullScreen;
+            }
+
+            if (GetKeyComboDown(SmallWindow.BindKeys))
+            {
+                Screen.SetResolution(1280, 720, fullscreen: false);
             }
             RanbyMod = false;
         }
@@ -351,6 +381,47 @@ namespace Magnetar_Client.Modules
                 return false;
             }
         }
+        #endregion
+
+        #region GameAPP
+
+        [HarmonyPatch(typeof(GameAPP))]
+        public static class GameAPPPatch
+        {
+            [HarmonyPatch(nameof(GameAPP.Update))]
+            [HarmonyPrefix]
+            public static void UpdatePrefix()
+            {
+                if (instance == null || !instance.Active)
+                    return;
+                InputPatch.blockKeys = true;
+            }
+
+            [HarmonyPatch(nameof(GameAPP.Update))]
+            [HarmonyPostfix]
+            public static void UpdatePostfix()
+            {
+                InputPatch.blockKeys = false;
+            }
+        }
+
+        [HarmonyPatch(typeof(Input))]
+        public static class InputPatch
+        {
+            public static bool blockKeys;
+
+            [HarmonyPatch(nameof(Input.GetKeyDown), new System.Type[] { typeof(KeyCode) })]
+            [HarmonyPrefix]
+            public static bool GetKeyDown(KeyCode key)
+            {
+                if (blockKeys && (key == KeyCode.F || key == KeyCode.G))
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
         #endregion
     }
 }

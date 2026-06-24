@@ -37,7 +37,7 @@ namespace Magnetar_Client.Core
             Instance = this;
             Utils.Magnetar_Logger.Init();
             HarmonyInstance = new HarmonyLib.Harmony("com.tproplay.magnetar");
-            SafePatchAll();
+
             InitializeCore();
         }
 #elif BEPINEX || RELEASE_BEPINEX

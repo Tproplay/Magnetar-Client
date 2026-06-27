@@ -75,9 +75,10 @@ namespace Magnetar_Client.Modules
 
         private static readonly Color BannedColor = new Color(0.2f, 0.2f, 0.2f, 0.7f);
 
-        [HarmonyPatch(typeof(CardUI), nameof(CardUI.Awake))]
+        [HarmonyPatch(typeof(CardUI), nameof(CardUI.Update))]
         public static class CardUIVisualLockout
         {
+            [HarmonyPostfix]
             public static void Postfix(CardUI __instance)
             {
                 // Safety Check

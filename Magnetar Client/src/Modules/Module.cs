@@ -91,6 +91,11 @@ namespace Magnetar_Client.Modules
         public virtual void OnUpdateActive() { }
 
         /// <summary>
+        /// Runs every frame on UnityEngine.OnGUI
+        /// </summary>
+        public virtual void OnGUI() { }
+
+        /// <summary>
         /// Static method to add settings to the module. Call this in the constructor of your module with all the settings you want to add.
         /// </summary>
         protected void AddSettings(params Setting[] settings)

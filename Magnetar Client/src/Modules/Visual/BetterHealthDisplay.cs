@@ -1,7 +1,9 @@
 ﻿using HarmonyLib;
 using Magnetar_Client.Game;
+using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 using Il2CppTMPro;
@@ -34,6 +36,9 @@ namespace Magnetar_Client.Modules
 
         public BoolSetting SumHpSetting;
 
+        public BoolSetting ShowControlledPlant;
+
+
         public BetterHealthDisplay()
         {
             instance = this;
@@ -47,6 +52,12 @@ namespace Magnetar_Client.Modules
 
             AddSettings(SumHpSetting, ShowMaxHealth,AutoEnable_ShowHp_Plant,AutoEnable_ShowHp_Zombie);
 
+            EndCategory();
+
+            CreateCategory("Extra");
+
+            ShowControlledPlant = new BoolSetting("Show Star icon on Controlled Plant", true);
+            AddSettings(ShowControlledPlant);
             EndCategory();
         }
 
@@ -133,6 +144,11 @@ namespace Magnetar_Client.Modules
                             finalText = $"{formattedCurrent} / {formattedMax}";
                         }
 
+                        if (instance.ShowControlledPlant.Value && board.controledPlant == __instance)
+                        {
+                            finalText = $"<size=200%><color=yellow>★</color>\n{finalText}</size>";
+                        }
+                        
                         textComp.text = finalText;
                     }
                 }

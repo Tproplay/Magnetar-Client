@@ -95,6 +95,11 @@ namespace Magnetar_Client.Core
 
             HUDManager.Render();
 
+            foreach (var mod in ModuleManager.Modules)
+            {
+                mod.OnGUI();
+            }
+
             if (!Magnetar_Client.Config.showgui) return;
 
             TopBar.TopBar.Render();

@@ -129,6 +129,23 @@ namespace Magnetar_Client.Modules
         {
             Settings.Add(new EndCategorySetting());
         }
+
+        public static bool GetKeyComboDown(List<KeyCode> keyCodes)
+        {
+            if (keyCodes == null || keyCodes.Count == 0) return false;
+
+            KeyCode triggerKey = keyCodes[keyCodes.Count - 1];
+            if (!Input.GetKeyDown(triggerKey)) return false;
+
+            for (int i = 0; i < keyCodes.Count - 1; i++)
+            {
+                if (!Input.GetKey(keyCodes[i]))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 
     public abstract class Setting

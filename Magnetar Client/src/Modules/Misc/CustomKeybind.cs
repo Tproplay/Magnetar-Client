@@ -98,29 +98,7 @@ namespace Magnetar_Client.Modules
 
         // Mod Logic
 
-        private bool GetKeyComboDown(List<KeyCode> keyCodes)
-        {
-            if (keyCodes == null || keyCodes.Count == 0) return false;
-
-            KeyCode triggerKey = keyCodes[keyCodes.Count - 1];
-            if (!Input.GetKeyDown(triggerKey)) return false;
-
-            for (int i = 0; i < keyCodes.Count - 1; i++)
-            {
-                if (!Input.GetKey(keyCodes[i]))
-                {
-                    return false;
-                }
-            }
-#if MELONLOADER || BEPINEX
-            if (DebugMode.Value)
-                DebugLogger.Msg($"[Custom Keybind] Keys Down: " + string.Join(
-                        Environment.NewLine,
-                        keyCodes.Select(kvp => kvp.ToString())
-                        ));
-#endif
-            return true;
-        }
+        
 
         private static bool RanbyMod = false;
 

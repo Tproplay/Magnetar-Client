@@ -170,34 +170,6 @@ namespace Magnetar_Client.Game
 
         #endregion
 
-        #region Plants
-        public static int TotalNumberOfPlantsSpawned = 0;
-        public static int TotalNumberOfPlantsKilled = 0;
-        
-
-        [HarmonyPatch(typeof(Plant))]
-        private class PlantsKilledPatch
-        {
-
-            [HarmonyPatch(nameof(Plant.Start))]
-            [HarmonyPostfix]
-            public static void StartPostFix(Plant __instance)
-            {
-                if (__instance == null) return;
-
-                TotalNumberOfPlantsSpawned += 1;
-            }
-
-            [HarmonyPatch(nameof(Plant.Die))]
-            [HarmonyPrefix]
-            static void DiePatch(Plant __instance)
-            {
-                if (__instance == null || !plantList.Contains(__instance)) return;
-                TotalNumberOfPlantsKilled += 1;
-            }
- 
-        }
-        #endregion
 
         #region Zombies
 

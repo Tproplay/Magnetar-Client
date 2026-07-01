@@ -1,6 +1,8 @@
-﻿using static Magnetar_Client.UI.Themes.Magnetar_Default;
-using static Magnetar_Client.Game.GameData;
+﻿using Newtonsoft.Json.Linq;
 using UnityEngine;
+using static Magnetar_Client.Game.AppData;
+using static Magnetar_Client.Game.GameData;
+using static Magnetar_Client.UI.Themes.Magnetar_Default;
 namespace Magnetar_Client.HUDElements
 {
     public class NumberOfPlants : HudElement
@@ -25,11 +27,14 @@ namespace Magnetar_Client.HUDElements
         public NumberOfPlantsSpawned() : base("Plants Placed", HudElement.NewRect(100))
         { }
 
-
+        int value;
         protected override void DrawContent(float width, float height)
         {
-
-            string displayText = $"Plants Placed: {TotalNumberOfPlantsSpawned}";
+            if (!BoardInstanceIsNull)
+            {
+                value = board.boardStatistics.plantsPlanted;
+            }
+            string displayText = $"Plants Placed: {value}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
@@ -42,11 +47,14 @@ namespace Magnetar_Client.HUDElements
         public NumberOfPlantsKilled() : base("Plant Deaths", HudElement.NewRect(100))
         { }
 
-
+        int value;
         protected override void DrawContent(float width, float height)
         {
-
-            string displayText = $"Plant Death: {TotalNumberOfPlantsKilled}";
+            if (!BoardInstanceIsNull)
+            {
+                value = board.boardStatistics.plantsDeath;
+            }
+            string displayText = $"Plant Death: {value}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 

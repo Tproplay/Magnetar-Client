@@ -8,7 +8,7 @@ using static Magnetar_Client.Game.AppData;
 using Magnetar_Client.Game;
 using System;
 using HarmonyLib;
-using MelonLoader;
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -43,7 +43,9 @@ namespace Magnetar_Client.Modules
             ZombieList,
             PlantList,
             SoundPlayed,
-            ZombieAnimations
+            ZombieAnimations,
+            PlantDieReason,
+            ZombieDieReason,
         }
 
         public DebugMode()
@@ -61,7 +63,9 @@ namespace Magnetar_Client.Modules
                     { (int)Options.ZombieList, "ZombieList" },
                     { (int)Options.PlantList, "PlantList" },
                     { (int)Options.SoundPlayed, "Sound Played" },
-                    { (int)Options.ZombieAnimations, "Zombie Animations (single use)" }
+                    { (int)Options.ZombieAnimations, "Zombie Animations (single use)" },
+                    { (int)Options.PlantDieReason, "Plant die reason" },
+                    { (int)Options.ZombieDieReason, "Zombie die reason" }
                 }
             };
             Settings.Add(selected);
@@ -216,6 +220,35 @@ namespace Magnetar_Client.Modules
             }
         }
 
+        [HarmonyPatch(typeof(Plant))]
+        public static class PlantPatch
+        {
+            [HarmonyPatch(nameof(Plant.Die))]
+            [HarmonyPrefix]
+            public static void DiePatch(Plant.DieReason reason, Plant __instance)
+            {
+                if (instance == null || !instance.Active || 
+                    !instance.selected.IsSelected((int)Options.PlantDieReason)) return;
+
+                DebugLogger.Msg($"[Debug Mode] Plant died: tile=({__instance.thePlantRow}," +
+                    $"{__instance.thePlantColumn}), Reason: {reason.ToString()}");
+            }
+        }
+
+        [HarmonyPatch(typeof(Zombie))]
+        public static class ZombiePatch
+        {
+            [HarmonyPatch(nameof(Zombie.Die))]
+            [HarmonyPrefix]
+            public static void DiePatch(int reason, Zombie __instance)
+            {
+                if (instance == null || !instance.Active ||
+                    !instance.selected.IsSelected((int)Options.ZombieDieReason)) return;
+
+                DebugLogger.Msg($"[Debug Mode] Zombie died: Type:{__instance.theZombieType}, " +
+                    $"tile=({__instance.theZombieRow},{__instance.Column}), Reason: {reason.ToString()}");
+            }
+        }
 
 
     }

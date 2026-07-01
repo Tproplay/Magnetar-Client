@@ -125,28 +125,24 @@ namespace Magnetar_Client.HUDElements
         public TotalZombieHealth() : base("Zombie Wave Health", HudElement.NewRect(235))
         { }
 
+        long value;
         protected override void DrawContent(float width, float height)
         {
-
-            string displayText = $"Wave Health: {FormatInternational(GetZombieHealth())}";
+            if (!AppData.BoardInstanceIsNull)
+            {
+                value = (long)AppData.board.zombieCurrentWaveHealth;
+            }
+            else
+            {
+                value = 0;
+            }
+            string displayText = $"Wave Health: {FormatInternational(value)}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }
 
-
-        long GetZombieHealth()
-        {
-            long health = 0;
-            foreach(Zombie zombie in zombieList)
-            {
-                if (zombie.isMindControlled) continue;
-                health += zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
-                
-            }
-            return health>0?health:0;
-        }
     }
 
     public class TotalHypnotizedZombieHealth : HudElement

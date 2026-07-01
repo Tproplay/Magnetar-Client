@@ -8,6 +8,8 @@ using static Magnetar_Client.Game.AppData;
 using Magnetar_Client.Game;
 using System;
 using HarmonyLib;
+using MelonLoader;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -41,6 +43,7 @@ namespace Magnetar_Client.Modules
             ZombieList,
             PlantList,
             SoundPlayed,
+            ZombieAnimations
         }
 
         public DebugMode()
@@ -58,6 +61,7 @@ namespace Magnetar_Client.Modules
                     { (int)Options.ZombieList, "ZombieList" },
                     { (int)Options.PlantList, "PlantList" },
                     { (int)Options.SoundPlayed, "Sound Played" },
+                    { (int)Options.ZombieAnimations, "Zombie Animations (single use)" }
                 }
             };
             Settings.Add(selected);
@@ -132,6 +136,50 @@ namespace Magnetar_Client.Modules
                     );
             }
 
+            if (selected.IsSelected((int)Options.ZombieAnimations))
+            {
+                selected.Deselect((int)Options.ZombieAnimations);
+
+                DebugLogger.Msg("[Debug Mode] Dumping All animations");
+
+                var prefabs = GameAPP.resourcesManager?.zombiePrefabs;
+
+                if (prefabs == null)
+                {
+                    DebugLogger.Error("[Debug Mode] GameAPP.resourcesManager.zombiePrefabs is null or not loaded yet!");
+                    return;
+                }
+
+                foreach (var pair in prefabs)
+                {
+                    ZombieType typeKey = pair.Key;
+                    GameObject prefab = pair.Value;
+
+                    if (prefab == null) continue;
+
+                    Animator anim = prefab.GetComponent<Animator>();
+                    if (anim == null) continue;
+
+                    RuntimeAnimatorController controller = anim.runtimeAnimatorController;
+                    if (controller == null) continue;
+
+                    DebugLogger.Msg($"\n[ZombieType: {typeKey}] Prefab: {prefab.name}");
+
+                    HashSet<string> uniqueClips = new();
+
+                    foreach (AnimationClip clip in controller.animationClips)
+                    {
+                        if (clip != null && uniqueClips.Add(clip.name))
+                        {
+                            DebugLogger.Msg($"  -> Clip: {clip.name}");
+                        }
+                    }
+                }
+
+                DebugLogger.Msg("\n=== Bulk Animation Dump Complete ===");
+
+
+            }
 
             _time = Time.realtimeSinceStartup;
         }

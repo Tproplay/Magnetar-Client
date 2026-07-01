@@ -26,7 +26,7 @@ namespace Magnetar_Client.Modules
         public MultiSelectSetting ParticlesSetting;
 
         public MultiSelectSetting GameObjectsSetting;
-        public static HashSet<Bucket> Buckets = new HashSet<Bucket>();
+        public MultiSelectSetting BulletSetting;
 
         private Dictionary<int, string> fxDatabase = new Dictionary<int, string>();
         private string filePath;
@@ -86,6 +86,14 @@ namespace Magnetar_Client.Modules
             };
             AddSettings(GameObjectsSetting);
 
+            BulletSetting = new MultiSelectSetting("Bullets", typeof(BulletType))
+            {
+                CustomNames = TranslatedNames(typeof(BulletType))
+            };
+            AddSettings(BulletSetting);
+
+
+
             EndCategory();
 
         }
@@ -93,6 +101,7 @@ namespace Magnetar_Client.Modules
         public override void OnLanguageChanged()
         {
             GameObjectsSetting.CustomNames = TranslatedNames(typeof(BucketType));
+            BulletSetting.CustomNames = TranslatedNames(typeof(BulletType));
         }
 
         public override void OnUpdateActive()
@@ -164,12 +173,27 @@ namespace Magnetar_Client.Modules
             }
 
             // Buckets
-            Buckets.RemoveWhere(b => b == null || b.Pointer == IntPtr.Zero || b.gameObject == null);
+            var Buckets = GameObject.FindObjectsOfType<Bucket>();
 
-            // Buckets
             foreach (var bucket in Buckets)
             {
                 var renderers = bucket.GetComponentsInChildren<Renderer>(true);
+                foreach (var renderer in renderers)
+                {
+                    if (renderer != null && renderer.Pointer != IntPtr.Zero)
+                    {
+                        renderer.enabled = true;
+                    }
+                }
+            }
+
+            // Bullets
+
+            var Bullets = GameObject.FindObjectsOfType<Bullet>();
+
+            foreach (var bullet in Bullets)
+            {
+                var renderers = bullet.GetComponentsInChildren<Renderer>(true);
                 foreach (var renderer in renderers)
                 {
                     if (renderer != null && renderer.Pointer != IntPtr.Zero)
@@ -183,13 +207,32 @@ namespace Magnetar_Client.Modules
         public override void OnEnable()
         {
             // Buckets
-            Buckets.RemoveWhere(b => b == null || b.Pointer == IntPtr.Zero || b.gameObject == null);
+            var Buckets = GameObject.FindObjectsOfType<Bucket>();
 
             foreach (var bucket in Buckets)
             {
                 if (GameObjectsSetting.IsSelected((int)bucket.theBucketType))
                 {
                     var renderers = bucket.GetComponentsInChildren<Renderer>(true);
+                    foreach (var renderer in renderers)
+                    {
+                        if (renderer != null && renderer.Pointer != IntPtr.Zero)
+                        {
+                            renderer.enabled = false;
+                        }
+                    }
+                }
+            }
+
+            // Bullets
+
+            var Bullets = GameObject.FindObjectsOfType<Bullet>();
+
+            foreach (var bullet in Bullets)
+            {
+                if (BulletSetting.IsSelected((int)bullet.theBulletType))
+                {
+                    var renderers = bullet.GetComponentsInChildren<Renderer>(true);
                     foreach (var renderer in renderers)
                     {
                         if (renderer != null && renderer.Pointer != IntPtr.Zero)
@@ -208,9 +251,6 @@ namespace Magnetar_Client.Modules
             [HarmonyPostfix]
             public static void StartPatch(Bucket __instance)
             {
-                Buckets.Add(__instance);
-
-
                 if (instance == null || !instance.Active ||
                     !instance.GameObjectsSetting.IsSelected((int)__instance.theBucketType)) return;
 
@@ -222,15 +262,29 @@ namespace Magnetar_Client.Modules
                 }
             }
 
-            [HarmonyPatch(nameof(Bucket.Die))]
+        }
+
+        [HarmonyPatch(typeof(Bullet))]
+        public static class BulletPatch
+        {
+            [HarmonyPatch(nameof(Bullet.InitData))]
             [HarmonyPostfix]
-            public static void DiePatch(Bucket __instance)
+            public static void InitDataPatch(Bullet __instance)
             {
-                if (__instance!=null && Buckets.Contains(__instance))
+                if (instance == null || !instance.Active || 
+                    !instance.BulletSetting.IsSelected((int)__instance.theBulletType)) return;
+
+                var comp = __instance.GetComponentsInChildren<Renderer>(true);
+
+                foreach (var renderer in comp)
                 {
-                    Buckets.Remove(__instance);
+                    if (renderer != null && renderer.Pointer != IntPtr.Zero)
+                    {
+                        renderer.enabled = false;
+                    }
                 }
             }
         }
+
     }
 }

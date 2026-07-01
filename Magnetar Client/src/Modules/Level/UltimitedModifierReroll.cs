@@ -40,7 +40,7 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            rerollCount = new IntSetting("Reroll Count", 0, 99, 99);
+            rerollCount = new IntSetting("Reroll Count", 0, 50, 50, 0);
             preserveOriginal = new BoolSetting("Preserve Original Count", true);
 
             Settings.Add(rerollCount);

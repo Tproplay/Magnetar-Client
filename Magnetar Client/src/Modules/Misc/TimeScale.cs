@@ -34,7 +34,7 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            TimeScaleValueSetting = new FloatSetting("Time Scale", 0f, 200, 2);
+            TimeScaleValueSetting = new FloatSetting("Time Scale", 0f, 10, 2,0);
             AddSettings(TimeScaleValueSetting);
 
             EndCategory();

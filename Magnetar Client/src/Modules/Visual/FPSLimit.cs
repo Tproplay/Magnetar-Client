@@ -27,7 +27,7 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            FpsSetting = new IntSetting("Max FPS", 1, 400, 60);
+            FpsSetting = new IntSetting("Max FPS", 1, 400, 60, 1);
             AddSettings(FpsSetting);
 
             EndCategory();

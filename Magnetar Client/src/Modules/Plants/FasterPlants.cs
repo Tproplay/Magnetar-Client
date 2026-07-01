@@ -29,13 +29,10 @@ namespace Magnetar_Client.Modules
 
         public MultiSelectSetting PlantsSelectedSetting;
 
-        public float AttackIntervalMultiplier = 50;
         public FloatSetting AttackIntervalMultiplierSetting;
 
-        public float AnimationSpeedMultiplier = 2f;
         public FloatSetting AnimationSpeedMultiplierSetting;
 
-        public float ProduceSpeedMultiplier = 50;
         public FloatSetting ProduceSpeedMultiplierSetting;
         public override bool Active { get; set; } = false;
 
@@ -61,13 +58,13 @@ namespace Magnetar_Client.Modules
             Settings.Add(PlantsSelectedSetting);
             
 
-            AttackIntervalMultiplierSetting = new FloatSetting("Attack Interval", 0.01f, 50, AttackIntervalMultiplier);
+            AttackIntervalMultiplierSetting = new FloatSetting("Attack Interval", 0.01f, 50, 50);
             Settings.Add(AttackIntervalMultiplierSetting);
 
-            AnimationSpeedMultiplierSetting = new FloatSetting("Animation Speed", 0.01f, 50, AnimationSpeedMultiplier);
+            AnimationSpeedMultiplierSetting = new FloatSetting("Animation Speed", 0.01f, 50, 2);
             Settings.Add(AnimationSpeedMultiplierSetting);
 
-            ProduceSpeedMultiplierSetting = new FloatSetting("Produce Speed", 0.01f, 50, ProduceSpeedMultiplier);
+            ProduceSpeedMultiplierSetting = new FloatSetting("Produce Speed", 0.01f, 50, 50);
             Settings.Add(ProduceSpeedMultiplierSetting);
 
             EndCategory();

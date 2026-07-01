@@ -51,7 +51,7 @@ namespace Magnetar_Client.Modules
         {
             instance = this;
 
-            BulletsDamageIncreaseSetting = new IntSetting("Increase Damage", 1, 500,50);
+            BulletsDamageIncreaseSetting = new IntSetting("Increase Damage", 1, 200, 50);
             
             HelperPetSetting = new BoolSetting("Spawn Helper Pet", false);
 

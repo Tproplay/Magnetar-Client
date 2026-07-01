@@ -19,7 +19,7 @@ namespace Magnetar_Client.Modules
         public static SunHack instance;
 
         public BoolSetting UnlimitedSun;
-        private int originalSunAmount = -853721;
+        private int originalSunAmount = -1_853_721_342;
         private IntSetting sunSetting;
         private BoolSetting preserveOriginalSetting;
 
@@ -38,7 +38,7 @@ namespace Magnetar_Client.Modules
             CreateCategory("Unlimited Sun");
             UnlimitedSun = new BoolSetting("Unlimited Sun", true);
             Settings.Add(UnlimitedSun);
-            sunSetting = new IntSetting("Sun Amount", 0, 99999, 99999);
+            sunSetting = new IntSetting("Sun Amount", 0, 50000, 50000);
             Settings.Add(sunSetting);
             preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
@@ -47,7 +47,7 @@ namespace Magnetar_Client.Modules
             CreateCategory("Sun Multiplier");
             SunMultipier = new BoolSetting("Sun Multiplier", false);
             Settings.Add(SunMultipier);
-            sunMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);
+            sunMultiplierSetting = new FloatSetting("Multiplier", 0, 10, 2);
             Settings.Add(sunMultiplierSetting);
             EndCategory();
         }
@@ -63,7 +63,7 @@ namespace Magnetar_Client.Modules
                 if (originalSunAmount >= 0 && preserveOriginalSetting.Value)
                     board.theSun = originalSunAmount;
 
-                originalSunAmount = -853721;
+                originalSunAmount = -1_853_721_342;
                 _lastUnlimitedState = false;
             }
 
@@ -91,7 +91,7 @@ namespace Magnetar_Client.Modules
                     if (originalSunAmount >= 0 && preserveOriginalSetting.Value)
                         board.theSun = originalSunAmount;
 
-                    originalSunAmount = -853721;
+                    originalSunAmount = -1_853_721_342;
                 }
                 _lastUnlimitedState = UnlimitedSun.Value;
             }
@@ -139,7 +139,7 @@ namespace Magnetar_Client.Modules
         public static MoneyHack instance;
 
         public BoolSetting UnlimitedMoney;
-        private int originalMoneyAmount = -853721;
+        private int originalMoneyAmount = -1_853_721_342;
         private IntSetting moneySetting;
         private BoolSetting preserveOriginalSetting;
 
@@ -160,7 +160,7 @@ namespace Magnetar_Client.Modules
             CreateCategory("Unlimited Money");
             UnlimitedMoney = new BoolSetting("Unlimited Money", true);
             Settings.Add(UnlimitedMoney);
-            moneySetting = new IntSetting("Money Amount", 0, 9999999, 9999999);
+            moneySetting = new IntSetting("Money Amount", 0, 99999, 99999);
             Settings.Add(moneySetting);
             preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
@@ -169,7 +169,7 @@ namespace Magnetar_Client.Modules
             CreateCategory("Money Multiplier");
             MoneyMultiplier = new BoolSetting("Money Multiplier", false);
             Settings.Add(MoneyMultiplier);
-            moneyMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);
+            moneyMultiplierSetting = new FloatSetting("Multiplier", 0, 10, 2);
             Settings.Add(moneyMultiplierSetting);
             EndCategory();
         }
@@ -185,7 +185,7 @@ namespace Magnetar_Client.Modules
                 if (originalMoneyAmount >= 0 && preserveOriginalSetting.Value)
                     board.theMoney = originalMoneyAmount;
 
-                originalMoneyAmount = -853721;
+                originalMoneyAmount = -1_853_721_342;
                 _lastUnlimitedState = false;
             }
 
@@ -213,7 +213,7 @@ namespace Magnetar_Client.Modules
                     if (originalMoneyAmount >= 0 && preserveOriginalSetting.Value)
                         board.theMoney = originalMoneyAmount;
 
-                    originalMoneyAmount = -853721;
+                    originalMoneyAmount = -1_853_721_342;
                 }
                 _lastUnlimitedState = UnlimitedMoney.Value;
             }
@@ -261,13 +261,13 @@ namespace Magnetar_Client.Modules
         public static PointsHack instance;
 
         public BoolSetting UnlimitedPoints;
-        private float originalPointsAmount = -853721;
+        private float originalPointsAmount = -1_853_721_342;
         private FloatSetting pointsSetting;
         private BoolSetting preserveOriginalSetting;
 
         public BoolSetting PointsMultiplier;
         private FloatSetting pointsMultiplierSetting;
-        private float _pointsAmount = -947624.35f;
+        private float _pointsAmount = -9476224.35443f;
 
         // State trackers for live toggling
         private bool _lastUnlimitedState = false;
@@ -282,7 +282,7 @@ namespace Magnetar_Client.Modules
             CreateCategory("Unlimited Points");
             UnlimitedPoints = new BoolSetting("Unlimited Points", true);
             Settings.Add(UnlimitedPoints);
-            pointsSetting = new FloatSetting("Points Amount", 0, 9999999, 9999999);
+            pointsSetting = new FloatSetting("Points Amount", 0, 99999, 99999);
             Settings.Add(pointsSetting);
             preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
@@ -291,7 +291,7 @@ namespace Magnetar_Client.Modules
             CreateCategory("Points Multiplier");
             PointsMultiplier = new BoolSetting("Points Multiplier", false);
             Settings.Add(PointsMultiplier);
-            pointsMultiplierSetting = new FloatSetting("Multiplier", -100, 100, 2);
+            pointsMultiplierSetting = new FloatSetting("Multiplier", 0, 10, 2);
             Settings.Add(pointsMultiplierSetting);
             EndCategory();
         }
@@ -307,12 +307,12 @@ namespace Magnetar_Client.Modules
                 if (originalPointsAmount >= 0 && preserveOriginalSetting.Value)
                     board.thePoints = originalPointsAmount;
 
-                originalPointsAmount = -853721;
+                originalPointsAmount = -1_853_721_342;
                 _lastUnlimitedState = false;
             }
 
             // Clean up Multiplier Tracker
-            _pointsAmount = -947624.35f;
+            _pointsAmount = -9476224.35443f;
             _lastMultiplierState = false;
         }
 
@@ -332,7 +332,7 @@ namespace Magnetar_Client.Modules
                     if (originalPointsAmount >= 0 && preserveOriginalSetting.Value)
                         board.thePoints = originalPointsAmount;
 
-                    originalPointsAmount = -853721;
+                    originalPointsAmount = -1_853_721_342;
                 }
                 _lastUnlimitedState = UnlimitedPoints.Value;
             }
@@ -352,7 +352,7 @@ namespace Magnetar_Client.Modules
                 }
                 else // Just turned OFF
                 {
-                    _pointsAmount = -947624.35f;
+                    _pointsAmount = -9476224.35443f;
                 }
                 _lastMultiplierState = PointsMultiplier.Value;
             }
@@ -362,7 +362,7 @@ namespace Magnetar_Client.Modules
             {
                 float points = board.thePoints;
 
-                if (_pointsAmount == -947624.35f || points == pointsSetting.Value)
+                if (_pointsAmount == -9476224.35443f || points == pointsSetting.Value)
                     _pointsAmount = points;
 
                 if (points != _pointsAmount)

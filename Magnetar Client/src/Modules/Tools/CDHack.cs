@@ -319,7 +319,6 @@ namespace Magnetar_Client.Modules
 
         public static CustomCDCards instance;
 
-        public float customCD = 100;
         public FloatSetting CustomCDSetting;
 
         public MultiSelectSetting selectedSeeds;
@@ -359,7 +358,7 @@ namespace Magnetar_Client.Modules
             Settings.Add(selectedSeeds_dup);
             selectedSeeds_dup.Options.Keys.ToList().ForEach(selectedSeeds_dup.Select);
 
-            CustomCDSetting = new FloatSetting("Custom CD Multiplier", 0.01f, 100, customCD,2);
+            CustomCDSetting = new FloatSetting("Custom CD Multiplier", 0.01f, 10, 10,2);
             Settings.Add(CustomCDSetting);
 
             EndCategory();
@@ -415,15 +414,7 @@ namespace Magnetar_Client.Modules
                         originalCD.Remove(card);
                     }
                 }
-
-                
-
-                // Full CD if slider is at max
-                if (customCD == 100)
-                {
-                    card.fullCD = 0;
-                    continue;
-                }
+              
 
                 if (card.fullCD != originalCD[card] / customCD)
                 {

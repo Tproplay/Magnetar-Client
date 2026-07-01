@@ -71,7 +71,7 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            SwitchSpeed = new FloatSetting("Switch Speed (s)", 1f, 30f, 5f);
+            SwitchSpeed = new FloatSetting("Switch Speed (s)", 1f, 30f, 5f, 0);
             AddSettings(SwitchSpeed);
 
             EndCategory();

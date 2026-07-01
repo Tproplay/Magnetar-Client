@@ -185,24 +185,29 @@ namespace Magnetar_Client.Modules
     {
         public int Value;
         public int DefaultValue;
+
+        // Visual Slider Limits
         public int Min;
         public int Max;
 
+        // Absolute Text Input Limits
+        public int TrueMin;
+        public int TrueMax;
+
         /// <summary>
-        /// Initializes a new instance of the IntSetting class with the specified name, minimum and maximum values, and
-        /// default value.
+        /// Initializes a new instance of the IntSetting class.
         /// </summary>
-        /// <param name="name">The unique name that identifies the setting.</param>
-        /// <param name="min">The minimum allowed value for the setting.</param>
-        /// <param name="max">The maximum allowed value for the setting.</param>
-        /// <param name="defaultValue">The default value assigned to the setting. Must be within the specified minimum and maximum range.</param>
-        public IntSetting(string name, int min, int max, int defaultValue)
+        public IntSetting(string name, int min, int max, int defaultValue, int trueMin = int.MinValue, int trueMax = int.MaxValue)
         {
             Name = name;
             Min = min;
             Max = max;
-            Value = defaultValue;
-            DefaultValue = defaultValue;
+            TrueMin = trueMin;
+            TrueMax = trueMax;
+
+            // Clamp initial value to the absolute limits
+            Value = System.Math.Max(TrueMin, System.Math.Min(defaultValue, TrueMax));
+            DefaultValue = Value;
         }
     }
 
@@ -210,27 +215,29 @@ namespace Magnetar_Client.Modules
     {
         public float Value;
         public float DefaultValue;
+
         public float Min;
         public float Max;
+
+        public float TrueMin;
+        public float TrueMax;
+
         public int DecimalPlaces;
 
         /// <summary>
-        /// Initializes a new instance of the FloatSetting class with the specified name, value range, default value,
-        /// and number of decimal places.
+        /// Initializes a new instance of the FloatSetting class.
         /// </summary>
-        /// <param name="name">The unique name that identifies the setting.</param>
-        /// <param name="min">The minimum allowed value for the setting.</param>
-        /// <param name="max">The maximum allowed value for the setting.</param>
-        /// <param name="defaultValue">The default value assigned to the setting. Must be within the specified range.</param>
-        /// <param name="decimalPlaces">The number of decimal places to use when displaying or storing the value. Must be zero or greater. The
-        /// default is 1.</param>
-        public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces = 1)
+        public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces = 1, float trueMin = float.MinValue, float trueMax = float.MaxValue)
         {
             Name = name;
             Min = min;
             Max = max;
-            Value = defaultValue;
-            DefaultValue = defaultValue;
+            TrueMin = trueMin;
+            TrueMax = trueMax;
+
+            // Clamp initial value to the absolute limits
+            Value = UnityEngine.Mathf.Clamp(defaultValue, TrueMin, TrueMax);
+            DefaultValue = Value;
             DecimalPlaces = decimalPlaces;
         }
     }

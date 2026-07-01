@@ -28,19 +28,22 @@ namespace Magnetar_Client.UI.WindowDrawing
 
         public static void HandleNumericSetting(object setting, ref float y, float width, bool isFloat)
         {
-            float val, min, max;
+            float val, sliderMin, sliderMax, trueMin, trueMax;
             string name;
             int myId = setting.GetHashCode();
             int decPlaces = 0;
 
-            int intMin = 0, intMax = 0;
+            int intTrueMin = 0, intTrueMax = 0;
+            int intSliderMin = 0, intSliderMax = 0;
 
             if (isFloat)
             {
                 var s = (FloatSetting)setting;
                 val = s.Value;
-                min = s.Min;
-                max = s.Max;
+                sliderMin = s.Min;
+                sliderMax = s.Max;
+                trueMin = s.TrueMin;
+                trueMax = s.TrueMax;
                 name = s.Name;
                 decPlaces = s.DecimalPlaces;
             }
@@ -48,12 +51,16 @@ namespace Magnetar_Client.UI.WindowDrawing
             {
                 var s = (IntSetting)setting;
                 val = (float)s.Value;
-                min = (float)s.Min;
-                max = (float)s.Max;
+                sliderMin = (float)s.Min;
+                sliderMax = (float)s.Max;
+                trueMin = (float)s.TrueMin;
+                trueMax = (float)s.TrueMax;
                 name = s.Name;
 
-                intMin = s.Min;
-                intMax = s.Max;
+                intSliderMin = s.Min;
+                intSliderMax = s.Max;
+                intTrueMin = s.TrueMin;
+                intTrueMax = s.TrueMax;
             }
 
             string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
@@ -64,9 +71,12 @@ namespace Magnetar_Client.UI.WindowDrawing
             float LogConvert(float v) => Mathf.Sign(v) * Mathf.Log10(Mathf.Abs(v) + 1.0f);
             float ExpConvert(float l) => Mathf.Sign(l) * (Mathf.Pow(10.0f, Mathf.Abs(l)) - 1.0f);
 
-            float logMin = LogConvert(min);
-            float logMax = LogConvert(max);
-            float logVal = LogConvert(val);
+            float logMin = LogConvert(sliderMin);
+            float logMax = LogConvert(sliderMax);
+
+            // Visually clamp the value so the slider bar doesn't overflow if the absolute value is beyond the slider limits
+            float visualVal = Mathf.Clamp(val, sliderMin, sliderMax);
+            float logVal = LogConvert(visualVal);
 
             float percentage = Mathf.Clamp01((logVal - logMin) / (logMax - logMin));
 
@@ -90,6 +100,7 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             Event e = Event.current;
 
+            // Slider Scroll Wheel (Clamps to Slider Limits)
             if (e.type == EventType.ScrollWheel && (sliderHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition)))
             {
                 float scrollDirection = Mathf.Sign(e.delta.y);
@@ -102,23 +113,23 @@ namespace Magnetar_Client.UI.WindowDrawing
                 if (isFloat)
                 {
                     float currentVal = ((FloatSetting)setting).Value;
-                    float finalVal = (float)System.Math.Round(Mathf.Clamp(newVal, min, max), decPlaces);
+                    float finalVal = (float)System.Math.Round(Mathf.Clamp(newVal, sliderMin, sliderMax), decPlaces);
 
                     if (finalVal == currentVal && scrollDirection != 0)
                     {
                         float minStep = Mathf.Pow(10, -decPlaces);
-                        finalVal = (float)System.Math.Round(Mathf.Clamp(currentVal + (scrollDirection * minStep), min, max), decPlaces);
+                        finalVal = (float)System.Math.Round(Mathf.Clamp(currentVal + (scrollDirection * minStep), sliderMin, sliderMax), decPlaces);
                     }
                     ((FloatSetting)setting).Value = finalVal;
                 }
                 else
                 {
                     int currentVal = ((IntSetting)setting).Value;
-                    int finalVal = (int)System.Math.Max(intMin, System.Math.Min((long)newVal, intMax));
+                    int finalVal = (int)System.Math.Max(intSliderMin, System.Math.Min((long)newVal, intSliderMax));
 
                     if (finalVal == currentVal && scrollDirection != 0)
                     {
-                        finalVal = (int)System.Math.Max(intMin, System.Math.Min((long)currentVal + (long)scrollDirection, intMax));
+                        finalVal = (int)System.Math.Max(intSliderMin, System.Math.Min((long)currentVal + (long)scrollDirection, intSliderMax));
                     }
                     ((IntSetting)setting).Value = finalVal;
                 }
@@ -132,6 +143,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                 e.Use();
             }
 
+            // Slider Mouse Drag (Clamps to Slider Limits)
             if (activeSliderId == myId)
             {
                 if (e.type == EventType.MouseDrag || e.type == EventType.MouseDown)
@@ -140,8 +152,8 @@ namespace Magnetar_Client.UI.WindowDrawing
                     float newLogVal = logMin + (mousePct * (logMax - logMin));
                     float newVal = ExpConvert(newLogVal);
 
-                    if (isFloat) ((FloatSetting)setting).Value = (float)System.Math.Round(Mathf.Clamp(newVal, min, max), decPlaces);
-                    else ((IntSetting)setting).Value = (int)System.Math.Max(intMin, System.Math.Min((long)newVal, intMax));
+                    if (isFloat) ((FloatSetting)setting).Value = (float)System.Math.Round(Mathf.Clamp(newVal, sliderMin, sliderMax), decPlaces);
+                    else ((IntSetting)setting).Value = (int)System.Math.Max(intSliderMin, System.Math.Min((long)newVal, intSliderMax));
 
                     e.Use();
                 }
@@ -158,6 +170,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             string displayValue = isFocused ? currentInputBuffer : val.ToString(formatString);
             string newText = DrawManualTextField(inputRect, displayValue, "0");
 
+            // Text Input Handling (Clamps to True Limits)
             if (activeTextFieldId == controlId)
             {
                 currentInputBuffer = newText;
@@ -166,16 +179,15 @@ namespace Magnetar_Client.UI.WindowDrawing
                 {
                     if (isFloat)
                     {
-                        ((FloatSetting)setting).Value = (float)System.Math.Round(Mathf.Clamp((float)parsed, min, max), decPlaces);
+                        ((FloatSetting)setting).Value = (float)System.Math.Round(Mathf.Clamp((float)parsed, trueMin, trueMax), decPlaces);
                     }
                     else
                     {
-                        ((IntSetting)setting).Value = (int)System.Math.Max(intMin, System.Math.Min((long)parsed, intMax));
+                        ((IntSetting)setting).Value = (int)System.Math.Max(intTrueMin, System.Math.Min((long)parsed, intTrueMax));
                     }
                 }
             }
         }
-
         public static void HandleBindSetting(BindSetting bSet, ref float y, float width)
         {
             Event e = Event.current;

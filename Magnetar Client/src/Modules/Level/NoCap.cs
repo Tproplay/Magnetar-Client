@@ -30,10 +30,10 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            SunLimit = new IntSetting("Sun Cap", 0, 2147483647, 2147483647);
+            SunLimit = new IntSetting("Sun Cap", 0, 1_000_000 ,int.MaxValue);
             AddSettings(SunLimit);
 
-            MoneyLimit = new IntSetting("Money Cap", 0, 2147483647, 2147483647);
+            MoneyLimit = new IntSetting("Money Cap", 0, 1_000_000, int.MaxValue);
             AddSettings(MoneyLimit);
 
             EndCategory();

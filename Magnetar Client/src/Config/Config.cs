@@ -1,5 +1,4 @@
-﻿
-namespace Magnetar_Client
+﻿namespace Magnetar_Client
 {
     public enum TabType
     {
@@ -8,7 +7,6 @@ namespace Magnetar_Client
         GUI,
         NEF
     }
-    
 
     public static class Config
     {
@@ -30,8 +28,49 @@ namespace Magnetar_Client
 
         public static string Language = "English";
 
-        public static float SettingWidth = 220;
+        public static float SettingWidth = 280;
 
+        public static class ModuleManager
+        {
+            public static float SettingsWidth = 650f;
+            public static float PopupSpeed = 10f;
 
+            // Search Window
+            public static float SearchAnimationSpeed = 15f;
+            public static float SearchWidthMultiplier = 1.5f;
+
+            // Settings Window
+            public static float MaxSettingsWindowHeightPct = 0.8f;
+            public static float SettingsScrollLerpSpeed = 15f;
+            public static float ScrollSensitivity = 25f;
+
+            // Multi-Select Window
+            public static float MultiSelectWindowWidth = 500f;
+            public static float MultiSelectWindowHeight = 800f;
+        }
+
+        public static class SettingsInput
+        {
+            // Numeric Sliders
+            public static float NumericInputWidth = 75f;
+            public static float SliderScrollStep = 0.04f;
+            public static float SliderHeight = 8f;
+            public static int SliderThumbFontSize = 40;
+
+            // Multi-Select Window
+            public static float MultiSelectRowHeight = 22f;
+            public static float MultiSelectHeaderHeight = 65f;
+
+            // Dropdowns (Select Setting)
+            public static float DropdownRowHeight = 22f;
+            public static int DropdownMaxVisibleRows = 6;
+            public static float DropdownScrollSensitivity = 15f;
+
+            // Text Fields & Autocomplete
+            public static int TextFieldUndoLimit = 200;
+            public static float AutocompleteRowHeight = 22f;
+            public static float AutocompleteMaxHeight = 150f;
+            public static float AutocompleteScrollSensitivity = 15f;
+        }
     }
 }

@@ -81,10 +81,10 @@ namespace Magnetar_Client.UI.WindowDrawing
             float percentage = Mathf.Clamp01((logVal - logMin) / (logMax - logMin));
 
             // --- UI RENDERING (SLIDER CONSTANT BOUNDS) ---
-            float inputW = 45f;
-            float sliderW = Config.SettingWidth - inputW - 10f; // 85px for slider track
+            float inputW = Config.SettingsInput.NumericInputWidth;
+            float sliderW = Config.SettingWidth - inputW - 10f;
 
-            Rect sliderRect = new Rect(width - Config.indent - Config.SettingWidth, y + 10, sliderW, 8);
+            Rect sliderRect = new Rect(width - Config.indent - Config.SettingWidth, y + 10, sliderW, Config.SettingsInput.SliderHeight);
             Rect sliderHitBox = new Rect(sliderRect.x, y, sliderRect.width, 22);
             Rect inputRect = new Rect(width - Config.indent - inputW, y, inputW, 22);
             float fillWidth = sliderRect.width * percentage;
@@ -93,7 +93,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             GUI.Box(sliderRect, "", Magnetar_Default.SettingOff);
             if (fillWidth > 0) GUI.Box(new Rect(sliderRect.x, sliderRect.y, fillWidth, sliderRect.height), "", Magnetar_Default.SettingOn);
 
-            GUIStyle thumbStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontSize = 40 };
+            GUIStyle thumbStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontSize = Config.SettingsInput.SliderThumbFontSize };
             thumbStyle.normal.textColor = Magnetar_Default.AccentColor;
 
             GUI.Label(thumbRect, "●", thumbStyle);
@@ -104,7 +104,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             if (e.type == EventType.ScrollWheel && (sliderHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition)))
             {
                 float scrollDirection = Mathf.Sign(e.delta.y);
-                float scrollStep = 0.04f;
+                float scrollStep = Config.SettingsInput.SliderScrollStep;
                 float newPercentage = Mathf.Clamp01(percentage + (scrollDirection * scrollStep));
 
                 float newLogVal = logMin + (newPercentage * (logMax - logMin));
@@ -282,7 +282,7 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             Event e = Event.current;
             int sliderId = 1002;
-            float ROW_HEIGHT = 22f;
+            float ROW_HEIGHT = Config.SettingsInput.MultiSelectRowHeight;
 
             var options = activeMultiSelect.Options;
 
@@ -312,7 +312,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             }
             totalContentHeight = calcTotalHeight;
 
-            float headerHeight = 65f;
+            float headerHeight = Config.SettingsInput.MultiSelectHeaderHeight;
             float viewHeight = multiSelectWindowRect.height - headerHeight - 10f;
             float maxScrollDist = Mathf.Max(0, totalContentHeight - viewHeight);
 
@@ -602,8 +602,8 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             if (activeDropdownId == controlId)
             {
-                float rowHeight = 22f;
-                int maxVisibleRows = 6;
+                float rowHeight = Config.SettingsInput.DropdownRowHeight;
+                int maxVisibleRows = Config.SettingsInput.DropdownMaxVisibleRows;
                 int itemCount = selSet.Options.Count;
                 float dropHeight = Mathf.Min(itemCount * rowHeight, maxVisibleRows * rowHeight);
 
@@ -611,7 +611,8 @@ namespace Magnetar_Client.UI.WindowDrawing
 
                 if (dropRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
                 {
-                    dropdownScrollY = Mathf.Clamp(dropdownScrollY + e.delta.y * 15f, 0, Mathf.Max(0, (itemCount * rowHeight) - dropHeight));
+                    dropdownScrollY = Mathf.Clamp(dropdownScrollY + e.delta.y * Config.SettingsInput.DropdownScrollSensitivity,
+                        0, Mathf.Max(0, (itemCount * rowHeight) - dropHeight));
                     e.Use();
                 }
 
@@ -705,7 +706,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             public int Select;
             public TextState(string t, int c, int s) { Text = t; Cursor = c; Select = s; }
         }
-        private static int undoStackCount = 200;
+        private static int undoStackCount = Config.SettingsInput.TextFieldUndoLimit;
         private static List<TextState> undoStack = new List<TextState>();
         private static List<TextState> redoStack = new List<TextState>();
         private static int lastHistoryFieldId = -1;
@@ -1053,8 +1054,8 @@ namespace Magnetar_Client.UI.WindowDrawing
             // --- DRAW THE AUTOCOMPLETE DROPDOWN ---
             if (showAutocomplete && filteredVars.Count > 0)
             {
-                float rowHeight = 22f;
-                float maxDropdownHeight = 150f;
+                float rowHeight = Config.SettingsInput.AutocompleteRowHeight;
+                float maxDropdownHeight = Config.SettingsInput.AutocompleteMaxHeight;
                 float totalHeight = filteredVars.Count * rowHeight;
                 float dropHeight = Mathf.Min(totalHeight, maxDropdownHeight);
 
@@ -1084,7 +1085,8 @@ namespace Magnetar_Client.UI.WindowDrawing
 
                     if (e.type == EventType.ScrollWheel)
                     {
-                        autocompleteScrollY = Mathf.Clamp(autocompleteScrollY + e.delta.y * 15f, 0, Mathf.Max(0, totalHeight - dropHeight));
+                        autocompleteScrollY = Mathf.Clamp(autocompleteScrollY + e.delta.y * Config.SettingsInput.AutocompleteScrollSensitivity,
+                            0, Mathf.Max(0, totalHeight - dropHeight));
                         e.Use();
                     }
                     else if (e.type == EventType.MouseDown && e.button == 0)

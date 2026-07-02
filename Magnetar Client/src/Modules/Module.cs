@@ -42,7 +42,7 @@ namespace Magnetar_Client.Modules
         /// </summary>
         public abstract ModuleCategory Category { get; set; }
 
-        // These will be in Every Module.
+        // These will be in Every ModuleManager.
         // Edit if you want a different default keybind or want it to be enabled by default.
 
         public BindSetting KeyBind = new BindSetting("Keybind");
@@ -122,9 +122,9 @@ namespace Magnetar_Client.Modules
 
         }
 
-        public virtual float SettingsWidth { get; set; } = 500f;
+        public virtual float SettingsWidth { get; set; } = Config.ModuleManager.SettingsWidth;
 
-        // Add these category helper methods anywhere inside the Module class
+        // Add these category helper methods anywhere inside the ModuleManager class
         public void CreateCategory(string name, bool defaultExpanded = true)
         {
             Settings.Add(new CategorySetting(name, defaultExpanded));

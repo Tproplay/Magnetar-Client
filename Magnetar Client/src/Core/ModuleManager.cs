@@ -46,7 +46,8 @@ namespace Magnetar_Client.Core
         public static int activeSliderId = -1;
 
         public static MultiSelectSetting activeMultiSelect = null;
-        private static Rect multiSelectWindowRect = new Rect(0, 0, 500, 800);
+        private static Rect multiSelectWindowRect = new Rect(0, 0, Config.ModuleManager.MultiSelectWindowWidth,
+            Config.ModuleManager.MultiSelectWindowHeight);
 
         public static string ModuleSearchQuery = "";
         public static Rect searchWindowRect;
@@ -98,7 +99,7 @@ namespace Magnetar_Client.Core
             }
             catch (Exception ex)
             {
-                Utils.Magnetar_Logger.DebugLogger.Error("Failed to load Module: " + ex);
+                Utils.Magnetar_Logger.DebugLogger.Error("Failed to load ModuleManager: " + ex);
             }
         }
 
@@ -137,12 +138,12 @@ namespace Magnetar_Client.Core
                 if (Event.current.type == EventType.Repaint)
                 {
                     float targetProgress = isSearchOpen ? 1f : 0f;
-                    searchAnimProgress = Mathf.Lerp(searchAnimProgress, targetProgress, Time.unscaledDeltaTime * 15f);
+                    searchAnimProgress = Mathf.Lerp(searchAnimProgress, targetProgress, Time.unscaledDeltaTime * Config.ModuleManager.SearchAnimationSpeed);
                 }
 
                 if (searchAnimProgress > 0.01f)
                 {
-                    float searchWidth = Config.ModuleWindowWidth*1.5f;
+                    float searchWidth = Config.ModuleWindowWidth * Config.ModuleManager.SearchWidthMultiplier;
                     float searchHeight = 30f;
 
                     float targetY = 1080f - searchHeight - 20f;
@@ -249,7 +250,8 @@ namespace Magnetar_Client.Core
                             Rect currentRect = settingsPositions[mod];
                             if (Mathf.Abs(currentRect.width - targetWidth) > 0.5f)
                             {
-                                float newWidth = Mathf.Lerp(currentRect.width, targetWidth, Time.deltaTime * 15f);
+                                float newWidth = Mathf.Lerp(currentRect.width, targetWidth,
+                                    Time.deltaTime * Config.ModuleManager.PopupSpeed);
                                 float widthDiff = newWidth - currentRect.width;
 
                                 currentRect.width = newWidth;
@@ -363,7 +365,7 @@ namespace Magnetar_Client.Core
         {
             float windowWidth = settingsPositions[mod].width;
             float headerHeight = 25f;
-            float maxWindowHeight = Screen.height * 0.7f;
+            float maxWindowHeight = Screen.height * Config.ModuleManager.MaxSettingsWindowHeightPct;
             float maxViewHeight = maxWindowHeight - headerHeight;
 
             if (!moduleContentHeights.ContainsKey(mod)) moduleContentHeights[mod] = 0f;
@@ -373,7 +375,8 @@ namespace Magnetar_Client.Core
             Rect headerBgRect = new Rect(0, 0, windowWidth, headerHeight);
             GUI.Box(headerBgRect, Translate(mod.Name), Magnetar_Default.SettingsWindow);
 
-            moduleContentHeights[mod] = Mathf.Lerp(moduleContentHeights[mod], targetContentHeights[mod], Time.unscaledDeltaTime * 15f);
+            moduleContentHeights[mod] = Mathf.Lerp(moduleContentHeights[mod], targetContentHeights[mod], 
+                Time.unscaledDeltaTime * Config.ModuleManager.SettingsScrollLerpSpeed);
 
             if (Mathf.Abs(moduleContentHeights[mod] - targetContentHeights[mod]) < 0.5f)
                 moduleContentHeights[mod] = targetContentHeights[mod];
@@ -422,7 +425,7 @@ namespace Magnetar_Client.Core
 
             if (outRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
             {
-                currentScroll = Mathf.Clamp(currentScroll + e.delta.y * 25f, 0, maxScroll);
+                currentScroll = Mathf.Clamp(currentScroll + e.delta.y * Config.ModuleManager.ScrollSensitivity, 0, maxScroll);
                 settingsScrollPositions[mod] = new Vector2(0, currentScroll);
                 e.Use();
             }
@@ -569,7 +572,9 @@ namespace Magnetar_Client.Core
 
             GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), Translate(set.Name), Magnetar_Default.SettingDescriptionStyle);
 
-            Rect btnRect = new Rect(width * 0.58f, y, Config.selectButtonWidth, Config.elementHeight);
+            Rect btnRect = new Rect(width - Config.SettingWidth/2f-Config.selectButtonWidth - 
+                Magnetar_Default.SettingDescriptionStyle.CalcSize(new GUIContent('(' + Translate($"{set.SelectedValues.Count} selected") + ")")).x/2, y,
+                Config.selectButtonWidth, Config.elementHeight);
 
             if (btnRect.Contains(e.mousePosition))
                 GUI.backgroundColor = Magnetar_Default.AccentColor;

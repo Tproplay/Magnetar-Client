@@ -1,4 +1,5 @@
-﻿using static Magnetar_Client.Game.AppData;
+﻿using System;
+using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Modules
@@ -31,6 +32,11 @@ namespace Magnetar_Client.Modules
         private bool _lastMultiplierState = false;
         private float _originalSunEfficiency = 1f;
 
+        // extra
+        public BoolSetting Active_AutoSunCD;
+        public FloatSetting AutoSunCD;
+
+
         public SunHack()
         {
             instance = this;
@@ -50,30 +56,17 @@ namespace Magnetar_Client.Modules
             sunMultiplierSetting = new FloatSetting("Multiplier", 0, 10, 2);
             Settings.Add(sunMultiplierSetting);
             EndCategory();
+
+            CreateCategory("Extra");
+            Active_AutoSunCD = new BoolSetting("Custom Automatic sun drop cd", false);
+            AutoSunCD = new FloatSetting("Automatic Sun drop CD", 0, 20, 7.5f, 2,0);
+            AddSettings(Active_AutoSunCD, AutoSunCD);
+            EndCategory();
         }
 
         // Mod Logic
-        public override void OnDisable()
-        {
-            if (BoardInstanceIsNull) return;
 
-            // Clean up Unlimited Sun
-            if (_lastUnlimitedState)
-            {
-                if (originalSunAmount >= 0 && preserveOriginalSetting.Value)
-                    board.theSun = originalSunAmount;
-
-                originalSunAmount = -1_853_721_342;
-                _lastUnlimitedState = false;
-            }
-
-            // Clean up Multiplier
-            if (_lastMultiplierState)
-            {
-                board.sunEfficiency = _originalSunEfficiency;
-                _lastMultiplierState = false;
-            }
-        }
+        private static float last_fallsuncd;
 
         public override void OnUpdateActive()
         {
@@ -121,6 +114,38 @@ namespace Magnetar_Client.Modules
             {
                 board.sunEfficiency = sunMultiplierSetting.Value;
             }
+
+            if (Active_AutoSunCD.Value)
+            {
+                if (board.theFallingSunCountDown > Math.Min(AutoSunCD.Value,last_fallsuncd))
+                    board.theFallingSunCountDown = AutoSunCD.Value;
+
+                last_fallsuncd = board.theFallingSunCountDown;
+            }
+
+        }
+
+        public override void OnDisable()
+        {
+            if (BoardInstanceIsNull) return;
+
+            // Clean up Unlimited Sun
+            if (_lastUnlimitedState)
+            {
+                if (originalSunAmount >= 0 && preserveOriginalSetting.Value)
+                    board.theSun = originalSunAmount;
+
+                originalSunAmount = -1_853_721_342;
+                _lastUnlimitedState = false;
+            }
+
+            // Clean up Multiplier
+            if (_lastMultiplierState)
+            {
+                board.sunEfficiency = _originalSunEfficiency;
+                _lastMultiplierState = false;
+            }
+            
         }
     }
 

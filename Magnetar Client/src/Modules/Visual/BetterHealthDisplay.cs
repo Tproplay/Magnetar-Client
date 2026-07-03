@@ -37,16 +37,22 @@ namespace Magnetar_Client.Modules
         public BoolSetting SumHpSetting;
 
         public BoolSetting ShowControlledPlant;
-
-
+        
         public BetterHealthDisplay()
         {
             instance = this;
 
             CreateCategory("General");
 
-            SumHpSetting = new BoolSetting("Combine HP and Shield", true);
-            ShowMaxHealth = new BoolSetting("Show Max Health", false);
+            SumHpSetting = new BoolSetting("Combine HP and Shield", true)
+            {
+                OnValueChanged = UpdateTexts
+            };
+            
+            ShowMaxHealth = new BoolSetting("Show Max Health", false)
+            {
+                OnValueChanged = UpdateTexts
+            };
             AutoEnable_ShowHp_Plant = new BoolSetting("Auto Enable Plant Hp", false);
             AutoEnable_ShowHp_Zombie = new BoolSetting("Auto Enable Zombie Hp", false);
 
@@ -56,7 +62,10 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("Extra");
 
-            ShowControlledPlant = new BoolSetting("Show Star icon on Controlled Plant", true);
+            ShowControlledPlant = new BoolSetting("Show Star icon on Controlled Plant", true)
+            {
+                OnValueChanged = UpdateTexts
+            };
             AddSettings(ShowControlledPlant);
             EndCategory();
         }
@@ -76,10 +85,18 @@ namespace Magnetar_Client.Modules
             }
         }
 
+        static void UpdateTexts<T>(T input)
+        {
+            UpdateTexts(); 
+        }
+
         // Ensure the effect is seen immediately
+
         public override void OnEnable() { UpdateTexts(); }
         public override void OnDisable() { UpdateTexts(); }
 
+
+        // Patches
 
         [HarmonyPatch(typeof(Plant))]
         public static class PlantTextPatch
@@ -155,7 +172,7 @@ namespace Magnetar_Client.Modules
             }
         }
 
-        [HarmonyLib.HarmonyPatch(typeof(Zombie))]
+        [HarmonyPatch(typeof(Zombie))]
         public static class ZombieTextPatch
         {
             [HarmonyLib.HarmonyPatch(nameof(Zombie.UpdateHealthText))]

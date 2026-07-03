@@ -1,9 +1,8 @@
-﻿using Il2CppSystem;
-using Magnetar_Client.Utils;
+﻿using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using UnityEngine;
+using System;
 
 namespace Magnetar_Client.Modules
 {
@@ -160,22 +159,32 @@ namespace Magnetar_Client.Modules
 
     public class StringSetting : Setting
     {
-        public string Value;
+        private string _value;
         public string DefaultValue;
-
         public List<string> AutocompleteVars;
 
-        /// <summary>
-        /// Initializes a new instance of the StringSetting class with the specified name and default value, 
-        /// with an optional list of autocomplete variables.
-        /// </summary>
-        /// <param name="name">The unique name that identifies the setting.</param>
-        /// <param name="defaultValue">The default string value assigned to the setting.</param>
-        /// <param name="autocompleteVars">Optional list of variables for the rich-text autocomplete dropdown.</param>
+        // Callbacks
+        public Action<string> OnValueChanging { get; set; }
+        public Action<string> OnValueChanged { get; set; }
+
+        public string Value
+        {
+            get => _value;
+            set
+            {
+                if (_value != value)
+                {
+                    OnValueChanging?.Invoke(value); // Pre
+                    _value = value;
+                    OnValueChanged?.Invoke(_value); // Post
+                }
+            }
+        }
+
         public StringSetting(string name, string defaultValue, List<string> autocompleteVars = null)
         {
             Name = name;
-            Value = defaultValue;
+            _value = defaultValue;
             DefaultValue = defaultValue;
             AutocompleteVars = autocompleteVars;
         }
@@ -183,20 +192,32 @@ namespace Magnetar_Client.Modules
 
     public class IntSetting : Setting
     {
-        public int Value;
+        private int _value;
         public int DefaultValue;
 
-        // Visual Slider Limits
         public int Min;
         public int Max;
-
-        // Absolute Text Input Limits
         public int TrueMin;
         public int TrueMax;
 
-        /// <summary>
-        /// Initializes a new instance of the IntSetting class.
-        /// </summary>
+        // Callbacks
+        public Action<int> OnValueChanging { get; set; }
+        public Action<int> OnValueChanged { get; set; }
+
+        public int Value
+        {
+            get => _value;
+            set
+            {
+                if (_value != value)
+                {
+                    OnValueChanging?.Invoke(value); // Pre
+                    _value = value;
+                    OnValueChanged?.Invoke(_value); // Post
+                }
+            }
+        }
+
         public IntSetting(string name, int min, int max, int defaultValue, int trueMin = int.MinValue, int trueMax = int.MaxValue)
         {
             Name = name;
@@ -204,29 +225,40 @@ namespace Magnetar_Client.Modules
             Max = max;
             TrueMin = trueMin;
             TrueMax = trueMax;
-
-            // Clamp initial value to the absolute limits
-            Value = System.Math.Max(TrueMin, System.Math.Min(defaultValue, TrueMax));
-            DefaultValue = Value;
+            _value = System.Math.Max(TrueMin, System.Math.Min(defaultValue, TrueMax));
+            DefaultValue = _value;
         }
     }
 
     public class FloatSetting : Setting
     {
-        public float Value;
+        private float _value;
         public float DefaultValue;
 
         public float Min;
         public float Max;
-
         public float TrueMin;
         public float TrueMax;
-
         public int DecimalPlaces;
 
-        /// <summary>
-        /// Initializes a new instance of the FloatSetting class.
-        /// </summary>
+        // Callbacks
+        public Action<float> OnValueChanging { get; set; }
+        public Action<float> OnValueChanged { get; set; }
+
+        public float Value
+        {
+            get => _value;
+            set
+            {
+                if (_value != value)
+                {
+                    OnValueChanging?.Invoke(value); // Pre
+                    _value = value;
+                    OnValueChanged?.Invoke(_value); // Post
+                }
+            }
+        }
+
         public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces = 1, float trueMin = float.MinValue, float trueMax = float.MaxValue)
         {
             Name = name;
@@ -234,33 +266,42 @@ namespace Magnetar_Client.Modules
             Max = max;
             TrueMin = trueMin;
             TrueMax = trueMax;
-
-            // Clamp initial value to the absolute limits
-            Value = UnityEngine.Mathf.Clamp(defaultValue, TrueMin, TrueMax);
-            DefaultValue = Value;
+            _value = UnityEngine.Mathf.Clamp(defaultValue, TrueMin, TrueMax);
+            DefaultValue = _value;
             DecimalPlaces = decimalPlaces;
         }
     }
 
-
     public class BoolSetting : Setting
     {
-        public bool Value;
+        private bool _value;
         public bool DefaultValue;
 
-        /// <summary>
-        /// Initializes a new instance of the BoolSetting class with the specified name and default value.
-        /// </summary>
-        /// <param name="name">The unique name that identifies the setting. Cannot be null or empty.</param>
-        /// <param name="defaultValue">The default boolean value to assign to the setting.</param>
+        // Callbacks
+        public Action<bool> OnValueChanging { get; set; }
+        public Action<bool> OnValueChanged { get; set; }
+
+        public bool Value
+        {
+            get => _value;
+            set
+            {
+                if (_value != value)
+                {
+                    OnValueChanging?.Invoke(value); // Pre
+                    _value = value;
+                    OnValueChanged?.Invoke(_value); // Post
+                }
+            }
+        }
+
         public BoolSetting(string name, bool defaultValue)
         {
             Name = name;
-            Value = defaultValue;
+            _value = defaultValue;
             DefaultValue = defaultValue;
         }
     }
-
 
     public class BindSetting : Setting
     {
@@ -289,38 +330,17 @@ namespace Magnetar_Client.Modules
         }
     }
 
-
     public class MultiSelectSetting : Setting
     {
-        /// <summary>
-        /// Specifies the maximum number of items that can be selected. A value of -1 indicates no limit.
-        /// </summary>
         public int MaxSelection = -1;
-
-        /// <summary>
-        /// Gets the collection of available options, where each key is an option identifier and each value is the
-        /// option's display name.
-        /// </summary>
         public Dictionary<int, string> Options { get; set; }
-
-        /// <summary>
-        /// Represents the set of currently selected values.
-        /// </summary>
         public HashSet<int> SelectedValues = new HashSet<int>();
-        /// <summary>
-        /// Contains the set of integer values that are blacklisted and should be excluded from processing.
-        /// </summary>
-        /// <remarks>Modifying this collection directly affects which values are considered blacklisted.
-        /// Thread safety is not guaranteed; synchronize access if used concurrently.</remarks>
         public HashSet<int> Blacklist = new HashSet<int>();
-        /// <summary>
-        /// Contains the set of names that are excluded from processing or usage.
-        /// </summary>
-        /// <remarks>Names included in this blacklist will be ignored or rejected by operations that
-        /// reference this collection. Modifying this set affects which names are considered valid throughout the
-        /// application.</remarks>
         public HashSet<string> NameBlacklist = new HashSet<string>();
         public System.Type EnumType { get; private set; }
+
+        // Callback passes: (int optionId, bool isSelected)
+        public Action<int, bool> OnSelectionChanged { get; set; }
 
         private Dictionary<int, string> _customNames;
         public Dictionary<int, string> CustomNames
@@ -331,32 +351,17 @@ namespace Magnetar_Client.Modules
                 _customNames = value;
                 if (_customNames != null)
                 {
-                    foreach (var kvp in _customNames)
-                    {
-                        Options[kvp.Key] = kvp.Value;
-                    }
+                    foreach (var kvp in _customNames) Options[kvp.Key] = kvp.Value;
                 }
             }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the MultiSelectSetting class with the specified setting name.
-        /// </summary>
-        /// <param name="name">The name of the setting. Cannot be null or empty.</param>
         public MultiSelectSetting(string name)
         {
             Name = name;
             Options = new Dictionary<int, string>();
-            EnumType = null;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the MultiSelectSetting class for the specified enumeration type.
-        /// </summary>
-        /// <remarks>If the specified enum type is valid, the constructor populates the options with all
-        /// defined values from the enumeration.</remarks>
-        /// <param name="name">The name of the setting. Cannot be null.</param>
-        /// <param name="enumType">The enumeration type to use for the available options. Must be a valid enum type.</param>
         public MultiSelectSetting(string name, System.Type enumType)
         {
             Name = name;
@@ -365,109 +370,96 @@ namespace Magnetar_Client.Modules
 
             if (enumType != null && enumType.IsEnum)
             {
-                var values = System.Enum.GetValues(enumType);
-                foreach (var val in values)
+                foreach (var val in System.Enum.GetValues(enumType))
                 {
-                    int intVal = System.Convert.ToInt32(val);
-                    string displayName = val.ToString();
-
-                    Options[intVal] = displayName;
+                    Options[System.Convert.ToInt32(val)] = val.ToString();
                 }
             }
         }
 
-        /// <summary>
-        /// Retrieves the display name associated with the specified identifier, or returns a fallback name if no match
-        /// is found.
-        /// </summary>
-        /// <param name="id">The identifier for which to retrieve the display name.</param>
-        /// <param name="fallbackName">The name to return if no display name is associated with the specified identifier. Cannot be null.</param>
-        /// <returns>The display name associated with the specified identifier if found; otherwise, the value of <paramref
-        /// name="fallbackName"/>.</returns>
-        public string GetDisplayName(int id, string fallbackName)
-        {
-            if (Options.ContainsKey(id)) return Options[id];
-            return fallbackName;
-        }
+        public string GetDisplayName(int id, string fallbackName) => Options.ContainsKey(id) ? Options[id] : fallbackName;
+        public void AddOption(int id, string displayName) => Options[id] = displayName;
 
-        /// <summary>
-        /// Adds an option with the specified identifier and display name to the collection.
-        /// </summary>
-        /// <param name="id">The unique identifier for the option to add.</param>
-        /// <param name="displayName">The display name associated with the option.</param>
-        public void AddOption(int id, string displayName)
-        {
-            Options[id] = displayName;
-        }
-
-        /// <summary>
-        /// Removes the option with the specified identifier from the collection of available options and selected
-        /// values.
-        /// </summary>
-        /// <remarks>If the specified identifier does not exist in the collection, no action is
-        /// taken.</remarks>
-        /// <param name="id">The identifier of the option to remove.</param>
         public void RemoveOption(int id)
         {
             if (Options.ContainsKey(id))
             {
                 Options.Remove(id);
-                SelectedValues.Remove(id);
+                if (SelectedValues.Contains(id))
+                {
+                    SelectedValues.Remove(id);
+                    OnSelectionChanged?.Invoke(id, false);
+                }
             }
         }
 
-        /// <summary>
-        /// Toggles the selection state of the specified item by its identifier.
-        /// </summary>
-        /// <remarks>If the item is already selected, it is removed from the selection. If the item is not
-        /// selected and the maximum selection limit has not been reached, it is added to the selection. If the maximum
-        /// selection limit is set to -1, there is no limit to the number of selected items.</remarks>
-        /// <param name="id">The identifier of the item to toggle in the selection.</param>
         public void Toggle(int id)
         {
-            if (IsSelected(id)) SelectedValues.Remove(id);
-            else if (MaxSelection == -1 || SelectedValues.Count < MaxSelection) SelectedValues.Add(id);
+            if (IsSelected(id)) Deselect(id);
+            else Select(id);
         }
 
-        public void Select(int id) => SelectedValues.Add(id);
-        public void Deselect(int id) => SelectedValues.Remove(id);
-        public bool IsSelected(int id)
+        public void Select(int id)
         {
-            return SelectedValues.Contains(id);
+            if (!SelectedValues.Contains(id))
+            {
+                if (MaxSelection == -1 || SelectedValues.Count < MaxSelection)
+                {
+                    SelectedValues.Add(id);
+                    OnSelectionChanged?.Invoke(id, true);
+                }
+            }
         }
 
+        public void Deselect(int id)
+        {
+            if (SelectedValues.Contains(id))
+            {
+                SelectedValues.Remove(id);
+                OnSelectionChanged?.Invoke(id, false);
+            }
+        }
+
+        public bool IsSelected(int id) => SelectedValues.Contains(id);
     }
 
     public class SelectSetting : Setting
     {
-        public int Value;
+        private int _value;
         public int DefaultValue;
-
         public Dictionary<int, string> Options { get; set; }
         public System.Type EnumType { get; private set; }
-
         public Dictionary<int, string> CustomNames { get; set; }
 
-        /// <summary>
-        /// Initializes an empty SelectSetting.
-        /// </summary>
+        // Selection Callback
+        public Action<int> OnSelectionChanged { get; set; }
+
+        public int Value
+        {
+            get => _value;
+            set
+            {
+                if (_value != value)
+                {
+                    _value = value;
+                    OnSelectionChanged?.Invoke(_value);
+                }
+            }
+        }
+
         public SelectSetting(string name, int defaultValue)
         {
             Name = name;
-            Value = defaultValue;
+            _value = defaultValue;
             DefaultValue = defaultValue;
             Options = new Dictionary<int, string>();
             CustomNames = new Dictionary<int, string>();
-            EnumType = null;
         }
 
-        /// <summary>
-        /// Initializes a SelectSetting populated by an Enum.
-        /// </summary>
         public SelectSetting(string name, System.Type enumType, int defaultValue)
         {
             Name = name;
-            Value = defaultValue;
+            _value = defaultValue;
             DefaultValue = defaultValue;
             EnumType = enumType;
             Options = new Dictionary<int, string>();
@@ -475,20 +467,14 @@ namespace Magnetar_Client.Modules
 
             if (enumType != null && enumType.IsEnum)
             {
-                var values = System.Enum.GetValues(enumType);
-                foreach (var val in values)
+                foreach (var val in System.Enum.GetValues(enumType))
                 {
-                    int intVal = System.Convert.ToInt32(val);
-                    string displayName = val.ToString();
-                    Options[intVal] = displayName;
+                    Options[System.Convert.ToInt32(val)] = val.ToString();
                 }
             }
         }
 
-        public void AddOption(int id, string displayName)
-        {
-            Options[id] = displayName;
-        }
+        public void AddOption(int id, string displayName) => Options[id] = displayName;
     }
 
     public class CategorySetting : Setting

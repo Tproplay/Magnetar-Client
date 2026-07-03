@@ -15,7 +15,9 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Control";
-        public override string Description { get; set; } = "Allows you to control any plant using the WASD keys.";
+        public override string Description { get; set; } = "Allows you to control any plant using the WASD keys.\n" +
+            "Press the <color=yellow>Control Key</color> to control the plant at mouse position.\n" +
+            "Press the <color=yellow>Control Key</color> again to remove the plant from control.";
         public override string SearchHints { get; set; } = "control wasdplant wasdcontrol moveplant plantcontrol " +
             "plantmovement wasd controller plantwasd controlmod plantmover moveplants plantsteer wasdmove driveplant" +
             " pilotplant steerplant wasdmovement plantdrive plantpilot manualcontrol plantcontrolmod movementmod" +
@@ -54,7 +56,10 @@ namespace Magnetar_Client.Modules
                     Plant plant = cast.collider.gameObject.GetComponent<Plant>();
                     if (plant!= null)
                     {
-                        board.controledPlant = plant;
+                        var current_plant = board.controledPlant;
+                        if (board.controledPlant != plant) { board.controledPlant = plant; current_plant?.UpdateText(); }
+                        else board.controledPlant = null;
+                        plant.UpdateText();
                     }
                 }
             }

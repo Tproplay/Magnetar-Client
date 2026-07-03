@@ -9,7 +9,8 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Any Buff";
-        public override string Description { get; set; } = "Allows you to pick any buff from the modifiers menu";
+        public override string Description { get; set; } = "Allows you to pick any buff from the modifiers menu.\n" +
+            "Make sure to refresh the buffs menu by clicking any button.";
         public override string SearchHints { get; set; } = "anybuff buffpicker selectbuff pickbuff modifierpicker " +
             "modpicker buffmenu buffselector custombuffs bufflist modlist buffmod unlockbuffs buffchoice " +
             "pickmodifiers anymodifier buffaccess modbuffs buffselection buffunlocker buffcustomizer pickanybuff" +

@@ -1,6 +1,10 @@
 ﻿using System;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using HarmonyLib;
+using Il2Cpp;
+using UnityEngine;
+using System.Diagnostics;
 
 namespace Magnetar_Client.Modules
 {
@@ -35,6 +39,7 @@ namespace Magnetar_Client.Modules
         // extra
         public BoolSetting Active_AutoSunCD;
         public FloatSetting AutoSunCD;
+        public BoolSetting AllowSunDropAnywhere;
 
 
         public SunHack()
@@ -59,15 +64,19 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("Extra");
             Active_AutoSunCD = new BoolSetting("Custom Automatic sun drop cd", false);
-            AutoSunCD = new FloatSetting("Automatic Sun drop CD", 0, 20, 7.5f, 2,0);
-            AddSettings(Active_AutoSunCD, AutoSunCD);
+            AutoSunCD = new FloatSetting("Automatic sun drop cd", 0, 20, 7.5f, 2,0);
+            AllowSunDropAnywhere = new BoolSetting("Allow Sun drop anywhere", false)
+            {
+                OnValueChanged = disableAutoSun,
+            };
+            AddSettings(Active_AutoSunCD, AutoSunCD, AllowSunDropAnywhere);
             EndCategory();
         }
 
         // Mod Logic
 
         private static float last_fallsuncd;
-
+        private static bool wasAutoSun = true;
         public override void OnUpdateActive()
         {
             if (BoardInstanceIsNull) return;
@@ -115,37 +124,86 @@ namespace Magnetar_Client.Modules
                 board.sunEfficiency = sunMultiplierSetting.Value;
             }
 
+            // Auto Sun Drop
+
             if (Active_AutoSunCD.Value)
             {
                 if (board.theFallingSunCountDown > Math.Min(AutoSunCD.Value,last_fallsuncd))
                     board.theFallingSunCountDown = AutoSunCD.Value;
 
+                // Update fall sun cd manually (if allow sun drop anywhere)
+                if (AllowSunDropAnywhere.Value && last_fallsuncd == board.theFallingSunCountDown && Time.timeScale !=0)
+                    board.theFallingSunCountDown -= Time.deltaTime;
+
                 last_fallsuncd = board.theFallingSunCountDown;
             }
 
+            if (AllowSunDropAnywhere.Value)
+            {
+                if (!board.fallSun)
+                {
+                    wasAutoSun = false;
+                    board.fallSun = true;
+                }
+
+                if (board.theFallingSunCountDown <= 0 && GameAPP.theGameStatus == GameStatus.InGame)
+                {
+                    int col = UnityEngine.Random.RandomRangeInt(3, 10);
+                    createManualFallSun(col);
+                    board.theFallingSunCountDown = 7.5f;
+                }
+            }
         }
 
         public override void OnDisable()
         {
-            if (BoardInstanceIsNull) return;
-
-            // Clean up Unlimited Sun
-            if (_lastUnlimitedState)
+            if (!BoardInstanceIsNull)
             {
-                if (originalSunAmount >= 0 && preserveOriginalSetting.Value)
-                    board.theSun = originalSunAmount;
+                // Clean up Unlimited Sun
+                if (_lastUnlimitedState)
+                {
+                    if (originalSunAmount >= 0 && preserveOriginalSetting.Value)
+                        board.theSun = originalSunAmount;
 
-                originalSunAmount = -1_853_721_342;
-                _lastUnlimitedState = false;
+                    originalSunAmount = -1_853_721_342;
+                    _lastUnlimitedState = false;
+                }
+
+                // Clean up Multiplier
+                if (_lastMultiplierState)
+                {
+                    board.sunEfficiency = _originalSunEfficiency;
+                    _lastMultiplierState = false;
+                }
+
+                // Auto Sun
             }
 
-            // Clean up Multiplier
-            if (_lastMultiplierState)
+            disableAutoSun();
+        }
+
+        public void disableAutoSun(bool enable = false)
+        {
+            if (enable) return;
+
+            if (!BoardInstanceIsNull) board.fallSun = wasAutoSun;
+            wasAutoSun = true;
+        }
+
+        public void createManualFallSun(int col)
+        {
+            CreateItem.Instance.SetCoin(col, -1, 0, 1);
+        }
+
+        [HarmonyPatch(typeof(Board))]
+        public static class BoardPatch
+        {
+            [HarmonyPatch(nameof(Board.Start))]
+            [HarmonyPostfix]
+            public static void StartPostfix()
             {
-                board.sunEfficiency = _originalSunEfficiency;
-                _lastMultiplierState = false;
+                wasAutoSun = true;
             }
-            
         }
     }
 

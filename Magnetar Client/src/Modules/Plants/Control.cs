@@ -67,6 +67,7 @@ namespace Magnetar_Client.Modules
 
         public override void OnDisable()
         {
+            if (BoardInstanceIsNull) return;
             board.controledPlant = null;
         }
 

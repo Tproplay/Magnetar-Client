@@ -28,11 +28,11 @@
 
         public static string Language = "English";
 
-        public static float SettingWidth = 280;
+        public static float SettingWidth = 260;
 
         public static class ModuleManager
         {
-            public static float SettingsWidth = 650f;
+            public static float SettingsWidth = 630f;
             public static float PopupSpeed = 10f;
 
             // Search Window

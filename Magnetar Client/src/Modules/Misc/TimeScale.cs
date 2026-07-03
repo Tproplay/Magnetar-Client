@@ -22,7 +22,7 @@ namespace Magnetar_Client.Modules
 
         public static TimeScale Instance;
 
-        public FloatSetting TimeScaleValueSetting;
+        public FloatSetting TimeScaleSetting;
 
         public BoolSetting ResumeAfterPaused;
 
@@ -34,8 +34,8 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            TimeScaleValueSetting = new FloatSetting("Time Scale", 0f, 10, 2,0);
-            AddSettings(TimeScaleValueSetting);
+            TimeScaleSetting = new FloatSetting("Time Scale", 0f, 10, 2, 2, 0);
+            AddSettings(TimeScaleSetting);
 
             EndCategory();
             CreateCategory("Extra");
@@ -90,11 +90,11 @@ namespace Magnetar_Client.Modules
                 if (!allKeysHeld) { Active = false; OnDisable(); return; }
             }
             float timeScale = UnityEngine.Time.timeScale;
-            if (timeScale != TimeScaleValueSetting.Value)
+            if (timeScale != TimeScaleSetting.Value)
             {
                 if (GameAPP.theGameStatus == GameStatus.Pause)
                     { Active = false; paused = true; return; }
-                UnityEngine.Time.timeScale = TimeScaleValueSetting.Value; 
+                UnityEngine.Time.timeScale = TimeScaleSetting.Value; 
             }
         }
 

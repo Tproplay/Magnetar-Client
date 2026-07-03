@@ -30,11 +30,7 @@ namespace Magnetar_Client.Modules
         public BoolSetting FreezeWaveSetting;
 
         // Spawn Rate
-        public BoolSetting Active_NumberOfZombiePerWave;
-        public IntSetting NumberOfZombiePerWave;
-
-        // Spawn Rate Multiplier
-        public FloatSetting ZombiesCountMultiplier;
+        public IntSetting ZombiesCountMultiplier;
 
         public WaveHack()
         {
@@ -51,15 +47,7 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("Spawn Rate");
 
-            Active_NumberOfZombiePerWave = new BoolSetting("Custom number of zombie spawn", false);
-            NumberOfZombiePerWave = new IntSetting("Number of Zombie per wave", 5, 100, 15, 0);
-
-            AddSettings(Active_NumberOfZombiePerWave,NumberOfZombiePerWave);
-            EndCategory();
-
-            CreateCategory("Spawn Rate Multiplier");
-
-            ZombiesCountMultiplier = new FloatSetting("Zombies count multiplier", 0.5f, 10, 1f, 2, 0);
+            ZombiesCountMultiplier = new IntSetting("Zombies count multiplier", 1, 10, 1, 0);
 
             AddSettings(ZombiesCountMultiplier);
             EndCategory();
@@ -84,6 +72,33 @@ namespace Magnetar_Client.Modules
             }
 
             last_val = board.timeUntilNextWave;
+        }
+
+        [HarmonyPatch(typeof(BoardSpawner))]
+        public static class BoardSpawnerPatch
+        {
+            static bool spawnedByMod = false;
+
+            [HarmonyPatch(nameof(BoardSpawner.SummonZombies))]
+            [HarmonyPrefix]
+            public static bool SummonZombiesPrefix(int wave, BoardSpawner __instance)
+            {
+                if (instance == null || !instance.Active || instance.ZombiesCountMultiplier.Value == 1 || 
+                    spawnedByMod) return true;
+                if (instance.ZombiesCountMultiplier.Value == 0) return false;
+
+                spawnedByMod = true;
+
+                for (int i = 0; i < instance.ZombiesCountMultiplier.Value; i++)
+                {
+                    __instance.SummonZombies(wave);
+                }
+
+                spawnedByMod = false;
+
+                return false;
+
+            }
         }
 
 

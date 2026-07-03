@@ -44,7 +44,6 @@ namespace Magnetar_Client.Game
             }
         }
 
-        /*
         public static Wheel wheel;
 
         [HarmonyPatch(typeof(InGameTool))]
@@ -56,7 +55,6 @@ namespace Magnetar_Client.Game
             {
                 if (__instance == null) return;
 
-                // We safely cast it to Wheel inside the method instead
                 var wheelInstance = __instance.TryCast<Wheel>();
                 if (wheelInstance != null)
                 {
@@ -64,7 +62,6 @@ namespace Magnetar_Client.Game
                 }
             }
         }
-        */
     }
 
 

@@ -37,6 +37,7 @@ namespace Magnetar_Client.Modules
         public BindSetting PickUpShovel;
         public BindSetting PickUpGlove;
         public BindSetting PickUpHammer;
+        public BindSetting PickUpWheel;
         public BindSetting CoffeeBean;
 
         public BindSetting Fullscreen;
@@ -54,9 +55,10 @@ namespace Magnetar_Client.Modules
             PickUpShovel = new BindSetting("Pick up Shovel", new List<KeyCode> { KeyCode.Alpha1 });
             PickUpGlove = new BindSetting("Pick up Glove", new List<KeyCode> { KeyCode.Alpha2 });
             PickUpHammer = new BindSetting("Pick up Hammer", new List<KeyCode> { KeyCode.Alpha4 });
+            PickUpWheel = new BindSetting("Pick up Wheel Barrow", new List<KeyCode> { KeyCode.Alpha5 });
             CoffeeBean = new BindSetting("Coffee Bean", new List<KeyCode> { KeyCode.E });
 
-            AddSettings(PickUpShovel,PickUpGlove,PickUpHammer,CoffeeBean);
+            AddSettings(PickUpShovel,PickUpGlove,PickUpHammer,PickUpWheel,CoffeeBean);
 
             EndCategory();
 
@@ -116,6 +118,8 @@ namespace Magnetar_Client.Modules
                     Glove.Instance.OnClick(Mouse.Instance);
                 if (GetKeyComboDown(PickUpHammer.BindKeys) && Hammer.Instance != null)
                     Hammer.Instance.OnClick(Mouse.Instance);
+                if (GetKeyComboDown(PickUpWheel.BindKeys) && wheel != null)
+                    wheel.OnClick(Mouse.Instance);
 
                 if (GetKeyComboDown(CoffeeBean.BindKeys) && itemBtn != null) 
                     Mouse.Instance.theItemOnMouse = itemBtn.Clicked();
@@ -179,8 +183,8 @@ namespace Magnetar_Client.Modules
 
         public static void ClickSeedSlot(int slot)
         {
-            if (Mouse.Instance.theItemOnMouse != null) return;
-            if (InGameUI.Instance == null || InGameUI.Instance.Cards == null) return;
+            if (Mouse.Instance?.theItemOnMouse != null) return;
+            if (InGameUI.Instance == null) return;
             if (slot < 0 || slot >= InGameUI.Instance.Cards.Count) return;
 
             CardUI targetCard = InGameUI.Instance.Cards[slot];
@@ -317,7 +321,7 @@ namespace Magnetar_Client.Modules
 
         #endregion
 
-        #region Shovel Glove Hammer
+        #region Shovel Glove Hammer Wheel
 
         [HarmonyPatch(typeof(Shovel))]
         public static class ShovelPatch
@@ -352,6 +356,20 @@ namespace Magnetar_Client.Modules
             [HarmonyPatch(nameof(Hammer.OnUpdate))]
             [HarmonyPrefix]
             private static bool PickPrefix(Hammer __instance)
+            {
+                if (instance == null || !instance.Active || RanbyMod || Input.GetMouseButtonDown(0))
+                    return true;
+                __instance.CDUpdate();
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(Wheel))]
+        public static class WheelPatch
+        {
+            [HarmonyPatch(nameof(Wheel.OnUpdate))]
+            [HarmonyPrefix]
+            private static bool PickPrefix(Wheel __instance)
             {
                 if (instance == null || !instance.Active || RanbyMod || Input.GetMouseButtonDown(0))
                     return true;

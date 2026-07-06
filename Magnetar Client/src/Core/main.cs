@@ -59,12 +59,13 @@ namespace Magnetar_Client.Core
         private void InitializeCore()
         {
             Utils.Translator.LoadTranslations();
-
-            TopBar.TopBar.Init();
+            
             ModuleManager.Init();
             HUDRenderer.Init();
             NEFManager.Init();
             GUIManager.Init();
+
+            TopBar.TopBar.Init();
 
             SaveLoad.Load();
             DebugLogger.Msg("Magnetar Client Loaded!");
@@ -109,6 +110,33 @@ namespace Magnetar_Client.Core
             if (Magnetar_Client.Config.CurrentTab == TabType.NEF) NEFManager.Render();
             if (Magnetar_Client.Config.CurrentTab == TabType.GUI) GUIManager.Render();
 
+            
+        }
+
+        public void CoreUpdate()
+        {
+            if (HUDRenderer.Elements.Count !=0)
+                HUDRenderer.UpdateElements();
+
+            if (!ModuleManager.IsInitialized) return;
+
+            if (Input.GetKeyDown(KeyCode.RightShift) && !HUDManager.forceShow)
+            {
+                Magnetar_Client.Config.showgui = !Magnetar_Client.Config.showgui;
+                Save();
+            }
+
+            if (!Magnetar_Client.Config.showgui && !HUDManager.forceShow)
+            {
+                ModuleManager.HandleHotkeys();
+            }
+
+            foreach (var mod in ModuleManager.Modules)
+            {
+                if (mod != null) mod.OnUpdate();
+            }
+
+            if (!hasWarmedUp) return;
             #region handle Escape Key
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape && ModuleManager.showModules)
             {
@@ -142,30 +170,6 @@ namespace Magnetar_Client.Core
                 }
             }
             #endregion
-        }
-
-        public void CoreUpdate()
-        {
-            if (HUDRenderer.Elements.Count !=0)
-                HUDRenderer.UpdateElements();
-
-            if (!ModuleManager.IsInitialized) return;
-
-            if (Input.GetKeyDown(KeyCode.RightShift) && !HUDManager.forceShow)
-            {
-                Magnetar_Client.Config.showgui = !Magnetar_Client.Config.showgui;
-                Save();
-            }
-
-            if (!Magnetar_Client.Config.showgui && !HUDManager.forceShow)
-            {
-                ModuleManager.HandleHotkeys();
-            }
-
-            foreach (var mod in ModuleManager.Modules)
-            {
-                if (mod != null) mod.OnUpdate();
-            }
         }
 
         public static void ResetInputBind()

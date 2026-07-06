@@ -40,9 +40,7 @@ namespace Magnetar_Client.Core
 
             foreach ( var language in lanuages)
             {
-#if MELONLOADER || BEPINEX
-                DebugLogger.Msg("Found Language: " + language);
-#endif
+                TranslatorLogger.Msg("Found Language: " + language);
                 string _language = Path.GetFileName(language);
 
                 LanguageSetting.AddOption(i, _language);

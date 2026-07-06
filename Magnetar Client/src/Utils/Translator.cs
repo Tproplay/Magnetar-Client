@@ -287,11 +287,22 @@ namespace Magnetar_Client.Utils
 
         public static Dictionary<int, string> TranslateEnum(Type enumType)
         {
+            // If already in memory cache, return a copy immediately
             if (_nameCache.TryGetValue(enumType, out var cachedDict))
             {
                 return new Dictionary<int, string>(cachedDict);
             }
 
+            // Load, validate, and populate from disk/fallback systems
+            Dictionary<int, string> parsedNames = LoadEnumTranslations(enumType);
+
+            // Cache the result for subsequent requests
+            _nameCache[enumType] = parsedNames;
+            return new Dictionary<int, string>(parsedNames);
+        }
+
+        public static Dictionary<int, string> LoadEnumTranslations(Type enumType)
+        {
             Dictionary<int, string> parsedNames = new Dictionary<int, string>();
 
             string magnetarDir = Path.Combine(ModsDir, "Magnetar Translation", Config.Language);
@@ -411,8 +422,7 @@ namespace Magnetar_Client.Utils
                 }
             }
 
-            _nameCache[enumType] = parsedNames;
-            return new Dictionary<int, string>(parsedNames);
+            return parsedNames;
         }
     }
 }

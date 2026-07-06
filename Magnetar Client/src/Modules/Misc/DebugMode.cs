@@ -89,7 +89,7 @@ namespace Magnetar_Client.Modules
 
             if (selected.IsSelected((int)Options.TheGameStatus))
             {
-                DebugLogger.Msg("[Debug Mode] GameStatus: " + GameAPP.theGameStatus);
+                DebugModeLogger.Msg("GameStatus: " + GameAPP.theGameStatus);
             }
 
             if (selected.IsSelected((int)Options.BoardTag))
@@ -97,7 +97,7 @@ namespace Magnetar_Client.Modules
                 if (!BoardInstanceIsNull)
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.AppendLine("[Debug Mode] Dumping boardTag Fields:");
+                    sb.AppendLine("Dumping boardTag Fields:");
 
                     // Grab all public, instance fields from the boardTag object
                     FieldInfo[] fields = board.boardTag.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
@@ -108,13 +108,13 @@ namespace Magnetar_Client.Modules
 
                         sb.AppendLine($"   -> {field.Name}: {value}");
                     }
-                    DebugLogger.Msg(sb.ToString());
+                    DebugModeLogger.Msg(sb.ToString());
                 }
             }
 
             if (selected.IsSelected((int)Options.PlantList))
             {
-                DebugLogger.Msg("[Debug Mode]\n"+
+                DebugModeLogger.Msg(
                     string.Join(
                         Environment.NewLine,
                         GameData.plantList.Select(kvp=>
@@ -128,7 +128,7 @@ namespace Magnetar_Client.Modules
 
             if (selected.IsSelected((int)Options.ZombieList))
             {
-                DebugLogger.Msg("[Debug Mode]\n"+
+                DebugModeLogger.Msg(
                     string.Join(
                         Environment.NewLine,
                         GameData.zombieList.Select(kvp =>
@@ -144,13 +144,13 @@ namespace Magnetar_Client.Modules
             {
                 selected.Deselect((int)Options.ZombieAnimations);
 
-                DebugLogger.Msg("[Debug Mode] Dumping All animations");
+                DebugModeLogger.Msg("Dumping All animations");
 
                 var prefabs = GameAPP.resourcesManager?.zombiePrefabs;
 
                 if (prefabs == null)
                 {
-                    DebugLogger.Error("[Debug Mode] GameAPP.resourcesManager.zombiePrefabs is null or not loaded yet!");
+                    DebugModeLogger.Error("GameAPP.resourcesManager.zombiePrefabs is null or not loaded yet!");
                     return;
                 }
 
@@ -167,7 +167,7 @@ namespace Magnetar_Client.Modules
                     RuntimeAnimatorController controller = anim.runtimeAnimatorController;
                     if (controller == null) continue;
 
-                    DebugLogger.Msg($"\n[ZombieType: {typeKey}] Prefab: {prefab.name}");
+                    DebugModeLogger.Msg($"\n[ZombieType: {typeKey}] Prefab: {prefab.name}");
 
                     HashSet<string> uniqueClips = new();
 
@@ -175,12 +175,12 @@ namespace Magnetar_Client.Modules
                     {
                         if (clip != null && uniqueClips.Add(clip.name))
                         {
-                            DebugLogger.Msg($"  -> Clip: {clip.name}");
+                            DebugModeLogger.Msg($"  -> Clip: {clip.name}");
                         }
                     }
                 }
 
-                DebugLogger.Msg("\n=== Bulk Animation Dump Complete ===");
+                DebugModeLogger.Msg("\n=== Bulk Animation Dump Complete ===");
 
 
             }
@@ -214,7 +214,7 @@ namespace Magnetar_Client.Modules
 
                 SoundType soundType = (SoundType)theSoundID;
 
-                DebugLogger.Msg($"[Debug Mode] Sound Played: SoundType={soundType} ({theSoundID})," +
+                DebugModeLogger.Msg($"Sound Played: SoundType={soundType} ({theSoundID})," +
                     $" Volume={theVolume}, Pitch={pitch}");
                 logged = true;
             }
@@ -230,7 +230,7 @@ namespace Magnetar_Client.Modules
                 if (instance == null || !instance.Active || 
                     !instance.selected.IsSelected((int)Options.PlantDieReason)) return;
 
-                DebugLogger.Msg($"[Debug Mode] Plant died: tile=({__instance.thePlantRow}," +
+                DebugModeLogger.Msg($"Plant died: tile=({__instance.thePlantRow}," +
                     $"{__instance.thePlantColumn}), Reason: {reason.ToString()}");
             }
         }
@@ -245,7 +245,7 @@ namespace Magnetar_Client.Modules
                 if (instance == null || !instance.Active ||
                     !instance.selected.IsSelected((int)Options.ZombieDieReason)) return;
 
-                DebugLogger.Msg($"[Debug Mode] Zombie died: Type:{__instance.theZombieType}, " +
+                DebugModeLogger.Msg($"Zombie died: Type:{__instance.theZombieType}, " +
                     $"tile=({__instance.theZombieRow},{__instance.Column}), Reason: {reason.ToString()}");
             }
         }

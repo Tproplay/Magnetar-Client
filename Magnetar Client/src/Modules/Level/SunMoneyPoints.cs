@@ -2,7 +2,9 @@
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using HarmonyLib;
+#if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
+#endif
 using UnityEngine;
 using System.Diagnostics;
 

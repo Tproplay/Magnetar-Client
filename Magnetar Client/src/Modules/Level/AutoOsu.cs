@@ -20,7 +20,7 @@ namespace Magnetar_Client.Modules
             "auto-osu osuauto autorythm rhythmbot osuexplode osux2 rhythmsync osusync rythmmaster rhythm-master " +
             "explode-o-su rhythmplayer osuhelper rhythmtrainer";
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
 
 

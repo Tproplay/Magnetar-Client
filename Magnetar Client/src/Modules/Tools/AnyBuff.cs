@@ -16,7 +16,7 @@ namespace Magnetar_Client.Modules
             "pickmodifiers anymodifier buffaccess modbuffs buffselection buffunlocker buffcustomizer pickanybuff" +
             " buffhack modmenu pickany";
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
 
         // Mod Data
 

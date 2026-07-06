@@ -16,7 +16,7 @@ namespace Magnetar_Client.Modules
             " plantswitch plantrepick reselect seedbankreset pickagain repickseed re-pick changeseed midgameselector " +
             "plantchange plantmenu seedreselect selectagain reselectseeds plantselection repickmode changeplant" +
             " midgamepick resetplants repickselection seedsrepick re-select repick plantreselector";
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
 
         // Mod Data
 

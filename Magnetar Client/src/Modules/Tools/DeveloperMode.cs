@@ -14,7 +14,7 @@ namespace Magnetar_Client.Modules
             " adminmode devconsole cheatsdev devsettings testingmode developeroptions devtoolsenabled" +
             " devaccess devmenu developeraccess devbuild testingtool";
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
 
         public override bool Active
         {

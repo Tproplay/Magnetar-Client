@@ -25,7 +25,7 @@ namespace Magnetar_Client.Modules
             "eliteosu osuremastered perfectosu osunext osucustom osuoptimized osurefined osuadvanced osutools osugameplay " +
             "osufaster osusmooth";
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
         // Mod data
 

@@ -4,8 +4,8 @@
   "Plant": "Cây Trồng",
   "Zombie": "Zombie ",
   "Visual": "Hiển Thị Đồ Họa",
-  "Addon": "Tiện ích mở rộng (Addon)",
-  "Select an entity to view its recipes.": "Chọn một thực thể để xem công thức chế tạo / hợp nhất.",
+  "Addon": "Mở rộng (Addon)",
+  "Select an entity to view its recipes.": "Chọn một thực thể để xem công thức hợp nhất.",
   "Search:": "Tìm Kiếm:",
   "Search...": "Tìm Kiếm...",
   "Clear Search": "Xóa Tìm Kiếm",
@@ -37,5 +37,5 @@
   "3x3": "Vùng 3x3",
   "Full Lawn": "Toàn Bộ Sân Cỏ",
   "Select ": "lựa chọn",
-  "Select HUD Elements": " Chọn các thành phần của HUD"
+  "Select HUD Elements": " Chọn tính năng của HUD"
 }

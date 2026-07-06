@@ -1,0 +1,119 @@
+{
+  "FPS Counter": {
+    "Name": "Bộ Đếm Khung Hình (FPS)"
+  },
+  "Real FPS Counter": {
+    "Name": "Real FPS Counter"
+  },
+  "Frame Time": {
+    "Name": "Thời Gian Khung Hình (Frame Time)"
+  },
+  "Game Name and Version": {
+    "Name": "Tên và phiên bản trò chơi"
+  },
+  "Magnetar Name and Version": {
+    "Name": "Tên và phiên bản của Magnetar"
+  },
+  "Up Time": {
+    "Name": "Thời gian hoạt động"
+  },
+  "Number of Bullets Spawned": {
+    "Name": "Số lượng đạn được tạo ra"
+  },
+  "Total Damage by Plants": {
+    "Name": "Tổng Sát Thương Bởi Cây Trồng"
+  },
+  "Average Damage by Plants": {
+    "Name": "Sát Thương Trung Bình Bởi Cây Trồng"
+  },
+  "Total Plants": {
+    "Name": "Tổng Số Cây Trên Sân"
+  },
+  "Plants Placed": {
+    "Name": "Số Cây Đã Trồng"
+  },
+  "Plant Deaths": {
+    "Name": "Số Cây Đã Chết / Bị Phá Hủy"
+  },
+  "Total Sun Obtained": {
+    "Name": "Tổng lượng ánh nắng mặt trời thu được"
+  },
+  "Total Sun Spent": {
+    "Name": "Tổng thời gian nắng đã sử dụng"
+  },
+  "Total Money Obtained": {
+    "Name": "Tổng số tiền thu được"
+  },
+  "Total Money Spent": {
+    "Name": "Tổng số tiền đã chi tiêu"
+  },
+  "Auto drop/fall sun timer": {
+    "Name": "Auto drop/fall sun timer"
+  },
+  "Time In Current Level": {
+    "Name": "Thời gian ở cấp độ hiện tại"
+  },
+  "Next wave arrival time": {
+    "Name": "Thời gian xuất hiện của đợt tiếp theo"
+  },
+  "Active Star drop Cooldown": {
+    "Name": "Thời Gian Hồi Chiêu Kích Hoạt Rơi Sao"
+  },
+  "Passive Star drop Cooldown": {
+    "Name": "Thời Gian Hồi Chiêu Nội Tại Rơi Sao"
+  },
+  "Game Speed": {
+    "Name": "Tốc Độ Trò Chơi"
+  },
+  "Zombies On Lawn": {
+    "Name": "Thây ma trên bãi cỏ"
+  },
+  "Hypnotized Zombies On Lawn": {
+    "Name": "Những thây ma bị thôi miên trên bãi cỏ"
+  },
+  "Zombies Spawned": {
+    "Name": "Zombie xuất hiện"
+  },
+  "Hypnotized Zombies Spawned": {
+    "Name": "Những thây ma bị thôi miên xuất hiện"
+  },
+  "Zombies Killed": {
+    "Name": "Zombie bị giết"
+  },
+  "Hypnotized Zombies Killed": {
+    "Name": "Những thây ma bị thôi miên đã bị giết"
+  },
+  "Current Zombie Wave Health": {
+    "Name": "Current Zombie Wave Health"
+  },
+  "Total Zombies Health": {
+    "Name": "Total Zombies Health"
+  },
+  "Hypnotized Zombies Health": {
+    "Name": "Tổng Máu Của Zombie Bị Thôi Miên"
+  },
+  "Current Wave": {
+    "Name": "Current Wave"
+  },
+  "RAM Usage": {
+    "Name": "Dung Lượng RAM Đang Dùng (Game)"
+  },
+  "System RAM Usage": {
+    "Name": "Dung Lượng RAM Hệ Thống"
+  },
+  "CPU Usage": {
+    "Name": "Mức Sử Dụng CPU"
+  },
+  "VRAM Usage": {
+    "Name": "Mức Sử Dụng VRAM (Bộ Nhớ Đồ Họa)"
+  },
+  "GPU Name": {
+    "Name": "Tên Card Đồ Họa (GPU)"
+  },
+  "CPU Name": {
+    "Name": "Tên Bộ Vi Xử Lý (CPU)"
+  },
+  "Current Time": {
+    "Name": "Thời Gian Hiện Tại"
+  }
+}

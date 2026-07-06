@@ -85,7 +85,7 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("Application");
 
-            Fullscreen = new BindSetting("Fulscreen",new List<KeyCode>{ KeyCode.F });
+            Fullscreen = new BindSetting("Fullscreen",new List<KeyCode>{ KeyCode.F });
             SmallWindow = new BindSetting("Small Window", new List<KeyCode> { KeyCode.G });
 
             AddSettings(Fullscreen, SmallWindow);

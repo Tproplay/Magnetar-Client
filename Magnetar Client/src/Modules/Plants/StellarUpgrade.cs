@@ -11,8 +11,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Stellar Upgrade";
-        public override string Description { get; set; } = "Allows you to upgrade specific plants to their StarBound version." +
-            " version.";
+        public override string Description { get; set; } = "Allows you to upgrade specific plants to their StarBound version.";
         public override string SearchHints { get; set; } = "starboundupgrade starbound starupgrade starplant" +
             " plantupgrade starboundmode starboundconversion upgradeplant plant-starbound star-bound " +
             "upgrade-starbound starboundmod starboundplants starboundify starboundchanger plantstar " +

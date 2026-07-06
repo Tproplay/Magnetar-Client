@@ -1,0 +1,119 @@
+{
+  "FPS Counter": {
+    "Name": "FPS Counter"
+  },
+  "Real FPS Counter": {
+    "Name": "Real FPS Counter"
+  },
+  "Frame Time": {
+    "Name": "Frame Time"
+  },
+  "Game Name and Version": {
+    "Name": "Game Name and Version"
+  },
+  "Magnetar Name and Version": {
+    "Name": "Magnetar Name and Version"
+  },
+  "Up Time": {
+    "Name": "Up Time"
+  },
+  "Number of Bullets Spawned": {
+    "Name": "Number of Bullets Spawned"
+  },
+  "Total Damage by Plants": {
+    "Name": "Total Damage by Plants"
+  },
+  "Average Damage by Plants": {
+    "Name": "Average Damage by Plants"
+  },
+  "Total Plants": {
+    "Name": "Total Plants"
+  },
+  "Plants Placed": {
+    "Name": "Plants Placed"
+  },
+  "Plant Deaths": {
+    "Name": "Plant Deaths"
+  },
+  "Total Sun Obtained": {
+    "Name": "Total Sun Obtained"
+  },
+  "Total Sun Spent": {
+    "Name": "Total Sun Spent"
+  },
+  "Total Money Obtained": {
+    "Name": "Total Money Obtained"
+  },
+  "Total Money Spent": {
+    "Name": "Total Money Spent"
+  },
+  "Auto drop/fall sun timer": {
+    "Name": "Auto drop/fall sun timer"
+  },
+  "Time In Current Level": {
+    "Name": "Time In Current Level"
+  },
+  "Next wave arrival time": {
+    "Name": "Next wave arrival time"
+  },
+  "Active Star drop Cooldown": {
+    "Name": "Active Star drop Cooldown"
+  },
+  "Passive Star drop Cooldown": {
+    "Name": "Passive Star drop Cooldown"
+  },
+  "Game Speed": {
+    "Name": "Game Speed"
+  },
+  "Zombies On Lawn": {
+    "Name": "Zombies On Lawn"
+  },
+  "Hypnotized Zombies On Lawn": {
+    "Name": "Hypnotized Zombies On Lawn"
+  },
+  "Zombies Spawned": {
+    "Name": "Zombies Spawned"
+  },
+  "Hypnotized Zombies Spawned": {
+    "Name": "Hypnotized Zombies Spawned"
+  },
+  "Zombies Killed": {
+    "Name": "Zombies Killed"
+  },
+  "Hypnotized Zombies Killed": {
+    "Name": "Hypnotized Zombies Killed"
+  },
+  "Current Zombie Wave Health": {
+    "Name": "Current Zombie Wave Health"
+  },
+  "Total Zombies Health": {
+    "Name": "Total Zombies Health"
+  },
+  "Hypnotized Zombies Health": {
+    "Name": "Hypnotized Zombies Health"
+  },
+  "Current Wave": {
+    "Name": "Current Wave"
+  },
+  "RAM Usage": {
+    "Name": "RAM Usage"
+  },
+  "System RAM Usage": {
+    "Name": "System RAM Usage"
+  },
+  "CPU Usage": {
+    "Name": "CPU Usage"
+  },
+  "VRAM Usage": {
+    "Name": "VRAM Usage"
+  },
+  "GPU Name": {
+    "Name": "GPU Name"
+  },
+  "CPU Name": {
+    "Name": "CPU Name"
+  },
+  "Current Time": {
+    "Name": "Current Time"
+  }
+}

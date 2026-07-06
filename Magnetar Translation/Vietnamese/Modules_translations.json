@@ -1,0 +1,588 @@
+{
+  "Any Buff": {
+    "Name": "Any Buff",
+    "Description": "Allows you to pick any buff from the modifiers menu.\nMake sure to refresh the buffs menu by clicking any button.",
+    "Search Hints": "anybuff buffpicker selectbuff pickbuff modifierpicker modpicker buffmenu buffselector custombuffs bufflist modlist buffmod unlockbuffs buffchoice pickmodifiers anymodifier buffaccess modbuffs buffselection buffunlocker buffcustomizer pickanybuff buffhack modmenu pickany",
+    "settings": {}
+  },
+  "Repick Plants": {
+    "Name": "Chọn Lại Cây Trồng",
+    "Description": "Cho phép bạn chọn lại danh sách cây trồng ngay giữa trận đấu.",
+    "Search Hints": "chọn lại cây chọn lại thẻ cây đổi cây đổi cây giữa trận hoán đổi cây đặt lại túi hạt giống chọn lại hạt giống menu chọn cây giữa trận đổi danh sách cây reset cây trồng",
+    "settings": {
+      "Debug Mode": "Debug Mode"
+    }
+  },
+  "Custom Conveyor": {
+    "Name": "Băng Chuyền Tùy Chỉnh",
+    "Description": "Bắt buộc các loại cây cụ thể xuất hiện trên băng chuyền. Nếu không có cây nào được chọn, hệ thống sẽ nạp tất cả các loại cây vào.",
+    "Search Hints": "băng chuyền tùy chỉnh băng truyền cây tùy chỉnh ép cây xuất hiện lực ép băng chuyền băng chuyền cây trồng chọn băng chuyền sửa băng chuyền bộ nạp băng chuyền nạp cây vào ghi đè băng chuyền băng chuyền tự chế băng tải nạp cây trồng nạp tất cả sinh cây trồng băng tải tùy biến ép băng chuyền băng chuyền tùy biến ép cây trồng tất cả cây trồng vật phẩm băng chuyền tạo thẻ cây bể chứa cây băng chuyền bể chứa tùy chỉnh danh sách cây băng chuyền",
+    "settings": {
+      "General": "General",
+      "Allowed Plants": "Cây Trồng Được Cho Phép"
+    }
+  },
+  "Developer Mode": {
+    "Name": "Chế độ nhà phát triển",
+    "Description": "Chế độ nhà phát triển được nhà phát triển dùng khi test game",
+    "Search Hints": "developermode devmode devmod developer devtools developmentmode debugmode debugdev devtesting gametesting dev-tools devfeatures adminmode devconsole cheatsdev devsettings testingmode developeroptions devtoolsenabled devaccess devmenu developeraccess devbuild testingtool",
+    "settings": {}
+  },
+  "No Cap": {
+    "Name": "Bỏ Giới Hạn Tối Đa",
+    "Description": "Vượt qua giới hạn tối đa của Điểm Mặt Trời và Tiền Vàng trong trò chơi",
+    "Search Hints": "không giới hạn giới hạn mặt trời giới hạn tiền vượt giới hạn xóa giới hạn mặt trời vô hạn tiền vô hạn phá giới hạn mặt trời tối đa tiền tối đa hack tiền hack mặt trời tiền không giới hạn",
+    "settings": {
+      "General": "General",
+      "Sun Cap": "Giới Hạn Mặt Trời",
+      "Money Cap": "Giới Hạn Tiền Vàng"
+    }
+  },
+  "No Craters": {
+    "Name": "Không Tạo Hố Sụt",
+    "Description": "Xóa bỏ toàn bộ các hố sụt trên mặt đất khi tính năng này đang hoạt động.",
+    "Search Hints": "không hố sụt xóa hố sụt loại bỏ hố sụt xóa hố bom mặt đất bằng phẳng dọn hố sụt sửa mặt đất chống hố sụt sửa lỗi hố chặn hố sụt xóa hố lấp hố sụt vá mặt đất làm mịn đất ẩn hố sụt hủy hố sụt hố sụt biến mất",
+    "settings": {
+      "Extra": "Extra",
+      "Auto Turn Off": "Tự Động Tắt"
+    }
+  },
+  "No Grid Item": {
+    "Name": "Không Chướng Ngại Vật",
+    "Description": "Loại bỏ tất cả các chướng ngại vật được chọn trên ô đất khi tính năng này đang hoạt động.",
+    "Search Hints": "không vật cản ô đất xóa vật cản ô đất dọn vật cản xóa bia mộ không bia mộ không thang không băng không bình gốm dọn bia mộ dọn thang dọn tảng băng dọn bình ma phá bia mộ gỡ thang đập bình xóa vật thể ô đất",
+    "settings": {
+      "General": "General",
+      "Grid Items": "Các Chướng Ngại Vật",
+      "Extra": "Extra",
+      "Auto Turn Off": "Tự Động Tắt",
+      "Debug Mode": "Debug Mode"
+    }
+  },
+  "No Lose": {
+    "Name": "Không Thua Cuộc",
+    "Description": "'Làm ơn tắt cái đó đi' - Thân gửi từ Tiến sĩ Zomboss",
+    "Search Hints": "không thua không thất bại luôn thắng không bao giờ thua chống game over bất tử cheat không thua không thể phá hủy luôn luôn thắng sửa lỗi thua chặn chết chế độ sinh tồn không thể bị giết chiến thắng tuyệt đối",
+    "settings": {}
+  },
+  "Card Roulette": {
+    "Name": "Vòng Quay Thẻ Bài",
+    "Description": "Xáo trộn khay hạt giống của bạn liên tục trong mỗi khung hình với các cây ngẫu nhiên có giá 0 Mặt Trời và không có thời gian hồi.",
+    "Search Hints": "vòng quay thẻ xáo khay hạt giống xáo bài cây ngẫu nhiên hạt giống ngẫu nhiên đổi cây liên tục cây giá 0 mặt trời cây miễn phí thẻ bài miễn phí hồi chiêu tức thì không hồi chiêu xáo thẻ cây thẻ ngẫu nhiên",
+    "settings": {}
+  },
+  "Sun Hack": {
+    "Name": "Hack Mặt Trời",
+    "Description": "Cấp cho bạn số lượng điểm Mặt Trời vô hạn.",
+    "Search Hints": "vô hạn mặt trời hack mặt trời điểm mặt trời vô tận nhân hệ số mặt trời năng lượng mặt trời vô hạn tăng mặt trời buff mặt trời",
+    "settings": {
+      "Unlimited Sun": "Mặt Trời Vô Hạn",
+      "Sun Amount": "Số Lượng Mặt Trời",
+      "Preserve Original": "Giữ Nguyên Chỉ Số Gốc",
+      "Sun Multiplier": "Hệ Số Nhân Mặt Trời",
+      "Multiplier": "Hệ Số Nhân",
+      "Extra": "Extra",
+      "Custom Automatic sun drop cd": "Custom Automatic sun drop cd",
+      "Automatic sun drop cd": "Automatic sun drop cd",
+      "Allow Sun drop anywhere": "Allow Sun drop anywhere"
+    }
+  },
+  "Money Hack": {
+    "Name": "Hack Tiền Vàng",
+    "Description": "Cấp cho bạn số lượng tiền xu/tiền vàng vô hạn.",
+    "Search Hints": "vô hạn tiền hack tiền vàng tiền vàng vô tận nhân tiền tăng tiền xu hack xu tiền bạc vô hạn tăng tiền vàng xu vô hạn",
+    "settings": {
+      "Unlimited Money": "Tiền Vô Hạn",
+      "Money Amount": "Số Lượng Tiền Vàng",
+      "Preserve Original": "Giữ Nguyên Chỉ Số Gốc",
+      "Money Multiplier": "Hệ Số Nhân Tiền Vàng",
+      "Multiplier": "Hệ Số Nhân"
+    }
+  },
+  "Points Hack": {
+    "Name": "Hack Điểm Số",
+    "Description": "Cấp cho bạn số lượng điểm số vô hạn trong các màn chơi.",
+    "Search Hints": "vô hạn điểm hack điểm số điểm vô tận nhân hệ số điểm tăng điểm số điểm cao kỷ lục điểm số vô hạn buff điểm",
+    "settings": {
+      "Unlimited Points": "Điểm Số Vô Hạn",
+      "Points Amount": "Số Lượng Điểm Số",
+      "Preserve Original": "Giữ Nguyên Chỉ Số Gốc",
+      "Points Multiplier": "Hệ Số Nhân Điểm Số",
+      "Multiplier": "Hệ Số Nhân"
+    }
+  },
+  "Unlimited Modifier Reroll": {
+    "Name": "Xoay Chỉ Số Không Giới Hạn",
+    "Description": "Cho phép làm mới (reroll) các hiệu ứng chỉ số bổ trợ không giới hạn số lần",
+    "Search Hints": "xoay lại chỉ số xoay buff vô hạn xoay lại buff làm mới buff làm mới mod xoay mod không giới hạn buff ngẫu nhiên đổi chỉ số xúc xắc buff đổi hiệu ứng chỉ số vô hạn hack reroll",
+    "settings": {
+      "General": "General",
+      "Reroll Count": "Số Lần Reroll",
+      "Preserve Original Count": "Giữ Nguyên Số Lần Gốc",
+      "Debug Mode": "Debug Mode"
+    }
+  },
+  "Auto Collect": {
+    "Name": "Tự Động Thu Thập",
+    "Description": "Tự động thu thập các vật phẩm được chọn nếu chúng xuất hiện trong trận đấu.",
+    "Search Hints": "thu thập hộp quà bộ thu thập hộp quà hộp quà thu thập hộp quà lấy hộp quà bộ chọn hộp quà tự động thu thập hộp quà các hộp quà các hộp quà lấy hộp quà thu thập hộp quà lấy hộp quà người săn hộp quà thu thập hộp quà hộp quà hộp quà hộp quà hộp quà thu thập hộp tự động lấy hộp quà quà hộp thu thập hộp thu thập hộp thợ săn hộp quà bộ giật hộp quà giật lấy hộp quà bộ giật lấy hộp giật hộp hộp tiền",
+    "settings": {
+      "General": "General",
+      "Items": "Vật Phẩm"
+    }
+  },
+  "Auto Osu": {
+    "Name": "Tự Động Chơi Màn Osu",
+    "Description": "Tự động thực hiện các thao tác bấm hoàn hảo trong chế độ mini-game nhịp điệu Explode-O-su.",
+    "Search Hints": "tự động osu bot osu tự chơi osu master nhịp điệu tự động nhịp điệu tự chơi mini game nhịp điệu hỗ trợ osu đồng bộ nhịp điệu",
+    "settings": {}
+  },
+  "Better Osu": {
+    "Name": "Tối Ưu Chế Độ Osu",
+    "Description": "Cải tiến chế độ Explode-O-su.\nTự động gia tăng chỉ số sức mạnh của đạn dựa trên số chuỗi Combo hiện tại của bạn.",
+    "Search Hints": "tối ưu osu osu tốt hơn tăng sát thương combo osu nâng cấp osu cải tiến osu chuẩn combo osu chuyên nghiệp",
+    "settings": {
+      "General": "General",
+      "Increase Damage": "Gia Tăng Sát Thương",
+      "Spawn Helper Pet": "Triệu Hồi Thú Nuôi Trợ Thủ",
+      "Pet Type": "Loại Thú Nuôi",
+      "Random Bullets": "Bắn Đạn Ngẫu Nhiên",
+      "Allowed bullets": "Các Loại Đạn Được Cho Phép",
+      "DebugMode": "ChếĐộDebug"
+    }
+  },
+  "Custom Keybind": {
+    "Name": "Phím Tắt Tùy Chỉnh",
+    "Description": "Cho phép bạn tùy chỉnh các phím tắt trong trò chơi.",
+    "Search Hints": "phímtắttùychỉnh phímtắt phímtắtnhanh phímbuộc đặtphím đổiphím bảnđồphím ánhxạphím càiđặtphím phímtùychỉnh quảnlýphímtắt buộcphím cấuhìnhphím đổiphímbốtríbànphím bộtùychỉnhphímtắt modphímtắt đổiphím phím phímtùychỉnh ánhxạlạiphím phímcàiđặt buộc phím",
+    "settings": {
+      "In Game": "Trong trận đấu",
+      "Pick up Shovel": "Nhặt Xẻng",
+      "Pick up Glove": "Nhặt Găng Tay",
+      "Pick up Hammer": "Nhặt Búa",
+      "Pick up Wheel Barrow": "Pick up Wheel Barrow",
+      "Coffee Bean": "Hạt Cà Phê",
+      "Seed Slot": "Ô Hạt Giống",
+      "Seed Slot 1": "Seed Slot 1",
+      "Seed Slot 2": "Seed Slot 2",
+      "Seed Slot 3": "Seed Slot 3",
+      "Seed Slot 4": "Seed Slot 4",
+      "Seed Slot 5": "Seed Slot 5",
+      "Seed Slot 6": "Seed Slot 6",
+      "Seed Slot 7": "Seed Slot 7",
+      "Seed Slot 8": "Seed Slot 8",
+      "Seed Slot 9": "Seed Slot 9",
+      "Seed Slot 10": "Seed Slot 10",
+      "Seed Slot 11": "Seed Slot 11",
+      "Seed Slot 12": "Seed Slot 12",
+      "Seed Slot 13": "Seed Slot 13",
+      "Seed Slot 14": "Seed Slot 14",
+      "Misc": "Misc",
+      "Toggle Slow Mode": "Bật Tắt Chế Độ Chậm",
+      "Show Plant HP": "Hiển Thị Máu Của Cây",
+      "Show Zombie HP": "Hiển Thị Máu Của Zombie",
+      "Application": "Application",
+      "Fullscreen": "Fullscreen",
+      "Small Window": "Small Window",
+      "Debug Mode": "Debug Mode"
+    }
+  },
+  "Debug Mode (for devs)": {
+    "Name": "Chế Độ Gỡ Lỗi (Cho Nhà Phát Triển)",
+    "Description": "Ghi lại các thông tin gỡ lỗi (debug) vào bảng điều khiển console.",
+    "Search Hints": "chế độ debug thông tin gỡ lỗi log console nhật ký lỗi nhật ký hệ thống công cụ dev chế độ dev in debug theo dõi hệ thống hiển thị nhật ký",
+    "settings": {
+      "General": "General",
+      "elements": "Các Thành Phần",
+      "Time between Logs": "Thời Gian Giữa Các Lần Log"
+    }
+  },
+  "Dim Background": {
+    "Name": "Làm Tối Cảnh Nền",
+    "Description": "Làm tối mờ cảnh nền phía sau khi cửa sổ menu tính năng này đang mở.",
+    "Search Hints": "làm tối nền làm mờ nền nền trong suốt làm tối background giảm độ sáng nền nền tối phông nền tối mờ phông nền",
+    "settings": {}
+  },
+  "Discord RPC": {
+    "Name": "Trạng Thái Discord (RPC)",
+    "Description": "Hiện thị cập nhật trạng thái chơi game liên tục trên Discord.",
+    "Search Hints": "trạng thái discord hiển thị discord kết nối discord hoạt động discord liên kết discord hiển thị đang chơi game kết nối rpc discord",
+    "settings": {
+      "General": "Cài đặt chung",
+      "Switch Speed (s)": "Tốc Độ Chuyển Đổi (giây)",
+      "In Game": "Trong trận đấu",
+      "Line 1 Message 1": "Line 1 Message 1",
+      "Line 1 Message 2": "Line 1 Message 2",
+      "Line 1 Message 3": "Line 1 Message 3",
+      "Line 1 Message 4": "Line 1 Message 4",
+      "Line 2 Message 1": "Line 2 Message 1",
+      "Line 2 Message 2": "Line 2 Message 2",
+      "Line 2 Message 3": "Line 2 Message 3",
+      "Line 2 Message 4": "Line 2 Message 4",
+      "Iteration Mode": "Chế độ lặp"
+    }
+  },
+  "Time Scale": {
+    "Name": "Tốc Độ Thời Gian (Tốc Độ Game)",
+    "Description": "Thay đổi tỷ lệ thời gian hệ thống (Tăng tốc/Tua nhanh hoặc làm chậm game).",
+    "Search Hints": "tốc độ game tua nhanh game làm chậm game quay chậm tăng tốc độ game nhân tốc độ điều khiển thời gian tua thời gian",
+    "settings": {
+      "General": "General",
+      "Time Scale": "Tốc Độ Thời Gian (Tốc Độ Game)",
+      "Extra": "Extra",
+      "Auto Resume After Game Pause": "Tự Động Tiếp Tục Sau Khi Tạm Dừng Trò Chơi"
+    }
+  },
+  "Ban Plants": {
+    "Name": "Cấm Cây Trồng",
+    "Description": "Cấm (ẩn) các loại cây được chọn trong giai đoạn chọn thẻ hạt giống vào trận",
+    "Search Hints": "cấm cây cấm hạt giống khóa cây ẩn cây trồng chặn cây lọc cây danh sách cấm cây danh sách đen cây trồng giới hạn hạt giống tính năng cấm cây",
+    "settings": {
+      "General": "General",
+      "Entities": "Thực Thể"
+    }
+  },
+  "Odyssey Plants": {
+    "Name": "Cây Trồng Sử Thi (Viễn Chinh)",
+    "Description": "Cho phép bạn hợp nhất (Fusion) các loại cây thuộc chế độ Du Hành / Viễn Chinh (Travel/Odyssey).",
+    "Search Hints": "cây sử thi cây viễn chinh hợp nhất cây viễn chinh ghép cây sử thi fusion cây du hành kết hợp cây sử thi mod cây viễn chinh",
+    "settings": {}
+  },
+  "Change Bullets": {
+    "Name": "Thay Đổi Loại Đạn",
+    "Description": "Thay đổi loại đạn mà các cây trồng bắn ra theo ý muốn.",
+    "Search Hints": "đổi loại đạn thay đạn hoán đổi đạn loại đạn bắn ra skin đạn chỉnh sửa đạn tùy biến đạn đạn thay thế thay đổi loại bắn",
+    "settings": {
+      "General": "General",
+      "Allowed bullets": "Các Loại Đạn Được Cho Phép"
+    }
+  },
+  "Control": {
+    "Name": "Control",
+    "Description": "Allows you to control any plant using the WASD keys.\nPress the <color=yellow>Control Key</color> to control the plant at mouse position.\nPress the <color=yellow>Control Key</color> again to remove the plant from control.",
+    "Search Hints": "control wasdplant wasdcontrol moveplant plantcontrol plantmovement wasd controller plantwasd controlmod plantmover moveplants plantsteer wasdmove driveplant pilotplant steerplant wasdmovement plantdrive plantpilot manualcontrol plantcontrolmod movementmod movementhack wasdmode plantcontrolmode move",
+    "settings": {
+      "General": "General",
+      "Control Key": "Control Key"
+    }
+  },
+  "Faster Plants": {
+    "Name": "Cây Tấn Công Nhanh",
+    "Description": "Giúp các cây trồng được chọn hành động và tấn công nhanh hơn nhiều lần khi tính năng đang bật.",
+    "Search Hints": "cây bắn nhanh cây tốc độ tăng tốc cây cây tấn công nhanh giảm hồi chiêu cây tốc độ đánh tốc độ bắn của cây tăng tốc độ đánh",
+    "settings": {
+      "General": "General",
+      "Entities": "Thực Thể",
+      "Attack Interval": "Khoảng Cách Giữa Các Đòn Tấn Công",
+      "Animation Speed": "Tốc Độ Hoạt Ảnh (Animation)",
+      "Produce Speed": "Tốc Độ Sản Xuất (Mặt Trời/Tiền)"
+    }
+  },
+  "GiftBox Hack": {
+    "Name": "GiftBox Hack",
+    "Description": "Modifies the Plant type generated by GiftBox.",
+    "Search Hints": "giftboxhack giftboxmod giftboxeditor giftboxcustomizer plantgiftbox giftboxgift giftboxsettings giftboxinject giftboxoverride giftboxswap giftboxmanager giftboxpool giftboxrandomizer giftboxchange giftboxfix giftboxcheat giftboxselect giftboxspawn giftboxedit giftboxmodify",
+    "settings": {
+      "General": "General",
+      "Allowed Plants": "Cây Trồng Được Cho Phép"
+    }
+  },
+  "God Mode": {
+    "Name": "Chế Độ Bất Tử",
+    "Description": "Giúp toàn bộ cây trồng của bạn trở nên bất tử.",
+    "Search Hints": "bất tử chế độ thần thánh cây bất tử không nhận sát thương không thể bị giết không chết máu vô hạn thần thánh hack bất tử",
+    "settings": {
+      "General": "General",
+      "Entities": "Thực Thể",
+      "Immune To Damage": "Miễn Nhiễm Sát Thương",
+      "Immune To Vehicle": "Miễn Nhiễm Xe Đè (Xe Lu/Xe Cắt Cỏ)",
+      "Immune To Shovel": "Miễn Nhiễm Xẻng Đào"
+    }
+  },
+  "Homing Bullets": {
+    "Name": "Đạn Tầm Nhiệt (Đuổi Theo Mục Tiêu)",
+    "Description": "Giúp đạn bắn ra từ cây tự động chuyển hướng, tìm và đuổi theo các Zombie.",
+    "Search Hints": "đạn tầm nhiệt đạn đuổi mục tiêu đạn định vị đạn thông minh đạn tự đuổi khóa mục tiêu đạn tự hướng đạn dẫn đường",
+    "settings": {
+      "General": "General",
+      "Projectiles": "Các Loại Đạn / Vật Thể Bắn"
+    }
+  },
+  "Keep Shooting": {
+    "Name": "Bắn Liên Tục Không Ngừng",
+    "Description": "Ép các cây trồng liên tục tấn công/bắn đạn ngay cả khi không có Zombie trên làn đường.",
+    "Search Hints": "bắn liên tục bắn không ngừng xả đạn liên tục tự động bắn sấy đạn spam đạn bắn vô hạn loop bắn xả đạn điên cuồng luôn luôn bắn",
+    "settings": {
+      "General": "General",
+      "Entities": "Thực Thể"
+    }
+  },
+  "Kill All Plants": {
+    "Name": "Tiêu Diệt Tất Cả Cây Trồng",
+    "Description": "Lập tức xóa sạch và tiêu diệt các cây trồng được chọn trên sân đấu.",
+    "Search Hints": "xóa tất cả cây giết sạch cây phá hủy cây dọn dẹp sân quét sạch cây tiêu diệt cây dọn bãi cỏ xóa toàn bộ cây trồng",
+    "settings": {
+      "General": "General",
+      "Entities": "Thực Thể",
+      "Extra": "Extra",
+      "Auto Turn Off": "Tự Động Tắt"
+    }
+  },
+  "Stellar Upgrade": {
+    "Name": "Stellar Upgrade",
+    "Description": "Allows you to upgrade specific plants to their StarBound version.",
+    "Search Hints": "starboundupgrade starbound starupgrade starplant plantupgrade starboundmode starboundconversion upgradeplant plant-starbound star-bound upgrade-starbound starboundmod starboundplants starboundify starboundchanger plantstar upgrade-to-starbound starversion starboundlevel starboundtool starboundlogic stellarupgrade stellarplants",
+    "settings": {
+      "General": "General",
+      "Upgrade Key": "Upgrade Key"
+    }
+  },
+  "Auto Plant": {
+    "Name": "Tự động đặt cây",
+    "Description": "Cho phép bạn đặt phiên bản bóng ma của cây trồng cái mà sẽ được thay thế bằng cây trồng thực tế theo thời gian.\nSử dụng Chuột Phải để xóa Cây Bóng Ma",
+    "Search Hints": "tựđộngtrồng câybóngma trồngcâybóngma tựđộngtrồng câybóngma sinhbóngma tựđộngtrồngcâybóngma xâybóngma bộđặtbóngma vịtríbóngma câybóngma bộtựđộngtrồng modcâybóngma trồngcâybóngma tựđộngđiền hạtgiốngbóngma pháttriểnbóngma xâybóngma câybóngma modtựđộngtrồng tựđộngbóngma bóngma hạtgiốngbóngma bộđếmthờigianbóngma sinhbóngma bộđặtbóngma đặtbóngma côngcụtrồngcâybóngma",
+    "settings": {
+      "General": "General",
+      "Render Ghost Plant": "Hiển Thị Đồ Họa Cây Bóng Ma",
+      "Ghost Opacity": "Độ Mờ Của Bóng Ma",
+      "Multi Plant": "Trồng Nhiều Cây",
+      "Use Extra Plant": "Sử Dụng Cây Thêm",
+      "Planting Order": "Thứ Tự Trồng Cây"
+    }
+  },
+  "No Glove CD": {
+    "Name": "Găng Tay Không Hồi Chiêu",
+    "Description": "Thiết lập thời gian hồi chiêu tùy chỉnh cho vật phẩm Găng Tay.",
+    "Search Hints": "găng tay không hồi chiêu hồi chiêu găng tay thời gian hồi găng tay găng tay dùng liên tục xóa hồi chiêu găng tay găng tay tức thì",
+    "settings": {
+      "General": "General",
+      "Custom Glove Cooldown": "Thời Gian Hồi Găng Tay Tùy Chỉnh",
+      "Extra": "Extra",
+      "Preserve Original": "Giữ Nguyên Chỉ Số Gốc",
+      "Reset CD on Enable": "Đặt Lại Hồi Chiêu Khi Bật Tính Năng"
+    }
+  },
+  "No Hammer CD": {
+    "Name": "Búa không hồi chiêu",
+    "Description": "Búa Không Hồi Chiêu",
+    "Search Hints": "búa không hồi chiêu hồi chiêu búa thời gian hồi búa đập búa liên tục xóa hồi chiêu búa búa tức thì búa thần tốc búa vô hạn",
+    "settings": {
+      "General": "General",
+      "Custom Hammer Cooldown": "Thời Gian Hồi Búa Tùy Chỉnh",
+      "Extra": "Extra",
+      "Preserve Original": "Giữ Nguyên Chỉ Số Gốc",
+      "Reset CD on Enable": "Đặt Lại Hồi Chiêu Khi Bật Tính Năng"
+    }
+  },
+  "No Cards CD": {
+    "Name": "Thẻ Bài Không Hồi Chiêu",
+    "Description": "Thiết lập thời gian hồi chiêu tùy chỉnh cho các thẻ bài hạt giống.",
+    "Search Hints": "thẻ bài không hồi chiêu hồi chiêu thẻ cây trồng cây liên tục thẻ cây không hồi trồng cây tức thì xóa hồi chiêu thẻ bài trồng cây không chờ",
+    "settings": {
+      "General": "General",
+      "Cards": "Các Thẻ Bài Hạt Giống",
+      "Duplicate Cards": "Nhân Bản Thẻ Bài",
+      "Custom CD Multiplier": "Hệ Số Nhân Thời Gian Hồi Chiêu Tùy Chỉnh"
+    }
+  },
+  "Column Glove": {
+    "Name": "Găng Tay Theo Cột",
+    "Description": "Khi di chuyển một cây bằng găng tay, toàn bộ các cây cùng loại trên cột dọc đó cũng sẽ di chuyển đồng thời.",
+    "Search Hints": "găng tay theo cột di chuyển theo cột dời cây theo cột dời cây cùng loại di chuyển đồng thời di chuyển hàng loạt găng tay dời cây đồng bộ cột dọc",
+    "settings": {}
+  },
+  "Column Planting": {
+    "Name": "Trồng Cây Theo Cột",
+    "Description": "Trồng Toàn Bộ Cột Dọc Chỉ Với Một Click",
+    "Search Hints": "trồng theo cột trồng hàng loạt nhân bản cây trồng theo hàng trồng diện rộng trồng cây nhanh tự động trồng cây nhân số lượng cây trồng cột dọc",
+    "settings": {
+      "Debug Mode": "Debug Mode"
+    }
+  },
+  "Column Shovel": {
+    "Name": "Xẻng Đào Theo Cột",
+    "Description": "Khi dùng xẻng xúc một cây, toàn bộ các cây cùng loại trên cột dọc đó cũng sẽ bị đào đi cùng lúc.",
+    "Search Hints": "xẻng theo cột đào theo cột xóa cột dọc đào hàng loạt đào tất cả đào cây giống nhau dọn dẹp cột dọc gỡ bỏ hàng loạt đào cây đồng bộ",
+    "settings": {
+      "General": "General",
+      "Mode": "Chế Độ",
+      "Only Similar Plants": "Chỉ Những Cây Giống Nhau"
+    }
+  },
+  "Plant Anywhere": {
+    "Name": "Trồng Cây Mọi Nơi",
+    "Description": "Cho phép bạn đặt cây trồng ở cả những vị trí thông thường không hợp lệ (không cho phép).",
+    "Search Hints": "trồng mọi nơi đặt mọi chỗ vị trí không hợp lệ bỏ qua vị trí tự do trồng cây trồng tự do phá giới hạn ô đất xây dựng tự do bất chấp địa hình trồng cây trên nước trồng cây trên không",
+    "settings": {}
+  },
+  "Better Health Display": {
+    "Name": "Hiển Thị Máu Tối Ưu",
+    "Description": "Chuyển đổi văn bản hiển thị lượng máu (HP) dài dòng thành dạng rút gọn rõ ràng hơn",
+    "Search Hints": "hiển thị máu thanh máu hiện hp hiển thị hp rút gọn hp hp ngắn rõ ràng dạng máu giao diện máu nhìn rõ máu thanh hp tối ưu thanh máu",
+    "settings": {
+      "General": "General",
+      "Combine HP and Shield": "Kết Hợp Máu Và Khiên",
+      "Show Max Health": "Hiện Máu Tối Đa",
+      "Auto Enable Plant Hp": "Tự Bật Thanh Máu Của Cây",
+      "Auto Enable Zombie Hp": "Tự Bật Thanh Máu Của Zombie",
+      "Extra": "Extra",
+      "Show Star icon on Controlled Plant": "Show Star icon on Controlled Plant"
+    }
+  },
+  "Clean Weather": {
+    "Name": "Clean Weather",
+    "Description": "Clears fog/snowfall",
+    "Search Hints": "cleanweather clearweather nofog nosnow weatherclear weatherfix removefog removesnow clearfog clearsnow weathercontrol weatherclean skyclear fogremover snowremover no-weather weather-clear clear-weather visibilityfix clearweather-mod weather-mod weatherhack",
+    "settings": {
+      "General": "General",
+      "Clear Fog": "Clear Fog",
+      "Clear SnowFall": "Clear SnowFall"
+    }
+  },
+  "No FPS Limit": {
+    "Name": "No FPS Limit",
+    "Description": "Thiết lập giới hạn FPS tùy chỉnh hoặc phá vỡ giới hạn khung hình hiện tại của game",
+    "Search Hints": "giới hạn fps khóa fps khung hình trên giây phá giới hạn fps mở khóa fps fps tùy chỉnh fps tối đa sửa fps gỡ giới hạn khung hình mượt game tăng tốc fps sửa lag",
+    "settings": {
+      "General": "General",
+      "Max FPS": "FPS Tối Đa"
+    }
+  },
+  "No Render": {
+    "Name": "Ẩn Hiển Thị Đồ Họa",
+    "Description": "Giờ đây bạn có thể nhìn thấy bãi cỏ trống trải của mình.",
+    "Search Hints": "ẩn đồ họa ẩn sân cỏ cây tàng hình zombie tàng hình ẩn hiển thị tắt đồ họa sân cỏ trống ẩn texture ẩn hình ảnh tắt render ẩn cây ẩn zombie nhìn nền đất",
+    "settings": {
+      "General": "General",
+      "Particles": "Hiệu Ứng Hạt (Hạt Đạn/Khói/Nổ)",
+      "Game Objects": "Các Đối Tượng Trong Game",
+      "Bullets": "Bullets"
+    }
+  },
+  "Smaller Projectiles": {
+    "Name": "Thu Nhỏ Kích Thước Đạn",
+    "Description": "Thu nhỏ kích thước hiển thị của các viên đạn được chọn để giảm tình trạng rối mắt trên màn hình.",
+    "Search Hints": "đạn nhỏ hơn giảm kích thước đạn đạn tí hon kích thước đạn hạt đậu nhỏ đỡ rối màn hình thu nhỏ đạn đạn nhỏ màn hình gọn viên đạn nhỏ giảm lag đạn",
+    "settings": {
+      "General": "General",
+      "Bullet Types": "Các Loại Đạn",
+      "Scale Multiplier": "Hệ Số Tỷ Lệ Kích Thước"
+    }
+  },
+  "Anti-Lag Spawns": {
+    "Name": "Sinh Zombie Chống Lag",
+    "Description": "Giãn cách thời gian xuất hiện của các đợt Zombie đông nghẹt để tránh bị khựng/lag game đột ngột.\n*Lưu ý: Tính năng này có thể làm lỗi logic của trò chơi và bộ đếm số lượng Zombie.*",
+    "Search Hints": "chống lag sinh zombie giảm lag sửa lag zombie ra giãn cách zombie ra từ từ giảm đứng máy mượt game sửa lỗi bộ đếm lỗi đếm zombie sinh zombie mượt",
+    "settings": {
+      "General": "General",
+      "Frames Between Spawns": "Số Khung Hình Cách Nhau Giữa Mỗi Lần Sinh",
+      "Unaffected Entities": "Các Thực Thể Không Bị Ảnh Hưởng"
+    }
+  },
+  "Buff Zombies": {
+    "Name": "Tăng Sức Mạnh Zombie",
+    "Description": "Gia tăng chỉ số sức mạnh cho các Zombie được chọn khi tính năng này đang hoạt động.",
+    "Search Hints": "buff zombie zombie mạnh hơn tăng máu zombie tăng hp zombie zombie trâu bò zombie siêu khỏe cường hóa zombie tăng sức mạnh quái",
+    "settings": {
+      "General": "General",
+      "Entities": "Thực Thể",
+      "Hp Multiply": "Hệ Số Nhân Máu (HP)"
+    }
+  },
+  "Clamp Zombies": {
+    "Name": "Gom Cụm Gộp Máu Zombie",
+    "Description": "Duy trì FPS ổn định bằng cách gộp lượng máu của các Zombie giống nhau đứng gần lại làm một khi số lượng quái vượt quá giới hạn.\n*Lưu ý: Có thể làm lỗi bộ đếm sát thương.*",
+    "Search Hints": "gom cụm zombie gộp zombie tối ưu fps gộp máu zombie kết hợp zombie gộp quái zombie chồng lên nhau giới hạn zombie gộp hp zombie fusion",
+    "settings": {
+      "General": "General",
+      "Max Zombies": "Số Lượng Zombie Tối Đa",
+      "Apply Speed Reduction": "Áp Dụng Giảm Tốc Độ",
+      "Add % of Hp": "Cộng Thêm % Lượng Máu",
+      "Extra": "Extra",
+      "Visual Scale": "Tỷ Lệ Hiển Thị Kích Thước"
+    }
+  },
+  "Faster Zombies": {
+    "Name": "Zombie Di Chuyển Nhanh",
+    "Description": "Khiến các Zombie được chọn di chuyển và ăn cây nhanh hơn gấp nhiều lần khi bật tính năng này.",
+    "Search Hints": "zombie nhanh hơn tăng tốc zombie tốc độ zombie zombie thần tốc zombie chạy nhanh zombie tăng tốc quái vật chạy nhanh",
+    "settings": {
+      "General": "General",
+      "Entities": "Thực Thể",
+      "Speed": "Tốc Độ"
+    }
+  },
+  "Hypnotize All Zombies": {
+    "Name": "Thôi Miên Tất Cả Zombie",
+    "Description": "Thôi miên các Zombie được chọn khi tính năng này đang hoạt động (biến chúng thành đồng minh).",
+    "Search Hints": "thôi miên tất cả thôi miên zombie bùa mê zombie kiểm soát tâm trí zombie đồng minh tẩy não zombie biến zombie thành bầy mình zombie phản chủ",
+    "settings": {
+      "General": "General",
+      "Entities": "Thực Thể",
+      "Auto Turn Off": "Tự Động Tắt"
+    }
+  },
+  "Kill All Zombies": {
+    "Name": "Tiêu Diệt Tất Cả Zombie",
+    "Description": "Lập tức quét sạch và tiêu diệt toàn bộ các Zombie được chọn đang có trên sân.",
+    "Search Hints": "giết tất cả zombie xóa sạch zombie dọn sạch zombie tiêu diệt zombie diệt quái lập tức thắng quét sạch xác sống hạ gục toàn bộ zombie",
+    "settings": {
+      "General": "General",
+      "Entities": "Thực Thể",
+      "Hypnotized Entities": "Các Thực Thể Đã Bị Thôi Miên",
+      "Extra": "Extra",
+      "Auto Turn Off": "Tự Động Tắt"
+    }
+  },
+  "Wave Hack": {
+    "Name": "Wave Hack",
+    "Description": "Allows you to modify wave spawn logic.",
+    "Search Hints": "wavehack wavemod wavespawn wavemodify wavespawnlogic spawnlogic waveeditor wavemanager customwaves waveconfig wavespawnrate wavecontrol wavespawnsettings modifyspawn wavespawncontrol wavecheat wavespawner wavechanger wavesize wavemanager wavebypass waveflow dontsendzombies pause zombiespause wavepause pausewave removewave",
+    "settings": {
+      "Cooldown": "Cooldown",
+      "Custom Wave Cooldown": "Custom Wave Cooldown",
+      "Wave Cooldown": "Wave Cooldown",
+      "Freeze Wave Timer": "Freeze Wave Timer",
+      "Spawn Rate": "Spawn Rate",
+      "Zombies count multiplier": "Zombies count multiplier"
+    }
+  },
+  "Simple Spawner": {
+    "Name": "Bộ gọi cây/quái đơn giản",
+    "Description": "Một bản mod <color=red>gọi cây/quái đơn giản</color> cho PvZ Fusion.\n<b>Lưu ý:</b> Không hỗ trợ tổ hợp nhiều phím như (alt+ctrl+a).",
+    "Search Hints": "simplespawner spawnmod pvzfusion spawner spawnmenu spawnitems unitspawner spawnzombies spawnplants entityspawner spawncheat itemspawner spawntool summoner summonsummon simple-spawner fusion-spawner spawnpvz entitysummon spawnmanager summonmod spawnconfig spawnsettings spawncontroller",
+    "settings": {
+      "General": "General",
+      "Spawn plant": "Tạo thực vật (Plants)",
+      "Spawn zombie": "Tạo thây ma (Zombies)",
+      "Delete all plants": "Xóa tất cả thực vật",
+      "Delete all zombies": "Xóa tất cả thây ma",
+      "Pets": "Thú cưng",
+      "Pet Spawn Prefix": "Tiền tố tạo thú cưng",
+      "Spawn pet gargantuar": "Tạo thú cưng Khổng lồ (Gargantuar)",
+      "Spawn pet football": "Tạo thú cưng Cầu thủ (Football)",
+      "Spawn pet drown": "Tạo thú cưng Đuối nước",
+      "Spawn pet jackbox": "Tạo thú cưng Hộp hề (Jackbox)",
+      "Spawn pet snow boss": "Tạo thú cưng Trùm tuyết (Snow Boss)",
+      "Spawn pet horse": "Tạo thú cưng Ngựa",
+      "Spawn pet imp": "Tạo thú cưng Quỷ lùn (Imp)",
+      "Spawn pet kirov": "Tạo thú cưng Kirov (Khí cầu)",
+      "Extra": "Extra",
+      "Toggle time scale": "Bật/Tắt tốc độ thời gian",
+      "Mind control modifier": "Bộ chỉnh sửa thôi miên (Thao túng tâm trí)",
+      "Boss modifier": "Bộ chỉnh sửa Trùm (Boss)",
+      "Spawn boss 1": "Tạo Trùm 1",
+      "Spawn boss 2": "Tạo Trùm 2",
+      "Items": "Vật Phẩm",
+      "Spawn fertilizer": "Tạo bình phân bón",
+      "Spawn bucket": "Tạo xô chậu",
+      "Spawn helmet": "Tạo mũ bảo hiểm",
+      "Spawn jackbox": "Tạo hộp hề (Jackbox)",
+      "Spawn pickaxe": "Tạo cuốc chim",
+      "Spawn machine": "Tạo máy móc",
+      "Spawn super machine": "Tạo siêu máy móc",
+      "Spawn portal heart": "Tạo lõi cổng dịch chuyển (Portal Heart)",
+      "Spawn sprout pot prize": "Tạo chậu mầm thưởng"
+    }
+  }
+}

@@ -1,0 +1,588 @@
+{
+  "Any Buff": {
+    "Name": "Any Buff",
+    "Description": "Allows you to pick any buff from the modifiers menu.\nMake sure to refresh the buffs menu by clicking any button.",
+    "Search Hints": "anybuff buffpicker selectbuff pickbuff modifierpicker modpicker buffmenu buffselector custombuffs bufflist modlist buffmod unlockbuffs buffchoice pickmodifiers anymodifier buffaccess modbuffs buffselection buffunlocker buffcustomizer pickanybuff buffhack modmenu pickany",
+    "settings": {}
+  },
+  "Repick Plants": {
+    "Name": "Repick Plants",
+    "Description": "Allows you to repick your plants mid-game.",
+    "Search Hints": "repickplants reselectplants changeplants midgameplants plantswitch plantrepick reselect seedbankreset pickagain repickseed re-pick changeseed midgameselector plantchange plantmenu seedreselect selectagain reselectseeds plantselection repickmode changeplant midgamepick resetplants repickselection seedsrepick re-select repick plantreselector",
+    "settings": {
+      "Debug Mode": "Debug Mode"
+    }
+  },
+  "Custom Conveyor": {
+    "Name": "Custom Conveyor",
+    "Description": "Forces specific plants into the conveyor belt.\nIf none are selected, injects every plant.",
+    "Search Hints": "customconveyor conveyor belt customplants forceplants conveyorforce plantconveyor selectconveyor editconveyor conveyorinjector injectplants conveyoroverride customconveyer conveyerbelt plantinject injectevery plantspawn custombelt forceconveyer converyor conveyorcustom conveyerbelt forceplant allplants conveyoritem spawnplant conveyorpool custompool conveyorlist",
+    "settings": {
+      "General": "General",
+      "Allowed Plants": "Allowed Plants"
+    }
+  },
+  "Developer Mode": {
+    "Name": "Developer Mode",
+    "Description": "Developer Mode is used by game devs during game testing",
+    "Search Hints": "developermode devmode devmod developer devtools developmentmode debugmode debugdev devtesting gametesting dev-tools devfeatures adminmode devconsole cheatsdev devsettings testingmode developeroptions devtoolsenabled devaccess devmenu developeraccess devbuild testingtool",
+    "settings": {}
+  },
+  "No Cap": {
+    "Name": "No Cap",
+    "Description": "Bypasses the ingame sun/money cap.",
+    "Search Hints": "nocap suncap moneycap bypasscap capremove infinite sun money unlimitedsun unlimitedmoney capbreak nosuncap nomoneycap caplimit moneyfix sunfix capoverride unlimitedcurrency nosunlimit nomoneylimit capbypass maxsun maxmoney currencycap removecap moneycheat suncheat nocapmod",
+    "settings": {
+      "General": "General",
+      "Sun Cap": "Sun Cap",
+      "Money Cap": "Money Cap"
+    }
+  },
+  "No Craters": {
+    "Name": "No Craters",
+    "Description": "Removes all the craters while the module is active.",
+    "Search Hints": "nocraters removecraters craterremoval deletecraters nocrater craterless clearcraters craterclear anti-crater craterfix nocratermod craterblocker nocraeters nocraetors nocratars nocreaters nocreators nocratres nocraterss cratereraser craterslayer cratereraser craterterminator groundfix repairground smoothground cratergone craterhide hidecraters craterdisappear cratercancel craterbypass craternull",
+    "settings": {
+      "Extra": "Extra",
+      "Auto Turn Off": "Auto Turn Off"
+    }
+  },
+  "No Grid Item": {
+    "Name": "No Grid Item",
+    "Description": "Removes all the selected Grid Item(s) while the module is active.",
+    "Search Hints": "nogriditem removegriditem griditemremover cleargriditems deletegriditems nogriditems nogriditemmod nogriditemfix nograve noladder noiceblock noscarypot nograves noladders noiceblocks noscarypots anti-grave anti-ladder anti-iceblock anti-pot removegraves removeladders removeiceblocks removescarypots graveclearer ladderclearer iceblockclearer potclearer nogriditemm nogrditem nogrititem nogriditme nogriditemz removegridobjects deletegridobjects",
+    "settings": {
+      "General": "General",
+      "Grid Items": "Grid Items",
+      "Extra": "Extra",
+      "Auto Turn Off": "Auto Turn Off",
+      "Debug Mode": "Debug Mode"
+    }
+  },
+  "No Lose": {
+    "Name": "No Lose",
+    "Description": "'Please turn off that' - sincerely ZomBoss",
+    "Search Hints": "nolose nodefeat winalways neverlose antigameover godmode cheat no-lose indestructible cantlose alwayswin winmod losefix stoplose no-die nodie wincheat easywin nolosemod eternal survival unkillable endlesswin victoryalways neverdefeat flawless runwon antilose",
+    "settings": {}
+  },
+  "Card Roulette": {
+    "Name": "Card Roulette",
+    "Description": "Scrambles your seed bank every frame with 0-cost, instant-cooldown random plants.",
+    "Search Hints": "cardroulette seedbank scramble shuffle randomplants randomseed seedroulette frameplant framechange zerocost freeplants freecards instantcooldown nocoldown instantplants cardscramble roudlette seedrandom cardshuffle plantroulette cardscrambler seedscrambler instantseed framecooldown freeluck costzero randomcard instantcard luckseed",
+    "settings": {}
+  },
+  "Sun Hack": {
+    "Name": "Sun Hack",
+    "Description": "Gives you unlimited sun.",
+    "Search Hints": "unlimited sun infinite sun snu sum ifnite finite sunulimited sun limitless sun unrestricted sun endless sun sunmultiplier solarmultiplier Money Hack Money Cheat sunboost sunbonus sunpowerup sonmultiplier sunmultiplyer sunmultipliar sunmultipier sunmultyplier sunmulltiplier sunmultaplier lightmultiplier raymultiplier sunfactor sunamplifier sunintensifier sunenhancer solmultiplier sunx2",
+    "settings": {
+      "Unlimited Sun": "Unlimited Sun",
+      "Sun Amount": "Sun Amount",
+      "Preserve Original": "Preserve Original",
+      "Sun Multiplier": "Sun Multiplier",
+      "Multiplier": "Multiplier",
+      "Extra": "Extra",
+      "Custom Automatic sun drop cd": "Custom Automatic sun drop cd",
+      "Automatic sun drop cd": "Automatic sun drop cd",
+      "Allow Sun drop anywhere": "Allow Sun drop anywhere"
+    }
+  },
+  "Money Hack": {
+    "Name": "Money Hack",
+    "Description": "Dave will become rich with this one.",
+    "Search Hints": "unlimited money infinite money mny mney ifnite finiteulimited limitless unrestricted endless moneymultiplier cashmultiplier moneyboost moneybonus moneyincrease moneymultiplyer monymultiplier moenymultiplier moneymultipier moneymultaplier moneymulltiplier moneymultipyler wealthmultiplier richesmultiplier coinmultiplier dollarmultiplier currencymultiplier moneyfactor moneyx2 cashboost",
+    "settings": {
+      "Unlimited Money": "Unlimited Money",
+      "Money Amount": "Money Amount",
+      "Preserve Original": "Preserve Original",
+      "Money Multiplier": "Money Multiplier",
+      "Multiplier": "Multiplier"
+    }
+  },
+  "Points Hack": {
+    "Name": "Points Hack",
+    "Description": "Now you can purchase any modifier.",
+    "Search Hints": "unlimited points infinite points pts currency gold ifnite finiteulimited limitless unrestricted endless pointsmultiplier pointmultiplier ptsmultiplier scoremultiplier scoreboost pointsboost pointmultiplyer pointsmultiplyer pointmultipier pointsmultipier pointsmultyplier pointmultyplier scoreincrease pointsbonus pointbonus pointx2 ptsbonus pointsfactor scorefactor",
+    "settings": {
+      "Unlimited Points": "Unlimited Points",
+      "Points Amount": "Points Amount",
+      "Preserve Original": "Preserve Original",
+      "Points Multiplier": "Points Multiplier",
+      "Multiplier": "Multiplier"
+    }
+  },
+  "Unlimited Modifier Reroll": {
+    "Name": "Unlimited Modifier Reroll",
+    "Description": "Allows unlimited rerolls of modifiers",
+    "Search Hints": "unlimitedmodifierreroll modifierreroll infinite reroll buffs rerollbuffs buffreroll rerollmods modreroll modreroller unlimitedreroll infinitereoll rerollunlimited randombuff rerollability rerolloptions buffmod rerollcheat betterbuffs buffrandomizer freeroll endlessreroll modchange rerollpower rerollstats rerollfix modifierchange rerollanybuff infinitestats modrerollcheat",
+    "settings": {
+      "General": "General",
+      "Reroll Count": "Reroll Count",
+      "Preserve Original Count": "Preserve Original Count",
+      "Debug Mode": "Debug Mode"
+    }
+  },
+  "Auto Collect": {
+    "Name": "Auto Collect",
+    "Description": "Collects the selected item(s) if they apprear in the game.",
+    "Search Hints": "collectgiftbox giftboxcollector gitbox giftboxcollect getgiftbox giftboxpicker autocollectgiftbox giftboxes giftboxs giftboxget gitboxcollect giftboxget giftboxer giftbox-collect giftbix giftvox giftboxe giftbx collectgift giftboxauto gift-box giftcollect boxcollect giftboxhunter giftboxgrabber giftboxgrab giftgraber giftgrab giftbux",
+    "settings": {
+      "General": "General",
+      "Items": "Items"
+    }
+  },
+  "Auto Osu": {
+    "Name": "Auto Osu",
+    "Description": "Automatically plays the Explode-O-su mode.",
+    "Search Hints": "autoosu rhythmmaster explodeosu rhythmmaster explodosu auto-osu osuauto autorythm rhythmbot osuexplode osux2 rhythmsync osusync rythmmaster rhythm-master explode-o-su rhythmplayer osuhelper rhythmtrainer",
+    "settings": {}
+  },
+  "Better Osu": {
+    "Name": "Better Osu",
+    "Description": "Makes Explode-O-su Better.\nIncreases Stats of Bullets as the current combo Increases.",
+    "Search Hints": "betterosu osuplus osupro osuextended improvedosu bestosu osufix osutweak osulite osupremuim betterosuo betterossu betterosuu bedterosu betertosu bestterosu superosu eliteosu osuremastered perfectosu osunext osucustom osuoptimized osurefined osuadvanced osutools osugameplay osufaster osusmooth",
+    "settings": {
+      "General": "General",
+      "Increase Damage": "Increase Damage",
+      "Spawn Helper Pet": "Spawn Helper Pet",
+      "Pet Type": "Pet Type",
+      "Random Bullets": "Random Bullets",
+      "Allowed bullets": "Allowed bullets",
+      "DebugMode": "DebugMode"
+    }
+  },
+  "Custom Keybind": {
+    "Name": "Custom Keybind",
+    "Description": "Allows you to customize the ingame keybinds.",
+    "Search Hints": "customkeybind keybinds hotkeys keybindings setkeys changekeys keymap keymapping keysettings customkeys keybindmanager bindkeys keyconfig keyrebind keyboardlayout keybindcustomizer keybindmod rebind keys customkey keyremapping settingskey binds bind",
+    "settings": {
+      "In Game": "In Game",
+      "Pick up Shovel": "Pick up Shovel",
+      "Pick up Glove": "Pick up Glove",
+      "Pick up Hammer": "Pick up Hammer",
+      "Pick up Wheel Barrow": "Pick up Wheel Barrow",
+      "Coffee Bean": "Coffee Bean",
+      "Seed Slot": "Seed Slot",
+      "Seed Slot 1": "Seed Slot 1",
+      "Seed Slot 2": "Seed Slot 2",
+      "Seed Slot 3": "Seed Slot 3",
+      "Seed Slot 4": "Seed Slot 4",
+      "Seed Slot 5": "Seed Slot 5",
+      "Seed Slot 6": "Seed Slot 6",
+      "Seed Slot 7": "Seed Slot 7",
+      "Seed Slot 8": "Seed Slot 8",
+      "Seed Slot 9": "Seed Slot 9",
+      "Seed Slot 10": "Seed Slot 10",
+      "Seed Slot 11": "Seed Slot 11",
+      "Seed Slot 12": "Seed Slot 12",
+      "Seed Slot 13": "Seed Slot 13",
+      "Seed Slot 14": "Seed Slot 14",
+      "Misc": "Misc",
+      "Toggle Slow Mode": "Toggle Slow Mode",
+      "Show Plant HP": "Show Plant HP",
+      "Show Zombie HP": "Show Zombie HP",
+      "Application": "Application",
+      "Fullscreen": "Fullscreen",
+      "Small Window": "Small Window",
+      "Debug Mode": "Debug Mode"
+    }
+  },
+  "Debug Mode (for devs)": {
+    "Name": "Debug Mode (for devs)",
+    "Description": "Logs debug info onto the console.",
+    "Search Hints": "debugmode debuginfo consolelog loginfo debuglog debugconsole logger debugshow debugdata logs debugtools debugconsolelog devlog devmode debugprint systemlog debugdump printdebug debugmonitor showlogs debugmessages debugview debugactive loggingmode debugtrace debugpanel infolog",
+    "settings": {
+      "General": "General",
+      "elements": "elements",
+      "Time between Logs": "Time between Logs"
+    }
+  },
+  "Dim Background": {
+    "Name": "Dim Background",
+    "Description": "Dims the background while the module window is open.",
+    "Search Hints": "dimbackground transparentbackground backgrounddim backgroundtransparent dimmedbackground bgdim bgtransparent dimbg transparentbg darkerbackground lowopacitybackground glassbackground clearbackground seethroughbackground dimbackround dimbackgound transperent transparant transparents transperantbg transparantbg dimbackgorund opacitymultiplier hidebackground nobackground backgroundopacity backgroundalpha backgroundshade backgrounddarken backgroundblur",
+    "settings": {}
+  },
+  "Discord RPC": {
+    "Name": "Discord RPC",
+    "Description": "Shows rolling Gamestatus updates on Discord.",
+    "Search Hints": "discordrpc discordrichpresence discordpresence discordactivity discordstatus discordintegration rpcstatus richpresence discordconnect discordlink discordinfo discorddisplay rpcpresence discordrp discordstat discordlive discordsync discordgame discordapi discrodrpc discordrcp discordrps discordrich discordpresance discordpresense discordconection discordintigration rpcbot rpcclient rpcactive",
+    "settings": {
+      "General": "General",
+      "Switch Speed (s)": "Switch Speed (s)",
+      "In Game": "In Game",
+      "Line 1 Message 1": "Line 1 Message 1",
+      "Line 1 Message 2": "Line 1 Message 2",
+      "Line 1 Message 3": "Line 1 Message 3",
+      "Line 1 Message 4": "Line 1 Message 4",
+      "Line 2 Message 1": "Line 2 Message 1",
+      "Line 2 Message 2": "Line 2 Message 2",
+      "Line 2 Message 3": "Line 2 Message 3",
+      "Line 2 Message 4": "Line 2 Message 4",
+      "Iteration Mode": "Iteration Mode"
+    }
+  },
+  "Time Scale": {
+    "Name": "Time Scale",
+    "Description": "Changes the Time scale.",
+    "Search Hints": "timescale slowmo slowmotion slow-mo speedmultiplier gamespeed timespeed slowmoion slowmoshun slowmow slomo slomotion slomow timesclae timescael timescal timesclae speedfactor timescaleup timescaleslow timescalebot speedcontrol fastforward speedchange bullettime speedup speeddown velocitycontrol timingmultiplier timefactor",
+    "settings": {
+      "General": "General",
+      "Time Scale": "Time Scale",
+      "Extra": "Extra",
+      "Auto Resume After Game Pause": "Auto Resume After Game Pause"
+    }
+  },
+  "Ban Plants": {
+    "Name": "Ban Plants",
+    "Description": "Bans the selected Plant(s) in the seed selection phase.",
+    "Search Hints": "banplants plantban seedban banseed disableplants removeplants plantremoval plantblock blockplants seedblock banplant plantbanmod seedfilter filterplants disableseed blockseed plantselectionban banlist plantblacklist banselections seedbanmod banplantsmod plantblocker banselected removeplant seedlimit banplantselect banfeature",
+    "settings": {
+      "General": "General",
+      "Entities": "Entities"
+    }
+  },
+  "Odyssey Plants": {
+    "Name": "Odyssey Plants",
+    "Description": "Allows you to fuse Travel/Odyssey Plants.",
+    "Search Hints": "travelplants odysseyplants travelplantfusion odysseyplantfusion fuseplants fusionplants travelplantodyssey travelodyssey odysseyfuse travelfuse plantmerging plantcombine travelplantcombine odysseyplantcombine travelplantmix odysseyplantmix travelplantmerger odysseyplantmerger travelplantsfused odysseyplantsfused travelplantsmix travelplantsmerger travalplants travleplants odesseyplants odessyplants odyseyplants odyseeplants plantfusion travelodysseymod",
+    "settings": {}
+  },
+  "Change Bullets": {
+    "Name": "Change Bullets",
+    "Description": "Changes the Bullet Plant(s) shoot.",
+    "Search Hints": "changebullets bulletchanger projectilechanger bulletswap projectileswap changebullet switchbullets bulletskins bullettype projectiletype bulletmodifier changeammo ammoswitch bulleteditor bulletcustomizer projectilecustomizer changebulletts changebullits changebullits changebulits projectilemod ammomod bulletvariant projectileskin bulletoverride ammovariant shootchange bulletprojectile bullettransformation bulletreplace",
+    "settings": {
+      "General": "General",
+      "Allowed bullets": "Allowed bullets"
+    }
+  },
+  "Control": {
+    "Name": "Control",
+    "Description": "Allows you to control any plant using the WASD keys.\nPress the <color=yellow>Control Key</color> to control the plant at mouse position.\nPress the <color=yellow>Control Key</color> again to remove the plant from control.",
+    "Search Hints": "control wasdplant wasdcontrol moveplant plantcontrol plantmovement wasd controller plantwasd controlmod plantmover moveplants plantsteer wasdmove driveplant pilotplant steerplant wasdmovement plantdrive plantpilot manualcontrol plantcontrolmod movementmod movementhack wasdmode plantcontrolmode move",
+    "settings": {
+      "General": "General",
+      "Control Key": "Control Key"
+    }
+  },
+  "Faster Plants": {
+    "Name": "Faster Plants",
+    "Description": "Makes the selected plant(s) faster while the module is active.",
+    "Search Hints": "fasterplants speedplants plantattack speedup plantspeed fastplant plantspeedup plantcooldown plantrate quickplants plantfast plantaccelerator plantboost attackspeed fire-rate plantspeeder fasterplantsmod plantvelocity fasterplantsup fasterplantspeed faster-plants plantrapid plantswift plantspeedy plantturbo plantoverdrive plantbuff plantagility plantquickness plantalacrity fastattack",
+    "settings": {
+      "General": "General",
+      "Entities": "Entities",
+      "Attack Interval": "Attack Interval",
+      "Animation Speed": "Animation Speed",
+      "Produce Speed": "Produce Speed"
+    }
+  },
+  "GiftBox Hack": {
+    "Name": "GiftBox Hack",
+    "Description": "Modifies the Plant type generated by GiftBox.",
+    "Search Hints": "giftboxhack giftboxmod giftboxeditor giftboxcustomizer plantgiftbox giftboxgift giftboxsettings giftboxinject giftboxoverride giftboxswap giftboxmanager giftboxpool giftboxrandomizer giftboxchange giftboxfix giftboxcheat giftboxselect giftboxspawn giftboxedit giftboxmodify",
+    "settings": {
+      "General": "General",
+      "Allowed Plants": "Allowed Plants"
+    }
+  },
+  "God Mode": {
+    "Name": "God Mode",
+    "Description": "Makes Plants Invincible.",
+    "Search Hints": "godmode godmod invincibilty invinsible invincabel unkillable nodamage immortal immortel invincibillity goddmode godmdoe invuln invulnerable invunrable invun invinc plantgod plantinvincibility invensible invonceable invinci godmodecheat no-die infinitelife god-mode invinciblity godmodde",
+    "settings": {
+      "General": "General",
+      "Entities": "Entities",
+      "Immune To Damage": "Immune To Damage",
+      "Immune To Vehicle": "Immune To Vehicle",
+      "Immune To Shovel": "Immune To Shovel"
+    }
+  },
+  "Homing Bullets": {
+    "Name": "Homing Bullets",
+    "Description": "Makes Plants fire Homing rounds.",
+    "Search Hints": "homingbullets homingrounds trackingbullets targetingsystem trackingrounds smartbullets seekerbullets seekershells seekerprojectiles bullettracking homingmod homingplugin homingattack hommingbullets hommingrounds hominbullets homingbulits homingbullits targetbullets targettingbullets autobullets guidedbullets guidedrounds missilebullets curvebullets magneticbullets stickybullets lockonbullets lockonrounds precisionbullets",
+    "settings": {
+      "General": "General",
+      "Projectiles": "Projectiles"
+    }
+  },
+  "Keep Shooting": {
+    "Name": "Keep Shooting",
+    "Description": "Makes Plants fire continuously.",
+    "Search Hints": "keepshooting continuousfire autofire rapidfire nonstopshooting endlessfire alwaysshooting holdfire automaticshooting shootingloop firingloop fireloop keepfire shootingbot autoshot keepshotting keepshoting continousfire continuousshoot nonstopfire rapidshooting firespam shootspam infinitieshooting infiniteshoot burstfire firingrate firespeed shootalways perpetualfire constantfire",
+    "settings": {
+      "General": "General",
+      "Entities": "Entities"
+    }
+  },
+  "Kill All Plants": {
+    "Name": "Kill All Plants",
+    "Description": "Kills the selected plant(s) while the module is active.",
+    "Search Hints": "killallplants killplants plantkiller removeplants deleteplants plantremoval plantslayer destroyplants exterminateplants plantexterminator plantclear clearplants wipeplants plantwipe plantdeath deathplants killallplant killalplants kilallplants killallplantes killallplantts plantdestructor plantdestroyer plantdeleter plantsmasher plantpurger plantexecutioner plantelimination plantterminator plantender planteraser plantvanisher",
+    "settings": {
+      "General": "General",
+      "Entities": "Entities",
+      "Extra": "Extra",
+      "Auto Turn Off": "Auto Turn Off"
+    }
+  },
+  "Stellar Upgrade": {
+    "Name": "Stellar Upgrade",
+    "Description": "Allows you to upgrade specific plants to their StarBound version.",
+    "Search Hints": "starboundupgrade starbound starupgrade starplant plantupgrade starboundmode starboundconversion upgradeplant plant-starbound star-bound upgrade-starbound starboundmod starboundplants starboundify starboundchanger plantstar upgrade-to-starbound starversion starboundlevel starboundtool starboundlogic stellarupgrade stellarplants",
+    "settings": {
+      "General": "General",
+      "Upgrade Key": "Upgrade Key"
+    }
+  },
+  "Auto Plant": {
+    "Name": "Auto Plant",
+    "Description": "Allows you to place ghost version of plants which will be replaced with the actual plants overtime.\nUse Right Click to delete Ghost Plants",
+    "Search Hints": "autoplant ghostplant ghostplanting auto-plant plantghost ghostspawn ghostautoplant ghostbuild ghostplacer ghostplacement ghost-plant autoplanter ghostplantmod ghost-planting autofill ghostseeds ghostgrowth ghost-build ghostingplant autoplantmod ghostauto ghosting ghostseeds ghosttimer ghost-spawn ghostplacer ghostplacing ghostplantingtool",
+    "settings": {
+      "General": "General",
+      "Render Ghost Plant": "Render Ghost Plant",
+      "Ghost Opacity": "Ghost Opacity",
+      "Multi Plant": "Multi Plant",
+      "Use Extra Plant": "Use Extra Plant",
+      "Planting Order": "Planting Order"
+    }
+  },
+  "No Glove CD": {
+    "Name": "No Glove CD",
+    "Description": "Modifies the Ingame Glove's Cooldown.",
+    "Search Hints": "noglovecd glovecooldown customglovecd glovecd zeroglovecd noglovecoolndown glovecooldownreset fastglove instantglove glovebuff glovecdmod glovecdchanger glovecdremover glovecolldown glovecooldon glovecooldwn glovcd glovecooldoun glovecdtimer glovecdreducion glovecooldownreduction glovefast gloveready gloveunlimited gloveinfinite gloveinterval gloveperiod glovespeed glovespam glovefrequency",
+    "settings": {
+      "General": "General",
+      "Custom Glove Cooldown": "Custom Glove Cooldown",
+      "Extra": "Extra",
+      "Preserve Original": "Preserve Original",
+      "Reset CD on Enable": "Reset CD on Enable"
+    }
+  },
+  "No Hammer CD": {
+    "Name": "No Hammer CD",
+    "Description": "Modifies the Ingame Hammer's Cooldown.",
+    "Search Hints": "nohammercd hammercooldown customhammercd hammercd zerohammercd nohammercoolndown hammercooldownreset fasthammer instanthammer hammerbuff hammercdmod hammercdchanger hammercdremover hammercolldown hammercooldon hammercooldwn hamrcd hammercooldoun hammercdtimer hammercdreducion hammercooldownreduction hammerfast hammerready hammerunlimited hammerinfinite hammerinterval hammerperiod hammerspeed hammerspam hammerfrequency",
+    "settings": {
+      "General": "General",
+      "Custom Hammer Cooldown": "Custom Hammer Cooldown",
+      "Extra": "Extra",
+      "Preserve Original": "Preserve Original",
+      "Reset CD on Enable": "Reset CD on Enable"
+    }
+  },
+  "No Cards CD": {
+    "Name": "No Cards CD",
+    "Description": "Modifies the Ingame SeedSlot Cards's Cooldown.",
+    "Search Hints": "nocardscd cardscooldown customcardscd cardscd zerocardscd nocardcoolndown cardcooldownreset fastcards instantcards cardbuff cardcdmod cardcdchanger cardcdremover cardcolldown cardcooldon cardcooldwn cardcd cardcooldoun cardcdtimer cardcdreducion cardcooldownreduction cardfast cardready cardunlimited cardinfinite cardinterval cardperiod cardspeed cardspam cardfrequency",
+    "settings": {
+      "General": "General",
+      "Cards": "Cards",
+      "Duplicate Cards": "Duplicate Cards",
+      "Custom CD Multiplier": "Custom CD Multiplier"
+    }
+  },
+  "Column Glove": {
+    "Name": "Column Glove",
+    "Description": "Moving a plant with the glove moves all identical plants in that column simultaneously.",
+    "Search Hints": "columnglove glovecol columnmove movecolumn identicalplants moveplants columnglovemod simultaneousmove massmove multi-move gloveswap plantglove plantcolumn glovemove multijmove plantmover glovecolumn moveall rowmove quickmove glovecopy columncopy columnsync gloveplant columnshift movemulti plantshift glovesync syncmove identicalmove",
+    "settings": {}
+  },
+  "Column Planting": {
+    "Name": "Column Planting",
+    "Description": "Columns' Like you See 'Em.",
+    "Search Hints": "multiplanting columnplanting multiplant columnplant multiplants columnplants multiplantingmod columnplantingmod multiplantingplugin multiplantingtool multiplantinghack multiplantingcheat multiplaning multiplantin multiplantting multiplantting columplanting columnplaning columnplantting columnplanter multiplanter rowplanting gridplanting massplanting batchplanting fastplanting autoplanter plantmultiplier plantcolumn plantrows areaofeffectplanting",
+    "settings": {
+      "Debug Mode": "Debug Mode"
+    }
+  },
+  "Column Shovel": {
+    "Name": "Column Shovel",
+    "Description": "Shoveling a plant, also shovel all identical plants in that column simultaneously.",
+    "Search Hints": "columnshovel shovelcolumn columnremove massshovel shovelall removecolumn identicalshovel multi-shovel shovelidentical columnclear clearsameplants removeallshovel columncleanup shovelplants shovelmod columnshovelmod clearcolumn multi-remove shovelrow rowshovel clearsamecolumn plantshovel column-shovel shovelidenticalplants massremove shovelgroup shovelmulti shovelsync colshovel",
+    "settings": {
+      "General": "General",
+      "Mode": "Mode",
+      "Only Similar Plants": "Only Similar Plants"
+    }
+  },
+  "Plant Anywhere": {
+    "Name": "Plant Anywhere",
+    "Description": "Allows you to place plants in illegal positions.",
+    "Search Hints": "plantanywhere placeanywhere illegalplacement ignoreposition anywheremode freeplant plantcheat placeeverywhere plantfreedom freeplacement placementfix ignoregrid plantlimit overridegrid nodistriction placeanygrid anygrid plantgrid ignoreplacerules freebuild plantany unrestrictedplant placeanywherecheat plantanywherehack placementcheat bypassgrid placeanywhereon gridfix",
+    "settings": {}
+  },
+  "Better Health Display": {
+    "Name": "Better Health Display",
+    "Description": "Converts long health texts to a much more clear shorter form.",
+    "Search Hints": "healthdisplay healthtext healthshow hpdisplay hptext betterhealth clearhealth shorthealth healthform shorthp clearhp healthconverter texthp hpconverter shorttext healthui hpui hpvisual healthvisual betterhp displayhealth healthshortener hp-display health-display texthp health-txt hptxt healthtxt",
+    "settings": {
+      "General": "General",
+      "Combine HP and Shield": "Combine HP and Shield",
+      "Show Max Health": "Show Max Health",
+      "Auto Enable Plant Hp": "Auto Enable Plant Hp",
+      "Auto Enable Zombie Hp": "Auto Enable Zombie Hp",
+      "Extra": "Extra",
+      "Show Star icon on Controlled Plant": "Show Star icon on Controlled Plant"
+    }
+  },
+  "Clean Weather": {
+    "Name": "Clean Weather",
+    "Description": "Clears fog/snowfall",
+    "Search Hints": "cleanweather clearweather nofog nosnow weatherclear weatherfix removefog removesnow clearfog clearsnow weathercontrol weatherclean skyclear fogremover snowremover no-weather weather-clear clear-weather visibilityfix clearweather-mod weather-mod weatherhack",
+    "settings": {
+      "General": "General",
+      "Clear Fog": "Clear Fog",
+      "Clear SnowFall": "Clear SnowFall"
+    }
+  },
+  "No FPS Limit": {
+    "Name": "No FPS Limit",
+    "Description": "Set a custom FPS limit or break the current fps limit.",
+    "Search Hints": "fpslimit fpscap limitfps framespersecond fpsbreaker unlockfps capfps customfps maxfps fpsfix fpsunlocked framecap framepersecond fpslimiter fpxlimit fpaslimit fps-limit fpsbypass bypassfps nofpslimit unlimitedfps fpsset setfps fps-cap morefps fpsboost lagfix frameslimit",
+    "settings": {
+      "General": "General",
+      "Max FPS": "Max FPS"
+    }
+  },
+  "No Render": {
+    "Name": "No Render",
+    "Description": "Now you can see your lawn.",
+    "Search Hints": "norender blank lawn invisible invisibleplants novisual clear lawn invisiblezombies hiderender hidedisplay nographics seelawn hidden lawnclear hidetexture graphicsoff renderdisable norendering invisibletextures clearfield plantshide zombieshide blankfield hidelawn seebackground hiderenderer seeground norend hidedraw",
+    "settings": {
+      "General": "General",
+      "Particles": "Particles",
+      "Game Objects": "Game Objects",
+      "Bullets": "Bullets"
+    }
+  },
+  "Smaller Projectiles": {
+    "Name": "Smaller Projectiles",
+    "Description": "Reduces the visual size of selected Projectile(s) to reduce screen clutter.",
+    "Search Hints": "smallerprojectiles smallprojectiles projectile size visual reduce screen clutter tiny peas bullet bulletsize smallpea lessclutter screenclutter projectile size visualreduce projectileclutter shrinking projectilesize projectil smallbullet clear screen projectilevisual smallammo ammoclutter pea size hitclutter tinyprojectiles lagclutter projectils",
+    "settings": {
+      "General": "General",
+      "Bullet Types": "Bullet Types",
+      "Scale Multiplier": "Scale Multiplier"
+    }
+  },
+  "Anti-Lag Spawns": {
+    "Name": "Anti-Lag Spawns",
+    "Description": "Staggers mass zombie spawns over time to prevent lag spikes.\nMay break Game's logic and the Zombie Counter.",
+    "Search Hints": "antilag antilagspawns lagspawn fixlag lagfix countersmasher stagger spawns staggerzombies staggeredspawns massspawn lagspike nolag spawnerlag zombielag lagprevent performanceboost spawnfix breakcounter counterbreak zombiecounter smoothspawn logicbreak massspawnfix antilagmod lagspawns antispawnlag laglessspawns",
+    "settings": {
+      "General": "General",
+      "Frames Between Spawns": "Frames Between Spawns",
+      "Unaffected Entities": "Unaffected Entities"
+    }
+  },
+  "Buff Zombies": {
+    "Name": "Buff Zombies",
+    "Description": "Buffs the selected zombie(s) while the module is active.",
+    "Search Hints": "buffzombies buffzombie bufzombie buffingzombies hpbuff healthboost strongzombies zombiehp morehealth tankyzombies zombiefy buffzombs biffzombies buffzombes hpup extrahealth buffedzombs healthup zombieboost buffmod buffactive buff-zombies hpplus zombiefying zombiebiff buffzom biffzom hpp boost buffzombiez",
+    "settings": {
+      "General": "General",
+      "Entities": "Entities",
+      "Hp Multiply": "Hp Multiply"
+    }
+  },
+  "Clamp Zombies": {
+    "Name": "Clamp Zombies",
+    "Description": "Maintains stable FPS by merging the HP of nearby identical zombies when the spawn limit is exceeded.\nMay Break the Damage Counter.",
+    "Search Hints": "clampzombies clampzombie limitfps maxfps fpsoptimize fixlag mergezombies combinezombies zombiehp healthmerge mergespawn performanceboost memoryfix stackzombies zombieclamp hpstack zombielimit fpsboost lagfix clusterspawns clumpzombies mergehp optimizefps lowfps hpfusion zombiemerge lagprevent clampzomb",
+    "settings": {
+      "General": "General",
+      "Max Zombies": "Max Zombies",
+      "Apply Speed Reduction": "Apply Speed Reduction",
+      "Add % of Hp": "Add % of Hp",
+      "Extra": "Extra",
+      "Visual Scale": "Visual Scale"
+    }
+  },
+  "Faster Zombies": {
+    "Name": "Faster Zombies",
+    "Description": "Makes the selected zombie(s) faster while the module is active.",
+    "Search Hints": "fasterzombies speedzombies zombieboost zombiespeed fastzombies zombiespeedup quickzombies zombievelocity zombierun runzombies fastzombie zombiespeedmod zombiespeeder speedupzombies rapidzombies swiftzombies turbozombies zombieagility zombiequickness zombiealacrity zombiefast zombiesprint zombiesprinting zombieoverdrive zombiemovement fasterzombie speedyzombies fastmovezombies zombiehurry zombierapid",
+    "settings": {
+      "General": "General",
+      "Entities": "Entities",
+      "Speed": "Speed"
+    }
+  },
+  "Hypnotize All Zombies": {
+    "Name": "Hypnotize All Zombies",
+    "Description": "Hypnotizes the selected zombie(s) while the module is active.",
+    "Search Hints": "hypnotizeallzombies hypnozombies zombieshypnotize hypnotisezombies charmzombies zombiecharm mindcontrolzombies zombiesmindcontrol allyzombies zombiealliance brainwashzombies turnzombies hypnotizezombie hypnozombie hipnotizezombies hipnozombies hypnatizezombies hypnotiseallzombies hypnotisedzombies hypnoallzombies zombiehypnotizer zombiehypnosis zombiespell zombieconvert convertzombies friendlyzombies zombiebrainwash zombiemind hypnotiseallzombie",
+    "settings": {
+      "General": "General",
+      "Entities": "Entities",
+      "Auto Turn Off": "Auto Turn Off"
+    }
+  },
+  "Kill All Zombies": {
+    "Name": "Kill All Zombies",
+    "Description": "Kills the selected zombie(s) while the module is active.",
+    "Search Hints": "killallzombies killzombies zombiekiller removezombies deletezombies zombieremoval zombieslayer destroyzombies exterminatezombies zombieexterminator zombieclear clearzombies wipezombies zombiewipe zombiedeath deathzombies killallzombie killalzoombies kilallzombies killallzombiees killallzombis zombiedestructor zombiedestroyer zombiedeleter zombiesmasher zombiepurger zombieexecutioner zombieelimination zombieterminator zombieender zombieeraser zombievanisher",
+    "settings": {
+      "General": "General",
+      "Entities": "Entities",
+      "Hypnotized Entities": "Hypnotized Entities",
+      "Extra": "Extra",
+      "Auto Turn Off": "Auto Turn Off"
+    }
+  },
+  "Wave Hack": {
+    "Name": "Wave Hack",
+    "Description": "Allows you to modify wave spawn logic.",
+    "Search Hints": "wavehack wavemod wavespawn wavemodify wavespawnlogic spawnlogic waveeditor wavemanager customwaves waveconfig wavespawnrate wavecontrol wavespawnsettings modifyspawn wavespawncontrol wavecheat wavespawner wavechanger wavesize wavemanager wavebypass waveflow dontsendzombies pause zombiespause wavepause pausewave removewave",
+    "settings": {
+      "Cooldown": "Cooldown",
+      "Custom Wave Cooldown": "Custom Wave Cooldown",
+      "Wave Cooldown": "Wave Cooldown",
+      "Freeze Wave Timer": "Freeze Wave Timer",
+      "Spawn Rate": "Spawn Rate",
+      "Zombies count multiplier": "Zombies count multiplier"
+    }
+  },
+  "Simple Spawner": {
+    "Name": "Simple Spawner",
+    "Description": "A <color=red>simple spawner</color> mod for Pvz fusion.\n<b>Note:</b> Multi keybinds like (alt+ctrl+a) is not supported.",
+    "Search Hints": "simplespawner spawnmod pvzfusion spawner spawnmenu spawnitems unitspawner spawnzombies spawnplants entityspawner spawncheat itemspawner spawntool summoner summonsummon simple-spawner fusion-spawner spawnpvz entitysummon spawnmanager summonmod spawnconfig spawnsettings spawncontroller",
+    "settings": {
+      "General": "General",
+      "Spawn plant": "Spawn plant",
+      "Spawn zombie": "Spawn zombie",
+      "Delete all plants": "Delete all plants",
+      "Delete all zombies": "Delete all zombies",
+      "Pets": "Pets",
+      "Pet Spawn Prefix": "Pet Spawn Prefix",
+      "Spawn pet gargantuar": "Spawn pet gargantuar",
+      "Spawn pet football": "Spawn pet football",
+      "Spawn pet drown": "Spawn pet drown",
+      "Spawn pet jackbox": "Spawn pet jackbox",
+      "Spawn pet snow boss": "Spawn pet snow boss",
+      "Spawn pet horse": "Spawn pet horse",
+      "Spawn pet imp": "Spawn pet imp",
+      "Spawn pet kirov": "Spawn pet kirov",
+      "Extra": "Extra",
+      "Toggle time scale": "Toggle time scale",
+      "Mind control modifier": "Mind control modifier",
+      "Boss modifier": "Boss modifier",
+      "Spawn boss 1": "Spawn boss 1",
+      "Spawn boss 2": "Spawn boss 2",
+      "Items": "Items",
+      "Spawn fertilizer": "Spawn fertilizer",
+      "Spawn bucket": "Spawn bucket",
+      "Spawn helmet": "Spawn helmet",
+      "Spawn jackbox": "Spawn jackbox",
+      "Spawn pickaxe": "Spawn pickaxe",
+      "Spawn machine": "Spawn machine",
+      "Spawn super machine": "Spawn super machine",
+      "Spawn portal heart": "Spawn portal heart",
+      "Spawn sprout pot prize": "Spawn sprout pot prize"
+    }
+  }
+}

@@ -2,6 +2,7 @@
 using Il2Cpp;
 #endif
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 using static Magnetar_Client.Utils.Translator;
 using static Magnetar_Client.Game.AppData;
@@ -13,14 +14,11 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Anti-Lag Spawns";
-        public override string Description { get; set; } = "Staggers mass zombie spawns over time to prevent lag spikes.\nMay " +
-            "break Game's logic and the Zombie Counter.";
+        public override string Description { get; set; } = "Staggers mass zombie spawns over time to prevent lag spikes.\nSafe for game loop structures.";
         public override string SearchHints { get; set; } = "antilag antilagspawns lagspawn fixlag lagfix countersmasher stagger spawns " +
             "staggerzombies staggeredspawns massspawn lagspike nolag spawnerlag zombielag lagprevent performanceboost spawnfix breakcounter" +
             " counterbreak zombiecounter smoothspawn logicbreak massspawnfix antilagmod lagspawns antispawnlag laglessspawns";
         public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
-
-        // Mod Data
 
         public static AntiLagSpawns instance;
 
@@ -33,6 +31,7 @@ namespace Magnetar_Client.Modules
         public static int spawnsThisFrame = 0;
 
         public MultiSelectSetting UnaffectedZombies;
+
         public AntiLagSpawns()
         {
             instance = this;
@@ -41,7 +40,6 @@ namespace Magnetar_Client.Modules
 
             FrameDelaySetting = new IntSetting("Frames Between Spawns", 1, 10, 1);
             AddSettings(FrameDelaySetting);
-
 
             UnaffectedZombies = new MultiSelectSetting("Unaffected Entities", typeof(ZombieType))
             {
@@ -61,7 +59,6 @@ namespace Magnetar_Client.Modules
             AddSettings(UnaffectedZombies);
 
             EndCategory();
-
         }
 
         public override void OnLanguageChanged()
@@ -91,7 +88,6 @@ namespace Magnetar_Client.Modules
 
         public override void OnDisable()
         {
-            // If the user turns the module off, instantly release all queued zombies
             while (staggerQueue.Count > 0)
             {
                 Zombie z = staggerQueue.Dequeue();
@@ -106,7 +102,7 @@ namespace Magnetar_Client.Modules
         public static class CreateZombiePatch
         {
             [HarmonyPatch(nameof(CreateZombie.SetZombie))]
-            [HarmonyPostfix]
+            [HarmonyPostfix] 
             public static void Postfix(ref Zombie __result)
             {
                 if (instance == null || !instance.Active || __result == null) return;
@@ -156,7 +152,6 @@ namespace Magnetar_Client.Modules
 
                 spawnsThisFrame = 0;
                 lastFrameCount = Time.frameCount;
-
             }
         }
     }

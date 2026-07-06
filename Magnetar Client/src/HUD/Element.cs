@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Magnetar_Client.HUDElements
 {
-    
+
     public abstract class HudElement
     {
         private bool _isCurrentlyEnabled = false;
@@ -15,6 +15,8 @@ namespace Magnetar_Client.HUDElements
         public static int ActiveDragId = -1;
         private Vector2 dragOffset;
 
+        public float UpdateInterval = 0;
+        private float _updateInterval = 0;
         public HudElement(string name, Rect defaultBounds)
         {
             Name = name;
@@ -33,7 +35,25 @@ namespace Magnetar_Client.HUDElements
         /// <summary>
         /// Runs every frame regardless of whether the HUD element is active or not.
         /// </summary>
-        public virtual void OnUpdate() { if (_isCurrentlyEnabled) OnUpdateActive(); }
+        public virtual void OnUpdate()
+        {
+            if (_isCurrentlyEnabled)
+            {
+                if (UpdateInterval <= 0f)
+                {
+                    OnUpdateActive();
+                }
+                else
+                {
+                    _updateInterval += Time.unscaledDeltaTime;
+                    if (_updateInterval >= UpdateInterval)
+                    {
+                        _updateInterval = 0f;
+                        OnUpdateActive();
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Runs every frame only when the HUD element is active.

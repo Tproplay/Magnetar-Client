@@ -229,7 +229,7 @@ namespace Magnetar_Client.Modules
             string result = input;
 
             result = result.Replace("{Magnetar_Version}",
-                Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
+                Magnetar_Info.Version);
             result = result.Replace("{Game_Version}", Application.version);
             result = result.Replace("{Level_Name}", GetLevelName());
             result = result.Replace("{Sun}", FormatInternational(board.theSun));

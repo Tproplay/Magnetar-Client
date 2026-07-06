@@ -11,34 +11,37 @@ namespace Magnetar_Client.HUDElements
     public class RAMElement : HudElement
     {
         private Process currentProcess;
-        private float lastUpdate;
         private string displayValue = "0.0";
 
         public RAMElement() : base("RAM Usage", HudElement.NewRect(150))
         {
             currentProcess = Process.GetCurrentProcess();
+            UpdateInterval = 1;
         }
 
+        string displayText = "RAM: <color=yellow>{Na</color>";
         protected override void DrawContent(float width, float height)
         {
-            if (Time.time - lastUpdate > 1f)
-            {
-                currentProcess.Refresh();
-                // WorkingSet64 is the total physical memory used by the process
-                long totalBytes = currentProcess.WorkingSet64;
-                displayValue = (totalBytes / 1024f / 1024f).ToString("F1");
-                lastUpdate = Time.time;
-            }
+            GUI.Label(new Rect(5, 5, width - 5, height - 5), displayText, HUDElementStyle);
+        }
+
+        public override void OnUpdateActive()
+        {
+            currentProcess.Refresh();
+            // WorkingSet64 is the total physical memory used by the process
+            long totalBytes = currentProcess.WorkingSet64;
+            displayValue = (totalBytes / 1024f / 1024f).ToString("F1");
 
             string color = "white";
             if (float.Parse(displayValue) > 1500) color = "red"; // Over 2GB turns red
 
-            string displayText = $"RAM: <color={color}>{displayValue} MB</color>";
+            displayText = $"RAM: <color={color}>{displayValue} MB</color>";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10);
-
-            Magnetar_Default.HUDElementStyle.richText = true;
-            GUI.Label(new Rect(5, 5, width - 5, height - 5), displayText, HUDElementStyle);
+        }
+        public override void OnEnable()
+        {
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
         }
     }
 
@@ -76,24 +79,25 @@ namespace Magnetar_Client.HUDElements
             {
                 totalInstalled = (memStatus.ullTotalPhys / 1024f / 1024f / 1024f).ToString(); // GB
             }
+            UpdateInterval = 1;
         }
 
+        string displayText = "RAM: <color=yellow>Na</color>";
         protected override void DrawContent(float width, float height)
         {
-            if (Time.time > nextActionTime)
-            {
-                nextActionTime = Time.time + 1.5f;
-                MEMORYSTATUSEX memStatus = new MEMORYSTATUSEX();
-                if (GlobalMemoryStatusEx(memStatus))
-                    systemLoad = memStatus.dwMemoryLoad.ToString(); // % total system use
-            }
+            GUI.Label(new Rect(5, 5, width - 5, height - 5), displayText, HUDElementStyle);
+        }
 
+        public override void OnUpdateActive()
+        {
+            nextActionTime = Time.time + 1.5f;
+            MEMORYSTATUSEX memStatus = new MEMORYSTATUSEX();
+            if (GlobalMemoryStatusEx(memStatus))
+                systemLoad = memStatus.dwMemoryLoad.ToString(); // % total system use
 
-            string displayText = $"RAM: <color=white>{systemLoad}% of {totalInstalled.Substring(0,5)}GB</color>";
+            displayText = $"RAM: <color=white>{systemLoad}% of {totalInstalled.Substring(0, 5)}GB</color>";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10);
-
-            GUI.Label(new Rect(5, 5, width - 5, height - 5), displayText, HUDElementStyle);
         }
     }
 
@@ -107,42 +111,47 @@ namespace Magnetar_Client.HUDElements
         private System.TimeSpan lastCpuTime;
         private System.DateTime lastSampleTime;
         private float cpuUsage;
-        private float nextUpdateTime;
 
         public CPUUsageElement() : base("CPU Usage", HudElement.NewRect(105))
         {
             currentProc = Process.GetCurrentProcess();
             lastCpuTime = currentProc.TotalProcessorTime;
             lastSampleTime = System.DateTime.Now;
+
+            UpdateInterval = 1f;
         }
+
+        string displayText = "CPU: <color=yellow>Na</color>";
 
         protected override void DrawContent(float width, float height)
         {
-            if (Time.time > nextUpdateTime)
+            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+
+        public override void OnUpdateActive()
+        {
+            System.DateTime currentTime = System.DateTime.Now;
+            System.TimeSpan currentCpuTime = currentProc.TotalProcessorTime;
+
+            double timeDiff = (currentTime - lastSampleTime).TotalMilliseconds;
+            double cpuDiff = (currentCpuTime - lastCpuTime).TotalMilliseconds;
+
+            if (timeDiff > 0)
             {
-                System.DateTime currentTime = System.DateTime.Now;
-                System.TimeSpan currentCpuTime = currentProc.TotalProcessorTime;
-
-                double timeDiff = (currentTime - lastSampleTime).TotalMilliseconds;
-                double cpuDiff = (currentCpuTime - lastCpuTime).TotalMilliseconds;
-
-                // Fixed: System.Environment.ProcessorCount
-                if (timeDiff > 0)
-                {
-                    cpuUsage = (float)(cpuDiff / (System.Environment.ProcessorCount * timeDiff)) * 100f;
-                }
-
-                lastCpuTime = currentCpuTime;
-                lastSampleTime = currentTime;
-                nextUpdateTime = Time.time + 1f;
+                cpuUsage = (float)(cpuDiff / (System.Environment.ProcessorCount * timeDiff)) * 100f;
             }
 
+            lastCpuTime = currentCpuTime;
+            lastSampleTime = currentTime;
+
             string color = cpuUsage > 80 ? "red" : (cpuUsage > 40 ? "yellow" : "lime");
-            string displayText = $"CPU: <color={color}>{Mathf.Clamp(cpuUsage, 0, 100):F1}%</color>";
+            displayText = $"CPU: <color={color}>{Mathf.Clamp(cpuUsage, 0, 100):F1}%</color>";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10);
-
-            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+        public override void OnEnable()
+        {
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
         }
     }
 
@@ -154,36 +163,39 @@ namespace Magnetar_Client.HUDElements
     {
         private int totalVram;
         private float lastVramMb;
-        private float nextUpdateTime;
 
         public VramUsageElement() : base("VRAM Usage", HudElement.NewRect(200))
         {
             totalVram = SystemInfo.graphicsMemorySize;
         }
 
+        string displayText = "VRAM: <color=yellow>Na</color>";
         protected override void DrawContent(float width, float height)
         {
-            if (Time.time > nextUpdateTime)
+            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+
+        public override void OnUpdateActive()
+        {
+            long usedBytes = Profiler.GetAllocatedMemoryForGraphicsDriver();
+
+            // Fallback if GfxDriver returns 0
+            if (usedBytes <= 0)
             {
-                long usedBytes = Profiler.GetAllocatedMemoryForGraphicsDriver();
-
-                // Fallback if GfxDriver returns 0
-                if (usedBytes <= 0)
-                {
-                    usedBytes = Profiler.GetTotalAllocatedMemory();
-                }
-
-                lastVramMb = usedBytes / 1024f / 1024f;
-                nextUpdateTime = Time.time + 0.5f;
+                usedBytes = Profiler.GetTotalAllocatedMemory();
             }
+
+            lastVramMb = usedBytes / 1024f / 1024f;
 
             float displayVram = Mathf.Min(lastVramMb, totalVram);
 
-            string displayText = $"VRAM: <color=yellow>{displayVram:F0}</color> / <color=white>{totalVram} MB</color>";
+            displayText = $"VRAM: {displayVram:F0} / {totalVram} MB";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10);
-
-            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+        public override void OnEnable()
+        {
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
         }
     }
 

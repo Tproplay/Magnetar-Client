@@ -7,7 +7,7 @@ namespace Magnetar_Client.HUDElements
     public class GpuNameElement : HudElement
     {
         private string gpuName;
-
+        string displayText;
         public GpuNameElement() : base("GPU Name", HudElement.NewRect(400))
         {
             gpuName = SystemInfo.graphicsDeviceName;
@@ -15,32 +15,36 @@ namespace Magnetar_Client.HUDElements
 
         protected override void DrawContent(float width, float height)
         {
-            string displayText = $"<color=cyan>{gpuName}</color>";
+            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+
+        public override void OnEnable()
+        {
+            displayText = $"<color=cyan>{gpuName}</color>";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10);
-
-            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
         }
     }
 
     public class CPUElement : HudElement
     {
         private string cpuName;
-        private int cores;
-
+        string displayText;
         public CPUElement() : base("CPU Name", HudElement.NewRect(400))
         {
             cpuName = SystemInfo.processorType;
-            cores = SystemInfo.processorCount;
         }
 
         protected override void DrawContent(float width, float height)
         {
-            string displayText = $"<color=cyan>{cpuName}</color>\n";
+            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+
+        public override void OnEnable()
+        {
+            displayText = $"<color=cyan>{cpuName}</color>\n";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10);
-
-            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
         }
     }
 }

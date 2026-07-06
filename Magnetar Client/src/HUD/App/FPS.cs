@@ -7,74 +7,88 @@ namespace Magnetar_Client.HUDElements
     public class FpsElement : HudElement
     {
         public FpsElement() : base("FPS Counter", HudElement.NewRect(90))
-        { }
+        { UpdateInterval = 0.7f; }
 
         float fps;
+        string displayText = "FPS: <color=yellow>Na</color>";
 
         protected override void DrawContent(float width, float height)
         {
-            string colorName = fps > 55 ? "lime" : (fps > 30 ? "yellow" : "red");
-
-            string displayText = $"FPS: <color={colorName}>{(int)fps}</color>";
-
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }
 
-        float deltaTime = 1;
+        public override void OnUpdateActive()
+        {
+            float _fps = 1.0f / Time.smoothDeltaTime;
+            fps = _fps == int.MinValue ? fps : _fps;
+            string colorName = fps > 55 ? "lime" : (fps > 30 ? "yellow" : "red");
+
+            displayText = $"FPS: <color={colorName}>{(int)fps}</color>";
+
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        }
+        public override void OnEnable()
+        {
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        }
+    }
+
+    public class RealFpsElement : HudElement
+    {
+        public RealFpsElement() : base("Real FPS Counter", HudElement.NewRect(90))
+        { UpdateInterval = 0.7f; }
+
+        float fps;
+        string displayText = "FPS (Real): <color=yellow>Na</color>";
+
+        protected override void DrawContent(float width, float height)
+        {
+            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        }
 
         public override void OnUpdateActive()
         {
-            deltaTime += Time.deltaTime;
+            fps = 1.0f / Time.unscaledDeltaTime;
+            string colorName = fps > 55 ? "lime" : (fps > 30 ? "yellow" : "red");
 
-            if (deltaTime >= 1)
-            {
-                fps = 1.0f / Time.smoothDeltaTime;
-                deltaTime = 0;
-            }
+            displayText = $"FPS (Real): <color={colorName}>{(int)fps}</color>";
+
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
         }
-
         public override void OnEnable()
         {
-            deltaTime = 1;
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
         }
     }
 
     public class FrameTimeElement : HudElement
     {
         public FrameTimeElement() : base("Frame Time", HudElement.NewRect(155))
-        { }
+        { UpdateInterval = 0.7f;}
 
         float currentFrameTime;
+        string displayText = "FrameTime: <color=yellow>Na</color>";
 
         protected override void DrawContent(float width, float height)
         {
-            string colorName = currentFrameTime < 1/55f ? "lime" : (currentFrameTime < 1/30f ? "yellow" : "red");
-
-            string displayText = $"FrameTime: <color={colorName}>{currentFrameTime*1000:f0}</color>ms";
-
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }
 
-        float deltaTime = 1;
 
         public override void OnUpdateActive()
         {
-            deltaTime += Time.deltaTime;
+            currentFrameTime = Time.smoothDeltaTime;
 
-            if (deltaTime >= 1)
-            {
-                currentFrameTime = Time.smoothDeltaTime;
-                deltaTime = 0;
-            }
+            string colorName = currentFrameTime < 1 / 55f ? "lime" : (currentFrameTime < 1 / 30f ? "yellow" : "red");
+
+            displayText = $"FrameTime: <color={colorName}>{currentFrameTime * 1000:f0}</color>ms";
+
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
+            
         }
-
         public override void OnEnable()
         {
-            deltaTime = 1;
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
         }
     }
     

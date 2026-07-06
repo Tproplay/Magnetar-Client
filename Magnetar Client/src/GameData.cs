@@ -152,7 +152,10 @@ namespace Magnetar_Client.Game
             public static void DiePreFix(Zombie __instance)
             {
                 if (_zombieList.Contains(__instance))
+                { 
                     _zombieList.Remove(__instance);
+                    Hypno_Zombies_Killed++;
+                }
             }
 
             [HarmonyPatch(nameof(Zombie.DestoryZombie))]
@@ -160,7 +163,10 @@ namespace Magnetar_Client.Game
             public static void DestoryZombiePreFix(Zombie __instance)
             {
                 if (_zombieList.Contains(__instance))
+                {
                     _zombieList.Remove(__instance);
+                    Hypno_Zombies_Killed++;
+                }
             }
         }
 
@@ -182,14 +188,6 @@ namespace Magnetar_Client.Game
             {
                 if (__instance == null || !__instance.isMindControlled) return;
                 Hypno_Zombies_Spawned++;
-            }
-
-            [HarmonyPatch(nameof(Zombie.Die))]
-            [HarmonyPrefix]
-            public static void DiePrefix(Zombie __instance)
-            {
-                if (__instance == null || !__instance.isMindControlled) return;
-                Hypno_Zombies_Killed++;
             }
 
             [HarmonyPatch(nameof(Zombie.SetMindControl))]

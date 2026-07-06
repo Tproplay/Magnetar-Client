@@ -4,11 +4,13 @@ using System;
 using static Magnetar_Client.Utils.SaveLoad;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using Magnetar_Client.Utils;
+using Magnetar_Client;
+
 
 
 #if MELONLOADER || RELEASE_MELON
 using MelonLoader;
-[assembly: MelonInfo(typeof(Magnetar_Client.Core.main), "Magnetar Client", "3.7.1", "Tproplay")]
+[assembly: MelonInfo(typeof(Magnetar_Client.Core.main),Magnetar_Info.ModName, Magnetar_Info.Version, Magnetar_Info.Developer)]
 [assembly: MelonGame("LanPiaoPiao", "PlantsVsZombiesRH")]
 #elif BEPINEX || RELEASE_BEPINEX
 using BepInEx;
@@ -20,7 +22,7 @@ namespace Magnetar_Client.Core
 #if MELONLOADER || RELEASE_MELON
     public class main : MelonMod
 #elif BEPINEX || RELEASE_BEPINEX
-    [BepInPlugin("com.tproplay.magnetar", "Magnetar Client", "3.7.1")]
+    [BepInPlugin("com.tproplay.magnetar", Magnetar_Info.ModName, Magnetar_Info.Version)]
     public class main : BasePlugin
 #endif
     {
@@ -144,6 +146,9 @@ namespace Magnetar_Client.Core
 
         public void CoreUpdate()
         {
+            if (HUDRenderer.Elements.Count !=0)
+                HUDRenderer.UpdateElements();
+
             if (!ModuleManager.IsInitialized) return;
 
             if (Input.GetKeyDown(KeyCode.RightShift) && !HUDManager.forceShow)

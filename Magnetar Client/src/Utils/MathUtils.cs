@@ -25,6 +25,34 @@ namespace Magnetar_Client.Utils
             return number.ToString();
         }
 
+        public static string FormatInternational(double number)
+        {
+            if (double.IsNaN(number)) return "NaN";
+            if (double.IsInfinity(number)) return number.ToString();
+
+            double absoluteValue = Math.Abs(number);
+
+            // Trillion
+            if (absoluteValue >= 1_000_000_000_000D)
+                return (number / 1_000_000_000_000D).ToString("0.##") + "T";
+
+            // Billion
+            if (absoluteValue >= 1_000_000_000D)
+                return (number / 1_000_000_000D).ToString("0.##") + "B";
+
+            // Million
+            if (absoluteValue >= 1_000_000D)
+                return (number / 1_000_000D).ToString("0.##") + "M";
+
+            // Thousand
+            if (absoluteValue >= 1_000D)
+                return (number / 1_000D).ToString("0.##") + "K";
+
+            // Return the original number under 1,000 (maintains up to two decimals)
+            return number.ToString("0.##");
+        }
+
+
         public static string FormatTime(long totalSeconds)
         {
             if (totalSeconds == 0) return "0s";

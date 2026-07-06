@@ -265,6 +265,8 @@ namespace Magnetar_Client.Core
         /// </summary>
         public static MultiSelectSetting HudToggles;
 
+        private static bool isMasterVisible;
+
         public static void Init()
         {
             HudToggles = new MultiSelectSetting("Active HUDManager Elements")
@@ -298,7 +300,7 @@ namespace Magnetar_Client.Core
 
         public static void RenderOverlay()
         {
-            bool isMasterVisible = HUDManager.Enabled;
+            isMasterVisible = HUDManager.Enabled;
 
             if (Config.showgui && Config.CurrentTab != TabType.HUD)
             {
@@ -311,12 +313,23 @@ namespace Magnetar_Client.Core
             {
                 bool isElementEnabled = isMasterVisible && HudToggles.IsSelected(element.WindowId);
 
-                element.HandleLifecycle(isElementEnabled);
-
                 if (isElementEnabled)
                 {
                     element.Render();
                 }
+            }
+        }
+
+        public static void UpdateElements()
+        {
+            if (!isMasterVisible) return;
+
+            foreach (var element in Elements)
+            {
+                bool isElementEnabled = isMasterVisible && HudToggles.IsSelected(element.WindowId);
+
+                element.HandleLifecycle(isElementEnabled);
+
             }
         }
 

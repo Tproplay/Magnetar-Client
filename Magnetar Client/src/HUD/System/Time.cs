@@ -7,15 +7,21 @@ namespace Magnetar_Client.HUDElements
     {
         public CurrentTime() : base("Current Time", HudElement.NewRect(80))
         { }
-
+        string displayText;
         protected override void DrawContent(float width, float height)
         { 
+            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
+        }
 
-            string displayText = $"<color=white>{SystemClock.now.ToString("HH:mm:ss")}</color>";
+        public override void OnUpdateActive()
+        {
+            displayText = $"<color=white>{SystemClock.now.ToString("HH:mm:ss")}</color>";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10);
-
-            GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
+        }
+        public override void OnEnable()
+        {
+            AdjustWidthToText(displayText, HUDElementStyle, 10f);
         }
     }
 }

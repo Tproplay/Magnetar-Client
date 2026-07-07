@@ -5,7 +5,6 @@ using DiscordRPC;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
@@ -36,11 +35,15 @@ namespace Magnetar_Client.Modules
         public StringSetting InGame_Line1_2;
         public StringSetting InGame_Line1_3;
         public StringSetting InGame_Line1_4;
+        public StringSetting InGame_Line1_5;
+        public StringSetting InGame_Line1_6;
 
         public StringSetting InGame_Line2_1;
         public StringSetting InGame_Line2_2;
         public StringSetting InGame_Line2_3;
         public StringSetting InGame_Line2_4;
+        public StringSetting InGame_Line2_5;
+        public StringSetting InGame_Line2_6;
 
         public SelectSetting InGame_Randomizer_mode;
 
@@ -82,14 +85,18 @@ namespace Magnetar_Client.Modules
             InGame_Line1_2 = new StringSetting("Line 1 Message 2", "Playing: {Level_Name}", In_Game_AutoCompleteArgs);
             InGame_Line1_3 = new StringSetting("Line 1 Message 3", "", In_Game_AutoCompleteArgs);
             InGame_Line1_4 = new StringSetting("Line 1 Message 4", "", In_Game_AutoCompleteArgs);
+            InGame_Line1_5 = new StringSetting("Line 1 Message 5", "", In_Game_AutoCompleteArgs);
+            InGame_Line1_6 = new StringSetting("Line 1 Message 6", "", In_Game_AutoCompleteArgs);
 
             InGame_Line2_1 = new StringSetting("Line 2 Message 1", "Sun: {Sun} | Money: {Money}", In_Game_AutoCompleteArgs);
             InGame_Line2_2 = new StringSetting("Line 2 Message 2", "Wave: {Current_Wave}/{Max_Wave}", In_Game_AutoCompleteArgs);
             InGame_Line2_3 = new StringSetting("Line 2 Message 3", "Plants: {number_of_plants} | Zombies: {number_of_zombies}", In_Game_AutoCompleteArgs);
             InGame_Line2_4 = new StringSetting("Line 2 Message 4", "", In_Game_AutoCompleteArgs);
+            InGame_Line2_5 = new StringSetting("Line 2 Message 5", "", In_Game_AutoCompleteArgs);
+            InGame_Line2_6 = new StringSetting("Line 2 Message 6", "", In_Game_AutoCompleteArgs);
 
-            AddSettings(InGame_Line1_1, InGame_Line1_2, InGame_Line1_3, InGame_Line1_4);
-            AddSettings(InGame_Line2_1, InGame_Line2_2, InGame_Line2_3, InGame_Line2_4);
+            AddSettings(InGame_Line1_1, InGame_Line1_2, InGame_Line1_3, InGame_Line1_4, InGame_Line1_5, InGame_Line1_6);
+            AddSettings(InGame_Line2_1, InGame_Line2_2, InGame_Line2_3, InGame_Line2_4, InGame_Line2_5, InGame_Line2_6);
 
             InGame_Randomizer_mode = new SelectSetting("Iteration Mode", 0)
             {
@@ -173,8 +180,8 @@ namespace Magnetar_Client.Modules
             {
                 status = Status.Menu;
 
-                Line1Cycle.Add("Browsing levels to play");
-                Line1Cycle.Add("Looking at the Main Menu");
+                Line1Cycle.Add(Translator.Translate("Browsing levels to play"));
+                Line1Cycle.Add(Translator.Translate("Looking at the Main Menu"));
             }
 
             else if (Gamestatus == GameStatus.InInterlude) // In Transition
@@ -205,11 +212,15 @@ namespace Magnetar_Client.Modules
                         if (!string.IsNullOrWhiteSpace(InGame_Line1_2.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_2.Value));
                         if (!string.IsNullOrWhiteSpace(InGame_Line1_3.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_3.Value));
                         if (!string.IsNullOrWhiteSpace(InGame_Line1_4.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_4.Value));
+                        if (!string.IsNullOrWhiteSpace(InGame_Line1_5.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_5.Value));
+                        if (!string.IsNullOrWhiteSpace(InGame_Line1_6.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_6.Value));
 
                         if (!string.IsNullOrWhiteSpace(InGame_Line2_1.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_1.Value));
                         if (!string.IsNullOrWhiteSpace(InGame_Line2_2.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_2.Value));
                         if (!string.IsNullOrWhiteSpace(InGame_Line2_3.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_3.Value));
                         if (!string.IsNullOrWhiteSpace(InGame_Line2_4.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_4.Value));
+                        if (!string.IsNullOrWhiteSpace(InGame_Line2_5.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_5.Value));
+                        if (!string.IsNullOrWhiteSpace(InGame_Line2_6.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_6.Value));
                         break;
                     }
             }
@@ -220,7 +231,8 @@ namespace Magnetar_Client.Modules
         {
             "Magnetar_Version","Game_Version",
             "Level_Name","Sun","Money","Current_Wave","Max_Wave",
-            "number_of_plants","number_of_zombies"
+            "number_of_plants","number_of_zombies",
+            "movers_left"
         };
 
         private string In_Game_FormatString(string input)
@@ -238,6 +250,7 @@ namespace Magnetar_Client.Modules
             result = result.Replace("{Max_Wave}", board.theMaxWave.ToString());
             result = result.Replace("{number_of_plants}", plantList.Count.ToString());
             result = result.Replace("{number_of_zombies}", zombieList.Count.ToString());
+            result = result.Replace("{movers_left}", board.mowerArray.Count.ToString());
             return result;
         }
 

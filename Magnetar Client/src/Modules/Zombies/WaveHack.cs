@@ -1,6 +1,12 @@
 ﻿using static Magnetar_Client.Game.AppData;
 using System;
 using HarmonyLib;
+using System.Collections;
+using System.Collections.Generic;
+using MelonLoader;
+using UnityEngine;
+
+
 
 
 #if MELONLOADER || RELEASE_MELON
@@ -31,6 +37,7 @@ namespace Magnetar_Client.Modules
 
         // Spawn Rate
         public IntSetting ZombiesCountMultiplier;
+        public FloatSetting SpawnDelay;
 
         public WaveHack()
         {
@@ -48,8 +55,8 @@ namespace Magnetar_Client.Modules
             CreateCategory("Spawn Rate");
 
             ZombiesCountMultiplier = new IntSetting("Zombies count multiplier", 1, 10, 1, 0);
-
-            AddSettings(ZombiesCountMultiplier);
+            SpawnDelay = new FloatSetting("Spawn Delay", 0, 3, 0.5f, 3);
+            AddSettings(ZombiesCountMultiplier,SpawnDelay);
             EndCategory();
 
         }
@@ -83,22 +90,42 @@ namespace Magnetar_Client.Modules
             [HarmonyPrefix]
             public static bool SummonZombiesPrefix(int wave, BoardSpawner __instance)
             {
-                if (instance == null || !instance.Active || instance.ZombiesCountMultiplier.Value == 1 || 
-                    spawnedByMod) return true;
+                if (spawnedByMod) return true;
+
+                if (instance == null || !instance.Active || instance.ZombiesCountMultiplier.Value == 1) return true;
                 if (instance.ZombiesCountMultiplier.Value == 0) return false;
 
-                spawnedByMod = true;
-
-                for (int i = 0; i < instance.ZombiesCountMultiplier.Value; i++)
-                {
-                    __instance.SummonZombies(wave);
-                }
-
-                spawnedByMod = false;
-
+#if MELONLOADER || RELEASE_MELON
+                MelonCoroutines.Start(SpawnZombies(__instance, wave));
+#elif BEPINEX || RELEASE_BEPINEX
+                MonoBehaviourExtensions.StartCoroutine(__instance, SpawnZombies(__instance, wave));
+#endif
                 return false;
-
             }
+
+            public static IEnumerator SpawnZombies(BoardSpawner __instance, int wave)
+            {
+
+                for (int currentSpawnCount = 0; currentSpawnCount < instance.ZombiesCountMultiplier.Value; currentSpawnCount++)
+                {
+                    if (__instance == null) yield break;
+                    yield return new WaitForSeconds(instance.SpawnDelay.Value);
+                    if (__instance == null) yield break;
+
+                    spawnedByMod = true;
+
+                    try
+                    {
+                        __instance.SummonZombies(wave);
+                    }
+                    finally
+                    {
+                        spawnedByMod = false;
+                    }
+                }
+            }
+
+
         }
 
 

@@ -4,6 +4,7 @@ using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Utils.Translator;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using HarmonyLib;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -27,7 +28,6 @@ namespace Magnetar_Client.Modules
 
         public static NoCraters instance;
 
-        public bool TurnOffAfterUse = false;
         public BoolSetting AutoTurnOff;
 
         public NoCraters()
@@ -36,7 +36,7 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("Extra");
 
-            AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
+            AutoTurnOff = new BoolSetting("Auto Turn Off", false);
             Settings.Add(AutoTurnOff);
 
             EndCategory();
@@ -57,7 +57,9 @@ namespace Magnetar_Client.Modules
                     deltaTime = 0;
                 }
             }
-
+        }
+        public override void OnEnable()
+        {
             if (BoardInstanceIsNull || board.griditemArray == null) return;
 
             for (int i = board.griditemArray.Count - 1; i >= 0; i--)
@@ -68,6 +70,20 @@ namespace Magnetar_Client.Modules
                     item.Die();
             }
             
+        }
+
+        [HarmonyPatch(typeof(GridItem))]
+        public static class GridItemPatch
+        {
+            [HarmonyPatch(nameof(GridItem.SetGridItem))]
+            [HarmonyPrefix]
+            public static bool SetGridItemPrefix(GridItemType theType)
+            {
+                if (instance == null || !instance.Active) return true;
+                if ((theType == GridItemType.CraterDay) || (theType == GridItemType.CraterNight))
+                    return false;
+                return true;
+            }
         }
     }
 
@@ -134,6 +150,17 @@ namespace Magnetar_Client.Modules
         public static float deltaTime = 0;
         public override void OnUpdateActive()
         {
+            // Handle auto turn off
+            if (!AutoTurnOff.Value) return;
+            deltaTime += Time.deltaTime;
+            if (deltaTime > 0.3f)
+            {
+                Active = false;
+                deltaTime = 0;
+            }
+        }
+        public override void OnEnable()
+        {
             if (BoardInstanceIsNull || board.griditemArray == null) return;
 
 #if MELONLOADER || BEPINEX
@@ -159,13 +186,20 @@ namespace Magnetar_Client.Modules
                 }
             }
 
-            // Handle auto turn off
-            if (!AutoTurnOff.Value) return;
-            deltaTime += Time.deltaTime;
-            if (deltaTime > 0.3f)
+            
+        }
+
+        [HarmonyPatch(typeof(GridItem))]
+        public static class GridItemPatch
+        {
+            [HarmonyPatch(nameof(GridItem.SetGridItem))]
+            [HarmonyPrefix]
+            public static bool SetGridItemPrefix(GridItemType theType)
             {
-                Active = false;
-                deltaTime = 0;
+                if (instance == null || !instance.Active) return true;
+                if (instance.selectedGridItems.IsSelected((int)theType))
+                    return false;
+                return true;
             }
         }
     }

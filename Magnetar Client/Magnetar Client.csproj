@@ -88,6 +88,9 @@
 		<Reference Include="UnityEngine.UIModule">
 			<HintPath>References\Melonloader\Il2Cpp\UnityEngine.UIModule.dll</HintPath>
 		</Reference>
+		<Reference Include="Il2CppUniTask">
+			<HintPath>References\Melonloader\Il2Cpp\Il2CppUniTask.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<ItemGroup Condition="$(Configuration.Contains('Bepinex')) or $(Configuration.Contains('bepinex'))">
@@ -141,6 +144,9 @@
 		</Reference>
 		<Reference Include="UnityEngine.UIModule">
 			<HintPath>References\Bepinex\Il2Cpp\Il2CppInterop.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="UniTask">
+			<HintPath>References\Bepinex\Il2Cpp\UniTask.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 

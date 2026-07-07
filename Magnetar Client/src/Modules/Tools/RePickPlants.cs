@@ -19,30 +19,95 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
 
         // Mod Data
-
         public static RePickPlants instance;
 
+        public BoolSetting ForceShowRepickButtton;
         public GameObject showCardsObj;
         public GameObject referenceBtnObj;
 
+        public BoolSetting AllowAllCards;
+        public BoolSetting AllowUltimateCards;
 #if MELONLOADER || BEPINEX
         public BoolSetting DebugMode;
 #endif
 
         public bool isDefaultEnabled = false;
-        public bool enabledByMod = false;
+        public bool RepickenabledByMod = false;
+
+        private bool allCardsEnabledbyMod;
+        private bool ultimateCardsEnabledbyMod;
 
         public RePickPlants()
         {
             instance = this;
 
+            CreateCategory("General");
+
+            ForceShowRepickButtton = new BoolSetting("Force Show Repick button", true);
+            ForceShowRepickButtton.OnValueChanged = (val) =>
+            {
+                if (!val) RemoveRepickButton();
+            };
+
+            AddSettings(ForceShowRepickButtton);
+            EndCategory();
+
+            CreateCategory("Card Groups");
+
+            AllowAllCards = new BoolSetting("Allow all plant cards", false);
+            AllowAllCards.OnValueChanged = (val) =>
+            {
+                if (!Active || SeedLibrary.Instance == null) return;
+                if (val)
+                {
+                    if (!CheckActiveUIButton("AllCards"))
+                    {
+                        SeedLibrary.Instance.SetAllCards();
+                        allCardsEnabledbyMod = true;
+                    }
+                }
+                else
+                {
+                    if (CheckActiveUIButton("AllCards") && allCardsEnabledbyMod)
+                    {
+                        RemoveUIButton("AllCards");
+                        allCardsEnabledbyMod = false;
+                    }
+                }
+            };
+
+            AllowUltimateCards = new BoolSetting("Allow Odyssey plant cards", false);
+            AllowUltimateCards.OnValueChanged = (val) =>
+            {
+                if (!Active || SeedLibrary.Instance == null) return;
+                if (val)
+                {
+                    if (!CheckActiveUIButton("UltimateCards"))
+                    {
+                        SeedLibrary.Instance.SetUltimateCards();
+                        ultimateCardsEnabledbyMod = true;
+                    }
+                }
+                else
+                {
+                    if (CheckActiveUIButton("UltimateCards") && ultimateCardsEnabledbyMod)
+                    {
+                        RemoveUIButton("UltimateCards");
+                        ultimateCardsEnabledbyMod = false;
+                    }
+                }
+            };
+
+            AddSettings(AllowAllCards, AllowUltimateCards);
+            EndCategory();
+
 #if MELONLOADER || BEPINEX
             DebugMode = new BoolSetting("Debug Mode", false);
             AddSettings(DebugMode);
 #endif
-
         }
 
+        // --- Mod Logic ---
         public void ResetState()
         {
 #if MELONLOADER || BEPINEX
@@ -52,7 +117,7 @@ namespace Magnetar_Client.Modules
             showCardsObj = null;
             referenceBtnObj = null;
             isDefaultEnabled = false;
-            enabledByMod = false;
+            RepickenabledByMod = false;
         }
 
         public void CaptureReferences()
@@ -89,39 +154,52 @@ namespace Magnetar_Client.Modules
             }
         }
 
-        // --- Mod Logic ---
         public override void OnUpdateActive()
         {
-            if (showCardsObj == null || referenceBtnObj == null)
+            if (ForceShowRepickButtton.Value)
             {
-                CaptureReferences();
-                if (showCardsObj == null || referenceBtnObj == null) return;
+                if (showCardsObj == null || referenceBtnObj == null)
+                {
+                    CaptureReferences();
+                    if (showCardsObj == null || referenceBtnObj == null) return;
+                }
+
+                if (referenceBtnObj.activeInHierarchy)
+                {
+                    if (!showCardsObj.activeSelf)
+                    {
+#if MELONLOADER || BEPINEX
+                        if (DebugMode.Value)
+                            DebugLogger.Msg("[RePickPlants] Other buttons appeared. Activating ShowCards button.");
+#endif
+                        showCardsObj.SetActive(true);
+                        RepickenabledByMod = true;
+                    }
+                }
+                else
+                {
+                    if (RepickenabledByMod && showCardsObj.activeSelf)
+                    {
+#if MELONLOADER || BEPINEX
+                        if (DebugMode.Value)
+                            DebugLogger.Msg("[RePickPlants] Other buttons hid. Hiding ShowCards button.");
+#endif
+                        showCardsObj.SetActive(false);
+                        RepickenabledByMod = false;
+                    }
+                }
+            }
+            else RemoveRepickButton();
+        }
+
+        private void RemoveRepickButton()
+        {
+            if (RepickenabledByMod && showCardsObj != null && !isDefaultEnabled)
+            {
+                showCardsObj.SetActive(false);
             }
 
-            if (referenceBtnObj.activeInHierarchy)
-            {
-                if (!showCardsObj.activeSelf)
-                {
-#if MELONLOADER || BEPINEX
-                    if (DebugMode.Value)
-                        DebugLogger.Msg("[RePickPlants] Other buttons appeared. Activating ShowCards button.");
-#endif
-                    showCardsObj.SetActive(true);
-                    enabledByMod = true;
-                }
-            }
-            else
-            {
-                if (enabledByMod && showCardsObj.activeSelf)
-                {
-#if MELONLOADER || BEPINEX
-                    if (DebugMode.Value)
-                        DebugLogger.Msg("[RePickPlants] Other buttons hid. Hiding ShowCards button.");
-#endif
-                    showCardsObj.SetActive(false);
-                    enabledByMod = false;
-                }
-            }
+            RepickenabledByMod = false;
         }
 
         public override void OnDisable()
@@ -130,12 +208,63 @@ namespace Magnetar_Client.Modules
             if (DebugMode.Value)
                 DebugLogger.Msg("[RePickPlants] Mod disabled");
 #endif
-            if (enabledByMod && showCardsObj != null && !isDefaultEnabled)
-            {
-                showCardsObj.SetActive(false);
-            }
+            RemoveRepickButton();
 
-            enabledByMod = false;
+            if (SeedLibrary.Instance != null)
+            {
+                if (CheckActiveUIButton("AllCards") && allCardsEnabledbyMod)
+                {
+                    RemoveUIButton("AllCards");
+                    allCardsEnabledbyMod = false;
+                }
+
+                if (CheckActiveUIButton("UltimateCards") && ultimateCardsEnabledbyMod)
+                {
+                    RemoveUIButton("UltimateCards");
+                    ultimateCardsEnabledbyMod = false;
+                }
+            }
+        }
+
+        public override void OnEnable()
+        {
+            if (SeedLibrary.Instance != null)
+            {
+                if (AllowAllCards.Value && !CheckActiveUIButton("AllCards"))
+                {
+                    SeedLibrary.Instance.SetAllCards();
+                    allCardsEnabledbyMod = true;
+                }
+
+                if (AllowUltimateCards.Value && !CheckActiveUIButton("UltimateCards"))
+                {
+                    SeedLibrary.Instance.SetUltimateCards();
+                    ultimateCardsEnabledbyMod = true;
+                }
+            }
+        }
+
+        private static void RemoveUIButton(string name)
+        {
+            var buttons = UnityEngine.Object.FindObjectsOfType<UIButton>();
+            foreach (var button in buttons)
+            {
+                if (button.gameObject.name == name)
+                {
+                    SeedLibrary.Instance.RemoveCardGroup(button);
+                    Object.Destroy(button.gameObject);
+                }
+            }
+        }
+
+        private static bool CheckActiveUIButton(string name)
+        {
+            var buttons = UnityEngine.Object.FindObjectsOfType<UIButton>();
+            foreach (var button in buttons)
+            {
+                if (button.gameObject.name == name) return true;
+            }
+            return false;
         }
 
         [HarmonyPatch(typeof(Board))]
@@ -155,6 +284,28 @@ namespace Magnetar_Client.Modules
                 if (instance != null) instance.ResetState();
             }
         }
-    }
 
+        [HarmonyPatch(typeof(SeedLibrary))]
+        public static class SeedLibraryPatch
+        {
+            [HarmonyPatch(nameof(SeedLibrary.Start))]
+            [HarmonyPostfix]
+            public static void StartPostfix(SeedLibrary __instance)
+            {
+                if (__instance == null || instance == null || !instance.Active) return;
+
+                if (instance.AllowAllCards.Value && !CheckActiveUIButton("AllCards")) 
+                {
+                    __instance.SetAllCards();
+                    instance.allCardsEnabledbyMod = true;
+                }
+                if (instance.AllowUltimateCards.Value && !CheckActiveUIButton("UltimateCards")) 
+                { 
+                    __instance.SetUltimateCards();
+                    instance.ultimateCardsEnabledbyMod = true;
+                }
+            }
+
+        }
+    }
 }

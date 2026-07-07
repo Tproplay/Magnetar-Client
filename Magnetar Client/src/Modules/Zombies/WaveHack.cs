@@ -3,14 +3,12 @@ using System;
 using HarmonyLib;
 using System.Collections;
 using System.Collections.Generic;
-using MelonLoader;
 using UnityEngine;
-
-
-
-
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
+using MelonLoader;
+#elif BEPINEX || RELEASE_BEPINEX
+using BepInEx.Unity.IL2CPP.Utils;
 #endif
 
 namespace Magnetar_Client.Modules
@@ -98,7 +96,7 @@ namespace Magnetar_Client.Modules
 #if MELONLOADER || RELEASE_MELON
                 MelonCoroutines.Start(SpawnZombies(__instance, wave));
 #elif BEPINEX || RELEASE_BEPINEX
-                MonoBehaviourExtensions.StartCoroutine(__instance, SpawnZombies(__instance, wave));
+                MonoBehaviourExtensions.StartCoroutine(__instance.Cast<MonoBehaviour>(), SpawnZombies(__instance, wave));
 #endif
                 return false;
             }

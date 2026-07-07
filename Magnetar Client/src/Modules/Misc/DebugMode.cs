@@ -70,7 +70,7 @@ namespace Magnetar_Client.Modules
             };
             Settings.Add(selected);
 
-            speed = new FloatSetting("Time between Logs", 0.1f, 10, 1, 1);
+            speed = new FloatSetting("Time between Logs", 0.1f, 10, 1, 2);
 
             Settings.Add(speed);
 

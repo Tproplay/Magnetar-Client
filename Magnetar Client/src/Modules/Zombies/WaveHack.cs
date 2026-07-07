@@ -46,7 +46,7 @@ namespace Magnetar_Client.Modules
             CreateCategory("Cooldown");
 
             Active_WaveCooldownSetting = new BoolSetting("Custom Wave Cooldown", false);
-            WaveCooldownSetting = new FloatSetting("Wave Cooldown", 0, 60, 30, 1, 0);
+            WaveCooldownSetting = new FloatSetting("Wave Cooldown", 0, 60, 30, 3, 0);
             FreezeWaveSetting = new BoolSetting("Freeze Wave Timer", false);
 
             AddSettings(Active_WaveCooldownSetting, WaveCooldownSetting,FreezeWaveSetting);

@@ -51,7 +51,7 @@ namespace Magnetar_Client.Modules
 
             Settings.Add(ZombieSelectedSetting);
 
-            HpMultiplierSettig = new FloatSetting("Hp Multiply", 0.1f, 100, 2);
+            HpMultiplierSettig = new FloatSetting("Hp Multiply", 0.1f, 100, 2, 3);
             Settings.Add(HpMultiplierSettig);
 
             EndCategory();

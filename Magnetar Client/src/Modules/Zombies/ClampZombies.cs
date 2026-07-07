@@ -38,16 +38,16 @@ namespace Magnetar_Client.Modules
             MaxZombiesSetting = new IntSetting("Max Zombies", 40, 100, 60,1);
             AddSettings(MaxZombiesSetting);
 
-            SpeedReductionSetting = new FloatSetting("Apply Speed Reduction", 0.01f, 1, 0.9f, 2,0);
+            SpeedReductionSetting = new FloatSetting("Apply Speed Reduction", 0.01f, 1, 0.9f, 3,0);
             AddSettings(SpeedReductionSetting);
 
-            HpAdditionPercentageSetting = new FloatSetting("Add % of Hp", 0.1f, 100, 100, 1,0);
+            HpAdditionPercentageSetting = new FloatSetting("Add % of Hp", 0.1f, 100, 100, 3,0);
             AddSettings(HpAdditionPercentageSetting);
 
             EndCategory();
             CreateCategory("Extra");
 
-            VisualScaleSetting = new FloatSetting("Visual Scale", 0.01f, 1, 0.03f, 2, 0);
+            VisualScaleSetting = new FloatSetting("Visual Scale", 0.01f, 1, 0.03f, 3, 0);
             AddSettings(VisualScaleSetting);
 
             EndCategory();

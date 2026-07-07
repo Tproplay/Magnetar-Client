@@ -25,16 +25,13 @@ namespace Magnetar_Client.Modules
         // Mod Data
         public static CustomCDGlove instance;
 
-        public float CustomCD = 0;
         public FloatSetting CustomCDSetting;
 
         private static float originalCD = -1f;
 
-        public bool preserveOriginal = true;
-        public BoolSetting preserveOriginalSetting;
+        public BoolSetting preserveOriginal;
 
-        public bool resetCDonEnable = false;
-        public BoolSetting resetCDonEnableSetting;
+        public BoolSetting resetCDonEnable;
 
         public override bool Active { get; set; } = false;
 
@@ -42,21 +39,17 @@ namespace Magnetar_Client.Modules
         {
             CreateCategory("General");
 
-            CustomCDSetting = new FloatSetting("Custom Glove Cooldown", 0, 999, CustomCD);
-            Settings.Add(CustomCDSetting);
-            CustomCD = CustomCDSetting.Value;
+            CustomCDSetting = new FloatSetting("Custom Glove Cooldown", 0, 60, 0, 3);
+            AddSettings(CustomCDSetting);
 
             EndCategory();
+
             CreateCategory("Extra");
 
-            preserveOriginalSetting = new BoolSetting("Preserve Original", preserveOriginal);
-            Settings.Add(preserveOriginalSetting);
-            preserveOriginal = preserveOriginalSetting.Value;
+            preserveOriginal = new BoolSetting("Preserve Original", true);
+            resetCDonEnable = new BoolSetting("Reset CD on Enable", false);
 
-            resetCDonEnableSetting = new BoolSetting("Reset CD on Enable", resetCDonEnable);
-            Settings.Add(resetCDonEnableSetting);
-            resetCDonEnable = resetCDonEnableSetting.Value;
-
+            AddSettings(preserveOriginal, resetCDonEnable);
             EndCategory();
         }
 
@@ -75,7 +68,7 @@ namespace Magnetar_Client.Modules
         {
             originalCD = -1f;
             if (Glove.Instance == null) return;
-            if (originalCD >= 0 && preserveOriginal)
+            if (originalCD >= 0 && preserveOriginal.Value)
             {
                 Glove.Instance.fullCD = originalCD;
             }
@@ -84,7 +77,7 @@ namespace Magnetar_Client.Modules
         public override void OnEnable()
         {
             if (Glove.Instance == null) return;
-            if (resetCDonEnableSetting.Value)
+            if (resetCDonEnable.Value)
             {
                 Glove.Instance.CD = Glove.Instance.fullCD;
             }
@@ -108,16 +101,13 @@ namespace Magnetar_Client.Modules
 
         public static CustomCDHammer instance;
 
-        public float CustomCD = 0;
-        public FloatSetting CustomCDSetting;
+        public FloatSetting CustomCD;
 
         private static float originalCD = -1f;
 
-        public bool preserveOriginal = true;
-        public BoolSetting preserveOriginalSetting;
+        public BoolSetting preserveOriginal;
 
-        public bool resetCDonEnable = false;
-        public BoolSetting resetCDonEnableSetting;
+        public BoolSetting resetCDonEnable;
 
         public override bool Active { get; set; } = false;
 
@@ -127,21 +117,17 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            CustomCDSetting = new FloatSetting("Custom Hammer Cooldown", 0, 999, CustomCD);
-            Settings.Add(CustomCDSetting);
-            CustomCD = CustomCDSetting.Value;
+            CustomCD = new FloatSetting("Custom Hammer Cooldown", 0, 60, 0 ,3);
+            AddSettings(CustomCD);
 
             EndCategory();
+
             CreateCategory("Extra");
 
-            preserveOriginalSetting = new BoolSetting("Preserve Original", preserveOriginal);
-            Settings.Add(preserveOriginalSetting);
-            preserveOriginal = preserveOriginalSetting.Value;
+            preserveOriginal = new BoolSetting("Preserve Original", true);
+            resetCDonEnable = new BoolSetting("Reset CD on Enable", false);
 
-            resetCDonEnableSetting = new BoolSetting("Reset CD on Enable", resetCDonEnable);
-            Settings.Add(resetCDonEnableSetting);
-            resetCDonEnable = resetCDonEnableSetting.Value;
-
+            AddSettings(preserveOriginal, resetCDonEnable);
             EndCategory();
 
         }
@@ -162,13 +148,13 @@ namespace Magnetar_Client.Modules
             // BugFix: If the player has a higher CD than the one we set, we set it to our custom CD so
             // it doesn't take longer than intended to use the hammer again. This can happen if the player
             // has a CD increasing item and they enable this mod while the CD is still active.
-            if (Hammer.Instance.CD > CustomCDSetting.Value)
+            if (Hammer.Instance.CD > CustomCD.Value)
             {
-                Hammer.Instance.CD = CustomCDSetting.Value;
+                Hammer.Instance.CD = CustomCD.Value;
                 Hammer.Instance.CDUpdate();
             }
 
-            Hammer.Instance.fullCD = CustomCDSetting.Value;
+            Hammer.Instance.fullCD = CustomCD.Value;
 
 
         }
@@ -178,7 +164,7 @@ namespace Magnetar_Client.Modules
 
             if (Hammer.Instance == null) return;
 
-            if (originalCD >= 0 && preserveOriginalSetting.Value)
+            if (originalCD >= 0 && preserveOriginal.Value)
             {
                 Hammer.Instance.fullCD = originalCD;
             }
@@ -188,24 +174,21 @@ namespace Magnetar_Client.Modules
         public override void OnEnable()
         {
             if (Hammer.Instance == null) return;
-            if (resetCDonEnableSetting.Value)
+            if (resetCDonEnable.Value)
             {
-                Hammer.Instance.CD = CustomCDSetting.Value;
+                Hammer.Instance.CD = CustomCD.Value;
             }
         }
     }
 
-    /*
     public class CustomCDWheel : Module
     {
         // Mod Info
         public override string Name { get; set; } = "No Wheel Barrow CD";
         public override string Description { get; set; } = "Modifies the Ingame Wheel Barrow's Cooldown.";
-        public override string SearchHints { get; set; } = "nohammercd hammercooldown customhammercd hammercd" +
-            " zerohammercd nohammercoolndown hammercooldownreset fasthammer instanthammer hammerbuff hammercdmod " +
-            "hammercdchanger hammercdremover hammercolldown hammercooldon hammercooldwn hamrcd hammercooldoun " +
-            "hammercdtimer hammercdreducion hammercooldownreduction hammerfast hammerready hammerunlimited hammerinfinite " +
-            "hammerinterval hammerperiod hammerspeed hammerspam hammerfrequency";
+        public override string SearchHints { get; set; } = "nowheelbarrowcd wheelbarrowcooldown wheelbarrowcd wheelbarrowinstant" +
+            " instantwheelbarrow cooldownhack cooldownremove wheelbarrow-cooldown wheelbarrowfix cd-remove wheelbarrowspeed " +
+            "wheelbarrowcooldownfix wheelbarrowinstantcooldown wheelbarrownocd nocd wheelbarrowmod wheelbarrowutility";
 
         public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
 
@@ -213,16 +196,13 @@ namespace Magnetar_Client.Modules
 
         public static CustomCDWheel instance;
 
-        public float CustomCD = 0;
-        public FloatSetting CustomCDSetting;
+        public FloatSetting CustomCD;
 
         private static float originalCD = -1f;
 
-        public bool preserveOriginal = true;
-        public BoolSetting preserveOriginalSetting;
+        public BoolSetting preserveOriginal;
 
-        public bool resetCDonEnable = false;
-        public BoolSetting resetCDonEnableSetting;
+        public BoolSetting resetCDonEnable;
 
         public override bool Active { get; set; } = false;
 
@@ -232,21 +212,17 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            CustomCDSetting = new FloatSetting("Custom Wheel Barrow Cooldown", 0, 999, CustomCD);
-            Settings.Add(CustomCDSetting);
-            CustomCD = CustomCDSetting.Value;
+            CustomCD = new FloatSetting("Custom Wheel Barrow Cooldown", 0, 60, 0, 3);
 
+            AddSettings(CustomCD);
             EndCategory();
+
             CreateCategory("Extra");
 
-            preserveOriginalSetting = new BoolSetting("Preserve Original", preserveOriginal);
-            Settings.Add(preserveOriginalSetting);
-            preserveOriginal = preserveOriginalSetting.Value;
+            preserveOriginal = new BoolSetting("Preserve Original", true);
+            resetCDonEnable = new BoolSetting("Reset CD on Enable", false);
 
-            resetCDonEnableSetting = new BoolSetting("Reset CD on Enable", resetCDonEnable);
-            Settings.Add(resetCDonEnableSetting);
-            resetCDonEnable = resetCDonEnableSetting.Value;
-
+            AddSettings(preserveOriginal, resetCDonEnable);
             EndCategory();
 
         }
@@ -265,16 +241,13 @@ namespace Magnetar_Client.Modules
             // Save Original CD
             if (originalCD == -1f) originalCD = wheel.fullCD;
 
-            // BugFix: If the player has a higher CD than the one we set, we set it to our custom CD so
-            // it doesn't take longer than intended to use the hammer again. This can happen if the player
-            // has a CD increasing item and they enable this mod while the CD is still active.
-            if (wheel.CD > CustomCDSetting.Value)
+            if (wheel.CD > CustomCD.Value)
             {
-                wheel.CD = CustomCDSetting.Value;
+                wheel.CD = CustomCD.Value;
                 wheel.CDUpdate();
             }
 
-            wheel.fullCD = CustomCDSetting.Value;
+            wheel.fullCD = CustomCD.Value;
 
 
         }
@@ -284,7 +257,7 @@ namespace Magnetar_Client.Modules
 
             if (wheel == null) return;
 
-            if (originalCD >= 0 && preserveOriginalSetting.Value)
+            if (originalCD >= 0 && preserveOriginal.Value)
             {
                 wheel.fullCD = originalCD;
             }
@@ -294,13 +267,12 @@ namespace Magnetar_Client.Modules
         public override void OnEnable()
         {
             if (wheel == null) return;
-            if (resetCDonEnableSetting.Value)
+            if (resetCDonEnable.Value)
             {
-                wheel.CD = CustomCDSetting.Value;
+                wheel.CD = CustomCD.Value;
             }
         }
     }
-    */
 
     public class CustomCDCards : Module
     {
@@ -336,12 +308,11 @@ namespace Magnetar_Client.Modules
                 Blacklist = new HashSet<int> {
                     (int)PlantType.Nothing,
                     257,258,259,260,261,262,263,264,265,266,267,268,
-                    246,247,
+                    246,247,3000
                 },
                 CustomNames = TranslatedNames(typeof(PlantType))
             };
 
-            Settings.Add(selectedSeeds);
             selectedSeeds.Options.Keys.ToList().ForEach(selectedSeeds.Select);
 
             selectedSeeds_dup = new MultiSelectSetting(
@@ -350,22 +321,21 @@ namespace Magnetar_Client.Modules
                 Blacklist = new HashSet<int> {
                     (int)PlantType.Nothing,
                     257,258,259,260,261,262,263,264,265,266,267,268,
-                    246,247,
+                    246,247,3000
                 },
                 CustomNames = TranslatedNames(typeof(PlantType))
             };
 
-            Settings.Add(selectedSeeds_dup);
             selectedSeeds_dup.Options.Keys.ToList().ForEach(selectedSeeds_dup.Select);
 
-            CustomCDSetting = new FloatSetting("Custom CD Multiplier", 0.01f, 10, 10,2);
-            Settings.Add(CustomCDSetting);
+            CustomCDSetting = new FloatSetting("Custom CD Multiplier", 0.001f, 10, 1_000_000,3, 0.001f);
 
+            AddSettings(selectedSeeds,selectedSeeds_dup,CustomCDSetting);
             EndCategory();
 
         }
 
-        // Mod Logic
+        // Mod Logics
 
         private Dictionary<CardUI,float> originalCD = new Dictionary<CardUI,float>();
         public override void OnUpdateActive()

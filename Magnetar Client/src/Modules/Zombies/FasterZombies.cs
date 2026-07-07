@@ -50,7 +50,7 @@ namespace Magnetar_Client.Modules
             ZombieSelectedSetting.Options.Keys.ToList().ForEach(ZombieSelectedSetting.Select);
             Settings.Add(ZombieSelectedSetting);
 
-            theSpeedSettig = new FloatSetting("Speed", 0.1f, 10f, 2f);
+            theSpeedSettig = new FloatSetting("Speed", 0.1f, 10f, 2f,3);
             Settings.Add(theSpeedSettig);
 
             EndCategory();

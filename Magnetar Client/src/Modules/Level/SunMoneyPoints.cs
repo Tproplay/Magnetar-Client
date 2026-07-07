@@ -60,13 +60,13 @@ namespace Magnetar_Client.Modules
             CreateCategory("Sun Multiplier");
             SunMultipier = new BoolSetting("Sun Multiplier", false);
             Settings.Add(SunMultipier);
-            sunMultiplierSetting = new FloatSetting("Multiplier", 0, 10, 2);
+            sunMultiplierSetting = new FloatSetting("Multiplier", 0, 10, 2, 3);
             Settings.Add(sunMultiplierSetting);
             EndCategory();
 
             CreateCategory("Extra");
             Active_AutoSunCD = new BoolSetting("Custom Automatic sun drop cd", false);
-            AutoSunCD = new FloatSetting("Automatic sun drop cd", 0, 20, 7.5f, 2,0);
+            AutoSunCD = new FloatSetting("Automatic sun drop cd", 0, 20, 7.5f, 3,0);
             AllowSunDropAnywhere = new BoolSetting("Allow Sun drop anywhere", false)
             {
                 OnValueChanged = disableAutoSun,
@@ -254,7 +254,7 @@ namespace Magnetar_Client.Modules
             CreateCategory("Money Multiplier");
             MoneyMultiplier = new BoolSetting("Money Multiplier", false);
             Settings.Add(MoneyMultiplier);
-            moneyMultiplierSetting = new FloatSetting("Multiplier", 0, 10, 2);
+            moneyMultiplierSetting = new FloatSetting("Multiplier", 0, 10, 2, 3);
             Settings.Add(moneyMultiplierSetting);
             EndCategory();
         }
@@ -367,7 +367,7 @@ namespace Magnetar_Client.Modules
             CreateCategory("Unlimited Points");
             UnlimitedPoints = new BoolSetting("Unlimited Points", true);
             Settings.Add(UnlimitedPoints);
-            pointsSetting = new FloatSetting("Points Amount", 0, 99999, 99999);
+            pointsSetting = new FloatSetting("Points Amount", 0, 99999, 99999, 2);
             Settings.Add(pointsSetting);
             preserveOriginalSetting = new BoolSetting("Preserve Original", true);
             Settings.Add(preserveOriginalSetting);
@@ -376,7 +376,7 @@ namespace Magnetar_Client.Modules
             CreateCategory("Points Multiplier");
             PointsMultiplier = new BoolSetting("Points Multiplier", false);
             Settings.Add(PointsMultiplier);
-            pointsMultiplierSetting = new FloatSetting("Multiplier", 0, 10, 2);
+            pointsMultiplierSetting = new FloatSetting("Multiplier", 0, 10, 2, 3);
             Settings.Add(pointsMultiplierSetting);
             EndCategory();
         }

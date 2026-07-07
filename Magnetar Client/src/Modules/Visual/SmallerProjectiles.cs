@@ -42,7 +42,7 @@ namespace Magnetar_Client.Modules
             BulletTypeSetting.Options.Keys.ToList().ForEach(BulletTypeSetting.Select);
             Settings.Add(BulletTypeSetting);
 
-            ScaleSetting = new FloatSetting("Scale Multiplier", 0.1f, 2f, 0.5f, 2, 0);
+            ScaleSetting = new FloatSetting("Scale Multiplier", 0.1f, 2f, 0.5f, 3, 0);
             Settings.Add(ScaleSetting);
 
             EndCategory();

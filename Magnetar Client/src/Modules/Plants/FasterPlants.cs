@@ -58,13 +58,13 @@ namespace Magnetar_Client.Modules
             Settings.Add(PlantsSelectedSetting);
             
 
-            AttackIntervalMultiplierSetting = new FloatSetting("Attack Interval", 0.01f, 50, 50);
+            AttackIntervalMultiplierSetting = new FloatSetting("Attack Interval", 0.01f, 50, 50,3);
             Settings.Add(AttackIntervalMultiplierSetting);
 
-            AnimationSpeedMultiplierSetting = new FloatSetting("Animation Speed", 0.01f, 50, 2);
+            AnimationSpeedMultiplierSetting = new FloatSetting("Animation Speed", 0.01f, 50, 2, 3);
             Settings.Add(AnimationSpeedMultiplierSetting);
 
-            ProduceSpeedMultiplierSetting = new FloatSetting("Produce Speed", 0.01f, 50, 50);
+            ProduceSpeedMultiplierSetting = new FloatSetting("Produce Speed", 0.01f, 50, 50, 3);
             Settings.Add(ProduceSpeedMultiplierSetting);
 
             EndCategory();

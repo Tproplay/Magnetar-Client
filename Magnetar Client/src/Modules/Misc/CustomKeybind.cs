@@ -139,11 +139,10 @@ namespace Magnetar_Client.Modules
                     else
                     {
 #if MELONLOADER || RELEASE_MELON
-                        var slowTrigger = UnityEngine.Object.FindAnyObjectByType<SlowTrigger>();
+                        var slowTrigger = UnityEngine.Object.FindObjectsOfType<SlowTrigger>().FirstOrDefault();
                         if (slowTrigger != null) slowTrigger.TriggerSlow();
 #elif BEPINEX || RELEASE_BEPINEX
-                        // Call the non-generic signature passing the C++ class identifier pointer
-                        var rawSlowTrigger = UnityEngine.Object.FindAnyObjectByType(Il2CppInterop.Runtime.Il2CppType.Of<SlowTrigger>());
+                        var rawSlowTrigger = UnityEngine.Object.FindObjectsOfType(Il2CppInterop.Runtime.Il2CppType.Of<SlowTrigger>()).FirstOrDefault();
                         var slowTrigger = rawSlowTrigger != null ? rawSlowTrigger.TryCast<SlowTrigger>() : null;
 
                         if (slowTrigger != null) slowTrigger.TriggerSlow();

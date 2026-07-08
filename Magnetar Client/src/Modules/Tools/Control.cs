@@ -23,13 +23,14 @@ namespace Magnetar_Client.Modules
             " pilotplant steerplant wasdmovement plantdrive plantpilot manualcontrol plantcontrolmod movementmod" +
             " movementhack wasdmode plantcontrolmode move";
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Plant;
+        public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
 
         // Mod Data
 
         public static Control instance;
 
         public BindSetting ControlKey;
+        public BoolSetting SinglePlantMode;
 
         public Control()
         {
@@ -38,8 +39,9 @@ namespace Magnetar_Client.Modules
             CreateCategory("General");
 
             ControlKey = new BindSetting("Control Key", new List<KeyCode> { KeyCode.U});
-            
-            AddSettings(ControlKey);
+            SinglePlantMode = new BoolSetting("Single Plant mode", false);
+
+            AddSettings(ControlKey, SinglePlantMode);
             EndCategory();
         }
 
@@ -47,6 +49,8 @@ namespace Magnetar_Client.Modules
 
         public override void OnUpdateActive()
         {
+            if (BoardInstanceIsNull) return;
+
             if (GetKeyComboDown(ControlKey.BindKeys))
             {
                 var cast = Physics2D.Raycast(Mouse.Instance.MousePosition, new Vector2(0, 0));
@@ -62,6 +66,11 @@ namespace Magnetar_Client.Modules
                         plant.UpdateText();
                     }
                 }
+            }
+
+            if (SinglePlantMode.Value)
+            {
+                if (board.controledPlant == null) board.controledPlant = Lawnf.GetAllPlants()?.Count > 0 ? Lawnf.GetAllPlants()[0] : null;
             }
         }
 

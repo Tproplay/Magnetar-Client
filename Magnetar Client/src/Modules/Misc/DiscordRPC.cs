@@ -74,7 +74,7 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            SwitchSpeed = new FloatSetting("Switch Speed (s)", 1f, 30f, 5f, 2);
+            SwitchSpeed = new FloatSetting("Switch Speed (s)", 2f, 30f, 5f, 3, 0);
             AddSettings(SwitchSpeed);
 
             EndCategory();
@@ -288,14 +288,9 @@ namespace Magnetar_Client.Modules
         {
             if (client == null || !client.IsInitialized) return;
 
-            if (Line1Cycle == null || Line1Cycle.Count == 0)
+            if (Line1Cycle == null || Line1Cycle.Count == 0 || index1 >= Line1Cycle.Count)
                 index1 = 0;
-            else if (index1 >= Line1Cycle.Count)
-                index1 = 0;
-
-            if (Line2Cycle == null || Line2Cycle.Count == 0)
-                index2 = 0;
-            else if (index2 >= Line2Cycle.Count)
+            if (Line2Cycle == null || Line2Cycle.Count == 0 || index2 >= Line2Cycle.Count)
                 index2 = 0; 
 
             string currentLine1 = Line1Cycle.Count > 0 ? Line1Cycle[index1] : "Made By Tproplay";

@@ -31,7 +31,7 @@ namespace Magnetar_Client.Utils
         public Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
     }
 
-    // --- NEW: Defines the JSON structure for hud_translations.json ---
+    // Defines the JSON structure for hud_translations.json
     public class HudTranslationNode
     {
         [JsonProperty("Name")]
@@ -42,7 +42,7 @@ namespace Magnetar_Client.Utils
     {
         private static bool _isLoaded = false;
         private static bool _modulesLinked = false;
-        private static bool _hudLinked = false; // --- NEW State Tracker ---
+        private static bool _hudLinked = false;
         private static Dictionary<string, string> _exactTranslations = new Dictionary<string, string>();
         private static Dictionary<Regex, string> _regexTranslations = new Dictionary<Regex, string>();
         private static Dictionary<System.Type, Dictionary<int, string>> _nameCache = new Dictionary<System.Type, Dictionary<int, string>>();
@@ -110,7 +110,7 @@ namespace Magnetar_Client.Utils
 
             _nameCache.Clear();
             _modulesLinked = false;
-            _hudLinked = false; // --- NEW Reset Switch ---
+            _hudLinked = false;
             _isLoaded = true;
         }
 
@@ -195,7 +195,6 @@ namespace Magnetar_Client.Utils
             }
         }
 
-        // --- NEW: Injects mapped HUD translations cleanly at runtime ---
         private static void LinkHudTranslations()
         {
             string hudPath = Path.Combine(ModsDir, "Magnetar Translation", Config.Language, "hud_translations.json");
@@ -233,7 +232,7 @@ namespace Magnetar_Client.Utils
 
             string stringsPath = Path.Combine(baseDir, "translation_strings.json");
             string modulesPath = Path.Combine(baseDir, "Modules_translations.json");
-            string hudPath = Path.Combine(baseDir, "hud_translations.json"); // --- HUD Target Path ---
+            string hudPath = Path.Combine(baseDir, "hud_translations.json");
 
             // 1. Process Module Translations (Modules_translations.json)
             bool isDirtyModules = !File.Exists(modulesPath);
@@ -280,10 +279,17 @@ namespace Magnetar_Client.Utils
                             if (string.IsNullOrWhiteSpace(setting.Name)) continue;
 
                             moduleManagedStrings.Add(setting.Name);
+
+                            if (node.Settings == null)
+                            {
+                                node.Settings = new Dictionary<string, string>();
+                                isDirtyModules = true;
+                            }
+
                             if (!node.Settings.ContainsKey(setting.Name))
                             {
                                 node.Settings[setting.Name] = _exactTranslations.ContainsKey(setting.Name) ? _exactTranslations[setting.Name] : setting.Name;
-                                isDirtyModules = true;
+                                isDirtyModules = true; 
                             }
                         }
                     }
@@ -296,12 +302,12 @@ namespace Magnetar_Client.Utils
                 {
                     string jsonDump = JsonConvert.SerializeObject(moduleTranslations, Formatting.Indented);
                     File.WriteAllText(modulesPath, jsonDump);
-                    TranslatorLogger.Warning($"Auto-dumped module strings into {Config.Language}/Modules_translations.json");
+                    TranslatorLogger.Warning($"Refreshed & Auto-dumped module strings into {Config.Language}/Modules_translations.json");
                 }
                 catch (Exception ex) { TranslatorLogger.Error($"Failed to dump module strings: {ex.Message}"); }
             }
 
-            // 2. --- NEW: Process HUD Translations (hud_translations.json) ---
+            // 2. Process HUD Translations (hud_translations.json)
             bool isDirtyHud = !File.Exists(hudPath);
             Dictionary<string, HudTranslationNode> hudTranslations = new Dictionary<string, HudTranslationNode>();
 
@@ -365,7 +371,6 @@ namespace Magnetar_Client.Utils
                 _modulesLinked = true;
             }
 
-            // --- NEW: Dynamically binds HUD file map when HUD initializes ---
             if (!_hudLinked && Core.HUDRenderer.Elements != null && Core.HUDRenderer.Elements.Count > 0)
             {
                 LinkHudTranslations();
@@ -456,7 +461,6 @@ namespace Magnetar_Client.Utils
                     }
                 }
 
-                // --- NEW: Blacklist HUD strings from general file dump ---
                 HashSet<string> hudManagedStrings = new HashSet<string>();
                 if (Core.HUDRenderer.Elements != null)
                 {

@@ -10,7 +10,12 @@
     "Description": "Allows you to repick your plants mid-game.",
     "Search Hints": "repickplants reselectplants changeplants midgameplants plantswitch plantrepick reselect seedbankreset pickagain repickseed re-pick changeseed midgameselector plantchange plantmenu seedreselect selectagain reselectseeds plantselection repickmode changeplant midgamepick resetplants repickselection seedsrepick re-select repick plantreselector",
     "settings": {
-      "Debug Mode": "Debug Mode"
+      "Debug Mode": "Debug Mode",
+      "General": "General",
+      "Force Show Repick button": "Force Show Repick button",
+      "Card Groups": "Card Groups",
+      "Allow all plant cards": "Allow all plant cards",
+      "Allow Odyssey plant cards (Ensure Odyssey Plant is enabled before entering the level)": "Allow Odyssey plant cards (Ensure Odyssey Plant is enabled before entering the level)"
     }
   },
   "Custom Conveyor": {
@@ -215,10 +220,14 @@
       "Line 1 Message 2": "Line 1 Message 2",
       "Line 1 Message 3": "Line 1 Message 3",
       "Line 1 Message 4": "Line 1 Message 4",
+      "Line 1 Message 5": "Line 1 Message 5",
+      "Line 1 Message 6": "Line 1 Message 6",
       "Line 2 Message 1": "Line 2 Message 1",
       "Line 2 Message 2": "Line 2 Message 2",
       "Line 2 Message 3": "Line 2 Message 3",
       "Line 2 Message 4": "Line 2 Message 4",
+      "Line 2 Message 5": "Line 2 Message 5",
+      "Line 2 Message 6": "Line 2 Message 6",
       "Iteration Mode": "Iteration Mode"
     }
   },
@@ -544,7 +553,8 @@
       "Wave Cooldown": "Wave Cooldown",
       "Freeze Wave Timer": "Freeze Wave Timer",
       "Spawn Rate": "Spawn Rate",
-      "Zombies count multiplier": "Zombies count multiplier"
+      "Zombies count multiplier": "Zombies count multiplier",
+      "Spawn Delay": "Spawn Delay"
     }
   },
   "Simple Spawner": {
@@ -583,6 +593,24 @@
       "Spawn super machine": "Spawn super machine",
       "Spawn portal heart": "Spawn portal heart",
       "Spawn sprout pot prize": "Spawn sprout pot prize"
+    }
+  },
+  "Unlimited Lawn Mowers": {
+    "Name": "Unlimited Lawn Mowers",
+    "Description": "Also provides cover against flying ships somehow",
+    "Search Hints": "unlimitedlawnmowers lawnmoverhack lawnmoverunlimited infinitelawnmowers multimower mowercheat mowerdefense flyingmower mowerprotection shipdefense unlimitedmovers lawnmovermod mowerfix antimower mowerunlimited flyingdefense lawnmovers unlimitedmover covermovers mowerbufflawnmoverunlimited infinite-mowers lawnmover-godmode mower-spam endless-mowers lawn-cleaner-unlimited ship-protection mower-respawn instant-mover lawn-saver all-lane-defense mower-cheat-code unlimited-lawn-protection ship-shield mower-unlimited-use",
+    "settings": {}
+  },
+  "No Wheel Barrow CD": {
+    "Name": "No Wheel Barrow CD",
+    "Description": "Modifies the Ingame Wheel Barrow's Cooldown.",
+    "Search Hints": "nowheelbarrowcd wheelbarrowcooldown wheelbarrowcd wheelbarrowinstant instantwheelbarrow cooldownhack cooldownremove wheelbarrow-cooldown wheelbarrowfix cd-remove wheelbarrowspeed wheelbarrowcooldownfix wheelbarrowinstantcooldown wheelbarrownocd nocd wheelbarrowmod wheelbarrowutility",
+    "settings": {
+      "General": "General",
+      "Custom Wheel Barrow Cooldown": "Custom Wheel Barrow Cooldown",
+      "Extra": "Extra",
+      "Preserve Original": "Preserve Original",
+      "Reset CD on Enable": "Reset CD on Enable"
     }
   }
 }

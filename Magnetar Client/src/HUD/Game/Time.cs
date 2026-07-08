@@ -54,7 +54,7 @@ namespace Magnetar_Client.HUDElements
         public override void OnUpdateActive()
         {
             if (!BoardInstanceIsNull)
-                displayText = $"Next Wave arrival: {FormatTime((int)board.timeUntilNextWave)}";
+                displayText = $"Next Wave arrival: {FormatTime((int)board.timeUntilNextWave >= 0 ? (int)board.timeUntilNextWave : 0)}";
             else
                 displayText = "Next Wave arrival: Na";
             AdjustWidthToText(displayText, HUDElementStyle, 10);

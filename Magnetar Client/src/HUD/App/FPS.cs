@@ -19,8 +19,10 @@ namespace Magnetar_Client.HUDElements
 
         public override void OnUpdateActive()
         {
-            float _fps = 1.0f / Time.smoothDeltaTime;
-            fps = _fps == int.MinValue ? fps : _fps;
+            if (Time.timeScale != 0)
+            {
+                fps = 1.0f / Time.smoothDeltaTime;
+            }
             string colorName = fps > 55 ? "lime" : (fps > 30 ? "yellow" : "red");
 
             displayText = $"FPS: <color={colorName}>{(int)fps}</color>";

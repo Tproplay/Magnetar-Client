@@ -76,7 +76,7 @@ namespace Magnetar_Client.Modules
                 }
             };
 
-            AllowUltimateCards = new BoolSetting("Allow Odyssey plant cards", false);
+            AllowUltimateCards = new BoolSetting("Allow Odyssey plant cards (Ensure Odyssey Plant is enabled before entering the level)", false);
             AllowUltimateCards.OnValueChanged = (val) =>
             {
                 if (!Active || SeedLibrary.Instance == null) return;

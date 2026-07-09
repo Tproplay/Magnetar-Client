@@ -3,22 +3,22 @@
     "Name": "Bộ Đếm Khung Hình (FPS)"
   },
   "Real FPS Counter": {
-    "Name": "Real FPS Counter"
+    "Name": "Bộ Đếm FPS Thực Tế"
   },
   "Frame Time": {
     "Name": "Thời Gian Khung Hình (Frame Time)"
   },
   "Game Name and Version": {
-    "Name": "Tên và phiên bản trò chơi"
+    "Name": "Tên và Phiên Bản Trò Chơi"
   },
   "Magnetar Name and Version": {
-    "Name": "Tên và phiên bản của Magnetar"
+    "Name": "Tên và Phiên Bản Của Magnetar"
   },
   "Up Time": {
-    "Name": "Thời gian hoạt động"
+    "Name": "Thời Gian Hoạt Động"
   },
   "Number of Bullets Spawned": {
-    "Name": "Số lượng đạn được tạo ra"
+    "Name": "Số Lượng Đạn Đã Tạo Ra"
   },
   "Total Damage by Plants": {
     "Name": "Tổng Sát Thương Bởi Cây Trồng"
@@ -36,25 +36,25 @@
     "Name": "Số Cây Đã Chết / Bị Phá Hủy"
   },
   "Total Sun Obtained": {
-    "Name": "Tổng lượng ánh nắng mặt trời thu được"
+    "Name": "Tổng Lượng Mặt Trời Thu Được"
   },
   "Total Sun Spent": {
-    "Name": "Tổng thời gian nắng đã sử dụng"
+    "Name": "Tổng Lượng Mặt Trời Đã Tiêu Thụ"
   },
   "Total Money Obtained": {
-    "Name": "Tổng số tiền thu được"
+    "Name": "Tổng Số Tiền Thu Được"
   },
   "Total Money Spent": {
-    "Name": "Tổng số tiền đã chi tiêu"
+    "Name": "Tổng Số Tiền Đã Chi Tiêu"
   },
   "Auto drop/fall sun timer": {
-    "Name": "Auto drop/fall sun timer"
+    "Name": "Bộ Đếm Thời Gian Tự Rơi Mặt Trời"
   },
   "Time In Current Level": {
-    "Name": "Thời gian ở cấp độ hiện tại"
+    "Name": "Thời Gian Ở Màn Chơi Hiện Tại"
   },
   "Next wave arrival time": {
-    "Name": "Thời gian xuất hiện của đợt tiếp theo"
+    "Name": "Thời Gian Xuất Hiện Đợt Tấn Công Kế Tiếp"
   },
   "Active Star drop Cooldown": {
     "Name": "Thời Gian Hồi Chiêu Kích Hoạt Rơi Sao"
@@ -66,34 +66,34 @@
     "Name": "Tốc Độ Trò Chơi"
   },
   "Zombies On Lawn": {
-    "Name": "Thây ma trên bãi cỏ"
+    "Name": "Số Zombie Trên Bãi Cỏ"
   },
   "Hypnotized Zombies On Lawn": {
-    "Name": "Những thây ma bị thôi miên trên bãi cỏ"
+    "Name": "Số Zombie Bị Thôi Miên Trên Bãi Cỏ"
   },
   "Zombies Spawned": {
-    "Name": "Zombie xuất hiện"
+    "Name": "Số Zombie Đã Xuất Hiện"
   },
   "Hypnotized Zombies Spawned": {
-    "Name": "Những thây ma bị thôi miên xuất hiện"
+    "Name": "Số Zombie Bị Thôi Miên Đã Xuất Hiện"
   },
   "Zombies Killed": {
-    "Name": "Zombie bị giết"
+    "Name": "Số Zombie Đã Bị Tiêu Diệt"
   },
   "Hypnotized Zombies Killed": {
-    "Name": "Những thây ma bị thôi miên đã bị giết"
+    "Name": "Số Zombie Bị Thôi Miên Đã Chết"
   },
   "Current Zombie Wave Health": {
-    "Name": "Current Zombie Wave Health"
+    "Name": "Tổng Máu Của Đợt Zombie Hiện Tại"
   },
   "Total Zombies Health": {
-    "Name": "Total Zombies Health"
+    "Name": "Tổng Lượng Máu Của Toàn Bộ Zombie"
   },
   "Hypnotized Zombies Health": {
     "Name": "Tổng Máu Của Zombie Bị Thôi Miên"
   },
   "Current Wave": {
-    "Name": "Current Wave"
+    "Name": "Đợt Tấn Công Hiện Tại"
   },
   "RAM Usage": {
     "Name": "Dung Lượng RAM Đang Dùng (Game)"

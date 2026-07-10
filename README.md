@@ -110,6 +110,12 @@ After installing the files, your game directory structure should look like this:
 
 ---
 
+## Addons
+
+> [**Simple Spawner**](https://github.com/Tproplay/Simple-Spawner)
+
+---
+
 ## 👥 Credits
 
 * 👑 **Tproplay** — Main Developer

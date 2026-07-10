@@ -119,7 +119,7 @@ After installing the files, your game directory structure should look like this:
 * 🧪 **D2013I** — Playtester
 * 🧪 **gaotmaster** — Playtester
 * 🦇 **The Dark Knight** — Playtester
-
+* 🧪 **Lêthāl_₵Ø₦QɄɆⱤɆⱤ** - Playtester
 ---
 
 ## 🙏 Special Thanks

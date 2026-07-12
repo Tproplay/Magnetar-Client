@@ -42,6 +42,7 @@ namespace Magnetar_Client.Modules
         public BoolSetting Active_AutoSunCD;
         public FloatSetting AutoSunCD;
         public BoolSetting AllowSunDropAnywhere;
+        public BoolSetting DisableAutoSun;
 
 
         public SunHack()
@@ -71,6 +72,7 @@ namespace Magnetar_Client.Modules
             {
                 OnValueChanged = disableAutoSun,
             };
+            DisableAutoSun = new BoolSetting("Force disable auto sun", false);
             AddSettings(Active_AutoSunCD, AutoSunCD, AllowSunDropAnywhere);
             EndCategory();
         }

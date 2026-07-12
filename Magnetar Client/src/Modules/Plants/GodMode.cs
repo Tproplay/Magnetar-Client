@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using static Magnetar_Client.Game.AppData;
@@ -131,7 +130,12 @@ namespace Magnetar_Client.Modules
                         // Only works if the shovel is used by Player
                         if (shovel.mouse.theMouseColumn == __instance.thePlantColumn &&
                             shovel.mouse.theMouseRow == __instance.thePlantRow) return true;
-
+                        if (TypeMgr.FlyingPlants(__instance.thePlantType))
+                        {
+                            if (shovel.mouse.theMouseColumn == __instance.thePlantColumn &&
+                            shovel.mouse.theMouseRow == (__instance.thePlantRow - 1)) return true;
+                        }
+                        
                         return false;
                     }
                     return true;
@@ -140,5 +144,6 @@ namespace Magnetar_Client.Modules
                 return true;
             }
         }
+        
     }
 }

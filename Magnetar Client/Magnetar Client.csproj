@@ -143,7 +143,7 @@
 			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.UIModule.dll</HintPath>
 		</Reference>
 		<Reference Include="UnityEngine.UIModule">
-			<HintPath>References\Bepinex\Il2Cpp\Il2CppInterop.Runtime.dll</HintPath>
+			<HintPath>References\Bepinex\Il2CppInterop.Runtime.dll</HintPath>
 		</Reference>
 		<Reference Include="UniTask">
 			<HintPath>References\Bepinex\Il2Cpp\UniTask.dll</HintPath>
@@ -152,9 +152,9 @@
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 
-		<Exec Condition="$(Configuration) == 'melonloader'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.7\Mods\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.7\PlantsVsZombiesRH.exe&quot;" />
+		<Exec Condition="$(Configuration) == 'melonloader'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.8\Mods\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.8\PlantsVsZombiesRH.exe&quot;" />
 
-		<Exec Condition="$(Configuration) == 'Bepinex'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\3.7 UnityExploror\BepInEx\plugins\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\3.7 UnityExploror\PlantsVsZombiesRH.exe&quot;" />
+		<Exec Condition="$(Configuration) == 'Bepinex'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\3.8 UnityExploror\BepInEx\plugins\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\3.8 UnityExploror\PlantsVsZombiesRH.exe&quot;" />
 
 	</Target>
 

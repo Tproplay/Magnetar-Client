@@ -2,6 +2,9 @@
 using static Magnetar_Client.Utils.Magnetar_Logger;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
+using Il2CppGameLevel.RogueShooting;
+#elif BEPINEX || RELEASE_BEPINEX
+using GameLevel.RogueShooting;
 #endif
 
 namespace Magnetar_Client.Modules
@@ -25,6 +28,7 @@ namespace Magnetar_Client.Modules
         public static MultipleChoiceMenu multipleChoiceMenu;
         public static TravelRefresh travelRefresh;
         public static TravelStore travelStore;
+        public static ShootingManager shootingManager;
 
         public IntSetting rerollCount;
         private int originalRerollCount = -1;
@@ -70,11 +74,11 @@ namespace Magnetar_Client.Modules
 #endif
                 }
 
-                if (multipleChoiceMenu.refreshCount != rerollCount.Value - 1)
+                if (multipleChoiceMenu.refreshCount != rerollCount.Value)
                 {
 #if MELONLOADER || BEPINEX
                     if (DebugMode.Value)
-                        DebugLogger.Msg($"[Unlimited Modifier] Forcing MultipleChoiceMenu count from {multipleChoiceMenu.refreshCount} to {rerollCount.Value - 1}");
+                        DebugLogger.Msg($"[Unlimited Modifier] Forcing MultipleChoiceMenu count from {multipleChoiceMenu.refreshCount} to {rerollCount.Value}");
 #endif
                     multipleChoiceMenu.refreshCount = rerollCount.Value;
                 }
@@ -122,6 +126,27 @@ namespace Magnetar_Client.Modules
                     travelStore.refreshCount = 0;
                 }
             }
+
+            if (shootingManager != null)
+            {
+                if (originalRerollCount == -1 && shootingManager.refreshCount>0)
+                {
+                    originalRerollCount = shootingManager.refreshCount;
+#if MELONLOADER || BEPINEX
+                    if (DebugMode.Value)
+                        DebugLogger.Msg("[Unlimited Modifier] OriginalRerollCount (ShootingManager) set to " + originalRerollCount);
+#endif
+                }
+
+                if (originalRerollCount != -1 && shootingManager.refreshCount != rerollCount.Value)
+                {
+#if MELONLOADER || BEPINEX
+                    if (DebugMode.Value)
+                        DebugLogger.Msg($"[Unlimited Modifier] Forcing ShootingManager count from {shootingManager.refreshCount} to {rerollCount.Value}");
+#endif
+                    shootingManager.refreshCount = rerollCount.Value;
+                }
+            }
         }
 
         public override void OnDisable()
@@ -140,6 +165,8 @@ namespace Magnetar_Client.Modules
                     travelRefresh.SetRefrashTimes(originalRerollCount);
                 if (travelStore != null)
                     travelStore.refreshCount = originalRerollCount;
+                if (shootingManager != null)
+                    shootingManager.refreshCount = originalRerollCount;
             }
             originalRerollCount = -1;
         }
@@ -181,8 +208,8 @@ namespace Magnetar_Client.Modules
             }
 
             [HarmonyPatch(nameof(MultipleChoiceMenu.SetRefreshable))]
-            [HarmonyPostfix]
-            public static void SetRefreshablePostfix(ref int refreshCount)
+            [HarmonyPrefix]
+            public static void SetRefreshablePrefix(ref int refreshCount)
             {
                 if (instance == null || !instance.Active) return;
 
@@ -252,6 +279,30 @@ namespace Magnetar_Client.Modules
                 if (instance != null && instance.DebugMode.Value) DebugLogger.Msg("[Unlimited Modifier] TravelStore exited. Clearing instance.");
 #endif
                 travelStore = null;
+            }
+        }
+
+        [HarmonyPatch(typeof(ShootingManager))]
+        public static class ShootingManagerPatch
+        {
+            [HarmonyPatch(nameof(ShootingManager.Awake))]
+            [HarmonyPostfix]
+            public static void AwakePostfix(ShootingManager __instance)
+            {
+#if MELONLOADER || BEPINEX
+                if (instance != null && instance.DebugMode.Value) DebugLogger.Msg("[Unlimited Modifier] Found and registered ShootingManager instance (Awake).");
+#endif
+                shootingManager = __instance;
+            }
+
+            [HarmonyPatch(nameof(ShootingManager.Start))]
+            [HarmonyPostfix]
+            public static void StartPostfix(ShootingManager __instance)
+            {
+#if MELONLOADER || BEPINEX
+                if (instance != null && instance.DebugMode.Value && travelStore == null) DebugLogger.Msg("[Unlimited Modifier] Found and registered ShootingManager instance (Start).");
+#endif
+                shootingManager = __instance;
             }
         }
     }

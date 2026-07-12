@@ -110,6 +110,12 @@ After installing the files, your game directory structure should look like this:
 
 ---
 
+## Addons
+
+> [**Simple Spawner**](https://github.com/Tproplay/Simple-Spawner)
+
+---
+
 ## 👥 Credits
 
 * 👑 **Tproplay** — Main Developer
@@ -119,7 +125,7 @@ After installing the files, your game directory structure should look like this:
 * 🧪 **D2013I** — Playtester
 * 🧪 **gaotmaster** — Playtester
 * 🦇 **The Dark Knight** — Playtester
-
+* 🧪 **Lêthāl_₵Ø₦QɄɆⱤɆⱤ** - Playtester
 ---
 
 ## 🙏 Special Thanks

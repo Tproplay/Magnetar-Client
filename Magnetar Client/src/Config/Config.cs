@@ -11,7 +11,7 @@
     public static class Magnetar_Info
     {
         public const string ModName = "Magnetar Client";
-        public const string Version = "3.7.2";
+        public const string Version = "3.8.1";
         public const string Developer = "Tproplay";
     }
 

@@ -1,6 +1,4 @@
 ﻿using HarmonyLib;
-using Magnetar_Client.Game;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -8,6 +6,7 @@ using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
+using Il2CppRhythmGame;
 #endif
 
 namespace Magnetar_Client.Modules
@@ -29,6 +28,11 @@ namespace Magnetar_Client.Modules
         public static CustomKeybind instance;
 
         public List<BindSetting> SeedSlot;
+
+        //public BindSetting Rhythm1;
+        //public BindSetting Rhythm2;
+        //public BindSetting Rhythm3;
+        //public BindSetting Rhythm4;
 
         public BindSetting SlowMode;
         public BindSetting ShowPlantHP;
@@ -74,6 +78,15 @@ namespace Magnetar_Client.Modules
 
             EndCategory();
 
+            //CreateCategory("Rhythm");
+
+            //Rhythm1 = new BindSetting("Rhythm 1", new List<KeyCode> { KeyCode.S });
+            //Rhythm2 = new BindSetting("Rhythm 2", new List<KeyCode> { KeyCode.D });
+            //Rhythm3 = new BindSetting("Rhythm 3", new List<KeyCode> { KeyCode.J });
+            //Rhythm4 = new BindSetting("Rhythm 4", new List<KeyCode> { KeyCode.K });
+
+            //AddSettings(Rhythm1, Rhythm2, Rhythm3, Rhythm4);
+            //EndCategory();
 
             CreateCategory("Misc");
 
@@ -214,7 +227,6 @@ namespace Magnetar_Client.Modules
 
 
         #endregion
-
 
         #region UI Buttons
 

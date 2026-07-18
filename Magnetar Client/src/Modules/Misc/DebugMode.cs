@@ -46,6 +46,7 @@ namespace Magnetar_Client.Modules
             ZombieAnimations,
             PlantDieReason,
             ZombieDieReason,
+            CheatKeys,
         }
 
         public DebugMode()
@@ -65,7 +66,8 @@ namespace Magnetar_Client.Modules
                     { (int)Options.SoundPlayed, "Sound Played" },
                     { (int)Options.ZombieAnimations, "Zombie Animations (single use)" },
                     { (int)Options.PlantDieReason, "Plant die reason" },
-                    { (int)Options.ZombieDieReason, "Zombie die reason" }
+                    { (int)Options.ZombieDieReason, "Zombie die reason" },
+                    { (int)Options.CheatKeys, "Cheat keys (single use)" },
                 }
             };
             Settings.Add(selected);
@@ -78,7 +80,8 @@ namespace Magnetar_Client.Modules
         }
 
 
-
+        // Acess Private methods
+        private static List<string> CheatKeys = new List<string>();
 
         // Mod Logic
 
@@ -185,6 +188,17 @@ namespace Magnetar_Client.Modules
 
             }
 
+            if (selected.IsSelected((int)Options.CheatKeys))
+            {
+                selected.Deselect( (int)Options.CheatKeys);
+
+                foreach (var key in CheatKeys)
+                {
+                    DebugModeLogger.Msg($"Found key: {key.ToString()}");
+                }
+
+            }
+
             _time = Time.realtimeSinceStartup;
         }
 
@@ -250,6 +264,19 @@ namespace Magnetar_Client.Modules
             }
         }
 
-
+        [HarmonyPatch(typeof(CheatKey))]
+        public static class CheatKeyPatch
+        {
+            [HarmonyPatch(nameof(CheatKey.Awake))]
+            [HarmonyPostfix]
+            public static void AwakePostfix(CheatKey __instance)
+            {
+                if (__instance == null || __instance.key == null) return;
+                foreach (var key in __instance.CheatKeys)
+                {
+                    CheatKeys.Add(key.Key);
+                }
+            }
+        }
     }
 }

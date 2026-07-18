@@ -305,20 +305,47 @@ namespace Magnetar_Client.Modules
 
     public class BindSetting : Setting
     {
-        public List<KeyCode> BindKeys = new List<KeyCode>();
+        private List<KeyCode> _bindKeys = new List<KeyCode>();
+        public List<KeyCode> DefaultKeys { get; private set; } = new List<KeyCode>();
+
         public bool IsBinding = false;
 
+        // Callbacks matched to the style of BoolSetting
+        public Action<List<KeyCode>> OnValueChanging { get; set; }
+        public Action<List<KeyCode>> OnValueChanged { get; set; }
+
+        public List<KeyCode> BindKeys
+        {
+            get => _bindKeys;
+            set
+            {
+                // Ensure safe lists comparison to avoid unnecessary triggers
+                if (value == null) value = new List<KeyCode>();
+
+                if (!_bindKeys.SequenceEqual(value))
+                {
+                    OnValueChanging?.Invoke(value); // Pre
+                    _bindKeys = value;
+                    OnValueChanged?.Invoke(_bindKeys); // Post
+                }
+            }
+        }
+
         /// <summary>
-        /// Initializes a new instance of the BindSetting class with the specified name and optional default key
-        /// bindings.
+        /// Initializes a new instance of the BindSetting class with the specified name and optional default key bindings.
         /// </summary>
         /// <param name="name">The unique name that identifies this binding setting. Cannot be null.</param>
         /// <param name="defaultKeys">An optional list of default key codes to assign to this binding. If null, no default keys are set.</param>
         public BindSetting(string name, List<KeyCode> defaultKeys = null)
         {
             Name = name;
-            if (defaultKeys != null) BindKeys = defaultKeys;
+            if (defaultKeys != null)
+            {
+                DefaultKeys = defaultKeys;
+                _bindKeys = new List<KeyCode>(defaultKeys); // Create a fresh copy to prevent shared reference bugs
+            }
         }
+
         /// <summary>
         /// Returns a string representation of the current key binding.
         /// </summary>

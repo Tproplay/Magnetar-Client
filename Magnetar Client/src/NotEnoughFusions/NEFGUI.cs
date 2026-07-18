@@ -216,9 +216,9 @@ namespace Magnetar_Client.NEF
         private static void DrawUsagesView(Rect viewRect, Event e)
         {
             GUI.Label(new Rect(viewRect.x + 10f, viewRect.y + 10f, viewRect.width - 150f, 30f), 
-                Translator.Translate(Translator.Translate("Fusions requiring") + ":" + 
+                Translator.Translate(Translator.Translate("Fusions requiring") + ": " + 
                 NEFData.GetEntityName(NEFData.usageViewTarget) + " (" + 
-                NEFData.currentUsages.Count + ") " +
+                NEFData.currentUsages.Count + " " +
                 Translator.Translate("found)"))
                 );
 

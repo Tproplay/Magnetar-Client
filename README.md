@@ -47,6 +47,7 @@ Choose your preferred mod loader below and follow the respective instructions.
 3. **Copy** the contents of the `MagnetarBeta.MelonLoader\Mods` folder into `[Your Game Folder]\Mods`.
 4. **Copy** the contents of the `MagnetarBeta.MelonLoader\UserLibs` folder into `[Your Game Folder]\UserLibs`.
 5. **Launch** your game to activate the client!
+> **Optional:** Remove the `Blooms_QOL.dll` if you are installing on Multi-lang version, as it might conflict with it.
 
 **Folder Structure**
 After installing the files, your game directory structure should look like this:

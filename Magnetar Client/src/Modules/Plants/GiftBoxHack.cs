@@ -23,24 +23,48 @@ namespace Magnetar_Client.Modules
 
         public static GiftBoxHack instance;
 
-        public MultiSelectSetting AllowedPlants;
+        public BoolSetting ModifyNormalGiftbox;
+        public MultiSelectSetting NormalGiftboxAllowedPlants;
 
+        public BoolSetting ModifySnowGiftbox;
+        public MultiSelectSetting SnowGiftboxAllowedPlants;
+
+        //public BoolSetting ModifyZombieGiftbox;
+        //public MultiSelectSetting ZombieGiftboxAllowedZombies;
         public GiftBoxHack()
         {
             instance = this;
 
-            CreateCategory("General");
+            CreateCategory("Giftbox");
 
-            AllowedPlants = new MultiSelectSetting("Allowed Plants",typeof(PlantType));
+            ModifyNormalGiftbox = new BoolSetting("Modify Normal Giftbox",false);
+            NormalGiftboxAllowedPlants = new MultiSelectSetting("Allowed Plants",typeof(PlantType));
 
-            AddSettings(AllowedPlants);
-
+            AddSettings(ModifyNormalGiftbox, NormalGiftboxAllowedPlants);
             EndCategory();
+
+            CreateCategory("Snow Giftbox");
+
+            ModifySnowGiftbox = new BoolSetting("Modify Snow Giftbox", false);
+            SnowGiftboxAllowedPlants = new MultiSelectSetting("Allowed Plants", typeof(PlantType));
+
+            AddSettings(ModifySnowGiftbox, SnowGiftboxAllowedPlants);
+            EndCategory();
+
+            //CreateCategory("Zombie Giftbox");
+
+            //ModifyZombieGiftbox = new BoolSetting("Modify Zombie Giftbox", false);
+            //ZombieGiftboxAllowedZombies = new MultiSelectSetting("Allowed Zombies", typeof(ZombieType));
+
+            //AddSettings(ModifyZombieGiftbox, ZombieGiftboxAllowedZombies);
+            //EndCategory();
         }
 
         public override void OnLanguageChanged()
         {
-            AllowedPlants.CustomNames = TranslatedNames(typeof(PlantType));
+            NormalGiftboxAllowedPlants.CustomNames = TranslatedNames(typeof(PlantType));
+            SnowGiftboxAllowedPlants.CustomNames = TranslatedNames(typeof(PlantType));
+            //ZombieGiftboxAllowedZombies.CustomNames = TranslatedNames(typeof(ZombieType));
         }
 
         // Mod Logic
@@ -52,13 +76,13 @@ namespace Magnetar_Client.Modules
             [HarmonyPrefix]
             public static bool RandomPlant(Present __instance)
             {
-                if (instance == null || __instance == null || !instance.Active) return true;
+                if (instance == null || __instance == null || !instance.Active || !instance.ModifyNormalGiftbox.Value) return true;
 
                 PlantType random;
 
-                if (instance.AllowedPlants.SelectedValues.Count>0)
-                    random = (PlantType)instance.AllowedPlants.SelectedValues.ElementAt(
-                        UnityEngine.Random.RandomRangeInt(0,instance.AllowedPlants.SelectedValues.Count));
+                if (instance.NormalGiftboxAllowedPlants.SelectedValues.Count>0)
+                    random = (PlantType)instance.NormalGiftboxAllowedPlants.SelectedValues.ElementAt(
+                        UnityEngine.Random.RandomRangeInt(0,instance.NormalGiftboxAllowedPlants.SelectedValues.Count));
                 else
                 {
                     random = PlantType.Nothing;
@@ -76,6 +100,28 @@ namespace Magnetar_Client.Modules
             }
         }
 
+        [HarmonyPatch(typeof(FreezedPlant))]
+        public static class FreezedPlantPatch
+        {
+            [HarmonyPatch(nameof(FreezedPlant.InitFreezedPlant))]
+            [HarmonyPrefix]
+            public static void InitFreezedPlantPrefix(ref PlantType thePlantType)
+            {
+                if (instance == null || !instance.Active || !instance.ModifySnowGiftbox.Value) return;
+
+                PlantType random;
+
+                if (instance.SnowGiftboxAllowedPlants.SelectedValues.Count > 0)
+                    random = (PlantType)instance.SnowGiftboxAllowedPlants.SelectedValues.ElementAt(
+                        UnityEngine.Random.RandomRangeInt(0, instance.SnowGiftboxAllowedPlants.SelectedValues.Count));
+                else
+                {
+                    random = PlantType.Nothing;
+                }
+
+                thePlantType = random;
+            }
+        }
 
     }
 }

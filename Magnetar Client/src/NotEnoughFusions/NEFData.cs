@@ -182,9 +182,15 @@ namespace Magnetar_Client.NEF
 
             string query = NEFGUI.searchQuery.ToLower();
 
+            HashSet<int> seenIds = new HashSet<int>();
+
             foreach (PlantType pt in Enum.GetValues(typeof(PlantType)))
             {
-                if (BannedPlants.Contains((int)pt) || SearchHiddenPlants.Contains((int)pt)) continue;
+                int id = (int)pt;
+                if (BannedPlants.Contains(id) || SearchHiddenPlants.Contains(id)) continue;
+
+                if (!seenIds.Add(id)) continue;
+
                 RecipeEntity ent = RecipeEntity.Plant(pt);
                 if (string.IsNullOrEmpty(query) || GetEntityName(ent).ToLower().Contains(query))
                 {
@@ -194,9 +200,13 @@ namespace Magnetar_Client.NEF
 
             foreach (var kvp in CustomNames)
             {
+                if (seenIds.Contains(kvp.Key)) continue;
+
                 if (!Enum.IsDefined(typeof(PlantType), kvp.Key) || kvp.Key >= 3000)
                 {
                     if (BannedPlants.Contains(kvp.Key) || SearchHiddenPlants.Contains(kvp.Key)) continue;
+
+                    seenIds.Add(kvp.Key);
 
                     RecipeEntity customEnt = RecipeEntity.Custom(kvp.Key);
                     if (string.IsNullOrEmpty(query) || kvp.Value.ToLower().Contains(query))
@@ -212,7 +222,7 @@ namespace Magnetar_Client.NEF
             List<CustomRecipe> recipes = new List<CustomRecipe>();
             HashSet<string> seenKeys = new HashSet<string>();
 
-            if (!target.IsZombie && target.Id < 3000 && PlantMixTreeManager.ChildToParents != null)
+            if (!target.IsZombie && PlantMixTreeManager.ChildToParents != null)
             {
                 PlantType nativeTarget = (PlantType)target.Id;
                 if (PlantMixTreeManager.ChildToParents.ContainsKey(nativeTarget))

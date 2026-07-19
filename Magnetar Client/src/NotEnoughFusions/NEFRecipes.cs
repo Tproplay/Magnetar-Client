@@ -120,6 +120,18 @@ namespace Magnetar_Client.NEF.Data
             }
         };
 
+        public static List<CustomRecipe> MiscellaneousPlants = new List<CustomRecipe>
+        {
+            new CustomRecipe
+            {
+                Result = RecipeEntity.Plant(PlantType.MagicSnowPea),
+                ParentA = RecipeEntity.Plant(PlantType.SnowPeaShooter),
+                ParentB = RecipeEntity.Plant(PlantType.IceBean)
+            }
+        };
+
+
+
         public static List<CustomRecipe> ZombieItemPlants = new List<CustomRecipe>
         {
 
@@ -146,6 +158,11 @@ namespace Magnetar_Client.NEF.Data
             }
 
             foreach (CustomRecipe plantRecipe in SpawnedPlants)
+            {
+                AddToList(plantRecipe);
+            }
+
+            foreach (CustomRecipe plantRecipe in MiscellaneousPlants)
             {
                 AddToList(plantRecipe);
             }

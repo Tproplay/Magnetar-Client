@@ -15,7 +15,8 @@ namespace Magnetar_Client.NEF.Data
             355,356,357,358,359,360,361,362,363,364,365,366,367,368,219,220,221,230,231,232,-1,
             (int)PlantType.ZombieEndoFlame,(int)PlantType.UltimateRedLunar,
             (int)PlantType.TorchFireNut, (int)PlantType.HolographicPlant,
-            (int)PlantType.HypnoCattailGirl_land,(int)PlantType.Ulti_cherryGatling  
+            (int)PlantType.HypnoCattailGirl_land,(int)PlantType.Ulti_cherryGatling,
+            (int)PlantType.MagicSnowPea2,
             
         };
 

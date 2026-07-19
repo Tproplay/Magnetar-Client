@@ -70,9 +70,9 @@ namespace Magnetar_Client.Modules
 
             // 1. Group zombies by Lane and Type
             var groupedZombies = GameData.zombieList
-                .Where(z => z != null && z.Alive && !z.isIdle && z.gameObject != null)
+                .Where(z => z != null && z.Alive && z.gameObject != null)
                 .GroupBy(z => new { z.theZombieRow, z.theZombieType })
-                .ToList();
+                .ToList();  
 
             foreach (var group in groupedZombies)
             {

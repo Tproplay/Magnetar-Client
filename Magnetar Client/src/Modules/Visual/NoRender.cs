@@ -23,10 +23,13 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
 
         public static NoRender instance;
-        public MultiSelectSetting ParticlesSetting;
 
+        public MultiSelectSetting ParticlesSetting;
         public MultiSelectSetting GameObjectsSetting;
         public MultiSelectSetting BulletSetting;
+        public MultiSelectSetting EffectSetting;
+
+        public BoolSetting ScreenShakeSetting;
 
         private Dictionary<int, string> fxDatabase = new Dictionary<int, string>();
         private string filePath;
@@ -92,8 +95,23 @@ namespace Magnetar_Client.Modules
             };
             AddSettings(BulletSetting);
 
+            EffectSetting = new MultiSelectSetting("Effects")
+            {
+                Options = new Dictionary<int, string>
+                {
+                    { 1, "Ice shroom effect" },
+                    { 2, "Doom shroom effect" },
+                }
+            };
 
+            AddSettings(EffectSetting);
+            EndCategory();
 
+            CreateCategory("Extra");
+
+            ScreenShakeSetting = new BoolSetting("Disable Screen Shake effect", false);
+
+            AddSettings(ScreenShakeSetting);
             EndCategory();
 
         }
@@ -102,6 +120,9 @@ namespace Magnetar_Client.Modules
         {
             GameObjectsSetting.CustomNames = TranslatedNames(typeof(BucketType));
             BulletSetting.CustomNames = TranslatedNames(typeof(BulletType));
+
+            EffectSetting.Options = EffectSetting.Options
+                .ToDictionary(kvp => kvp.Key, kvp => Translator.Translate(kvp.Value));
         }
 
         public override void OnUpdateActive()
@@ -156,8 +177,6 @@ namespace Magnetar_Client.Modules
             string json = Newtonsoft.Json.JsonConvert.SerializeObject(effectsList, Newtonsoft.Json.Formatting.Indented);
             File.WriteAllText(filePath, json);
         }
-
-
 
         public override void OnDisable()
         {
@@ -286,5 +305,51 @@ namespace Magnetar_Client.Modules
             }
         }
 
+        [HarmonyPatch(typeof(IceExplodeControl))]
+        public static class IceExplodeControlPatch
+        {
+            [HarmonyPatch(nameof(IceExplodeControl.Start))]
+            [HarmonyPostfix]
+            public static void StartPostfix(IceExplodeControl __instance)
+            {
+                if (instance == null || !instance.Active || __instance==null || !instance.EffectSetting.IsSelected(1)) return;
+                
+                var effect = __instance.GetComponent<SpriteRenderer>();
+                if (effect != null)
+                {
+                    effect.enabled = false;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Doom))]
+        public static class DoomPatch
+        {
+            [HarmonyPatch(nameof(Doom.Start))]
+            [HarmonyPostfix]
+            public static void StartPostfix(Doom __instance)
+            {
+                if (instance==null || !instance.Active || !instance.EffectSetting.IsSelected(2)) return;
+
+                var effect = __instance.transform.Find("sprit");
+                if (effect != null)
+                {
+                    effect.gameObject.active = false;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(ScreenShake))]
+        public static class ScreenShakePatch
+        {
+            [HarmonyPatch(nameof(ScreenShake.TriggerShake))]
+            [HarmonyPrefix]
+            public static bool TriggerShakePrefix()
+            {
+                if (instance == null || !instance.Active || !instance.ScreenShakeSetting.Value) return true;
+
+                return false;
+            }
+        }
     }
 }

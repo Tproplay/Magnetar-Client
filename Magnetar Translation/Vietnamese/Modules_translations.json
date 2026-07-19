@@ -272,7 +272,8 @@
     "Search Hints": "control wasdplant wasdcontrol moveplant plantcontrol plantmovement wasd controller plantwasd controlmod plantmover moveplants plantsteer wasdmove driveplant pilotplant steerplant wasdmovement plantdrive plantpilot manualcontrol plantcontrolmod movementmod movementhack wasdmode plantcontrolmode move",
     "settings": {
       "General": "Cài Đặt Chung",
-      "Control Key": "Phím Điều Khiển"
+      "Control Key": "Phím Điều Khiển",
+      "Single Plant mode": "Single Plant mode"
     }
   },
   "Faster Plants": {
@@ -293,7 +294,11 @@
     "Search Hints": "giftboxhack giftboxmod giftboxeditor giftboxcustomizer plantgiftbox giftboxgift giftboxsettings giftboxinject giftboxoverride giftboxswap giftboxmanager giftboxpool giftboxrandomizer giftboxchange giftboxfix giftboxcheat giftboxselect giftboxspawn giftboxedit giftboxmodify",
     "settings": {
       "General": "Cài Đặt Chung",
-      "Allowed Plants": "Cây Trồng Được Cho Phép"
+      "Allowed Plants": "Cây Trồng Được Cho Phép",
+      "Giftbox": "Giftbox",
+      "Modify Normal Giftbox": "Modify Normal Giftbox",
+      "Snow Giftbox": "Snow Giftbox",
+      "Modify Snow Giftbox": "Modify Snow Giftbox"
     }
   },
   "God Mode": {
@@ -465,7 +470,10 @@
       "General": "Cài Đặt Chung",
       "Particles": "Hiệu Ứng Hạt (Hạt Đạn/Khói/Nổ)",
       "Game Objects": "Các Đối Tượng Trong Game",
-      "Bullets": "Các Viên Đạn"
+      "Bullets": "Các Viên Đạn",
+      "Effects": "Effects",
+      "Extra": "Extra",
+      "Disable Screen Shake effect": "Disable Screen Shake effect"
     }
   },
   "Smaller Projectiles": {

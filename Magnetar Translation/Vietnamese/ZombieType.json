@@ -89,6 +89,8 @@
   "86": "Siêu Zombie Chim Cánh Cụt",
   "87": "Zombie Đội Cọc Sắt",
   "88": "Zombie Voi",
+  "89": "ZombieLoonNut",
+  "90": "RedZombieLoonNut",
   "100": "Zombie Đậu Hà Lan",
   "101": "Zombie Đậu Anh Đào",
   "102": "Zombie Siêu Đậu Anh Đào",
@@ -121,6 +123,7 @@
   "129": "Zombie Quang Hạch Vương",
   "130": "Zombie Đậu Liên Thanh",
   "131": "Zombie Đậu Liên Thanh Băng",
+  "132": "BedRockSnowZombie",
   "200": "Đại Thiết Tiềm Hải Độn",
   "201": "Hắc Chiến Xa",
   "202": "Zombie Khổng Hạch Phi Thương",
@@ -177,6 +180,11 @@
   "253": "Zombie hề nổ hắc ám",
   "254": "Zombie Voi Đen",
   "255": "Đoàn Tàu Đen Thây Ma",
+  "256": "BlackFlagFootball",
+  "257": "SuperBlackFootball",
+  "258": "ArmoredImpZombie",
+  "259": "UltimateEndoflameZombie",
+  "260": "FootballBoss",
   "300": "Liên Báo Anh Đào",
   "301": "Bão Tố Anh Pháo",
   "302": "Bão Tố Pháo Kích",
@@ -212,5 +220,8 @@
   "332": "Cương Thi Vương Giả",
   "333": "Xe Cẩu Đinh Ba",
   "334": "Xe Cẩu Óc Chó Đinh Ba",
-  "335": "Xe Cẩu Đinh Ba Hạng Nặng"
+  "335": "Xe Cẩu Đinh Ba Hạng Nặng",
+  "336": "ElephantZombie_a",
+  "337": "ElephantZombie_b",
+  "338": "ElephantZombie_c"
 }

@@ -89,6 +89,8 @@
   "86": "Zombie Emperor Penguin",
   "87": "IronConeZombie",
   "88": "ElephantZombie",
+  "89": "ZombieLoonNut",
+  "90": "RedZombieLoonNut",
   "100": "Peashooter Zombie",
   "101": "Cherryshooter Zombie",
   "102": "Explode-o-shooter Zombie",
@@ -121,6 +123,7 @@
   "129": "Twin Solar-nut Zombie",
   "130": "Gatling Pea Zombie",
   "131": "Gatling Snow Zombie",
+  "132": "BedRockSnowZombie",
   "195": "Sniper Commando Zombie",
   "200": "Sharkmarine",
   "201": "Michael Zomboni",
@@ -178,6 +181,11 @@
   "253": "BlackJackboxZombie",
   "254": "BlackElephantZombie",
   "255": "BlackTrainZombie",
+  "256": "BlackFlagFootball",
+  "257": "SuperBlackFootball",
+  "258": "ArmoredImpZombie",
+  "259": "UltimateEndoflameZombie",
+  "260": "FootballBoss",
   "300": "Gatling Cherry Scholar Zombie",
   "301": "Gatling Cherry Bachelor Zombie",
   "302": "Gatling Cherry Doctor Zombie",
@@ -213,5 +221,8 @@
   "332": "Eternal Wraith",
   "333": "Trident Light Hwacha",
   "334": "Trident Medium Hwacha",
-  "335": "Trident Heavy Hwacha"
+  "335": "Trident Heavy Hwacha",
+  "336": "ElephantZombie_a",
+  "337": "ElephantZombie_b",
+  "338": "ElephantZombie_c"
 }

@@ -272,7 +272,8 @@
     "Search Hints": "control wasdplant wasdcontrol moveplant plantcontrol plantmovement wasd controller plantwasd controlmod plantmover moveplants plantsteer wasdmove driveplant pilotplant steerplant wasdmovement plantdrive plantpilot manualcontrol plantcontrolmod movementmod movementhack wasdmode plantcontrolmode move",
     "settings": {
       "General": "General",
-      "Control Key": "Control Key"
+      "Control Key": "Control Key",
+      "Single Plant mode": "Single Plant mode"
     }
   },
   "Faster Plants": {
@@ -293,7 +294,11 @@
     "Search Hints": "giftboxhack giftboxmod giftboxeditor giftboxcustomizer plantgiftbox giftboxgift giftboxsettings giftboxinject giftboxoverride giftboxswap giftboxmanager giftboxpool giftboxrandomizer giftboxchange giftboxfix giftboxcheat giftboxselect giftboxspawn giftboxedit giftboxmodify",
     "settings": {
       "General": "General",
-      "Allowed Plants": "Allowed Plants"
+      "Allowed Plants": "Allowed Plants",
+      "Giftbox": "Giftbox",
+      "Modify Normal Giftbox": "Modify Normal Giftbox",
+      "Snow Giftbox": "Snow Giftbox",
+      "Modify Snow Giftbox": "Modify Snow Giftbox"
     }
   },
   "God Mode": {
@@ -465,7 +470,11 @@
       "General": "General",
       "Particles": "Particles",
       "Game Objects": "Game Objects",
-      "Bullets": "Bullets"
+      "Bullets": "Bullets",
+      "Effects": "Effects",
+      "Extra": "Extra",
+      "Disable Screen Shake effect": "Disable Screen Shake effect",
+      "Particle Types": "Particle Types"
     }
   },
   "Smaller Projectiles": {

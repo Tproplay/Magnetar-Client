@@ -219,7 +219,7 @@ namespace Magnetar_Client.NEF
                 Translator.Translate("Fusions requiring") + ": " + 
                 NEFData.GetEntityName(NEFData.usageViewTarget) + " (" + 
                 NEFData.currentUsages.Count + " " +
-                Translator.Translate("found)")
+                Translator.Translate("found") + ")"
                 );
 
             Rect backBtnRect = new Rect(viewRect.x + viewRect.width - 110f, viewRect.y + 10f, 100f, 30f);

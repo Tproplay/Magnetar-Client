@@ -143,10 +143,6 @@ namespace Magnetar_Client.Game
                 if (AppData.BoardInstanceIsNull || __instance.gameObject==null ||
                     __instance.theZombieType==ZombieType.Nothing) return;
 
-                AnimatorStateInfo stateInfo = __instance.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0);
-
-                if (stateInfo.IsName("idle") && stateInfo.normalizedTime < 1.0f) return;
-
                 if (!_zombieList.Contains(__instance))
                     _zombieList.Add(__instance);
             }

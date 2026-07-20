@@ -47,11 +47,16 @@ namespace Magnetar_Client.Modules
             PlantDieReason,
             ZombieDieReason,
             CheatKeys,
+            ParticleEmitted
         }
+
+        public static Dictionary<int, string> ParticleNameTranslated;
 
         public DebugMode()
         {
             instance = this;
+
+            ParticleNameTranslated = TranslatedNames(typeof(ParticleType));
 
             CreateCategory("General");
 
@@ -68,6 +73,7 @@ namespace Magnetar_Client.Modules
                     { (int)Options.PlantDieReason, "Plant die reason" },
                     { (int)Options.ZombieDieReason, "Zombie die reason" },
                     { (int)Options.CheatKeys, "Cheat keys (single use)" },
+                    { (int)Options.ParticleEmitted, "Particle effect emitted" }
                 }
             };
             Settings.Add(selected);
@@ -78,7 +84,6 @@ namespace Magnetar_Client.Modules
 
             EndCategory();
         }
-
 
         // Acess Private methods
         private static List<string> CheatKeys = new List<string>();
@@ -276,6 +281,19 @@ namespace Magnetar_Client.Modules
                 {
                     CheatKeys.Add(key.Key);
                 }
+            }
+        }
+
+        [HarmonyPatch(typeof(ParticleManager))]
+        public static class ParticleManagerPatch
+        {
+            [HarmonyPatch(nameof(ParticleManager.SetParticle))]
+            [HarmonyPostfix]
+            public static void SetParticlePostfix(ParticleType particleType)
+            {
+                if (instance==null || !instance.Active || !instance.selected.IsSelected((int)Options.ParticleEmitted)) return;
+                if (ParticleNameTranslated==null) DebugModeLogger.Msg($"Particle emitted: {particleType} ({(int)particleType})");
+                else DebugModeLogger.Msg($"Particle emitted: {ParticleNameTranslated[(int)particleType]}");
             }
         }
     }

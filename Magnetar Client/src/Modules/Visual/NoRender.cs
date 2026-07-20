@@ -19,12 +19,14 @@ namespace Magnetar_Client.Modules
         public override string SearchHints { get; set; } = "norender blank lawn invisible invisibleplants novisual" +
             " clear lawn invisiblezombies hiderender hidedisplay nographics seelawn hidden lawnclear hidetexture " +
             "graphicsoff renderdisable norendering invisibletextures clearfield plantshide zombieshide blankfield " +
-            "hidelawn seebackground hiderenderer seeground norend hidedraw";
+            "hidelawn seebackground hiderenderer seeground norend hidedraw no particles remove particles particletypes remove" +
+            "particles disable particles clear particles";
         public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
 
         public static NoRender instance;
 
         public MultiSelectSetting ParticlesSetting;
+        public MultiSelectSetting ParticleTypeSetting;
         public MultiSelectSetting GameObjectsSetting;
         public MultiSelectSetting BulletSetting;
         public MultiSelectSetting EffectSetting;
@@ -83,6 +85,12 @@ namespace Magnetar_Client.Modules
             AddSettings(ParticlesSetting);
             #endregion
 
+            ParticleTypeSetting = new MultiSelectSetting("Particle Types", typeof(ParticleType))
+            {
+                CustomNames = TranslatedNames(typeof(ParticleType))
+            };
+            AddSettings(ParticleTypeSetting);
+
             GameObjectsSetting = new MultiSelectSetting("Game Objects", typeof(BucketType))
             {
                 CustomNames = TranslatedNames(typeof(BucketType))
@@ -101,6 +109,8 @@ namespace Magnetar_Client.Modules
                 {
                     { 1, "Ice shroom effect" },
                     { 2, "Doom shroom effect" },
+                    { 3, "Jalapeno fire line" },
+                    { 4, "Doom shroom smoke cloud" }
                 }
             };
 
@@ -130,27 +140,30 @@ namespace Magnetar_Client.Modules
             if (Game.AppData.BoardInstanceIsNull) return;
 
             // Particles
-            bool isFileDirty = false;
-            var allParticleSystems = UnityEngine.Object.FindObjectsOfType<ParticleSystem>();
-
-            foreach (var ps in allParticleSystems)
+            if (ParticlesSetting.SelectedValues.Count != 0)
             {
-                if (ps == null || ps.gameObject == null) continue;
+                bool isFileDirty = false;
+                var allParticleSystems = UnityEngine.Object.FindObjectsOfType<ParticleSystem>();
 
-                string name = ps.gameObject.name;
-                if (name.EndsWith("(Clone)")) name = name.Substring(0, name.Length - 7);
-
-                // Fetch the ID, and automatically register it if it is new
-                int effectId = GetOrRegisterEffect(name, ref isFileDirty);
-
-                if (ParticlesSetting.IsSelected(effectId))
+                foreach (var ps in allParticleSystems)
                 {
-                    ps.emission.enabled = false;
-                    ps.Clear();
-                }
-            }
+                    if (ps == null || ps.gameObject == null) continue;
 
-            if (isFileDirty) SaveToJson();
+                    string name = ps.gameObject.name;
+                    if (name.EndsWith("(Clone)")) name = name.Substring(0, name.Length - 7);
+
+                    // Fetch the ID, and automatically register it if it is new
+                    int effectId = GetOrRegisterEffect(name, ref isFileDirty);
+
+                    if (ParticlesSetting.IsSelected(effectId))
+                    {
+                        ps.emission.enabled = false;
+                        ps.Clear();
+                    }
+                }
+
+                if (isFileDirty) SaveToJson();
+            }
         }
 
         private int GetOrRegisterEffect(string effectName, ref bool isFileDirty)
@@ -329,14 +342,42 @@ namespace Magnetar_Client.Modules
             [HarmonyPostfix]
             public static void StartPostfix(Doom __instance)
             {
-                if (instance==null || !instance.Active || !instance.EffectSetting.IsSelected(2)) return;
+                if (instance==null || !instance.Active) return;
 
-                var effect = __instance.transform.Find("sprit");
-                if (effect != null)
+                if (instance.EffectSetting.IsSelected(2))
                 {
-                    effect.gameObject.active = false;
+                    var effect = __instance.transform.Find("sprit");
+                    if (effect != null)
+                    {
+                        effect.gameObject.active = false;
+                    }
+                }
+                if (instance.EffectSetting.IsSelected(4))
+                {
+                    for (int i = 0; i < __instance.transform.childCount; i++)
+                    {
+                        Transform child = __instance.transform.GetChild(i);
+
+                        if (child != null && child.gameObject != null)
+                        {
+                            child.gameObject.active = false;
+                        }
+                    }
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(BoardAction))]
+        public static class BoardActionPatch
+        {
+            [HarmonyPatch(nameof(BoardAction.CreateFireAnim))]
+            [HarmonyPrefix]
+            public static bool CreateFireAnim(GameObject __instance)
+            {
+                if (instance == null || !instance.Active || !instance.EffectSetting.IsSelected(3)) return true;
+                return false;
+            }
+
         }
 
         [HarmonyPatch(typeof(ScreenShake))]
@@ -349,6 +390,19 @@ namespace Magnetar_Client.Modules
                 if (instance == null || !instance.Active || !instance.ScreenShakeSetting.Value) return true;
 
                 return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(ParticleManager))]
+        public static class ParticleManagerPatch
+        {
+            [HarmonyPatch(nameof(ParticleManager.SetParticle))]
+            [HarmonyPrefix]
+            public static void SetParticlePrefix(ParticleType particleType, ref Vector2 position)
+            {
+                if (instance == null || !instance.Active || !instance.ParticleTypeSetting.IsSelected((int)particleType)) return;
+
+                position = new Vector2(999, 999);
             }
         }
     }

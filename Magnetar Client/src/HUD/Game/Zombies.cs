@@ -286,7 +286,7 @@ namespace Magnetar_Client.HUDElements
         {
             if (!AppData.BoardInstanceIsNull)
             {
-                displayText = $"Wave: {AppData.board.theWave + 1}/{AppData.board.theMaxWave + 1}";
+                displayText = $"Wave: {AppData.board.theWave}/{AppData.board.theMaxWave}";
             }
             else
             {

@@ -1,5 +1,7 @@
 ﻿using HarmonyLib;
 using UnityEngine;
+using System.Collections.Generic;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -24,9 +26,9 @@ namespace Magnetar_Client.Modules
 
         public FloatSetting TimeScaleSetting;
 
-        public BoolSetting ResumeAfterPaused;
+        public Dictionary<FloatSetting, BindSetting> Buttons = new Dictionary<FloatSetting, BindSetting>();
+        public BoolSetting ResetOnDoubleActive;
 
-        private bool paused = false;
 
         public TimeScale()
         {
@@ -34,75 +36,58 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            TimeScaleSetting = new FloatSetting("Time Scale", 0f, 10, 2, 3, 0);
+            TimeScaleSetting = new FloatSetting("Time Scale", 0f, 10, 2, 3, 0)
+            {
+                OnValueChanged = x =>
+                {
+                    if (Instance.Active) UnityEngine.Time.timeScale = x;
+                }
+            };
             AddSettings(TimeScaleSetting);
 
             EndCategory();
+            CreateCategory("Buttons");
+
+            for (int i = 1; i <= 5; i++)
+            {
+                Buttons[new FloatSetting($"Speed setting {i}", 0f, 10, 1, 3, 0)] = new BindSetting($"Control button {i}");
+            }
+
+            foreach (var button in Buttons)
+            {
+                AddSettings(button.Key, button.Value);
+            }
+            
+            EndCategory();
             CreateCategory("Extra");
 
-            ResumeAfterPaused = new BoolSetting("Auto Resume After Game Pause", true);
-            AddSettings(ResumeAfterPaused);
+            ResetOnDoubleActive = new BoolSetting("Reset on double click", true);
 
+            AddSettings(ResetOnDoubleActive);
             EndCategory();
 
         }
 
-        public float originalTimeScale = 1;
-
         // Mod Logic
-        public override void OnEnable()
+
+        public override void OnUpdateActive()
         {
-            originalTimeScale = UnityEngine.Time.timeScale == 0 ? 1 : UnityEngine.Time.timeScale;
-        }
-        public override void OnDisable()
-        {
-            paused = false;
-            if (GameAPP.theGameStatus!=GameStatus.Pause)
-                UnityEngine.Time.timeScale = originalTimeScale;
-            originalTimeScale = 1;
+            foreach (var button in Buttons)
+            {
+                if (GetKeyComboDown(button.Value.BindKeys))
+                {
+                    if (Time.timeScale != button.Key.Value) Time.timeScale = button.Key.Value;
+                    else if (ResetOnDoubleActive.Value) Time.timeScale = 1;
+                }
+            }
         }
 
         public override void OnUpdate()
         {
             base.OnUpdate();
 
-            if (paused && ResumeAfterPaused.Value)
-            {
-                if (UnityEngine.Time.timeScale != 0)
-                {
-                    Active = true;
-                    paused = false;
-                }
-            }
+            TimeScaleSetting.Value = Time.timeScale;
         }
 
-        public override void OnUpdateActive()
-        {
-            if (HoldMode)
-            {
-                bool allKeysHeld = true;
-
-                foreach (KeyCode key in BindKeys)
-                {
-                    if (!Input.GetKey(key)) allKeysHeld = false; // Is this key currently down?
-                }
-
-                if (!allKeysHeld) { Active = false; OnDisable(); return; }
-            }
-            float timeScale = UnityEngine.Time.timeScale;
-            if (timeScale != TimeScaleSetting.Value)
-            {
-                if (GameAPP.theGameStatus == GameStatus.Pause)
-                    { Active = false; paused = true; return; }
-                UnityEngine.Time.timeScale = TimeScaleSetting.Value; 
-            }
-        }
-
-        [HarmonyPatch(typeof(SlowTrigger),nameof(SlowTrigger.Clicking))]
-        public static bool SlowTriggerPatch()
-        {
-            if (Instance == null) return true;
-            return !Instance.Active;
-        }
     }
 }

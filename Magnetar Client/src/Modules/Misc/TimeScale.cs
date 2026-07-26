@@ -21,26 +21,33 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
 
         // Mod data
-
-        public static TimeScale Instance;
+        public static TimeScale instance;
 
         public FloatSetting TimeScaleSetting;
 
         public Dictionary<FloatSetting, BindSetting> Buttons = new Dictionary<FloatSetting, BindSetting>();
         public BoolSetting ResetOnDoubleActive;
+        public BoolSetting DisableOnGamePaused;
+        public BoolSetting ReEnableAfterPause;
 
+        public float TargetSpeed { get; private set; } = 1f;
+        private bool wasPausedLastFrame = false;
 
         public TimeScale()
         {
-            Instance = this;
+            instance = this;
 
             CreateCategory("General");
 
-            TimeScaleSetting = new FloatSetting("Time Scale", 0f, 10, 2, 3, 0)
+            TimeScaleSetting = new FloatSetting("Time Scale (Engine)", 0f, 10f, 2f, 3, 0)
             {
                 OnValueChanged = x =>
                 {
-                    if (Instance.Active) UnityEngine.Time.timeScale = x;
+                    if (instance.Active && !IsGamePaused())
+                    {
+                        TargetSpeed = x;
+                        Time.timeScale = x;
+                    }
                 }
             };
             AddSettings(TimeScaleSetting);
@@ -50,34 +57,56 @@ namespace Magnetar_Client.Modules
 
             for (int i = 1; i <= 5; i++)
             {
-                Buttons[new FloatSetting($"Speed setting {i}", 0f, 10, 1, 3, 0)] = new BindSetting($"Control button {i}");
+                Buttons[new FloatSetting($"Speed setting {i}", 0f, 10f, 1f, 3, 0)] = new BindSetting($"Control button {i}");
             }
 
             foreach (var button in Buttons)
             {
                 AddSettings(button.Key, button.Value);
             }
-            
+
             EndCategory();
             CreateCategory("Extra");
 
             ResetOnDoubleActive = new BoolSetting("Reset on double click", true);
+            DisableOnGamePaused = new BoolSetting("Disable on game paused", true);
+            ReEnableAfterPause = new BoolSetting("Re-enable after pause", true);
 
-            AddSettings(ResetOnDoubleActive);
+            AddSettings(ResetOnDoubleActive, DisableOnGamePaused, ReEnableAfterPause);
             EndCategory();
-
         }
 
-        // Mod Logic
+        public override void OnEnable()
+        {
+            base.OnEnable();
+            TargetSpeed = TimeScaleSetting.Value;
+            if (!IsGamePaused())
+            {
+                Time.timeScale = TargetSpeed;
+            }
+        }
+
+        public override void OnDisable()
+        {
+            base.OnDisable();
+            Time.timeScale = 1f;
+        }
 
         public override void OnUpdateActive()
         {
+            // Handle keybind shortcuts
             foreach (var button in Buttons)
             {
                 if (GetKeyComboDown(button.Value.BindKeys))
                 {
-                    if (Time.timeScale != button.Key.Value) Time.timeScale = button.Key.Value;
-                    else if (ResetOnDoubleActive.Value) Time.timeScale = 1;
+                    if (Mathf.Approximately(TargetSpeed, button.Key.Value))
+                    {
+                        if (ResetOnDoubleActive.Value) SetGameSpeed(1f);
+                    }
+                    else
+                    {
+                        SetGameSpeed(button.Key.Value);
+                    }
                 }
             }
         }
@@ -86,8 +115,61 @@ namespace Magnetar_Client.Modules
         {
             base.OnUpdate();
 
-            TimeScaleSetting.Value = Time.timeScale;
+            bool currentlyPaused = IsGamePaused();
+
+            if (wasPausedLastFrame && !currentlyPaused)
+            {
+                if (Active && ReEnableAfterPause.Value)
+                {
+                    Time.timeScale = TargetSpeed;
+                }
+            }
+
+            wasPausedLastFrame = currentlyPaused;
+
+            if (Active && !currentlyPaused)
+            {
+                TimeScaleSetting.Value = Time.timeScale;
+            }
         }
 
+        public void SetGameSpeed(float speed)
+        {
+            TargetSpeed = speed;
+            TimeScaleSetting.Value = speed;
+
+            if (DisableOnGamePaused.Value && IsGamePaused()) return;
+
+            Time.timeScale = speed;
+        }
+
+        private bool IsGamePaused()
+        {
+            var status = GameAPP.theGameStatus;
+            bool isPausedStatus = (status == GameStatus.OpenOptions || status == GameStatus.Pause);
+            return Time.timeScale == 0f && isPausedStatus;
+        }
+
+        [HarmonyPatch(typeof(SlowTrigger), nameof(SlowTrigger.Clicking))]
+        public static class SlowTriggerPatch
+        {
+            [HarmonyPrefix]
+            public static bool Prefix()
+            {
+                if (instance == null || !instance.Active)
+                    return true;
+
+                if (Mathf.Approximately(instance.TargetSpeed, 0.2f))
+                {
+                    instance.SetGameSpeed(1.0f);
+                }
+                else
+                {
+                    instance.SetGameSpeed(0.2f);
+                }
+
+                return false;
+            }
+        }
     }
 }

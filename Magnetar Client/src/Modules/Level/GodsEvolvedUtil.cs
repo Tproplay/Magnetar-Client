@@ -21,8 +21,6 @@ namespace Magnetar_Client.Modules
 
         public static GodsEvolvedUtil instance;
 
-        public BoolSetting CheatHard;
-
         public FloatSetting QualityDefaultWeight;
         public FloatSetting QualitySilverWeight;
         public FloatSetting QualityGoldtWeight;
@@ -36,23 +34,12 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            CheatHard = new BoolSetting("Hard Mode", false)
-            {
-                OnValueChanged = x =>
-                {
-                    if (ShootingManager.Instance == null) { instance.CheatHard.Value = false; return; }
-
-                    if (x) ShootingManager.Instance.cheatHard = true;
-                    else instance.CheatHard.Value = true;
-                }
-            };
-
             ShieldValue = new FloatSetting("Shield value", 0, 100000, 0, 2)
             {
                 OnValueChanged = x => { if (ShootingManager.Instance != null && Active) ShootingManager.Instance.shieldHealth = x; }
             };
 
-            AddSettings(CheatHard, ShieldValue);
+            AddSettings(ShieldValue);
             EndCategory();
 
             CreateCategory("Quality Weight");
@@ -108,15 +95,6 @@ namespace Magnetar_Client.Modules
                 instance.QualityGoldtWeight.Value = __instance.qualityWeights[Quality.gold];
                 instance.QualityDiamondWeight.Value = __instance.qualityWeights[Quality.diamond];
 
-                instance.CheatHard.Value = __instance.cheatHard;
-            }
-
-            [HarmonyPatch(nameof(ShootingManager.CheatHard))]
-            [HarmonyPrefix]
-            public static void CheatHardPrefix()
-            {
-                if (instance == null) return;
-                instance.CheatHard.Value = true;    
             }
 
             [HarmonyPatch(nameof(ShootingManager.GetRandomQuality))]

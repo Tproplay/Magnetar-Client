@@ -6,12 +6,12 @@ using Il2CppUI;
 #endif
 namespace Magnetar_Client.Modules
 {
-    public class GodsEvolvedUtil : Module
+    public class GodsEvolvedHack : Module
     {
         // Mod Info
-        public override string Name { get; set; } = "Gods Evolved Utilities";
+        public override string Name { get; set; } = "Gods Evolved Hack";
         public override string Description { get; set; } = "Various Ultils to make Gods Evolved Easier";
-        public override string SearchHints { get; set; } = "godsevolvedutil godsevolved helper utility cheats mod " +
+        public override string SearchHints { get; set; } = "godsevolvedutil godsevolved helper utility cheats mod godsevolvedhack" +
             "godsevolvedmod trainer easetools assistant godsevolvedcheats godsevolvedtrainer utilitymod mods helpertools" +
             " gameutils godsevolvedhelper godsevolvedutilities qualityoflife qol devutils godsevolvedassist";
 
@@ -19,7 +19,7 @@ namespace Magnetar_Client.Modules
 
         // Mod Data
 
-        public static GodsEvolvedUtil instance;
+        public static GodsEvolvedHack instance;
 
         public FloatSetting QualityDefaultWeight;
         public FloatSetting QualitySilverWeight;
@@ -27,8 +27,9 @@ namespace Magnetar_Client.Modules
         public FloatSetting QualityDiamondWeight;
 
         public FloatSetting ShieldValue;
+        public FloatSetting ReviveCD;
 
-        public GodsEvolvedUtil() 
+        public GodsEvolvedHack() 
         { 
             instance = this;
 
@@ -39,7 +40,12 @@ namespace Magnetar_Client.Modules
                 OnValueChanged = x => { if (ShootingManager.Instance != null && Active) ShootingManager.Instance.shieldHealth = x; }
             };
 
-            AddSettings(ShieldValue);
+            ReviveCD = new FloatSetting("Revive CD", 0, 3, 3, 3)
+            {
+                OnValueChanged = x => { if (ShootingManager.Instance != null && Active) ShootingManager.Instance.reviveTimer = x*1000; }
+            };
+
+            AddSettings(ShieldValue, ReviveCD);
             EndCategory();
 
             CreateCategory("Quality Weight");
@@ -79,6 +85,7 @@ namespace Magnetar_Client.Modules
             QualityDiamondWeight.Value = ShootingManager.Instance.qualityWeights[Quality.diamond];
 
             ShieldValue.Value = ShootingManager.Instance.shieldHealth;
+            ReviveCD.Value = ShootingManager.Instance.reviveTimer/1000f;
         }
 
         [HarmonyPatch(typeof(ShootingManager))]

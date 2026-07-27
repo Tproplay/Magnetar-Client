@@ -1,4 +1,6 @@
 ﻿using static Magnetar_Client.Game.AppData;
+using HarmonyLib;
+using Il2Cpp;
 
 namespace Magnetar_Client.Modules
 {
@@ -21,8 +23,8 @@ namespace Magnetar_Client.Modules
         public IntSetting SunLimit;
         public IntSetting MoneyLimit;
 
-        private static int originalSunLimit = -1;
-        private static int originalMoneyLimit = -1;
+        public int originalSunLimit = -1;
+        public int originalMoneyLimit = -1;
 
         public NoCap() 
         { 
@@ -30,10 +32,16 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            SunLimit = new IntSetting("Sun Cap", 0, 1_000_000 ,int.MaxValue);
+            SunLimit = new IntSetting("Sun Cap", 0, 1_000_000, int.MaxValue)
+            {
+                OnValueChanged = SetSunLimit
+            };
             AddSettings(SunLimit);
 
-            MoneyLimit = new IntSetting("Money Cap", 0, 1_000_000, int.MaxValue);
+            MoneyLimit = new IntSetting("Money Cap", 0, 1_000_000, int.MaxValue)
+            {
+                OnValueChanged = SetMoneyLimit
+            };
             AddSettings(MoneyLimit);
 
             EndCategory();
@@ -41,14 +49,10 @@ namespace Magnetar_Client.Modules
 
         // Mod Logic
 
-        public override void OnUpdateActive()
+        public override void OnEnable()
         {
-            if (BoardInstanceIsNull) { originalMoneyLimit = -1;originalSunLimit = -1; return; }
-
-            if (board.maxSun != SunLimit.Value)
-                board.maxSun = SunLimit.Value;
-            if (board.maxMoney != MoneyLimit.Value)
-                board.maxMoney = MoneyLimit.Value;
+            SetSunLimit(SunLimit.Value);
+            SetMoneyLimit(MoneyLimit.Value);
         }
 
         public override void OnDisable()
@@ -66,6 +70,43 @@ namespace Magnetar_Client.Modules
                 originalMoneyLimit = -1;
             }
 
+        }
+
+        void SetSunLimit(int value)
+        {
+            if (BoardInstanceIsNull) return;
+            board.maxSun = value;
+        }
+
+        void SetMoneyLimit(int value)
+        {
+            if (BoardInstanceIsNull) return;
+            board.maxMoney = value;
+        }
+
+        [HarmonyPatch(typeof(Board))]
+        public static class BoardPatch
+        {
+            [HarmonyPatch(nameof(Board.Start))]
+            [HarmonyPostfix]
+            public static void StartPostfix(Board __instance)
+            {
+                if (instance == null) return;
+                instance.originalSunLimit = __instance.maxSun;
+                instance.originalMoneyLimit = __instance.maxMoney;
+
+                if (instance.Active) instance.OnEnable();
+            }
+
+            [HarmonyPatch(nameof(Board.Die))]
+            [HarmonyPostfix]
+            public static void DiePostfix()
+            {
+                if (instance == null) return;
+
+                instance.originalSunLimit = -1;
+                instance.originalMoneyLimit = -1;
+            }
         }
 
     }

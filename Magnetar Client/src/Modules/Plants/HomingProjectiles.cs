@@ -25,8 +25,6 @@ namespace Magnetar_Client.Modules
         // Mod Data
 
         public static HomingProjectiles instance;
-
-        public List<int> preselected = Enum.GetValues(typeof(BulletType)).Cast<int>().ToList();
         public MultiSelectSetting selectedBulletsSetting;
 
         public HomingProjectiles()

@@ -67,6 +67,8 @@ namespace Magnetar_Client.Modules
 
             if (instance.FreezeWaveSetting.Value)
             {
+                if (last_val <= 0) last_val = 1f;
+
                 board.timeUntilNextWave = last_val;
             }
 
@@ -126,7 +128,18 @@ namespace Magnetar_Client.Modules
 
         }
 
-
+        [HarmonyPatch(typeof(Board))]
+        public static class BoardPatch
+        {
+            [HarmonyPatch(nameof(Board.Start))]
+            [HarmonyPostfix]
+            public static void StartPostfix(Board __instance)
+            {
+                if (instance == null) return;
+                if (!instance.Active_WaveCooldownSetting.Value) 
+                    instance.WaveCooldownSetting.Value = __instance.config.waveInterval;
+            }
+        }
 
     }
 }

@@ -1,11 +1,19 @@
-﻿namespace Magnetar_Client
+﻿#if MELONLOADER || RELEASE_MELON
+using MelonLoader;
+using MelonLoader.Utils;
+#elif BEPINEX || RELEASE_BEPINEX
+using BepInEx.Configuration;
+#endif
+
+namespace Magnetar_Client
 {
     public enum TabType
     {
         MODULES,
         HUD,
         GUI,
-        NEF
+        NEF,
+        PROFILE,
     }
 
     public static class Magnetar_Info
@@ -17,6 +25,8 @@
 
     public static class Config
     {
+        public static string CurrentProfile = "Default";
+
         public readonly static float WindowWidth = 1920;
         public readonly static float WindowHeight = 1080;
 
@@ -79,5 +89,14 @@
             public static float AutocompleteMaxHeight = 150f;
             public static float AutocompleteScrollSensitivity = 15f;
         }
+    }
+
+    public static class Prefrences
+    {
+#if MELONLOADER || RELEASE_MELON
+        public static MelonPreferences_Category MagnetarCategory;
+#elif BEPINEX || RELEASE_BEPINEX
+        public static ConfigFile BepInExConfig;
+#endif
     }
 }

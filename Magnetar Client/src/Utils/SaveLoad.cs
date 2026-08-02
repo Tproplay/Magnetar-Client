@@ -13,6 +13,7 @@ using MelonLoader;
 using MelonLoader.Utils;
 #elif BEPINEX || RELEASE_BEPINEX
 using BepInEx;
+using BepInEx.Configuration;
 #endif
 
 namespace Magnetar_Client.Utils
@@ -23,7 +24,6 @@ namespace Magnetar_Client.Utils
         public class MagnetarSaveData
         {
             public bool ShowGui = false;
-            public bool DimBg = true;
             public int Language;
 
             public bool HudEnabled = true;
@@ -75,7 +75,7 @@ namespace Magnetar_Client.Utils
             Paths.PluginPath;
 #endif
 
-        private static string Path => System.IO.Path.Combine(ConfigDir, "Magnetar_Config.json");
+        private static string Path => ProfileManager.GetProfilePath(Config.CurrentProfile);
         private static string TexturePath => System.IO.Path.Combine(ModsDir, "Magnetar Data", "TextureData.json");
 
         static float LastSaved;
@@ -109,7 +109,6 @@ namespace Magnetar_Client.Utils
             MagnetarSaveData data = new MagnetarSaveData
             {
                 ShowGui = Config.showgui,
-                DimBg = Config.dimBg,
                 HudEnabled = HUDManager.Enabled,
                 ShowBackground = HUDManager.showBackground,
                 SelectedHudElements = safeHudElements,
@@ -225,8 +224,8 @@ namespace Magnetar_Client.Utils
                     MagnetarSaveData data = JsonConvert.DeserializeObject<MagnetarSaveData>(json);
                     if (data != null)
                     {
+
                         Config.showgui = data.ShowGui;
-                        Config.dimBg = data.DimBg;
 
                         if (GUIManager.LanguageSetting != null)
                         {
@@ -338,5 +337,16 @@ namespace Magnetar_Client.Utils
             }
             catch (Exception ex) { AutoSaveLogger.Error($"Error setting '{setting.Name}': {ex.Message}"); }
         }
+
+        public static void InitializePrefrences()
+        {
+#if MELONLOADER || RELEASE_MELON
+            Prefrences.MagnetarCategory = MelonPreferences.CreateCategory("Magnetar Client", "Magnetar Client");
+#elif BEPINEX || RELEASE_BEPINEX
+            string configFilePath = System.IO.Path.Combine(Paths.ConfigPath, "Magnetar_Client.cfg");
+            Prefrences.BepInExConfig = new ConfigFile(configFilePath, true);
+#endif
+        }
+
     }
 }

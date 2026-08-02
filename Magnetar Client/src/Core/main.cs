@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using HarmonyLib;
 using System;
-using static Magnetar_Client.Utils.SaveLoad;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using Magnetar_Client.Utils;
 using Magnetar_Client;
@@ -58,6 +57,7 @@ namespace Magnetar_Client.Core
 
         private void InitializeCore()
         {
+            SaveLoad.InitializePrefrences();
             Utils.Translator.LoadTranslations();
             
             ModuleManager.Init();
@@ -67,13 +67,14 @@ namespace Magnetar_Client.Core
 
             TopBar.TopBar.Init();
 
+            ProfileManager.Init();
             SaveLoad.Load();
             DebugLogger.Msg("Magnetar Client Loaded!");
         }
 
         public void CoreApplicationQuit()
         {
-            Save(true);
+            SaveLoad.Save(true);
             DebugLogger.Msg("Magnetar Prefrences Saved!");
         }
 
@@ -109,8 +110,8 @@ namespace Magnetar_Client.Core
             if (Magnetar_Client.Config.CurrentTab == TabType.MODULES) ModuleManager.Render();
             if (Magnetar_Client.Config.CurrentTab == TabType.NEF) NEFManager.Render();
             if (Magnetar_Client.Config.CurrentTab == TabType.GUI) GUIManager.Render();
+            if (Magnetar_Client.Config.CurrentTab == TabType.PROFILE) ProfileGUI.Render();
 
-            
         }
 
         public void CoreUpdate()
@@ -123,7 +124,7 @@ namespace Magnetar_Client.Core
             if (Input.GetKeyDown(KeyCode.RightShift) && !HUDManager.forceShow)
             {
                 Magnetar_Client.Config.showgui = !Magnetar_Client.Config.showgui;
-                Save();
+                SaveLoad.Save();
             }
 
             if (!Magnetar_Client.Config.showgui && !HUDManager.forceShow)
@@ -142,7 +143,7 @@ namespace Magnetar_Client.Core
             {
                 Magnetar_Client.Config.showgui = false;
                 Event.current.Use();
-                Save();
+                SaveLoad.Save();
                 ResetInputBind();
             }
             else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape &&

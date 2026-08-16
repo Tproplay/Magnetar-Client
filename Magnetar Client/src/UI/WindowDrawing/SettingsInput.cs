@@ -275,7 +275,7 @@ namespace Magnetar_Client.UI.WindowDrawing
         private static bool isShiftDragging = false;
         private static bool dragTargetState = false;
         private static HashSet<int> draggedItemsSession = new HashSet<int>();
-             
+
         public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, dynamic activeMultiSelect)
         {
             if (activeMultiSelect == null) return;
@@ -360,9 +360,8 @@ namespace Magnetar_Client.UI.WindowDrawing
             Rect searchRect = new Rect(10, 30, searchWidth, 22);
             Rect toggleRect = new Rect(10 + searchWidth, 30, toggleWidth, 22);
 
-            // 1. Draw Advanced Search Input
+            // 1. Search Field
             string oldQuery = multiSelectSearchQuery;
-
             multiSelectSearchQuery = DrawManualTextField(
                 searchRect,
                 multiSelectSearchQuery ?? "",
@@ -374,7 +373,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                 manualScrollY = 0f;
             }
 
-            // 2. Toggle Button
+            // 2. Select All / Deselect All Button
             int selectedCount = activeMultiSelect.SelectedValues.Count;
             bool allSelected = visibleCount > 0 && selectedCount >= visibleCount;
 
@@ -384,7 +383,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             }
 
             if (GUI.Button(toggleRect,
-                allSelected ? Magnetar_Client.Utils.Translator.Translate("Deselect All") : Magnetar_Client.Utils.Translator.Translate("Select All"),
+                allSelected ? Translator.Translate("Deselect All") : Translator.Translate("Select All"),
                 !allSelected ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff))
             {
                 foreach (var kvp in options)
@@ -426,22 +425,15 @@ namespace Magnetar_Client.UI.WindowDrawing
                 e.Use();
             }
 
-            // --- DRAG DETECTION ---
-            if (e.rawType == EventType.MouseUp && e.button == 0)
+            // --- RESET DRAG ON MOUSE UP ---
+            if ((e.type == EventType.MouseUp || e.rawType == EventType.MouseUp) && e.button == 0)
             {
-                isShiftDragging = false;
-                draggedItemsSession.Clear();
-                lastHoveredIndex = -1;
-            }
-
-            if (isShiftDragging && !Input.GetMouseButton(0))
-            {
-                isShiftDragging = false;
-                draggedItemsSession.Clear();
-                lastHoveredIndex = -1;
-#if MELONLOADER || BEPINEX
-                Magnetar_Client.Utils.Magnetar_Logger.DebugLogger.Msg("Drag Complete");
-#endif
+                if (isShiftDragging)
+                {
+                    isShiftDragging = false;
+                    draggedItemsSession.Clear();
+                    lastHoveredIndex = -1;
+                }
             }
 
             // --- THE LIST (CLIPPED) ---
@@ -476,20 +468,24 @@ namespace Magnetar_Client.UI.WindowDrawing
                     visibleItemsThisFrame.Add(intVal);
                     int currentIndex = visibleItemsThisFrame.Count - 1;
 
-                    // --- RENDERING & LOGIC ---
+                    // --- RENDERING & HIT-TESTING ---
                     float drawY = currentY - manualScrollY;
                     Rect rowRect = new Rect(0, drawY, multiSelectWindowRect.width - 30, ROW_HEIGHT);
 
                     bool isHovering = rowRect.Contains(e.mousePosition);
                     bool isCurrentlySelected = activeMultiSelect.IsSelected(intVal);
 
-                    if (isHovering) hoveredIndexThisFrame = currentIndex;
+                    if (isHovering)
+                    {
+                        hoveredIndexThisFrame = currentIndex;
+                    }
 
                     if (drawY + ROW_HEIGHT > 0 && drawY < viewHeight)
                     {
+                        // Mouse Down Initiation
                         if (e.type == EventType.MouseDown && e.button == 0 && isHovering)
                         {
-                            if (e.shift || Input.GetKey(KeyCode.LeftShift))
+                            if (e.shift || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                             {
                                 isShiftDragging = true;
                                 draggedItemsSession.Clear();
@@ -516,27 +512,35 @@ namespace Magnetar_Client.UI.WindowDrawing
                     currentY += ROW_HEIGHT + 1;
                 }
 
-                // B. CONTINUE DRAG (PAINT SELECT - FRAME SKIP FIX)
-                if (isShiftDragging && hoveredIndexThisFrame != -1 && Input.GetMouseButton(0))
+                // --- CONTINUOUS PAINT DRAG (INTERPOLATE SKIPPED FRAMES) ---
+                if (isShiftDragging && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove || e.type == EventType.Repaint))
                 {
-                    if (lastHoveredIndex != -1)
+                    if (hoveredIndexThisFrame != -1 && lastHoveredIndex != -1)
                     {
                         int start = Mathf.Min(lastHoveredIndex, hoveredIndexThisFrame);
                         int end = Mathf.Max(lastHoveredIndex, hoveredIndexThisFrame);
 
                         for (int i = start; i <= end; i++)
                         {
-                            int val = visibleItemsThisFrame[i];
-                            if (!draggedItemsSession.Contains(val))
+                            if (i >= 0 && i < visibleItemsThisFrame.Count)
                             {
-                                if (dragTargetState) ToggleWithLimit(activeMultiSelect, val);
-                                else activeMultiSelect.Deselect(val);
+                                int val = visibleItemsThisFrame[i];
+                                if (!draggedItemsSession.Contains(val))
+                                {
+                                    if (dragTargetState) ToggleWithLimit(activeMultiSelect, val);
+                                    else activeMultiSelect.Deselect(val);
 
-                                draggedItemsSession.Add(val);
+                                    draggedItemsSession.Add(val);
+                                }
                             }
                         }
+                        lastHoveredIndex = hoveredIndexThisFrame;
                     }
-                    lastHoveredIndex = hoveredIndexThisFrame;
+
+                    if (e.type == EventType.MouseDrag)
+                    {
+                        e.Use();
+                    }
                 }
             }
             GUI.EndGroup();
@@ -550,6 +554,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             bool shouldHighlight = (activeSliderId == sliderId) || (Time.time - lastSliderUpdateTime < 1.0f);
             GUI.Box(new Rect(scrollX, handleY, 12, handleSize), "", shouldHighlight ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
         }
+
         private static void ToggleWithLimit(dynamic activeMultiSelect, int val)
         {
             if (activeMultiSelect.MaxSelection == -1 || activeMultiSelect.SelectedValues.Count < activeMultiSelect.MaxSelection)
@@ -557,7 +562,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                 activeMultiSelect.Select(val);
             }
         }
-
         public static int activeDropdownId = -1;
         public static float dropdownScrollY = 0f;
 

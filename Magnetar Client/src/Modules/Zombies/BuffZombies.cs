@@ -64,7 +64,7 @@ namespace Magnetar_Client.Modules
         }
 
         // Tracks the original max healths: [0] = Base, [1] = Armor1, [2] = Armor2
-        public static Dictionary<Zombie, List<int>> originalHpData = new Dictionary<Zombie, List<int>>();
+        public static Dictionary<Zombie, List<long>> originalHpData = new Dictionary<Zombie, List<long>>();
 
         // Mod Logic
         public override void OnUpdateActive()
@@ -83,7 +83,7 @@ namespace Magnetar_Client.Modules
                     if (!originalHpData.ContainsKey(zombie))
                     {
                         // 1. Store the original maximums
-                        originalHpData[zombie] = new List<int> {
+                        originalHpData[zombie] = new List<long> {
                             zombie.theMaxHealth,
                             zombie.theFirstArmorMaxHealth,
                             zombie.theSecondArmorMaxHealth
@@ -113,10 +113,10 @@ namespace Magnetar_Client.Modules
 
                 if (originalHpData.ContainsKey(zombie))
                 {
-                    List<int> origData = originalHpData[zombie];
-                    int origMaxHp = origData[0];
-                    int origFirstArmorMax = origData[1];
-                    int origSecondArmorMax = origData[2];
+                    List<long> origData = originalHpData[zombie];
+                    long origMaxHp = origData[0];
+                    long origFirstArmorMax = origData[1];
+                    long origSecondArmorMax = origData[2];
 
                     // 1. Calculate current health ratios (safeguard against divide by zero for unarmored zombies)
                     float hpRatio = zombie.theMaxHealth > 0 ? (float)zombie.theHealth / zombie.theMaxHealth : 0f;
@@ -125,8 +125,8 @@ namespace Magnetar_Client.Modules
 
                     // 2. Restore Original Max Healths
                     zombie.theMaxHealth = origMaxHp;
-                    zombie.theFirstArmorMaxHealth = origFirstArmorMax;
-                    zombie.theSecondArmorMaxHealth = origSecondArmorMax;
+                    zombie.theFirstArmorMaxHealth = (int)origFirstArmorMax;
+                    zombie.theSecondArmorMaxHealth = (int)origSecondArmorMax;
 
                     // 3. Scale Current Healths down using the preserved ratios
                     zombie.theHealth = Mathf.RoundToInt(origMaxHp * hpRatio);

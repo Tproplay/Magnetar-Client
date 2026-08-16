@@ -2,6 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<RootNamespace>Magnetar_Client</RootNamespace>
 		<AssemblyName>Magnetar Client</AssemblyName>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -30,6 +31,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="DiscordRichPresence" Version="1.6.1.70" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 		<Reference Include="0Harmony">
 			<HintPath>References\Melonloader\0Harmony.dll</HintPath>
 		</Reference>
@@ -154,9 +156,9 @@
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 
-		<Exec Condition="$(Configuration) == 'melonloader'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.8\Mods\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.8\PlantsVsZombiesRH.exe&quot;" />
+		<Exec Condition="$(Configuration) == 'melonloader'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.9\Mods\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.9\PlantsVsZombiesRH.exe&quot;" />
 
-		<Exec Condition="$(Configuration) == 'Bepinex'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\3.8 UnityExploror\BepInEx\plugins\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\3.8 UnityExploror\PlantsVsZombiesRH.exe&quot;" />
+		<Exec Condition="$(Configuration) == 'Bepinex'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\UnityExploror 3.9\BepInEx\plugins\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\UnityExploror 3.9\PlantsVsZombiesRH.exe&quot;" />
 
 	</Target>
 

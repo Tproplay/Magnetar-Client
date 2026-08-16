@@ -185,8 +185,8 @@ namespace Magnetar_Client.Modules
 
                 // Grab the total health (Base Health + Armor 1 + Armor 2)
                 // And Display only them
-                int currentHp = __instance.CurrentAllHealth;
-                int maxHp = __instance.TotalAllHealth;
+                long currentHp = __instance.CurrentAllHealth;
+                long maxHp = __instance.TotalAllHealth;
 
                 string formattedCurrent = FormatInternational(currentHp);
                 string finalText = formattedCurrent;

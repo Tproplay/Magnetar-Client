@@ -1,8 +1,10 @@
 ﻿using HarmonyLib;
-using Magnetar_Client.Utils;
-using System;
 using System.Collections.Generic;
+using static Magnetar_Client.Game.AppData;
+
 using UnityEngine;
+using static MelonLoader.MelonLogger;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -21,13 +23,14 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Plant;
 
         // Mod Data
-
         public static BanPlant instance;
-
         public MultiSelectSetting selectedPlants;
 
-        public BanPlant() 
-        { 
+        // Fast O(1) Cache for active card instances
+        public static readonly HashSet<CardUI> ActiveCards = new HashSet<CardUI>();
+
+        public BanPlant()
+        {
             instance = this;
 
             CreateCategory("General");
@@ -37,15 +40,14 @@ namespace Magnetar_Client.Modules
                 CustomNames = TranslatedNames(typeof(PlantType)),
                 Blacklist = new HashSet<int> {
                     (int)PlantType.Nothing,
-                    257,258,259,260,261,262,263,264,265,266,267,268,
-                    246,247,3000,
-                }
+                    257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268,
+                    246, 247, 3000
+                },
+                OnSelectionChanged = UpdateSelection
             };
 
-            Settings.Add(selectedPlants);
-
+            AddSettings(selectedPlants);
             EndCategory();
-
         }
 
         public override void OnLanguageChanged()
@@ -53,58 +55,100 @@ namespace Magnetar_Client.Modules
             selectedPlants.CustomNames = TranslatedNames(typeof(PlantType));
         }
 
-        // Mod Logic
-
-        [HarmonyPatch(typeof(CardUI), nameof(CardUI.OnMouseDown))]
-        public static class CardUIClickPatch
+        private void UpdateSelection(int id, bool val)
         {
-            public static bool Prefix(CardUI __instance)
-            {
-                if (__instance == null || __instance.Pointer == System.IntPtr.Zero) return true;
+            if (!Active) return;
 
-                if (instance == null || !instance.Active) return true;
+            // Iterate only over cached active cards without scene traversal
+            foreach (var card in ActiveCards)
+            {
+                if (card != null && (int)card.thePlantType == id)
+                {
+                    BanCard(card, val);
+                }
+            }
+        }
+
+        public override void OnEnable()
+        {
+            ApplyAllCards(true);
+        }
+
+        public override void OnDisable()
+        {
+            ApplyAllCards(false);
+        }
+
+        private void ApplyAllCards(bool isEnabling)
+        {
+            foreach (var card in ActiveCards)
+            {
+                if (card == null) continue;
+
+                bool shouldBan = isEnabling && selectedPlants.IsSelected((int)card.thePlantType);
+                BanCard(card, shouldBan);
+            }
+        }
+
+        public static void BanCard(CardUI card, bool value)
+        {
+            if (card == null) return;
+
+            var shadow = card.transform.Find("Shadow");
+            if (shadow != null)
+            {
+                shadow.gameObject.SetActive(value);
+            }
+        }
+
+        // ==========================================
+        // Harmony Patches
+        // ==========================================
+
+        [HarmonyPatch(typeof(CardUI))]
+        public static class CardUIPatches
+        {
+            // Register card into cache on creation and apply ban state immediately
+            [HarmonyPatch(nameof(CardUI.Awake))]
+            [HarmonyPostfix]
+            public static void AwakePostfix(CardUI __instance)
+            {
+                if (__instance == null) return;
+
+                ActiveCards.Add(__instance);
+
+                if (instance != null && instance.Active)
+                {
+                    bool shouldBan = instance.selectedPlants.IsSelected((int)__instance.thePlantType);
+                    BanCard(__instance, shouldBan);
+                }
+            }
+
+            // Deregister card from cache when destroyed
+            [HarmonyPatch(nameof(CardUI.OnDestroy))]
+            [HarmonyPrefix]
+            public static void OnDestroyPrefix(CardUI __instance)
+            {
+                if (__instance != null)
+                {
+                    ActiveCards.Remove(__instance);
+                }
+            }
+
+            // Block click execution on banned cards
+            [HarmonyPatch(nameof(CardUI.OnMouseDown))]
+            [HarmonyPrefix]
+            public static bool OnMouseDownPrefix(CardUI __instance)
+            {
+                if (__instance == null || instance == null || !instance.Active) return true;
 
                 if (instance.selectedPlants.IsSelected((int)__instance.thePlantType))
                 {
+                    GameAPP.PlaySound(SoundType.Buzzer);
                     return false;
                 }
 
                 return true;
-            }
-        }
-
-        private static readonly Color BannedColor = new Color(0.2f, 0.2f, 0.2f, 0.7f);
-
-        [HarmonyPatch(typeof(CardUI), nameof(CardUI.Update))]
-        public static class CardUIVisualLockout
-        {
-            [HarmonyPostfix]
-            public static void Postfix(CardUI __instance)
-            {
-                // Safety Check
-                if (__instance == null || __instance.Pointer == IntPtr.Zero) return;
-
-                if (instance == null || !instance.Active) return;
-
-                if (instance.selectedPlants.IsSelected((int)__instance.thePlantType))
-                {
-                    // 1. Force the internal game flag for disabled cards
-                    __instance.disabled = true;
-
-                    // 2. Desaturate the Card visuals
-                    var renderers = __instance.GetComponentsInChildren<SpriteRenderer>();
-                    foreach (var sr in renderers)
-                    {
-                        sr.color = BannedColor;
-                    }
-
-                    // 3. Update the text
-                    if (__instance.text != null)
-                    {
-                        __instance.text.color = Color.red;
-                        __instance.text.text = "X";
-                    }
-                }
             }
         }
     }

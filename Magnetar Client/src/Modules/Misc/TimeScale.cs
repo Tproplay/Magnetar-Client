@@ -39,7 +39,7 @@ namespace Magnetar_Client.Modules
 
             CreateCategory("General");
 
-            TimeScaleSetting = new FloatSetting("Time Scale (Engine)", 0f, 10f, 2f, 3, 0)
+            TimeScaleSetting = new FloatSetting("Time Scale (Engine)", 0f, 10f, 1f, 3, 0)
             {
                 OnValueChanged = x =>
                 {
@@ -76,20 +76,9 @@ namespace Magnetar_Client.Modules
             EndCategory();
         }
 
-        public override void OnEnable()
-        {
-            base.OnEnable();
-            TargetSpeed = TimeScaleSetting.Value;
-            if (!IsGamePaused())
-            {
-                Time.timeScale = TargetSpeed;
-            }
-        }
-
         public override void OnDisable()
         {
-            base.OnDisable();
-            Time.timeScale = 1f;
+            if (!IsGamePaused()) Time.timeScale = 1f;
         }
 
         public override void OnUpdateActive()
@@ -127,16 +116,12 @@ namespace Magnetar_Client.Modules
 
             wasPausedLastFrame = currentlyPaused;
 
-            if (Active && !currentlyPaused)
-            {
-                TimeScaleSetting.Value = Time.timeScale;
-            }
+            TimeScaleSetting.Value = Time.timeScale;
         }
 
         public void SetGameSpeed(float speed)
         {
             TargetSpeed = speed;
-            TimeScaleSetting.Value = speed;
 
             if (DisableOnGamePaused.Value && IsGamePaused()) return;
 

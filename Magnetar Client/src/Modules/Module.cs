@@ -428,7 +428,7 @@ namespace Magnetar_Client.Modules
 
         public void Select(int id)
         {
-            if (!SelectedValues.Contains(id))
+            if (!SelectedValues.Contains(id) && !Blacklist.Contains(id))
             {
                 if (MaxSelection == -1 || SelectedValues.Count < MaxSelection)
                 {

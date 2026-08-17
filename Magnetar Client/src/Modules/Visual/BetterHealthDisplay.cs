@@ -3,6 +3,12 @@ using Magnetar_Client.Game;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
+using System.Linq;
+using System.Collections.Generic;
+using System;
+
+
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -33,7 +39,8 @@ namespace Magnetar_Client.Modules
         public BoolSetting ShowMaxHealth;
         public BoolSetting AutoEnable_ShowHp_Plant;
         public BoolSetting AutoEnable_ShowHp_Zombie;
-
+        public MultiSelectSetting SelectedPlants;
+        public MultiSelectSetting SelectedZombies;
         public BoolSetting SumHpSetting;
 
         public BoolSetting ShowControlledPlant;
@@ -49,24 +56,64 @@ namespace Magnetar_Client.Modules
                 OnValueChanged = UpdateTexts
             };
             
+
+            AddSettings(SumHpSetting);
+
+            EndCategory();
+
+            CreateCategory("Plants");
+
             ShowMaxHealth = new BoolSetting("Show Max Health", false)
             {
                 OnValueChanged = UpdateTexts
             };
-            AutoEnable_ShowHp_Plant = new BoolSetting("Auto Enable Plant Hp", false);
-            AutoEnable_ShowHp_Zombie = new BoolSetting("Auto Enable Zombie Hp", false);
 
-            AddSettings(SumHpSetting, ShowMaxHealth,AutoEnable_ShowHp_Plant,AutoEnable_ShowHp_Zombie);
+            SelectedPlants = new MultiSelectSetting("Whitelist Plants", typeof(PlantType))
+            {
+                CustomNames = TranslatedNames(typeof(PlantType)),
+                Blacklist = new HashSet<int> {
+                    (int)PlantType.Nothing,
+                    257,258,259,260,261,262,263,264,265,266,267,268,
+                    246,247,3000
+                },
+            };
+            foreach (var item in SelectedPlants.Options.Keys)
+            {
+                SelectedPlants.Select(item);
+            }
+
+            AddSettings(SelectedPlants, ShowMaxHealth);
+
+            EndCategory();
+
+            CreateCategory("Zombies");
+
+            SelectedZombies = new MultiSelectSetting("Whitelist Zombies", typeof(ZombieType))
+            {
+                CustomNames = TranslatedNames(typeof(ZombieType)),
+                Blacklist = new HashSet<int> {
+                (int)ZombieType.Nothing
+                }
+            };
+            foreach (var item in SelectedZombies.Options.Keys)
+            {
+                SelectedZombies.Select(item);
+            }
+
+            AddSettings(SelectedZombies);
 
             EndCategory();
 
             CreateCategory("Extra");
 
+            AutoEnable_ShowHp_Plant = new BoolSetting("Auto Enable Plant Hp", false);
+            AutoEnable_ShowHp_Zombie = new BoolSetting("Auto Enable Zombie Hp", false);
+
             ShowControlledPlant = new BoolSetting("Show Star icon on Controlled Plant", true)
             {
                 OnValueChanged = UpdateTexts
             };
-            AddSettings(ShowControlledPlant);
+            AddSettings(AutoEnable_ShowHp_Plant, AutoEnable_ShowHp_Zombie, ShowControlledPlant);
             EndCategory();
         }
 
@@ -111,6 +158,15 @@ namespace Magnetar_Client.Modules
                 var textComponents = __instance.healthSlider.GetComponentsInChildren<TMP_Text>(true);
 
                 string rawHpString = __instance.thePlantHealth.ToString();
+
+                if (!instance.SelectedPlants.IsSelected((int)__instance.thePlantType))
+                {
+                    foreach (var textComp in textComponents)
+                    {
+                        textComp.text = String.Empty;
+                    }
+                    return;
+                }
 
                 foreach (var textComp in textComponents)
                 {
@@ -175,13 +231,19 @@ namespace Magnetar_Client.Modules
         [HarmonyPatch(typeof(Zombie))]
         public static class ZombieTextPatch
         {
-            [HarmonyLib.HarmonyPatch(nameof(Zombie.UpdateHealthText))]
-            [HarmonyLib.HarmonyPostfix]
+            [HarmonyPatch(nameof(Zombie.UpdateHealthText))]
+            [HarmonyPostfix]
             public static void UpdateHealthTextPostfix(Zombie __instance)
             {
                 if (instance == null || !instance.Active) return;
 
                 if (__instance.healthText == null) return;
+
+                if (!instance.SelectedZombies.IsSelected((int)__instance.theZombieType))
+                {
+                    __instance.healthText.text = string.Empty;
+                    return;
+                }
 
                 // Grab the total health (Base Health + Armor 1 + Armor 2)
                 // And Display only them
@@ -196,7 +258,7 @@ namespace Magnetar_Client.Modules
                     string formattedMax = FormatInternational(maxHp);
                     finalText = $"{formattedCurrent} / {formattedMax}";
                 }
-
+                
                 __instance.healthText.text = finalText;
             }
         }

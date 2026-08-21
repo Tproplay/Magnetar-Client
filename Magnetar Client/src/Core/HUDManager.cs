@@ -269,7 +269,7 @@ namespace Magnetar_Client.Core
 
         public static void Init()
         {
-            HudToggles = new MultiSelectSetting("Active HUDManager Elements")
+            HudToggles = new MultiSelectSetting("Active Elements")
             {
                 CustomNames = new Dictionary<int, string>()
             };

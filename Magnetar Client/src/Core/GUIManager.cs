@@ -70,7 +70,7 @@ namespace Magnetar_Client.Core
                     4001,
                     selectorRect,
                     (GUI.WindowFunction)DrawLanguageSelector,
-                    Translator.Translate("Select Language"),
+                    "",
                     Magnetar_Default.ModuleWindow
                 );
             }

@@ -297,7 +297,7 @@ namespace Magnetar_Client.Core
                         1000,
                         multiSelectWindowRect,
                         Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)MultiSelectBridge),
-                        Translate("Select ") + Translate(activeMultiSelect.Name),
+                        "",
                         Magnetar_Default.ModuleWindow
                     );
                 }

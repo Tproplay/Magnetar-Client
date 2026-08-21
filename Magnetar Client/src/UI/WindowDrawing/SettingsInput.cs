@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.UI.Themes.Magnetar_Default;
+using static Magnetar_Client.Utils.Translator;
 
 namespace Magnetar_Client.UI.WindowDrawing
 {
@@ -274,22 +275,26 @@ namespace Magnetar_Client.UI.WindowDrawing
         private static int lastHoveredIndex = -1;
         private static bool isShiftDragging = false;
         private static bool dragTargetState = false;
-        private static HashSet<int> draggedItemsSession = new HashSet<int>();
+        private static readonly HashSet<int> draggedItemsSession = new HashSet<int>();
 
         public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, dynamic activeMultiSelect)
         {
             if (activeMultiSelect == null) return;
-
+            
             Event e = Event.current;
             int sliderId = 1002;
             float ROW_HEIGHT = Config.SettingsInput.MultiSelectRowHeight;
+            float rowStep = ROW_HEIGHT + 1f;
 
             var options = activeMultiSelect.Options;
 
-            float calcTotalHeight = 0;
-            int visibleCount = 0;
+            Rect headerBgRect = new Rect(0, 0, multiSelectWindowRect.width, 25);
+            GUI.Box(headerBgRect, Translate("Select ") + Translate(activeMultiSelect.Name), Magnetar_Default.SettingsWindow);
 
-            // --- HEIGHT PRE-CALCULATION & FILTERING ---
+            // --- 1. FILTER & CACHE VISIBLE ITEMS ---
+            var filteredItems = new List<(int Key, string DisplayName)>();
+            string cleanQuery = multiSelectSearchQuery?.Replace(" ", "") ?? "";
+
             foreach (var kvp in options)
             {
                 int intVal = kvp.Key;
@@ -304,13 +309,13 @@ namespace Magnetar_Client.UI.WindowDrawing
                 if (activeMultiSelect.Blacklist != null && activeMultiSelect.Blacklist.Contains(intVal)) continue;
                 if (activeMultiSelect.NameBlacklist != null && activeMultiSelect.NameBlacklist.Contains(internalName)) continue;
 
-                if (!string.IsNullOrEmpty(multiSelectSearchQuery) && displayName.IndexOf(multiSelectSearchQuery, StringComparison.OrdinalIgnoreCase) < 0)
+                if (!string.IsNullOrEmpty(cleanQuery) && displayName.Replace(" ", "").IndexOf(cleanQuery, StringComparison.OrdinalIgnoreCase) < 0)
                     continue;
 
-                visibleCount++;
-                calcTotalHeight += ROW_HEIGHT + 1;
+                filteredItems.Add((intVal, displayName));
             }
-            totalContentHeight = calcTotalHeight;
+
+            totalContentHeight = filteredItems.Count * rowStep;
 
             float headerHeight = Config.SettingsInput.MultiSelectHeaderHeight;
             float viewHeight = multiSelectWindowRect.height - headerHeight - 10f;
@@ -323,7 +328,7 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             Rect trackHitbox = new Rect(scrollX - 5, trackStartY, 20, trackHeight);
 
-            // --- THE SLIDER ---
+            // --- 2. SCROLLBAR DRAG ---
             if (activeSliderId == sliderId)
             {
                 if (e.type == EventType.MouseDrag || e.type == EventType.MouseDown)
@@ -335,7 +340,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                     lastSliderUpdateTime = Time.time;
                     e.Use();
                 }
-                if (e.type == EventType.MouseUp)
+                if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
                 {
                     activeSliderId = -1;
                     e.Use();
@@ -354,13 +359,12 @@ namespace Magnetar_Client.UI.WindowDrawing
                 e.Use();
             }
 
-            // --- HEADER: SEARCH & TOGGLE ---
+            // --- 3. HEADER: SEARCH & TOGGLE ALL ---
             float searchWidth = (multiSelectWindowRect.width - 30) * 0.75f;
             float toggleWidth = (multiSelectWindowRect.width - 30) * 0.25f;
-            Rect searchRect = new Rect(10, 30, searchWidth, 22);
-            Rect toggleRect = new Rect(10 + searchWidth, 30, toggleWidth, 22);
+            Rect searchRect = new Rect(10, 33, searchWidth, 22);
+            Rect toggleRect = new Rect(10 + searchWidth, 33, toggleWidth, 22);
 
-            // 1. Search Field
             string oldQuery = multiSelectSearchQuery;
             multiSelectSearchQuery = DrawManualTextField(
                 searchRect,
@@ -373,9 +377,8 @@ namespace Magnetar_Client.UI.WindowDrawing
                 manualScrollY = 0f;
             }
 
-            // 2. Select All / Deselect All Button
             int selectedCount = activeMultiSelect.SelectedValues.Count;
-            bool allSelected = visibleCount > 0 && selectedCount >= visibleCount;
+            bool allSelected = filteredItems.Count > 0 && selectedCount >= filteredItems.Count;
 
             if (activeMultiSelect.MaxSelection >= 0 && selectedCount >= activeMultiSelect.MaxSelection)
             {
@@ -386,38 +389,24 @@ namespace Magnetar_Client.UI.WindowDrawing
                 allSelected ? Translator.Translate("Deselect All") : Translator.Translate("Select All"),
                 !allSelected ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff))
             {
-                foreach (var kvp in options)
+                foreach (var item in filteredItems)
                 {
-                    int intVal = kvp.Key;
-                    string internalName = kvp.Value;
-
-                    string displayName = internalName;
-                    if (activeMultiSelect.CustomNames != null && activeMultiSelect.CustomNames.ContainsKey(intVal))
-                    {
-                        displayName = activeMultiSelect.CustomNames[intVal];
-                    }
-
-                    if (activeMultiSelect.Blacklist != null && activeMultiSelect.Blacklist.Contains(intVal)) continue;
-                    if (activeMultiSelect.NameBlacklist != null && activeMultiSelect.NameBlacklist.Contains(internalName)) continue;
-                    if (!string.IsNullOrEmpty(multiSelectSearchQuery) && displayName.IndexOf(multiSelectSearchQuery, StringComparison.OrdinalIgnoreCase) < 0) continue;
-
                     if (allSelected)
                     {
-                        activeMultiSelect.Deselect(intVal);
+                        activeMultiSelect.Deselect(item.Key);
                     }
                     else
                     {
                         if (activeMultiSelect.MaxSelection >= 0 && activeMultiSelect.SelectedValues.Count >= activeMultiSelect.MaxSelection)
-                        {
                             break;
-                        }
-                        activeMultiSelect.Select(intVal);
+
+                        activeMultiSelect.Select(item.Key);
                     }
                 }
                 e.Use();
             }
 
-            // --- SCROLL WHEEL ---
+            // --- 4. SCROLL WHEEL ---
             if (e.type == EventType.ScrollWheel && new Rect(0, 0, multiSelectWindowRect.width, multiSelectWindowRect.height).Contains(e.mousePosition))
             {
                 manualScrollY = Mathf.Clamp(manualScrollY + (e.delta.y * 25f), 0, maxScrollDist);
@@ -425,8 +414,8 @@ namespace Magnetar_Client.UI.WindowDrawing
                 e.Use();
             }
 
-            // --- RESET DRAG ON MOUSE UP ---
-            if ((e.type == EventType.MouseUp || e.rawType == EventType.MouseUp) && e.button == 0)
+            // --- 5. GLOBAL MOUSE UP (STOPS DRAG RELIABLY) ---
+            if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
             {
                 if (isShiftDragging)
                 {
@@ -436,116 +425,103 @@ namespace Magnetar_Client.UI.WindowDrawing
                 }
             }
 
-            // --- THE LIST (CLIPPED) ---
-            GUI.BeginGroup(new Rect(10, headerHeight, multiSelectWindowRect.width - 25, viewHeight));
+            // --- 6. THE LIST VIEWPORT ---
+            Rect listGroupRect = new Rect(10, headerHeight, multiSelectWindowRect.width - 25, viewHeight);
+            GUI.BeginGroup(listGroupRect);
             {
-                float currentY = 0;
-                string cleanQuery = multiSelectSearchQuery?.Replace(" ", "") ?? "";
+                Vector2 mousePos = e.mousePosition;
+                bool isMouseInsideList = mousePos.x >= 0 && mousePos.x <= listGroupRect.width && mousePos.y >= 0 && mousePos.y <= listGroupRect.height;
+                bool isShiftHeld = e.shift || ((e.modifiers & EventModifiers.Shift) != 0) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
-                int hoveredIndexThisFrame = -1;
-                List<int> visibleItemsThisFrame = new List<int>();
-
-                foreach (var kvp in options)
+                // A. INITIATE CLICK / DRAG (MouseDown)
+                if (e.type == EventType.MouseDown && e.button == 0 && isMouseInsideList)
                 {
-                    int intVal = kvp.Key;
-                    string internalName = kvp.Value;
+                    float contentY = mousePos.y + manualScrollY;
+                    int clickedIdx = Mathf.FloorToInt(contentY / rowStep);
 
-                    string displayName = internalName;
-                    if (activeMultiSelect.CustomNames != null && activeMultiSelect.CustomNames.ContainsKey(intVal))
+                    if (clickedIdx >= 0 && clickedIdx < filteredItems.Count)
                     {
-                        displayName = activeMultiSelect.CustomNames[intVal];
-                    }
+                        int itemKey = filteredItems[clickedIdx].Key;
+                        bool isCurrentlySelected = activeMultiSelect.IsSelected(itemKey);
 
-                    // --- FILTERING ---
-                    if (activeMultiSelect.Blacklist != null && activeMultiSelect.Blacklist.Contains(intVal)) continue;
-                    if (activeMultiSelect.NameBlacklist != null && activeMultiSelect.NameBlacklist.Contains(internalName)) continue;
-
-                    if (!string.IsNullOrEmpty(cleanQuery))
-                    {
-                        if (displayName.Replace(" ", "").IndexOf(cleanQuery, StringComparison.OrdinalIgnoreCase) < 0) continue;
-                    }
-
-                    visibleItemsThisFrame.Add(intVal);
-                    int currentIndex = visibleItemsThisFrame.Count - 1;
-
-                    // --- RENDERING & HIT-TESTING ---
-                    float drawY = currentY - manualScrollY;
-                    Rect rowRect = new Rect(0, drawY, multiSelectWindowRect.width - 30, ROW_HEIGHT);
-
-                    bool isHovering = rowRect.Contains(e.mousePosition);
-                    bool isCurrentlySelected = activeMultiSelect.IsSelected(intVal);
-
-                    if (isHovering)
-                    {
-                        hoveredIndexThisFrame = currentIndex;
-                    }
-
-                    if (drawY + ROW_HEIGHT > 0 && drawY < viewHeight)
-                    {
-                        // Mouse Down Initiation
-                        if (e.type == EventType.MouseDown && e.button == 0 && isHovering)
+                        if (isShiftHeld)
                         {
-                            if (e.shift || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-                            {
-                                isShiftDragging = true;
-                                draggedItemsSession.Clear();
+                            isShiftDragging = true;
+                            dragTargetState = !isCurrentlySelected;
+                            draggedItemsSession.Clear();
+                            lastHoveredIndex = clickedIdx;
 
-                                dragTargetState = !isCurrentlySelected;
-                                lastHoveredIndex = currentIndex;
+                            if (dragTargetState) ToggleWithLimit(activeMultiSelect, itemKey);
+                            else activeMultiSelect.Deselect(itemKey);
 
-                                if (dragTargetState) ToggleWithLimit(activeMultiSelect, intVal);
-                                else activeMultiSelect.Deselect(intVal);
-
-                                draggedItemsSession.Add(intVal);
-                            }
-                            else
-                            {
-                                if (isCurrentlySelected) activeMultiSelect.Deselect(intVal);
-                                else ToggleWithLimit(activeMultiSelect, intVal);
-                            }
-                            e.Use();
+                            draggedItemsSession.Add(itemKey);
+                        }
+                        else
+                        {
+                            isShiftDragging = false;
+                            if (isCurrentlySelected) activeMultiSelect.Deselect(itemKey);
+                            else ToggleWithLimit(activeMultiSelect, itemKey);
                         }
 
-                        GUI.Box(rowRect, displayName, activeMultiSelect.IsSelected(intVal) ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
-                    }
-
-                    currentY += ROW_HEIGHT + 1;
-                }
-
-                // --- CONTINUOUS PAINT DRAG (INTERPOLATE SKIPPED FRAMES) ---
-                if (isShiftDragging && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove || e.type == EventType.Repaint))
-                {
-                    if (hoveredIndexThisFrame != -1 && lastHoveredIndex != -1)
-                    {
-                        int start = Mathf.Min(lastHoveredIndex, hoveredIndexThisFrame);
-                        int end = Mathf.Max(lastHoveredIndex, hoveredIndexThisFrame);
-
-                        for (int i = start; i <= end; i++)
-                        {
-                            if (i >= 0 && i < visibleItemsThisFrame.Count)
-                            {
-                                int val = visibleItemsThisFrame[i];
-                                if (!draggedItemsSession.Contains(val))
-                                {
-                                    if (dragTargetState) ToggleWithLimit(activeMultiSelect, val);
-                                    else activeMultiSelect.Deselect(val);
-
-                                    draggedItemsSession.Add(val);
-                                }
-                            }
-                        }
-                        lastHoveredIndex = hoveredIndexThisFrame;
-                    }
-
-                    if (e.type == EventType.MouseDrag)
-                    {
                         e.Use();
                     }
+                }
+
+                // B. CONTINUOUS PAINT SELECTION WHILE DRAGGING
+                if (isShiftDragging)
+                {
+                    if (isShiftHeld && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove || e.type == EventType.Repaint))
+                    {
+                        if (isMouseInsideList && filteredItems.Count > 0)
+                        {
+                            float contentY = mousePos.y + manualScrollY;
+                            int currentIdx = Mathf.Clamp(Mathf.FloorToInt(contentY / rowStep), 0, filteredItems.Count - 1);
+
+                            if (lastHoveredIndex != -1)
+                            {
+                                int start = Mathf.Min(lastHoveredIndex, currentIdx);
+                                int end = Mathf.Max(lastHoveredIndex, currentIdx);
+
+                                for (int i = start; i <= end; i++)
+                                {
+                                    int key = filteredItems[i].Key;
+                                    if (draggedItemsSession.Add(key))
+                                    {
+                                        if (dragTargetState) ToggleWithLimit(activeMultiSelect, key);
+                                        else activeMultiSelect.Deselect(key);
+                                    }
+                                }
+                            }
+
+                            lastHoveredIndex = currentIdx;
+                        }
+                    }
+                    else if (!isShiftHeld)
+                    {
+                        // Released Shift mid-drag
+                        isShiftDragging = false;
+                        draggedItemsSession.Clear();
+                        lastHoveredIndex = -1;
+                    }
+                }
+
+                // C. RENDER VISIBLE ITEMS
+                int firstVisibleIdx = Mathf.Max(0, Mathf.FloorToInt(manualScrollY / rowStep));
+                int lastVisibleIdx = Mathf.Min(filteredItems.Count - 1, Mathf.CeilToInt((manualScrollY + viewHeight) / rowStep));
+
+                for (int i = firstVisibleIdx; i <= lastVisibleIdx; i++)
+                {
+                    var item = filteredItems[i];
+                    float drawY = (i * rowStep) - manualScrollY;
+                    Rect rowRect = new Rect(0, drawY, multiSelectWindowRect.width - 30, ROW_HEIGHT);
+
+                    bool isSelected = activeMultiSelect.IsSelected(item.Key);
+                    GUI.Box(rowRect, item.DisplayName, isSelected ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
                 }
             }
             GUI.EndGroup();
 
-            // --- RENDER SCROLLBAR VISUALS ---
+            // --- 7. SCROLLBAR VISUALS ---
             GUI.Box(new Rect(scrollX + 5, trackStartY, 2, trackHeight), "", Magnetar_Default.SeparatorStyle);
 
             float scrollPctVisual = (maxScrollDist > 0) ? manualScrollY / maxScrollDist : 0;

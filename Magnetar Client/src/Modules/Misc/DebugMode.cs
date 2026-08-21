@@ -7,6 +7,8 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Game.AppData;
 using Magnetar_Client.Game;
 using System;
+using System.Runtime.InteropServices;
+using Il2CppInterop.Runtime;
 using HarmonyLib;
 
 
@@ -47,7 +49,8 @@ namespace Magnetar_Client.Modules
             PlantDieReason,
             ZombieDieReason,
             CheatKeys,
-            ParticleEmitted
+            ParticleEmitted,
+            AllRecipes
         }
 
         public static Dictionary<int, string> ParticleNameTranslated;
@@ -73,7 +76,8 @@ namespace Magnetar_Client.Modules
                     { (int)Options.PlantDieReason, "Plant die reason" },
                     { (int)Options.ZombieDieReason, "Zombie die reason" },
                     { (int)Options.CheatKeys, "Cheat keys (single use)" },
-                    { (int)Options.ParticleEmitted, "Particle effect emitted" }
+                    { (int)Options.ParticleEmitted, "Particle effect emitted" },
+                    { (int)Options.AllRecipes, "All recipes (single use)" }
                 }
             };
             Settings.Add(selected);
@@ -199,7 +203,34 @@ namespace Magnetar_Client.Modules
 
                 foreach (var key in CheatKeys)
                 {
-                    DebugModeLogger.Msg($"Found key: {key.ToString()}");
+                    DebugModeLogger.Msg($"Found keypair: {key.ToString()}");
+                }
+
+            }
+
+            if (selected.IsSelected((int)Options.AllRecipes))
+            {
+                selected.Deselect((int)Options.AllRecipes);
+
+                if (MixData._recipes != null)
+                {
+                    foreach (var keypair in MixData._recipes)
+                    {
+                        // Get the unmanaged memory pointer to the boxed ValueTuple object
+                        IntPtr rawPtr = keypair.Key.Pointer;
+
+                        // Offset 0x10 (16) = Item1, Offset 0x14 (20) = Item2
+                        PlantType plant1 = (PlantType)Marshal.ReadInt32(rawPtr, 0x10);
+                        PlantType plant2 = (PlantType)Marshal.ReadInt32(rawPtr, 0x14);
+
+                        PlantType result = keypair.Value;
+
+                        string name1 = Enum.GetName(typeof(PlantType), plant1) ?? plant1.ToString();
+                        string name2 = Enum.GetName(typeof(PlantType), plant2) ?? plant2.ToString();
+                        string nameResult = Enum.GetName(typeof(PlantType), result) ?? result.ToString();
+
+                        DebugModeLogger.Msg($"Found recipe: {name1} ({(int)plant1}) + {name2} ({(int)plant2}) -> {nameResult} ({(int)result})");
+                    }
                 }
 
             }

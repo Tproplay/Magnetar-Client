@@ -239,7 +239,22 @@
       "General": "General",
       "Time Scale": "Time Scale",
       "Extra": "Extra",
-      "Auto Resume After Game Pause": "Auto Resume After Game Pause"
+      "Auto Resume After Game Pause": "Auto Resume After Game Pause",
+      "Time Scale (Engine)": "Time Scale (Engine)",
+      "Buttons": "Buttons",
+      "Speed setting 1": "Speed setting 1",
+      "Control button 1": "Control button 1",
+      "Speed setting 2": "Speed setting 2",
+      "Control button 2": "Control button 2",
+      "Speed setting 3": "Speed setting 3",
+      "Control button 3": "Control button 3",
+      "Speed setting 4": "Speed setting 4",
+      "Control button 4": "Control button 4",
+      "Speed setting 5": "Speed setting 5",
+      "Control button 5": "Control button 5",
+      "Reset on double click": "Reset on double click",
+      "Disable on game paused": "Disable on game paused",
+      "Re-enable after pause": "Re-enable after pause"
     }
   },
   "Ban Plants": {
@@ -440,7 +455,11 @@
       "Auto Enable Plant Hp": "Auto Enable Plant Hp",
       "Auto Enable Zombie Hp": "Auto Enable Zombie Hp",
       "Extra": "Extra",
-      "Show Star icon on Controlled Plant": "Show Star icon on Controlled Plant"
+      "Show Star icon on Controlled Plant": "Show Star icon on Controlled Plant",
+      "Plants": "Plants",
+      "Whitelist Plants": "Whitelist Plants",
+      "Zombies": "Zombies",
+      "Whitelist Zombies": "Whitelist Zombies"
     }
   },
   "Clean Weather": {
@@ -620,6 +639,33 @@
       "Extra": "Extra",
       "Preserve Original": "Preserve Original",
       "Reset CD on Enable": "Reset CD on Enable"
+    }
+  },
+  "Gods Evolved Hack": {
+    "Name": "Gods Evolved Hack",
+    "Description": "Various Utils to make Gods Evolved Easier",
+    "Search Hints": "godsevolvedutil godsevolved helper utility cheats mod godsevolvedhackgodsevolvedmod trainer easetools assistant godsevolvedcheats godsevolvedtrainer utilitymod mods helpertools gameutils godsevolvedhelper godsevolvedutilities qualityoflife qol devutils godsevolvedassist",
+    "settings": {
+      "General": "General",
+      "Shield value": "Shield value",
+      "Revive CD": "Revive CD",
+      "Quality Weight": "Quality Weight",
+      "Default Quality Weight": "Default Quality Weight",
+      "Silver Quality Weight": "Silver Quality Weight",
+      "Gold Quality Weight": "Gold Quality Weight",
+      "Diamond Quality Weight": "Diamond Quality Weight",
+      "Curse Quality Weight": "Curse Quality Weight",
+      "Iridescent Quality Weight": "Iridescent Quality Weight",
+      "Random Quality Weight": "Random Quality Weight"
+    }
+  },
+  "Sound Muffler": {
+    "Name": "Sound Muffler",
+    "Description": "Disable certain sounds from being played.",
+    "Search Hints": "soundmuffler audiofilter soundmuffle muteaudio soundblocker audiosettings volumecontrol soundmute noisecontrol disablesounds soundcleaner audioblock soundfix muteeffects audiomute soundmanager customaudio soundfilter audiodampener soundkiller",
+    "settings": {
+      "General": "General",
+      "Blacklisted": "Blacklisted"
     }
   }
 }

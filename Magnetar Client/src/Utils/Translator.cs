@@ -154,10 +154,7 @@ namespace Magnetar_Client.Utils
         {
             string modulesPath = Path.Combine(ModsDir, "Magnetar Translation", Config.Language, "Modules_translations.json");
 
-            if (!File.Exists(modulesPath))
-            {
-                DumpMissingStrings();
-            }
+            DumpMissingStrings();
 
             if (!File.Exists(modulesPath)) return;
 
@@ -199,10 +196,7 @@ namespace Magnetar_Client.Utils
         {
             string hudPath = Path.Combine(ModsDir, "Magnetar Translation", Config.Language, "hud_translations.json");
 
-            if (!File.Exists(hudPath))
-            {
-                DumpMissingStrings();
-            }
+            DumpMissingStrings();
 
             if (!File.Exists(hudPath)) return;
 
@@ -515,6 +509,7 @@ namespace Magnetar_Client.Utils
 
             bool requiresSave = false;
 
+            // 1. Load existing translations from the Magnetar client if the file exists
             if (File.Exists(targetFile))
             {
                 try
@@ -533,12 +528,26 @@ namespace Magnetar_Client.Utils
                     TranslatorLogger.Error($"Failed to parse Magnetar file {enumType.Name}.json: {ex.Message}");
                 }
             }
-            else
-            {
-#if MELONLOADER
-                TranslatorLogger.Warning($"{enumType.Name}.json not found. Generating new file...");
-                requiresSave = true;
 
+            // 2. Identify specifically which Enum keys are missing
+            Array values = Enum.GetValues(enumType);
+            List<int> missingKeys = new List<int>();
+
+            foreach (object val in values)
+            {
+                int intVal = (int)val;
+                if (!parsedNames.ContainsKey(intVal))
+                {
+                    missingKeys.Add(intVal);
+                }
+            }
+
+            if (missingKeys.Count > 0)
+            {
+                requiresSave = true;
+                Dictionary<int, string> fallbackNames = new Dictionary<int, string>();
+
+#if MELONLOADER
                 try
                 {
                     if (enumType.Name == "PlantType")
@@ -549,7 +558,7 @@ namespace Magnetar_Client.Utils
                             var root = JObject.Parse(File.ReadAllText(translatorPath));
                             if (root["plants"] != null)
                             {
-                                foreach (var p in root["plants"]) parsedNames[(int)p["seedType"]] = CleanText((string)p["name"]);
+                                foreach (var p in root["plants"]) fallbackNames[(int)p["seedType"]] = CleanText((string)p["name"]);
                             }
                         }
                     }
@@ -561,7 +570,7 @@ namespace Magnetar_Client.Utils
                             var root = JObject.Parse(File.ReadAllText(translatorPath));
                             if (root["zombies"] != null)
                             {
-                                foreach (var z in root["zombies"]) parsedNames[(int)z["theZombieType"]] = CleanText((string)z["name"]);
+                                foreach (var z in root["zombies"]) fallbackNames[(int)z["theZombieType"]] = CleanText((string)z["name"]);
                             }
                         }
                     }
@@ -571,22 +580,22 @@ namespace Magnetar_Client.Utils
                     TranslatorLogger.Error($"Failed to parse fallback for {enumType.Name}: {ex.Message}");
                 }
 #endif
-            }
 
-            Array values = Enum.GetValues(enumType);
-            int missingCount = 0;
-
-            foreach (object val in values)
-            {
-                int intVal = (int)val;
-                if (!parsedNames.ContainsKey(intVal))
+                // Apply fallbacks or default to Enum standard strings for the missing keys
+                foreach (int missingKey in missingKeys)
                 {
-                    parsedNames[intVal] = val.ToString();
-                    missingCount++;
-                    requiresSave = true;
+                    if (fallbackNames.TryGetValue(missingKey, out string fallbackName))
+                    {
+                        parsedNames[missingKey] = fallbackName;
+                    }
+                    else
+                    {
+                        parsedNames[missingKey] = Enum.GetName(enumType, missingKey) ?? missingKey.ToString();
+                    }
                 }
             }
 
+            // 3. Save updates if new data was loaded/generated
             if (requiresSave)
             {
                 try
@@ -596,9 +605,9 @@ namespace Magnetar_Client.Utils
 
                     File.WriteAllText(targetFile, dumpJson);
 
-                    if (missingCount > 0 && File.Exists(targetFile) && parsedNames.Count > missingCount)
+                    if (File.Exists(targetFile) && parsedNames.Count > missingKeys.Count)
                     {
-                        TranslatorLogger.Warning($"Appended {missingCount} missing entries to existing {enumType.Name}.json");
+                        TranslatorLogger.Warning($"Appended {missingKeys.Count} missing entries to existing {enumType.Name}.json");
                     }
                     else
                     {

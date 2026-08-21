@@ -2,9 +2,7 @@
 using Il2Cpp;
 #endif
 using UnityEngine;
-using System;
 using System.Collections.Generic;
-using static Magnetar_Client.Utils.Translator;
 using static Magnetar_Client.Game.AppData;
 using HarmonyLib;
 
@@ -14,7 +12,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Anti-Lag Spawns";
-        public override string Description { get; set; } = "Staggers mass zombie spawns over time to prevent lag spikes.\nSafe for game loop structures.";
+        public override string Description { get; set; } = "Staggers mass zombie spawns over time to prevent lag spikes.";
         public override string SearchHints { get; set; } = "antilag antilagspawns lagspawn fixlag lagfix countersmasher stagger spawns " +
             "staggerzombies staggeredspawns massspawn lagspike nolag spawnerlag zombielag lagprevent performanceboost spawnfix breakcounter" +
             " counterbreak zombiecounter smoothspawn logicbreak massspawnfix antilagmod lagspawns antispawnlag laglessspawns";

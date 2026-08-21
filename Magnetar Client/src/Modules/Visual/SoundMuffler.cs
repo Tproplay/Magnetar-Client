@@ -1,6 +1,8 @@
 ﻿using HarmonyLib;
-using Il2Cpp;
 using System;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {

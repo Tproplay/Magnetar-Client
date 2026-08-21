@@ -339,7 +339,11 @@ namespace Magnetar_Client.Core
                 {
                     if (Event.current.button == 0)
                     {
-                        mod.Toggle();
+                        if (VanillaMode.instance.IsAllowed(mod))
+                        {
+                            mod.Toggle();
+                        }
+                            
                         Event.current.Use();
                     }
                     else if (Event.current.button == 1)
@@ -551,7 +555,10 @@ namespace Magnetar_Client.Core
 
             if (enabledHover && isLeftClick)
             {
-                mod.Toggle();
+                if (VanillaMode.instance.IsAllowed(mod))
+                {
+                    mod.Toggle();
+                }
                 e.Use();
             }
             y += Config.elementHeight + Config.spacing / 2;
@@ -624,18 +631,27 @@ namespace Magnetar_Client.Core
                     {
                         if (allKeysHeld && anyKeyJustPressed && !mod.Active)
                         {
-                            mod.Toggle();
+                            if (VanillaMode.instance.IsAllowed(mod))
+                            {
+                                mod.Toggle();
+                            }
                         }
                         else if (mod.Active && anyKeyJustReleased)
                         {
-                            mod.Toggle();
+                            if (VanillaMode.instance.IsAllowed(mod))
+                            {
+                                mod.Toggle();
+                            }
                         }
                     }
                     else
                     {
                         if (allKeysHeld && anyKeyJustPressed)
                         {
-                            mod.Toggle();
+                            if (VanillaMode.instance.IsAllowed(mod))
+                            {
+                                mod.Toggle();
+                            }
                         }
                     }
 

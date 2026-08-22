@@ -115,5 +115,8 @@
   },
   "Current Time": {
     "Name": "Current Time"
+  },
+  "Using Vanilla Mode": {
+    "Name": "Using Vanilla Mode"
   }
 }

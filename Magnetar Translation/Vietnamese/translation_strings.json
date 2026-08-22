@@ -38,8 +38,19 @@
   "Full Lawn": "Toàn Bộ Sân Cỏ",
   "Select ": "lựa chọn",
   "Select HUD Elements": " Chọn tính năng của HUD",
-  "Ice shroom effect": "Ice shroom effect",
-  "Doom shroom effect": "Doom shroom effect",
-  "Jalapeno fire line": "Jalapeno fire line",
-  "Doom shroom smoke cloud": "Doom shroom smoke cloud"
+  "Ice shroom effect": "Hiệu ứng Nấm băng",
+  "Doom shroom effect": "Hiệu ứng Nấm hủy diệt",
+  "Jalapeno fire line": "Đường lửa Trái ớt",
+  "Doom shroom smoke cloud": "Đám mây khói Nấm hủy diệt",
+  "Profile Manager": "Quản lý Hồ sơ",
+  "Current Active Profile": "Hồ sơ Đang hoạt động",
+  "New Profile:": "Hồ sơ Mới:",
+  "Enter profile name...": "Nhập tên hồ sơ...",
+  "Create": "Tạo",
+  "Available Profiles:": "Hồ sơ Hiện có:",
+  "Delete": "Xóa",
+  "Active": "Hoạt động",
+  "Active Elements": "Các Thành phần Kích hoạt",
+  "Language": "Ngôn ngữ"
+
 }

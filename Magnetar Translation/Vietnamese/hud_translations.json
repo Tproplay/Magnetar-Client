@@ -115,5 +115,8 @@
   },
   "Current Time": {
     "Name": "Thời Gian Hiện Tại"
+  },
+  "Using Vanilla Mode": {
+    "Name": "Sử Dụng Chế Độ Thường"
   }
 }

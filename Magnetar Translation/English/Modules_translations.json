@@ -667,5 +667,11 @@
       "General": "General",
       "Blacklisted": "Blacklisted"
     }
+  },
+  "Vanilla Mode": {
+    "Name": "Vanilla Mode",
+    "Description": "Disables all the modules that provide any kind of gameplay advantage until the level is quitted.",
+    "Search Hints": "vanillamode vanilla puremode vanilla-mode disablecheats legitmode cleanmode unmodded vanillaexperience fairplay anticheat legitclean vanilla-game baseline disableadvantages fairmode vanilla-rules vanilla-toggle",
+    "settings": {}
   }
 }

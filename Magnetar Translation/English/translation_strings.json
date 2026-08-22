@@ -43,5 +43,14 @@
   "Ice shroom effect": "Ice shroom effect",
   "Doom shroom effect": "Doom shroom effect",
   "Jalapeno fire line": "Jalapeno fire line",
-  "Doom shroom smoke cloud": "Doom shroom smoke cloud"
+  "Doom shroom smoke cloud": "Doom shroom smoke cloud",
+  "Profile Manager": "Profile Manager",
+  "Current Active Profile": "Current Active Profile",
+  "New Profile:": "New Profile:",
+  "Enter profile name...": "Enter profile name...",
+  "Create": "Create",
+  "Available Profiles:": "Available Profiles:",
+  "Delete": "Delete",
+  "Active": "Active",
+  "Active Elements": "Active Elements"
 }

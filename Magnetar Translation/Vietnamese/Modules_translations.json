@@ -239,7 +239,22 @@
       "General": "Cài Đặt Chung",
       "Time Scale": "Tốc Độ Thời Gian (Tốc Độ Game)",
       "Extra": "Mở Rộng",
-      "Auto Resume After Game Pause": "Tự Động Tiếp Tục Sau Khi Tạm Dừng Trò Chơi"
+      "Auto Resume After Game Pause": "Tự Động Tiếp Tục Sau Khi Tạm Dừng Trò Chơi",
+      "Time Scale (Engine)": "Tỷ Lệ Thời Gian (Engine)",
+      "Buttons": "Các Nút Bấm",
+      "Speed setting 1": "Cài đặt tốc độ 1",
+      "Control button 1": "Nút điều khiển 1",
+      "Speed setting 2": "Cài đặt tốc độ 2",
+      "Control button 2": "Nút điều khiển 2",
+      "Speed setting 3": "Cài đặt tốc độ 3",
+      "Control button 3": "Nút điều khiển 3",
+      "Speed setting 4": "Cài đặt tốc độ 4",
+      "Control button 4": "Nút điều khiển 4",
+      "Speed setting 5": "Cài đặt tốc độ 5",
+      "Control button 5": "Nút điều khiển 5",
+      "Reset on double click": "Đặt lại khi nhấp đúp",
+      "Disable on game paused": "Vô hiệu hóa khi tạm dừng game",
+      "Re-enable after pause": "Bật lại sau khi hết tạm dừng"
     }
   },
   "Ban Plants": {
@@ -273,7 +288,7 @@
     "settings": {
       "General": "Cài Đặt Chung",
       "Control Key": "Phím Điều Khiển",
-      "Single Plant mode": "Single Plant mode"
+      "Single Plant mode": "Chế độ một Cây duy nhất"
     }
   },
   "Faster Plants": {
@@ -440,7 +455,11 @@
       "Auto Enable Plant Hp": "Tự Bật Thanh Máu Của Cây",
       "Auto Enable Zombie Hp": "Tự Bật Thanh Máu Của Zombie",
       "Extra": "Mở Rộng",
-      "Show Star icon on Controlled Plant": "Hiện Biểu Tượng Ngôi Sao Trên Cây Đang Điều Khiển"
+      "Show Star icon on Controlled Plant": "Hiện Biểu Tượng Ngôi Sao Trên Cây Đang Điều Khiển",
+      "Plants": "Cây trồng",
+      "Whitelist Plants": "Danh sách trắng Cây trồng",
+      "Zombies": "Thây ma",
+      "Whitelist Zombies": "Danh sách trắng Thây ma"
     }
   },
   "Clean Weather": {
@@ -471,10 +490,11 @@
       "Particles": "Hiệu Ứng Hạt (Hạt Đạn/Khói/Nổ)",
       "Game Objects": "Các Đối Tượng Trong Game",
       "Bullets": "Các Viên Đạn",
-      "Effects": "Effects",
-      "Extra": "Extra",
-      "Disable Screen Shake effect": "Disable Screen Shake effect",
-      "Particle Types": "Particle Types"
+      "Effects": "Hiệu ứng",
+      "Extra": "Tính năng thêm",
+      "Disable Screen Shake effect": "Vô hiệu hóa hiệu ứng rung màn hình",
+      "Particle Types": "Các loại hạt hiệu ứng"
+
     }
   },
   "Smaller Projectiles": {
@@ -621,5 +641,39 @@
       "Preserve Original": "Giữ Nguyên Chỉ Số Gốc",
       "Reset CD on Enable": "Đặt Lại Hồi Chiêu Khi Bật Tính Năng"
     }
+  },
+  "Gods Evolved Hack": {
+    "Name": "Bản Hack Gods Evolved",
+    "Description": "Các công cụ khác nhau giúp chơi Gods Evolved dễ dàng hơn",
+    "Search Hints": "godsevolvedutil godsevolved helper utility cheats mod godsevolvedhackgodsevolvedmod trainer easetools assistant godsevolvedcheats godsevolvedtrainer utilitymod mods helpertools gameutils godsevolvedhelper godsevolvedutilities qualityoflife qol devutils godsevolvedassist",
+    "settings": {
+      "General": "Cài đặt chung",
+      "Shield value": "Chỉ số khiên",
+      "Revive CD": "Hồi chiêu hồi sinh",
+      "Quality Weight": "Trọng số chất lượng",
+      "Default Quality Weight": "Trọng số chất lượng mặc định",
+      "Silver Quality Weight": "Trọng số chất lượng Bạc",
+      "Gold Quality Weight": "Trọng số chất lượng Vàng",
+      "Diamond Quality Weight": "Trọng số chất lượng Kim cương",
+      "Curse Quality Weight": "Trọng số chất lượng Nguyền rủa",
+      "Iridescent Quality Weight": "Trọng số chất lượng Cầu vồng",
+      "Random Quality Weight": "Trọng số chất lượng Ngẫu nhiên"
+    }
+  },
+  "Vanilla Mode": {
+    "Name": "Chế Độ Thường",
+    "Description": "Vô hiệu hóa tất cả các mô-đun mang lại bất kỳ lợi thế chơi game nào cho đến khi thoát màn chơi.",
+    "Search Hints": "vanillamode vanilla puremode vanilla-mode disablecheats legitmode cleanmode unmodded vanillaexperience fairplay anticheat legitclean vanilla-game baseline disableadvantages fairmode vanilla-rules vanilla-toggle",
+    "settings": {}
+  },
+  "Sound Muffler": {
+    "Name": "Bộ Giảm Âm Thanh",
+    "Description": "Ngăn chặn một số âm thanh nhất định phát ra.",
+    "Search Hints": "soundmuffler audiofilter soundmuffle muteaudio soundblocker audiosettings volumecontrol soundmute noisecontrol disablesounds soundcleaner audioblock soundfix muteeffects audiomute soundmanager customaudio soundfilter audiodampener soundkiller",
+    "settings": {
+      "General": "Cài đặt chung",
+      "Blacklisted": "Danh sách đen"
+    }
   }
+
 }

@@ -57,6 +57,11 @@ namespace Magnetar_Client.Modules
                     _classesDisabled.Add(module);
                 }
             }
+            if (HUDElements.VanillaMode.instance!=null)
+            { 
+                HUDElements.VanillaMode.instance.VanillaModeEnabled = Active;
+                HUDElements.VanillaMode.instance.UpdateText();
+            }
         }
 
         public override void OnDisable()
@@ -69,6 +74,11 @@ namespace Magnetar_Client.Modules
                 module.OnEnable();
             }
             _classesDisabled.Clear();
+            if (HUDElements.VanillaMode.instance != null)
+            {
+                HUDElements.VanillaMode.instance.VanillaModeEnabled = Active;
+                HUDElements.VanillaMode.instance.UpdateText();
+            }
         }
 
         public bool IsAllowed(Module module)

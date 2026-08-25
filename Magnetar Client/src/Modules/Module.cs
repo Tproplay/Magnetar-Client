@@ -155,6 +155,7 @@ namespace Magnetar_Client.Modules
     public abstract class Setting
     {
         public string Name;
+        public bool IsDisabled { get; set; } = false;
     }
 
     public class StringSetting : Setting
@@ -172,6 +173,8 @@ namespace Magnetar_Client.Modules
             get => _value;
             set
             {
+                if (IsDisabled) return;
+
                 if (_value != value)
                 {
                     OnValueChanging?.Invoke(value); // Pre
@@ -209,6 +212,8 @@ namespace Magnetar_Client.Modules
             get => _value;
             set
             {
+                if (IsDisabled) return;
+
                 if (_value != value)
                 {
                     OnValueChanging?.Invoke(value); // Pre
@@ -250,6 +255,8 @@ namespace Magnetar_Client.Modules
             get => _value;
             set
             {
+                if (IsDisabled) return;
+
                 if (_value != value)
                 {
                     OnValueChanging?.Invoke(value); // Pre
@@ -286,6 +293,8 @@ namespace Magnetar_Client.Modules
             get => _value;
             set
             {
+                if (IsDisabled) return;
+
                 if (_value != value)
                 {
                     OnValueChanging?.Invoke(value); // Pre
@@ -310,7 +319,7 @@ namespace Magnetar_Client.Modules
 
         public bool IsBinding = false;
 
-        // Callbacks matched to the style of BoolSetting
+        // Callbacks
         public Action<List<KeyCode>> OnValueChanging { get; set; }
         public Action<List<KeyCode>> OnValueChanged { get; set; }
 
@@ -319,7 +328,8 @@ namespace Magnetar_Client.Modules
             get => _bindKeys;
             set
             {
-                // Ensure safe lists comparison to avoid unnecessary triggers
+                if (IsDisabled) return;
+
                 if (value == null) value = new List<KeyCode>();
 
                 if (!_bindKeys.SequenceEqual(value))
@@ -331,25 +341,16 @@ namespace Magnetar_Client.Modules
             }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the BindSetting class with the specified name and optional default key bindings.
-        /// </summary>
-        /// <param name="name">The unique name that identifies this binding setting. Cannot be null.</param>
-        /// <param name="defaultKeys">An optional list of default key codes to assign to this binding. If null, no default keys are set.</param>
         public BindSetting(string name, List<KeyCode> defaultKeys = null)
         {
             Name = name;
             if (defaultKeys != null)
             {
                 DefaultKeys = defaultKeys;
-                _bindKeys = new List<KeyCode>(defaultKeys); // Create a fresh copy to prevent shared reference bugs
+                _bindKeys = new List<KeyCode>(defaultKeys);
             }
         }
 
-        /// <summary>
-        /// Returns a string representation of the current key binding.
-        /// </summary>
-        /// <returns>A string listing the bound keys separated by "+". Returns "None" if no keys are bound.</returns>
         public string GetBindString()
         {
             if (BindKeys == null || BindKeys.Count == 0) return "None";
@@ -409,6 +410,8 @@ namespace Magnetar_Client.Modules
 
         public void RemoveOption(int id)
         {
+            if (IsDisabled) return;
+
             if (Options.ContainsKey(id))
             {
                 Options.Remove(id);
@@ -422,12 +425,16 @@ namespace Magnetar_Client.Modules
 
         public void Toggle(int id)
         {
+            if (IsDisabled) return;
+
             if (IsSelected(id)) Deselect(id);
             else Select(id);
         }
 
         public void Select(int id)
         {
+            if (IsDisabled) return;
+
             if (!SelectedValues.Contains(id) && !Blacklist.Contains(id))
             {
                 if (MaxSelection == -1 || SelectedValues.Count < MaxSelection)
@@ -440,6 +447,8 @@ namespace Magnetar_Client.Modules
 
         public void Deselect(int id)
         {
+            if (IsDisabled) return;
+
             if (SelectedValues.Contains(id))
             {
                 SelectedValues.Remove(id);
@@ -466,6 +475,8 @@ namespace Magnetar_Client.Modules
             get => _value;
             set
             {
+                if (IsDisabled) return;
+
                 if (_value != value)
                 {
                     _value = value;

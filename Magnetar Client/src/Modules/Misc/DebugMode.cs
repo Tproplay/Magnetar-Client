@@ -10,6 +10,8 @@ using System;
 using System.Runtime.InteropServices;
 using Il2CppInterop.Runtime;
 using HarmonyLib;
+using static Magnetar_Client.Modules.NoRender;
+
 
 
 #if MELONLOADER || RELEASE_MELON
@@ -50,7 +52,8 @@ namespace Magnetar_Client.Modules
             ZombieDieReason,
             CheatKeys,
             ParticleEmitted,
-            AllRecipes
+            AllRecipes,
+            CreatePlant_SetPlant
         }
 
         public static Dictionary<int, string> ParticleNameTranslated;
@@ -77,7 +80,8 @@ namespace Magnetar_Client.Modules
                     { (int)Options.ZombieDieReason, "Zombie die reason" },
                     { (int)Options.CheatKeys, "Cheat keys (single use)" },
                     { (int)Options.ParticleEmitted, "Particle effect emitted" },
-                    { (int)Options.AllRecipes, "All recipes (single use)" }
+                    { (int)Options.AllRecipes, "All recipes (single use)" },
+                    { (int)Options.CreatePlant_SetPlant, "CreatePlant.SetPlant logs" },
                 }
             };
             Settings.Add(selected);
@@ -326,6 +330,32 @@ namespace Magnetar_Client.Modules
                 if (ParticleNameTranslated==null) DebugModeLogger.Msg($"Particle emitted: {particleType} ({(int)particleType})");
                 else DebugModeLogger.Msg($"Particle emitted: {ParticleNameTranslated[(int)particleType]}");
             }
+        }
+
+        [HarmonyPatch(typeof(CreatePlant))]
+        public static class CreatePlantPatch
+        {
+            [HarmonyPatch(typeof(CreatePlant), nameof(CreatePlant.SetPlant))]
+            [HarmonyPrefix]
+            public static void SetPlantPrefix(int newColumn, int newRow, PlantType theSeedType,
+                Plant targetPlant = null, Vector2 puffV = default(Vector2), bool isFreeSet = false,
+                bool withEffect = true, Plant hidplant = null)
+            {
+                if (instance == null || !instance.Active || !instance.selected.IsSelected((int)Options.CreatePlant_SetPlant)) return;
+
+                DebugModeLogger.Msg($"[CreatePlant.SetPlant] Triggered with parameters:\n" +
+                    $"- newColumn: {newColumn}\n" +
+                    $"- newRow: {newRow}\n" +
+                    $"- theSeedType: {theSeedType} ({(int)theSeedType})\n" +
+
+                    $"- targetPlant: {(targetPlant != null ? $"{targetPlant.thePlantType} ({targetPlant.thePlantRow},{targetPlant.thePlantColumn})" : "null")}\n" +
+
+                    $"- puffV: X={puffV.x}, Y={puffV.y}\n" +
+                    $"- isFreeSet: {isFreeSet}\n" +
+                    $"- withEffect: {withEffect}\n" +
+                    $"- hidplant: {(hidplant != null ? hidplant.name : "null")}");
+            }
+
         }
     }
 }

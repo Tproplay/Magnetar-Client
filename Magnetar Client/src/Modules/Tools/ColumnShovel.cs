@@ -80,8 +80,17 @@ namespace Magnetar_Client.Modules
                 if (!shovel.isActiveAndEnabled || shovel.isPickUp) return;
 
                 // Only works if the shovel is used by Player
-                if (shovel.mouse.theMouseColumn != __instance.thePlantColumn ||
-                    shovel.mouse.theMouseRow != __instance.thePlantRow) return;
+                if (shovel.mouse.theMouseColumn != __instance.thePlantColumn) return;
+
+                if (TypeMgr.FlyingPlants(__instance.thePlantType))
+                {
+                    if ((shovel.mouse.theMouseRow != __instance.thePlantRow - 1) &&
+                        (shovel.mouse.theMouseRow != __instance.thePlantRow)) return;
+                }
+                else
+                {
+                    if (shovel.mouse.theMouseRow != __instance.thePlantRow) return;
+                }
 
                 // BugFix: Disable Plant GodMode for smooth execution
                 bool _disabledGodMode = false;

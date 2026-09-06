@@ -9,7 +9,7 @@ using Magnetar_Client;
 
 #if MELONLOADER || RELEASE_MELON
 using MelonLoader;
-[assembly: MelonInfo(typeof(Magnetar_Client.Core.main),Magnetar_Info.ModName, Magnetar_Info.Version, Magnetar_Info.Developer)]
+[assembly: MelonInfo(typeof(Magnetar_Client.Core.main), Magnetar_Info.ModName, Magnetar_Info.Version, Magnetar_Info.Developer)]
 [assembly: MelonGame("LanPiaoPiao", "PlantsVsZombiesRH")]
 #elif BEPINEX || RELEASE_BEPINEX
 using BepInEx;
@@ -116,6 +116,10 @@ namespace Magnetar_Client.Core
                     hasWarmedUp = true;
                 }
 
+                // Keep theme font sizes/padding in sync with the current GUIScale.
+                // Cheap no-op when the scale hasn't changed since last frame.
+                UI.Themes.Magnetar_Default.Rescale();
+
                 // Render HUD
 
                 HUDManager.Render();
@@ -148,7 +152,7 @@ namespace Magnetar_Client.Core
 
         public void CoreUpdate()
         {
-            if (HUDRenderer.Elements.Count !=0)
+            if (HUDRenderer.Elements.Count != 0)
                 HUDRenderer.UpdateElements();
 
             if (!ModuleManager.IsInitialized) return;
@@ -220,7 +224,6 @@ namespace Magnetar_Client.Core
 
             UI.Themes.Magnetar_Default.Init();
 
-            DebugLogger.Msg("Now rendering ModuleManager...");
             ModuleManager.Render();
             NEFManager.Render();
             GUIManager.Render();

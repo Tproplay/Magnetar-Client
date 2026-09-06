@@ -32,12 +32,78 @@ namespace Magnetar_Client.Utils
         private static ConfigEntry<string> prefCurrentProfile;
 #endif
 
-        public static string ConfigDir =>
-#if MELONLOADER || RELEASE_MELON
-            MelonEnvironment.UserDataDirectory;
-#elif BEPINEX || RELEASE_BEPINEX
-            Paths.ConfigPath;
+        private static string _cachedConfigDir;
+
+        public static string ConfigDir
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_cachedConfigDir) && Directory.Exists(_cachedConfigDir))
+                {
+                    return _cachedConfigDir;
+                }
+
+                string targetDir = null;
+
+#if ANDROID
+                // 1. Mobile BepInEx path
+                string mobileBepInExConfig = "/storage/emulated/0/PVZRH_Launcher/com.LanPiaoPiao.PlantsVsZombiesRH/BepInEx/config";
+
+                try
+                {
+                    if (Directory.Exists("/storage/emulated/0/PVZRH_Launcher/com.LanPiaoPiao.PlantsVsZombiesRH/BepInEx"))
+                    {
+                        targetDir = mobileBepInExConfig;
+                    }
+                }
+                catch { }
+
+                // 2. Fallback to BepInEx Paths.ConfigPath if available
+                if (string.IsNullOrEmpty(targetDir))
+                {
+                    try
+                    {
+#if BEPINEX || RELEASE_BEPINEX
+                        if (!string.IsNullOrEmpty(Paths.ConfigPath))
+                        {
+                            targetDir = Paths.ConfigPath;
+                        }
 #endif
+                    }
+                    catch { }
+                }
+
+                // 3. Fallback to internal app sandbox storage
+                if (string.IsNullOrEmpty(targetDir))
+                {
+                    targetDir = Path.Combine(Application.persistentDataPath, "Magnetar", "Config");
+                }
+#elif MELONLOADER || RELEASE_MELON
+                targetDir = MelonEnvironment.UserDataDirectory;
+#elif BEPINEX || RELEASE_BEPINEX
+                targetDir = Paths.ConfigPath;
+#else
+                targetDir = Path.Combine(Application.persistentDataPath, "Magnetar", "Config");
+#endif
+
+                try
+                {
+                    if (!Directory.Exists(targetDir))
+                    {
+                        Directory.CreateDirectory(targetDir);
+                    }
+                    _cachedConfigDir = targetDir;
+                }
+                catch (Exception ex)
+                {
+                    AutoSaveLogger.Error($"[ProfileManager] Failed to create config dir '{targetDir}': {ex.Message}");
+                    _cachedConfigDir = Application.persistentDataPath;
+                    return _cachedConfigDir;
+                }
+
+                return targetDir;
+            }
+        }
 
         public static string GetProfilePath(string profileName)
         {
@@ -47,30 +113,26 @@ namespace Magnetar_Client.Utils
 
         public static void Init()
         {
+            // Resolve and create config directory before initialization
+            _ = ConfigDir;
+
 #if MELONLOADER || RELEASE_MELON
             prefCurrentProfile = Prefrences.MagnetarCategory.CreateEntry("CurrentProfile", DefaultProfile, "Active Profile");
 #elif BEPINEX || RELEASE_BEPINEX
-            prefCurrentProfile = Prefrences.BepInExConfig.Bind("ProfileManager", "CurrentProfile", DefaultProfile, "Active Profile");
+            try
+            {
+                if (Prefrences.BepInExConfig != null)
+                {
+                    prefCurrentProfile = Prefrences.BepInExConfig.Bind("ProfileManager", "CurrentProfile", DefaultProfile, "Active Profile");
+                }
+            }
+            catch (Exception ex)
+            {
+                AutoSaveLogger.Error($"Failed to bind BepInEx preference: {ex.Message}");
+            }
 #endif
 
             RefreshProfiles();
-
-            // Migrate legacy config if needed
-            string legacyPath = Path.Combine(ConfigDir, "Magnetar_Config.json");
-            string defaultPath = GetProfilePath(DefaultProfile);
-
-            if (File.Exists(legacyPath) && !File.Exists(defaultPath))
-            {
-                try
-                {
-                    File.Move(legacyPath, defaultPath);
-                    AutoSaveLogger.Msg($"Migrated legacy config to '{defaultPath}'");
-                }
-                catch (Exception ex)
-                {
-                    AutoSaveLogger.Error($"Failed to migrate legacy config: {ex.Message}");
-                }
-            }
 
             if (!Profiles.Contains(DefaultProfile, StringComparer.OrdinalIgnoreCase))
             {
@@ -94,24 +156,31 @@ namespace Magnetar_Client.Utils
                 SaveCurrentProfileToPrefrences(DefaultProfile);
             }
 
-            AutoSaveLogger.Msg($"Profile Manager initialized. Active profile: '{Config.CurrentProfile}'");
+            AutoSaveLogger.Msg($"Profile Manager initialized. Directory: '{ConfigDir}', Active profile: '{Config.CurrentProfile}'");
         }
 
         private static void SaveCurrentProfileToPrefrences(string profileName)
         {
+            try
+            {
 #if MELONLOADER || RELEASE_MELON
-            if (prefCurrentProfile != null)
-            {
-                prefCurrentProfile.Value = profileName;
-                Prefrences.MagnetarCategory.SaveToFile();
-            }
+                if (prefCurrentProfile != null)
+                {
+                    prefCurrentProfile.Value = profileName;
+                    Prefrences.MagnetarCategory.SaveToFile();
+                }
 #elif BEPINEX || RELEASE_BEPINEX
-            if (prefCurrentProfile != null && Prefrences.BepInExConfig != null)
-            {
-                prefCurrentProfile.Value = profileName;
-                Prefrences.BepInExConfig.Save();
-            }
+                if (prefCurrentProfile != null && Prefrences.BepInExConfig != null)
+                {
+                    prefCurrentProfile.Value = profileName;
+                    Prefrences.BepInExConfig.Save();
+                }
 #endif
+            }
+            catch (Exception ex)
+            {
+                AutoSaveLogger.Error($"Failed to persist profile preference: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -122,24 +191,31 @@ namespace Magnetar_Client.Utils
             Profiles.Clear();
             Profiles.Add(DefaultProfile);
 
-            if (Directory.Exists(ConfigDir))
+            try
             {
-                var files = Directory.GetFiles(ConfigDir, "Magnetar_*.json");
-                foreach (var file in files)
+                if (Directory.Exists(ConfigDir))
                 {
-                    string fileName = Path.GetFileNameWithoutExtension(file);
-                    if (fileName.StartsWith("Magnetar_"))
+                    var files = Directory.GetFiles(ConfigDir, "Magnetar_*.json");
+                    foreach (var file in files)
                     {
-                        string profileName = fileName.Substring("Magnetar_".Length);
-
-                        if (!string.IsNullOrWhiteSpace(profileName) &&
-                            !string.Equals(profileName, "Config", StringComparison.OrdinalIgnoreCase) &&
-                            !Profiles.Contains(profileName, StringComparer.OrdinalIgnoreCase))
+                        string fileName = Path.GetFileNameWithoutExtension(file);
+                        if (fileName.StartsWith("Magnetar_"))
                         {
-                            Profiles.Add(profileName);
+                            string profileName = fileName.Substring("Magnetar_".Length);
+
+                            if (!string.IsNullOrWhiteSpace(profileName) &&
+                                !string.Equals(profileName, "Config", StringComparison.OrdinalIgnoreCase) &&
+                                !Profiles.Contains(profileName, StringComparer.OrdinalIgnoreCase))
+                            {
+                                Profiles.Add(profileName);
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                AutoSaveLogger.Error($"Error scanning profiles in '{ConfigDir}': {ex.Message}");
             }
         }
 

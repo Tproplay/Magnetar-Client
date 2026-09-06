@@ -1,5 +1,4 @@
-﻿using Il2Cpp;
-using Magnetar_Client.Utils;
+﻿using Magnetar_Client.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,6 +9,10 @@ using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {

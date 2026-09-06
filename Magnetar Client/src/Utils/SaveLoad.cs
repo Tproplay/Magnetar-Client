@@ -61,28 +61,73 @@ namespace Magnetar_Client.Utils
         }
         #endregion
 
-        private static string ConfigDir =>
-#if MELONLOADER || RELEASE_MELON
-            MelonEnvironment.UserDataDirectory;
+        private static string _cachedModsDir;
+        private static string ModsDir
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_cachedModsDir) && Directory.Exists(_cachedModsDir))
+                {
+                    return _cachedModsDir;
+                }
+
+                string targetDir = null;
+
+#if ANDROID
+                string mobilePlugins = "/storage/emulated/0/PVZRH_Launcher/com.LanPiaoPiao.PlantsVsZombiesRH/BepInEx/plugins";
+
+                try
+                {
+                    if (Directory.Exists("/storage/emulated/0/PVZRH_Launcher/com.LanPiaoPiao.PlantsVsZombiesRH/BepInEx"))
+                    {
+                        targetDir = mobilePlugins;
+                    }
+                }
+                catch { }
+
+                if (string.IsNullOrEmpty(targetDir))
+                {
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(Paths.PluginPath)) targetDir = Paths.PluginPath;
+                    }
+                    catch { }
+                }
+
+                if (string.IsNullOrEmpty(targetDir))
+                {
+                    targetDir = Path.Combine(Application.persistentDataPath, "Magnetar", "Plugins");
+                }
+#elif MELONLOADER || RELEASE_MELON
+                targetDir = MelonEnvironment.ModsDirectory;
 #elif BEPINEX || RELEASE_BEPINEX
-            Paths.ConfigPath;
+                targetDir = Paths.PluginPath;
+#else
+                targetDir = Path.Combine(Application.persistentDataPath, "Magnetar", "Plugins");
 #endif
 
-        private static string ModsDir =>
-#if MELONLOADER || RELEASE_MELON
-            MelonEnvironment.ModsDirectory;
-#elif BEPINEX || RELEASE_BEPINEX
-            Paths.PluginPath;
-#endif
+                try
+                {
+                    if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
+                    _cachedModsDir = targetDir;
+                }
+                catch
+                {
+                    _cachedModsDir = ProfileManager.ConfigDir;
+                    return _cachedModsDir;
+                }
 
-        private static string Path => ProfileManager.GetProfilePath(Config.CurrentProfile);
+                return targetDir;
+            }
+        }
+
+        private static string ProfilePath => ProfileManager.GetProfilePath(Config.CurrentProfile);
         private static string TexturePath => System.IO.Path.Combine(ModsDir, "Magnetar Data", "TextureData.json");
 
         static float LastSaved;
 
         public static void Save(bool force = false)
         {
-            // Ensure that it only save after some time to reduce lag
             if (!force)
             {
                 if (LastSaved == 0)
@@ -165,7 +210,7 @@ namespace Magnetar_Client.Utils
                 }
             }
 
-            string savePath = Path;
+            string savePath = ProfilePath;
             string dir = System.IO.Path.GetDirectoryName(savePath);
 
             try
@@ -227,15 +272,16 @@ namespace Magnetar_Client.Utils
 
         public static void Load()
         {
-            if (File.Exists(Path))
+            string loadPath = ProfilePath;
+
+            if (File.Exists(loadPath))
             {
                 try
                 {
-                    string json = File.ReadAllText(Path);
+                    string json = File.ReadAllText(loadPath);
                     MagnetarSaveData data = JsonConvert.DeserializeObject<MagnetarSaveData>(json);
                     if (data != null)
                     {
-
                         Config.showgui = data.ShowGui;
 
                         if (GUIManager.LanguageSetting != null)
@@ -293,7 +339,7 @@ namespace Magnetar_Client.Utils
                             }
                         }
 
-                        AutoSaveLogger.Msg("Loaded Magnetar Profile 'Magnetar_Config'");
+                        AutoSaveLogger.Msg($"Loaded Magnetar Profile '{Config.CurrentProfile}'");
                     }
                 }
                 catch (Exception e) { AutoSaveLogger.Error($"Main SaveLoad Error: {e.Message}"); }
@@ -354,10 +400,16 @@ namespace Magnetar_Client.Utils
 #if MELONLOADER || RELEASE_MELON
             Prefrences.MagnetarCategory = MelonPreferences.CreateCategory("Magnetar Client", "Magnetar Client");
 #elif BEPINEX || RELEASE_BEPINEX
-            string configFilePath = System.IO.Path.Combine(Paths.ConfigPath, "Magnetar_Client.cfg");
-            Prefrences.BepInExConfig = new ConfigFile(configFilePath, true);
+            try
+            {
+                string configFilePath = System.IO.Path.Combine(ProfileManager.ConfigDir, "Magnetar_Client.cfg");
+                Prefrences.BepInExConfig = new ConfigFile(configFilePath, true);
+            }
+            catch (Exception ex)
+            {
+                AutoSaveLogger.Error($"Failed to initialize BepInEx ConfigFile: {ex.Message}");
+            }
 #endif
         }
-
     }
 }

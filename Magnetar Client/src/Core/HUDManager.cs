@@ -18,13 +18,18 @@ namespace Magnetar_Client.Core
         public static bool isSelectingElements = false;
         public static bool showBackground = false;
 
-        static float width = 500;
-        public static float elementHeight = 25f;
+        // Base (unscaled, GUIScale == 1) sizes - actual sizes are derived via
+        // Config.S() so this window scales with the rest of the UI.
+        private const float BaseWidth = 500f;
+        private const float BaseHeight = 300f;
+        private const float BaseElementHeight = 25f;
+        private const float BaseSelectorWidth = 500f;
+        private const float BaseSelectorHeight = 800f;
+
+        public static float elementHeight => Config.S(BaseElementHeight);
 
         // Lazy initialized rects to avoid static constructor (.cctor) crashes
         public static Rect windowRect = Rect.zero;
-        static float selectorWidth = 500;
-        static float selectorHeight = 800;
         public static Rect selectorRect = Rect.zero;
 
         private static bool _rectsInitialized = false;
@@ -33,10 +38,24 @@ namespace Magnetar_Client.Core
         {
             if (!_rectsInitialized)
             {
-                windowRect = new Rect((Config.WindowWidth - width) / 2, (Config.WindowHeight - 300) / 2, width, 300);
-                selectorRect = new Rect((Config.WindowWidth - selectorWidth) / 2, (Config.WindowHeight - selectorHeight) / 2, selectorWidth, selectorHeight);
+                windowRect = new Rect(
+                    (Config.WindowWidth - Config.S(BaseWidth)) / 2,
+                    (Config.WindowHeight - Config.S(BaseHeight)) / 2,
+                    Config.S(BaseWidth),
+                    Config.S(BaseHeight));
+                selectorRect = new Rect(
+                    (Config.WindowWidth - Config.S(BaseSelectorWidth)) / 2,
+                    (Config.WindowHeight - Config.S(BaseSelectorHeight)) / 2,
+                    Config.S(BaseSelectorWidth),
+                    Config.S(BaseSelectorHeight));
                 _rectsInitialized = true;
             }
+
+            // Keep both windows sized for the current GUIScale, growing or
+            // shrinking around wherever they're currently positioned so an
+            // open window doesn't jump when the scale changes mid-session.
+            Config.RescaleAroundCenter(ref windowRect, Config.S(BaseWidth), windowRect.height);
+            Config.RescaleAroundCenter(ref selectorRect, Config.S(BaseSelectorWidth), Config.S(BaseSelectorHeight));
         }
 
         private static GUI.WindowFunction _cachedSelectorDelegate;
@@ -108,7 +127,7 @@ namespace Magnetar_Client.Core
                             2001,
                             selectorRect,
                             GetSelectorDelegate(),
-                            Translator.Translate("Select HUD Elements"),
+                            "",
                             Magnetar_Default.ModuleWindow
                         );
                     }
@@ -134,10 +153,10 @@ namespace Magnetar_Client.Core
 
         private static void DrawElementSelector(int windowID)
         {
-            GUI.DragWindow(new Rect(0, 0, selectorRect.width, 25));
+            GUI.DragWindow(new Rect(0, 0, selectorRect.width, Config.S(25f)));
             Event e = Event.current;
 
-            float startY = 35 + elementHeight + 10;
+            float startY = Config.S(35f) + elementHeight + Config.S(10f);
             Rect multiSelectRect = new Rect(0, startY, selectorRect.width, selectorRect.height);
 
             UI.WindowDrawing.DrawSetting.DrawMultiSelectWindow(multiSelectRect, UI.WindowDrawing.DrawSetting.activeMultiSelect);
@@ -152,10 +171,10 @@ namespace Magnetar_Client.Core
         private static void DrawHUDControls(int windowID)
         {
             float width = windowRect.width;
-            float elementWidth = width - 20;
-            float indent = 10;
+            float elementWidth = width - Config.S(20f);
+            float indent = Config.S(10f);
             Event e = Event.current;
-            float y = 35;
+            float y = Config.S(35f);
 
             Rect headerBgRect = new Rect(0, 0, width, y - indent);
             GUI.Box(headerBgRect, Translator.Translate("Customize HUD"), Magnetar_Default.SettingsWindow);
@@ -177,8 +196,8 @@ namespace Magnetar_Client.Core
                 UI.WindowDrawing.DrawSetting.multiSelectSearchQuery = "";
                 UI.WindowDrawing.DrawSetting.manualScrollY = 0f;
 
-                selectorRect.x = (1920 - selectorWidth) / 2;
-                selectorRect.y = (1080 - selectorHeight) / 2;
+                selectorRect.x = (Config.WindowWidth - Config.S(BaseSelectorWidth)) / 2;
+                selectorRect.y = (Config.WindowHeight - Config.S(BaseSelectorHeight)) / 2;
 
                 isSelectingElements = true;
             }
@@ -186,7 +205,7 @@ namespace Magnetar_Client.Core
             GUI.Box(selectBtnRect, Translator.Translate("Select"), Magnetar_Default.SettingOff);
             GUI.backgroundColor = Color.white;
 
-            y += elementHeight + 5;
+            y += elementHeight + Config.S(5f);
 
             GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Layout"),
                 Magnetar_Default.SettingDescriptionStyle);
@@ -207,7 +226,7 @@ namespace Magnetar_Client.Core
             GUI.Box(configBtnRect, Translator.Translate("Edit"), Magnetar_Default.SettingOff);
             GUI.backgroundColor = Color.white;
 
-            y += elementHeight + 5;
+            y += elementHeight + Config.S(5f);
 
             GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Background"),
                 Magnetar_Default.SettingDescriptionStyle);
@@ -225,7 +244,7 @@ namespace Magnetar_Client.Core
                 e.Use();
             }
 
-            y += elementHeight + 5;
+            y += elementHeight + Config.S(5f);
 
             GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Enabled"),
                 Magnetar_Default.SettingDescriptionStyle);
@@ -243,10 +262,10 @@ namespace Magnetar_Client.Core
                 e.Use();
             }
 
-            y += elementHeight + 10;
+            y += elementHeight + Config.S(10f);
             windowRect.height = y;
 
-            GUI.DragWindow(new Rect(0, 0, width, 25));
+            GUI.DragWindow(new Rect(0, 0, width, Config.S(25f)));
 
             Rect _windowRect = new Rect(0, 0, width, y);
             if (_windowRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
@@ -272,7 +291,7 @@ namespace Magnetar_Client.Core
         /// Gets the collection of HUD elements currently managed by the client.
         /// </summary>
         public static List<HudElement> Elements = new List<HudElement>();
-        
+
 
         /// <summary>
         /// Gets or sets the collection of HUD toggle options available/Selected.
@@ -287,7 +306,7 @@ namespace Magnetar_Client.Core
             {
                 CustomNames = new Dictionary<int, string>()
             };
-                
+
             int currentWindowId = 4000;
 
             var types = Assembly.GetExecutingAssembly().GetTypes()

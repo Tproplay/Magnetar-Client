@@ -100,15 +100,15 @@ namespace Magnetar_Client.Core
             foreach (ModuleCategory cat in System.Enum.GetValues(typeof(ModuleCategory)))
             {
                 // Default category window positions
-                windowPositions[cat] = new Rect(20 + (index * (Config.ModuleWindowWidth + 10)), 50, Config.ModuleWindowWidth, 50);
+                windowPositions[cat] = new Rect(Config.S(20f) + (index * (Config.ModuleWindowWidth + Config.S(10f))), Config.S(50f), Config.ModuleWindowWidth, Config.S(50f));
                 index++;
             }
 
             multiSelectWindowRect = new Rect(
-                        1920 / 2f - multiSelectWindowRect.width / 2f,
-                        1080 / 2f - multiSelectWindowRect.height / 2f,
-                        multiSelectWindowRect.width,
-                        multiSelectWindowRect.height
+                        Config.WindowWidth / 2f - Config.ModuleManager.MultiSelectWindowWidth / 2f,
+                        Config.WindowHeight / 2f - Config.ModuleManager.MultiSelectWindowHeight / 2f,
+                        Config.ModuleManager.MultiSelectWindowWidth,
+                        Config.ModuleManager.MultiSelectWindowHeight
                         );
 
             showModules = true; showSettings = false; showSelectionGui = false;
@@ -129,9 +129,6 @@ namespace Magnetar_Client.Core
             }
         }
 
-        // --- Delegate Cache Fields (Prevents GC sweeps and IL2CPP trampoline pool exhaustion) ---
-        
-
         public static void Render()
         {
             if (showModules)
@@ -144,8 +141,8 @@ namespace Magnetar_Client.Core
                     requestSearchFocus = true;
 
                     float searchWidth = Config.ModuleWindowWidth;
-                    float tfY = 10f;
-                    Rect anticipatedTfRect = new Rect(Config.indent, tfY, searchWidth - (Config.indent * 2), 20);
+                    float tfY = Config.S(10f);
+                    Rect anticipatedTfRect = new Rect(Config.indent, tfY, searchWidth - (Config.indent * 2), Config.S(20f));
                     activeTextFieldId = anticipatedTfRect.GetHashCode();
 
                     GUI.FocusWindow(999);
@@ -173,12 +170,12 @@ namespace Magnetar_Client.Core
                 if (searchAnimProgress > 0.01f)
                 {
                     float searchWidth = Config.ModuleWindowWidth * Config.ModuleManager.SearchWidthMultiplier;
-                    float searchHeight = 30f;
+                    float searchHeight = Config.S(30f);
 
-                    float targetY = 1080f - searchHeight - 20f;
-                    float hiddenY = 1080f + 10f;
+                    float targetY = Config.WindowHeight - searchHeight - Config.S(20f);
+                    float hiddenY = Config.WindowHeight + Config.S(10f);
                     float currentY = Mathf.Lerp(hiddenY, targetY, searchAnimProgress);
-                    float currentX = (1920f / 2f) - (searchWidth / 2f);
+                    float currentX = (Config.WindowWidth / 2f) - (searchWidth / 2f);
 
                     searchWindowRect = new Rect(currentX, currentY, searchWidth, searchHeight);
 
@@ -196,6 +193,16 @@ namespace Magnetar_Client.Core
                 {
                     if (cat == ModuleCategory.Addon && !showAddonCategory) continue;
                     int id = (int)cat;
+
+                    // Keep the window body's width in sync with the current
+                    // GUIScale without moving its dragged position - height is
+                    // already re-derived every frame below from module rows.
+                    Rect syncedPos = windowPositions[cat];
+                    if (!Mathf.Approximately(syncedPos.width, Config.ModuleWindowWidth))
+                    {
+                        syncedPos.width = Config.ModuleWindowWidth;
+                        windowPositions[cat] = syncedPos;
+                    }
 
                     windowPositions[cat] = GUI.Window(
                         id,
@@ -254,8 +261,8 @@ namespace Magnetar_Client.Core
                             if (w > maxNameWidth) maxNameWidth = w;
                         }
 
-                        float fixedControlWidth = 140f;
-                        float calculatedWidth = Config.indent + maxNameWidth + 20f + fixedControlWidth + Config.indent;
+                        float fixedControlWidth = Config.S(140f);
+                        float calculatedWidth = Config.indent + maxNameWidth + Config.S(20f) + fixedControlWidth + Config.indent;
 
                         float targetWidth = Mathf.Max(mod.SettingsWidth, calculatedWidth);
 
@@ -263,7 +270,7 @@ namespace Magnetar_Client.Core
                         {
                             resetWindowPos = false;
 
-                            float popupHeight = 25f;
+                            float popupHeight = Config.S(25f);
 
                             settingsPositions[mod] = new Rect(
                                 (Config.WindowWidth / 2f) - (targetWidth / 2f),
@@ -298,7 +305,7 @@ namespace Magnetar_Client.Core
                             Magnetar_Default.ModuleWindow
                         );
 
-                        if (settingsPositions[mod].Contains(new Vector2(Input.mousePosition.x, 1080 - Input.mousePosition.y)))
+                        if (settingsPositions[mod].Contains(new Vector2(Input.mousePosition.x, Config.WindowHeight - Input.mousePosition.y)))
                         {
                             if (Input.GetMouseButtonDown(0) | Input.GetMouseButtonDown(1) | Input.GetMouseButtonDown(2))
                             {
@@ -312,13 +319,23 @@ namespace Magnetar_Client.Core
             {
                 if (resetWindowPos)
                 {
-                    // Re-Center the window
+                    // Freshly opened - snap to the true screen center at the
+                    // current GUIScale, ignoring any previous drag position.
                     multiSelectWindowRect = new Rect(
-                        1920 / 2f - multiSelectWindowRect.width / 2f,
-                        1080 / 2f - multiSelectWindowRect.height / 2f,
-                        multiSelectWindowRect.width,
-                        multiSelectWindowRect.height
+                        Config.WindowWidth / 2f - Config.ModuleManager.MultiSelectWindowWidth / 2f,
+                        Config.WindowHeight / 2f - Config.ModuleManager.MultiSelectWindowHeight / 2f,
+                        Config.ModuleManager.MultiSelectWindowWidth,
+                        Config.ModuleManager.MultiSelectWindowHeight
                     );
+                }
+                else
+                {
+                    // Already open - just keep its size in sync with the
+                    // current GUIScale, growing/shrinking around wherever the
+                    // user last dragged it.
+                    Config.RescaleAroundCenter(ref multiSelectWindowRect,
+                        Config.ModuleManager.MultiSelectWindowWidth,
+                        Config.ModuleManager.MultiSelectWindowHeight);
                 }
 
                 if (activeMultiSelect != null)
@@ -355,11 +372,11 @@ namespace Magnetar_Client.Core
                 float windowWidth = windowPositions[category].width;
 
 #if !ANDROID
-                GUI.DragWindow(new Rect(0, 0, windowWidth, 25));
+                GUI.DragWindow(new Rect(0, 0, windowWidth, Config.S(25f)));
 #endif
 
-                float yOffset = 28;
-                float buttonHeight = 28;
+                float yOffset = Config.S(28f);
+                float buttonHeight = Config.S(28f);
                 foreach (var mod in categoryModules)
                 {
                     GUIStyle currentStyle = mod.Active ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff;
@@ -408,8 +425,10 @@ namespace Magnetar_Client.Core
         private static void DrawSettingsWindow(int id, Magnetar_Client.Modules.Module mod)
         {
             float windowWidth = settingsPositions[mod].width;
-            float headerHeight = 25f;
-            float maxWindowHeight = Screen.height * Config.ModuleManager.MaxSettingsWindowHeightPct;
+            float headerHeight = Config.S(25f);
+            // Percentage of the native (letterboxed) canvas height, not the
+            // real screen height - this rect lives inside GUI.matrix space.
+            float maxWindowHeight = Config.WindowHeight * Config.ModuleManager.MaxSettingsWindowHeightPct;
             float maxViewHeight = maxWindowHeight - headerHeight;
 
             if (!moduleContentHeights.ContainsKey(mod)) moduleContentHeights[mod] = 0f;
@@ -419,7 +438,7 @@ namespace Magnetar_Client.Core
             Rect headerBgRect = new Rect(0, 0, windowWidth, headerHeight);
             GUI.Box(headerBgRect, Translate(mod.Name), Magnetar_Default.SettingsWindow);
 
-            moduleContentHeights[mod] = Mathf.Lerp(moduleContentHeights[mod], targetContentHeights[mod], 
+            moduleContentHeights[mod] = Mathf.Lerp(moduleContentHeights[mod], targetContentHeights[mod],
                 Time.unscaledDeltaTime * Config.ModuleManager.SettingsScrollLerpSpeed);
 
             if (Mathf.Abs(moduleContentHeights[mod] - targetContentHeights[mod]) < 0.5f)
@@ -433,7 +452,7 @@ namespace Magnetar_Client.Core
             Event e = Event.current;
 
 #if ANDROID
-            Rect closeButtonRect = new Rect(windowWidth - 26, 4, 22, 22);
+            Rect closeButtonRect = new Rect(windowWidth - Config.S(26f), Config.S(4f), Config.S(22f), Config.S(22f));
             GUI.Box(closeButtonRect, "X", Magnetar_Default.ModuleOff);
             if (e.type == EventType.MouseDown && closeButtonRect.Contains(e.mousePosition))
             {
@@ -462,7 +481,7 @@ namespace Magnetar_Client.Core
 
             bool needsScrollbar = targetContentHeights[mod] > maxViewHeight;
             float maxScroll = needsScrollbar ? (targetContentHeights[mod] - maxViewHeight) : 0f;
-            float contentWidth = needsScrollbar ? windowWidth - 16 : windowWidth;
+            float contentWidth = needsScrollbar ? windowWidth - Config.S(16f) : windowWidth;
             float currentScroll = settingsScrollPositions[mod].y;
 
             Rect outRect = new Rect(0, headerHeight, windowWidth, viewHeight);
@@ -495,16 +514,16 @@ namespace Magnetar_Client.Core
 
             if (needsScrollbar)
             {
-                float trackX = windowWidth - 14;
-                float trackY = headerHeight + 5;
-                float trackHeight = viewHeight - 10;
+                float trackX = windowWidth - Config.S(14f);
+                float trackY = headerHeight + Config.S(5f);
+                float trackHeight = viewHeight - Config.S(10f);
 
-                float handleHeight = Mathf.Max(20f, (maxViewHeight / targetContentHeights[mod]) * trackHeight);
+                float handleHeight = Mathf.Max(Config.S(20f), (maxViewHeight / targetContentHeights[mod]) * trackHeight);
                 float scrollPct = maxScroll > 0 ? currentScroll / maxScroll : 0f;
                 float handleY = trackY + (scrollPct * (trackHeight - handleHeight));
 
-                GUI.Box(new Rect(trackX + 5, trackY, 2, trackHeight), "", Magnetar_Default.SeparatorStyle);
-                GUI.Box(new Rect(trackX, handleY, 12, handleHeight), "", Magnetar_Default.ModuleOff);
+                GUI.Box(new Rect(trackX + Config.S(5f), trackY, Config.S(2f), trackHeight), "", Magnetar_Default.SeparatorStyle);
+                GUI.Box(new Rect(trackX, handleY, Config.S(12f), handleHeight), "", Magnetar_Default.ModuleOff);
             }
 
             GUI.DragWindow(new Rect(0, 0, windowWidth, headerHeight));
@@ -527,8 +546,9 @@ namespace Magnetar_Client.Core
 
             if (!string.IsNullOrEmpty(mod.Author))
             {
-                GUI.Label(new Rect(Config.indent, y, width - (Config.indent * 2), 18), "by " + mod.Author, Magnetar_Default.AuthorStyle);
-                y += 18 + Config.spacing;
+                float authorLineHeight = Config.S(18f);
+                GUI.Label(new Rect(Config.indent, y, width - (Config.indent * 2), authorLineHeight), "by " + mod.Author, Magnetar_Default.AuthorStyle);
+                y += authorLineHeight + Config.spacing;
             }
 
             bool skipSettings = false;
@@ -610,7 +630,7 @@ namespace Magnetar_Client.Core
 
         private static void MultiSelectBridge(int id)
         {
-            GUI.DragWindow(new Rect(0, 0, multiSelectWindowRect.width, 25));
+            GUI.DragWindow(new Rect(0, 0, multiSelectWindowRect.width, Config.S(25f)));
 
             DrawMultiSelectWindow(multiSelectWindowRect, activeMultiSelect);
         }
@@ -621,8 +641,8 @@ namespace Magnetar_Client.Core
 
             GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), Translate(set.Name), Magnetar_Default.SettingDescriptionStyle);
 
-            Rect btnRect = new Rect(width - Config.SettingWidth/2f-Config.selectButtonWidth - 
-                Magnetar_Default.SettingDescriptionStyle.CalcSize(new GUIContent('(' + Translate($"{set.SelectedValues.Count} selected") + ")")).x/2, y,
+            Rect btnRect = new Rect(width - Config.SettingWidth / 2f - Config.selectButtonWidth -
+                Magnetar_Default.SettingDescriptionStyle.CalcSize(new GUIContent('(' + Translate($"{set.SelectedValues.Count} selected") + ")")).x / 2, y,
                 Config.selectButtonWidth, Config.elementHeight);
 
             if (btnRect.Contains(e.mousePosition))
@@ -645,7 +665,7 @@ namespace Magnetar_Client.Core
 
             Color originalColor = GUI.contentColor;
             GUI.contentColor = Magnetar_Default.TextDim;
-            GUI.Label(new Rect(btnRect.x + Config.selectButtonWidth + 5, y, width * 0.4f, Config.elementHeight),
+            GUI.Label(new Rect(btnRect.x + Config.selectButtonWidth + Config.S(5f), y, width * 0.4f, Config.elementHeight),
                 '(' + Translate($"{set.SelectedValues.Count} selected") + ")", Magnetar_Default.SettingDescriptionStyle);
             GUI.contentColor = originalColor;
         }
@@ -704,7 +724,7 @@ namespace Magnetar_Client.Core
         private static void DrawSearchWindow(int id)
         {
 
-            Rect tfRect = new Rect(5, 5, searchWindowRect.width - 10, 20);
+            Rect tfRect = new Rect(Config.S(5f), Config.S(5f), searchWindowRect.width - Config.S(10f), Config.S(20f));
 
             if (requestSearchFocus)
             {

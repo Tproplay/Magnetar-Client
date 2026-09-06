@@ -5,6 +5,8 @@ using MelonLoader.Utils;
 using BepInEx.Configuration;
 #endif
 
+using UnityEngine;
+
 namespace Magnetar_Client
 {
     public enum TabType
@@ -27,8 +29,14 @@ namespace Magnetar_Client
     {
         public static string CurrentProfile = "Default";
 
+        // Native canvas size used by the outer letterbox matrix (main.cs).
+        // NOT scaled by GUIScale - it's the fixed reference resolution
+        // everything else is authored against.
         public readonly static float WindowWidth = 1920;
         public readonly static float WindowHeight = 1080;
+
+        public static float GUIScale = 1f;
+        public static float S(float value) => value * GUIScale;
 
         public static bool showgui = true;
         public static bool dimBg = false;
@@ -36,20 +44,46 @@ namespace Magnetar_Client
 
         public static float MinTimeBetweenSaves = 120;
 
-        public readonly static float ModuleWindowWidth = 200f;
-        public readonly static float elementHeight = 22;
-        public readonly static float indent = 10;
-        public readonly static float spacing = 6;
+        // --- Scaled UI sizes ---------------------------------------------
+        // These are exposed as their original (unscaled) "base"/1x sizes via
+        // the Base* fields, and every public property below returns that
+        // base size run through S(), so every consumer (ModuleManager,
+        // DrawSetting, etc.) automatically scales with Config.GUIScale
+        // without needing to call S() itself.
 
-        public readonly static float selectButtonWidth = 70;
+        private const float BaseModuleWindowWidth = 200f;
+        public static float ModuleWindowWidth => S(BaseModuleWindowWidth);
+
+        private const float BaseElementHeight = 22f;
+        public static float elementHeight => S(BaseElementHeight);
+
+        private const float BaseIndent = 10f;
+        public static float indent => S(BaseIndent);
+
+        private const float BaseSpacing = 6f;
+        public static float spacing => S(BaseSpacing);
+
+        private const float BaseSelectButtonWidth = 70f;
+        public static float selectButtonWidth => S(BaseSelectButtonWidth);
 
         public static string Language = "English";
 
-        public static float SettingWidth = 260;
+        private static float _baseSettingWidth = 260f;
+        public static float SettingWidth
+        {
+            get => S(_baseSettingWidth);
+            set => _baseSettingWidth = value;
+        }
 
         public static class ModuleManager
         {
-            public static float SettingsWidth = 630f;
+            private static float _baseSettingsWidth = 630f;
+            public static float SettingsWidth
+            {
+                get => S(_baseSettingsWidth);
+                set => _baseSettingsWidth = value;
+            }
+
             public static float PopupSpeed = 10f;
 
             // Search Window
@@ -59,35 +93,132 @@ namespace Magnetar_Client
             // Settings Window
             public static float MaxSettingsWindowHeightPct = 0.8f;
             public static float SettingsScrollLerpSpeed = 15f;
-            public static float ScrollSensitivity = 25f;
+
+            private static float _baseScrollSensitivity = 25f;
+            public static float ScrollSensitivity
+            {
+                get => S(_baseScrollSensitivity);
+                set => _baseScrollSensitivity = value;
+            }
 
             // Multi-Select Window
-            public static float MultiSelectWindowWidth = 500f;
-            public static float MultiSelectWindowHeight = 800f;
+            private static float _baseMultiSelectWindowWidth = 500f;
+            public static float MultiSelectWindowWidth
+            {
+                get => S(_baseMultiSelectWindowWidth);
+                set => _baseMultiSelectWindowWidth = value;
+            }
+
+            private static float _baseMultiSelectWindowHeight = 800f;
+            public static float MultiSelectWindowHeight
+            {
+                get => S(_baseMultiSelectWindowHeight);
+                set => _baseMultiSelectWindowHeight = value;
+            }
         }
 
         public static class SettingsInput
         {
             // Numeric Sliders
-            public static float NumericInputWidth = 75f;
+            private static float _baseNumericInputWidth = 75f;
+            public static float NumericInputWidth
+            {
+                get => S(_baseNumericInputWidth);
+                set => _baseNumericInputWidth = value;
+            }
+
+            // Fraction of the slider's own value range moved per scroll tick -
+            // not a pixel size, so it does not scale with GUIScale.
             public static float SliderScrollStep = 0.04f;
-            public static float SliderHeight = 8f;
-            public static int SliderThumbFontSize = 40;
+
+            private static float _baseSliderHeight = 8f;
+            public static float SliderHeight
+            {
+                get => S(_baseSliderHeight);
+                set => _baseSliderHeight = value;
+            }
+
+            private static int _baseSliderThumbFontSize = 40;
+            public static int SliderThumbFontSize
+            {
+                get => Mathf.Max(1, Mathf.RoundToInt(S(_baseSliderThumbFontSize)));
+                set => _baseSliderThumbFontSize = value;
+            }
 
             // Multi-Select Window
-            public static float MultiSelectRowHeight = 22f;
-            public static float MultiSelectHeaderHeight = 65f;
+            private static float _baseMultiSelectRowHeight = 22f;
+            public static float MultiSelectRowHeight
+            {
+                get => S(_baseMultiSelectRowHeight);
+                set => _baseMultiSelectRowHeight = value;
+            }
+
+            private static float _baseMultiSelectHeaderHeight = 65f;
+            public static float MultiSelectHeaderHeight
+            {
+                get => S(_baseMultiSelectHeaderHeight);
+                set => _baseMultiSelectHeaderHeight = value;
+            }
 
             // Dropdowns (Select Setting)
-            public static float DropdownRowHeight = 22f;
+            private static float _baseDropdownRowHeight = 22f;
+            public static float DropdownRowHeight
+            {
+                get => S(_baseDropdownRowHeight);
+                set => _baseDropdownRowHeight = value;
+            }
+
+            // Row count, not a size - does not scale.
             public static int DropdownMaxVisibleRows = 6;
-            public static float DropdownScrollSensitivity = 15f;
+
+            private static float _baseDropdownScrollSensitivity = 15f;
+            public static float DropdownScrollSensitivity
+            {
+                get => S(_baseDropdownScrollSensitivity);
+                set => _baseDropdownScrollSensitivity = value;
+            }
 
             // Text Fields & Autocomplete
+            // History depth, not a size - does not scale.
             public static int TextFieldUndoLimit = 200;
-            public static float AutocompleteRowHeight = 22f;
-            public static float AutocompleteMaxHeight = 150f;
-            public static float AutocompleteScrollSensitivity = 15f;
+
+            private static float _baseAutocompleteRowHeight = 22f;
+            public static float AutocompleteRowHeight
+            {
+                get => S(_baseAutocompleteRowHeight);
+                set => _baseAutocompleteRowHeight = value;
+            }
+
+            private static float _baseAutocompleteMaxHeight = 150f;
+            public static float AutocompleteMaxHeight
+            {
+                get => S(_baseAutocompleteMaxHeight);
+                set => _baseAutocompleteMaxHeight = value;
+            }
+
+            private static float _baseAutocompleteScrollSensitivity = 15f;
+            public static float AutocompleteScrollSensitivity
+            {
+                get => S(_baseAutocompleteScrollSensitivity);
+                set => _baseAutocompleteScrollSensitivity = value;
+            }
+        }
+
+        /// <summary>
+        /// Resizes a Rect to the given width/height while keeping its current
+        /// center point fixed. Used for draggable windows so they grow/shrink
+        /// around wherever the user last dragged them when GUIScale changes,
+        /// instead of always resetting to a default position.
+        /// </summary>
+        public static void RescaleAroundCenter(ref Rect rect, float newWidth, float newHeight)
+        {
+            float centerX = rect.x + rect.width / 2f;
+            float centerY = rect.y + rect.height / 2f;
+
+            rect.width = newWidth;
+            rect.height = newHeight;
+            rect.x = centerX - newWidth / 2f;
+            rect.y = centerY - newHeight / 2f;
         }
     }
 

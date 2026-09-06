@@ -13,18 +13,42 @@ namespace Magnetar_Client.Core
         public static bool isSelectingLanguage = false;
 
         public static MultiSelectSetting LanguageSetting;
+        public static FloatSetting ScaleSetting;
 
-        static float width = 500;
-        public static float elementHeight = 25f;
+        // Base (unscaled, GUIScale == 1) sizes - actual sizes are derived via
+        // Config.S() so this window scales with the rest of the UI.
+        private const float BaseWidth = 500f;
+        private const float BaseHeight = 300f;
+        private const float BaseElementHeight = 25f;
+        private const float BaseSelectorWidth = 500f;
+        private const float BaseSelectorHeight = 800f;
 
-        public static Rect windowRect = new Rect((Config.WindowWidth - width) / 2, (Config.WindowHeight - 300) / 2, width, 300);
+        public static float elementHeight => Config.S(BaseElementHeight);
 
-        static float selectorWidth = 500;
-        static float selectorHeight = 800;
-        public static Rect selectorRect = new Rect((Config.WindowWidth - selectorWidth) / 2, (Config.WindowHeight - selectorHeight) / 2, selectorWidth, selectorHeight);
+        public static Rect windowRect = new Rect(
+            (Config.WindowWidth - Config.S(BaseWidth)) / 2,
+            (Config.WindowHeight - Config.S(BaseHeight)) / 2,
+            Config.S(BaseWidth),
+            Config.S(BaseHeight));
+
+        public static Rect selectorRect = new Rect(
+            (Config.WindowWidth - Config.S(BaseSelectorWidth)) / 2,
+            (Config.WindowHeight - Config.S(BaseSelectorHeight)) / 2,
+            Config.S(BaseSelectorWidth),
+            Config.S(BaseSelectorHeight));
+
+        private static GUI.WindowFunction _cachedLangSelector;
+        private static GUI.WindowFunction _cachedGuiControls;
+
+        private static GUI.WindowFunction LangSelectorDelegate => _cachedLangSelector ??=
+            Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((System.Action<int>)DrawLanguageSelector);
+
+        private static GUI.WindowFunction GuiControlsDelegate => _cachedGuiControls ??=
+            Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((System.Action<int>)DrawGUIControls);
 
         public static void Init()
         {
+            // --- 1. Language Setting ---
             LanguageSetting = new MultiSelectSetting("Language")
             {
                 MaxSelection = 1,
@@ -45,23 +69,38 @@ namespace Magnetar_Client.Core
             {
                 LanguageSetting.AddOption(0, "English");
                 LanguageSetting.SelectedValues.Add(0);
-                return;
             }
-
-            var languages = System.IO.Directory.GetDirectories(path);
-
-            var i = 0;
-            foreach (var language in languages)
+            else
             {
-                TranslatorLogger.Msg("Found Language: " + language);
-                string _language = Path.GetFileName(language);
+                var languages = System.IO.Directory.GetDirectories(path);
 
-                LanguageSetting.AddOption(i, _language);
-                // Default to english
-                if (_language == "English") LanguageSetting.SelectedValues.Add(i);
-                i++;
+                var i = 0;
+                foreach (var language in languages)
+                {
+                    TranslatorLogger.Msg("Found Language: " + language);
+                    string _language = Path.GetFileName(language);
+
+                    LanguageSetting.AddOption(i, _language);
+                    if (_language == "English") LanguageSetting.SelectedValues.Add(i);
+                    i++;
+                }
             }
 #endif
+
+            // --- 2. GUI Scale Slider Setting ---
+            if (Config.GUIScale <= 0.1f)
+            {
+                Config.GUIScale = 1.0f;
+            }
+
+            ScaleSetting = new FloatSetting("GUI Scale", 0.5f, 2.0f, Config.GUIScale, decimalPlaces: 3, trueMin: 0.25f, trueMax: 3.0f)
+            {
+                OnValueChanged = (val) =>
+                {
+                    Config.GUIScale = val;
+                    SaveLoad.Save(true);
+                }
+            };
         }
 
         public static void Render()
@@ -69,7 +108,6 @@ namespace Magnetar_Client.Core
             Event e = Event.current;
 
             #region Handle Escape
-            // Close the Language Selector Window
             if (isSelectingLanguage && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
             {
                 isSelectingLanguage = false;
@@ -78,12 +116,18 @@ namespace Magnetar_Client.Core
             }
             #endregion
 
+            // Keep both windows sized for the current GUIScale, growing or
+            // shrinking around wherever they're currently positioned so an
+            // open window doesn't jump when the scale changes mid-session.
+            Config.RescaleAroundCenter(ref windowRect, Config.S(BaseWidth), windowRect.height);
+            Config.RescaleAroundCenter(ref selectorRect, Config.S(BaseSelectorWidth), Config.S(BaseSelectorHeight));
+
             if (isSelectingLanguage)
             {
                 selectorRect = GUI.Window(
                     4001,
                     selectorRect,
-                    (GUI.WindowFunction)DrawLanguageSelector,
+                    LangSelectorDelegate,
                     "",
                     Magnetar_Default.ModuleWindow
                 );
@@ -93,7 +137,7 @@ namespace Magnetar_Client.Core
                 windowRect = GUI.Window(
                     4000,
                     windowRect,
-                    (GUI.WindowFunction)DrawGUIControls,
+                    GuiControlsDelegate,
                     "",
                     Magnetar_Default.ModuleWindow
                 );
@@ -102,34 +146,36 @@ namespace Magnetar_Client.Core
 
         private static void DrawLanguageSelector(int windowID)
         {
-            GUI.DragWindow(new Rect(0, 0, selectorRect.width, 25));
+#if !ANDROID
+            GUI.DragWindow(new Rect(0, 0, selectorRect.width, Config.S(25f)));
+#endif
             Event e = Event.current;
 
-            float startY = 35 + elementHeight + 10;
+            float startY = Config.S(35f) + elementHeight + Config.S(10f);
             Rect multiSelectRect = new Rect(0, startY, selectorRect.width, selectorRect.height);
 
             UI.WindowDrawing.DrawSetting.DrawMultiSelectWindow(multiSelectRect, UI.WindowDrawing.DrawSetting.activeMultiSelect);
 
             if (multiSelectRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
+#if !ANDROID
                 Input.ResetInputAxes();
+#endif
                 e.Use();
-                e = null;
             }
         }
 
         private static void DrawGUIControls(int windowID)
         {
             float w = windowRect.width;
-            float indent = 10;
+            float indent = Config.S(10f);
             Event e = Event.current;
-            float y = 35;
+            float y = Config.S(35f);
 
-            Rect headerBgRect = new Rect(0, 0, w, y-indent);
+            Rect headerBgRect = new Rect(0, 0, w, y - indent);
             GUI.Box(headerBgRect, Translator.Translate("GUI Configuration"), Magnetar_Default.SettingsWindow);
 
-            
-
+            // --- 1. Language Row ---
             string currentLangName = "English";
 
             if (LanguageSetting != null && LanguageSetting.SelectedValues != null && LanguageSetting.SelectedValues.Count > 0)
@@ -146,10 +192,9 @@ namespace Magnetar_Client.Core
             {
                 Config.Language = currentLangName;
 
-                Magnetar_Client.Utils.Magnetar_Logger.TranslatorLogger.Msg($"Language changed to {Config.Language}. Reloading translations...");
-                Magnetar_Client.Utils.Translator.LoadTranslations();
-                Magnetar_Client.Utils.Translator.DumpMissingStrings();
-                
+                TranslatorLogger.Msg($"Language changed to {Config.Language}. Reloading translations...");
+                Translator.LoadTranslations();
+                Translator.DumpMissingStrings();
 
                 if (ModuleManager.Modules != null)
                 {
@@ -163,7 +208,7 @@ namespace Magnetar_Client.Core
                 Magnetar_Client.NEF.NEFData.OnLanguageChanged();
             }
 
-            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), $"Language: <color=yellow>{currentLangName}</color>",Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), $"Language: <color=yellow>{currentLangName}</color>", Magnetar_Default.SettingDescriptionStyle);
 
             Rect selectBtnRect = new Rect(w * 0.5f, y, w * 0.45f, elementHeight);
 
@@ -177,9 +222,8 @@ namespace Magnetar_Client.Core
                 UI.WindowDrawing.DrawSetting.multiSelectSearchQuery = "";
                 UI.WindowDrawing.DrawSetting.manualScrollY = 0f;
 
-                // Re-center the selector window
-                selectorRect.x = (Config.WindowWidth - selectorWidth) / 2;
-                selectorRect.y = (Config.WindowHeight - selectorHeight) / 2;
+                selectorRect.x = (Config.WindowWidth - Config.S(BaseSelectorWidth)) / 2;
+                selectorRect.y = (Config.WindowHeight - Config.S(BaseSelectorHeight)) / 2;
 
                 isSelectingLanguage = true;
             }
@@ -187,18 +231,41 @@ namespace Magnetar_Client.Core
             GUI.Box(selectBtnRect, "Change", Magnetar_Default.SettingOff);
             GUI.backgroundColor = Color.white;
 
-            y += elementHeight + 10;
+            y += elementHeight + Config.S(10f);
+
+            // --- 2. GUI Scale Row ---
+            if (ScaleSetting != null)
+            {
+                // Synchronize if loaded from config externally while not actively dragging
+                if (UI.WindowDrawing.DrawSetting.activeSliderId != ScaleSetting.GetHashCode() &&
+                    Mathf.Abs(ScaleSetting.Value - Config.GUIScale) > 0.001f)
+                {
+                    ScaleSetting.Value = Config.GUIScale;
+                }
+
+                UI.WindowDrawing.DrawSetting.HandleNumericSetting(ScaleSetting, ref y, w, true);
+                y += elementHeight + Config.S(10f);
+            }
+
+            if (UI.WindowDrawing.DrawSetting.OnPostDraw != null)
+            {
+                UI.WindowDrawing.DrawSetting.OnPostDraw.Invoke();
+                UI.WindowDrawing.DrawSetting.OnPostDraw = null;
+            }
 
             windowRect.height = y;
 
-            GUI.DragWindow(new Rect(0, 0, w, 25));
+#if !ANDROID
+            GUI.DragWindow(new Rect(0, 0, w, Config.S(25f)));
+#endif
 
             Rect _windowRect = new Rect(0, 0, w, y);
             if (_windowRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
+#if !ANDROID
                 Input.ResetInputAxes();
+#endif
                 e.Use();
-                e = null;
             }
         }
     }

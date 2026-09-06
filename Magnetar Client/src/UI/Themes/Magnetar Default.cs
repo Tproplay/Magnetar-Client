@@ -42,6 +42,10 @@ namespace Magnetar_Client.UI.Themes
         private static Texture2D TransparentTex;
         private static Texture2D DimTex;
 
+        // Tracks the GUIScale that styles were last rescaled for, so Rescale()
+        // is a no-op (aside from the float compare) when nothing changed.
+        private static float lastScale = -1f;
+
         #region Colors
         public static readonly Color BackgroundColor = new Color(26 / 255f, 26 / 255f, 26 / 255f, 220 / 255f);
         public static readonly Color AccentColor = new Color(255 / 255f, 61 / 255f, 61 / 255f, 255 / 255f);
@@ -53,6 +57,49 @@ namespace Magnetar_Client.UI.Themes
         public static readonly Color ActiveHoverColor = new Color(240 / 255f, 51 / 255f, 51 / 255f, 255 / 255f);
         public static readonly Color Transparent = new Color(128 / 255f, 128 / 255f, 128 / 255f, 0 / 255f);
         public static readonly Color DimColor = new Color(26 / 255f, 26 / 255f, 26 / 255f, 102 / 255f);
+        #endregion
+
+        // Base (unscaled, GUIScale == 1) sizes. Init() builds every style from
+        // these, and Rescale() re-derives fontSize/padding/fixedHeight from
+        // these same numbers whenever Config.GUIScale changes, so there's a
+        // single source of truth for "what size is this at 1x".
+        #region Base Sizes
+        private const int TopBarFontSize = 14;
+        private const int TopBarPaddingLR = 10;
+        private const int TopBarPaddingTB = 5;
+
+        private const int ModuleFontSize = 12;
+        private const int ModulePaddingLeft = 10;
+
+        private const int ModuleWindowFontSize = 21;
+        private const int ModuleWindowPaddingTop = 3;
+
+        private const int SettingsWindowFontSize = 21;
+        private const int SettingsWindowPaddingTop = 1;
+
+        private const int SettingFontSize = 12;
+        private const int SettingPaddingLeft = 10;
+
+        private const int DescriptionFontSize = 18;
+        private const int DescriptionPaddingLR = 5;
+        private const int DescriptionPaddingTB = 2;
+
+        private const int SettingDescriptionFontSize = 14;
+        private const int SettingDescriptionPaddingLR = 5;
+        private const int SettingDescriptionPaddingTB = 2;
+
+        private const int AuthorFontSize = 15;
+        private const int AuthorPaddingLeft = 10;
+
+        private const float SeparatorFixedHeight = 1;
+
+        private const int HUDElementFontSize = 18;
+
+        private const int NEFNodePaddingLR = 2;
+        private const int NEFNodePaddingTop = 2;
+        private const int NEFNodePaddingBottom = 5;
+
+        private const int TextFontSize = 13;
         #endregion
 
         public static void Init()
@@ -78,13 +125,13 @@ namespace Magnetar_Client.UI.Themes
             TopBar.hover.background = HoverTex;
             TopBar.active.background = ActiveTex;
             TopBar.alignment = TextAnchor.MiddleCenter;
-            TopBar.fontSize = 14;
+            TopBar.fontSize = TopBarFontSize;
 
             TopBar.padding = new RectOffset();
-            TopBar.padding.left = 10;
-            TopBar.padding.right = 10;
-            TopBar.padding.top = 5;
-            TopBar.padding.bottom = 5;
+            TopBar.padding.left = TopBarPaddingLR;
+            TopBar.padding.right = TopBarPaddingLR;
+            TopBar.padding.top = TopBarPaddingTB;
+            TopBar.padding.bottom = TopBarPaddingTB;
 
             // Style for the active tab in the top bar (when it's selected)
             TopBarActive = new GUIStyle();
@@ -95,13 +142,13 @@ namespace Magnetar_Client.UI.Themes
             TopBarActive.hover.background = AccentTex;
             TopBarActive.active.background = AccentTex;
             TopBarActive.alignment = TextAnchor.MiddleCenter;
-            TopBarActive.fontSize = 14;
+            TopBarActive.fontSize = TopBarFontSize;
 
             TopBarActive.padding = new RectOffset();
-            TopBarActive.padding.left = 10;
-            TopBarActive.padding.right = 10;
-            TopBarActive.padding.top = 5;
-            TopBarActive.padding.bottom = 5;
+            TopBarActive.padding.left = TopBarPaddingLR;
+            TopBarActive.padding.right = TopBarPaddingLR;
+            TopBarActive.padding.top = TopBarPaddingTB;
+            TopBarActive.padding.bottom = TopBarPaddingTB;
 
             #endregion
 
@@ -109,24 +156,24 @@ namespace Magnetar_Client.UI.Themes
             ModuleOn = new GUIStyle();
             ModuleOn.normal.background = AccentTex;
             ModuleOn.normal.textColor = Color.black;
-            ModuleOn.fontSize = 12;
+            ModuleOn.fontSize = ModuleFontSize;
             ModuleOn.alignment = TextAnchor.MiddleLeft;
             ModuleOn.hover.background = ActiveHoverTex;
             ModuleOn.padding = new RectOffset();
-            ModuleOn.padding.left = 10;
+            ModuleOn.padding.left = ModulePaddingLeft;
             #endregion
 
             #region ModuleOff
             ModuleOff = new GUIStyle();
             ModuleOff.normal.background = BgLightTex;
             ModuleOff.normal.textColor = TextDim;
-            ModuleOff.fontSize = 12;
+            ModuleOff.fontSize = ModuleFontSize;
             ModuleOff.hover.background = HoverTex;
             ModuleOff.hover.textColor = Color.white;
 
             ModuleOff.alignment = TextAnchor.MiddleLeft;
             ModuleOff.padding = new RectOffset();
-            ModuleOff.padding.left = 10;
+            ModuleOff.padding.left = ModulePaddingLeft;
             #endregion
 
             #region ModuleWindow
@@ -135,11 +182,11 @@ namespace Magnetar_Client.UI.Themes
             ModuleWindow.normal.textColor = Color.white;
 
             ModuleWindow.alignment = TextAnchor.UpperCenter;
-            ModuleWindow.fontSize = 21;
+            ModuleWindow.fontSize = ModuleWindowFontSize;
             ModuleWindow.fontStyle = FontStyle.Bold;
 
             ModuleWindow.padding = new RectOffset();
-            ModuleWindow.padding.top = 3;
+            ModuleWindow.padding.top = ModuleWindowPaddingTop;
             ModuleWindow.padding.bottom = 0;
             ModuleWindow.padding.left = 0;
             ModuleWindow.padding.right = 0;
@@ -151,11 +198,11 @@ namespace Magnetar_Client.UI.Themes
             SettingsWindow.normal.textColor = Color.black;
 
             SettingsWindow.alignment = TextAnchor.UpperCenter;
-            SettingsWindow.fontSize = 21;
+            SettingsWindow.fontSize = SettingsWindowFontSize;
             SettingsWindow.fontStyle = FontStyle.Bold;
 
             SettingsWindow.padding = new RectOffset();
-            SettingsWindow.padding.top = 1;
+            SettingsWindow.padding.top = SettingsWindowPaddingTop;
             SettingsWindow.padding.bottom = 0;
             SettingsWindow.padding.left = 0;
             SettingsWindow.padding.right = 0;
@@ -165,29 +212,29 @@ namespace Magnetar_Client.UI.Themes
             SettingOn = new GUIStyle();
             SettingOn.normal.background = AccentTex;
             SettingOn.normal.textColor = Color.black;
-            SettingOn.fontSize = 12;
+            SettingOn.fontSize = SettingFontSize;
             SettingOn.alignment = TextAnchor.MiddleLeft;
             SettingOn.hover.background = ActiveHoverTex;
             SettingOn.padding = new RectOffset();
-            SettingOn.padding.left = 10;
+            SettingOn.padding.left = SettingPaddingLeft;
             #endregion
 
             #region SettingOff
             SettingOff = new GUIStyle();
             SettingOff.normal.background = BgLightTex;
             SettingOff.normal.textColor = TextDim;
-            SettingOff.fontSize = 12;
+            SettingOff.fontSize = SettingFontSize;
             SettingOff.hover.background = HoverTex;
             SettingOff.hover.textColor = Color.white;
 
             SettingOff.alignment = TextAnchor.MiddleLeft;
             SettingOff.padding = new RectOffset();
-            SettingOff.padding.left = 10;
+            SettingOff.padding.left = SettingPaddingLeft;
             #endregion
 
             #region Description
             DescriptionStyle = new GUIStyle();
-            DescriptionStyle.fontSize = 18;
+            DescriptionStyle.fontSize = DescriptionFontSize;
             DescriptionStyle.wordWrap = true;
             DescriptionStyle.alignment = TextAnchor.UpperLeft;
             DescriptionStyle.richText = true;
@@ -196,16 +243,16 @@ namespace Magnetar_Client.UI.Themes
             DescriptionStyle.normal.textColor = new Color(0.75f, 0.75f, 0.75f);
 
             DescriptionStyle.padding = new RectOffset();
-            DescriptionStyle.padding.left = 5;
-            DescriptionStyle.padding.right = 5;
-            DescriptionStyle.padding.top = 2;
-            DescriptionStyle.padding.bottom = 2;
+            DescriptionStyle.padding.left = DescriptionPaddingLR;
+            DescriptionStyle.padding.right = DescriptionPaddingLR;
+            DescriptionStyle.padding.top = DescriptionPaddingTB;
+            DescriptionStyle.padding.bottom = DescriptionPaddingTB;
 
             #endregion
 
             #region SettingDescriptionStyle
             SettingDescriptionStyle = new GUIStyle();
-            SettingDescriptionStyle.fontSize = 14;
+            SettingDescriptionStyle.fontSize = SettingDescriptionFontSize;
             SettingDescriptionStyle.wordWrap = true;
             SettingDescriptionStyle.alignment = TextAnchor.UpperLeft;
             SettingDescriptionStyle.richText = true;
@@ -214,20 +261,20 @@ namespace Magnetar_Client.UI.Themes
             SettingDescriptionStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f);
 
             SettingDescriptionStyle.padding = new RectOffset();
-            SettingDescriptionStyle.padding.left = 5;
-            SettingDescriptionStyle.padding.right = 5;
-            SettingDescriptionStyle.padding.top = 2;
-            SettingDescriptionStyle.padding.bottom = 2;
+            SettingDescriptionStyle.padding.left = SettingDescriptionPaddingLR;
+            SettingDescriptionStyle.padding.right = SettingDescriptionPaddingLR;
+            SettingDescriptionStyle.padding.top = SettingDescriptionPaddingTB;
+            SettingDescriptionStyle.padding.bottom = SettingDescriptionPaddingTB;
 
             #endregion
 
             #region Author Style
             AuthorStyle = new GUIStyle();
-            AuthorStyle.fontSize = 15;
+            AuthorStyle.fontSize = AuthorFontSize;
             AuthorStyle.fontStyle = FontStyle.Italic;
             AuthorStyle.alignment = TextAnchor.MiddleLeft;
             AuthorStyle.padding = new RectOffset();
-            AuthorStyle.padding.left = 10;
+            AuthorStyle.padding.left = AuthorPaddingLeft;
             AuthorStyle.richText = true;
 
             AuthorStyle.normal = new GUIStyleState();
@@ -237,8 +284,8 @@ namespace Magnetar_Client.UI.Themes
 
             #region Seperator Style
             SeparatorStyle = new GUIStyle();
-            SeparatorStyle.fixedHeight = 1; 
-            SeparatorStyle.margin = new RectOffset(); 
+            SeparatorStyle.fixedHeight = SeparatorFixedHeight;
+            SeparatorStyle.margin = new RectOffset();
             SeparatorStyle.padding = new RectOffset();
             SeparatorStyle.normal = new GUIStyleState();
 
@@ -256,7 +303,7 @@ namespace Magnetar_Client.UI.Themes
             #region HudElement
             HUDElementStyle = new GUIStyle();
 
-            HUDElementStyle.fontSize = 18;
+            HUDElementStyle.fontSize = HUDElementFontSize;
             HUDElementStyle.alignment = TextAnchor.UpperLeft;
             HUDElementStyle.wordWrap = false;
             HUDElementStyle.richText = true;
@@ -290,10 +337,10 @@ namespace Magnetar_Client.UI.Themes
 
             NEFNodeStyle.alignment = TextAnchor.LowerCenter;
             NEFNodeStyle.padding = new RectOffset();
-            NEFNodeStyle.padding.left = 2;
-            NEFNodeStyle.padding.right = 2;
-            NEFNodeStyle.padding.top = 2;
-            NEFNodeStyle.padding.bottom = 5;
+            NEFNodeStyle.padding.left = NEFNodePaddingLR;
+            NEFNodeStyle.padding.right = NEFNodePaddingLR;
+            NEFNodeStyle.padding.top = NEFNodePaddingTop;
+            NEFNodeStyle.padding.bottom = NEFNodePaddingBottom;
             #endregion
 
             #region TextStyle Normal
@@ -303,7 +350,7 @@ namespace Magnetar_Client.UI.Themes
             TextStyle.alignment = TextAnchor.MiddleLeft;
             TextStyle.richText = false;
             TextStyle.clipping = TextClipping.Clip;
-            TextStyle.fontSize = 13;
+            TextStyle.fontSize = TextFontSize;
 
             TextStyle.normal.textColor = Color.white;
 
@@ -323,8 +370,98 @@ namespace Magnetar_Client.UI.Themes
 
             #endregion
 
+            // Apply current GUIScale immediately in case it isn't 1 at startup.
+            lastScale = -1f;
+            Rescale();
+
             DebugLogger.Msg("Initialized the Theme 'Magnetar_Default'");
 
+        }
+
+        /// <summary>
+        /// Re-derives every style's fontSize/padding/fixedHeight from the base
+        /// (1x) sizes using the current Config.GUIScale. Cheap to call every
+        /// frame - it only mutates plain int/float fields on existing GUIStyle
+        /// instances, it never allocates new styles or textures, and it bails
+        /// out immediately if the scale hasn't changed since the last call.
+        /// </summary>
+        public static void Rescale()
+        {
+            float scale = Config.GUIScale;
+            if (Mathf.Approximately(scale, lastScale)) return;
+            lastScale = scale;
+
+            int S(int baseValue) => Mathf.Max(1, Mathf.RoundToInt(Config.S(baseValue)));
+            float Sf(float baseValue) => Mathf.Max(0f, Config.S(baseValue));
+
+            // TopBar / TopBarActive
+            TopBar.fontSize = S(TopBarFontSize);
+            TopBar.padding.left = S(TopBarPaddingLR);
+            TopBar.padding.right = S(TopBarPaddingLR);
+            TopBar.padding.top = S(TopBarPaddingTB);
+            TopBar.padding.bottom = S(TopBarPaddingTB);
+
+            TopBarActive.fontSize = S(TopBarFontSize);
+            TopBarActive.padding.left = S(TopBarPaddingLR);
+            TopBarActive.padding.right = S(TopBarPaddingLR);
+            TopBarActive.padding.top = S(TopBarPaddingTB);
+            TopBarActive.padding.bottom = S(TopBarPaddingTB);
+
+            // ModuleOn / ModuleOff
+            ModuleOn.fontSize = S(ModuleFontSize);
+            ModuleOn.padding.left = S(ModulePaddingLeft);
+
+            ModuleOff.fontSize = S(ModuleFontSize);
+            ModuleOff.padding.left = S(ModulePaddingLeft);
+
+            // ModuleWindow
+            ModuleWindow.fontSize = S(ModuleWindowFontSize);
+            ModuleWindow.padding.top = S(ModuleWindowPaddingTop);
+
+            // SettingsWindow
+            SettingsWindow.fontSize = S(SettingsWindowFontSize);
+            SettingsWindow.padding.top = S(SettingsWindowPaddingTop);
+
+            // SettingOn / SettingOff
+            SettingOn.fontSize = S(SettingFontSize);
+            SettingOn.padding.left = S(SettingPaddingLeft);
+
+            SettingOff.fontSize = S(SettingFontSize);
+            SettingOff.padding.left = S(SettingPaddingLeft);
+
+            // DescriptionStyle
+            DescriptionStyle.fontSize = S(DescriptionFontSize);
+            DescriptionStyle.padding.left = S(DescriptionPaddingLR);
+            DescriptionStyle.padding.right = S(DescriptionPaddingLR);
+            DescriptionStyle.padding.top = S(DescriptionPaddingTB);
+            DescriptionStyle.padding.bottom = S(DescriptionPaddingTB);
+
+            // SettingDescriptionStyle
+            SettingDescriptionStyle.fontSize = S(SettingDescriptionFontSize);
+            SettingDescriptionStyle.padding.left = S(SettingDescriptionPaddingLR);
+            SettingDescriptionStyle.padding.right = S(SettingDescriptionPaddingLR);
+            SettingDescriptionStyle.padding.top = S(SettingDescriptionPaddingTB);
+            SettingDescriptionStyle.padding.bottom = S(SettingDescriptionPaddingTB);
+
+            // AuthorStyle
+            AuthorStyle.fontSize = S(AuthorFontSize);
+            AuthorStyle.padding.left = S(AuthorPaddingLeft);
+
+            // SeparatorStyle
+            SeparatorStyle.fixedHeight = Sf(SeparatorFixedHeight);
+
+            // HUDElementStyle
+            HUDElementStyle.fontSize = S(HUDElementFontSize);
+
+            // NEFNodeStyle
+            NEFNodeStyle.padding.left = S(NEFNodePaddingLR);
+            NEFNodeStyle.padding.right = S(NEFNodePaddingLR);
+            NEFNodeStyle.padding.top = S(NEFNodePaddingTop);
+            NEFNodeStyle.padding.bottom = S(NEFNodePaddingBottom);
+
+            // TextStyle, then mirror into TextHighlightedStyle
+            TextStyle.fontSize = S(TextFontSize);
+            TextHighlightedStyle.fontSize = TextStyle.fontSize;
         }
 
         private static Texture2D CreateTex(Color col)

@@ -7,8 +7,12 @@ namespace Magnetar_Client.Core
 {
     public static class NEFManager
     {
+        // Base (unscaled, GUIScale == 1) margin around the window - actual
+        // margin is derived via Config.S() so it scales with the rest of the UI.
+        private const float BaseMargin = 60f;
+
         public static bool ShowMenu = false;
-        public static float elementHeight = 25f;
+        public static float elementHeight => Config.S(25f);
         public static Rect windowRect = new Rect(60, 60, 1000, 700);
 
         public static void Init()
@@ -20,10 +24,11 @@ namespace Magnetar_Client.Core
 
         public static void Render()
         {
-            windowRect.x = 60f;
-            windowRect.y = 60f;
-            windowRect.width = Config.WindowWidth - 120f;
-            windowRect.height = Config.WindowHeight - 120f;
+            float margin = Config.S(BaseMargin);
+            windowRect.x = margin;
+            windowRect.y = margin;
+            windowRect.width = Config.WindowWidth - margin * 2f;
+            windowRect.height = Config.WindowHeight - margin * 2f;
 
             windowRect = GUI.Window(
                 2002,

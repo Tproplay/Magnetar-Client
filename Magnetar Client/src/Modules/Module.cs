@@ -538,4 +538,34 @@ namespace Magnetar_Client.Modules
     }
 
     public class EndCategorySetting : Setting { }
+
+    public class ButtonSetting : Setting
+    {
+        public string ButtonText;
+        public Action OnClick;
+
+        public ButtonSetting(string name, Action onClick, string buttonText = "Click")
+        {
+            Name = name;
+            OnClick = onClick;
+            ButtonText = buttonText;
+        }
+    }
+
+    public class LabelSetting : Setting
+    {
+        public string Text;
+
+        public LabelSetting(string text)
+        {
+            Name = text;
+            Text = text;
+        }
+
+        public LabelSetting(string name, string text)
+        {
+            Name = name;
+            Text = text;
+        }
+    }
 }

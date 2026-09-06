@@ -557,6 +557,8 @@ namespace Magnetar_Client.Core
                 else if (setting is MultiSelectSetting multiSet) HandleMultiSelectSetting(multiSet, ref y, width);
                 else if (setting is StringSetting strSet) HandleStringSetting(strSet, ref y, width);
                 else if (setting is SelectSetting selSet) HandleSelectSetting(selSet, ref y, width);
+                else if (setting is ButtonSetting btnSet) HandleButtonSetting(btnSet, ref y, width);
+                else if (setting is LabelSetting lblSet) HandleLabelSetting(lblSet, ref y, width);
 
                 y += Config.elementHeight + Config.spacing;
             }

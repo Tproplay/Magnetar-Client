@@ -62,14 +62,12 @@ namespace Magnetar_Client.Core
 
         public static void Render()
         {
-            DebugLogger.Msg("[HUDManager] Enter Render()");
             EnsureRects();
 
             try
             {
                 if (Config.dimBg && (Config.showgui || forceShow))
                 {
-                    DebugLogger.Msg("[HUDManager] Drawing dim background...");
                     if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2))
                     {
                         Input.ResetInputAxes();
@@ -82,7 +80,6 @@ namespace Magnetar_Client.Core
                         GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "", Magnetar_Default.DimStyle);
                     }
                     GUI.matrix = backupMatrix;
-                    DebugLogger.Msg("[HUDManager] Dim background drawn.");
                 }
 
                 Event e = Event.current;
@@ -107,7 +104,6 @@ namespace Magnetar_Client.Core
                 {
                     if (isSelectingElements)
                     {
-                        DebugLogger.Msg("[HUDManager] Invoking GUI.Window for ElementSelector (2001)...");
                         selectorRect = GUI.Window(
                             2001,
                             selectorRect,
@@ -118,7 +114,6 @@ namespace Magnetar_Client.Core
                     }
                     else
                     {
-                        DebugLogger.Msg("[HUDManager] Invoking GUI.Window for HUDControls (2000)...");
                         windowRect = GUI.Window(
                             2000,
                             windowRect,
@@ -129,9 +124,7 @@ namespace Magnetar_Client.Core
                     }
                 }
 
-                DebugLogger.Msg("[HUDManager] Reaching HUDRenderer.RenderOverlay()...");
                 HUDRenderer.RenderOverlay();
-                DebugLogger.Msg("[HUDManager] Finished HUDRenderer.RenderOverlay().");
             }
             catch (Exception ex)
             {
@@ -308,7 +301,7 @@ namespace Magnetar_Client.Core
                 currentWindowId++;
             }
 
-            DebugLogger .Msg($"Registered {Elements.Count} HUD elements");
+            DebugLogger.Msg($"Registered {Elements.Count} HUD elements");
 
         }
 
@@ -330,11 +323,8 @@ namespace Magnetar_Client.Core
 
             if (!isMasterVisible)
             {
-                DebugLogger.Msg("[HUDRenderer] Overlay not visible (isMasterVisible == false).");
                 return;
             }
-
-            DebugLogger.Msg($"[HUDRenderer] Rendering overlay elements (Total registered: {Elements.Count})...");
 
             for (int i = 0; i < Elements.Count; i++)
             {
@@ -347,13 +337,11 @@ namespace Magnetar_Client.Core
                 {
                     try
                     {
-                        DebugLogger.Msg($"  -> [HUDRenderer] Drawing Element: {element.Name} (ID: {element.WindowId})");
                         element.Render();
-                        DebugLogger.Msg($"  -> [HUDRenderer] Successfully drew: {element.Name}");
                     }
                     catch (Exception ex)
                     {
-                        DebugLogger.Error($"  -> [HUDRenderer] CRASH in element '{element.Name}': {ex}");
+                        DebugLogger.Error($"[HUDRenderer] CRASH in element '{element.Name}': {ex}");
                     }
                 }
             }

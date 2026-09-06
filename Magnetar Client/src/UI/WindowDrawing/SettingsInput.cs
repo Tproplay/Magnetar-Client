@@ -1105,5 +1105,35 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             return text;
         }
+
+        public static void HandleButtonSetting(ButtonSetting btnSet, ref float y, float width)
+        {
+            Event e = Event.current;
+            string translatedName = Translator.Translate(btnSet.Name);
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
+
+            Rect btnRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
+            bool isHovered = btnRect.Contains(e.mousePosition);
+
+            if (isHovered && !btnSet.IsDisabled) GUI.backgroundColor = Magnetar_Default.AccentColor;
+            GUI.Box(btnRect, Translator.Translate(btnSet.ButtonText), Magnetar_Default.SettingOff);
+            GUI.backgroundColor = Color.white;
+
+            if (isHovered && e.type == EventType.MouseDown && e.button == 0)
+            {
+                if (!btnSet.IsDisabled)
+                {
+                    btnSet.OnClick?.Invoke();
+                }
+                e.Use();
+            }
+        }
+
+        public static void HandleLabelSetting(LabelSetting lblSet, ref float y, float width)
+        {
+            string displayText = Translator.Translate(!string.IsNullOrEmpty(lblSet.Text) ? lblSet.Text : lblSet.Name);
+            Rect labelRect = new Rect(Config.indent, y, width - (Config.indent * 2), Config.elementHeight);
+            GUI.Label(labelRect, displayText, Magnetar_Default.SettingDescriptionStyle);
+        }
     }
 }

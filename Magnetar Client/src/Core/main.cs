@@ -110,6 +110,11 @@ namespace Magnetar_Client.Core
                     new Vector3(uniformScale, uniformScale, 1)
                 );
 
+#if ANDROID
+                // Renders floating toggle button or top-right close button
+                MobileMenuUI.Render();
+#endif
+
                 if (!hasWarmedUp)
                 {
                     WarmUp();

@@ -68,7 +68,7 @@ namespace Magnetar_Client.Modules
         {
             if (plantList == null || plantList.Count == 0)
             {
-                DebugLogger.Warning("No plants found on the lawn to save.");
+                DebugLogger.Warning("[QuickSetup] No plants found on the lawn to save.");
                 return;
             }
 
@@ -81,7 +81,7 @@ namespace Magnetar_Client.Modules
             string code = GenerateSetupCode();
             if (string.IsNullOrEmpty(code))
             {
-                DebugLogger.Error("Failed to encode current board setup.");
+                DebugLogger.Error("[QuickSetup] Failed to encode current board setup.");
                 return;
             }
 
@@ -90,14 +90,14 @@ namespace Magnetar_Client.Modules
             RefreshLoadOptions();
 
             NameOfSave.Value = "";
-            DebugLogger.Msg($"Saved '{saveName}' ({plantList.Count} plants).");
+            DebugLogger.Msg($"[QuickSetup] Saved '{saveName}' ({plantList.Count} plants).");
         }
 
         public void LoadSelectedSetup()
         {
             if (!Active)
             {
-                DebugLogger.Warning("Module is disabled. Turn the module ON to load setups.");
+                DebugLogger.Warning("[QuickSetup] Module is disabled. Turn the module ON to load setups.");
                 return;
             }
 
@@ -116,7 +116,7 @@ namespace Magnetar_Client.Modules
 
             if (!_savedSetups.TryGetValue(selectedName, out string code) || string.IsNullOrEmpty(code))
             {
-                DebugLogger.Warning($"Setup '{selectedName}' contains no data.");
+                DebugLogger.Warning($"[QuickSetup] Setup '{selectedName}' contains no data.");
                 return;
             }
 
@@ -155,7 +155,7 @@ namespace Magnetar_Client.Modules
                 }
             }
 
-            DebugLogger.Msg($"Loaded '{selectedName}' ({placedCount} plants placed).");
+            DebugLogger.Msg($"[QuickSetup] Loaded '{selectedName}' ({placedCount} plants placed).");
         }
 
         public void DeleteSelectedSetup()
@@ -163,7 +163,7 @@ namespace Magnetar_Client.Modules
             string selectedName = GetSelectedSetupName();
             if (string.IsNullOrEmpty(selectedName))
             {
-                DebugLogger.Warning("No setup selected to delete.");
+                DebugLogger.Warning("[QuickSetup] No setup selected to delete.");
                 return;
             }
 
@@ -172,7 +172,7 @@ namespace Magnetar_Client.Modules
                 SaveSetupsToDisk();
                 RefreshLoadOptions();
                 LoadSetup.SelectedValues.Clear();
-                DebugLogger.Msg($"Deleted '{selectedName}'.");
+                DebugLogger.Msg($"[QuickSetup] Deleted '{selectedName}'.");
             }
         }
 

@@ -18,7 +18,6 @@ namespace Magnetar_Client.HUDElements
         public float UpdateInterval = 0;
         private float _updateInterval = 0;
 
-        // Cached IL2CPP delegate trampoline per instance
         private GUI.WindowFunction _cachedWindowDelegate;
 
         private GUI.WindowFunction GetWindowDelegate()
@@ -94,20 +93,21 @@ namespace Magnetar_Client.HUDElements
                     }
                 }
 
-                // B. Stop Dragging
-                if (e.rawType == EventType.MouseUp && e.button == 0)
-                {
-                    if (ActiveDragId == WindowId)
-                    {
-                        ActiveDragId = -1;
-                    }
-                }
-
-                // C. Process Drag
+                // B. Process Drag
                 if (ActiveDragId == WindowId)
                 {
                     Rect intendedBounds = new Rect(e.mousePosition.x - dragOffset.x, e.mousePosition.y - dragOffset.y, Bounds.width, Bounds.height);
                     Bounds = ApplySnapping(intendedBounds);
+                }
+
+                // C. Stop Dragging
+                if ((e.type == EventType.MouseUp || e.rawType == EventType.MouseUp) && e.button == 0)
+                {
+                    if (ActiveDragId == WindowId)
+                    {
+                        ActiveDragId = -1;
+                        e.Use();
+                    }
                 }
             }
 
@@ -116,7 +116,6 @@ namespace Magnetar_Client.HUDElements
 
             if (HUDManager.forceShow)
             {
-                // Converted delegate prevents IL2CPP crash
                 GUI.Window(
                     WindowId,
                     Bounds,
@@ -132,7 +131,6 @@ namespace Magnetar_Client.HUDElements
                     windowStyle.Draw(Bounds, false, false, false, false);
                 }
 
-                // Guard dimensions before BeginGroup
                 if (Bounds.width > 0 && Bounds.height > 0)
                 {
                     GUI.BeginGroup(Bounds);
@@ -144,6 +142,11 @@ namespace Magnetar_Client.HUDElements
 
         private Rect ApplySnapping(Rect rect)
         {
+#if ANDROID
+            // Mobile: Snapping is automatic and magnetic without requiring keyboard modifiers
+            return CalculateFlushDocking(rect);
+#else
+            // PC: Preserves key combinations
             bool isShiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             bool isCtrlHeld = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
 
@@ -157,42 +160,99 @@ namespace Magnetar_Client.HUDElements
 
             if (isShiftHeld)
             {
-                float snapDist = 10f;
-                float canvasWidth = 1920f;
-                float canvasHeight = 1080f;
+                return CalculateFlushDocking(rect);
+            }
 
-                float snappedX = rect.x;
-                float snappedY = rect.y;
+            // Free-form movement when no keys are held on PC
+            return rect;
+#endif
+        }
 
-                if (Mathf.Abs(snappedX) < snapDist) snappedX = 0;
-                else if (Mathf.Abs(snappedX + rect.width - canvasWidth) < snapDist) snappedX = canvasWidth - rect.width;
-                else if (Mathf.Abs((snappedX + rect.width / 2f) - (canvasWidth / 2f)) < snapDist) snappedX = (canvasWidth / 2f) - (rect.width / 2f);
+        private Rect CalculateFlushDocking(Rect rect)
+        {
+            float snapThreshold = 14f * Mathf.Max(1f, Config.ElementScale);
+            float canvasWidth = 1920f;
+            float canvasHeight = 1080f;
 
-                if (Mathf.Abs(snappedY) < snapDist) snappedY = 0;
-                else if (Mathf.Abs(snappedY + rect.height - canvasHeight) < snapDist) snappedY = canvasHeight - rect.height;
-                else if (Mathf.Abs((snappedY + rect.height / 2f) - (canvasHeight / 2f)) < snapDist) snappedY = (canvasHeight / 2f) - (rect.height / 2f);
+            float bestX = rect.x;
+            float bestDiffX = snapThreshold;
 
-                foreach (var other in HUDRenderer.Elements)
+            float bestY = rect.y;
+            float bestDiffY = snapThreshold;
+
+            // 1. Canvas Boundary Snapping
+            if (Mathf.Abs(rect.x) < bestDiffX)
+            {
+                bestX = 0f;
+                bestDiffX = Mathf.Abs(rect.x);
+            }
+            if (Mathf.Abs(rect.x + rect.width - canvasWidth) < bestDiffX)
+            {
+                bestX = canvasWidth - rect.width;
+                bestDiffX = Mathf.Abs(rect.x + rect.width - canvasWidth);
+            }
+            if (Mathf.Abs(rect.x + rect.width / 2f - canvasWidth / 2f) < bestDiffX)
+            {
+                bestX = (canvasWidth - rect.width) / 2f;
+                bestDiffX = Mathf.Abs(rect.x + rect.width / 2f - canvasWidth / 2f);
+            }
+
+            if (Mathf.Abs(rect.y) < bestDiffY)
+            {
+                bestY = 0f;
+                bestDiffY = Mathf.Abs(rect.y);
+            }
+            if (Mathf.Abs(rect.y + rect.height - canvasHeight) < bestDiffY)
+            {
+                bestY = canvasHeight - rect.height;
+                bestDiffY = Mathf.Abs(rect.y + rect.height - canvasHeight);
+            }
+            if (Mathf.Abs(rect.y + rect.height / 2f - canvasHeight / 2f) < bestDiffY)
+            {
+                bestY = (canvasHeight - rect.height) / 2f;
+                bestDiffY = Mathf.Abs(rect.y + rect.height / 2f - canvasHeight / 2f);
+            }
+
+            // 2. Element-to-Element Flush Docking (0px gap)
+            if (HUDRenderer.Elements != null)
+            {
+                for (int i = 0; i < HUDRenderer.Elements.Count; i++)
                 {
-                    if (other.WindowId == this.WindowId || !HUDRenderer.HudToggles.IsSelected(other.WindowId)) continue;
+                    var other = HUDRenderer.Elements[i];
+                    if (other == null || other.WindowId == this.WindowId) continue;
+                    if (HUDRenderer.HudToggles != null && !HUDRenderer.HudToggles.IsSelected(other.WindowId)) continue;
 
                     Rect otherR = other.Bounds;
 
-                    if (Mathf.Abs(snappedX - otherR.x) < snapDist) snappedX = otherR.x;
-                    else if (Mathf.Abs(snappedX - (otherR.x + otherR.width)) < snapDist) snappedX = otherR.x + otherR.width;
-                    else if (Mathf.Abs((snappedX + rect.width) - otherR.x) < snapDist) snappedX = otherR.x - rect.width;
-                    else if (Mathf.Abs((snappedX + rect.width) - (otherR.x + otherR.width)) < snapDist) snappedX = otherR.x + otherR.width - rect.width;
+                    // X-Axis Alignment & Docking
+                    float dLeft = Mathf.Abs(rect.x - otherR.x);
+                    if (dLeft < bestDiffX) { bestX = otherR.x; bestDiffX = dLeft; }
 
-                    if (Mathf.Abs(snappedY - otherR.y) < snapDist) snappedY = otherR.y;
-                    else if (Mathf.Abs(snappedY - (otherR.y + otherR.height)) < snapDist) snappedY = otherR.y + otherR.height;
-                    else if (Mathf.Abs((snappedY + rect.height) - otherR.y) < snapDist) snappedY = otherR.y - rect.height;
-                    else if (Mathf.Abs((snappedY + rect.height) - (otherR.y + otherR.height)) < snapDist) snappedY = otherR.y + otherR.height - rect.height;
+                    float dRight = Mathf.Abs((rect.x + rect.width) - (otherR.x + otherR.width));
+                    if (dRight < bestDiffX) { bestX = otherR.x + otherR.width - rect.width; bestDiffX = dRight; }
+
+                    float dDockRight = Mathf.Abs(rect.x - (otherR.x + otherR.width));
+                    if (dDockRight < bestDiffX) { bestX = otherR.x + otherR.width; bestDiffX = dDockRight; }
+
+                    float dDockLeft = Mathf.Abs((rect.x + rect.width) - otherR.x);
+                    if (dDockLeft < bestDiffX) { bestX = otherR.x - rect.width; bestDiffX = dDockLeft; }
+
+                    // Y-Axis Alignment & Docking
+                    float dDockUnder = Mathf.Abs(rect.y - (otherR.y + otherR.height));
+                    if (dDockUnder < bestDiffY) { bestY = otherR.y + otherR.height; bestDiffY = dDockUnder; }
+
+                    float dDockAbove = Mathf.Abs((rect.y + rect.height) - otherR.y);
+                    if (dDockAbove < bestDiffY) { bestY = otherR.y - rect.height; bestDiffY = dDockAbove; }
+
+                    float dTop = Mathf.Abs(rect.y - otherR.y);
+                    if (dTop < bestDiffY) { bestY = otherR.y; bestDiffY = dTop; }
+
+                    float dBottom = Mathf.Abs((rect.y + rect.height) - (otherR.y + otherR.height));
+                    if (dBottom < bestDiffY) { bestY = otherR.y + otherR.height - rect.height; bestDiffY = dBottom; }
                 }
-
-                return new Rect(snappedX, snappedY, rect.width, rect.height);
             }
 
-            return rect;
+            return new Rect(bestX, bestY, rect.width, rect.height);
         }
 
         private void DrawWindowContext(int id)
@@ -218,26 +278,39 @@ namespace Magnetar_Client.HUDElements
 
         protected abstract void DrawContent(float width, float height);
 
-        protected void AdjustWidthToText(string text, GUIStyle style, float padding = 10f)
+        protected void AdjustWidthToText(string text, GUIStyle style, float padding = 8f)
         {
             if (style == null || string.IsNullOrEmpty(text)) return;
 
             Vector2 textSize = style.CalcSize(new GUIContent(text));
-            float targetWidth = textSize.x + padding;
+            float targetWidth = textSize.x + (padding * Config.ElementScale);
+            float targetHeight = textSize.y + (4f * Config.ElementScale);
 
-            if (Mathf.Abs(Bounds.width - targetWidth) > 1f)
+            if (Mathf.Abs(Bounds.width - targetWidth) > 0.5f)
             {
                 Bounds.width = targetWidth;
+            }
+            if (Mathf.Abs(Bounds.height - targetHeight) > 0.5f)
+            {
+                Bounds.height = targetHeight;
             }
         }
 
         private static Vector2 windowPos = new Vector2(10, 10);
-        public static Rect NewRect(float width = 250, float height = 28)
+        public static Rect NewRect(float width = 250, float height = 24)
         {
-            Rect rect = new Rect(windowPos.x, windowPos.y, width, height);
+            float actualHeight = height * Config.ElementScale;
+            Rect rect = new Rect(windowPos.x, windowPos.y, width * Config.ElementScale, actualHeight);
 
-            if (windowPos.y > 800) { windowPos.x += 300; windowPos.y = 10; }
-            else windowPos.y += height;
+            if (windowPos.y > 800)
+            {
+                windowPos.x += 300;
+                windowPos.y = 10;
+            }
+            else
+            {
+                windowPos.y += actualHeight;
+            }
 
             return rect;
         }

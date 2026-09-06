@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using Magnetar_Client.UI.Themes;
+
 
 #if MELONLOADER || RELEASE_MELON
 using MelonLoader;
@@ -25,7 +27,8 @@ namespace Magnetar_Client.Utils
         {
             public bool ShowGui = false;
             public int Language;
-
+            public float GUIScale = 1f;
+            public float ElementScale = 1f;
             public bool HudEnabled = true;
             public bool ShowBackground = false;
             public List<int> SelectedHudElements = new List<int>();
@@ -161,6 +164,8 @@ namespace Magnetar_Client.Utils
                 CategoryPositions = new Dictionary<string, SimpleRect>(),
                 Modules = new Dictionary<string, ModuleSaveData>(),
                 Language = safeLanguage,
+                GUIScale = Config.GUIScale,
+                ElementScale = Config.ElementScale
             };
 
             if (HUDRenderer.Elements != null)
@@ -338,6 +343,16 @@ namespace Magnetar_Client.Utils
                                 }
                             }
                         }
+
+                        if (data.GUIScale > 0.1f)
+                        {
+                            Config.GUIScale = data.GUIScale;
+                        }
+                        if (data.ElementScale > 0.1f)
+                        {
+                            Config.ElementScale = data.ElementScale;
+                        }
+                        Magnetar_Default.Rescale();
 
                         AutoSaveLogger.Msg($"Loaded Magnetar Profile '{Config.CurrentProfile}'");
                     }

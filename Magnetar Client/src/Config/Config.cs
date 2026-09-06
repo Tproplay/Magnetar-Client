@@ -38,6 +38,9 @@ namespace Magnetar_Client
         public static float GUIScale = 1f;
         public static float S(float value) => value * GUIScale;
 
+        public static float ElementScale = 1f;
+        public static float ES(float value) => value * ElementScale;
+
         public static bool showgui = true;
         public static bool dimBg = false;
         public static TabType CurrentTab = TabType.MODULES;
@@ -101,7 +104,7 @@ namespace Magnetar_Client
                 set => _baseScrollSensitivity = value;
             }
 
-            // Multi-Select Window
+            // Multi-Select Window (Capped at 80% of screen height)
             private static float _baseMultiSelectWindowWidth = 500f;
             public static float MultiSelectWindowWidth
             {
@@ -112,7 +115,7 @@ namespace Magnetar_Client
             private static float _baseMultiSelectWindowHeight = 800f;
             public static float MultiSelectWindowHeight
             {
-                get => S(_baseMultiSelectWindowHeight);
+                get => Mathf.Min(S(_baseMultiSelectWindowHeight), WindowHeight * 0.8f);
                 set => _baseMultiSelectWindowHeight = value;
             }
         }

@@ -27,7 +27,7 @@ namespace Magnetar_Client.HUDElements
 
             displayText = $"FPS: <color={colorName}>{(int)fps}</color>";
 
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
         }
         public override void OnEnable()
         {
@@ -55,11 +55,11 @@ namespace Magnetar_Client.HUDElements
 
             displayText = $"FPS (Real): <color={colorName}>{(int)fps}</color>";
 
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
         }
         public override void OnEnable()
         {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
+            AdjustWidthToText(displayText, HUDElementStyle, 10);
         }
     }
 

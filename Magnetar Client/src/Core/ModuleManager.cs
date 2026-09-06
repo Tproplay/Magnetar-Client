@@ -317,26 +317,30 @@ namespace Magnetar_Client.Core
             }
             else if (showSelectionGui)
             {
+                // Enforce max 80% screen height and width constraints
+                float targetW = Mathf.Min(Config.ModuleManager.MultiSelectWindowWidth, Config.WindowWidth * 0.95f);
+                float targetH = Mathf.Min(Config.ModuleManager.MultiSelectWindowHeight, Config.WindowHeight * 0.8f);
+
                 if (resetWindowPos)
                 {
-                    // Freshly opened - snap to the true screen center at the
-                    // current GUIScale, ignoring any previous drag position.
+                    // Center the window on first open and consume the reset flag
                     multiSelectWindowRect = new Rect(
-                        Config.WindowWidth / 2f - Config.ModuleManager.MultiSelectWindowWidth / 2f,
-                        Config.WindowHeight / 2f - Config.ModuleManager.MultiSelectWindowHeight / 2f,
-                        Config.ModuleManager.MultiSelectWindowWidth,
-                        Config.ModuleManager.MultiSelectWindowHeight
+                        (Config.WindowWidth - targetW) / 2f,
+                        (Config.WindowHeight - targetH) / 2f,
+                        targetW,
+                        targetH
                     );
+                    resetWindowPos = false;
                 }
                 else
                 {
-                    // Already open - just keep its size in sync with the
-                    // current GUIScale, growing/shrinking around wherever the
-                    // user last dragged it.
-                    Config.RescaleAroundCenter(ref multiSelectWindowRect,
-                        Config.ModuleManager.MultiSelectWindowWidth,
-                        Config.ModuleManager.MultiSelectWindowHeight);
+                    // Maintain position while updating scale and height constraints
+                    Config.RescaleAroundCenter(ref multiSelectWindowRect, targetW, targetH);
                 }
+
+                // Keep the window inside playable screen boundaries
+                multiSelectWindowRect.x = Mathf.Clamp(multiSelectWindowRect.x, 0f, Mathf.Max(0f, Config.WindowWidth - multiSelectWindowRect.width));
+                multiSelectWindowRect.y = Mathf.Clamp(multiSelectWindowRect.y, 0f, Mathf.Max(0f, Config.WindowHeight - multiSelectWindowRect.height));
 
                 if (activeMultiSelect != null)
                 {
@@ -347,6 +351,21 @@ namespace Magnetar_Client.Core
                         "",
                         Magnetar_Default.ModuleWindow
                     );
+
+                    // Prevent click-through to game elements beneath the window
+                    Event currentEvent = Event.current;
+                    if (currentEvent != null && multiSelectWindowRect.Contains(currentEvent.mousePosition))
+                    {
+                        if (currentEvent.type == EventType.MouseDown)
+                        {
+                            Input.ResetInputAxes();
+                            currentEvent.Use();
+                        }
+                    }
+                }
+                else
+                {
+                    showSelectionGui = false;
                 }
             }
         }
@@ -371,9 +390,7 @@ namespace Magnetar_Client.Core
 
                 float windowWidth = windowPositions[category].width;
 
-#if !ANDROID
                 GUI.DragWindow(new Rect(0, 0, windowWidth, Config.S(25f)));
-#endif
 
                 float yOffset = Config.S(28f);
                 float buttonHeight = Config.S(28f);
@@ -630,8 +647,7 @@ namespace Magnetar_Client.Core
 
         private static void MultiSelectBridge(int id)
         {
-            GUI.DragWindow(new Rect(0, 0, multiSelectWindowRect.width, Config.S(25f)));
-
+            GUI.DragWindow(new Rect(0, 0, multiSelectWindowRect.width, Config.S(34f)));
             DrawMultiSelectWindow(multiSelectWindowRect, activeMultiSelect);
         }
 

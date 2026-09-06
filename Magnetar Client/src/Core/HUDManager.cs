@@ -18,8 +18,6 @@ namespace Magnetar_Client.Core
         public static bool isSelectingElements = false;
         public static bool showBackground = false;
 
-        // Base (unscaled, GUIScale == 1) sizes - actual sizes are derived via
-        // Config.S() so this window scales with the rest of the UI.
         private const float BaseWidth = 500f;
         private const float BaseHeight = 300f;
         private const float BaseElementHeight = 25f;
@@ -28,7 +26,6 @@ namespace Magnetar_Client.Core
 
         public static float elementHeight => Config.S(BaseElementHeight);
 
-        // Lazy initialized rects to avoid static constructor (.cctor) crashes
         public static Rect windowRect = Rect.zero;
         public static Rect selectorRect = Rect.zero;
 
@@ -36,26 +33,33 @@ namespace Magnetar_Client.Core
 
         private static void EnsureRects()
         {
+            float targetSelectorWidth = Config.S(BaseSelectorWidth);
+            float maxSelectorHeight = Config.WindowHeight * 0.8f;
+            float targetSelectorHeight = Mathf.Min(Config.S(BaseSelectorHeight), maxSelectorHeight);
+
             if (!_rectsInitialized)
             {
                 windowRect = new Rect(
-                    (Config.WindowWidth - Config.S(BaseWidth)) / 2,
-                    (Config.WindowHeight - Config.S(BaseHeight)) / 2,
+                    (Config.WindowWidth - Config.S(BaseWidth)) / 2f,
+                    (Config.WindowHeight - Config.S(BaseHeight)) / 2f,
                     Config.S(BaseWidth),
                     Config.S(BaseHeight));
+
                 selectorRect = new Rect(
-                    (Config.WindowWidth - Config.S(BaseSelectorWidth)) / 2,
-                    (Config.WindowHeight - Config.S(BaseSelectorHeight)) / 2,
-                    Config.S(BaseSelectorWidth),
-                    Config.S(BaseSelectorHeight));
+                    (Config.WindowWidth - targetSelectorWidth) / 2f,
+                    (Config.WindowHeight - targetSelectorHeight) / 2f,
+                    targetSelectorWidth,
+                    targetSelectorHeight);
+
                 _rectsInitialized = true;
             }
 
-            // Keep both windows sized for the current GUIScale, growing or
-            // shrinking around wherever they're currently positioned so an
-            // open window doesn't jump when the scale changes mid-session.
             Config.RescaleAroundCenter(ref windowRect, Config.S(BaseWidth), windowRect.height);
-            Config.RescaleAroundCenter(ref selectorRect, Config.S(BaseSelectorWidth), Config.S(BaseSelectorHeight));
+            Config.RescaleAroundCenter(ref selectorRect, targetSelectorWidth, targetSelectorHeight);
+
+            // Clamp selector window inside screen canvas
+            selectorRect.x = Mathf.Clamp(selectorRect.x, 0f, Mathf.Max(0f, Config.WindowWidth - selectorRect.width));
+            selectorRect.y = Mathf.Clamp(selectorRect.y, 0f, Mathf.Max(0f, Config.WindowHeight - selectorRect.height));
         }
 
         private static GUI.WindowFunction _cachedSelectorDelegate;
@@ -87,10 +91,12 @@ namespace Magnetar_Client.Core
             {
                 if (Config.dimBg && (Config.showgui || forceShow))
                 {
+#if !ANDROID
                     if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2))
                     {
                         Input.ResetInputAxes();
                     }
+#endif
 
                     Matrix4x4 backupMatrix = GUI.matrix;
                     GUI.matrix = Matrix4x4.identity;
@@ -108,6 +114,7 @@ namespace Magnetar_Client.Core
                 {
                     forceShow = false;
                     Config.showgui = true;
+                    SaveLoad.Save();
                     e.Use();
                     return;
                 }
@@ -118,6 +125,11 @@ namespace Magnetar_Client.Core
                     return;
                 }
                 #endregion
+
+                if (forceShow)
+                {
+                    DrawExitLayoutButton();
+                }
 
                 if (Config.CurrentTab == TabType.HUD && !forceShow && Config.showgui)
                 {
@@ -151,19 +163,78 @@ namespace Magnetar_Client.Core
             }
         }
 
+        private static GUIStyle _exitBtnStyle;
+        private static GUIStyle GetExitBtnStyle()
+        {
+            if (_exitBtnStyle == null)
+            {
+                _exitBtnStyle = new GUIStyle();
+
+                if (Magnetar_Default.SettingsWindow != null)
+                {
+                    _exitBtnStyle.normal.background = Magnetar_Default.SettingsWindow.normal.background;
+                    _exitBtnStyle.normal.textColor = Magnetar_Default.SettingsWindow.normal.textColor;
+                    _exitBtnStyle.fontStyle = Magnetar_Default.SettingsWindow.fontStyle;
+                }
+
+                _exitBtnStyle.alignment = TextAnchor.MiddleCenter;
+
+                _exitBtnStyle.padding = new RectOffset();
+                _exitBtnStyle.padding.left = 0;
+                _exitBtnStyle.padding.right = 0;
+                _exitBtnStyle.padding.top = 0;
+                _exitBtnStyle.padding.bottom = 0;
+
+                _exitBtnStyle.margin = new RectOffset();
+                _exitBtnStyle.margin.left = 0;
+                _exitBtnStyle.margin.right = 0;
+                _exitBtnStyle.margin.top = 0;
+                _exitBtnStyle.margin.bottom = 0;
+            }
+
+            _exitBtnStyle.fontSize = Mathf.RoundToInt(Config.S(16f));
+            return _exitBtnStyle;
+        }
+
+        private static void DrawExitLayoutButton()
+        {
+            Event e = Event.current;
+            float btnWidth = Config.S(180f);
+            float btnHeight = Config.S(36f);
+            Rect exitRect = new Rect((Config.WindowWidth - btnWidth) / 2f, Config.S(16f), btnWidth, btnHeight);
+
+            bool isHovered = exitRect.Contains(e.mousePosition);
+            if (isHovered) GUI.backgroundColor = Magnetar_Default.AccentColor;
+
+            GUI.Box(exitRect, Translator.Translate("Exit Layout"), GetExitBtnStyle());
+            GUI.backgroundColor = Color.white;
+
+            if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
+            {
+                forceShow = false;
+                Config.showgui = true;
+                SaveLoad.Save();
+#if !ANDROID
+                Input.ResetInputAxes();
+#endif
+                e.Use();
+            }
+        }
+
         private static void DrawElementSelector(int windowID)
         {
-            GUI.DragWindow(new Rect(0, 0, selectorRect.width, Config.S(25f)));
+            GUI.DragWindow(new Rect(0, 0, selectorRect.width, Config.S(34f)));
             Event e = Event.current;
 
-            float startY = Config.S(35f) + elementHeight + Config.S(10f);
-            Rect multiSelectRect = new Rect(0, startY, selectorRect.width, selectorRect.height);
-
+            // Fill local window canvas directly; DrawMultiSelectWindow handles banner and search bar internally
+            Rect multiSelectRect = new Rect(0, 0, selectorRect.width, selectorRect.height);
             UI.WindowDrawing.DrawSetting.DrawMultiSelectWindow(multiSelectRect, UI.WindowDrawing.DrawSetting.activeMultiSelect);
 
             if (multiSelectRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
+#if !ANDROID
                 Input.ResetInputAxes();
+#endif
                 e.Use();
             }
         }
@@ -171,7 +242,6 @@ namespace Magnetar_Client.Core
         private static void DrawHUDControls(int windowID)
         {
             float width = windowRect.width;
-            float elementWidth = width - Config.S(20f);
             float indent = Config.S(10f);
             Event e = Event.current;
             float y = Config.S(35f);
@@ -196,8 +266,16 @@ namespace Magnetar_Client.Core
                 UI.WindowDrawing.DrawSetting.multiSelectSearchQuery = "";
                 UI.WindowDrawing.DrawSetting.manualScrollY = 0f;
 
-                selectorRect.x = (Config.WindowWidth - Config.S(BaseSelectorWidth)) / 2;
-                selectorRect.y = (Config.WindowHeight - Config.S(BaseSelectorHeight)) / 2;
+                // Center using the 80% clamped target height
+                float targetW = Config.S(BaseSelectorWidth);
+                float targetH = Mathf.Min(Config.S(BaseSelectorHeight), Config.WindowHeight * 0.8f);
+
+                selectorRect = new Rect(
+                    (Config.WindowWidth - targetW) / 2f,
+                    (Config.WindowHeight - targetH) / 2f,
+                    targetW,
+                    targetH
+                );
 
                 isSelectingElements = true;
             }
@@ -270,7 +348,9 @@ namespace Magnetar_Client.Core
             Rect _windowRect = new Rect(0, 0, width, y);
             if (_windowRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
+#if !ANDROID
                 Input.ResetInputAxes();
+#endif
                 e.Use();
             }
         }
@@ -287,17 +367,8 @@ namespace Magnetar_Client.Core
 
     public static class HUDRenderer
     {
-        /// <summary>
-        /// Gets the collection of HUD elements currently managed by the client.
-        /// </summary>
         public static List<HudElement> Elements = new List<HudElement>();
-
-
-        /// <summary>
-        /// Gets or sets the collection of HUD toggle options available/Selected.
-        /// </summary>
         public static MultiSelectSetting HudToggles;
-
         private static bool isMasterVisible;
 
         public static void Init()
@@ -321,7 +392,6 @@ namespace Magnetar_Client.Core
             }
 
             DebugLogger.Msg($"Registered {Elements.Count} HUD elements");
-
         }
 
         public static void RegisterElement(HudElement element)
@@ -340,10 +410,7 @@ namespace Magnetar_Client.Core
                 isMasterVisible = false;
             }
 
-            if (!isMasterVisible)
-            {
-                return;
-            }
+            if (!isMasterVisible) return;
 
             for (int i = 0; i < Elements.Count; i++)
             {
@@ -373,11 +440,8 @@ namespace Magnetar_Client.Core
             foreach (var element in Elements)
             {
                 bool isElementEnabled = isMasterVisible && HudToggles.IsSelected(element.WindowId);
-
                 element.HandleLifecycle(isElementEnabled);
-
             }
         }
-
     }
 }

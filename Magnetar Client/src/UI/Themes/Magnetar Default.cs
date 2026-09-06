@@ -197,12 +197,12 @@ namespace Magnetar_Client.UI.Themes
             SettingsWindow.normal.background = AccentTex;
             SettingsWindow.normal.textColor = Color.black;
 
-            SettingsWindow.alignment = TextAnchor.UpperCenter;
+            SettingsWindow.alignment = TextAnchor.MiddleCenter;
             SettingsWindow.fontSize = SettingsWindowFontSize;
             SettingsWindow.fontStyle = FontStyle.Bold;
 
             SettingsWindow.padding = new RectOffset();
-            SettingsWindow.padding.top = SettingsWindowPaddingTop;
+            SettingsWindow.padding.top = 0;
             SettingsWindow.padding.bottom = 0;
             SettingsWindow.padding.left = 0;
             SettingsWindow.padding.right = 0;
@@ -302,17 +302,19 @@ namespace Magnetar_Client.UI.Themes
 
             #region HudElement
             HUDElementStyle = new GUIStyle();
-
             HUDElementStyle.fontSize = HUDElementFontSize;
-            HUDElementStyle.alignment = TextAnchor.UpperLeft;
+            HUDElementStyle.alignment = TextAnchor.MiddleCenter; // Centers text horizontally and vertically
             HUDElementStyle.wordWrap = false;
             HUDElementStyle.richText = true;
 
+            HUDElementStyle.padding = new RectOffset();
+            HUDElementStyle.padding.left = 0;
+            HUDElementStyle.padding.right = 0;
+            HUDElementStyle.padding.top = 0;
+            HUDElementStyle.padding.bottom = 0;
+
             HUDElementStyle.normal = new GUIStyleState();
             HUDElementStyle.normal.textColor = Color.white;
-
-
-
             #endregion
 
             #region NEF Node Connection line
@@ -372,11 +374,14 @@ namespace Magnetar_Client.UI.Themes
 
             // Apply current GUIScale immediately in case it isn't 1 at startup.
             lastScale = -1f;
+            lastElementScale = -1f;
             Rescale();
 
             DebugLogger.Msg("Initialized the Theme 'Magnetar_Default'");
 
         }
+
+        private static float lastElementScale = -1f;
 
         /// <summary>
         /// Re-derives every style's fontSize/padding/fixedHeight from the base
@@ -388,8 +393,13 @@ namespace Magnetar_Client.UI.Themes
         public static void Rescale()
         {
             float scale = Config.GUIScale;
-            if (Mathf.Approximately(scale, lastScale)) return;
+            float elementScale = Config.ElementScale;
+
+            if (Mathf.Approximately(scale, lastScale) && Mathf.Approximately(elementScale, lastElementScale))
+                return;
+
             lastScale = scale;
+            lastElementScale = elementScale;
 
             int S(int baseValue) => Mathf.Max(1, Mathf.RoundToInt(Config.S(baseValue)));
             float Sf(float baseValue) => Mathf.Max(0f, Config.S(baseValue));
@@ -420,7 +430,8 @@ namespace Magnetar_Client.UI.Themes
 
             // SettingsWindow
             SettingsWindow.fontSize = S(SettingsWindowFontSize);
-            SettingsWindow.padding.top = S(SettingsWindowPaddingTop);
+            SettingsWindow.padding.top = 0;
+            SettingsWindow.padding.bottom = 0;
 
             // SettingOn / SettingOff
             SettingOn.fontSize = S(SettingFontSize);
@@ -450,8 +461,13 @@ namespace Magnetar_Client.UI.Themes
             // SeparatorStyle
             SeparatorStyle.fixedHeight = Sf(SeparatorFixedHeight);
 
-            // HUDElementStyle
-            HUDElementStyle.fontSize = S(HUDElementFontSize);
+            // HUDElementStyle scales strictly by ElementScale
+            HUDElementStyle.fontSize = Mathf.Max(1, Mathf.RoundToInt(HUDElementFontSize * elementScale));
+            HUDElementStyle.alignment = TextAnchor.MiddleCenter;
+            HUDElementStyle.padding.left = 0;
+            HUDElementStyle.padding.right = 0;
+            HUDElementStyle.padding.top = 0;
+            HUDElementStyle.padding.bottom = 0;
 
             // NEFNodeStyle
             NEFNodeStyle.padding.left = S(NEFNodePaddingLR);

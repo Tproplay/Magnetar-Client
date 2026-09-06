@@ -14,9 +14,8 @@ namespace Magnetar_Client.Core
 
         public static MultiSelectSetting LanguageSetting;
         public static FloatSetting ScaleSetting;
+        public static FloatSetting ElementScaleSetting;
 
-        // Base (unscaled, GUIScale == 1) sizes - actual sizes are derived via
-        // Config.S() so this window scales with the rest of the UI.
         private const float BaseWidth = 500f;
         private const float BaseHeight = 300f;
         private const float BaseElementHeight = 25f;
@@ -57,7 +56,6 @@ namespace Magnetar_Client.Core
             };
 
 #if ANDROID
-            // Lock to default English on Android without directory scanning or translation switching
             LanguageSetting.AddOption(0, "English");
             LanguageSetting.SelectedValues.Add(0);
             LanguageSetting.IsDisabled = true;
@@ -87,17 +85,28 @@ namespace Magnetar_Client.Core
             }
 #endif
 
-            // --- 2. GUI Scale Slider Setting ---
-            if (Config.GUIScale <= 0.1f)
-            {
-                Config.GUIScale = 1.0f;
-            }
+            // --- 2. GUI Scale Setting ---
+            if (Config.GUIScale <= 0.1f) Config.GUIScale = 1.0f;
 
             ScaleSetting = new FloatSetting("GUI Scale", 0.5f, 2.0f, Config.GUIScale, decimalPlaces: 3, trueMin: 0.25f, trueMax: 3.0f)
             {
                 OnValueChanged = (val) =>
                 {
                     Config.GUIScale = val;
+                    Magnetar_Default.Rescale();
+                    SaveLoad.Save(true);
+                }
+            };
+
+            // --- 3. Element Scale Setting ---
+            if (Config.ElementScale <= 0.1f) Config.ElementScale = 1.0f;
+
+            ElementScaleSetting = new FloatSetting("Element Scale", 0.5f, 2.0f, Config.ElementScale, decimalPlaces: 3, trueMin: 0.25f, trueMax: 3.0f)
+            {
+                OnValueChanged = (val) =>
+                {
+                    Config.ElementScale = val;
+                    Magnetar_Default.Rescale();
                     SaveLoad.Save(true);
                 }
             };
@@ -105,6 +114,10 @@ namespace Magnetar_Client.Core
 
         public static void Render()
         {
+            float maxSelectorHeight = Config.WindowHeight * 0.8f;
+            float targetSelectorHeight = Mathf.Min(Config.S(BaseSelectorHeight), maxSelectorHeight);
+            Config.RescaleAroundCenter(ref selectorRect, Config.S(BaseSelectorWidth), targetSelectorHeight);
+
             Event e = Event.current;
 
             #region Handle Escape
@@ -116,9 +129,6 @@ namespace Magnetar_Client.Core
             }
             #endregion
 
-            // Keep both windows sized for the current GUIScale, growing or
-            // shrinking around wherever they're currently positioned so an
-            // open window doesn't jump when the scale changes mid-session.
             Config.RescaleAroundCenter(ref windowRect, Config.S(BaseWidth), windowRect.height);
             Config.RescaleAroundCenter(ref selectorRect, Config.S(BaseSelectorWidth), Config.S(BaseSelectorHeight));
 
@@ -146,9 +156,7 @@ namespace Magnetar_Client.Core
 
         private static void DrawLanguageSelector(int windowID)
         {
-#if !ANDROID
             GUI.DragWindow(new Rect(0, 0, selectorRect.width, Config.S(25f)));
-#endif
             Event e = Event.current;
 
             float startY = Config.S(35f) + elementHeight + Config.S(10f);
@@ -158,9 +166,7 @@ namespace Magnetar_Client.Core
 
             if (multiSelectRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
-#if !ANDROID
                 Input.ResetInputAxes();
-#endif
                 e.Use();
             }
         }
@@ -181,7 +187,6 @@ namespace Magnetar_Client.Core
             if (LanguageSetting != null && LanguageSetting.SelectedValues != null && LanguageSetting.SelectedValues.Count > 0)
             {
                 int selectedId = LanguageSetting.SelectedValues.First();
-
                 if (LanguageSetting.Options.ContainsKey(selectedId))
                 {
                     currentLangName = LanguageSetting.Options[selectedId];
@@ -236,7 +241,6 @@ namespace Magnetar_Client.Core
             // --- 2. GUI Scale Row ---
             if (ScaleSetting != null)
             {
-                // Synchronize if loaded from config externally while not actively dragging
                 if (UI.WindowDrawing.DrawSetting.activeSliderId != ScaleSetting.GetHashCode() &&
                     Mathf.Abs(ScaleSetting.Value - Config.GUIScale) > 0.001f)
                 {
@@ -244,6 +248,19 @@ namespace Magnetar_Client.Core
                 }
 
                 UI.WindowDrawing.DrawSetting.HandleNumericSetting(ScaleSetting, ref y, w, true);
+                y += elementHeight + Config.S(10f);
+            }
+
+            // --- 3. Element Scale Row ---
+            if (ElementScaleSetting != null)
+            {
+                if (UI.WindowDrawing.DrawSetting.activeSliderId != ElementScaleSetting.GetHashCode() &&
+                    Mathf.Abs(ElementScaleSetting.Value - Config.ElementScale) > 0.001f)
+                {
+                    ElementScaleSetting.Value = Config.ElementScale;
+                }
+
+                UI.WindowDrawing.DrawSetting.HandleNumericSetting(ElementScaleSetting, ref y, w, true);
                 y += elementHeight + Config.S(10f);
             }
 
@@ -255,16 +272,12 @@ namespace Magnetar_Client.Core
 
             windowRect.height = y;
 
-#if !ANDROID
             GUI.DragWindow(new Rect(0, 0, w, Config.S(25f)));
-#endif
 
             Rect _windowRect = new Rect(0, 0, w, y);
             if (_windowRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
-#if !ANDROID
                 Input.ResetInputAxes();
-#endif
                 e.Use();
             }
         }

@@ -16,13 +16,18 @@ namespace Magnetar_Client.UI.WindowDrawing
         public static string currentInputBuffer = "";
         public static int activeSliderId = -1;
 
+#if ANDROID
+        private static TouchScreenKeyboard _mobileKeyboard = null;
+        private static int _activeMobileKeyboardId = -1;
+#endif
+
         public static void HandleStringSetting(Magnetar_Client.Modules.StringSetting strSet, ref float y, float width)
         {
             string translatedName = Magnetar_Client.Utils.Translator.Translate(strSet.Name);
-            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, 
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth,
                 Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
 
-            Rect inputRect = new Rect(width - Config.indent - Config.SettingWidth*1.3f, y, Config.SettingWidth*1.3f, Config.elementHeight);
+            Rect inputRect = new Rect(width - Config.indent - Config.SettingWidth * 1.3f, y, Config.SettingWidth * 1.3f, Config.elementHeight);
 
             strSet.Value = DrawManualTextField(inputRect, strSet.Value, "", strSet.AutocompleteVars);
         }
@@ -75,13 +80,11 @@ namespace Magnetar_Client.UI.WindowDrawing
             float logMin = LogConvert(sliderMin);
             float logMax = LogConvert(sliderMax);
 
-            // Visually clamp the value so the slider bar doesn't overflow if the absolute value is beyond the slider limits
             float visualVal = Mathf.Clamp(val, sliderMin, sliderMax);
             float logVal = LogConvert(visualVal);
 
             float percentage = Mathf.Clamp01((logVal - logMin) / (logMax - logMin));
 
-            // --- UI RENDERING (SLIDER CONSTANT BOUNDS) ---
             float inputW = Config.SettingsInput.NumericInputWidth;
             float sliderW = Config.SettingWidth - inputW - 10f;
 
@@ -101,7 +104,6 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             Event e = Event.current;
 
-            // Slider Scroll Wheel (Clamps to Slider Limits)
             if (e.type == EventType.ScrollWheel && (sliderHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition)))
             {
                 float scrollDirection = Mathf.Sign(e.delta.y);
@@ -144,7 +146,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                 e.Use();
             }
 
-            // Slider Mouse Drag (Clamps to Slider Limits)
             if (activeSliderId == myId)
             {
                 if (e.type == EventType.MouseDrag || e.type == EventType.MouseDown)
@@ -171,7 +172,6 @@ namespace Magnetar_Client.UI.WindowDrawing
             string displayValue = isFocused ? currentInputBuffer : val.ToString(formatString);
             string newText = DrawManualTextField(inputRect, displayValue, "0");
 
-            // Text Input Handling (Clamps to True Limits)
             if (activeTextFieldId == controlId)
             {
                 currentInputBuffer = newText;
@@ -189,6 +189,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                 }
             }
         }
+
         public static void HandleBindSetting(BindSetting bSet, ref float y, float width)
         {
             Event e = Event.current;
@@ -256,8 +257,8 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             Rect btnRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
 
-            GUI.Box(btnRect, boolSet.Value ? Translator.Translate("ON") : Translator.Translate("OFF")
-                , boolSet.Value ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+            GUI.Box(btnRect, boolSet.Value ? Translator.Translate("ON") : Translator.Translate("OFF"),
+                boolSet.Value ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
 
             if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
             {
@@ -280,18 +281,52 @@ namespace Magnetar_Client.UI.WindowDrawing
         public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, dynamic activeMultiSelect)
         {
             if (activeMultiSelect == null) return;
-            
+
+            // Cap window height to a maximum of 80% of screen height
+            float maxAllowedHeight = Config.WindowHeight * 0.8f;
+            if (multiSelectWindowRect.height > maxAllowedHeight)
+            {
+                multiSelectWindowRect.height = maxAllowedHeight;
+            }
+
             Event e = Event.current;
             int sliderId = 1002;
             float ROW_HEIGHT = Config.SettingsInput.MultiSelectRowHeight;
-            float rowStep = ROW_HEIGHT + 1f;
+            float rowStep = ROW_HEIGHT + Config.S(2f);
 
             var options = activeMultiSelect.Options;
 
-            Rect headerBgRect = new Rect(0, 0, multiSelectWindowRect.width, 25);
+            // --- 1. TITLE BANNER ---
+            float titleHeight = Config.S(34f);
+            Rect headerBgRect = new Rect(0, 0, multiSelectWindowRect.width, titleHeight);
             GUI.Box(headerBgRect, Translate("Select ") + Translate(activeMultiSelect.Name), Magnetar_Default.SettingsWindow);
 
-            // --- 1. FILTER & CACHE VISIBLE ITEMS ---
+            // --- 2. HEADER: SEARCH & TOGGLE ALL ---
+            float spacing = Config.S(6f);
+            float searchY = titleHeight + spacing;
+            float searchHeight = Config.S(24f);
+
+            float padX = Config.S(10f);
+            float availWidth = multiSelectWindowRect.width - (padX * 2f);
+            float toggleWidth = Mathf.Min(Config.S(115f), availWidth * 0.32f);
+            float searchWidth = availWidth - toggleWidth - spacing;
+
+            Rect searchRect = new Rect(padX, searchY, searchWidth, searchHeight);
+            Rect toggleRect = new Rect(padX + searchWidth + spacing, searchY, toggleWidth, searchHeight);
+
+            string oldQuery = multiSelectSearchQuery;
+            multiSelectSearchQuery = DrawManualTextField(
+                searchRect,
+                multiSelectSearchQuery ?? "",
+                Translator.Translate("Search...")
+            );
+
+            if (oldQuery != multiSelectSearchQuery)
+            {
+                manualScrollY = 0f;
+            }
+
+            // --- 3. FILTER & CACHE VISIBLE ITEMS ---
             var filteredItems = new List<(int Key, string DisplayName)>();
             string cleanQuery = multiSelectSearchQuery?.Replace(" ", "") ?? "";
 
@@ -316,66 +351,6 @@ namespace Magnetar_Client.UI.WindowDrawing
             }
 
             totalContentHeight = filteredItems.Count * rowStep;
-
-            float headerHeight = Config.SettingsInput.MultiSelectHeaderHeight;
-            float viewHeight = multiSelectWindowRect.height - headerHeight - 10f;
-            float maxScrollDist = Mathf.Max(0, totalContentHeight - viewHeight);
-
-            float scrollX = multiSelectWindowRect.width - 18;
-            float trackStartY = headerHeight;
-            float trackHeight = multiSelectWindowRect.height - trackStartY - 15f;
-            float handleSize = Mathf.Max(30f, (viewHeight / Mathf.Max(1, totalContentHeight)) * trackHeight);
-
-            Rect trackHitbox = new Rect(scrollX - 5, trackStartY, 20, trackHeight);
-
-            // --- 2. SCROLLBAR DRAG ---
-            if (activeSliderId == sliderId)
-            {
-                if (e.type == EventType.MouseDrag || e.type == EventType.MouseDown)
-                {
-                    float localMouseY = e.mousePosition.y - trackStartY;
-                    float scrollPct = Mathf.Clamp01((localMouseY - (handleSize / 2f)) / (trackHeight - handleSize));
-                    manualScrollY = scrollPct * maxScrollDist;
-
-                    lastSliderUpdateTime = Time.time;
-                    e.Use();
-                }
-                if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
-                {
-                    activeSliderId = -1;
-                    e.Use();
-                }
-            }
-            else if (e.type == EventType.MouseDown && trackHitbox.Contains(e.mousePosition))
-            {
-                activeSliderId = sliderId;
-                focusedControlId = -1;
-
-                float localMouseY = e.mousePosition.y - trackStartY;
-                float scrollPct = Mathf.Clamp01((localMouseY - (handleSize / 2f)) / (trackHeight - handleSize));
-                manualScrollY = scrollPct * maxScrollDist;
-
-                lastSliderUpdateTime = Time.time;
-                e.Use();
-            }
-
-            // --- 3. HEADER: SEARCH & TOGGLE ALL ---
-            float searchWidth = (multiSelectWindowRect.width - 30) * 0.75f;
-            float toggleWidth = (multiSelectWindowRect.width - 30) * 0.25f;
-            Rect searchRect = new Rect(10, 33, searchWidth, 22);
-            Rect toggleRect = new Rect(10 + searchWidth, 33, toggleWidth, 22);
-
-            string oldQuery = multiSelectSearchQuery;
-            multiSelectSearchQuery = DrawManualTextField(
-                searchRect,
-                multiSelectSearchQuery ?? "",
-                Translator.Translate("Search...")
-            );
-
-            if (oldQuery != multiSelectSearchQuery)
-            {
-                manualScrollY = 0f;
-            }
 
             int selectedCount = activeMultiSelect.SelectedValues.Count;
             bool allSelected = filteredItems.Count > 0 && selectedCount >= filteredItems.Count;
@@ -406,7 +381,51 @@ namespace Magnetar_Client.UI.WindowDrawing
                 e.Use();
             }
 
-            // --- 4. SCROLL WHEEL ---
+            // --- 4. VIEWPORT & SCROLLBAR (Starts directly after search bar with uniform spacing) ---
+            float contentStartY = searchY + searchHeight + spacing;
+            float viewHeight = multiSelectWindowRect.height - contentStartY - Config.S(8f);
+            float maxScrollDist = Mathf.Max(0f, totalContentHeight - viewHeight);
+
+            float scrollbarWidth = Config.S(12f);
+            float scrollX = multiSelectWindowRect.width - padX - scrollbarWidth;
+            float trackStartY = contentStartY;
+            float trackHeight = viewHeight;
+            float handleSize = Mathf.Max(Config.S(25f), (viewHeight / Mathf.Max(1f, totalContentHeight)) * trackHeight);
+
+            Rect trackHitbox = new Rect(scrollX - Config.S(4f), trackStartY, scrollbarWidth + Config.S(8f), trackHeight);
+
+            // --- 5. SCROLLBAR DRAG ---
+            if (activeSliderId == sliderId)
+            {
+                if (e.type == EventType.MouseDrag || e.type == EventType.MouseDown)
+                {
+                    float localMouseY = e.mousePosition.y - trackStartY;
+                    float scrollPct = Mathf.Clamp01((localMouseY - (handleSize / 2f)) / (trackHeight - handleSize));
+                    manualScrollY = scrollPct * maxScrollDist;
+
+                    lastSliderUpdateTime = Time.time;
+                    e.Use();
+                }
+                if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
+                {
+                    activeSliderId = -1;
+                    e.Use();
+                }
+            }
+            else if (e.type == EventType.MouseDown && trackHitbox.Contains(e.mousePosition))
+            {
+                activeSliderId = sliderId;
+                focusedControlId = -1;
+
+                float localMouseY = e.mousePosition.y - trackStartY;
+                float scrollPct = Mathf.Clamp01((localMouseY - (handleSize / 2f)) / (trackHeight - handleSize));
+                manualScrollY = scrollPct * maxScrollDist;
+
+                lastSliderUpdateTime = Time.time;
+                e.Use();
+            }
+
+            // --- 6. SCROLL WHEEL ---
             if (e.type == EventType.ScrollWheel && new Rect(0, 0, multiSelectWindowRect.width, multiSelectWindowRect.height).Contains(e.mousePosition))
             {
                 manualScrollY = Mathf.Clamp(manualScrollY + (e.delta.y * 25f), 0, maxScrollDist);
@@ -414,7 +433,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                 e.Use();
             }
 
-            // --- 5. GLOBAL MOUSE UP (STOPS DRAG RELIABLY) ---
+            // --- 7. GLOBAL MOUSE UP ---
             if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
             {
                 if (isShiftDragging)
@@ -425,15 +444,15 @@ namespace Magnetar_Client.UI.WindowDrawing
                 }
             }
 
-            // --- 6. THE LIST VIEWPORT ---
-            Rect listGroupRect = new Rect(10, headerHeight, multiSelectWindowRect.width - 25, viewHeight);
+            // --- 8. THE LIST VIEWPORT ---
+            float listWidth = availWidth - scrollbarWidth - Config.S(6f);
+            Rect listGroupRect = new Rect(padX, contentStartY, listWidth, viewHeight);
             GUI.BeginGroup(listGroupRect);
             {
                 Vector2 mousePos = e.mousePosition;
                 bool isMouseInsideList = mousePos.x >= 0 && mousePos.x <= listGroupRect.width && mousePos.y >= 0 && mousePos.y <= listGroupRect.height;
                 bool isShiftHeld = e.shift || ((e.modifiers & EventModifiers.Shift) != 0) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
-                // A. INITIATE CLICK / DRAG (MouseDown)
                 if (e.type == EventType.MouseDown && e.button == 0 && isMouseInsideList)
                 {
                     float contentY = mousePos.y + manualScrollY;
@@ -467,7 +486,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     }
                 }
 
-                // B. CONTINUOUS PAINT SELECTION WHILE DRAGGING
                 if (isShiftDragging)
                 {
                     if (isShiftHeld && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove || e.type == EventType.Repaint))
@@ -498,14 +516,12 @@ namespace Magnetar_Client.UI.WindowDrawing
                     }
                     else if (!isShiftHeld)
                     {
-                        // Released Shift mid-drag
                         isShiftDragging = false;
                         draggedItemsSession.Clear();
                         lastHoveredIndex = -1;
                     }
                 }
 
-                // C. RENDER VISIBLE ITEMS
                 int firstVisibleIdx = Mathf.Max(0, Mathf.FloorToInt(manualScrollY / rowStep));
                 int lastVisibleIdx = Mathf.Min(filteredItems.Count - 1, Mathf.CeilToInt((manualScrollY + viewHeight) / rowStep));
 
@@ -513,7 +529,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                 {
                     var item = filteredItems[i];
                     float drawY = (i * rowStep) - manualScrollY;
-                    Rect rowRect = new Rect(0, drawY, multiSelectWindowRect.width - 30, ROW_HEIGHT);
+                    Rect rowRect = new Rect(0, drawY, listWidth, ROW_HEIGHT);
 
                     bool isSelected = activeMultiSelect.IsSelected(item.Key);
                     GUI.Box(rowRect, item.DisplayName, isSelected ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
@@ -521,14 +537,14 @@ namespace Magnetar_Client.UI.WindowDrawing
             }
             GUI.EndGroup();
 
-            // --- 7. SCROLLBAR VISUALS ---
-            GUI.Box(new Rect(scrollX + 5, trackStartY, 2, trackHeight), "", Magnetar_Default.SeparatorStyle);
+            // --- 9. SCROLLBAR VISUALS ---
+            GUI.Box(new Rect(scrollX + (scrollbarWidth / 2f) - 1f, trackStartY, 2, trackHeight), "", Magnetar_Default.SeparatorStyle);
 
-            float scrollPctVisual = (maxScrollDist > 0) ? manualScrollY / maxScrollDist : 0;
+            float scrollPctVisual = (maxScrollDist > 0) ? manualScrollY / maxScrollDist : 0f;
             float handleY = trackStartY + (scrollPctVisual * (trackHeight - handleSize));
 
             bool shouldHighlight = (activeSliderId == sliderId) || (Time.time - lastSliderUpdateTime < 1.0f);
-            GUI.Box(new Rect(scrollX, handleY, 12, handleSize), "", shouldHighlight ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+            GUI.Box(new Rect(scrollX, handleY, scrollbarWidth, handleSize), "", shouldHighlight ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
         }
 
         private static void ToggleWithLimit(dynamic activeMultiSelect, int val)
@@ -538,6 +554,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                 activeMultiSelect.Select(val);
             }
         }
+
         public static int activeDropdownId = -1;
         public static float dropdownScrollY = 0f;
 
@@ -635,7 +652,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                         if (drawY + rowHeight > 0 && drawY < dropHeight)
                         {
                             Rect rowRect = new Rect(0, drawY, dropRect.width, rowHeight);
-
                             string displayName = kvp.Value;
 
                             if (selSet.CustomNames != null && selSet.CustomNames.ContainsKey(kvp.Key))
@@ -678,7 +694,6 @@ namespace Magnetar_Client.UI.WindowDrawing
         public static int autocompleteSelectedIndex = 0;
         public static System.Action OnPostDraw = null;
 
-        // History tracking for Undo/Redo
         public struct TextState
         {
             public string Text;
@@ -690,16 +705,47 @@ namespace Magnetar_Client.UI.WindowDrawing
         private static List<TextState> undoStack = new List<TextState>();
         private static List<TextState> redoStack = new List<TextState>();
         private static int lastHistoryFieldId = -1;
+
         public static string DrawManualTextField(Rect rect, string text, string defaultText = "", List<string> autocompleteVars = null)
         {
-            
             Event e = Event.current;
             int controlId = rect.GetHashCode();
 
             if (text == null) text = "";
 
-            #region Delete old Data
+#if ANDROID
+            if (activeTextFieldId == controlId)
+            {
+                if (_activeMobileKeyboardId != controlId || _mobileKeyboard == null)
+                {
+                    _mobileKeyboard = TouchScreenKeyboard.Open(text, TouchScreenKeyboardType.Default);
+                    _activeMobileKeyboardId = controlId;
+                }
+                else
+                {
+                    text = _mobileKeyboard.text;
+                    cursorIndex = text.Length;
+                    selectIndex = cursorIndex;
 
+                    if (_mobileKeyboard.status == TouchScreenKeyboard.Status.Done ||
+                        _mobileKeyboard.status == TouchScreenKeyboard.Status.Canceled ||
+                        !_mobileKeyboard.active)
+                    {
+                        activeTextFieldId = -1;
+                        _activeMobileKeyboardId = -1;
+                        _mobileKeyboard = null;
+                    }
+                }
+            }
+            else if (_activeMobileKeyboardId == controlId && _mobileKeyboard != null)
+            {
+                _mobileKeyboard.active = false;
+                _mobileKeyboard = null;
+                _activeMobileKeyboardId = -1;
+            }
+#endif
+
+            #region Delete old Data
             if (activeTextFieldId == controlId && lastHistoryFieldId != controlId)
             {
                 undoStack.Clear();
@@ -712,7 +758,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                 cursorIndex = Mathf.Clamp(cursorIndex, 0, text.Length);
                 selectIndex = Mathf.Clamp(selectIndex, 0, text.Length);
             }
-
             #endregion
 
             int GetIndexFromMouse(float mouseX)
@@ -729,7 +774,6 @@ namespace Magnetar_Client.UI.WindowDrawing
             }
 
             #region AutoComplete
-            // --- AUTOCOMPLETE CONTEXT DETECTION ---
             bool showAutocomplete = false;
             string currentFilter = "";
             int bracketStartIndex = -1;
@@ -739,7 +783,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             {
                 for (int i = cursorIndex - 1; i >= 0; i--)
                 {
-                    if (text[i] == '}') break; // Closed block
+                    if (text[i] == '}') break;
                     if (text[i] == '{')
                     {
                         showAutocomplete = true;
@@ -756,11 +800,9 @@ namespace Magnetar_Client.UI.WindowDrawing
                     if (filteredVars.Count == 0) showAutocomplete = false;
                 }
             }
-
             #endregion
 
             #region Handle Mouse
-
             if (e.type == EventType.MouseDown && e.button == 0)
             {
                 Rect dropRect = new Rect(rect.x, rect.y + rect.height, rect.width, 150f);
@@ -771,6 +813,10 @@ namespace Magnetar_Client.UI.WindowDrawing
                     if (activeTextFieldId != controlId)
                     {
                         activeTextFieldId = controlId;
+#if ANDROID
+                        _mobileKeyboard = TouchScreenKeyboard.Open(text, TouchScreenKeyboardType.Default);
+                        _activeMobileKeyboardId = controlId;
+#endif
                     }
                     cursorIndex = GetIndexFromMouse(e.mousePosition.x - rect.x);
                     if (!e.shift) selectIndex = cursorIndex;
@@ -779,6 +825,14 @@ namespace Magnetar_Client.UI.WindowDrawing
                 else if (activeTextFieldId == controlId && !clickingDropdown)
                 {
                     activeTextFieldId = -1;
+#if ANDROID
+                    if (_mobileKeyboard != null)
+                    {
+                        _mobileKeyboard.active = false;
+                        _mobileKeyboard = null;
+                        _activeMobileKeyboardId = -1;
+                    }
+#endif
                 }
             }
             else if (e.type == EventType.MouseDrag && e.button == 0 && activeTextFieldId == controlId)
@@ -786,11 +840,10 @@ namespace Magnetar_Client.UI.WindowDrawing
                 cursorIndex = GetIndexFromMouse(e.mousePosition.x - rect.x);
                 e.Use();
             }
-
             #endregion
 
             #region Keyboard
-
+#if !ANDROID
             if (activeTextFieldId == controlId && e.type == EventType.KeyDown)
             {
                 char c = e.character;
@@ -802,12 +855,11 @@ namespace Magnetar_Client.UI.WindowDrawing
                 int selStart = Mathf.Min(cursorIndex, selectIndex);
                 int selEnd = Mathf.Max(cursorIndex, selectIndex);
 
-                // --- HISTORY HELPER ---
                 void SaveState()
                 {
                     undoStack.Add(new TextState(text, cursorIndex, selectIndex));
-                    if (undoStack.Count > undoStackCount) undoStack.RemoveAt(0); // Cap history
-                    redoStack.Clear(); // New action clears redo
+                    if (undoStack.Count > undoStackCount) undoStack.RemoveAt(0);
+                    redoStack.Clear();
                 }
 
                 void DeleteSelection()
@@ -816,7 +868,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     cursorIndex = selectIndex = selStart;
                 }
 
-                // --- WORD JUMP HELPER ---
                 int GetWordBoundary(int current, int dir)
                 {
                     if (dir < 0)
@@ -839,7 +890,6 @@ namespace Magnetar_Client.UI.WindowDrawing
 
                 bool interceptedForAutocomplete = false;
 
-                // --- AUTOCOMPLETE NAVIGATION ---
                 if (showAutocomplete && filteredVars.Count > 0)
                 {
                     if (k == KeyCode.DownArrow) { autocompleteSelectedIndex = Mathf.Min(autocompleteSelectedIndex + 1, filteredVars.Count - 1); interceptedForAutocomplete = true; e.Use(); }
@@ -855,10 +905,8 @@ namespace Magnetar_Client.UI.WindowDrawing
                     }
                 }
 
-                // --- STANDARD SHORTCUTS ---
                 if (!interceptedForAutocomplete)
                 {
-                    // UNDO
                     if (ctrl && k == KeyCode.Z)
                     {
                         if (undoStack.Count > 0)
@@ -870,7 +918,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                         }
                         e.Use();
                     }
-                    // REDO
                     else if (ctrl && k == KeyCode.Y)
                     {
                         if (redoStack.Count > 0)
@@ -882,7 +929,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                         }
                         e.Use();
                     }
-                    // COPY / CUT / PASTE / SELECT ALL
                     else if (ctrl && k == KeyCode.C)
                     {
                         if (hasSelection) GUIUtility.systemCopyBuffer = text.Substring(selStart, selEnd - selStart);
@@ -909,7 +955,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     {
                         selectIndex = 0; cursorIndex = text.Length; e.Use();
                     }
-                    // HOME / END
                     else if (k == KeyCode.Home)
                     {
                         cursorIndex = 0; if (!shift) selectIndex = cursorIndex; e.Use();
@@ -918,7 +963,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     {
                         cursorIndex = text.Length; if (!shift) selectIndex = cursorIndex; e.Use();
                     }
-                    // ARROWS (Word jumps with Ctrl)
                     else if (k == KeyCode.LeftArrow)
                     {
                         if (ctrl) cursorIndex = GetWordBoundary(cursorIndex, -1);
@@ -933,11 +977,10 @@ namespace Magnetar_Client.UI.WindowDrawing
                         if (!shift) selectIndex = cursorIndex;
                         e.Use();
                     }
-                    // DELETION
                     else if (k == KeyCode.Backspace)
                     {
                         if (hasSelection) { SaveState(); DeleteSelection(); }
-                        else if (ctrl && cursorIndex > 0) // Ctrl+Backspace (Delete Word)
+                        else if (ctrl && cursorIndex > 0)
                         {
                             SaveState();
                             int bound = GetWordBoundary(cursorIndex, -1);
@@ -955,7 +998,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                     else if (k == KeyCode.Delete)
                     {
                         if (hasSelection) { SaveState(); DeleteSelection(); }
-                        else if (ctrl && cursorIndex < text.Length) // Ctrl+Delete (Delete Next Word)
+                        else if (ctrl && cursorIndex < text.Length)
                         {
                             SaveState();
                             int bound = GetWordBoundary(cursorIndex, 1);
@@ -964,12 +1007,10 @@ namespace Magnetar_Client.UI.WindowDrawing
                         else if (cursorIndex < text.Length) { SaveState(); text = text.Remove(cursorIndex, 1); }
                         e.Use();
                     }
-                    // DEFOCUS
                     else if (k == KeyCode.Return || k == KeyCode.Escape)
                     {
                         activeTextFieldId = -1; e.Use();
                     }
-                    // TYPING
                     else if (c != '\0' && !char.IsControl(c))
                     {
                         SaveState();
@@ -980,10 +1021,9 @@ namespace Magnetar_Client.UI.WindowDrawing
                     }
                 }
             }
-
+#endif
             #endregion
 
-            // --- SCROLL MATH CALCULATION ---
             if (activeTextFieldId == controlId)
             {
                 float visibleWidth = rect.width - 10;
@@ -999,7 +1039,6 @@ namespace Magnetar_Client.UI.WindowDrawing
             else scrollOffset = 0f;
 
             #region Input Text Field
-
             GUI.Box(rect, "", Magnetar_Default.SettingOff);
             GUI.BeginGroup(rect);
 
@@ -1031,7 +1070,6 @@ namespace Magnetar_Client.UI.WindowDrawing
             }
             GUI.EndGroup();
 
-            // --- DRAW THE AUTOCOMPLETE DROPDOWN ---
             if (showAutocomplete && filteredVars.Count > 0)
             {
                 float rowHeight = Config.SettingsInput.AutocompleteRowHeight;
@@ -1041,12 +1079,14 @@ namespace Magnetar_Client.UI.WindowDrawing
 
                 Rect dropRect = new Rect(rect.x, rect.y + rect.height, rect.width, dropHeight);
 
+#if !ANDROID
                 void SaveState()
                 {
                     undoStack.Add(new TextState(text, cursorIndex, selectIndex));
                     if (undoStack.Count > undoStackCount) undoStack.RemoveAt(0);
-                    redoStack.Clear(); // Any new action invalidates the redo chain
+                    redoStack.Clear();
                 }
+#endif
 
                 if (e.type == EventType.Layout || e.type == EventType.Repaint)
                 {
@@ -1071,12 +1111,21 @@ namespace Magnetar_Client.UI.WindowDrawing
                     }
                     else if (e.type == EventType.MouseDown && e.button == 0)
                     {
-                        SaveState(); // Save state before clicking an autocomplete!
+#if !ANDROID
+                        SaveState();
+#endif
                         string chosen = filteredVars[autocompleteSelectedIndex];
                         text = text.Remove(bracketStartIndex + 1, cursorIndex - bracketStartIndex - 1);
                         text = text.Insert(bracketStartIndex + 1, chosen + "}");
                         cursorIndex = selectIndex = bracketStartIndex + chosen.Length + 2;
                         activeTextFieldId = controlId;
+
+#if ANDROID
+                        if (_mobileKeyboard != null)
+                        {
+                            _mobileKeyboard.text = text;
+                        }
+#endif
                         e.Use();
                     }
                 }

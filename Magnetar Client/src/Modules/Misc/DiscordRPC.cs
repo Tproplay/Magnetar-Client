@@ -10,7 +10,7 @@ using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
 
-
+#if !ANDROID
 namespace Magnetar_Client.Modules
 {
     public class DiscordRPC : Module
@@ -305,3 +305,4 @@ namespace Magnetar_Client.Modules
         }
     }
 }
+#endif

@@ -95,7 +95,7 @@ namespace Magnetar_Client
     {
 #if MELONLOADER || RELEASE_MELON
         public static MelonPreferences_Category MagnetarCategory;
-#elif BEPINEX || RELEASE_BEPINEX
+#elif BEPINEX || RELEASE_BEPINEX || ANDROID
         public static ConfigFile BepInExConfig;
 #endif
     }

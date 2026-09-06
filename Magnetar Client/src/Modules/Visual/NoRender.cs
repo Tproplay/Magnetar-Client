@@ -10,6 +10,7 @@ using System.Linq;
 using Il2Cpp;
 #endif
 
+#if !ANDROID
 namespace Magnetar_Client.Modules
 {
     public class NoRender : Module
@@ -407,3 +408,4 @@ namespace Magnetar_Client.Modules
         }
     }
 }
+#endif

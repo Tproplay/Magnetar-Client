@@ -31,9 +31,12 @@ namespace Magnetar_Client.Modules
         static List<Type> AllowedModules = new List<Type>
         {
             typeof(VanillaMode), typeof(AntiLagSpawns), typeof(AutoCollect), typeof(CustomKeybind),
-            typeof(DebugMode), typeof(DimBackground), typeof(DiscordRPC), typeof(TimeScale),
-            typeof(BetterHealthDisplay), typeof(FPSLimit), typeof(NoRender), typeof(SmallerProjectiles),
+            typeof(DebugMode), typeof(DimBackground), typeof(TimeScale),
+            typeof(BetterHealthDisplay), typeof(FPSLimit), typeof(SmallerProjectiles),
             typeof(SoundMuffler),
+#if !ANDROID
+            typeof(NoRender), typeof(DiscordRPC),
+#endif
         };
 
         public VanillaMode()

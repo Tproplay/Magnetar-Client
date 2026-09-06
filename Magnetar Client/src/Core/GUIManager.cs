@@ -32,13 +32,26 @@ namespace Magnetar_Client.Core
                 CustomNames = new System.Collections.Generic.Dictionary<int, string>()
             };
 
+#if ANDROID
+            // Lock to default English on Android without directory scanning or translation switching
+            LanguageSetting.AddOption(0, "English");
+            LanguageSetting.SelectedValues.Add(0);
+            LanguageSetting.IsDisabled = true;
+            TranslatorLogger.Msg("Android detected: Language locked to English.");
+#else
             string path = Path.Combine(Magnetar_Client.Core.main.ModsDirectory, "Magnetar Translation");
 
-            var lanuages = System.IO.Directory.GetDirectories(path);
+            if (!System.IO.Directory.Exists(path))
+            {
+                LanguageSetting.AddOption(0, "English");
+                LanguageSetting.SelectedValues.Add(0);
+                return;
+            }
+
+            var languages = System.IO.Directory.GetDirectories(path);
 
             var i = 0;
-
-            foreach ( var language in lanuages)
+            foreach (var language in languages)
             {
                 TranslatorLogger.Msg("Found Language: " + language);
                 string _language = Path.GetFileName(language);
@@ -48,6 +61,7 @@ namespace Magnetar_Client.Core
                 if (_language == "English") LanguageSetting.SelectedValues.Add(i);
                 i++;
             }
+#endif
         }
 
         public static void Render()

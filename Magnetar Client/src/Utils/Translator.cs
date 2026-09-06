@@ -57,9 +57,12 @@ namespace Magnetar_Client.Utils
 
         public static void LoadTranslations()
         {
+#if ANDROID
+            TranslatorLogger.Msg("[Translator] Android detected: Skipping disk translation loading.");
+            _isLoaded = true;
+            return;
+#else
             string targetLanguage = Config.Language;
-
-            SyncWithEnglishTemplate(targetLanguage);
 
             string baseDir = Path.Combine(ModsDir, "Magnetar Translation", targetLanguage);
 
@@ -112,10 +115,12 @@ namespace Magnetar_Client.Utils
             _modulesLinked = false;
             _hudLinked = false;
             _isLoaded = true;
+#endif
         }
 
         private static void SyncWithEnglishTemplate(string targetLanguage)
         {
+#if !ANDROID
             if (string.Equals(targetLanguage, "English", StringComparison.OrdinalIgnoreCase)) return;
 
             string englishDir = Path.Combine(ModsDir, "Magnetar Translation", "English");
@@ -148,6 +153,7 @@ namespace Magnetar_Client.Utils
                     }
                 }
             }
+#endif
         }
 
         private static void LinkModuleTranslations()
@@ -222,7 +228,12 @@ namespace Magnetar_Client.Utils
         public static void DumpMissingStrings()
         {
             string baseDir = Path.Combine(ModsDir, "Magnetar Translation", Config.Language);
+
+#if !ANDROID
             if (!Directory.Exists(baseDir)) Directory.CreateDirectory(baseDir);
+#else
+            if (!Directory.Exists(baseDir)) return;
+#endif
 
             string stringsPath = Path.Combine(baseDir, "translation_strings.json");
             string modulesPath = Path.Combine(baseDir, "Modules_translations.json");
@@ -283,7 +294,7 @@ namespace Magnetar_Client.Utils
                             if (!node.Settings.ContainsKey(setting.Name))
                             {
                                 node.Settings[setting.Name] = _exactTranslations.ContainsKey(setting.Name) ? _exactTranslations[setting.Name] : setting.Name;
-                                isDirtyModules = true; 
+                                isDirtyModules = true;
                             }
                         }
                     }
@@ -339,7 +350,7 @@ namespace Magnetar_Client.Utils
                 catch (Exception ex) { TranslatorLogger.Error($"Failed to dump HUD strings: {ex.Message}"); }
             }
 
-            // 3. Process Standard Translations (Isolate standard keychains completely)
+            // 3. Process Standard Translations
             var cleanDict = _exactTranslations
                 .Where(kvp => !_regexMatchedInputs.Contains(kvp.Key) && !moduleManagedStrings.Contains(kvp.Key) && !hudManagedStrings.Contains(kvp.Key))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
@@ -357,6 +368,10 @@ namespace Magnetar_Client.Utils
 
         public static string Translate(string input)
         {
+            if (string.IsNullOrEmpty(input)) return input;
+#if ANDROID
+            return input; // Never attempt to look up or dump missing strings to disk on mobile
+#else
             if (!_isLoaded) LoadTranslations();
 
             if (!_modulesLinked && Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
@@ -424,6 +439,7 @@ namespace Magnetar_Client.Utils
             }
 
             return input;
+#endif
         }
 
         private static void SaveMissingStringToDisk()
@@ -431,7 +447,12 @@ namespace Magnetar_Client.Utils
             try
             {
                 string baseDir = Path.Combine(ModsDir, "Magnetar Translation", Config.Language);
+
+#if !ANDROID
                 if (!Directory.Exists(baseDir)) Directory.CreateDirectory(baseDir);
+#else
+                if (!Directory.Exists(baseDir)) return;
+#endif
 
                 string stringsPath = Path.Combine(baseDir, "translation_strings.json");
 
@@ -479,14 +500,36 @@ namespace Magnetar_Client.Utils
 
         public static Dictionary<int, string> TranslateEnum(Type enumType)
         {
+            if (enumType == null)
+            {
+                TranslatorLogger.Error("[Translator] TranslateEnum called with null enumType!");
+                return new Dictionary<int, string>();
+            }
+
             if (_nameCache.TryGetValue(enumType, out var cachedDict))
             {
+                TranslatorLogger.Msg($"[Translator] Cache hit for enum '{enumType.Name}' ({cachedDict.Count} entries). Returning cached copy.");
                 return new Dictionary<int, string>(cachedDict);
             }
 
-            Dictionary<int, string> parsedNames = LoadEnumTranslations(enumType);
-            _nameCache[enumType] = parsedNames;
-            return new Dictionary<int, string>(parsedNames);
+            TranslatorLogger.Msg($"[Translator] Cache miss for enum '{enumType.Name}'. Initiating LoadEnumTranslations...");
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            try
+            {
+                Dictionary<int, string> parsedNames = LoadEnumTranslations(enumType);
+                _nameCache[enumType] = parsedNames;
+                sw.Stop();
+
+                TranslatorLogger.Msg($"[Translator] Successfully loaded and cached '{enumType.Name}' with {parsedNames.Count} entries ({sw.ElapsedMilliseconds} ms).");
+                return new Dictionary<int, string>(parsedNames);
+            }
+            catch (System.Exception ex)
+            {
+                sw.Stop();
+                TranslatorLogger.Error($"[Translator] Exception occurred while translating enum '{enumType.Name}' after {sw.ElapsedMilliseconds} ms: {ex}");
+                throw;
+            }
         }
 
         public static Dictionary<int, string> LoadEnumTranslations(Type enumType)
@@ -494,7 +537,10 @@ namespace Magnetar_Client.Utils
             Dictionary<int, string> parsedNames = new Dictionary<int, string>();
 
             string magnetarDir = Path.Combine(ModsDir, "Magnetar Translation", Config.Language);
+
+#if !ANDROID
             if (!Directory.Exists(magnetarDir)) Directory.CreateDirectory(magnetarDir);
+#endif
 
             string translatorAlmanacDir = Path.Combine(ModsDir,
                 "PvZ_Fusion_Translator", "Localization", Config.Language, "Almanac");
@@ -598,6 +644,9 @@ namespace Magnetar_Client.Utils
             // 3. Save updates if new data was loaded/generated
             if (requiresSave)
             {
+#if ANDROID
+                if (!Directory.Exists(magnetarDir)) return parsedNames;
+#endif
                 try
                 {
                     var sortedNames = parsedNames.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);

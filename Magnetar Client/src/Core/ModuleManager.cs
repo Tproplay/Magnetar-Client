@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.UI.WindowDrawing.DrawSetting;
 using static Magnetar_Client.Utils.Translator;
 
@@ -33,6 +34,31 @@ namespace Magnetar_Client.Core
         private static Dictionary<Modules.Module, Vector2> settingsScrollPositions = new Dictionary<Modules.Module, Vector2>();
         private static Dictionary<Modules.Module, float> moduleContentHeights = new Dictionary<Modules.Module, float>();
         private static Dictionary<Modules.Module, float> targetContentHeights = new Dictionary<Modules.Module, float>();
+
+        private static GUI.WindowFunction _cachedSearchDelegate;
+        private static GUI.WindowFunction _cachedCategoryDelegate;
+        private static GUI.WindowFunction _cachedMultiSelectDelegate;
+        private static readonly Dictionary<Magnetar_Client.Modules.Module, GUI.WindowFunction>
+            _cachedSettingsDelegates = new Dictionary<Magnetar_Client.Modules.Module, GUI.WindowFunction>();
+
+        private static GUI.WindowFunction SearchDelegate => _cachedSearchDelegate ??=
+            Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawSearchWindow);
+
+        private static GUI.WindowFunction CategoryDelegate => _cachedCategoryDelegate ??=
+            Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawCategoryWindow);
+
+        private static GUI.WindowFunction MultiSelectDelegate => _cachedMultiSelectDelegate ??=
+            Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)MultiSelectBridge);
+
+        private static GUI.WindowFunction GetSettingsDelegate(Magnetar_Client.Modules.Module mod)
+        {
+            if (!_cachedSettingsDelegates.TryGetValue(mod, out var del))
+            {
+                del = Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)(id => DrawSettingsWindow(id, mod)));
+                _cachedSettingsDelegates[mod] = del;
+            }
+            return del;
+        }
 
         public static bool showAddonCategory = false;
 
@@ -103,6 +129,9 @@ namespace Magnetar_Client.Core
             }
         }
 
+        // --- Delegate Cache Fields (Prevents GC sweeps and IL2CPP trampoline pool exhaustion) ---
+        
+
         public static void Render()
         {
             if (showModules)
@@ -156,7 +185,7 @@ namespace Magnetar_Client.Core
                     searchWindowRect = GUI.Window(
                         999,
                         searchWindowRect,
-                        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawSearchWindow),
+                        SearchDelegate,
                         "",
                         Magnetar_Default.ModuleWindow
                     );
@@ -167,15 +196,16 @@ namespace Magnetar_Client.Core
                 {
                     if (cat == ModuleCategory.Addon && !showAddonCategory) continue;
                     int id = (int)cat;
+
                     windowPositions[cat] = GUI.Window(
                         id,
                         windowPositions[cat],
-                        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawCategoryWindow),
+                        CategoryDelegate,
                         Translate(cat.ToString()),
                         Magnetar_Default.ModuleWindow
                     );
 
-                    // Block the mouse input to get recieved by game
+                    // Block the mouse input to get received by game
                     if (windowPositions[cat].Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y)))
                     {
                         if (Input.GetMouseButtonDown(0) | Input.GetMouseButtonDown(1) | Input.GetMouseButtonDown(2))
@@ -263,7 +293,7 @@ namespace Magnetar_Client.Core
                         settingsPositions[mod] = GUI.Window(
                             settingsId,
                             settingsPositions[mod],
-                            Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)(id => DrawSettingsWindow(id, mod))),
+                            GetSettingsDelegate(mod),
                             "",
                             Magnetar_Default.ModuleWindow
                         );
@@ -288,7 +318,7 @@ namespace Magnetar_Client.Core
                         1080 / 2f - multiSelectWindowRect.height / 2f,
                         multiSelectWindowRect.width,
                         multiSelectWindowRect.height
-                        );
+                    );
                 }
 
                 if (activeMultiSelect != null)
@@ -296,7 +326,7 @@ namespace Magnetar_Client.Core
                     multiSelectWindowRect = GUI.Window(
                         1000,
                         multiSelectWindowRect,
-                        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)MultiSelectBridge),
+                        MultiSelectDelegate,
                         "",
                         Magnetar_Default.ModuleWindow
                     );
@@ -306,63 +336,73 @@ namespace Magnetar_Client.Core
 
         private static void DrawCategoryWindow(int id)
         {
-            ModuleCategory category = (ModuleCategory)id;
-
-            string cleanSearch = ModuleSearchQuery.Replace(" ", "").ToLower();
-
-            var categoryModules = Modules.Where(m => {
-                if (string.IsNullOrEmpty(cleanSearch)) return m.Category == category;
-
-                string cleanHints = m.SearchHints.Replace(" ", "").ToLower();
-                string cleanName = m.Name.Replace(" ", "").ToLower();
-
-                return m.Category == category &&
-                       (cleanName.Contains(cleanSearch) || cleanHints.Contains(cleanSearch));
-            }).ToList();
-
-            float windowWidth = windowPositions[category].width;
-            GUI.DragWindow(new Rect(0, 0, windowWidth, 25));
-
-            float yOffset = 28;
-            float buttonHeight = 28;
-            foreach (var mod in categoryModules)
+            try
             {
-                GUIStyle currentStyle = mod.Active ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff;
-                Rect btnRect = new Rect(0, yOffset, windowWidth, buttonHeight);
+                ModuleCategory category = (ModuleCategory)id;
 
-                if (showModules)
-                {
-                    mod.ShowSettings = false;
-                }
+                string cleanSearch = ModuleSearchQuery.Replace(" ", "").ToLower();
 
-                if (Event.current.type == EventType.MouseDown && btnRect.Contains(Event.current.mousePosition))
+                var categoryModules = Modules.Where(m => {
+                    if (string.IsNullOrEmpty(cleanSearch)) return m.Category == category;
+
+                    string cleanHints = m.SearchHints.Replace(" ", "").ToLower();
+                    string cleanName = m.Name.Replace(" ", "").ToLower();
+
+                    return m.Category == category &&
+                           (cleanName.Contains(cleanSearch) || cleanHints.Contains(cleanSearch));
+                }).ToList();
+
+                float windowWidth = windowPositions[category].width;
+
+#if !ANDROID
+                GUI.DragWindow(new Rect(0, 0, windowWidth, 25));
+#endif
+
+                float yOffset = 28;
+                float buttonHeight = 28;
+                foreach (var mod in categoryModules)
                 {
-                    if (Event.current.button == 0)
+                    GUIStyle currentStyle = mod.Active ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff;
+                    Rect btnRect = new Rect(0, yOffset, windowWidth, buttonHeight);
+
+                    if (showModules)
                     {
-                        if (VanillaMode.instance.IsAllowed(mod))
+                        mod.ShowSettings = false;
+                    }
+
+                    if (Event.current.type == EventType.MouseDown && btnRect.Contains(Event.current.mousePosition))
+                    {
+                        if (Event.current.button == 0)
                         {
-                            mod.Toggle();
-                        }
-                            
-                        Event.current.Use();
-                    }
-                    else if (Event.current.button == 1)
-                    {
-                        showModules = false;
-                        showSelectionGui = false;
-                        showSettings = true;
+                            if (VanillaMode.instance.IsAllowed(mod))
+                            {
+                                mod.Toggle();
+                            }
 
-                        mod.ShowSettings = true;
-                        Event.current.Use();
+                            Event.current.Use();
+                        }
+                        else if (Event.current.button == 1)
+                        {
+                            showModules = false;
+                            showSelectionGui = false;
+                            showSettings = true;
+
+                            mod.ShowSettings = true;
+                            Event.current.Use();
+                        }
                     }
+
+                    string translatedModName = Magnetar_Client.Utils.Translator.Translate(mod.Name);
+                    GUI.Box(btnRect, translatedModName, currentStyle);
+                    yOffset += buttonHeight;
                 }
 
-                string translatedModName = Magnetar_Client.Utils.Translator.Translate(mod.Name);
-                GUI.Box(btnRect, translatedModName, currentStyle);
-                yOffset += buttonHeight;
+                windowPositions[category] = new Rect(windowPositions[category].x, windowPositions[category].y, windowWidth, yOffset);
             }
-
-            windowPositions[category] = new Rect(windowPositions[category].x, windowPositions[category].y, windowWidth, yOffset);
+            catch (System.Exception ex)
+            {
+                DebugLogger.Error($"[DrawCategoryWindow] Error rendering category {id}: {ex}");
+            }
         }
 
         private static void DrawSettingsWindow(int id, Magnetar_Client.Modules.Module mod)

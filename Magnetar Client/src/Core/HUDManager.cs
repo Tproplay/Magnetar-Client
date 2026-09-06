@@ -16,93 +16,127 @@ namespace Magnetar_Client.Core
         public static bool Enabled = true;
         public static bool forceShow = false;
         public static bool isSelectingElements = false;
-
         public static bool showBackground = false;
 
         static float width = 500;
         public static float elementHeight = 25f;
 
-        // Main HUDManager Menu Rect
-        public static Rect windowRect = new Rect((Config.WindowWidth - width) / 2, (Config.WindowHeight - 300) / 2, width, 300);
-
+        // Lazy initialized rects to avoid static constructor (.cctor) crashes
+        public static Rect windowRect = Rect.zero;
         static float selectorWidth = 500;
         static float selectorHeight = 800;
-        public static Rect selectorRect = new Rect((Config.WindowWidth - selectorWidth) / 2, (Config.WindowHeight - selectorHeight) / 2,
-            selectorWidth, selectorHeight);
+        public static Rect selectorRect = Rect.zero;
+
+        private static bool _rectsInitialized = false;
+
+        private static void EnsureRects()
+        {
+            if (!_rectsInitialized)
+            {
+                windowRect = new Rect((Config.WindowWidth - width) / 2, (Config.WindowHeight - 300) / 2, width, 300);
+                selectorRect = new Rect((Config.WindowWidth - selectorWidth) / 2, (Config.WindowHeight - selectorHeight) / 2, selectorWidth, selectorHeight);
+                _rectsInitialized = true;
+            }
+        }
+
+        private static GUI.WindowFunction _cachedSelectorDelegate;
+        private static GUI.WindowFunction _cachedControlsDelegate;
+
+        private static GUI.WindowFunction GetSelectorDelegate()
+        {
+            if (_cachedSelectorDelegate == null)
+            {
+                _cachedSelectorDelegate = Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawElementSelector);
+            }
+            return _cachedSelectorDelegate;
+        }
+
+        private static GUI.WindowFunction GetControlsDelegate()
+        {
+            if (_cachedControlsDelegate == null)
+            {
+                _cachedControlsDelegate = Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawHUDControls);
+            }
+            return _cachedControlsDelegate;
+        }
 
         public static void Render()
         {
-            if (Config.dimBg && (Config.showgui || forceShow))
+            DebugLogger.Msg("[HUDManager] Enter Render()");
+            EnsureRects();
+
+            try
             {
-                if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2))
+                if (Config.dimBg && (Config.showgui || forceShow))
                 {
-                    Input.ResetInputAxes();
+                    DebugLogger.Msg("[HUDManager] Drawing dim background...");
+                    if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2))
+                    {
+                        Input.ResetInputAxes();
+                    }
+
+                    Matrix4x4 backupMatrix = GUI.matrix;
+                    GUI.matrix = Matrix4x4.identity;
+                    if (Magnetar_Default.DimStyle != null)
+                    {
+                        GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "", Magnetar_Default.DimStyle);
+                    }
+                    GUI.matrix = backupMatrix;
+                    DebugLogger.Msg("[HUDManager] Dim background drawn.");
                 }
 
-                Matrix4x4 backupMatrix = GUI.matrix;
-                GUI.matrix = Matrix4x4.identity;
-                GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "", Magnetar_Default.DimStyle);
-                GUI.matrix = backupMatrix;
-            }
+                Event e = Event.current;
 
-            Event e = Event.current;
-
-
-
-            #region Handle Escape
-            // Layout Editing -> HUDManager Window
-            if (forceShow && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
-            {
-                forceShow = false;
-                Config.showgui = true;
-                e.Use();
-#if MELONLOADER || BEPINEX
-                DebugLogger.Msg("Escape Triggerd : Layout Editing -> HUDManager Window");
-#endif
-                return;
-
-            }
-
-            // Select Elemets -> HUDManager Window
-            else if (isSelectingElements && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
-            {
-                isSelectingElements = false;
-                e.Use();
-#if MELONLOADER || BEPINEX
-                DebugLogger.Msg("Escape Triggerd : Select Elemets -> HUDManager Window");
-#endif
-                return;
-            }
-
-
-
-            #endregion
-
-            if (Config.CurrentTab == TabType.HUD && !forceShow && Config.showgui)
-            {
-                if (isSelectingElements)
+                #region Handle Escape
+                if (forceShow && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
                 {
-                    selectorRect = GUI.Window(
-                        2001,
-                        selectorRect,
-                        (GUI.WindowFunction)DrawElementSelector,
-                        Translator.Translate("Select HUD Elements"),
-                        Magnetar_Default.ModuleWindow
-                    );
+                    forceShow = false;
+                    Config.showgui = true;
+                    e.Use();
+                    return;
                 }
-                else
+                else if (isSelectingElements && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
                 {
-                    windowRect = GUI.Window(
-                        2000,
-                        windowRect,
-                        (GUI.WindowFunction)DrawHUDControls,
-                        "",
-                        Magnetar_Default.ModuleWindow
-                    );
+                    isSelectingElements = false;
+                    e.Use();
+                    return;
                 }
-            }
+                #endregion
 
-            HUDRenderer.RenderOverlay();
+                if (Config.CurrentTab == TabType.HUD && !forceShow && Config.showgui)
+                {
+                    if (isSelectingElements)
+                    {
+                        DebugLogger.Msg("[HUDManager] Invoking GUI.Window for ElementSelector (2001)...");
+                        selectorRect = GUI.Window(
+                            2001,
+                            selectorRect,
+                            GetSelectorDelegate(),
+                            Translator.Translate("Select HUD Elements"),
+                            Magnetar_Default.ModuleWindow
+                        );
+                    }
+                    else
+                    {
+                        DebugLogger.Msg("[HUDManager] Invoking GUI.Window for HUDControls (2000)...");
+                        windowRect = GUI.Window(
+                            2000,
+                            windowRect,
+                            GetControlsDelegate(),
+                            "",
+                            Magnetar_Default.ModuleWindow
+                        );
+                    }
+                }
+
+                DebugLogger.Msg("[HUDManager] Reaching HUDRenderer.RenderOverlay()...");
+                HUDRenderer.RenderOverlay();
+                DebugLogger.Msg("[HUDManager] Finished HUDRenderer.RenderOverlay().");
+            }
+            catch (Exception ex)
+            {
+                DebugLogger.Error($"[HUDManager] Fatal error inside HUDManager.Render: {ex}");
+            }
         }
 
         private static void DrawElementSelector(int windowID)
@@ -119,9 +153,7 @@ namespace Magnetar_Client.Core
             {
                 Input.ResetInputAxes();
                 e.Use();
-                e = null;
             }
-            
         }
 
         private static void DrawHUDControls(int windowID)
@@ -135,10 +167,9 @@ namespace Magnetar_Client.Core
             Rect headerBgRect = new Rect(0, 0, width, y - indent);
             GUI.Box(headerBgRect, Translator.Translate("Customize HUD"), Magnetar_Default.SettingsWindow);
 
-            // 1. SELECT ELEMENTS BUTTON
             int activeCount = HUDRenderer.HudToggles != null ? HUDRenderer.HudToggles.SelectedValues.Count : 0;
-            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), 
-                Translator.Translate("Elements")+$" ({activeCount})",
+            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight),
+                Translator.Translate("Elements") + $" ({activeCount})",
                 Magnetar_Default.SettingDescriptionStyle);
 
             Rect selectBtnRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
@@ -153,7 +184,6 @@ namespace Magnetar_Client.Core
                 UI.WindowDrawing.DrawSetting.multiSelectSearchQuery = "";
                 UI.WindowDrawing.DrawSetting.manualScrollY = 0f;
 
-                // Re-center the selector window every time its opened
                 selectorRect.x = (1920 - selectorWidth) / 2;
                 selectorRect.y = (1080 - selectorHeight) / 2;
 
@@ -165,7 +195,6 @@ namespace Magnetar_Client.Core
 
             y += elementHeight + 5;
 
-            // 2. CONFIGURE HUDManager
             GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Layout"),
                 Magnetar_Default.SettingDescriptionStyle);
 
@@ -174,15 +203,12 @@ namespace Magnetar_Client.Core
             if (configBtnRect.Contains(e.mousePosition))
                 GUI.backgroundColor = Magnetar_Default.AccentColor;
 
-            // Hud Window -> Edit Layout
             if (e.type == EventType.MouseDown && e.button == 0 && configBtnRect.Contains(e.mousePosition))
             {
                 e.Use();
                 forceShow = true;
                 Config.showgui = false;
-#if MELONLOADER || BEPINEX
-                DebugLogger.Msg("Escape Triggerd : Hud Window -> Edit Layout");
-#endif
+                DebugLogger.Msg("Escape Triggered : Hud Window -> Edit Layout");
             }
 
             GUI.Box(configBtnRect, Translator.Translate("Edit"), Magnetar_Default.SettingOff);
@@ -190,7 +216,6 @@ namespace Magnetar_Client.Core
 
             y += elementHeight + 5;
 
-            // 3. SHOW BACKGROUND TOGGLE
             GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Background"),
                 Magnetar_Default.SettingDescriptionStyle);
             Rect bgRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
@@ -208,7 +233,7 @@ namespace Magnetar_Client.Core
             }
 
             y += elementHeight + 5;
-            // 4. ENABLED TOGGLE
+
             GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Enabled"),
                 Magnetar_Default.SettingDescriptionStyle);
             Rect enabledRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
@@ -226,28 +251,24 @@ namespace Magnetar_Client.Core
             }
 
             y += elementHeight + 10;
-
             windowRect.height = y;
 
             GUI.DragWindow(new Rect(0, 0, width, 25));
 
-            Rect _windowRect = new Rect(0,0, width, y);
-
+            Rect _windowRect = new Rect(0, 0, width, y);
             if (_windowRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
                 Input.ResetInputAxes();
                 e.Use();
-                e = null;
             }
         }
 
         public static void OnLanguageChange()
         {
-
+            if (HUDRenderer.HudToggles?.Options == null) return;
             foreach (var keypair in HUDRenderer.HudToggles.Options)
             {
-                HUDRenderer.HudToggles.CustomNames[keypair.Key] = Translator.Translate(
-                    keypair.Value);
+                HUDRenderer.HudToggles.CustomNames[keypair.Key] = Translator.Translate(keypair.Value);
             }
         }
     }
@@ -307,15 +328,33 @@ namespace Magnetar_Client.Core
                 isMasterVisible = false;
             }
 
-            if (!isMasterVisible) return;
-
-            foreach (var element in Elements)
+            if (!isMasterVisible)
             {
-                bool isElementEnabled = isMasterVisible && HudToggles.IsSelected(element.WindowId);
+                DebugLogger.Msg("[HUDRenderer] Overlay not visible (isMasterVisible == false).");
+                return;
+            }
+
+            DebugLogger.Msg($"[HUDRenderer] Rendering overlay elements (Total registered: {Elements.Count})...");
+
+            for (int i = 0; i < Elements.Count; i++)
+            {
+                var element = Elements[i];
+                if (element == null) continue;
+
+                bool isElementEnabled = HudToggles != null && HudToggles.IsSelected(element.WindowId);
 
                 if (isElementEnabled)
                 {
-                    element.Render();
+                    try
+                    {
+                        DebugLogger.Msg($"  -> [HUDRenderer] Drawing Element: {element.Name} (ID: {element.WindowId})");
+                        element.Render();
+                        DebugLogger.Msg($"  -> [HUDRenderer] Successfully drew: {element.Name}");
+                    }
+                    catch (Exception ex)
+                    {
+                        DebugLogger.Error($"  -> [HUDRenderer] CRASH in element '{element.Name}': {ex}");
+                    }
                 }
             }
         }

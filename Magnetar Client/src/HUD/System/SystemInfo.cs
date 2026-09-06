@@ -4,6 +4,7 @@ using static Magnetar_Client.UI.Themes.Magnetar_Default;
 
 namespace Magnetar_Client.HUDElements
 {
+#if !ANDROID
     public class GpuNameElement : HudElement
     {
         private string gpuName;
@@ -47,4 +48,5 @@ namespace Magnetar_Client.HUDElements
             AdjustWidthToText(displayText, HUDElementStyle, 10);
         }
     }
+#endif
 }

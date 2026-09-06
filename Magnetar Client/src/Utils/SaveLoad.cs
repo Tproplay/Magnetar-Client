@@ -152,7 +152,7 @@ namespace Magnetar_Client.Utils
                             else if (setting is MultiSelectSetting ms)
                             {
                                 modData.Settings[saveKey] = new MultiSelectSaveData { SelectedValues = new List<int>(ms.SelectedValues) };
-                            }   
+                            }
                             else if (setting is BindSetting bind) modData.Settings[bind.Name] = bind.BindKeys;
                             else if (setting is SelectSetting sel) modData.Settings[sel.Name] = sel.Value;
                             else if (setting is StringSetting str) modData.Settings[str.Name] = str.Value;
@@ -165,7 +165,18 @@ namespace Magnetar_Client.Utils
                 }
             }
 
-            File.WriteAllText(Path, JsonConvert.SerializeObject(data, Formatting.Indented));
+            string savePath = Path;
+            string dir = System.IO.Path.GetDirectoryName(savePath);
+
+            try
+            {
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                File.WriteAllText(savePath, JsonConvert.SerializeObject(data, Formatting.Indented));
+            }
+            catch (Exception ex)
+            {
+                AutoSaveLogger.Error($"Failed to write save file: {ex.Message}");
+            }
 
             // ==========================================
             // 2. SAVE TEXTURE LOADER DATA

@@ -1,5 +1,6 @@
 <Solution>
   <Configurations>
+    <BuildType Name="Android" />
     <BuildType Name="Bepinex" />
     <BuildType Name="Melonloader" />
     <BuildType Name="Release_bepinex" />

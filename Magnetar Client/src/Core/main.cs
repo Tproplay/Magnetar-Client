@@ -59,7 +59,7 @@ namespace Magnetar_Client.Core
         {
             SaveLoad.InitializePrefrences();
             Utils.Translator.LoadTranslations();
-            
+
             ModuleManager.Init();
             HUDRenderer.Init();
             NEFManager.Init();
@@ -82,36 +82,68 @@ namespace Magnetar_Client.Core
         {
             if (!ModuleManager.IsInitialized) return;
 
-            float scaleX = (float)Screen.width / nativeWidth;
-            float scaleY = (float)Screen.height / nativeHeight;
-            float uniformScale = Mathf.Min(scaleX, scaleY);
+            Event e = Event.current;
+            if (e == null) return;
 
-            float offsetX = (Screen.width - (nativeWidth * uniformScale)) * 0.5f;
-            float offsetY = (Screen.height - (nativeHeight * uniformScale)) * 0.5f;
-
-            GUI.matrix = Matrix4x4.TRS(
-                new Vector3(offsetX, offsetY, 0),
-                Quaternion.identity,
-                new Vector3(uniformScale, uniformScale, 1)
-            );
-
-            if (!hasWarmedUp) { WarmUp(); hasWarmedUp = true; DebugLogger.Msg("Warmed Up the Menu!"); }
-
-            HUDManager.Render();
-
-            foreach (var mod in ModuleManager.Modules)
+            // Only render on layout and repaint passes to prevent IL2CPP native assertion panics
+            if (e.type != EventType.Repaint && e.type != EventType.Layout &&
+                e.type != EventType.MouseDown && e.type != EventType.MouseUp &&
+                e.type != EventType.MouseDrag && e.type != EventType.KeyDown)
             {
-                mod.OnGUI();
+                return;
             }
 
-            if (!Magnetar_Client.Config.showgui) return;
+            Matrix4x4 originalMatrix = GUI.matrix;
 
-            TopBar.TopBar.Render();
-            if (Magnetar_Client.Config.CurrentTab == TabType.MODULES) ModuleManager.Render();
-            if (Magnetar_Client.Config.CurrentTab == TabType.NEF) NEFManager.Render();
-            if (Magnetar_Client.Config.CurrentTab == TabType.GUI) GUIManager.Render();
-            if (Magnetar_Client.Config.CurrentTab == TabType.PROFILE) ProfileGUI.Render();
+            try
+            {
+                float scaleX = (float)Screen.width / nativeWidth;
+                float scaleY = (float)Screen.height / nativeHeight;
+                float uniformScale = Mathf.Min(scaleX, scaleY);
 
+                float offsetX = (Screen.width - (nativeWidth * uniformScale)) * 0.5f;
+                float offsetY = (Screen.height - (nativeHeight * uniformScale)) * 0.5f;
+
+                GUI.matrix = Matrix4x4.TRS(
+                    new Vector3(offsetX, offsetY, 0),
+                    Quaternion.identity,
+                    new Vector3(uniformScale, uniformScale, 1)
+                );
+
+                if (!hasWarmedUp)
+                {
+                    WarmUp();
+                    hasWarmedUp = true;
+                }
+
+                // Render HUD
+
+                HUDManager.Render();
+
+                // Render Modules
+                foreach (var mod in ModuleManager.Modules)
+                {
+                    mod.OnGUI();
+                }
+
+                if (Magnetar_Client.Config.showgui)
+                {
+                    TopBar.TopBar.Render();
+
+                    if (Magnetar_Client.Config.CurrentTab == TabType.MODULES) ModuleManager.Render();
+                    if (Magnetar_Client.Config.CurrentTab == TabType.NEF) NEFManager.Render();
+                    if (Magnetar_Client.Config.CurrentTab == TabType.GUI) GUIManager.Render();
+                    if (Magnetar_Client.Config.CurrentTab == TabType.PROFILE) ProfileGUI.Render();
+                }
+            }
+            catch (System.Exception ex)
+            {
+                DebugLogger.Error($"[CoreGUI] Render exception: {ex}");
+            }
+            finally
+            {
+                GUI.matrix = originalMatrix;
+            }
         }
 
         public void CoreUpdate()
@@ -186,9 +218,9 @@ namespace Magnetar_Client.Core
         {
             Magnetar_Client.Utils.LoadFont.Init();
 
-            // Themes initialized here so GUI.skin exists in IL2CPP
             UI.Themes.Magnetar_Default.Init();
 
+            DebugLogger.Msg("Now rendering ModuleManager...");
             ModuleManager.Render();
             NEFManager.Render();
             GUIManager.Render();

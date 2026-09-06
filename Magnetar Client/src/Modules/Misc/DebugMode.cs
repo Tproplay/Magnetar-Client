@@ -10,7 +10,6 @@ using System;
 using System.Runtime.InteropServices;
 using Il2CppInterop.Runtime;
 using HarmonyLib;
-using static Magnetar_Client.Modules.NoRender;
 
 
 

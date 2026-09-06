@@ -11,6 +11,7 @@ using MelonLoader.Utils;
 using BepInEx;
 #endif
 
+#if !ANDROID
 namespace Magnetar_Client.Utils
 {
     [HarmonyPatch(typeof(main))]
@@ -58,3 +59,4 @@ namespace Magnetar_Client.Utils
         }
     }
 }
+#endif

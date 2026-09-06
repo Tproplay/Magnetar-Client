@@ -7,6 +7,7 @@ using static Magnetar_Client.UI.Themes.Magnetar_Default;
 
 namespace Magnetar_Client.HUDElements
 {
+#if !ANDROID
     #region RAM
     public class RAMElement : HudElement
     {
@@ -201,4 +202,5 @@ namespace Magnetar_Client.HUDElements
 
 
     #endregion
+#endif
 }

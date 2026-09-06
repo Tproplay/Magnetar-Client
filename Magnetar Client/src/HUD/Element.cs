@@ -1,10 +1,10 @@
 ﻿using Magnetar_Client.Core;
 using Magnetar_Client.UI.Themes;
 using UnityEngine;
+using System;
 
 namespace Magnetar_Client.HUDElements
 {
-
     public abstract class HudElement
     {
         private bool _isCurrentlyEnabled = false;
@@ -17,24 +17,28 @@ namespace Magnetar_Client.HUDElements
 
         public float UpdateInterval = 0;
         private float _updateInterval = 0;
+
+        // Cached IL2CPP delegate trampoline per instance
+        private GUI.WindowFunction _cachedWindowDelegate;
+
+        private GUI.WindowFunction GetWindowDelegate()
+        {
+            if (_cachedWindowDelegate == null)
+            {
+                _cachedWindowDelegate = Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawWindowContext);
+            }
+            return _cachedWindowDelegate;
+        }
+
         public HudElement(string name, Rect defaultBounds)
         {
             Name = name;
             Bounds = defaultBounds;
         }
-        /// <summary>
-        /// Runs once when the HUD element is enabled. Runs before OnUpdate.
-        /// </summary>
+
         public virtual void OnEnable() { }
-        /// <summary>
-        /// Runs once when the HUD element is disabled. Runs after OnUpdate.
-        /// </summary>
         public virtual void OnDisable() { }
 
-
-        /// <summary>
-        /// Runs every frame regardless of whether the HUD element is active or not.
-        /// </summary>
         public virtual void OnUpdate()
         {
             if (_isCurrentlyEnabled)
@@ -55,10 +59,6 @@ namespace Magnetar_Client.HUDElements
             }
         }
 
-        /// <summary>
-        /// Runs every frame only when the HUD element is active.
-        /// Will not run if OnUpdate is overridden without calling base.OnUpdate().
-        /// </summary>
         public virtual void OnUpdateActive() { }
 
         public void HandleLifecycle(bool isEnabled)
@@ -68,7 +68,6 @@ namespace Magnetar_Client.HUDElements
                 _isCurrentlyEnabled = true;
                 OnEnable();
             }
-
             else if (!isEnabled && _isCurrentlyEnabled)
             {
                 _isCurrentlyEnabled = false;
@@ -90,10 +89,7 @@ namespace Magnetar_Client.HUDElements
                     if (ActiveDragId == -1)
                     {
                         ActiveDragId = WindowId;
-
-                        // Calculate where the mouse is relative to the top-left of the element
                         dragOffset = e.mousePosition - new Vector2(Bounds.x, Bounds.y);
-
                         e.Use();
                     }
                 }
@@ -107,7 +103,7 @@ namespace Magnetar_Client.HUDElements
                     }
                 }
 
-                // C. Process the Drag
+                // C. Process Drag
                 if (ActiveDragId == WindowId)
                 {
                     Rect intendedBounds = new Rect(e.mousePosition.x - dragOffset.x, e.mousePosition.y - dragOffset.y, Bounds.width, Bounds.height);
@@ -116,15 +112,15 @@ namespace Magnetar_Client.HUDElements
             }
 
             // --- 2. RENDER THE ELEMENT ---
-
             GUIStyle windowStyle = (HUDManager.forceShow || HUDManager.showBackground) ? Magnetar_Default.ModuleOff : GUIStyle.none;
 
             if (HUDManager.forceShow)
             {
+                // Converted delegate prevents IL2CPP crash
                 GUI.Window(
                     WindowId,
                     Bounds,
-                    (GUI.WindowFunction)DrawWindowContext,
+                    GetWindowDelegate(),
                     "",
                     windowStyle
                 );
@@ -136,30 +132,29 @@ namespace Magnetar_Client.HUDElements
                     windowStyle.Draw(Bounds, false, false, false, false);
                 }
 
-                GUI.BeginGroup(Bounds);
-                DrawWindowContext(WindowId);
-                GUI.EndGroup();
+                // Guard dimensions before BeginGroup
+                if (Bounds.width > 0 && Bounds.height > 0)
+                {
+                    GUI.BeginGroup(Bounds);
+                    DrawWindowContext(WindowId);
+                    GUI.EndGroup();
+                }
             }
         }
 
         private Rect ApplySnapping(Rect rect)
         {
-            // --- CHECK MODIFIER KEYS ---
             bool isShiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             bool isCtrlHeld = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
 
-            // 1. GRID SNAPPING (Hold Ctrl)
             if (isCtrlHeld)
             {
                 float gridSize = 10f;
-
                 float gridX = Mathf.Round(rect.x / gridSize) * gridSize;
                 float gridY = Mathf.Round(rect.y / gridSize) * gridSize;
-
                 return new Rect(gridX, gridY, rect.width, rect.height);
             }
 
-            // 2. MAGNETIC EDGE & ELEMENT SNAPPING (Hold Shift)
             if (isShiftHeld)
             {
                 float snapDist = 10f;
@@ -169,7 +164,6 @@ namespace Magnetar_Client.HUDElements
                 float snappedX = rect.x;
                 float snappedY = rect.y;
 
-                // --- SCREEN EDGE & CENTER SNAPPING ---
                 if (Mathf.Abs(snappedX) < snapDist) snappedX = 0;
                 else if (Mathf.Abs(snappedX + rect.width - canvasWidth) < snapDist) snappedX = canvasWidth - rect.width;
                 else if (Mathf.Abs((snappedX + rect.width / 2f) - (canvasWidth / 2f)) < snapDist) snappedX = (canvasWidth / 2f) - (rect.width / 2f);
@@ -178,20 +172,17 @@ namespace Magnetar_Client.HUDElements
                 else if (Mathf.Abs(snappedY + rect.height - canvasHeight) < snapDist) snappedY = canvasHeight - rect.height;
                 else if (Mathf.Abs((snappedY + rect.height / 2f) - (canvasHeight / 2f)) < snapDist) snappedY = (canvasHeight / 2f) - (rect.height / 2f);
 
-                // --- ELEMENT-TO-ELEMENT SNAPPING ---
                 foreach (var other in HUDRenderer.Elements)
                 {
                     if (other.WindowId == this.WindowId || !HUDRenderer.HudToggles.IsSelected(other.WindowId)) continue;
 
                     Rect otherR = other.Bounds;
 
-                    // X-Axis
                     if (Mathf.Abs(snappedX - otherR.x) < snapDist) snappedX = otherR.x;
                     else if (Mathf.Abs(snappedX - (otherR.x + otherR.width)) < snapDist) snappedX = otherR.x + otherR.width;
                     else if (Mathf.Abs((snappedX + rect.width) - otherR.x) < snapDist) snappedX = otherR.x - rect.width;
                     else if (Mathf.Abs((snappedX + rect.width) - (otherR.x + otherR.width)) < snapDist) snappedX = otherR.x + otherR.width - rect.width;
 
-                    // Y-Axis
                     if (Mathf.Abs(snappedY - otherR.y) < snapDist) snappedY = otherR.y;
                     else if (Mathf.Abs(snappedY - (otherR.y + otherR.height)) < snapDist) snappedY = otherR.y + otherR.height;
                     else if (Mathf.Abs((snappedY + rect.height) - otherR.y) < snapDist) snappedY = otherR.y - rect.height;
@@ -201,7 +192,6 @@ namespace Magnetar_Client.HUDElements
                 return new Rect(snappedX, snappedY, rect.width, rect.height);
             }
 
-            // 3. FREE MOVE (No modifiers held)
             return rect;
         }
 
@@ -230,6 +220,8 @@ namespace Magnetar_Client.HUDElements
 
         protected void AdjustWidthToText(string text, GUIStyle style, float padding = 10f)
         {
+            if (style == null || string.IsNullOrEmpty(text)) return;
+
             Vector2 textSize = style.CalcSize(new GUIContent(text));
             float targetWidth = textSize.x + padding;
 
@@ -249,6 +241,5 @@ namespace Magnetar_Client.HUDElements
 
             return rect;
         }
-
     }
 }

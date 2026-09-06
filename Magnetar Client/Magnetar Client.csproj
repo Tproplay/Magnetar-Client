@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -8,7 +7,7 @@
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<Configurations>melonloader;Release_melon;Bepinex;Release_bepinex</Configurations>
+		<Configurations>melonloader;Release_melon;Bepinex;Release_bepinex;Android</Configurations>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -23,6 +22,11 @@
 		<OutputPath>bin\Bepinex\$(Configuration)\</OutputPath>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)' == 'Android'">
+		<OutputPath>bin\Android\</OutputPath>
+		<DefineConstants>$(DefineConstants);BEPINEX</DefineConstants>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<Compile Remove="References\**" />
 		<EmbeddedResource Remove="References\**" />
@@ -35,12 +39,10 @@
 		<Reference Include="0Harmony">
 			<HintPath>References\Melonloader\0Harmony.dll</HintPath>
 		</Reference>
-		<Reference Include="Newtonsoft.Json">
-			<HintPath>References\Melonloader\Newtonsoft.Json.dll</HintPath>
-		</Reference>
 	</ItemGroup>
 
-	<ItemGroup Condition="$(Configuration.Contains('melon'))">
+	<!-- MelonLoader References -->
+	<ItemGroup Condition="$(Configuration.Contains('melon')) or $(Configuration.Contains('Melon'))">
 		<Reference Include="MelonLoader">
 			<HintPath>References\Melonloader\MelonLoader.dll</HintPath>
 		</Reference>
@@ -97,12 +99,16 @@
 		</Reference>
 	</ItemGroup>
 
-	<ItemGroup Condition="$(Configuration.Contains('Bepinex')) or $(Configuration.Contains('bepinex'))">
+	<!-- BepInEx / Android References -->
+	<ItemGroup Condition="$(Configuration.Contains('Bepinex')) or $(Configuration.Contains('bepinex')) or '$(Configuration)' == 'Android'">
 		<Reference Include="BepInEx.Core">
 			<HintPath>References\Bepinex\BepInEx.Core.dll</HintPath>
 		</Reference>
 		<Reference Include="BepInEx.Unity.IL2CPP">
 			<HintPath>References\Bepinex\BepInEx.Unity.IL2CPP.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppInterop.Runtime">
+			<HintPath>References\Bepinex\Il2CppInterop.Runtime.dll</HintPath>
 		</Reference>
 		<Reference Include="Assembly-CSharp">
 			<HintPath>References\Bepinex\Il2Cpp\Assembly-CSharp.dll</HintPath>
@@ -146,20 +152,13 @@
 		<Reference Include="UnityEngine.UIModule">
 			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.UIModule.dll</HintPath>
 		</Reference>
-		<Reference Include="UnityEngine.UIModule">
-			<HintPath>References\Bepinex\Il2CppInterop.Runtime.dll</HintPath>
-		</Reference>
 		<Reference Include="UniTask">
 			<HintPath>References\Bepinex\Il2Cpp\UniTask.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-
 		<Exec Condition="$(Configuration) == 'melonloader'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.9\Mods\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.9\PlantsVsZombiesRH.exe&quot;" />
-
 		<Exec Condition="$(Configuration) == 'Bepinex'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\UnityExploror 3.9\BepInEx\plugins\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\UnityExploror 3.9\PlantsVsZombiesRH.exe&quot;" />
-
 	</Target>
-
 </Project>

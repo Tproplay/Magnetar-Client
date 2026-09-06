@@ -13,7 +13,7 @@ using Il2Cpp;
 
 namespace Magnetar_Client.Modules
 {
-#if ANDROID
+#if false
     public class VideoPlayer : Module
     {
         // Mod Info

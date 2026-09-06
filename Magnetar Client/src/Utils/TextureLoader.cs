@@ -455,6 +455,10 @@ namespace Magnetar_Client.Utils
 
         public static void Init()
         {
+#if ANDROID
+            DebugLogger.Msg("[Texture Loader] Android detected: Skipping custom font load and using default system font.");
+            return;
+#else
             if (GUI.skin != null && GUI.skin.font == customWineFont) return;
 
             string bundlePath = System.IO.Path.Combine(ModsDir, "Magnetar Data", "magnetar_ui");
@@ -465,7 +469,6 @@ namespace Magnetar_Client.Utils
 
                 if (fontBundle != null)
                 {
-                    
                     UnityEngine.Object assetObj = fontBundle.LoadAsset("Magnetar_font", Il2CppType.Of<Font>());
                     if (assetObj != null)
                     {
@@ -497,6 +500,7 @@ namespace Magnetar_Client.Utils
             {
                 DebugLogger.Warning("[Texture Loader] Font AssetBundle not found!");
             }
+#endif
         }
     }
 }

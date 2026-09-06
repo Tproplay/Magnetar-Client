@@ -97,7 +97,7 @@ namespace Magnetar_Client.Modules
         /// <summary>
         /// Static method to add settings to the module. Call this in the constructor of your module with all the settings you want to add.
         /// </summary>
-        protected void AddSettings(params Setting[] settings)
+        public void AddSettings(params Setting[] settings)
         {
             Settings.AddRange(settings);
         }
@@ -110,15 +110,27 @@ namespace Magnetar_Client.Modules
 
         public static Dictionary<int, string> TranslatedNames(System.Type enumType)
         {
-            var names = Translator.TranslateEnum(enumType);
+            if (enumType == null || !enumType.IsEnum) return new Dictionary<int, string>();
 
-            foreach (var name in names)
+            Dictionary<int, string> names = new Dictionary<int, string>();
+
+#if ANDROID
+            foreach (var val in System.Enum.GetValues(enumType))
             {
-                names[name.Key] = name.Value + $" ({name.Key})";
+                int key = System.Convert.ToInt32(val);
+                string name = System.Enum.GetName(enumType, val) ?? val.ToString();
+                names[key] = $"{name} ({key})";
             }
+#else
+            names = Translator.TranslateEnum(enumType);
+
+            foreach (var kvp in names.ToList())
+            {
+                names[kvp.Key] = $"{kvp.Value} ({kvp.Key})";
+    }
+#endif
 
             return names;
-
         }
 
         public virtual float SettingsWidth { get; set; } = Config.ModuleManager.SettingsWidth;

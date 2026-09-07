@@ -10,7 +10,6 @@ using System.Linq;
 using Il2Cpp;
 #endif
 
-#if !ANDROID
 namespace Magnetar_Client.Modules
 {
     public class NoRender : Module
@@ -47,13 +46,15 @@ namespace Magnetar_Client.Modules
 
             #region Particle
             // 1. Setup Path & Ensure Directory Exists
-            string dirPath = Path.Combine(Magnetar_Client.Core.main.ModsDirectory, "Magnetar Data");
+            string baseModsDir = SaveLoad.ModsDir;
+            string dirPath = Path.Combine(baseModsDir, "Magnetar Data");
+
             if (!Directory.Exists(dirPath))
             {
                 Directory.CreateDirectory(dirPath);
             }
-            filePath = Path.Combine(dirPath, "FxData.json");
 
+            string filePath = Path.Combine(dirPath, "FxData.json");
             Dictionary<int, string> menuNames = new Dictionary<int, string>();
 
             // 2. Load the JSON
@@ -408,4 +409,3 @@ namespace Magnetar_Client.Modules
         }
     }
 }
-#endif

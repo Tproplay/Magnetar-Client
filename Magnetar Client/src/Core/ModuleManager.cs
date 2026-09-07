@@ -143,6 +143,7 @@ namespace Magnetar_Client.Core
         {
             Event currentEvent = Event.current;
 
+#if ANDROID
             // 1. Long-press hold timer update
             if (_pressedModule != null && !_hasTriggeredLongPress)
             {
@@ -160,24 +161,8 @@ namespace Magnetar_Client.Core
                     if (currentEvent.isMouse) currentEvent.Use();
                 }
             }
+#endif
 
-            // 2. Global MouseUp release handler (prevents dropped taps)
-            //if (currentEvent.type == EventType.MouseUp || currentEvent.rawType == EventType.MouseUp)
-            //{
-            //    if (_pressedModule != null)
-            //    {
-            //        if (!_hasTriggeredLongPress)
-            //        {
-            //            if (VanillaMode.instance.IsAllowed(_pressedModule))
-            //            {
-            //                _pressedModule.Toggle();
-            //            }
-            //        }
-            //        _pressedModule = null;
-            //        _hasTriggeredLongPress = false;
-            //        currentEvent.Use();
-            //    }
-            //}
 
             if (showModules)
             {

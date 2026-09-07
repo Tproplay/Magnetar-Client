@@ -21,10 +21,30 @@ namespace Magnetar_Client.NEF
         public static float pyramidZoom = 1f;
         public static bool isDraggingPyramid = false;
 
+        // Hold-and-drag scroll tracking for Search Results Grid
+        private static Vector2 _gridTouchStart = Vector2.zero;
+        private static float _gridScrollStartVal = 0f;
+        private static bool _isGridSwiping = false;
+
+        // Hold-and-drag scroll tracking for Usages View
+        private static Vector2 _usageTouchStart = Vector2.zero;
+        private static float _usageScrollStartVal = 0f;
+        private static bool _isUsageSwiping = false;
+
+#if ANDROID
+        // Long Press / Hold Tracking for Mobile Right Click (400ms threshold)
+        private static RecipeEntity? _heldEntity = null;
+        private static float _holdStartTime = 0f;
+        private static Vector2 _holdStartScreenPos = Vector2.zero;
+        private static bool _hasTriggeredHold = false;
+        private const float LongPressThreshold = 0.40f;
+#endif
+
         public static bool showUsagesView = false;
         public static Dictionary<Texture2D, GUIStyle> cachedImageStyles = new Dictionary<Texture2D, GUIStyle>();
 
         static bool firstLoad = true;
+
         public static void DrawNEFWindow(int windowID)
         {
             if (firstLoad)
@@ -32,15 +52,48 @@ namespace Magnetar_Client.NEF
                 firstLoad = false;
                 NEFData.PerformSearch();
             }
+
+            // Keep node layout distance in sync if GUI Scale changes dynamically
+            if (NEFData.currentPyramidRoots.Count > 0 && Mathf.Abs(NEFData.lastCalculatedScale - Config.GUIScale) > 0.001f)
+            {
+                NEFData.RelayoutCurrentTrees();
+            }
+
             Event e = Event.current;
 
-            float rightPanelWidth = NEFManager.windowRect.width * 0.3f;
-            float topIndent = 35f;
-            float leftPanelWidth = NEFManager.windowRect.width - rightPanelWidth - 30f;
-            float contentHeight = NEFManager.windowRect.height - topIndent - 10f;
+#if ANDROID
+            // 1. Long-press hold timer update
+            if (_heldEntity.HasValue && !_hasTriggeredHold)
+            {
+                Vector2 currentScreenPos = GUIUtility.GUIToScreenPoint(e.mousePosition);
+                float moveDist = Vector2.Distance(currentScreenPos, _holdStartScreenPos);
 
-            Rect pyramidBoxRect = new Rect(10f, topIndent, leftPanelWidth, contentHeight);
-            Rect rightPanelRect = new Rect(10f + leftPanelWidth + 10f, topIndent, rightPanelWidth, contentHeight);
+                if (moveDist > Config.S(20f))
+                {
+                    _heldEntity = null;
+                }
+                else if (Time.realtimeSinceStartup - _holdStartTime >= LongPressThreshold)
+                {
+                    _hasTriggeredHold = true;
+                    NEFData.GenerateUsagesView(_heldEntity.Value);
+                    _heldEntity = null;
+                    e.Use();
+                }
+            }
+#endif
+
+            float rightPanelWidth = NEFManager.windowRect.width * 0.3f;
+
+            // Dynamic top indent scaled with GUI font size to prevent overlapping the title bar
+            float titleFontSize = Magnetar_Default.ModuleWindow != null ? Magnetar_Default.ModuleWindow.fontSize : Config.S(18f);
+            float topIndent = Mathf.Max(Config.S(48f), titleFontSize + Config.S(18f));
+
+            float pad = Config.S(10f);
+            float leftPanelWidth = NEFManager.windowRect.width - rightPanelWidth - (pad * 3f);
+            float contentHeight = NEFManager.windowRect.height - topIndent - pad;
+
+            Rect pyramidBoxRect = new Rect(pad, topIndent, leftPanelWidth, contentHeight);
+            Rect rightPanelRect = new Rect(pad + leftPanelWidth + pad, topIndent, rightPanelWidth, contentHeight);
 
             // ==========================================
             // 1. LEFT PANEL: VISUALIZER
@@ -55,7 +108,7 @@ namespace Magnetar_Client.NEF
             {
                 if (NEFData.currentPyramidRoots.Count == 0)
                 {
-                    GUI.Label(new Rect(pyramidBoxRect.x + 10f, pyramidBoxRect.y + 10f, 400f, NEFManager.elementHeight),
+                    GUI.Label(new Rect(pyramidBoxRect.x + pad, pyramidBoxRect.y + pad, leftPanelWidth - (pad * 2f), NEFManager.elementHeight),
                         Translator.Translate("Select an entity to view its recipes."));
                 }
                 else
@@ -84,7 +137,7 @@ namespace Magnetar_Client.NEF
                         pyramidZoom = Mathf.Clamp(pyramidZoom, 0.2f, 3.0f);
 
                         float originX = pyramidBoxRect.x + (pyramidBoxRect.width / 2f);
-                        float originY = pyramidBoxRect.y + 60f;
+                        float originY = pyramidBoxRect.y + Config.S(60f);
 
                         float focusX = (e.mousePosition.x - originX - pyramidPan.x) / oldZoom;
                         float focusY = (e.mousePosition.y - originY - pyramidPan.y) / oldZoom;
@@ -104,11 +157,17 @@ namespace Magnetar_Client.NEF
 
                 if (isDraggingPyramid && e.type == EventType.MouseDrag)
                 {
+#if ANDROID
+                    pyramidPan.x += e.delta.x;
+                    pyramidPan.y -= e.delta.y; // Invert Y drag on mobile so dragging matches touch movement
+                    _heldEntity = null;
+#else
                     pyramidPan += e.delta;
+#endif
                     e.Use();
                 }
 
-                if (e.rawType == EventType.MouseUp)
+                if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
                 {
                     isDraggingPyramid = false;
                 }
@@ -120,9 +179,13 @@ namespace Magnetar_Client.NEF
             float rx = rightPanelRect.x;
             float ry = rightPanelRect.y;
 
-            GUI.Label(new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight), Translator.Translate("Search:"));
+            string searchLabelText = Translator.Translate("Search:");
+            GUIStyle labelStyle = Magnetar_Default.SettingDescriptionStyle ?? GUI.skin.label;
+            float searchLabelWidth = labelStyle.CalcSize(new GUIContent(searchLabelText)).x + Config.S(8f);
+
+            GUI.Label(new Rect(rx, ry, searchLabelWidth, NEFManager.elementHeight), searchLabelText, labelStyle);
             string newQuery = UI.WindowDrawing.DrawSetting.DrawManualTextField(
-                new Rect(rx + 65f, ry, rightPanelWidth - 65f, NEFManager.elementHeight), 
+                new Rect(rx + searchLabelWidth, ry, rightPanelWidth - searchLabelWidth, NEFManager.elementHeight),
                 searchQuery, Translator.Translate("Search..."));
 
             if (newQuery != searchQuery)
@@ -132,7 +195,7 @@ namespace Magnetar_Client.NEF
                 NEFData.PerformSearch();
             }
 
-            ry += NEFManager.elementHeight + 5f;
+            ry += NEFManager.elementHeight + Config.S(6f);
 
             Rect clearBtnRect = new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight);
             bool clearHover = clearBtnRect.Contains(e.mousePosition);
@@ -148,34 +211,67 @@ namespace Magnetar_Client.NEF
                 e.Use();
             }
 
-            ry += NEFManager.elementHeight + 15f;
+            ry += NEFManager.elementHeight + Config.S(10f);
 
+#if ANDROID
             GUI.Label(new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight),
-                Translator.Translate($"Results") + " ("+NEFData.searchResults.Count+ ") "+
-                Translator.Translate("| L-Click: Recipe | R-Click: Usages"));
-            ry += NEFManager.elementHeight;
+                Translator.Translate($"Results") + " (" + NEFData.searchResults.Count + ") " +
+                Translator.Translate("| Tap: Recipe | Hold: Usages"), labelStyle);
+#else
+            GUI.Label(new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight),
+                Translator.Translate($"Results") + " (" + NEFData.searchResults.Count + ") " +
+                Translator.Translate("| L-Click: Recipe | R-Click: Usages"), labelStyle);
+#endif
+            ry += NEFManager.elementHeight + Config.S(4f);
 
             float scrollHeight = rightPanelRect.height - (ry - rightPanelRect.y);
             Rect scrollRect = new Rect(rx, ry, rightPanelWidth, scrollHeight);
 
-            int columns = Mathf.Max(3, Mathf.FloorToInt(rightPanelWidth / 100f));
-            float padding = 5f;
-            float itemSize = (rightPanelWidth - (padding * (columns - 1))) / columns;
+            int columns = Mathf.Max(3, Mathf.FloorToInt(rightPanelWidth / Config.S(100f)));
+            float cellPadding = Config.S(5f);
+            float itemSize = (rightPanelWidth - (cellPadding * (columns - 1))) / columns;
             int rowCount = Mathf.CeilToInt((float)NEFData.searchResults.Count / columns);
-            float totalContentHeight = rowCount * (itemSize + padding);
+            float totalContentHeight = rowCount * (itemSize + cellPadding);
             float maxScrollY = Mathf.Max(0f, totalContentHeight - scrollRect.height);
 
+            // Scroll Wheel
             if (scrollRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
             {
-                currentScrollY += e.delta.y * 30f;
+                currentScrollY += e.delta.y * Config.S(30f);
                 currentScrollY = Mathf.Clamp(currentScrollY, 0f, maxScrollY);
+                e.Use();
+            }
+
+            // Hold-and-Drag Scrolling for Results Grid
+            if (e.type == EventType.MouseDown && e.button == 0 && scrollRect.Contains(e.mousePosition))
+            {
+                _gridTouchStart = e.mousePosition;
+                _gridScrollStartVal = currentScrollY;
+                _isGridSwiping = false;
+            }
+
+            if (e.type == EventType.MouseDrag && !_isGridSwiping && scrollRect.Contains(_gridTouchStart))
+            {
+                if (Vector2.Distance(e.mousePosition, _gridTouchStart) > Config.S(8f))
+                {
+                    _isGridSwiping = true;
+#if ANDROID
+                    _heldEntity = null;
+#endif
+                }
+            }
+
+            if (_isGridSwiping && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove))
+            {
+                float deltaY = _gridTouchStart.y - e.mousePosition.y;
+                currentScrollY = Mathf.Clamp(_gridScrollStartVal + deltaY, 0f, maxScrollY);
                 e.Use();
             }
 
             GUI.BeginGroup(scrollRect);
             if (!PlantMixTreeManager.IsInitialized)
             {
-                GUI.Label(new Rect(5, 5, rightPanelWidth, 30), Translator.Translate("Loading data..."));
+                GUI.Label(new Rect(Config.S(5f), Config.S(5f), rightPanelWidth, Config.S(30f)), Translator.Translate("Loading data..."));
             }
             else
             {
@@ -184,16 +280,34 @@ namespace Magnetar_Client.NEF
                     int col = i % columns;
                     int row = i / columns;
 
-                    float btnX = col * (itemSize + padding);
-                    float btnY = row * (itemSize + padding) - currentScrollY;
+                    float btnX = col * (itemSize + cellPadding);
+                    float btnY = row * (itemSize + cellPadding) - currentScrollY;
 
                     if (btnY + itemSize < 0 || btnY > scrollRect.height) continue;
 
                     RecipeEntity entity = NEFData.searchResults[i];
                     Rect plantBtnRect = new Rect(btnX, btnY, itemSize, itemSize);
 
-                    if (plantBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseUp)
+#if ANDROID
+                    if (plantBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
                     {
+                        _heldEntity = entity;
+                        _holdStartTime = Time.realtimeSinceStartup;
+                        _holdStartScreenPos = GUIUtility.GUIToScreenPoint(e.mousePosition);
+                        _hasTriggeredHold = false;
+                    }
+#endif
+
+                    if (!_isGridSwiping && plantBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseUp)
+                    {
+#if ANDROID
+                        if (!_hasTriggeredHold && e.button == 0)
+                        {
+                            showUsagesView = false;
+                            NEFData.GeneratePyramid(entity);
+                            e.Use();
+                        }
+#else
                         if (e.button == 0)
                         {
                             showUsagesView = false;
@@ -204,6 +318,7 @@ namespace Magnetar_Client.NEF
                             NEFData.GenerateUsagesView(entity);
                         }
                         e.Use();
+#endif
                     }
 
                     DrawSquareNodeBox(plantBtnRect, entity, 1.5f);
@@ -211,18 +326,31 @@ namespace Magnetar_Client.NEF
                 }
             }
             GUI.EndGroup();
+
+            if (e.type == EventType.MouseUp)
+            {
+                _isGridSwiping = false;
+#if ANDROID
+                _heldEntity = null;
+                _hasTriggeredHold = false;
+#endif
+            }
         }
 
         private static void DrawUsagesView(Rect viewRect, Event e)
         {
-            GUI.Label(new Rect(viewRect.x + 10f, viewRect.y + 10f, viewRect.width - 150f, 30f), 
-                Translator.Translate("Fusions requiring") + ": " + 
-                NEFData.GetEntityName(NEFData.usageViewTarget) + " (" + 
+            float pad = Config.S(10f);
+            float btnW = Config.S(110f);
+            float btnH = Config.S(30f);
+
+            GUI.Label(new Rect(viewRect.x + pad, viewRect.y + pad, viewRect.width - btnW - (pad * 2f), btnH),
+                Translator.Translate("Fusions requiring") + ": " +
+                NEFData.GetEntityName(NEFData.usageViewTarget) + " (" +
                 NEFData.currentUsages.Count + " " +
                 Translator.Translate("found") + ")"
                 );
 
-            Rect backBtnRect = new Rect(viewRect.x + viewRect.width - 110f, viewRect.y + 10f, 100f, 30f);
+            Rect backBtnRect = new Rect(viewRect.x + viewRect.width - btnW - pad, viewRect.y + pad, btnW, btnH);
             if (backBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
             {
                 showUsagesView = false;
@@ -234,14 +362,16 @@ namespace Magnetar_Client.NEF
 
             if (NEFData.currentUsages.Count == 0)
             {
-                GUI.Label(new Rect(viewRect.x + 10f, viewRect.y + 50f, 400f, 30f), Translator.Translate("This entity is not used as an ingredient in any fusion."));
+                GUI.Label(new Rect(viewRect.x + pad, viewRect.y + Config.S(50f), viewRect.width - (pad * 2f), btnH),
+                    Translator.Translate("This entity is not used as an ingredient in any fusion."));
                 return;
             }
 
-            Rect scrollAreaRect = new Rect(viewRect.x + 10f, viewRect.y + 50f, viewRect.width - 20f, viewRect.height - 60f);
+            float scrollStartY = viewRect.y + Config.S(50f);
+            Rect scrollAreaRect = new Rect(viewRect.x + pad, scrollStartY, viewRect.width - (pad * 2f), viewRect.height - Config.S(60f));
 
-            int columns = Mathf.Max(3, Mathf.FloorToInt(scrollAreaRect.width / 115f));
-            float padding = 10f;
+            int columns = Mathf.Max(3, Mathf.FloorToInt(scrollAreaRect.width / Config.S(115f)));
+            float padding = Config.S(10f);
             float itemSize = (scrollAreaRect.width - (padding * (columns - 1))) / columns;
             int rowCount = Mathf.CeilToInt((float)NEFData.currentUsages.Count / columns);
             float totalContentHeight = rowCount * (itemSize + padding);
@@ -249,8 +379,34 @@ namespace Magnetar_Client.NEF
 
             if (scrollAreaRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
             {
-                usageScrollY += e.delta.y * 30f;
+                usageScrollY += e.delta.y * Config.S(30f);
                 usageScrollY = Mathf.Clamp(usageScrollY, 0f, maxScroll);
+                e.Use();
+            }
+
+            // Hold-and-Drag Scrolling for Usages View
+            if (e.type == EventType.MouseDown && e.button == 0 && scrollAreaRect.Contains(e.mousePosition))
+            {
+                _usageTouchStart = e.mousePosition;
+                _usageScrollStartVal = usageScrollY;
+                _isUsageSwiping = false;
+            }
+
+            if (e.type == EventType.MouseDrag && !_isUsageSwiping && scrollAreaRect.Contains(_usageTouchStart))
+            {
+                if (Vector2.Distance(e.mousePosition, _usageTouchStart) > Config.S(8f))
+                {
+                    _isUsageSwiping = true;
+#if ANDROID
+                    _heldEntity = null;
+#endif
+                }
+            }
+
+            if (_isUsageSwiping && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove))
+            {
+                float deltaY = _usageTouchStart.y - e.mousePosition.y;
+                usageScrollY = Mathf.Clamp(_usageScrollStartVal + deltaY, 0f, maxScroll);
                 e.Use();
             }
 
@@ -268,8 +424,26 @@ namespace Magnetar_Client.NEF
                 RecipeEntity resultEntity = NEFData.currentUsages[i].Result;
                 Rect plantBtnRect = new Rect(btnX, btnY, itemSize, itemSize);
 
-                if (plantBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseUp)
+#if ANDROID
+                if (plantBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
                 {
+                    _heldEntity = resultEntity;
+                    _holdStartTime = Time.realtimeSinceStartup;
+                    _holdStartScreenPos = GUIUtility.GUIToScreenPoint(e.mousePosition);
+                    _hasTriggeredHold = false;
+                }
+#endif
+
+                if (!_isUsageSwiping && plantBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseUp)
+                {
+#if ANDROID
+                    if (!_hasTriggeredHold && e.button == 0)
+                    {
+                        showUsagesView = false;
+                        NEFData.GeneratePyramid(resultEntity);
+                        e.Use();
+                    }
+#else
                     if (e.button == 0)
                     {
                         showUsagesView = false;
@@ -280,18 +454,28 @@ namespace Magnetar_Client.NEF
                         NEFData.GenerateUsagesView(resultEntity);
                     }
                     e.Use();
+#endif
                 }
 
                 DrawSquareNodeBox(plantBtnRect, resultEntity, 1f);
             }
             GUI.EndGroup();
+
+            if (e.type == EventType.MouseUp)
+            {
+                _isUsageSwiping = false;
+#if ANDROID
+                _heldEntity = null;
+                _hasTriggeredHold = false;
+#endif
+            }
         }
 
         private static Vector2 GetProjectedPosition(float logicX, float logicY, Rect canvasRect, float centerOfAllTrees)
         {
             float centeredX = logicX - centerOfAllTrees;
             float screenX = (canvasRect.width / 2f) + (centeredX * pyramidZoom) + pyramidPan.x;
-            float screenY = 60f + (logicY * pyramidZoom) + pyramidPan.y;
+            float screenY = Config.S(60f) + (logicY * pyramidZoom) + pyramidPan.y;
             return new Vector2(screenX, screenY);
         }
 
@@ -299,7 +483,7 @@ namespace Magnetar_Client.NEF
         {
             if (node == null) return;
 
-            float baseSize = 100f;
+            float baseSize = Config.S(100f);
             float scaledSize = baseSize * pyramidZoom;
 
             Vector2 pos = GetProjectedPosition(node.RenderX, node.RenderY, canvasRect, centerOfAllTrees);
@@ -331,23 +515,41 @@ namespace Magnetar_Client.NEF
                 }
             }
 
-            // Draw Edge Message (Centered above the node)
+            // Draw Edge Message
             if (!string.IsNullOrEmpty(node.EdgeMessage))
             {
                 Color oldColor = GUI.contentColor;
                 GUI.contentColor = node.EdgeMessageColor;
-                GUIStyle msgStyle = new GUIStyle() { alignment = TextAnchor.LowerCenter, fontSize = Mathf.Max(1, (int)(16 * pyramidZoom)) };
+                GUIStyle msgStyle = new GUIStyle() { alignment = TextAnchor.LowerCenter, fontSize = Mathf.Max(1, (int)(Config.S(16f) * pyramidZoom)) };
 
-                Rect msgRect = new Rect(pos.x - (100f * pyramidZoom), pos.y - (30f * pyramidZoom), 200f * pyramidZoom, 30f * pyramidZoom);
+                Rect msgRect = new Rect(pos.x - (Config.S(100f) * pyramidZoom), pos.y - (Config.S(30f) * pyramidZoom), Config.S(200f) * pyramidZoom, Config.S(30f) * pyramidZoom);
                 GUI.Label(msgRect, node.EdgeMessage, msgStyle);
                 GUI.contentColor = oldColor;
             }
 
+#if ANDROID
+            if (nodeRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+            {
+                _heldEntity = node.Entity;
+                _holdStartTime = Time.realtimeSinceStartup;
+                _holdStartScreenPos = GUIUtility.GUIToScreenPoint(e.mousePosition);
+                _hasTriggeredHold = false;
+            }
+#endif
+
             if (nodeRect.Contains(e.mousePosition) && e.type == EventType.MouseUp)
             {
+#if ANDROID
+                if (!_hasTriggeredHold && e.button == 0)
+                {
+                    NEFData.GeneratePyramid(node.Entity);
+                    e.Use();
+                }
+#else
                 if (e.button == 0) NEFData.GeneratePyramid(node.Entity);
                 else if (e.button == 1) NEFData.GenerateUsagesView(node.Entity);
                 e.Use();
+#endif
             }
 
             DrawSquareNodeBox(nodeRect, node.Entity, pyramidZoom);
@@ -356,7 +558,7 @@ namespace Magnetar_Client.NEF
 
         private static void DrawSquareNodeBox(Rect rect, RecipeEntity entity, float scale)
         {
-            Magnetar_Default.NEFNodeStyle.fontSize = Mathf.Max(1, (int)(8f * scale));
+            Magnetar_Default.NEFNodeStyle.fontSize = Mathf.Max(1, (int)(Config.S(8f) * scale));
             string displayName = NEFData.GetEntityName(entity);
             GUI.Box(rect, displayName, Magnetar_Default.NEFNodeStyle);
 
@@ -366,8 +568,8 @@ namespace Magnetar_Client.NEF
             {
                 Texture2D tex = imgStyle.normal.background;
 
-                float pad = 10f * scale;
-                float bottomTextSpace = 25f * scale;
+                float pad = Config.S(10f) * scale;
+                float bottomTextSpace = Config.S(25f) * scale;
 
                 float availWidth = rect.width - (pad * 2f);
                 float availHeight = rect.height - pad - bottomTextSpace;
@@ -388,6 +590,7 @@ namespace Magnetar_Client.NEF
                 GUI.Box(imageRect, GUIContent.none, imgStyle);
             }
         }
+
         private static Dictionary<int, GUIStyle> cachedEntityStyles = new Dictionary<int, GUIStyle>();
 
         private static GUIStyle GetEntityStyle(RecipeEntity entity)
@@ -406,7 +609,6 @@ namespace Magnetar_Client.NEF
                     : Utils.TextureLoader.GetPlantTexture(entity.Id);
             }
 
-            
             if (finalTex == null)
             {
                 Sprite sprite = GetEntitySprite(entity);

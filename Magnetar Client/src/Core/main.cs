@@ -276,18 +276,6 @@ namespace Magnetar_Client.Core
                 return true;
             }
         }
-
-        public static string ModsDirectory
-        {
-            get
-            {
-#if MELONLOADER || RELEASE_MELON
-                return MelonLoader.Utils.MelonEnvironment.ModsDirectory;
-#elif BEPINEX || RELEASE_BEPINEX
-                return BepInEx.Paths.PluginPath;
-#endif
-            }
-        }
     }
 
 #if BEPINEX || RELEASE_BEPINEX

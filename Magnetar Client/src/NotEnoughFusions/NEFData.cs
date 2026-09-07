@@ -22,7 +22,6 @@ namespace Magnetar_Client.NEF
         public static int NextCustomPlantId = 3000;
 
         // Internal Data State
-
         public static bool hasSyncedCustomizeLib = false;
 
         public static List<RecipeEntity> searchResults = new List<RecipeEntity>();
@@ -31,6 +30,8 @@ namespace Magnetar_Client.NEF
         public static List<CustomRecipe> currentUsages = new List<CustomRecipe>();
 
         public static HashSet<int> LegacyLoadEntities = new HashSet<int>();
+
+        public static float lastCalculatedScale = 1.0f;
 
         public class RecipeNode
         {
@@ -50,13 +51,11 @@ namespace Magnetar_Client.NEF
 
         public static void Init()
         {
-
             LegacyLoadEntities.UnionWith(new HashSet<int>
             {
                 (int)PlantType.HelmetPlant, (int)PlantType.DoomSeed,
                 (int)PlantType.IceNut
             });
-
 
             // Cache native names
             foreach (PlantType pt in Enum.GetValues(typeof(PlantType)))
@@ -64,7 +63,7 @@ namespace Magnetar_Client.NEF
                 if (!CustomNames.ContainsKey((int)pt)) CustomNames[(int)pt] = pt.ToString();
             }
 #if RELEASE_MELON || RELEASE_BEPINEX
-            foreach ( var Entry in Translator.TranslateEnum(typeof(PlantType)))
+            foreach (var Entry in Translator.TranslateEnum(typeof(PlantType)))
             {
                 CustomNames[Entry.Key] = Entry.Value;
             }
@@ -78,7 +77,6 @@ namespace Magnetar_Client.NEF
         {
             try
             {
-                // Check if CustomizeLib is installed
                 var customizeLib = AppDomain.CurrentDomain.GetAssemblies()
                     .FirstOrDefault(a => a.GetName().Name == "PVZCustomization" || a.FullName.Contains("CustomizeLib"));
 
@@ -181,7 +179,6 @@ namespace Magnetar_Client.NEF
             if (!PlantMixTreeManager.IsInitialized) return;
 
             string query = NEFGUI.searchQuery.ToLower();
-
             HashSet<int> seenIds = new HashSet<int>();
 
             foreach (PlantType pt in Enum.GetValues(typeof(PlantType)))
@@ -249,7 +246,6 @@ namespace Magnetar_Client.NEF
                 }
             }
 
-            // Add custom injected recipes
             foreach (var custom in AddedRecipes)
             {
                 if (custom.Result.Equals(target))
@@ -258,17 +254,14 @@ namespace Magnetar_Client.NEF
                         (!custom.ParentB.IsNothing && BannedPlants.Contains(custom.ParentB.Id)) ||
                         (custom.IsTriple && BannedPlants.Contains(custom.ParentC.Id))) continue;
 
-                    // 1. Create a unique string for each ingredient
                     string aString = $"{custom.ParentA.Id}_{(custom.ParentA.IsZombie ? "Z" : "P")}";
                     string bString = $"{custom.ParentB.Id}_{(custom.ParentB.IsZombie ? "Z" : "P")}";
                     string cString = custom.IsTriple ? $"{custom.ParentC.Id}_{(custom.ParentC.IsZombie ? "Z" : "P")}" : "NONE";
 
-                    // 2. Sort Parent A and Parent B alphabetically so order doesn't matter
                     string sortedParents = string.Compare(aString, bString) < 0
                         ? $"{aString}_{bString}"
                         : $"{bString}_{aString}";
 
-                    // 3. Generate the final deduplication key
                     string key = $"{sortedParents}_{cString}";
 
                     if (!seenKeys.Contains(key))
@@ -279,6 +272,23 @@ namespace Magnetar_Client.NEF
                 }
             }
             return recipes;
+        }
+
+        public static void RelayoutCurrentTrees()
+        {
+            if (currentPyramidRoots == null || currentPyramidRoots.Count == 0) return;
+
+            // Spacing scales dynamically with GUI Scale to prevent overlap
+            float spacingX = Config.S(160f);
+            float spacingY = Config.S(160f);
+            float treeGap = Config.S(220f);
+
+            float currentStartX = 0f;
+            foreach (var root in currentPyramidRoots)
+            {
+                currentStartX = CalculateTreeLayout(root, currentStartX, 0f, spacingX, spacingY) + treeGap;
+            }
+            lastCalculatedScale = Config.GUIScale;
         }
 
         public static void GeneratePyramid(RecipeEntity target)
@@ -315,11 +325,7 @@ namespace Magnetar_Client.NEF
                 currentPyramidRoots.Add(new RecipeNode { Entity = target });
             }
 
-            float currentStartX = 0f;
-            foreach (var root in currentPyramidRoots)
-            {
-                currentStartX = CalculateTreeLayout(root, currentStartX, 0f, 150f, 150f) + 200f;
-            }
+            RelayoutCurrentTrees();
 
             NEFGUI.pyramidPan = Vector2.zero;
             NEFGUI.pyramidZoom = 1.0f;
@@ -355,7 +361,6 @@ namespace Magnetar_Client.NEF
                         node.ParentC = BuildRecipeTree(recipe.ParentC, new HashSet<RecipeEntity>(visitedAncestors), rootPlant);
                     }
 
-                    // Assign edge messages upward
                     node.EdgeMessage = recipe.EdgeMessage;
                     node.EdgeMessageColor = recipe.EdgeMessageColor;
                 }

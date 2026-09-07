@@ -126,6 +126,7 @@ namespace Magnetar_Client.Core
 
         public static void OpenModuleSettings(Modules.Module mod)
         {
+            _pressedModule = null; // Clear lingering hold states
             showModules = false;
             showSelectionGui = false;
             showSettings = true;
@@ -161,22 +162,22 @@ namespace Magnetar_Client.Core
             }
 
             // 2. Global MouseUp release handler (prevents dropped taps)
-            if (currentEvent.type == EventType.MouseUp || currentEvent.rawType == EventType.MouseUp)
-            {
-                if (_pressedModule != null)
-                {
-                    if (!_hasTriggeredLongPress)
-                    {
-                        if (VanillaMode.instance.IsAllowed(_pressedModule))
-                        {
-                            _pressedModule.Toggle();
-                        }
-                    }
-                    _pressedModule = null;
-                    _hasTriggeredLongPress = false;
-                    currentEvent.Use();
-                }
-            }
+            //if (currentEvent.type == EventType.MouseUp || currentEvent.rawType == EventType.MouseUp)
+            //{
+            //    if (_pressedModule != null)
+            //    {
+            //        if (!_hasTriggeredLongPress)
+            //        {
+            //            if (VanillaMode.instance.IsAllowed(_pressedModule))
+            //            {
+            //                _pressedModule.Toggle();
+            //            }
+            //        }
+            //        _pressedModule = null;
+            //        _hasTriggeredLongPress = false;
+            //        currentEvent.Use();
+            //    }
+            //}
 
             if (showModules)
             {
@@ -497,15 +498,13 @@ namespace Magnetar_Client.Core
 
             // Header close button (uses GUI.Button to prevent drag interception)
             float closeBtnSize = Config.S(20f);
-            Rect closeButtonRect = new Rect(windowWidth - closeBtnSize - Config.S(4f), Config.S(2.5f), closeBtnSize, closeBtnSize);
-
-            if (GUI.Button(closeButtonRect, "✕", Magnetar_Default.ModuleOn))
+            Rect closeButtonRect = new Rect(windowWidth - Config.S(26f), Config.S(4f), Config.S(22f), Config.S(22f));
+            GUI.Box(closeButtonRect, "X", Magnetar_Default.ModuleOff);
+            if (e.type == EventType.MouseDown && closeButtonRect.Contains(e.mousePosition))
             {
-                mod.ShowSettings = false;
                 showSettings = false;
                 showModules = true;
                 showSelectionGui = false;
-                e.Use();
                 return;
             }
 

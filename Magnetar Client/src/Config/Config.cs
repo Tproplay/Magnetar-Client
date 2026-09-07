@@ -105,7 +105,11 @@ namespace Magnetar_Client
 
         public static class ModuleManager
         {
+#if !ANDROID
             private static float _baseSettingsWidth = 630f;
+#elif ANDROID
+            private static float _baseSettingsWidth = 830f; // Wide enough for mobile displays
+#endif
             public static float SettingsWidth
             {
                 get => S(_baseSettingsWidth);

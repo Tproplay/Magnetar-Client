@@ -89,25 +89,28 @@ namespace Magnetar_Client.Core
 
             try
             {
+                Event e = Event.current;
+
                 if (Config.dimBg && (Config.showgui || forceShow))
                 {
-#if !ANDROID
-                    if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2))
-                    {
-                        Input.ResetInputAxes();
-                    }
-#endif
-
                     Matrix4x4 backupMatrix = GUI.matrix;
                     GUI.matrix = Matrix4x4.identity;
+                    
+                    Rect fullScreenRect = new Rect(0, 0, Screen.width, Screen.height);
                     if (Magnetar_Default.DimStyle != null)
                     {
-                        GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "", Magnetar_Default.DimStyle);
+                        GUI.Box(fullScreenRect, "", Magnetar_Default.DimStyle);
                     }
                     GUI.matrix = backupMatrix;
-                }
 
-                Event e = Event.current;
+                    // Safe background click detection: only reset axes if no slider/dropdown is active
+                    if (e.type == EventType.MouseDown && UI.WindowDrawing.DrawSetting.activeSliderId == -1 && UI.WindowDrawing.DrawSetting.activeDropdownId == -1)
+                    {
+#if !ANDROID
+                        Input.ResetInputAxes();
+#endif
+                    }
+                }
 
                 #region Handle Escape
                 if (forceShow && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)

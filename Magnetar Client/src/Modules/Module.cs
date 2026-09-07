@@ -209,6 +209,8 @@ namespace Magnetar_Client.Modules
     {
         private int _value;
         public int DefaultValue;
+        public bool InstantUpdate = false;
+        public int? PendingValue = null;
 
         public int Min;
         public int Max;
@@ -218,6 +220,8 @@ namespace Magnetar_Client.Modules
         // Callbacks
         public Action<int> OnValueChanging { get; set; }
         public Action<int> OnValueChanged { get; set; }
+
+        public int DisplayValue => PendingValue ?? _value;
 
         public int Value
         {
@@ -235,13 +239,36 @@ namespace Magnetar_Client.Modules
             }
         }
 
-        public IntSetting(string name, int min, int max, int defaultValue, int trueMin = int.MinValue, int trueMax = int.MaxValue)
+        public void SetPending(int val)
+        {
+            if (InstantUpdate)
+            {
+                Value = val;
+                PendingValue = null;
+            }
+            else
+            {
+                PendingValue = val;
+            }
+        }
+
+        public void Commit()
+        {
+            if (PendingValue.HasValue)
+            {
+                Value = PendingValue.Value;
+                PendingValue = null;
+            }
+        }
+
+        public IntSetting(string name, int min, int max, int defaultValue, int trueMin = int.MinValue, int trueMax = int.MaxValue, bool instantUpdate = false)
         {
             Name = name;
             Min = min;
             Max = max;
             TrueMin = trueMin;
             TrueMax = trueMax;
+            InstantUpdate = instantUpdate;
             _value = System.Math.Max(TrueMin, System.Math.Min(defaultValue, TrueMax));
             DefaultValue = _value;
         }
@@ -251,6 +278,8 @@ namespace Magnetar_Client.Modules
     {
         private float _value;
         public float DefaultValue;
+        public bool InstantUpdate = false;
+        public float? PendingValue = null;
 
         public float Min;
         public float Max;
@@ -261,6 +290,8 @@ namespace Magnetar_Client.Modules
         // Callbacks
         public Action<float> OnValueChanging { get; set; }
         public Action<float> OnValueChanged { get; set; }
+
+        public float DisplayValue => PendingValue ?? _value;
 
         public float Value
         {
@@ -278,16 +309,39 @@ namespace Magnetar_Client.Modules
             }
         }
 
-        public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces = 1, float trueMin = float.MinValue, float trueMax = float.MaxValue)
+        public void SetPending(float val)
+        {
+            if (InstantUpdate)
+            {
+                Value = val;
+                PendingValue = null;
+            }
+            else
+            {
+                PendingValue = val;
+            }
+        }
+
+        public void Commit()
+        {
+            if (PendingValue.HasValue)
+            {
+                Value = PendingValue.Value;
+                PendingValue = null;
+            }
+        }
+
+        public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces = 1, float trueMin = float.MinValue, float trueMax = float.MaxValue, bool instantUpdate = false)
         {
             Name = name;
             Min = min;
             Max = max;
             TrueMin = trueMin;
             TrueMax = trueMax;
+            DecimalPlaces = decimalPlaces;
+            InstantUpdate = instantUpdate;
             _value = UnityEngine.Mathf.Clamp(defaultValue, TrueMin, TrueMax);
             DefaultValue = _value;
-            DecimalPlaces = decimalPlaces;
         }
     }
 

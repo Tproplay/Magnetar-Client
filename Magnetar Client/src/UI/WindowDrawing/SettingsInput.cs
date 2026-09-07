@@ -16,6 +16,9 @@ namespace Magnetar_Client.UI.WindowDrawing
         public static string currentInputBuffer = "";
         public static int activeSliderId = -1;
 
+        public static object activeNumericSetting = null;
+        public static int lastFocusedNumericControlId = -1;
+
 #if ANDROID
         private static TouchScreenKeyboard _mobileKeyboard = null;
         private static int _activeMobileKeyboardId = -1;
@@ -23,12 +26,20 @@ namespace Magnetar_Client.UI.WindowDrawing
 
         public static void HandleStringSetting(Magnetar_Client.Modules.StringSetting strSet, ref float y, float width)
         {
+            float elemH = Config.elementHeight;
             string translatedName = Magnetar_Client.Utils.Translator.Translate(strSet.Name);
-            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth,
-                Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
 
-            Rect inputRect = new Rect(width - Config.indent - Config.SettingWidth * 1.3f, y, Config.SettingWidth * 1.3f, Config.elementHeight);
+            // 1. Responsive control width (caps at 55% of window width)
+            float controlW = Mathf.Min(Config.SettingWidth * 1.25f, width * 0.55f);
+            float gap = Config.S(8f);
 
+            // 2. Safe label width calculation to eliminate text overlapping
+            float labelW = Mathf.Max(width * 0.38f, width - (Config.indent * 2f) - controlW - gap);
+
+            Rect labelRect = new Rect(Config.indent, y, labelW, elemH);
+            Rect inputRect = new Rect(width - Config.indent - controlW, y, controlW, elemH);
+
+            GUI.Label(labelRect, translatedName, Magnetar_Default.SettingDescriptionStyle);
             strSet.Value = DrawManualTextField(inputRect, strSet.Value, "", strSet.AutocompleteVars);
         }
 
@@ -36,7 +47,6 @@ namespace Magnetar_Client.UI.WindowDrawing
         {
             float val, sliderMin, sliderMax, trueMin, trueMax;
             string name;
-            int myId = setting.GetHashCode();
             int decPlaces = 0;
 
             int intTrueMin = 0, intTrueMax = 0;
@@ -45,7 +55,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             if (isFloat)
             {
                 var s = (FloatSetting)setting;
-                val = s.Value;
+                val = s.DisplayValue;
                 sliderMin = s.Min;
                 sliderMax = s.Max;
                 trueMin = s.TrueMin;
@@ -56,7 +66,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             else
             {
                 var s = (IntSetting)setting;
-                val = (float)s.Value;
+                val = (float)s.DisplayValue;
                 sliderMin = (float)s.Min;
                 sliderMax = (float)s.Max;
                 trueMin = (float)s.TrueMin;
@@ -79,10 +89,8 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             float logMin = LogConvert(sliderMin);
             float logMax = LogConvert(sliderMax);
-
             float visualVal = Mathf.Clamp(val, sliderMin, sliderMax);
             float logVal = LogConvert(visualVal);
-
             float percentage = Mathf.Clamp01((logVal - logMin) / (logMax - logMin));
 
             float inputW = Config.SettingsInput.NumericInputWidth;
@@ -92,87 +100,107 @@ namespace Magnetar_Client.UI.WindowDrawing
             Rect sliderHitBox = new Rect(sliderRect.x, y, sliderRect.width, 22);
             Rect inputRect = new Rect(width - Config.indent - inputW, y, inputW, 22);
             float fillWidth = sliderRect.width * percentage;
-            Rect thumbRect = new Rect(sliderRect.x + fillWidth - 10, y + 1, 20, 20);
+
+            // Thumb with baseline offset
+            Rect thumbRect = new Rect(sliderRect.x + fillWidth - 10, y + 1 - Config.S(3f), 20, 20);
 
             GUI.Box(sliderRect, "", Magnetar_Default.SettingOff);
             if (fillWidth > 0) GUI.Box(new Rect(sliderRect.x, sliderRect.y, fillWidth, sliderRect.height), "", Magnetar_Default.SettingOn);
 
-            GUIStyle thumbStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontSize = Config.SettingsInput.SliderThumbFontSize };
+            GUIStyle thumbStyle = Magnetar_Default.HUDElementStyle ?? GUI.skin.label;
+            Color prevColor = thumbStyle.normal.textColor;
+            int prevFontSize = thumbStyle.fontSize;
+            TextAnchor prevAlignment = thumbStyle.alignment;
+            RectOffset prevPadding = thumbStyle.padding;
+
+            thumbStyle.alignment = TextAnchor.MiddleCenter;
+            if (thumbStyle.padding == null) thumbStyle.padding = new RectOffset();
+            thumbStyle.padding.left = 0; thumbStyle.padding.right = 0;
+            thumbStyle.padding.top = 0; thumbStyle.padding.bottom = 0;
+            thumbStyle.fontSize = Config.SettingsInput.SliderThumbFontSize;
             thumbStyle.normal.textColor = Magnetar_Default.AccentColor;
 
             GUI.Label(thumbRect, "●", thumbStyle);
 
+            thumbStyle.normal.textColor = prevColor;
+            thumbStyle.fontSize = prevFontSize;
+            thumbStyle.alignment = prevAlignment;
+            thumbStyle.padding = prevPadding;
+
             Event e = Event.current;
 
-            if (e.type == EventType.ScrollWheel && (sliderHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition)))
+            void CommitSettingValue()
             {
-                float scrollDirection = Mathf.Sign(e.delta.y);
-                float scrollStep = Config.SettingsInput.SliderScrollStep;
-                float newPercentage = Mathf.Clamp01(percentage + (scrollDirection * scrollStep));
+                if (isFloat) ((FloatSetting)setting).Commit();
+                else ((IntSetting)setting).Commit();
+            }
 
-                float newLogVal = logMin + (newPercentage * (logMax - logMin));
+            void ApplyFromMouseX(float mouseX)
+            {
+                float mousePct = Mathf.Clamp01((mouseX - sliderRect.x) / sliderRect.width);
+                float newLogVal = logMin + (mousePct * (logMax - logMin));
                 float newVal = ExpConvert(newLogVal);
 
-                if (isFloat)
-                {
-                    float currentVal = ((FloatSetting)setting).Value;
-                    float finalVal = (float)System.Math.Round(Mathf.Clamp(newVal, sliderMin, sliderMax), decPlaces);
-
-                    if (finalVal == currentVal && scrollDirection != 0)
-                    {
-                        float minStep = Mathf.Pow(10, -decPlaces);
-                        finalVal = (float)System.Math.Round(Mathf.Clamp(currentVal + (scrollDirection * minStep), sliderMin, sliderMax), decPlaces);
-                    }
-                    ((FloatSetting)setting).Value = finalVal;
-                }
-                else
-                {
-                    int currentVal = ((IntSetting)setting).Value;
-                    int finalVal = (int)System.Math.Max(intSliderMin, System.Math.Min((long)newVal, intSliderMax));
-
-                    if (finalVal == currentVal && scrollDirection != 0)
-                    {
-                        finalVal = (int)System.Math.Max(intSliderMin, System.Math.Min((long)currentVal + (long)scrollDirection, intSliderMax));
-                    }
-                    ((IntSetting)setting).Value = finalVal;
-                }
-                e.Use();
+                if (isFloat) ((FloatSetting)setting).SetPending((float)System.Math.Round(Mathf.Clamp(newVal, sliderMin, sliderMax), decPlaces));
+                else ((IntSetting)setting).SetPending((int)System.Math.Max(intSliderMin, System.Math.Min((long)newVal, intSliderMax)));
             }
 
-            if (e.type == EventType.MouseDown && (sliderHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition)))
+            bool inHitbox = sliderHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition);
+
+            // 1. Generate a stable IMGUI control ID based strictly on the setting's name hash
+            int sliderControlId = GUIUtility.GetControlID(name.GetHashCode(), FocusType.Passive);
+
+            // 2. Click initiation (claim hotControl so Unity routes all drags here)
+            if (e.type == EventType.MouseDown && e.button == 0 && inHitbox)
             {
-                activeSliderId = myId;
+                GUIUtility.hotControl = sliderControlId;
+                activeSliderId = sliderControlId;
+                activeNumericSetting = setting;
                 focusedControlId = -1;
+                activeTextFieldId = -1;
+
+                ApplyFromMouseX(e.mousePosition.x);
                 e.Use();
             }
 
-            if (activeSliderId == myId)
+            // 3. Drag Tracking (Delivered directly because we own hotControl)
+            if (GUIUtility.hotControl == sliderControlId)
             {
-                if (e.type == EventType.MouseDrag || e.type == EventType.MouseDown)
+                if (e.type == EventType.MouseDrag)
                 {
-                    float mousePct = Mathf.Clamp01((e.mousePosition.x - sliderRect.x) / sliderRect.width);
-                    float newLogVal = logMin + (mousePct * (logMax - logMin));
-                    float newVal = ExpConvert(newLogVal);
-
-                    if (isFloat) ((FloatSetting)setting).Value = (float)System.Math.Round(Mathf.Clamp(newVal, sliderMin, sliderMax), decPlaces);
-                    else ((IntSetting)setting).Value = (int)System.Math.Max(intSliderMin, System.Math.Min((long)newVal, intSliderMax));
-
-                    e.Use();
+                    ApplyFromMouseX(e.mousePosition.x);
+                    e.Use(); // Consumes the drag so the window doesn't move
                 }
-                else if (e.type == EventType.MouseUp)
+                // Only evaluate rawType if the event is actively being ignored (dragged off-screen)
+                else if (e.type == EventType.MouseUp || (e.type == EventType.Ignore && e.rawType == EventType.MouseUp))
                 {
+                    CommitSettingValue();
+                    GUIUtility.hotControl = 0; // Releases capture back to Unity
                     activeSliderId = -1;
+                    activeNumericSetting = null;
                     e.Use();
                 }
             }
 
+            // 4. Text Input Handling
             int controlId = inputRect.GetHashCode();
             bool isFocused = (activeTextFieldId == controlId);
+
+            if (isFocused && lastFocusedNumericControlId != controlId)
+            {
+                currentInputBuffer = val.ToString(formatString);
+                lastFocusedNumericControlId = controlId;
+            }
+            else if (!isFocused && lastFocusedNumericControlId == controlId)
+            {
+                CommitSettingValue();
+                lastFocusedNumericControlId = -1;
+            }
 
             string displayValue = isFocused ? currentInputBuffer : val.ToString(formatString);
             string newText = DrawManualTextField(inputRect, displayValue, "0");
 
-            if (activeTextFieldId == controlId)
+            if (isFocused)
             {
                 currentInputBuffer = newText;
 
@@ -180,11 +208,11 @@ namespace Magnetar_Client.UI.WindowDrawing
                 {
                     if (isFloat)
                     {
-                        ((FloatSetting)setting).Value = (float)System.Math.Round(Mathf.Clamp((float)parsed, trueMin, trueMax), decPlaces);
+                        ((FloatSetting)setting).SetPending((float)System.Math.Round(Mathf.Clamp((float)parsed, trueMin, trueMax), decPlaces));
                     }
                     else
                     {
-                        ((IntSetting)setting).Value = (int)System.Math.Max(intTrueMin, System.Math.Min((long)parsed, intTrueMax));
+                        ((IntSetting)setting).SetPending((int)System.Math.Max(intTrueMin, System.Math.Min((long)parsed, intTrueMax)));
                     }
                 }
             }
@@ -196,10 +224,14 @@ namespace Magnetar_Client.UI.WindowDrawing
             bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
 
             string translatedName = Magnetar_Client.Utils.Translator.Translate(bSet.Name);
-            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
+            float labelWidth = Mathf.Max(width * 0.45f, width - Config.indent * 2 - Config.SettingWidth);
+
+            GUI.Label(new Rect(Config.indent, y, labelWidth, Config.elementHeight),
+                translatedName, Magnetar_Default.SettingDescriptionStyle);
 
             string bindText = bSet.IsBinding ? "[...]" : bSet.GetBindString();
-            Rect bindRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
+            Rect bindRect = new Rect(width - Config.indent - Config.SettingWidth, y,
+                Config.SettingWidth, Config.elementHeight);
             bool bindHover = bindRect.Contains(e.mousePosition);
 
             if (bindHover) GUI.backgroundColor = Magnetar_Default.AccentColor;
@@ -253,9 +285,13 @@ namespace Magnetar_Client.UI.WindowDrawing
             Event e = Event.current;
 
             string translatedName = Magnetar_Client.Utils.Translator.Translate(boolSet.Name);
-            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
+            float labelWidth = Mathf.Max(width * 0.45f, width - Config.indent * 2 - Config.SettingWidth);
 
-            Rect btnRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
+            GUI.Label(new Rect(Config.indent, y, labelWidth, Config.elementHeight),
+                translatedName, Magnetar_Default.SettingDescriptionStyle);
+
+            Rect btnRect = new Rect(width - Config.indent - Config.SettingWidth, y,
+                Config.SettingWidth, Config.elementHeight);
 
             GUI.Box(btnRect, boolSet.Value ? Translator.Translate("ON") : Translator.Translate("OFF"),
                 boolSet.Value ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
@@ -278,11 +314,14 @@ namespace Magnetar_Client.UI.WindowDrawing
         private static bool dragTargetState = false;
         private static readonly HashSet<int> draggedItemsSession = new HashSet<int>();
 
-        public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, dynamic activeMultiSelect)
+        private static Vector2 _listTouchStart = Vector2.zero;
+        private static float _scrollStartVal = 0f;
+        private static bool _isListSwiping = false;
+
+        public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, dynamic activeMultiSelect, Action onClose = null)
         {
             if (activeMultiSelect == null) return;
 
-            // Cap window height to a maximum of 80% of screen height
             float maxAllowedHeight = Config.WindowHeight * 0.8f;
             if (multiSelectWindowRect.height > maxAllowedHeight)
             {
@@ -296,10 +335,30 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             var options = activeMultiSelect.Options;
 
-            // --- 1. TITLE BANNER ---
+            // --- 1. TITLE BANNER WITH WORKING CLOSE BUTTON ---
             float titleHeight = Config.S(34f);
+            float closeBtnSize = Config.S(24f);
             Rect headerBgRect = new Rect(0, 0, multiSelectWindowRect.width, titleHeight);
             GUI.Box(headerBgRect, Translate("Select ") + Translate(activeMultiSelect.Name), Magnetar_Default.SettingsWindow);
+
+            Rect closeBtnRect = new Rect(multiSelectWindowRect.width - closeBtnSize - Config.S(6f), Config.S(5f), closeBtnSize, closeBtnSize);
+
+            // Use GUI.Button so Unity routes click/touch states unconditionally
+            if (GUI.Button(closeBtnRect, "✕", Magnetar_Default.ModuleOn))
+            {
+                if (onClose != null)
+                {
+                    onClose.Invoke();
+                }
+                else
+                {
+                    Core.ModuleManager.showSelectionGui = false;
+                    Core.ModuleManager.showModules = true;
+                    Core.GUIManager.isSelectingLanguage = false;
+                }
+                e.Use();
+                return;
+            }
 
             // --- 2. HEADER: SEARCH & TOGGLE ALL ---
             float spacing = Config.S(6f);
@@ -381,7 +440,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                 e.Use();
             }
 
-            // --- 4. VIEWPORT & SCROLLBAR (Starts directly after search bar with uniform spacing) ---
+            // --- 4. VIEWPORT & SCROLLBAR ---
             float contentStartY = searchY + searchHeight + spacing;
             float viewHeight = multiSelectWindowRect.height - contentStartY - Config.S(8f);
             float maxScrollDist = Mathf.Max(0f, totalContentHeight - viewHeight);
@@ -402,11 +461,10 @@ namespace Magnetar_Client.UI.WindowDrawing
                     float localMouseY = e.mousePosition.y - trackStartY;
                     float scrollPct = Mathf.Clamp01((localMouseY - (handleSize / 2f)) / (trackHeight - handleSize));
                     manualScrollY = scrollPct * maxScrollDist;
-
                     lastSliderUpdateTime = Time.time;
                     e.Use();
                 }
-                if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
+                else if (e.type == EventType.MouseUp || (e.type == EventType.Ignore && e.rawType == EventType.MouseUp))
                 {
                     activeSliderId = -1;
                     e.Use();
@@ -420,12 +478,10 @@ namespace Magnetar_Client.UI.WindowDrawing
                 float localMouseY = e.mousePosition.y - trackStartY;
                 float scrollPct = Mathf.Clamp01((localMouseY - (handleSize / 2f)) / (trackHeight - handleSize));
                 manualScrollY = scrollPct * maxScrollDist;
-
                 lastSliderUpdateTime = Time.time;
                 e.Use();
             }
 
-            // --- 6. SCROLL WHEEL ---
             if (e.type == EventType.ScrollWheel && new Rect(0, 0, multiSelectWindowRect.width, multiSelectWindowRect.height).Contains(e.mousePosition))
             {
                 manualScrollY = Mathf.Clamp(manualScrollY + (e.delta.y * 25f), 0, maxScrollDist);
@@ -433,9 +489,9 @@ namespace Magnetar_Client.UI.WindowDrawing
                 e.Use();
             }
 
-            // --- 7. GLOBAL MOUSE UP ---
-            if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
+            if (e.type == EventType.MouseUp || (e.type == EventType.Ignore && e.rawType == EventType.MouseUp))
             {
+                _isListSwiping = false;
                 if (isShiftDragging)
                 {
                     isShiftDragging = false;
@@ -444,7 +500,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                 }
             }
 
-            // --- 8. THE LIST VIEWPORT ---
+            // --- 6. THE LIST VIEWPORT (Includes Mobile Touch-Swipe Drag) ---
             float listWidth = availWidth - scrollbarWidth - Config.S(6f);
             Rect listGroupRect = new Rect(padX, contentStartY, listWidth, viewHeight);
             GUI.BeginGroup(listGroupRect);
@@ -454,6 +510,28 @@ namespace Magnetar_Client.UI.WindowDrawing
                 bool isShiftHeld = e.shift || ((e.modifiers & EventModifiers.Shift) != 0) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
                 if (e.type == EventType.MouseDown && e.button == 0 && isMouseInsideList)
+                {
+                    _listTouchStart = mousePos;
+                    _scrollStartVal = manualScrollY;
+                    _isListSwiping = false;
+                }
+
+                if (e.type == EventType.MouseDrag && isMouseInsideList && !_isListSwiping)
+                {
+                    if (Vector2.Distance(mousePos, _listTouchStart) > 12f)
+                    {
+                        _isListSwiping = true;
+                    }
+                }
+
+                if (_isListSwiping && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove))
+                {
+                    float deltaY = _listTouchStart.y - mousePos.y;
+                    manualScrollY = Mathf.Clamp(_scrollStartVal + deltaY, 0f, maxScrollDist);
+                    e.Use();
+                }
+
+                if (e.type == EventType.MouseDown && e.button == 0 && isMouseInsideList && !_isListSwiping)
                 {
                     float contentY = mousePos.y + manualScrollY;
                     int clickedIdx = Mathf.FloorToInt(contentY / rowStep);
@@ -486,42 +564,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     }
                 }
 
-                if (isShiftDragging)
-                {
-                    if (isShiftHeld && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove || e.type == EventType.Repaint))
-                    {
-                        if (isMouseInsideList && filteredItems.Count > 0)
-                        {
-                            float contentY = mousePos.y + manualScrollY;
-                            int currentIdx = Mathf.Clamp(Mathf.FloorToInt(contentY / rowStep), 0, filteredItems.Count - 1);
-
-                            if (lastHoveredIndex != -1)
-                            {
-                                int start = Mathf.Min(lastHoveredIndex, currentIdx);
-                                int end = Mathf.Max(lastHoveredIndex, currentIdx);
-
-                                for (int i = start; i <= end; i++)
-                                {
-                                    int key = filteredItems[i].Key;
-                                    if (draggedItemsSession.Add(key))
-                                    {
-                                        if (dragTargetState) ToggleWithLimit(activeMultiSelect, key);
-                                        else activeMultiSelect.Deselect(key);
-                                    }
-                                }
-                            }
-
-                            lastHoveredIndex = currentIdx;
-                        }
-                    }
-                    else if (!isShiftHeld)
-                    {
-                        isShiftDragging = false;
-                        draggedItemsSession.Clear();
-                        lastHoveredIndex = -1;
-                    }
-                }
-
                 int firstVisibleIdx = Mathf.Max(0, Mathf.FloorToInt(manualScrollY / rowStep));
                 int lastVisibleIdx = Mathf.Min(filteredItems.Count - 1, Mathf.CeilToInt((manualScrollY + viewHeight) / rowStep));
 
@@ -537,7 +579,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             }
             GUI.EndGroup();
 
-            // --- 9. SCROLLBAR VISUALS ---
+            // --- 7. SCROLLBAR VISUALS ---
             GUI.Box(new Rect(scrollX + (scrollbarWidth / 2f) - 1f, trackStartY, 2, trackHeight), "", Magnetar_Default.SeparatorStyle);
 
             float scrollPctVisual = (maxScrollDist > 0) ? manualScrollY / maxScrollDist : 0f;

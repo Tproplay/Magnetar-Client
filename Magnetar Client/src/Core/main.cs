@@ -4,6 +4,8 @@ using System;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using Magnetar_Client.Utils;
 using Magnetar_Client;
+using Magnetar_Client.UI.WindowDrawing;
+
 
 
 
@@ -84,14 +86,6 @@ namespace Magnetar_Client.Core
 
             Event e = Event.current;
             if (e == null) return;
-
-            // Only render on layout and repaint passes to prevent IL2CPP native assertion panics
-            if (e.type != EventType.Repaint && e.type != EventType.Layout &&
-                e.type != EventType.MouseDown && e.type != EventType.MouseUp &&
-                e.type != EventType.MouseDrag && e.type != EventType.KeyDown)
-            {
-                return;
-            }
 
             Matrix4x4 originalMatrix = GUI.matrix;
 
@@ -218,7 +212,6 @@ namespace Magnetar_Client.Core
             Magnetar_Client.UI.WindowDrawing.DrawSetting.activeSliderId = -1;
             Magnetar_Client.UI.WindowDrawing.DrawSetting.activeTextFieldId = -1;
             ModuleManager.bindingModuleId = -1;
-            ModuleManager.activeSliderId = -1;
         }
 
         public static void WarmUp()

@@ -392,6 +392,10 @@ namespace Magnetar_Client.UI.Themes
         /// </summary>
         public static void Rescale()
         {
+            if (!Magnetar_Client.Core.main.Instance.hasWarmedUp)
+            {
+                return;
+            }
             float scale = Config.GUIScale;
             float elementScale = Config.ElementScale;
 

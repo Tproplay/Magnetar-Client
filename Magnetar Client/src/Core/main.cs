@@ -30,7 +30,7 @@ namespace Magnetar_Client.Core
 
         private readonly float nativeWidth = 1920f;
         private readonly float nativeHeight = 1080f;
-        bool hasWarmedUp = false;
+        public bool hasWarmedUp = false;
 
 #if MELONLOADER || RELEASE_MELON
         public override void OnInitializeMelon()
@@ -110,10 +110,8 @@ namespace Magnetar_Client.Core
                     new Vector3(uniformScale, uniformScale, 1)
                 );
 
-#if ANDROID
                 // Renders floating toggle button or top-right close button
                 MobileMenuUI.Render();
-#endif
 
                 if (!hasWarmedUp)
                 {

@@ -15,7 +15,6 @@ using BepInEx;
 
 namespace Magnetar_Client.Utils
 {
-    // Defines the nested JSON structure for Modules_translations.json
     public class ModuleTranslationNode
     {
         [JsonProperty("Name")]
@@ -31,7 +30,6 @@ namespace Magnetar_Client.Utils
         public Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
     }
 
-    // Defines the JSON structure for hud_translations.json
     public class HudTranslationNode
     {
         [JsonProperty("Name")]
@@ -48,79 +46,77 @@ namespace Magnetar_Client.Utils
         private static Dictionary<System.Type, Dictionary<int, string>> _nameCache = new Dictionary<System.Type, Dictionary<int, string>>();
         private static HashSet<string> _regexMatchedInputs = new HashSet<string>();
 
-        private static string ModsDir =>
-#if MELONLOADER || RELEASE_MELON
-            MelonEnvironment.ModsDirectory;
-#elif BEPINEX || RELEASE_BEPINEX
-            Paths.PluginPath;
-#endif
+        // Resolves correctly across PC and Android launcher directories
+        private static string ModsDir => SaveLoad.ModsDir;
 
         public static void LoadTranslations()
         {
-#if ANDROID
-            TranslatorLogger.Msg("[Translator] Android detected: Skipping disk translation loading.");
-            _isLoaded = true;
-            return;
-#else
-            string targetLanguage = Config.Language;
-
-            string baseDir = Path.Combine(ModsDir, "Magnetar Translation", targetLanguage);
-
-            if (!Directory.Exists(baseDir))
+            try
             {
-                Directory.CreateDirectory(baseDir);
-                TranslatorLogger.Msg($"Created Magnetar Translation directory for: {targetLanguage}");
-            }
+                string targetLanguage = Config.Language;
+                string baseDir = Path.Combine(ModsDir, "Magnetar Translation", targetLanguage);
 
-            string stringsPath = Path.Combine(baseDir, "translation_strings.json");
-            _exactTranslations.Clear();
-
-            if (File.Exists(stringsPath))
-            {
-                try
+                if (!Directory.Exists(baseDir))
                 {
-                    string jsonContent = File.ReadAllText(stringsPath);
-                    _exactTranslations = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent) ?? new Dictionary<string, string>();
-                    TranslatorLogger.Msg($"Loaded {_exactTranslations.Count} exact strings for {targetLanguage}.");
+                    Directory.CreateDirectory(baseDir);
+                    TranslatorLogger.Msg($"Created Magnetar Translation directory for: {targetLanguage}");
                 }
-                catch (Exception ex)
+
+                SyncWithEnglishTemplate(targetLanguage);
+
+                string stringsPath = Path.Combine(baseDir, "translation_strings.json");
+                _exactTranslations.Clear();
+
+                if (File.Exists(stringsPath))
                 {
-                    TranslatorLogger.Error($"Failed to load exact strings: {ex.Message}");
-                }
-            }
-
-            string regexPath = Path.Combine(baseDir, "translation_regexs.json");
-            _regexTranslations.Clear();
-
-            if (File.Exists(regexPath))
-            {
-                try
-                {
-                    string jsonContent = File.ReadAllText(regexPath);
-                    var rawData = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent) ?? new Dictionary<string, string>();
-
-                    foreach (var entry in rawData)
+                    try
                     {
-                        _regexTranslations.Add(new Regex(entry.Key, RegexOptions.Compiled), entry.Value);
+                        string jsonContent = File.ReadAllText(stringsPath);
+                        _exactTranslations = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent) ?? new Dictionary<string, string>();
+                        TranslatorLogger.Msg($"Loaded {_exactTranslations.Count} exact strings for {targetLanguage}.");
                     }
-                    TranslatorLogger.Msg($"Loaded {_regexTranslations.Count} regex rules for {targetLanguage}.");
+                    catch (Exception ex)
+                    {
+                        TranslatorLogger.Error($"Failed to load exact strings: {ex.Message}");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    TranslatorLogger.Error($"Failed to load regex strings: {ex.Message}");
-                }
-            }
 
-            _nameCache.Clear();
-            _modulesLinked = false;
-            _hudLinked = false;
-            _isLoaded = true;
-#endif
+                string regexPath = Path.Combine(baseDir, "translation_regexs.json");
+                _regexTranslations.Clear();
+
+                if (File.Exists(regexPath))
+                {
+                    try
+                    {
+                        string jsonContent = File.ReadAllText(regexPath);
+                        var rawData = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent) ?? new Dictionary<string, string>();
+
+                        foreach (var entry in rawData)
+                        {
+                            _regexTranslations.Add(new Regex(entry.Key, RegexOptions.Compiled), entry.Value);
+                        }
+                        TranslatorLogger.Msg($"Loaded {_regexTranslations.Count} regex rules for {targetLanguage}.");
+                    }
+                    catch (Exception ex)
+                    {
+                        TranslatorLogger.Error($"Failed to load regex strings: {ex.Message}");
+                    }
+                }
+
+                _nameCache.Clear();
+                _modulesLinked = false;
+                _hudLinked = false;
+                _isLoaded = true;
+            }
+            catch (Exception ex)
+            {
+                TranslatorLogger.Error($"[Translator] LoadTranslations failed: {ex.Message}");
+                _isLoaded = true;
+            }
         }
 
         private static void SyncWithEnglishTemplate(string targetLanguage)
         {
-#if !ANDROID
             if (string.Equals(targetLanguage, "English", StringComparison.OrdinalIgnoreCase)) return;
 
             string englishDir = Path.Combine(ModsDir, "Magnetar Translation", "English");
@@ -128,32 +124,38 @@ namespace Magnetar_Client.Utils
 
             if (!Directory.Exists(englishDir)) return;
 
-            if (!Directory.Exists(targetDir))
+            try
             {
-                Directory.CreateDirectory(targetDir);
-            }
-
-            string[] sourceFiles = Directory.GetFiles(englishDir, "*.json");
-
-            foreach (string file in sourceFiles)
-            {
-                string fileName = Path.GetFileName(file);
-                string destFile = Path.Combine(targetDir, fileName);
-
-                if (!File.Exists(destFile))
+                if (!Directory.Exists(targetDir))
                 {
-                    try
+                    Directory.CreateDirectory(targetDir);
+                }
+
+                string[] sourceFiles = Directory.GetFiles(englishDir, "*.json");
+
+                foreach (string file in sourceFiles)
+                {
+                    string fileName = Path.GetFileName(file);
+                    string destFile = Path.Combine(targetDir, fileName);
+
+                    if (!File.Exists(destFile))
                     {
-                        File.Copy(file, destFile);
-                        TranslatorLogger.Msg($"Copied template file to {targetLanguage}: {fileName}");
-                    }
-                    catch (Exception ex)
-                    {
-                        TranslatorLogger.Error($"Failed to copy {fileName}: {ex.Message}");
+                        try
+                        {
+                            File.Copy(file, destFile);
+                            TranslatorLogger.Msg($"Copied template file to {targetLanguage}: {fileName}");
+                        }
+                        catch (Exception ex)
+                        {
+                            TranslatorLogger.Error($"Failed to copy {fileName}: {ex.Message}");
+                        }
                     }
                 }
             }
-#endif
+            catch (Exception ex)
+            {
+                TranslatorLogger.Error($"[Translator] SyncWithEnglishTemplate error: {ex.Message}");
+            }
         }
 
         private static void LinkModuleTranslations()
@@ -169,23 +171,26 @@ namespace Magnetar_Client.Utils
                 var modulesDict = JsonConvert.DeserializeObject<Dictionary<string, ModuleTranslationNode>>(File.ReadAllText(modulesPath));
                 if (modulesDict == null) return;
 
-                foreach (var mod in Core.ModuleManager.Modules)
+                if (Core.ModuleManager.Modules != null)
                 {
-                    if (modulesDict.TryGetValue(mod.Name, out var node))
+                    foreach (var mod in Core.ModuleManager.Modules)
                     {
-                        if (!string.IsNullOrEmpty(node.Name)) _exactTranslations[mod.Name] = node.Name;
-                        if (!string.IsNullOrEmpty(node.Description)) _exactTranslations[mod.Description] = node.Description;
-                        if (!string.IsNullOrEmpty(node.SearchHints) && !string.IsNullOrEmpty(mod.SearchHints)) _exactTranslations[mod.SearchHints] = node.SearchHints;
-
-                        if (mod.Settings != null && node.Settings != null)
+                        if (modulesDict.TryGetValue(mod.Name, out var node))
                         {
-                            foreach (var setting in mod.Settings)
-                            {
-                                if (string.IsNullOrWhiteSpace(setting.Name)) continue;
+                            if (!string.IsNullOrEmpty(node.Name)) _exactTranslations[mod.Name] = node.Name;
+                            if (!string.IsNullOrEmpty(node.Description)) _exactTranslations[mod.Description] = node.Description;
+                            if (!string.IsNullOrEmpty(node.SearchHints) && !string.IsNullOrEmpty(mod.SearchHints)) _exactTranslations[mod.SearchHints] = node.SearchHints;
 
-                                if (node.Settings.TryGetValue(setting.Name, out var setTrans))
+                            if (mod.Settings != null && node.Settings != null)
+                            {
+                                foreach (var setting in mod.Settings)
                                 {
-                                    _exactTranslations[setting.Name] = setTrans;
+                                    if (string.IsNullOrWhiteSpace(setting.Name)) continue;
+
+                                    if (node.Settings.TryGetValue(setting.Name, out var setTrans))
+                                    {
+                                        _exactTranslations[setting.Name] = setTrans;
+                                    }
                                 }
                             }
                         }
@@ -211,11 +216,14 @@ namespace Magnetar_Client.Utils
                 var hudDict = JsonConvert.DeserializeObject<Dictionary<string, HudTranslationNode>>(File.ReadAllText(hudPath));
                 if (hudDict == null) return;
 
-                foreach (var element in Core.HUDRenderer.Elements)
+                if (Core.HUDRenderer.Elements != null)
                 {
-                    if (hudDict.TryGetValue(element.Name, out var node))
+                    foreach (var element in Core.HUDRenderer.Elements)
                     {
-                        if (!string.IsNullOrEmpty(node.Name)) _exactTranslations[element.Name] = node.Name;
+                        if (hudDict.TryGetValue(element.Name, out var node))
+                        {
+                            if (!string.IsNullOrEmpty(node.Name)) _exactTranslations[element.Name] = node.Name;
+                        }
                     }
                 }
             }
@@ -227,138 +235,147 @@ namespace Magnetar_Client.Utils
 
         public static void DumpMissingStrings()
         {
-            string baseDir = Path.Combine(ModsDir, "Magnetar Translation", Config.Language);
-
-#if !ANDROID
-            if (!Directory.Exists(baseDir)) Directory.CreateDirectory(baseDir);
-#else
-            if (!Directory.Exists(baseDir)) return;
-#endif
-
-            string stringsPath = Path.Combine(baseDir, "translation_strings.json");
-            string modulesPath = Path.Combine(baseDir, "Modules_translations.json");
-            string hudPath = Path.Combine(baseDir, "hud_translations.json");
-
-            // 1. Process Module Translations (Modules_translations.json)
-            bool isDirtyModules = !File.Exists(modulesPath);
-            Dictionary<string, ModuleTranslationNode> moduleTranslations = new Dictionary<string, ModuleTranslationNode>();
-
-            if (File.Exists(modulesPath))
+            try
             {
-                try { moduleTranslations = JsonConvert.DeserializeObject<Dictionary<string, ModuleTranslationNode>>(File.ReadAllText(modulesPath)) ?? new Dictionary<string, ModuleTranslationNode>(); } catch { }
-            }
+                string baseDir = Path.Combine(ModsDir, "Magnetar Translation", Config.Language);
 
-            HashSet<string> moduleManagedStrings = new HashSet<string>();
-
-            if (Core.ModuleManager.Modules != null)
-            {
-                foreach (var mod in Core.ModuleManager.Modules)
+                if (!Directory.Exists(baseDir))
                 {
-                    if (!moduleTranslations.ContainsKey(mod.Name))
+                    Directory.CreateDirectory(baseDir);
+                }
+
+                string stringsPath = Path.Combine(baseDir, "translation_strings.json");
+                string modulesPath = Path.Combine(baseDir, "Modules_translations.json");
+                string hudPath = Path.Combine(baseDir, "hud_translations.json");
+
+                // 1. Process Module Translations
+                bool isDirtyModules = !File.Exists(modulesPath);
+                Dictionary<string, ModuleTranslationNode> moduleTranslations = new Dictionary<string, ModuleTranslationNode>();
+
+                if (File.Exists(modulesPath))
+                {
+                    try
                     {
-                        moduleTranslations[mod.Name] = new ModuleTranslationNode
-                        {
-                            Name = _exactTranslations.ContainsKey(mod.Name) ? _exactTranslations[mod.Name] : mod.Name,
-                            Description = _exactTranslations.ContainsKey(mod.Description) ? _exactTranslations[mod.Description] : mod.Description,
-                            SearchHints = (!string.IsNullOrEmpty(mod.SearchHints) && _exactTranslations.ContainsKey(mod.SearchHints)) ? _exactTranslations[mod.SearchHints] : (mod.SearchHints ?? "")
-                        };
-                        isDirtyModules = true;
+                        moduleTranslations = JsonConvert.DeserializeObject<Dictionary<string, ModuleTranslationNode>>(File.ReadAllText(modulesPath))
+                            ?? new Dictionary<string, ModuleTranslationNode>();
                     }
+                    catch { }
+                }
 
-                    var node = moduleTranslations[mod.Name];
+                HashSet<string> moduleManagedStrings = new HashSet<string>();
 
-                    if (node.SearchHints == null && !string.IsNullOrEmpty(mod.SearchHints))
+                if (Core.ModuleManager.Modules != null)
+                {
+                    foreach (var mod in Core.ModuleManager.Modules)
                     {
-                        node.SearchHints = _exactTranslations.ContainsKey(mod.SearchHints) ? _exactTranslations[mod.SearchHints] : mod.SearchHints;
-                        isDirtyModules = true;
-                    }
-
-                    moduleManagedStrings.Add(mod.Name);
-                    moduleManagedStrings.Add(mod.Description);
-                    if (!string.IsNullOrEmpty(mod.SearchHints)) moduleManagedStrings.Add(mod.SearchHints);
-
-                    if (mod.Settings != null)
-                    {
-                        foreach (var setting in mod.Settings)
+                        if (!moduleTranslations.ContainsKey(mod.Name))
                         {
-                            if (string.IsNullOrWhiteSpace(setting.Name)) continue;
-
-                            moduleManagedStrings.Add(setting.Name);
-
-                            if (node.Settings == null)
+                            moduleTranslations[mod.Name] = new ModuleTranslationNode
                             {
-                                node.Settings = new Dictionary<string, string>();
-                                isDirtyModules = true;
-                            }
+                                Name = _exactTranslations.ContainsKey(mod.Name) ? _exactTranslations[mod.Name] : mod.Name,
+                                Description = _exactTranslations.ContainsKey(mod.Description) ? _exactTranslations[mod.Description] : mod.Description,
+                                SearchHints = (!string.IsNullOrEmpty(mod.SearchHints) && _exactTranslations.ContainsKey(mod.SearchHints)) ? _exactTranslations[mod.SearchHints] : (mod.SearchHints ?? "")
+                            };
+                            isDirtyModules = true;
+                        }
 
-                            if (!node.Settings.ContainsKey(setting.Name))
+                        var node = moduleTranslations[mod.Name];
+
+                        if (node.SearchHints == null && !string.IsNullOrEmpty(mod.SearchHints))
+                        {
+                            node.SearchHints = _exactTranslations.ContainsKey(mod.SearchHints) ? _exactTranslations[mod.SearchHints] : mod.SearchHints;
+                            isDirtyModules = true;
+                        }
+
+                        moduleManagedStrings.Add(mod.Name);
+                        moduleManagedStrings.Add(mod.Description);
+                        if (!string.IsNullOrEmpty(mod.SearchHints)) moduleManagedStrings.Add(mod.SearchHints);
+
+                        if (mod.Settings != null)
+                        {
+                            foreach (var setting in mod.Settings)
                             {
-                                node.Settings[setting.Name] = _exactTranslations.ContainsKey(setting.Name) ? _exactTranslations[setting.Name] : setting.Name;
-                                isDirtyModules = true;
+                                if (string.IsNullOrWhiteSpace(setting.Name)) continue;
+
+                                moduleManagedStrings.Add(setting.Name);
+
+                                if (node.Settings == null)
+                                {
+                                    node.Settings = new Dictionary<string, string>();
+                                    isDirtyModules = true;
+                                }
+
+                                if (!node.Settings.ContainsKey(setting.Name))
+                                {
+                                    node.Settings[setting.Name] = _exactTranslations.ContainsKey(setting.Name) ? _exactTranslations[setting.Name] : setting.Name;
+                                    isDirtyModules = true;
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            if (isDirtyModules && Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
-            {
-                try
+                if (isDirtyModules && Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
                 {
-                    string jsonDump = JsonConvert.SerializeObject(moduleTranslations, Formatting.Indented);
-                    File.WriteAllText(modulesPath, jsonDump);
-                    TranslatorLogger.Warning($"Refreshed & Auto-dumped module strings into {Config.Language}/Modules_translations.json");
-                }
-                catch (Exception ex) { TranslatorLogger.Error($"Failed to dump module strings: {ex.Message}"); }
-            }
-
-            // 2. Process HUD Translations (hud_translations.json)
-            bool isDirtyHud = !File.Exists(hudPath);
-            Dictionary<string, HudTranslationNode> hudTranslations = new Dictionary<string, HudTranslationNode>();
-
-            if (File.Exists(hudPath))
-            {
-                try { hudTranslations = JsonConvert.DeserializeObject<Dictionary<string, HudTranslationNode>>(File.ReadAllText(hudPath)) ?? new Dictionary<string, HudTranslationNode>(); } catch { }
-            }
-
-            HashSet<string> hudManagedStrings = new HashSet<string>();
-
-            if (Core.HUDRenderer.Elements != null)
-            {
-                foreach (var element in Core.HUDRenderer.Elements)
-                {
-                    if (!hudTranslations.ContainsKey(element.Name))
+                    try
                     {
-                        hudTranslations[element.Name] = new HudTranslationNode
-                        {
-                            Name = _exactTranslations.ContainsKey(element.Name) ? _exactTranslations[element.Name] : element.Name
-                        };
-                        isDirtyHud = true;
+                        string jsonDump = JsonConvert.SerializeObject(moduleTranslations, Formatting.Indented);
+                        File.WriteAllText(modulesPath, jsonDump);
+                        TranslatorLogger.Warning($"Refreshed & Auto-dumped module strings into {Config.Language}/Modules_translations.json");
                     }
-                    hudManagedStrings.Add(element.Name);
+                    catch (Exception ex) { TranslatorLogger.Error($"Failed to dump module strings: {ex.Message}"); }
                 }
-            }
 
-            if (isDirtyHud && Core.HUDRenderer.Elements != null && Core.HUDRenderer.Elements.Count > 0)
-            {
-                try
+                // 2. Process HUD Translations
+                bool isDirtyHud = !File.Exists(hudPath);
+                Dictionary<string, HudTranslationNode> hudTranslations = new Dictionary<string, HudTranslationNode>();
+
+                if (File.Exists(hudPath))
                 {
-                    string jsonDump = JsonConvert.SerializeObject(hudTranslations, Formatting.Indented);
-                    File.WriteAllText(hudPath, jsonDump);
-                    TranslatorLogger.Warning($"Auto-dumped HUD strings into {Config.Language}/hud_translations.json");
+                    try
+                    {
+                        hudTranslations = JsonConvert.DeserializeObject<Dictionary<string, HudTranslationNode>>(File.ReadAllText(hudPath))
+                            ?? new Dictionary<string, HudTranslationNode>();
+                    }
+                    catch { }
                 }
-                catch (Exception ex) { TranslatorLogger.Error($"Failed to dump HUD strings: {ex.Message}"); }
-            }
 
-            // 3. Process Standard Translations
-            var cleanDict = _exactTranslations
-                .Where(kvp => !_regexMatchedInputs.Contains(kvp.Key) && !moduleManagedStrings.Contains(kvp.Key) && !hudManagedStrings.Contains(kvp.Key))
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                HashSet<string> hudManagedStrings = new HashSet<string>();
 
-            try
-            {
-                string jsonDump = JsonConvert.SerializeObject(cleanDict, Formatting.Indented);
-                File.WriteAllText(stringsPath, jsonDump);
+                if (Core.HUDRenderer.Elements != null)
+                {
+                    foreach (var element in Core.HUDRenderer.Elements)
+                    {
+                        if (!hudTranslations.ContainsKey(element.Name))
+                        {
+                            hudTranslations[element.Name] = new HudTranslationNode
+                            {
+                                Name = _exactTranslations.ContainsKey(element.Name) ? _exactTranslations[element.Name] : element.Name
+                            };
+                            isDirtyHud = true;
+                        }
+                        hudManagedStrings.Add(element.Name);
+                    }
+                }
+
+                if (isDirtyHud && Core.HUDRenderer.Elements != null && Core.HUDRenderer.Elements.Count > 0)
+                {
+                    try
+                    {
+                        string jsonDump = JsonConvert.SerializeObject(hudTranslations, Formatting.Indented);
+                        File.WriteAllText(hudPath, jsonDump);
+                        TranslatorLogger.Warning($"Auto-dumped HUD strings into {Config.Language}/hud_translations.json");
+                    }
+                    catch (Exception ex) { TranslatorLogger.Error($"Failed to dump HUD strings: {ex.Message}"); }
+                }
+
+                // 3. Process Standard Translations
+                var cleanDict = _exactTranslations
+                    .Where(kvp => !_regexMatchedInputs.Contains(kvp.Key) && !moduleManagedStrings.Contains(kvp.Key) && !hudManagedStrings.Contains(kvp.Key))
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+                string generalDump = JsonConvert.SerializeObject(cleanDict, Formatting.Indented);
+                File.WriteAllText(stringsPath, generalDump);
             }
             catch (Exception ex)
             {
@@ -369,9 +386,7 @@ namespace Magnetar_Client.Utils
         public static string Translate(string input)
         {
             if (string.IsNullOrEmpty(input)) return input;
-#if ANDROID
-            return input; // Never attempt to look up or dump missing strings to disk on mobile
-#else
+
             if (!_isLoaded) LoadTranslations();
 
             if (!_modulesLinked && Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
@@ -435,11 +450,13 @@ namespace Magnetar_Client.Utils
             if (!_exactTranslations.ContainsKey(input))
             {
                 _exactTranslations[input] = input;
+#if !ANDROID
+                // Avoid calling synchronous disk writes per frame during gameplay rendering on mobile
                 SaveMissingStringToDisk();
+#endif
             }
 
             return input;
-#endif
         }
 
         private static void SaveMissingStringToDisk()
@@ -448,11 +465,10 @@ namespace Magnetar_Client.Utils
             {
                 string baseDir = Path.Combine(ModsDir, "Magnetar Translation", Config.Language);
 
-#if !ANDROID
-                if (!Directory.Exists(baseDir)) Directory.CreateDirectory(baseDir);
-#else
-                if (!Directory.Exists(baseDir)) return;
-#endif
+                if (!Directory.Exists(baseDir))
+                {
+                    Directory.CreateDirectory(baseDir);
+                }
 
                 string stringsPath = Path.Combine(baseDir, "translation_strings.json");
 
@@ -508,11 +524,9 @@ namespace Magnetar_Client.Utils
 
             if (_nameCache.TryGetValue(enumType, out var cachedDict))
             {
-                TranslatorLogger.Msg($"[Translator] Cache hit for enum '{enumType.Name}' ({cachedDict.Count} entries). Returning cached copy.");
                 return new Dictionary<int, string>(cachedDict);
             }
 
-            TranslatorLogger.Msg($"[Translator] Cache miss for enum '{enumType.Name}'. Initiating LoadEnumTranslations...");
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
             try
@@ -527,7 +541,7 @@ namespace Magnetar_Client.Utils
             catch (System.Exception ex)
             {
                 sw.Stop();
-                TranslatorLogger.Error($"[Translator] Exception occurred while translating enum '{enumType.Name}' after {sw.ElapsedMilliseconds} ms: {ex}");
+                TranslatorLogger.Error($"[Translator] Exception occurred while translating enum '{enumType.Name}': {ex}");
                 throw;
             }
         }
@@ -538,9 +552,10 @@ namespace Magnetar_Client.Utils
 
             string magnetarDir = Path.Combine(ModsDir, "Magnetar Translation", Config.Language);
 
-#if !ANDROID
-            if (!Directory.Exists(magnetarDir)) Directory.CreateDirectory(magnetarDir);
-#endif
+            if (!Directory.Exists(magnetarDir))
+            {
+                try { Directory.CreateDirectory(magnetarDir); } catch { }
+            }
 
             string translatorAlmanacDir = Path.Combine(ModsDir,
                 "PvZ_Fusion_Translator", "Localization", Config.Language, "Almanac");
@@ -555,7 +570,7 @@ namespace Magnetar_Client.Utils
 
             bool requiresSave = false;
 
-            // 1. Load existing translations from the Magnetar client if the file exists
+            // 1. Load existing translations
             if (File.Exists(targetFile))
             {
                 try
@@ -575,7 +590,7 @@ namespace Magnetar_Client.Utils
                 }
             }
 
-            // 2. Identify specifically which Enum keys are missing
+            // 2. Identify missing keys
             Array values = Enum.GetValues(enumType);
             List<int> missingKeys = new List<int>();
 
@@ -627,7 +642,6 @@ namespace Magnetar_Client.Utils
                 }
 #endif
 
-                // Apply fallbacks or default to Enum standard strings for the missing keys
                 foreach (int missingKey in missingKeys)
                 {
                     if (fallbackNames.TryGetValue(missingKey, out string fallbackName))
@@ -641,27 +655,15 @@ namespace Magnetar_Client.Utils
                 }
             }
 
-            // 3. Save updates if new data was loaded/generated
-            if (requiresSave)
+            // 3. Save updates
+            if (requiresSave && Directory.Exists(magnetarDir))
             {
-#if ANDROID
-                if (!Directory.Exists(magnetarDir)) return parsedNames;
-#endif
                 try
                 {
                     var sortedNames = parsedNames.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
                     string dumpJson = JsonConvert.SerializeObject(sortedNames);
 
                     File.WriteAllText(targetFile, dumpJson);
-
-                    if (File.Exists(targetFile) && parsedNames.Count > missingKeys.Count)
-                    {
-                        TranslatorLogger.Warning($"Appended {missingKeys.Count} missing entries to existing {enumType.Name}.json");
-                    }
-                    else
-                    {
-                        TranslatorLogger.Warning($"Successfully generated {enumType.Name}.json with {parsedNames.Count} total entries.");
-                    }
                 }
                 catch (Exception ex)
                 {

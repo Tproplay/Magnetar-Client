@@ -31,6 +31,7 @@ namespace Magnetar_Client.Utils
             public float ElementScale = 1f;
             public bool HudEnabled = true;
             public bool ShowBackground = false;
+            public bool ShowFloatingIcon = true;
             public List<int> SelectedHudElements = new List<int>();
             public Dictionary<string, SimpleRect> HudPositions = new Dictionary<string, SimpleRect>();
             public Dictionary<string, SimpleRect> CategoryPositions = new Dictionary<string, SimpleRect>();
@@ -65,7 +66,7 @@ namespace Magnetar_Client.Utils
         #endregion
 
         private static string _cachedModsDir;
-        private static string ModsDir
+        public static string ModsDir
         {
             get
             {
@@ -165,7 +166,8 @@ namespace Magnetar_Client.Utils
                 Modules = new Dictionary<string, ModuleSaveData>(),
                 Language = safeLanguage,
                 GUIScale = Config.GUIScale,
-                ElementScale = Config.ElementScale
+                ElementScale = Config.ElementScale,
+                ShowFloatingIcon = Config.ShowFloatingIcon
             };
 
             if (HUDRenderer.Elements != null)
@@ -275,109 +277,205 @@ namespace Magnetar_Client.Utils
             if (!force) AutoSaveLogger.Msg("Saved the current Config Data");
         }
 
+        private static readonly object _fileLock = new object();
+
+        // Safe profile path fallback to prevent null returns
+        public static string SafeProfilePath
+        {
+            get
+            {
+                try
+                {
+                    string path = ProfileManager.GetProfilePath(Config.CurrentProfile);
+                    if (!string.IsNullOrEmpty(path)) return path;
+                }
+                catch { }
+
+                string fallbackDir = Path.Combine(ModsDir, "Magnetar Profiles");
+                if (!Directory.Exists(fallbackDir)) Directory.CreateDirectory(fallbackDir);
+                return Path.Combine(fallbackDir, $"{Config.CurrentProfile}.json");
+            }
+        }
+
+        // Safe texture data path fallback
+        public static string SafeTexturePath
+        {
+            get
+            {
+                string texDir = Path.Combine(ModsDir, "Magnetar Data");
+                if (!Directory.Exists(texDir)) Directory.CreateDirectory(texDir);
+                return Path.Combine(texDir, "TextureData.json");
+            }
+        }
         public static void Load()
         {
-            string loadPath = ProfilePath;
+            string loadPath = SafeProfilePath;
 
-            if (File.Exists(loadPath))
+            lock (_fileLock)
             {
+                bool exists = false;
                 try
                 {
-                    string json = File.ReadAllText(loadPath);
-                    MagnetarSaveData data = JsonConvert.DeserializeObject<MagnetarSaveData>(json);
-                    if (data != null)
+                    exists = !string.IsNullOrEmpty(loadPath) && File.Exists(loadPath);
+                }
+                catch { exists = false; }
+
+                if (exists)
+                {
+                    try
                     {
-                        Config.showgui = data.ShowGui;
-
-                        if (GUIManager.LanguageSetting != null)
+                        string json = File.ReadAllText(loadPath);
+                        MagnetarSaveData data = JsonConvert.DeserializeObject<MagnetarSaveData>(json);
+                        if (data != null)
                         {
-                            GUIManager.LanguageSetting.Deselect(0);
-                            GUIManager.LanguageSetting.Select(data.Language);
-                        }
+                            Config.showgui = data.ShowGui;
+                            Config.ShowFloatingIcon = data.ShowFloatingIcon;
 
-                        foreach (var entry in data.CategoryPositions)
-                        {
-                            if (Enum.TryParse(entry.Key, out ModuleCategory category))
-                                ModuleManager.windowPositions[category] = new Rect(entry.Value.x, entry.Value.y, entry.Value.w, entry.Value.h);
-                        }
-
-                        HUDManager.Enabled = data.HudEnabled;
-                        HUDManager.showBackground = data.ShowBackground;
-
-                        if (data.HudPositions != null && HUDRenderer.Elements != null)
-                        {
-                            if (HUDRenderer.HudToggles != null)
-                                HUDRenderer.HudToggles.SelectedValues = new HashSet<int>(data.SelectedHudElements);
-
-                            foreach (var element in HUDRenderer.Elements)
+                            // 1. Language Setting
+                            if (GUIManager.LanguageSetting != null && GUIManager.LanguageSetting.Options != null)
                             {
-                                if (data.HudPositions.TryGetValue(element.Name, out SimpleRect savedPos))
-                                    element.Bounds = savedPos;
-                            }
-                        }
-
-                        if (data.Modules != null && ModuleManager.Modules != null)
-                        {
-                            foreach (var mod in ModuleManager.Modules)
-                            {
-                                if (string.IsNullOrEmpty(mod.Name)) continue;
-                                if (data.Modules.TryGetValue(mod.Name, out ModuleSaveData modData))
+                                if (GUIManager.LanguageSetting.SelectedValues != null)
                                 {
-                                    if (modData.KeyBinds != null && mod.KeyBind != null) mod.KeyBind.BindKeys = modData.KeyBinds;
-                                    mod.HoldMode = modData.HoldMode;
-
-                                    if (modData.Settings != null && mod.Settings != null)
-                                    {
-                                        foreach (var setting in mod.Settings)
-                                        {
-                                            if (string.IsNullOrEmpty(setting.Name)) continue;
-                                            string loadKey = setting is CategorySetting ? setting.Name + "_Category" : setting.Name;
-                                            if (modData.Settings.TryGetValue(loadKey, out object rawValue) ||
-                                                modData.Settings.TryGetValue(setting.Name, out rawValue))
-                                            {
-                                                RestoreSettingValue(setting, rawValue);
-                                            }
-                                        }
-                                    }
-                                    if (mod.Active != modData.Active) mod.Toggle();
+                                    GUIManager.LanguageSetting.Deselect(0);
+                                    GUIManager.LanguageSetting.Select(data.Language);
                                 }
                             }
-                        }
 
-                        if (data.GUIScale > 0.1f)
-                        {
-                            Config.GUIScale = data.GUIScale;
-                        }
-                        if (data.ElementScale > 0.1f)
-                        {
-                            Config.ElementScale = data.ElementScale;
-                        }
-                        Magnetar_Default.Rescale();
+                            // 2. Category Window Positions
+                            if (data.CategoryPositions != null && ModuleManager.windowPositions != null)
+                            {
+                                foreach (var entry in data.CategoryPositions)
+                                {
+                                    if (Enum.TryParse(entry.Key, out ModuleCategory category))
+                                    {
+                                        ModuleManager.windowPositions[category] = new Rect(entry.Value.x, entry.Value.y, entry.Value.w, entry.Value.h);
+                                    }
+                                }
+                            }
 
-                        AutoSaveLogger.Msg($"Loaded Magnetar Profile '{Config.CurrentProfile}'");
+                            // 3. HUD Settings & Elements
+                            HUDManager.Enabled = data.HudEnabled;
+                            HUDManager.showBackground = data.ShowBackground;
+
+                            if (HUDRenderer.HudToggles != null && data.SelectedHudElements != null)
+                            {
+                                HUDRenderer.HudToggles.SelectedValues = new HashSet<int>(data.SelectedHudElements);
+                            }
+
+                            if (data.HudPositions != null && HUDRenderer.Elements != null)
+                            {
+                                foreach (var element in HUDRenderer.Elements)
+                                {
+                                    if (element != null && !string.IsNullOrEmpty(element.Name))
+                                    {
+                                        if (data.HudPositions.TryGetValue(element.Name, out SimpleRect savedPos))
+                                        {
+                                            element.Bounds = savedPos;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // 4. Modules & Sub-Settings
+                            if (data.Modules != null && ModuleManager.Modules != null)
+                            {
+                                foreach (var mod in ModuleManager.Modules)
+                                {
+                                    if (mod == null || string.IsNullOrEmpty(mod.Name)) continue;
+
+                                    if (data.Modules.TryGetValue(mod.Name, out ModuleSaveData modData))
+                                    {
+                                        if (modData.KeyBinds != null && mod.KeyBind != null)
+                                        {
+                                            mod.KeyBind.BindKeys = new List<KeyCode>(modData.KeyBinds);
+                                        }
+                                        mod.HoldMode = modData.HoldMode;
+
+                                        if (modData.Settings != null && mod.Settings != null)
+                                        {
+                                            foreach (var setting in mod.Settings)
+                                            {
+                                                if (setting == null || string.IsNullOrEmpty(setting.Name)) continue;
+
+                                                string loadKey = setting is CategorySetting ? setting.Name + "_Category" : setting.Name;
+                                                if (modData.Settings.TryGetValue(loadKey, out object rawValue) ||
+                                                    modData.Settings.TryGetValue(setting.Name, out rawValue))
+                                                {
+                                                    RestoreSettingValue(setting, rawValue);
+                                                }
+                                            }
+                                        }
+
+                                        if (mod.Active != modData.Active)
+                                        {
+                                            mod.Toggle();
+                                        }
+                                    }
+                                }
+                            }
+
+                            // 5. Scales & Visual Updates
+                            if (data.GUIScale > 0.1f)
+                            {
+                                Config.GUIScale = data.GUIScale;
+                            }
+                            if (data.ElementScale > 0.1f)
+                            {
+                                Config.ElementScale = data.ElementScale;
+                            }
+
+                            Magnetar_Default.Rescale();
+                            AutoSaveLogger.Msg($"Loaded Magnetar Profile '{Config.CurrentProfile}'");
+                        }
                     }
-                }
-                catch (Exception e) { AutoSaveLogger.Error($"Main SaveLoad Error: {e.Message}"); }
-            }
-
-            if (File.Exists(TexturePath))
-            {
-                try
-                {
-                    string texJson = File.ReadAllText(TexturePath);
-                    TextureSaveData texData = JsonConvert.DeserializeObject<TextureSaveData>(texJson);
-                    if (texData != null)
+                    catch (Exception e)
                     {
-                        TextureLoader.PlantTextureOverrides = texData.PlantTextureOverrides ?? new Dictionary<int, string>();
-                        TextureLoader.ZombieTextureOverrides = texData.ZombieTextureOverrides ?? new Dictionary<int, string>();
+                        AutoSaveLogger.Error($"Main SaveLoad Error: {e.Message}\nStack: {e.StackTrace}");
                     }
                 }
-                catch (Exception e) { AutoSaveLogger.Error($"Texture Load Error: {e.Message}"); }
-            }
-            else
-            {
-                string texDirectory = System.IO.Path.GetDirectoryName(TexturePath);
-                if (!Directory.Exists(texDirectory)) Directory.CreateDirectory(texDirectory);
+                else
+                {
+                    AutoSaveLogger.Msg($"No profile found at '{loadPath}'. Initializing defaults.");
+                    if (ModuleManager.IsInitialized)
+                    {
+                        Save(true);
+                    }
+                }
+
+                // 6. Texture Overrides Data
+                string texPath = SafeTexturePath;
+                if (File.Exists(texPath))
+                {
+                    try
+                    {
+                        string texJson = File.ReadAllText(texPath);
+                        TextureSaveData texData = JsonConvert.DeserializeObject<TextureSaveData>(texJson);
+                        if (texData != null)
+                        {
+                            TextureLoader.PlantTextureOverrides = texData.PlantTextureOverrides ?? new Dictionary<int, string>();
+                            TextureLoader.ZombieTextureOverrides = texData.ZombieTextureOverrides ?? new Dictionary<int, string>();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        AutoSaveLogger.Error($"Texture Load Error: {e.Message}");
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        string texDirectory = Path.GetDirectoryName(texPath);
+                        if (!string.IsNullOrEmpty(texDirectory) && !Directory.Exists(texDirectory))
+                        {
+                            Directory.CreateDirectory(texDirectory);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        AutoSaveLogger.Error($"Failed to create texture data folder: {ex.Message}");
+                    }
+                }
             }
         }
 
@@ -414,11 +512,35 @@ namespace Magnetar_Client.Utils
         {
 #if MELONLOADER || RELEASE_MELON
             Prefrences.MagnetarCategory = MelonPreferences.CreateCategory("Magnetar Client", "Magnetar Client");
-#elif BEPINEX || RELEASE_BEPINEX
+            Prefrences.ShowFloatingIconEntry = Prefrences.MagnetarCategory.CreateEntry<bool>("ShowFloatingIcon",
+#if ANDROID
+                true,
+#else
+                false,
+#endif
+                "Show Floating Icon", "Display floating draggable menu button.");
+            if (Prefrences.ShowFloatingIconEntry != null)
+            {
+                Config.ShowFloatingIcon = Prefrences.ShowFloatingIconEntry.Value;
+            }
+#elif BEPINEX || RELEASE_BEPINEX || ANDROID
             try
             {
-                string configFilePath = System.IO.Path.Combine(ProfileManager.ConfigDir, "Magnetar_Client.cfg");
+                string configDir = Path.Combine(ModsDir, "Magnetar Config");
+                if (!Directory.Exists(configDir)) Directory.CreateDirectory(configDir);
+                string configFilePath = Path.Combine(configDir, "Magnetar_Client.cfg");
                 Prefrences.BepInExConfig = new ConfigFile(configFilePath, true);
+                Prefrences.ShowFloatingIconEntry = Prefrences.BepInExConfig.Bind<bool>("UI", "ShowFloatingIcon",
+#if ANDROID
+                    true,
+#else
+                    false,
+#endif
+                    "Display floating draggable menu button.");
+                if (Prefrences.ShowFloatingIconEntry != null)
+                {
+                    Config.ShowFloatingIcon = Prefrences.ShowFloatingIconEntry.Value;
+                }
             }
             catch (Exception ex)
             {

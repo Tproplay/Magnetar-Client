@@ -47,6 +47,31 @@ namespace Magnetar_Client
 
         public static float MinTimeBetweenSaves = 120;
 
+        // Floating Menu Icon toggle (Default: true on mobile, false on PC)
+        public static bool ShowFloatingIcon =
+#if ANDROID
+            true;
+#else
+            false;
+#endif
+        public static void SetFloatingIcon(bool enabled)
+        {
+            ShowFloatingIcon = enabled;
+#if MELONLOADER || RELEASE_MELON
+        if (Prefrences.ShowFloatingIconEntry != null)
+        {
+            Prefrences.ShowFloatingIconEntry.Value = enabled;
+        }
+#elif BEPINEX || RELEASE_BEPINEX || ANDROID
+            if (Prefrences.ShowFloatingIconEntry != null)
+            {
+                Prefrences.ShowFloatingIconEntry.Value = enabled;
+                Prefrences.BepInExConfig?.Save();
+            }
+#endif
+            Utils.SaveLoad.Save();
+        }
+
         // --- Scaled UI sizes ---------------------------------------------
         // These are exposed as their original (unscaled) "base"/1x sizes via
         // the Base* fields, and every public property below returns that
@@ -229,8 +254,10 @@ namespace Magnetar_Client
     {
 #if MELONLOADER || RELEASE_MELON
         public static MelonPreferences_Category MagnetarCategory;
+        public static MelonPreferences_Entry<bool> ShowFloatingIconEntry;
 #elif BEPINEX || RELEASE_BEPINEX || ANDROID
         public static ConfigFile BepInExConfig;
+        public static BepInEx.Configuration.ConfigEntry<bool> ShowFloatingIconEntry;
 #endif
     }
 }

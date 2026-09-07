@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -7,7 +8,7 @@
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<Configurations>melonloader;Release_melon;Bepinex;Release_bepinex;Android</Configurations>
+		<Configurations>melonloader;Release_Melon;Bepinex;Release_bepinex;Android</Configurations>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -97,6 +98,9 @@
 		<Reference Include="Il2CppUniTask">
 			<HintPath>References\Melonloader\Il2Cpp\Il2CppUniTask.dll</HintPath>
 		</Reference>
+		<Reference Include="UnityEngine.ImageConversionModule">
+			<HintPath>References\Melonloader\Il2Cpp\UnityEngine.ImageConversionModule.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<!-- BepInEx / Android References -->
@@ -155,10 +159,14 @@
 		<Reference Include="UniTask">
 			<HintPath>References\Bepinex\Il2Cpp\UniTask.dll</HintPath>
 		</Reference>
+		<Reference Include="UnityEngine.ImageConversionModule">
+			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.ImageConversionModule.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Condition="$(Configuration) == 'melonloader'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.9\Mods\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\English 3.9\PlantsVsZombiesRH.exe&quot;" />
 		<Exec Condition="$(Configuration) == 'Bepinex'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\UnityExploror 3.9\BepInEx\plugins\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\UnityExploror 3.9\PlantsVsZombiesRH.exe&quot;" />
 	</Target>
+
 </Project>

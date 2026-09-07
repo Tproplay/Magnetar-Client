@@ -465,40 +465,59 @@ namespace Magnetar_Client.Utils
 
             if (System.IO.File.Exists(bundlePath))
             {
-                AssetBundle fontBundle = AssetBundle.LoadFromFile(bundlePath);
+                AssetBundle fontBundle = null;
+                foreach (var b in AssetBundle.GetAllLoadedAssetBundles().ToArray())
+                {
+                    if (b != null && b.name == "magnetar_ui")
+                    {
+                        fontBundle = b;
+                        break;
+                    }
+                }
+
+                bool loadedFromDisk = false;
+                if (fontBundle == null)
+                {
+                    fontBundle = AssetBundle.LoadFromFile(bundlePath);
+                    loadedFromDisk = true;
+                }
 
                 if (fontBundle != null)
                 {
-                    UnityEngine.Object assetObj = fontBundle.LoadAsset("Magnetar_font", Il2CppType.Of<Font>());
-                    if (assetObj != null)
+                    try
                     {
-                        customWineFont = assetObj.TryCast<Font>();
-                    }
+                        UnityEngine.Object assetObj = fontBundle.LoadAsset("Magnetar_font", Il2CppType.Of<Font>());
+                        if (assetObj != null)
+                        {
+                            customWineFont = assetObj.TryCast<Font>();
+                        }
 
-                    if (customWineFont != null)
+                        if (customWineFont != null)
+                        {
+                            GUI.skin.font = customWineFont;
+                            GUI.skin.box.font = customWineFont;
+                            GUI.skin.label.font = customWineFont;
+                            GUI.skin.button.font = customWineFont;
+                            GUI.skin.textField.font = customWineFont;
+                            GUI.skin.textArea.font = customWineFont;
+                            GUI.skin.toggle.font = customWineFont;
+                            GUI.skin.window.font = customWineFont;
+
+                            DebugLogger.Msg("[Texture Loader] Successfully loaded and applied font!");
+                        }
+                        else
+                        {
+                            DebugLogger.Error("[Texture Loader] Found bundle, but 'Magnetar_font' asset was missing inside it.");
+                        }
+                    }
+                    finally
                     {
-                        GUI.skin.font = customWineFont;
-                        GUI.skin.box.font = customWineFont;
-                        GUI.skin.label.font = customWineFont;
-                        GUI.skin.button.font = customWineFont;
-                        GUI.skin.textField.font = customWineFont;
-                        GUI.skin.textArea.font = customWineFont;
-                        GUI.skin.toggle.font = customWineFont;
-                        GUI.skin.window.font = customWineFont;
-
-                        DebugLogger.Msg("[Texture Loader] Successfully loaded and applied font!");
+                        if (loadedFromDisk)
+                        {
+                            fontBundle.Unload(false);
+                        }
                     }
-                    else
-                    {
-                        DebugLogger.Error("[Texture Loader] Found bundle, but 'Magnetar_font' asset was missing inside it.");
-                    }
-
-                    fontBundle.Unload(false);
                 }
-            }
-            else
-            {
-                DebugLogger.Warning("[Texture Loader] Font AssetBundle not found!");
             }
 #endif
         }

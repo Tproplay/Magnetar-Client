@@ -39,12 +39,19 @@ namespace Magnetar_Client.Core
 
         private static GUI.WindowFunction _cachedLangSelector;
         private static GUI.WindowFunction _cachedGuiControls;
+        private static readonly Action _cachedOnClose = OnClose;
 
         private static GUI.WindowFunction LangSelectorDelegate => _cachedLangSelector ??=
             Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((System.Action<int>)DrawLanguageSelector);
 
         private static GUI.WindowFunction GuiControlsDelegate => _cachedGuiControls ??=
             Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((System.Action<int>)DrawGUIControls);
+
+        public static void OnClose()
+        {
+            isSelectingLanguage = false;
+            UI.WindowDrawing.DrawSetting.activeMultiSelect = null;
+        }
 
         public static void Init()
         {
@@ -125,7 +132,6 @@ namespace Magnetar_Client.Core
 
         public static void Render()
         {
-            // Rescale styles safely at the top of the frame before any window functions execute
             Magnetar_Default.Rescale();
 
             Event e = Event.current;
@@ -133,7 +139,7 @@ namespace Magnetar_Client.Core
             #region Handle Escape
             if (isSelectingLanguage && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
             {
-                isSelectingLanguage = false;
+                OnClose();
                 e.Use();
                 return;
             }
@@ -170,11 +176,14 @@ namespace Magnetar_Client.Core
 
         private static void DrawLanguageSelector(int windowID)
         {
-            GUI.DragWindow(new Rect(0, 0, selectorRect.width, Config.S(34f)));
             Event e = Event.current;
 
             Rect multiSelectRect = new Rect(0, 0, selectorRect.width, selectorRect.height);
-            UI.WindowDrawing.DrawSetting.DrawMultiSelectWindow(multiSelectRect, UI.WindowDrawing.DrawSetting.activeMultiSelect);
+            UI.WindowDrawing.DrawSetting.DrawMultiSelectWindow(multiSelectRect, UI.WindowDrawing.DrawSetting.activeMultiSelect, _cachedOnClose);
+
+            float titleHeight = Config.S(34f);
+            float dragSafeMargin = Config.ShowMobileButtons ? Config.S(35f) : 0f;
+            GUI.DragWindow(new Rect(0, 0, selectorRect.width - dragSafeMargin, titleHeight));
 
             if (multiSelectRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
@@ -287,6 +296,28 @@ namespace Magnetar_Client.Core
             if (floatIconHover && e.type == EventType.MouseDown && e.button == 0)
             {
                 Config.SetFloatingIcon(!Config.ShowFloatingIcon);
+                e.Use();
+            }
+
+            y += elementHeight + Config.S(10f);
+
+            // --- 5. Mobile Buttons Toggle Row ---
+            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight),
+                Translator.Translate("Mobile Close Buttons"),
+                Magnetar_Default.SettingDescriptionStyle);
+
+            Rect mobileBtnRect = new Rect(w * 0.5f, y, w * 0.45f, elementHeight);
+            bool mobileBtnHover = mobileBtnRect.Contains(e.mousePosition);
+
+            if (mobileBtnHover) GUI.backgroundColor = Magnetar_Default.AccentColor;
+            GUI.Box(mobileBtnRect,
+                Config.ShowMobileButtons ? Translator.Translate("ON") : Translator.Translate("OFF"),
+                Config.ShowMobileButtons ? Magnetar_Default.ModuleOn : Magnetar_Default.SettingOff);
+            GUI.backgroundColor = Color.white;
+
+            if (mobileBtnHover && e.type == EventType.MouseDown && e.button == 0)
+            {
+                Config.ShowMobileButtons = !Config.ShowMobileButtons;
                 e.Use();
             }
 

@@ -110,7 +110,7 @@ namespace Magnetar_Client.Utils
             }
             catch (Exception ex)
             {
-                TranslatorLogger.Error($"[Translator] LoadTranslations failed: {ex.Message}");
+                TranslatorLogger.Error($"LoadTranslations failed: {ex.Message}");
                 _isLoaded = true;
             }
         }
@@ -154,7 +154,7 @@ namespace Magnetar_Client.Utils
             }
             catch (Exception ex)
             {
-                TranslatorLogger.Error($"[Translator] SyncWithEnglishTemplate error: {ex.Message}");
+                TranslatorLogger.Error($"SyncWithEnglishTemplate error: {ex.Message}");
             }
         }
 
@@ -518,7 +518,7 @@ namespace Magnetar_Client.Utils
         {
             if (enumType == null)
             {
-                TranslatorLogger.Error("[Translator] TranslateEnum called with null enumType!");
+                TranslatorLogger.Error("TranslateEnum called with null enumType!");
                 return new Dictionary<int, string>();
             }
 
@@ -535,13 +535,13 @@ namespace Magnetar_Client.Utils
                 _nameCache[enumType] = parsedNames;
                 sw.Stop();
 
-                TranslatorLogger.Msg($"[Translator] Successfully loaded and cached '{enumType.Name}' with {parsedNames.Count} entries ({sw.ElapsedMilliseconds} ms).");
+                TranslatorLogger.Msg($"Successfully loaded and cached '{enumType.Name}' with {parsedNames.Count} entries ({sw.ElapsedMilliseconds} ms).");
                 return new Dictionary<int, string>(parsedNames);
             }
             catch (System.Exception ex)
             {
                 sw.Stop();
-                TranslatorLogger.Error($"[Translator] Exception occurred while translating enum '{enumType.Name}': {ex}");
+                TranslatorLogger.Error($"Exception occurred while translating enum '{enumType.Name}': {ex}");
                 throw;
             }
         }
@@ -581,7 +581,6 @@ namespace Magnetar_Client.Utils
                     if (rawData != null)
                     {
                         foreach (var kvp in rawData) parsedNames[kvp.Key] = CleanText(kvp.Value);
-                        TranslatorLogger.Msg($"Loaded {parsedNames.Count} entries from {enumType.Name}.json");
                     }
                 }
                 catch (Exception ex)

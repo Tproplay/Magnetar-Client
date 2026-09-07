@@ -30,6 +30,13 @@ namespace Magnetar_Client.Core
         public static Rect selectorRect = Rect.zero;
 
         private static bool _rectsInitialized = false;
+        private static readonly Action _cachedOnClose = OnClose;
+
+        public static void OnClose()
+        {
+            isSelectingElements = false;
+            UI.WindowDrawing.DrawSetting.activeMultiSelect = null;
+        }
 
         private static void EnsureRects()
         {
@@ -57,7 +64,6 @@ namespace Magnetar_Client.Core
             Config.RescaleAroundCenter(ref windowRect, Config.S(BaseWidth), windowRect.height);
             Config.RescaleAroundCenter(ref selectorRect, targetSelectorWidth, targetSelectorHeight);
 
-            // Clamp selector window inside screen canvas
             selectorRect.x = Mathf.Clamp(selectorRect.x, 0f, Mathf.Max(0f, Config.WindowWidth - selectorRect.width));
             selectorRect.y = Mathf.Clamp(selectorRect.y, 0f, Mathf.Max(0f, Config.WindowHeight - selectorRect.height));
         }
@@ -95,7 +101,7 @@ namespace Magnetar_Client.Core
                 {
                     Matrix4x4 backupMatrix = GUI.matrix;
                     GUI.matrix = Matrix4x4.identity;
-                    
+
                     Rect fullScreenRect = new Rect(0, 0, Screen.width, Screen.height);
                     if (Magnetar_Default.DimStyle != null)
                     {
@@ -103,7 +109,6 @@ namespace Magnetar_Client.Core
                     }
                     GUI.matrix = backupMatrix;
 
-                    // Safe background click detection: only reset axes if no slider/dropdown is active
                     if (e.type == EventType.MouseDown && UI.WindowDrawing.DrawSetting.activeSliderId == -1 && UI.WindowDrawing.DrawSetting.activeDropdownId == -1)
                     {
 #if !ANDROID
@@ -123,7 +128,7 @@ namespace Magnetar_Client.Core
                 }
                 else if (isSelectingElements && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
                 {
-                    isSelectingElements = false;
+                    OnClose();
                     e.Use();
                     return;
                 }
@@ -201,37 +206,43 @@ namespace Magnetar_Client.Core
 
         private static void DrawExitLayoutButton()
         {
-            Event e = Event.current;
-            float btnWidth = Config.S(180f);
-            float btnHeight = Config.S(36f);
-            Rect exitRect = new Rect((Config.WindowWidth - btnWidth) / 2f, Config.S(16f), btnWidth, btnHeight);
-
-            bool isHovered = exitRect.Contains(e.mousePosition);
-            if (isHovered) GUI.backgroundColor = Magnetar_Default.AccentColor;
-
-            GUI.Box(exitRect, Translator.Translate("Exit Layout"), GetExitBtnStyle());
-            GUI.backgroundColor = Color.white;
-
-            if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
+            if (Config.ShowMobileButtons)
             {
-                forceShow = false;
-                Config.showgui = true;
-                SaveLoad.Save();
+                Event e = Event.current;
+                float btnWidth = Config.S(180f);
+                float btnHeight = Config.S(36f);
+                Rect exitRect = new Rect((Config.WindowWidth - btnWidth) / 2f, Config.S(16f), btnWidth, btnHeight);
+
+                bool isHovered = exitRect.Contains(e.mousePosition);
+                if (isHovered) GUI.backgroundColor = Magnetar_Default.AccentColor;
+
+                GUI.Box(exitRect, Translator.Translate("Exit Layout"), GetExitBtnStyle());
+                GUI.backgroundColor = Color.white;
+
+                if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
+                {
+                    forceShow = false;
+                    Config.showgui = true;
+                    SaveLoad.Save();
 #if !ANDROID
-                Input.ResetInputAxes();
+                    Input.ResetInputAxes();
 #endif
-                e.Use();
+                    e.Use();
+                }
             }
+            
         }
 
         private static void DrawElementSelector(int windowID)
         {
-            GUI.DragWindow(new Rect(0, 0, selectorRect.width, Config.S(34f)));
             Event e = Event.current;
 
-            // Fill local window canvas directly; DrawMultiSelectWindow handles banner and search bar internally
             Rect multiSelectRect = new Rect(0, 0, selectorRect.width, selectorRect.height);
-            UI.WindowDrawing.DrawSetting.DrawMultiSelectWindow(multiSelectRect, UI.WindowDrawing.DrawSetting.activeMultiSelect);
+            UI.WindowDrawing.DrawSetting.DrawMultiSelectWindow(multiSelectRect, UI.WindowDrawing.DrawSetting.activeMultiSelect, _cachedOnClose);
+
+            float titleHeight = Config.S(34f);
+            float dragSafeMargin = Config.ShowMobileButtons ? Config.S(35f) : 0f;
+            GUI.DragWindow(new Rect(0, 0, selectorRect.width - dragSafeMargin, titleHeight));
 
             if (multiSelectRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
@@ -269,7 +280,6 @@ namespace Magnetar_Client.Core
                 UI.WindowDrawing.DrawSetting.multiSelectSearchQuery = "";
                 UI.WindowDrawing.DrawSetting.manualScrollY = 0f;
 
-                // Center using the 80% clamped target height
                 float targetW = Config.S(BaseSelectorWidth);
                 float targetH = Mathf.Min(Config.S(BaseSelectorHeight), Config.WindowHeight * 0.8f);
 

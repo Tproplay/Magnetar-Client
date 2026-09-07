@@ -11,6 +11,7 @@ namespace Magnetar_Client.UI.Themes
 
         public static GUIStyle ModuleWindow;
         public static GUIStyle ModuleOn;
+        public static GUIStyle ModuleOnCentralized;
         public static GUIStyle ModuleOff;
 
         public static GUIStyle SettingsWindow;
@@ -161,6 +162,15 @@ namespace Magnetar_Client.UI.Themes
             ModuleOn.hover.background = ActiveHoverTex;
             ModuleOn.padding = new RectOffset();
             ModuleOn.padding.left = ModulePaddingLeft;
+            #endregion
+
+            #region ModuleOnCentralized
+            ModuleOnCentralized = new GUIStyle();
+            ModuleOnCentralized.normal.background = AccentTex;
+            ModuleOnCentralized.normal.textColor = Color.black;
+            ModuleOnCentralized.fontSize = ModuleFontSize;
+            ModuleOnCentralized.alignment = TextAnchor.MiddleCenter;
+            ModuleOnCentralized.hover.background = ActiveHoverTex;
             #endregion
 
             #region ModuleOff
@@ -424,6 +434,8 @@ namespace Magnetar_Client.UI.Themes
             // ModuleOn / ModuleOff
             ModuleOn.fontSize = S(ModuleFontSize);
             ModuleOn.padding.left = S(ModulePaddingLeft);
+
+            ModuleOnCentralized.fontSize = S(ModuleFontSize);
 
             ModuleOff.fontSize = S(ModuleFontSize);
             ModuleOff.padding.left = S(ModulePaddingLeft);

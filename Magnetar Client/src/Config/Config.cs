@@ -41,6 +41,37 @@ namespace Magnetar_Client
         public static float ElementScale = 1f;
         public static float ES(float value) => value * ElementScale;
 
+        private static bool _showMobileButtons =
+#if ANDROID
+            true;
+#else
+            false;
+#endif
+
+        public static bool ShowMobileButtons
+        {
+            get => _showMobileButtons;
+            set
+            {
+                if (_showMobileButtons == value) return;
+                _showMobileButtons = value;
+
+#if MELONLOADER || RELEASE_MELON
+                if (Prefrences.ShowMobileButtonsEntry != null)
+                {
+                    Prefrences.ShowMobileButtonsEntry.Value = value;
+                }
+#elif BEPINEX || RELEASE_BEPINEX || ANDROID
+                if (Prefrences.ShowMobileButtonsEntry != null)
+                {
+                    Prefrences.ShowMobileButtonsEntry.Value = value;
+                    Prefrences.BepInExConfig?.Save();
+                }
+#endif
+                Utils.SaveLoad.Save();
+            }
+        }
+
         public static bool showgui = true;
         public static bool dimBg = false;
         public static TabType CurrentTab = TabType.MODULES;
@@ -259,9 +290,11 @@ namespace Magnetar_Client
 #if MELONLOADER || RELEASE_MELON
         public static MelonPreferences_Category MagnetarCategory;
         public static MelonPreferences_Entry<bool> ShowFloatingIconEntry;
+        public static MelonPreferences_Entry<bool> ShowMobileButtonsEntry;
 #elif BEPINEX || RELEASE_BEPINEX || ANDROID
         public static ConfigFile BepInExConfig;
         public static BepInEx.Configuration.ConfigEntry<bool> ShowFloatingIconEntry;
+        public static BepInEx.Configuration.ConfigEntry<bool> ShowMobileButtonsEntry;
 #endif
     }
 }

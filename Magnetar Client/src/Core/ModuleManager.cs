@@ -496,17 +496,23 @@ namespace Magnetar_Client.Core
 
             Event e = Event.current;
 
-            // Header close button (uses GUI.Button to prevent drag interception)
             float closeBtnSize = Config.S(20f);
-            Rect closeButtonRect = new Rect(windowWidth - Config.S(26f), Config.S(4f), Config.S(22f), Config.S(22f));
-            GUI.Box(closeButtonRect, "X", Magnetar_Default.ModuleOff);
-            if (e.type == EventType.MouseDown && closeButtonRect.Contains(e.mousePosition))
+
+            if (Config.ShowMobileButtons)
             {
-                showSettings = false;
-                showModules = true;
-                showSelectionGui = false;
-                return;
+                // Header close button
+                Rect closeButtonRect = new Rect(windowWidth - Config.S(26f), Config.S(4f), Config.S(22f), Config.S(22f));
+                GUI.Box(closeButtonRect, "X", Magnetar_Default.ModuleOn);
+                if (e.type == EventType.MouseDown && closeButtonRect.Contains(e.mousePosition))
+                {
+                    showSettings = false;
+                    showModules = true;
+                    showSelectionGui = false;
+                    return;
+                }
             }
+
+            
 
             if (e.type == EventType.Layout)
             {

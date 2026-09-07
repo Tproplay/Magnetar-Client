@@ -47,54 +47,82 @@ namespace Magnetar_Client.Core
                 string bundlePath = System.IO.Path.Combine(SaveLoad.ModsDir, "Magnetar Data", "magnetar_ui");
                 if (System.IO.File.Exists(bundlePath))
                 {
-                    AssetBundle uiBundle = AssetBundle.LoadFromFile(bundlePath);
+                    // Check if already in memory before attempting to load from disk
+                    AssetBundle uiBundle = null;
+                    foreach (var b in AssetBundle.GetAllLoadedAssetBundles().ToArray())
+                    {
+                        if (b != null && b.name == "magnetar_ui")
+                        {
+                            uiBundle = b;
+                            break;
+                        }
+                    }
+
+                    bool loadedFromDisk = false;
+                    if (uiBundle == null)
+                    {
+                        uiBundle = AssetBundle.LoadFromFile(bundlePath);
+                        loadedFromDisk = true;
+                    }
+
                     if (uiBundle != null)
                     {
-                        string[] targetNames = new string[]
+                        try
                         {
-                            "assets/assets/magnetar_logo.png",
-                            "magnetar_logo"
-                        };
+                            string[] targetNames = new string[]
+                            {
+                        "assets/assets/magnetar_logo.png",
+                        "magnetar_logo"
+                            };
 
-                        foreach (string name in targetNames)
-                        {
+                            foreach (string name in targetNames)
+                            {
 #if MELONLOADER || RELEASE_MELON
-                            Texture2D tex = uiBundle.LoadAsset<Texture2D>(name);
-                            if (tex != null)
-                            {
-                                Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Texture2D from magnetar_ui!");
-                                return tex;
-                            }
-
-                            Sprite spr = uiBundle.LoadAsset<Sprite>(name);
-                            if (spr != null)
-                            {
-                                Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Sprite from magnetar_ui!");
-                                return ExtractSpriteTexture(spr);
-                            }
-#elif BEPINEX || RELEASE_BEPINEX || ANDROID
-                            var rawTex = uiBundle.LoadAsset(name, Il2CppType.Of<Texture2D>());
-                            if (rawTex != null)
-                            {
-                                Texture2D tex = rawTex.TryCast<Texture2D>();
+                                Texture2D tex = uiBundle.LoadAsset<Texture2D>(name);
                                 if (tex != null)
                                 {
                                     Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Texture2D from magnetar_ui!");
                                     return tex;
                                 }
-                            }
 
-                            var rawSpr = uiBundle.LoadAsset(name, Il2CppType.Of<Sprite>());
-                            if (rawSpr != null)
-                            {
-                                Sprite spr = rawSpr.TryCast<Sprite>();
+                                Sprite spr = uiBundle.LoadAsset<Sprite>(name);
                                 if (spr != null)
                                 {
                                     Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Sprite from magnetar_ui!");
                                     return ExtractSpriteTexture(spr);
                                 }
+#elif BEPINEX || RELEASE_BEPINEX || ANDROID
+                        var rawTex = uiBundle.LoadAsset(name, Il2CppType.Of<Texture2D>());
+                        if (rawTex != null)
+                        {
+                            Texture2D tex = rawTex.TryCast<Texture2D>();
+                            if (tex != null)
+                            {
+                                Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Texture2D from magnetar_ui!");
+                                return tex;
                             }
+                        }
+
+                        var rawSpr = uiBundle.LoadAsset(name, Il2CppType.Of<Sprite>());
+                        if (rawSpr != null)
+                        {
+                            Sprite spr = rawSpr.TryCast<Sprite>();
+                            if (spr != null)
+                            {
+                                Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Sprite from magnetar_ui!");
+                                return ExtractSpriteTexture(spr);
+                            }
+                        }
 #endif
+                            }
+                        }
+                        finally
+                        {
+                            // Always unload the bundle wrapper so subsequent loaders can read from it
+                            if (loadedFromDisk)
+                            {
+                                uiBundle.Unload(false);
+                            }
                         }
                     }
                 }
@@ -334,7 +362,7 @@ namespace Magnetar_Client.Core
                     DrawFloatingCircle(e);
                 }
             }
-            else if (Config.showgui && !HUDManager.forceShow)
+            else if (Config.showgui && !HUDManager.forceShow && Config.ShowMobileButtons)
             {
                 DrawCloseButton(e);
             }

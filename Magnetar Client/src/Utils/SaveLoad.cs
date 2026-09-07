@@ -512,6 +512,7 @@ namespace Magnetar_Client.Utils
         {
 #if MELONLOADER || RELEASE_MELON
             Prefrences.MagnetarCategory = MelonPreferences.CreateCategory("Magnetar Client", "Magnetar Client");
+
             Prefrences.ShowFloatingIconEntry = Prefrences.MagnetarCategory.CreateEntry<bool>("ShowFloatingIcon",
 #if ANDROID
                 true,
@@ -519,17 +520,33 @@ namespace Magnetar_Client.Utils
                 false,
 #endif
                 "Show Floating Icon", "Display floating draggable menu button.");
+
             if (Prefrences.ShowFloatingIconEntry != null)
             {
                 Config.ShowFloatingIcon = Prefrences.ShowFloatingIconEntry.Value;
             }
-#elif BEPINEX || RELEASE_BEPINEX || ANDROID
+
+            Prefrences.ShowMobileButtonsEntry = Prefrences.MagnetarCategory.CreateEntry<bool>("ShowMobileButtons",
+#if ANDROID
+                true,
+#else
+                false,
+#endif
+                "Show Mobile Buttons", "Display top-right close buttons on popup windows.");
+
+            if (Prefrences.ShowMobileButtonsEntry != null)
+            {
+                Config.ShowMobileButtons = Prefrences.ShowMobileButtonsEntry.Value;
+            }
+#elif BEPINEX || RELEASE_BEPINEX
             try
             {
                 string configDir = Path.Combine(ModsDir, "Magnetar Config");
                 if (!Directory.Exists(configDir)) Directory.CreateDirectory(configDir);
                 string configFilePath = Path.Combine(configDir, "Magnetar_Client.cfg");
+                
                 Prefrences.BepInExConfig = new ConfigFile(configFilePath, true);
+                
                 Prefrences.ShowFloatingIconEntry = Prefrences.BepInExConfig.Bind<bool>("UI", "ShowFloatingIcon",
 #if ANDROID
                     true,
@@ -537,9 +554,23 @@ namespace Magnetar_Client.Utils
                     false,
 #endif
                     "Display floating draggable menu button.");
+
                 if (Prefrences.ShowFloatingIconEntry != null)
                 {
                     Config.ShowFloatingIcon = Prefrences.ShowFloatingIconEntry.Value;
+                }
+
+                Prefrences.ShowMobileButtonsEntry = Prefrences.BepInExConfig.Bind<bool>("UI", "ShowMobileButtons",
+#if ANDROID
+                    true,
+#else
+                    false,
+#endif
+                    "Display top-right close buttons on popup windows.");
+
+                if (Prefrences.ShowMobileButtonsEntry != null)
+                {
+                    Config.ShowMobileButtons = Prefrences.ShowMobileButtonsEntry.Value;
                 }
             }
             catch (Exception ex)

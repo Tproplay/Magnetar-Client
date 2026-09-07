@@ -102,7 +102,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             float fillWidth = sliderRect.width * percentage;
 
             // Thumb with baseline offset
-            Rect thumbRect = new Rect(sliderRect.x + fillWidth - 10, y + 1 - Config.S(3f), 20, 20);
+            Rect thumbRect = new Rect(sliderRect.x + fillWidth - 10, y + Config.S(1f), 20, 20);
 
             GUI.Box(sliderRect, "", Magnetar_Default.SettingOff);
             if (fillWidth > 0) GUI.Box(new Rect(sliderRect.x, sliderRect.y, fillWidth, sliderRect.height), "", Magnetar_Default.SettingOn);
@@ -318,6 +318,9 @@ namespace Magnetar_Client.UI.WindowDrawing
         private static float _scrollStartVal = 0f;
         private static bool _isListSwiping = false;
 
+        // Static cached style to eliminate frame allocations and IL2CPP pointer errors
+        private static GUIStyle _cachedCloseBtnStyle = null;
+
         public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, dynamic activeMultiSelect, Action onClose = null)
         {
             if (activeMultiSelect == null) return;
@@ -335,29 +338,43 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             var options = activeMultiSelect.Options;
 
-            // --- 1. TITLE BANNER WITH WORKING CLOSE BUTTON ---
+            // --- 1. TITLE BANNER WITH CENTERED WORKING CLOSE BUTTON ---
             float titleHeight = Config.S(34f);
-            float closeBtnSize = Config.S(24f);
             Rect headerBgRect = new Rect(0, 0, multiSelectWindowRect.width, titleHeight);
             GUI.Box(headerBgRect, Translate("Select ") + Translate(activeMultiSelect.Name), Magnetar_Default.SettingsWindow);
 
-            Rect closeBtnRect = new Rect(multiSelectWindowRect.width - closeBtnSize - Config.S(6f), Config.S(5f), closeBtnSize, closeBtnSize);
-
-            // Use GUI.Button so Unity routes click/touch states unconditionally
-            if (GUI.Button(closeBtnRect, "✕", Magnetar_Default.ModuleOn))
+            if (Config.ShowMobileButtons)
             {
-                if (onClose != null)
+                float closeBtnSize = Config.S(22f);
+                float btnX = multiSelectWindowRect.width - Config.S(26f);
+                float btnY = Config.S(6f);
+                Rect closeButtonRect = new Rect(btnX, btnY, closeBtnSize, closeBtnSize);
+
+                bool isHovered = closeButtonRect.Contains(e.mousePosition);
+
+                if (isHovered) GUI.backgroundColor = Magnetar_Default.AccentColor;
+
+                // Direct MouseDown intercept before DragWindow or GUI internals can consume it
+                if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
                 {
-                    onClose.Invoke();
+                    e.Use();
+                    if (onClose != null)
+                    {
+                        onClose.Invoke();
+                    }
+                    else
+                    {
+                        Core.ModuleManager.showSelectionGui = false;
+                        Core.ModuleManager.showModules = true;
+                        Core.GUIManager.isSelectingLanguage = false;
+                        Core.HUDManager.isSelectingElements = false;
+                    }
+                    return;
                 }
-                else
-                {
-                    Core.ModuleManager.showSelectionGui = false;
-                    Core.ModuleManager.showModules = true;
-                    Core.GUIManager.isSelectingLanguage = false;
-                }
-                e.Use();
-                return;
+
+                // Draw centered button visual
+                GUI.Box(closeButtonRect, "✕", Magnetar_Default.ModuleOnCentralized);
+                GUI.backgroundColor = Color.white;
             }
 
             // --- 2. HEADER: SEARCH & TOGGLE ALL ---

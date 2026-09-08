@@ -111,9 +111,7 @@ namespace Magnetar_Client.Core
 
                     if (e.type == EventType.MouseDown && UI.WindowDrawing.DrawSetting.activeSliderId == -1 && UI.WindowDrawing.DrawSetting.activeDropdownId == -1)
                     {
-#if !ANDROID
                         Input.ResetInputAxes();
-#endif
                     }
                 }
 
@@ -224,9 +222,7 @@ namespace Magnetar_Client.Core
                     forceShow = false;
                     Config.showgui = true;
                     SaveLoad.Save();
-#if !ANDROID
                     Input.ResetInputAxes();
-#endif
                     e.Use();
                 }
             }
@@ -246,9 +242,7 @@ namespace Magnetar_Client.Core
 
             if (multiSelectRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
-#if !ANDROID
                 Input.ResetInputAxes();
-#endif
                 e.Use();
             }
         }
@@ -361,9 +355,7 @@ namespace Magnetar_Client.Core
             Rect _windowRect = new Rect(0, 0, width, y);
             if (_windowRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
-#if !ANDROID
                 Input.ResetInputAxes();
-#endif
                 e.Use();
             }
         }

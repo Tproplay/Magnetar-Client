@@ -92,27 +92,27 @@ namespace Magnetar_Client.Core
                                     return ExtractSpriteTexture(spr);
                                 }
 #elif BEPINEX || RELEASE_BEPINEX || ANDROID
-                        var rawTex = uiBundle.LoadAsset(name, Il2CppType.Of<Texture2D>());
-                        if (rawTex != null)
-                        {
-                            Texture2D tex = rawTex.TryCast<Texture2D>();
-                            if (tex != null)
-                            {
-                                Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Texture2D from magnetar_ui!");
-                                return tex;
-                            }
-                        }
+                                var rawTex = uiBundle.LoadAsset(name, Il2CppType.Of<Texture2D>());
+                                if (rawTex != null)
+                                {
+                                    Texture2D tex = rawTex.TryCast<Texture2D>();
+                                    if (tex != null)
+                                    {
+                                        Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Texture2D from magnetar_ui!");
+                                        return tex;
+                                    }
+                                }
 
-                        var rawSpr = uiBundle.LoadAsset(name, Il2CppType.Of<Sprite>());
-                        if (rawSpr != null)
-                        {
-                            Sprite spr = rawSpr.TryCast<Sprite>();
-                            if (spr != null)
-                            {
-                                Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Sprite from magnetar_ui!");
-                                return ExtractSpriteTexture(spr);
-                            }
-                        }
+                                var rawSpr = uiBundle.LoadAsset(name, Il2CppType.Of<Sprite>());
+                                if (rawSpr != null)
+                                {
+                                    Sprite spr = rawSpr.TryCast<Sprite>();
+                                    if (spr != null)
+                                    {
+                                        Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Sprite from magnetar_ui!");
+                                        return ExtractSpriteTexture(spr);
+                                    }
+                                }
 #endif
                             }
                         }
@@ -133,32 +133,26 @@ namespace Magnetar_Client.Core
             }
 
             // --- 2. Loose disk fallback (Magnetar Data/Magnetar_logo.png) ---
-            string[] candidatePaths = new string[]
-            {
-                System.IO.Path.Combine(SaveLoad.ModsDir, "Magnetar Data", "Magnetar_logo.png"),
-                System.IO.Path.Combine(SaveLoad.ModsDir, "Magnetar_logo.png")
-            };
+            string path = System.IO.Path.Combine(SaveLoad.ModsDir, "Magnetar Data", "Magnetar_logo.png");
 
-            foreach (string path in candidatePaths)
+            if (System.IO.File.Exists(path))
             {
-                if (System.IO.File.Exists(path))
+                try
                 {
-                    try
+                    byte[] rawBytes = System.IO.File.ReadAllBytes(path);
+                    Texture2D diskTex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                    if (ImageConversion.LoadImage(diskTex, rawBytes))
                     {
-                        byte[] rawBytes = System.IO.File.ReadAllBytes(path);
-                        Texture2D diskTex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-                        if (ImageConversion.LoadImage(diskTex, rawBytes))
-                        {
-                            Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded logo from disk: {path}");
-                            return diskTex;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Magnetar_Logger.DebugLogger.Error($"[MobileMenuUI] Failed reading disk logo: {ex.Message}");
+                        Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded logo from disk: {path}");
+                        return diskTex;
                     }
                 }
+                catch (Exception ex)
+                {
+                    Magnetar_Logger.DebugLogger.Error($"[MobileMenuUI] Failed reading disk logo: {ex.Message}");
+                }
             }
+            
 
             return null;
         }

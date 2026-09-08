@@ -187,9 +187,7 @@ namespace Magnetar_Client.Core
 
             if (multiSelectRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
-#if !ANDROID
                 Input.ResetInputAxes();
-#endif
                 e.Use();
             }
         }
@@ -335,9 +333,7 @@ namespace Magnetar_Client.Core
             Rect _windowRect = new Rect(0, 0, w, y);
             if (_windowRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
-#if !ANDROID
                 Input.ResetInputAxes();
-#endif
                 e.Use();
             }
         }

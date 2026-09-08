@@ -107,6 +107,12 @@ namespace Magnetar_Client.Core
             );
 
             showModules = true; showSettings = false; showSelectionGui = false;
+
+#if ANDROID
+            isSearchOpen = true;
+            searchAnimProgress = 1f;
+#endif
+
             IsInitialized = true;
 
             Utils.Magnetar_Logger.DebugLogger.Msg($"Loaded {Modules.Count} modules");
@@ -126,7 +132,7 @@ namespace Magnetar_Client.Core
 
         public static void OpenModuleSettings(Modules.Module mod)
         {
-            _pressedModule = null; // Clear lingering hold states
+            _pressedModule = null;
             showModules = false;
             showSelectionGui = false;
             showSettings = true;
@@ -161,13 +167,38 @@ namespace Magnetar_Client.Core
                     if (currentEvent.isMouse) currentEvent.Use();
                 }
             }
-#endif
 
+            // 2. Global release fallback (toggles module if tap was lifted outside bounds)
+            if (currentEvent.type == EventType.MouseUp || currentEvent.rawType == EventType.MouseUp)
+            {
+                if (_pressedModule != null)
+                {
+                    if (!_hasTriggeredLongPress)
+                    {
+                        float moveDist = Vector2.Distance(currentEvent.mousePosition, _pressStartScreenPos);
+                        if (moveDist <= Config.S(22f))
+                        {
+                            if (VanillaMode.instance.IsAllowed(_pressedModule))
+                            {
+                                _pressedModule.Toggle();
+                            }
+                        }
+                    }
+                    _pressedModule = null;
+                    _hasTriggeredLongPress = false;
+                }
+            }
+#endif
 
             if (showModules)
             {
                 resetWindowPos = true;
 
+#if ANDROID
+                // Search window is always on for mobile devices
+                isSearchOpen = true;
+                searchAnimProgress = 1f;
+#else
                 if (currentEvent.type == EventType.KeyDown && (currentEvent.keyCode == KeyCode.Return || currentEvent.keyCode == KeyCode.KeypadEnter))
                 {
                     isSearchOpen = true;
@@ -199,6 +230,7 @@ namespace Magnetar_Client.Core
                     float targetProgress = isSearchOpen ? 1f : 0f;
                     searchAnimProgress = Mathf.Lerp(searchAnimProgress, targetProgress, Time.unscaledDeltaTime * Config.ModuleManager.SearchAnimationSpeed);
                 }
+#endif
 
                 if (searchAnimProgress > 0.01f)
                 {
@@ -258,8 +290,6 @@ namespace Magnetar_Client.Core
                     {
                         int settingsId = Mathf.Abs(mod.GetHashCode()) + 1000;
 
-                        // Inside ModuleManager.cs -> Render() under `else if (showSettings)`:
-
                         float maxNameWidth = 0f;
                         if (mod.Settings != null)
                         {
@@ -290,10 +320,7 @@ namespace Magnetar_Client.Core
                             if (w > maxNameWidth) maxNameWidth = w;
                         }
 
-                        // Calculate required width based on actual control width plus label width
                         float calculatedWidth = Config.indent + maxNameWidth + Config.S(25f) + Config.SettingWidth + Config.indent;
-
-                        // Use the larger of the base window width or the calculated width
                         float targetWidth = Mathf.Max(Config.ModuleManager.SettingsWidth, Mathf.Max(mod.SettingsWidth, calculatedWidth));
 
                         if (!settingsPositions.ContainsKey(mod) || resetWindowPos)
@@ -326,7 +353,6 @@ namespace Magnetar_Client.Core
                             }
                         }
 
-                        // WITH THIS (mirrors GUIManager):
                         settingsPositions[mod] = GUI.Window(
                             settingsId,
                             settingsPositions[mod],
@@ -403,14 +429,21 @@ namespace Magnetar_Client.Core
                 }).ToList();
 
                 float windowWidth = windowPositions[category].width;
-                float yOffset = Config.S(28f);
+                float startY = Config.S(28f);
                 float buttonHeight = Config.S(28f);
                 Event e = Event.current;
 
-                foreach (var mod in categoryModules)
+                for (int i = 0; i < categoryModules.Count; i++)
                 {
+                    var mod = categoryModules[i];
+
+                    // Contiguous integer rounding eliminates fractional 1px gaps across scaled rows
+                    float currentY = Mathf.Round(startY + (i * buttonHeight));
+                    float nextY = Mathf.Round(startY + ((i + 1) * buttonHeight));
+                    float thisButtonHeight = nextY - currentY;
+
                     GUIStyle currentStyle = mod.Active ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff;
-                    Rect btnRect = new Rect(0, yOffset, windowWidth, buttonHeight);
+                    Rect btnRect = new Rect(0, currentY, windowWidth, thisButtonHeight);
 
                     if (showModules)
                     {
@@ -419,33 +452,60 @@ namespace Magnetar_Client.Core
 
                     if (btnRect.Contains(e.mousePosition))
                     {
+#if !ANDROID
                         if (e.type == EventType.MouseDown)
                         {
-                            if (e.button == 0) // Touch down / left click
+                            if (e.button == 0) // PC Left Click: instant toggle
                             {
-                                _pressedModule = mod;
-                                _pressStartTime = Time.realtimeSinceStartup;
-                                // Convert to virtual screen coordinates so distance checks in Render() match
-                                _pressStartScreenPos = new Vector2(windowPositions[category].x + e.mousePosition.x, windowPositions[category].y + e.mousePosition.y);
-                                _hasTriggeredLongPress = false;
+                                if (VanillaMode.instance.IsAllowed(mod))
+                                {
+                                    mod.Toggle();
+                                }
                                 e.Use();
                             }
-                            else if (e.button == 1) // PC Right Click
+                            else if (e.button == 1) // PC Right Click: open settings
                             {
                                 OpenModuleSettings(mod);
                                 e.Use();
                             }
                         }
+#else
+                        if (e.type == EventType.MouseDown && e.button == 0)
+                        {
+                            _pressedModule = mod;
+                            _pressStartTime = Time.realtimeSinceStartup;
+                            _pressStartScreenPos = new Vector2(windowPositions[category].x + e.mousePosition.x, windowPositions[category].y + e.mousePosition.y);
+                            _hasTriggeredLongPress = false;
+                            e.Use();
+                        }
+                        else if (e.type == EventType.MouseUp && e.button == 0)
+                        {
+                            // Mobile Tap: toggle module when released before long-press threshold
+                            if (_pressedModule == mod && !_hasTriggeredLongPress)
+                            {
+                                if (VanillaMode.instance.IsAllowed(mod))
+                                {
+                                    mod.Toggle();
+                                }
+                                _pressedModule = null;
+                                _hasTriggeredLongPress = false;
+                                e.Use();
+                            }
+                        }
+#endif
                     }
 
                     string translatedModName = Magnetar_Client.Utils.Translator.Translate(mod.Name);
                     GUI.Box(btnRect, translatedModName, currentStyle);
-                    yOffset += buttonHeight;
                 }
 
                 // Window drag handle
                 GUI.DragWindow(new Rect(0, 0, windowWidth, Config.S(25f)));
-                windowPositions[category] = new Rect(windowPositions[category].x, windowPositions[category].y, windowWidth, yOffset);
+
+                float totalContentY = categoryModules.Count > 0
+                    ? Mathf.Round(startY + (categoryModules.Count * buttonHeight))
+                    : startY;
+                windowPositions[category] = new Rect(windowPositions[category].x, windowPositions[category].y, windowWidth, totalContentY);
             }
             catch (System.Exception ex)
             {
@@ -480,12 +540,10 @@ namespace Magnetar_Client.Core
             float viewHeight = windowHeight - headerHeight;
 
             Event e = Event.current;
-
             float closeBtnSize = Config.S(20f);
 
             if (Config.ShowMobileButtons)
             {
-                // Header close button
                 Rect closeButtonRect = new Rect(windowWidth - Config.S(26f), Config.S(4f), Config.S(22f), Config.S(22f));
                 GUI.Box(closeButtonRect, "X", Magnetar_Default.ModuleOn);
                 if (e.type == EventType.MouseDown && closeButtonRect.Contains(e.mousePosition))
@@ -496,8 +554,6 @@ namespace Magnetar_Client.Core
                     return;
                 }
             }
-
-            
 
             if (e.type == EventType.Layout)
             {
@@ -546,7 +602,6 @@ namespace Magnetar_Client.Core
 
             GUI.EndGroup();
 
-
             if (needsScrollbar)
             {
                 float trackX = windowWidth - Config.S(14f);
@@ -561,7 +616,6 @@ namespace Magnetar_Client.Core
                 GUI.Box(new Rect(trackX, handleY, Config.S(12f), handleHeight), "", Magnetar_Default.ModuleOff);
             }
 
-            // Placed after interactive controls, leaving space for the close button
             GUI.DragWindow(new Rect(0, 0, windowWidth - closeBtnSize - Config.S(10f), headerHeight));
         }
 
@@ -664,7 +718,6 @@ namespace Magnetar_Client.Core
 
         private static void MultiSelectBridge(int id)
         {
-            // 1. Draw controls first so buttons receive clicks
             DrawMultiSelectWindow(multiSelectWindowRect, activeMultiSelect, () =>
             {
                 showSelectionGui = false;
@@ -679,7 +732,6 @@ namespace Magnetar_Client.Core
                 }
             });
 
-            // 2. Drag window on title bar EXCLUDING the close button area
             float titleHeight = Config.S(34f);
             float closeBtnWidth = Config.S(40f);
             GUI.DragWindow(new Rect(0, 0, multiSelectWindowRect.width - closeBtnWidth, titleHeight));

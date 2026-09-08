@@ -38,6 +38,10 @@ namespace Magnetar_Client.NEF
         private static Vector2 _holdStartScreenPos = Vector2.zero;
         private static bool _hasTriggeredHold = false;
         private const float LongPressThreshold = 0.40f;
+
+        // Pinch-to-zoom tracking for Mobile
+        private static float _lastPinchDistance = -1f;
+        private static bool _isPinching = false;
 #endif
 
         public static bool showUsagesView = false;
@@ -128,8 +132,10 @@ namespace Magnetar_Client.NEF
                 }
 
                 // --- PAN & ZOOM ---
+                // --- PAN & ZOOM ---
                 if (pyramidBoxRect.Contains(e.mousePosition))
                 {
+                    // 1. Mouse Scroll Wheel Zoom (Desktop)
                     if (e.type == EventType.ScrollWheel)
                     {
                         float oldZoom = pyramidZoom;
@@ -148,19 +154,79 @@ namespace Magnetar_Client.NEF
                         e.Use();
                     }
 
+                    // 2. Click / Touch Initiation
                     if (e.type == EventType.MouseDown && (e.button == 0 || e.button == 2))
                     {
                         isDraggingPyramid = true;
                         e.Use();
                     }
                 }
+#if ANDROID
+                // 3. Pinch-to-Zoom (Touch Screens / Mobile)
+                if (Input.touchCount >= 2)
+                {
+                    UnityEngine.Touch t0 = Input.GetTouch(0);
+                    UnityEngine.Touch t1 = Input.GetTouch(1);
 
+                    // Convert bottom-left screen space to top-left IMGUI window coordinates
+                    Vector2 p0 = new Vector2(t0.position.x, Screen.height - t0.position.y);
+                    Vector2 p1 = new Vector2(t1.position.x, Screen.height - t1.position.y);
+
+                    // Only zoom if touches are within the visualizer box
+                    if (pyramidBoxRect.Contains(p0) || pyramidBoxRect.Contains(p1))
+                    {
+                        float currentDist = Vector2.Distance(p0, p1);
+
+                        if (t0.phase == TouchPhase.Began || t1.phase == TouchPhase.Began || !_isPinching || _lastPinchDistance <= 0f)
+                        {
+                            _isPinching = true;
+                            _lastPinchDistance = currentDist;
+
+                            _heldEntity = null;
+            }
+                        else if (t0.phase == TouchPhase.Moved || t1.phase == TouchPhase.Moved)
+                        {
+                            float deltaDist = currentDist - _lastPinchDistance;
+                            if (Mathf.Abs(deltaDist) > 1f)
+                            {
+                                float oldZoom = pyramidZoom;
+                                float zoomFactor = deltaDist * 0.005f;
+                                pyramidZoom = Mathf.Clamp(pyramidZoom + zoomFactor, 0.2f, 3.0f);
+
+                                Vector2 pinchCenter = (p0 + p1) * 0.5f;
+                                float originX = pyramidBoxRect.x + (pyramidBoxRect.width / 2f);
+                                float originY = pyramidBoxRect.y + Config.S(60f);
+
+                                float focusX = (pinchCenter.x - originX - pyramidPan.x) / oldZoom;
+                                float focusY = (pinchCenter.y - originY - pyramidPan.y) / oldZoom;
+
+                                pyramidPan.x = pinchCenter.x - originX - (focusX * pyramidZoom);
+                                pyramidPan.y = pinchCenter.y - originY - (focusY * pyramidZoom);
+
+                                _lastPinchDistance = currentDist;
+                                _heldEntity = null;
+
+                                e.Use();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    _isPinching = false;
+                    _lastPinchDistance = -1f;
+                }
+#endif
+                // 4. Drag Pan (Only pan when not pinching)
                 if (isDraggingPyramid && e.type == EventType.MouseDrag)
                 {
 #if ANDROID
-                    pyramidPan.x += e.delta.x;
-                    pyramidPan.y -= e.delta.y; // Invert Y drag on mobile so dragging matches touch movement
-                    _heldEntity = null;
+                    if (!_isPinching)
+                    {
+                        pyramidPan.x += e.delta.x;
+                        pyramidPan.y -= e.delta.y; // Inverted Y for Android touch
+                        _heldEntity = null;
+                    }
 #else
                     pyramidPan += e.delta;
 #endif
@@ -171,6 +237,7 @@ namespace Magnetar_Client.NEF
                 {
                     isDraggingPyramid = false;
                 }
+
             }
 
             // ==========================================

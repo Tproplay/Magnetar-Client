@@ -318,8 +318,15 @@ namespace Magnetar_Client.UI.WindowDrawing
         private static float _scrollStartVal = 0f;
         private static bool _isListSwiping = false;
 
-        // Static cached style to eliminate frame allocations and IL2CPP pointer errors
-        private static GUIStyle _cachedCloseBtnStyle = null;
+#if ANDROID
+        // Mobile Hold-to-Shift-Drag & Tap tracking
+        private static float _mobileHoldStartTime = 0f;
+        private static Vector2 _mobileHoldStartPos = Vector2.zero;
+        private static int _mobileHoldItemIdx = -1;
+        private static bool _isMobileHolding = false;
+        private static bool _mobileShiftDragActive = false;
+        private const float MobileShiftHoldThreshold = 0.50f; // 500ms hold triggers shift dragging
+#endif
 
         public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, dynamic activeMultiSelect, Action onClose = null)
         {
@@ -515,9 +522,13 @@ namespace Magnetar_Client.UI.WindowDrawing
                     draggedItemsSession.Clear();
                     lastHoveredIndex = -1;
                 }
+#if ANDROID
+                _mobileShiftDragActive = false;
+                _isMobileHolding = false;
+#endif
             }
 
-            // --- 6. THE LIST VIEWPORT (Includes Mobile Touch-Swipe Drag) ---
+            // --- 6. THE LIST VIEWPORT (Touch-Swipe Drag & Mobile Shift-Drag) ---
             float listWidth = availWidth - scrollbarWidth - Config.S(6f);
             Rect listGroupRect = new Rect(padX, contentStartY, listWidth, viewHeight);
             GUI.BeginGroup(listGroupRect);
@@ -526,30 +537,147 @@ namespace Magnetar_Client.UI.WindowDrawing
                 bool isMouseInsideList = mousePos.x >= 0 && mousePos.x <= listGroupRect.width && mousePos.y >= 0 && mousePos.y <= listGroupRect.height;
                 bool isShiftHeld = e.shift || ((e.modifiers & EventModifiers.Shift) != 0) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
+#if ANDROID
+                // 1. Mobile 0.5s Hold Timer Update
+                if (_isMobileHolding && !_mobileShiftDragActive)
+                {
+                    if (Vector2.Distance(mousePos, _mobileHoldStartPos) > Config.S(12f))
+                    {
+                        // Moved finger beyond threshold before 0.5s -> regular swipe scroll
+                        _isMobileHolding = false;
+                    }
+                    else if (Time.realtimeSinceStartup - _mobileHoldStartTime >= MobileShiftHoldThreshold)
+                    {
+                        // 0.5s threshold reached: activate mobile shift-dragging
+                        _mobileShiftDragActive = true;
+                        _isMobileHolding = false;
+
+                        if (_mobileHoldItemIdx >= 0 && _mobileHoldItemIdx < filteredItems.Count)
+                        {
+                            int itemKey = filteredItems[_mobileHoldItemIdx].Key;
+                            bool isCurrentlySelected = activeMultiSelect.IsSelected(itemKey);
+
+                            isShiftDragging = true;
+                            dragTargetState = !isCurrentlySelected;
+                            draggedItemsSession.Clear();
+                            lastHoveredIndex = _mobileHoldItemIdx;
+
+                            if (dragTargetState) ToggleWithLimit(activeMultiSelect, itemKey);
+                            else activeMultiSelect.Deselect(itemKey);
+
+                            draggedItemsSession.Add(itemKey);
+                        }
+                    }
+                }
+
+                // 2. Mobile Touch Down
                 if (e.type == EventType.MouseDown && e.button == 0 && isMouseInsideList)
                 {
                     _listTouchStart = mousePos;
                     _scrollStartVal = manualScrollY;
                     _isListSwiping = false;
+
+                    float contentY = mousePos.y + manualScrollY;
+                    int clickedIdx = Mathf.FloorToInt(contentY / rowStep);
+
+                    _mobileHoldItemIdx = clickedIdx;
+                    _mobileHoldStartTime = Time.realtimeSinceStartup;
+                    _mobileHoldStartPos = mousePos;
+                    _isMobileHolding = (clickedIdx >= 0 && clickedIdx < filteredItems.Count);
+                    _mobileShiftDragActive = false;
                 }
 
-                if (e.type == EventType.MouseDrag && isMouseInsideList && !_isListSwiping)
+                // 3. Mobile Drag (Swiping vs Shift-Paint)
+                if (_mobileShiftDragActive)
                 {
-                    if (Vector2.Distance(mousePos, _listTouchStart) > 12f)
+                    if (e.type == EventType.MouseDrag || e.type == EventType.MouseMove || e.type == EventType.Repaint)
                     {
-                        _isListSwiping = true;
+                        if (isMouseInsideList && filteredItems.Count > 0)
+                        {
+                            float contentY = mousePos.y + manualScrollY;
+                            int currentIdx = Mathf.Clamp(Mathf.FloorToInt(contentY / rowStep), 0, filteredItems.Count - 1);
+
+                            if (lastHoveredIndex != -1)
+                            {
+                                int start = Mathf.Min(lastHoveredIndex, currentIdx);
+                                int end = Mathf.Max(lastHoveredIndex, currentIdx);
+
+                                for (int i = start; i <= end; i++)
+                                {
+                                    int key = filteredItems[i].Key;
+                                    if (draggedItemsSession.Add(key))
+                                    {
+                                        if (dragTargetState) ToggleWithLimit(activeMultiSelect, key);
+                                        else activeMultiSelect.Deselect(key);
+                                    }
+                                }
+                            }
+
+                            lastHoveredIndex = currentIdx;
+                        }
+
+                        if (e.type == EventType.MouseDrag || e.type == EventType.MouseMove)
+                        {
+                            e.Use();
+                        }
+                    }
+                }
+                else
+                {
+                    if (e.type == EventType.MouseDrag && isMouseInsideList && !_isListSwiping)
+                    {
+                        if (Vector2.Distance(mousePos, _listTouchStart) > Config.S(12f))
+                        {
+                            _isListSwiping = true;
+                            _isMobileHolding = false;
+                        }
+                    }
+
+                    if (_isListSwiping && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove))
+                    {
+                        float deltaY = _listTouchStart.y - mousePos.y;
+                        manualScrollY = Mathf.Clamp(_scrollStartVal + deltaY, 0f, maxScrollDist);
+                        e.Use();
                     }
                 }
 
-                if (_isListSwiping && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove))
+                // 4. Mobile Touch Up (Release Selection)
+                if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
                 {
-                    float deltaY = _listTouchStart.y - mousePos.y;
-                    manualScrollY = Mathf.Clamp(_scrollStartVal + deltaY, 0f, maxScrollDist);
-                    e.Use();
-                }
+                    if (_mobileShiftDragActive)
+                    {
+                        _mobileShiftDragActive = false;
+                        isShiftDragging = false;
+                        draggedItemsSession.Clear();
+                        lastHoveredIndex = -1;
+                        e.Use();
+                    }
+                    else if (_isMobileHolding && !_isListSwiping)
+                    {
+                        // Clean tap without swiping or holding for 0.5s -> toggle single item
+                        if (_mobileHoldItemIdx >= 0 && _mobileHoldItemIdx < filteredItems.Count)
+                        {
+                            int itemKey = filteredItems[_mobileHoldItemIdx].Key;
+                            if (activeMultiSelect.IsSelected(itemKey))
+                                activeMultiSelect.Deselect(itemKey);
+                            else
+                                ToggleWithLimit(activeMultiSelect, itemKey);
 
-                if (e.type == EventType.MouseDown && e.button == 0 && isMouseInsideList && !_isListSwiping)
+                            e.Use();
+                        }
+                    }
+
+                    _isMobileHolding = false;
+                    _isListSwiping = false;
+                }
+#else
+                // PC Implementation (Unchanged)
+                if (e.type == EventType.MouseDown && e.button == 0 && isMouseInsideList)
                 {
+                    _listTouchStart = mousePos;
+                    _scrollStartVal = manualScrollY;
+                    _isListSwiping = false;
+
                     float contentY = mousePos.y + manualScrollY;
                     int clickedIdx = Mathf.FloorToInt(contentY / rowStep);
 
@@ -580,6 +708,58 @@ namespace Magnetar_Client.UI.WindowDrawing
                         e.Use();
                     }
                 }
+
+                if (e.type == EventType.MouseDrag && isMouseInsideList && !_isListSwiping && !isShiftDragging)
+                {
+                    if (Vector2.Distance(mousePos, _listTouchStart) > 12f)
+                    {
+                        _isListSwiping = true;
+                    }
+                }
+
+                if (_isListSwiping && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove))
+                {
+                    float deltaY = _listTouchStart.y - mousePos.y;
+                    manualScrollY = Mathf.Clamp(_scrollStartVal + deltaY, 0f, maxScrollDist);
+                    e.Use();
+                }
+
+                if (isShiftDragging && isShiftHeld)
+                {
+                    if (e.type == EventType.MouseDrag || e.type == EventType.MouseMove || e.type == EventType.Repaint)
+                    {
+                        if (isMouseInsideList && filteredItems.Count > 0)
+                        {
+                            float contentY = mousePos.y + manualScrollY;
+                            int currentIdx = Mathf.Clamp(Mathf.FloorToInt(contentY / rowStep), 0, filteredItems.Count - 1);
+
+                            if (lastHoveredIndex != -1)
+                            {
+                                int start = Mathf.Min(lastHoveredIndex, currentIdx);
+                                int end = Mathf.Max(lastHoveredIndex, currentIdx);
+
+                                for (int i = start; i <= end; i++)
+                                {
+                                    int key = filteredItems[i].Key;
+                                    if (draggedItemsSession.Add(key))
+                                    {
+                                        if (dragTargetState) ToggleWithLimit(activeMultiSelect, key);
+                                        else activeMultiSelect.Deselect(key);
+                                    }
+                                }
+                            }
+
+                            lastHoveredIndex = currentIdx;
+                        }
+                    }
+                }
+                else if (isShiftDragging && !isShiftHeld)
+                {
+                    isShiftDragging = false;
+                    draggedItemsSession.Clear();
+                    lastHoveredIndex = -1;
+                }
+#endif
 
                 int firstVisibleIdx = Mathf.Max(0, Mathf.FloorToInt(manualScrollY / rowStep));
                 int lastVisibleIdx = Mathf.Min(filteredItems.Count - 1, Mathf.CeilToInt((manualScrollY + viewHeight) / rowStep));

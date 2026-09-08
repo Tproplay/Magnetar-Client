@@ -52,5 +52,9 @@
   "Available Profiles:": "Available Profiles:",
   "Delete": "Delete",
   "Active": "Active",
-  "Active Elements": "Active Elements"
+  "Active Elements": "Active Elements",
+  "GUI Scale": "GUI Scale",
+  "Element Scale": "Element Scale",
+  "Floating Icon": "Floating Icon",
+  "Mobile Close Buttons": "Mobile Close Buttons"
 }

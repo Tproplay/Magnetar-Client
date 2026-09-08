@@ -425,7 +425,9 @@
     "Description": "Columns' Like you See 'Em.",
     "Search Hints": "multiplanting columnplanting multiplant columnplant multiplants columnplants multiplantingmod columnplantingmod multiplantingplugin multiplantingtool multiplantinghack multiplantingcheat multiplaning multiplantin multiplantting multiplantting columplanting columnplaning columnplantting columnplanter multiplanter rowplanting gridplanting massplanting batchplanting fastplanting autoplanter plantmultiplier plantcolumn plantrows areaofeffectplanting",
     "settings": {
-      "Debug Mode": "Debug Mode"
+      "Debug Mode": "Debug Mode",
+      "General": "General",
+      "Mode": "Mode"
     }
   },
   "Column Shovel": {
@@ -620,7 +622,47 @@
       "Spawn machine": "Spawn machine",
       "Spawn super machine": "Spawn super machine",
       "Spawn portal heart": "Spawn portal heart",
-      "Spawn sprout pot prize": "Spawn sprout pot prize"
+      "Spawn sprout pot prize": "Spawn sprout pot prize",
+      "Entities": "Entities",
+      "Select Plant": "Select Plant",
+      "Select Zombie": "Select Zombie",
+      "Spawn Plant": "Spawn Plant",
+      "Spawn Zombie": "Spawn Zombie",
+      "Freeze/Unfreeze Time": "Freeze/Unfreeze Time",
+      "Delete All Plants": "Delete All Plants",
+      "Delete All Zombies": "Delete All Zombies",
+      "Zombies": "Zombies",
+      "Spawn Hypnotized Zombie": "Spawn Hypnotized Zombie",
+      "Spawn Zomboss 1": "Spawn Zomboss 1",
+      "Spawn Zomboss 2": "Spawn Zomboss 2",
+      "Spawn Hypno Zomboss 1": "Spawn Hypno Zomboss 1",
+      "Spawn Hypno Zomboss 2": "Spawn Hypno Zomboss 2",
+      "Pots": "Pots",
+      "Spawn Plant Pot": "Spawn Plant Pot",
+      "Spawn Zombie Pot": "Spawn Zombie Pot",
+      "Spawn Hypno Zombie Pot": "Spawn Hypno Zombie Pot",
+      "Spawn Zomboss 1 Pot": "Spawn Zomboss 1 Pot",
+      "Spawn Zomboss 2 Pot": "Spawn Zomboss 2 Pot",
+      "Spawn Hypno Zomboss 1 Pot": "Spawn Hypno Zomboss 1 Pot",
+      "Spawn Hypno Zomboss 2 Pot": "Spawn Hypno Zomboss 2 Pot",
+      "Spawn Pet Gargantuar": "Spawn Pet Gargantuar",
+      "Spawn Pet Football": "Spawn Pet Football",
+      "Spawn Pet Drown": "Spawn Pet Drown",
+      "Spawn Pet Jackbox": "Spawn Pet Jackbox",
+      "Spawn Pet Snow Boss": "Spawn Pet Snow Boss",
+      "Spawn Pet Horse": "Spawn Pet Horse",
+      "Spawn Pet Imp": "Spawn Pet Imp",
+      "Spawn Pet Kirov": "Spawn Pet Kirov",
+      "Spawn Fertilizer": "Spawn Fertilizer",
+      "Spawn Bucket": "Spawn Bucket",
+      "Spawn Helmet": "Spawn Helmet",
+      "Spawn Jackbox": "Spawn Jackbox",
+      "Spawn Pickaxe": "Spawn Pickaxe",
+      "Spawn Machine": "Spawn Machine",
+      "Spawn Super Machine": "Spawn Super Machine",
+      "Spawn Portal Heart": "Spawn Portal Heart",
+      "Spawn Sprout Pot Prize": "Spawn Sprout Pot Prize",
+      "Spawn Zombie Fertilizer": "Spawn Zombie Fertilizer"
     }
   },
   "Unlimited Lawn Mowers": {
@@ -673,5 +715,20 @@
     "Description": "Disables all the modules that provide any kind of gameplay advantage until the level is quitted.",
     "Search Hints": "vanillamode vanilla puremode vanilla-mode disablecheats legitmode cleanmode unmodded vanillaexperience fairplay anticheat legitclean vanilla-game baseline disableadvantages fairmode vanilla-rules vanilla-toggle",
     "settings": {}
+  },
+  "Quick setup": {
+    "Name": "Quick setup",
+    "Description": "Save/load a custom setup loadout.",
+    "Search Hints": "quicksetup loadout setupmanager savebuild loadbuild setup presetmanager quickload quicksave plantsetup configuration buildmanager setuploader loadouts quick-setup customsetup setupsaver presetload",
+    "settings": {
+      "Save": "Save",
+      "Name": "Name",
+      "Save Current Setup": "Save Current Setup",
+      "Load": "Load",
+      "Clear Lawn Before Load": "Clear Lawn Before Load",
+      "Setup": "Setup",
+      "Load Selected Setup": "Load Selected Setup",
+      "Delete Selected Setup": "Delete Selected Setup"
+    }
   }
 }

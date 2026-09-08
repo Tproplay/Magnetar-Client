@@ -425,7 +425,9 @@
     "Description": "Trồng Toàn Bộ Cột Dọc Chỉ Với Một Click",
     "Search Hints": "trồng theo cột trồng hàng loạt nhân bản cây trồng theo hàng trồng diện rộng trồng cây nhanh tự động trồng cây nhân số lượng cây trồng cột dọc",
     "settings": {
-      "Debug Mode": "Chế Độ Gỡ Lỗi (Debug)"
+      "Debug Mode": "Chế Độ Gỡ Lỗi (Debug)",
+      "General": "General",
+      "Mode": "Mode"
     }
   },
   "Column Shovel": {
@@ -494,7 +496,6 @@
       "Extra": "Tính năng thêm",
       "Disable Screen Shake effect": "Vô hiệu hóa hiệu ứng rung màn hình",
       "Particle Types": "Các loại hạt hiệu ứng"
-
     }
   },
   "Smaller Projectiles": {
@@ -621,7 +622,47 @@
       "Spawn machine": "Tạo máy móc",
       "Spawn super machine": "Tạo siêu máy móc",
       "Spawn portal heart": "Tạo lõi cổng dịch chuyển (Portal Heart)",
-      "Spawn sprout pot prize": "Tạo chậu mầm thưởng"
+      "Spawn sprout pot prize": "Tạo chậu mầm thưởng",
+      "Entities": "Thực Thể",
+      "Select Plant": "Chọn thực vật",
+      "Select Zombie": "Chọn thây ma",
+      "Spawn Plant": "Tạo thực vật",
+      "Spawn Zombie": "Tạo thây ma",
+      "Freeze/Unfreeze Time": "Đóng băng/Hủy đóng băng thời gian",
+      "Delete All Plants": "Xóa tất cả thực vật",
+      "Delete All Zombies": "Xóa tất cả thây ma",
+      "Zombies": "Thây Ma (Zombies)",
+      "Spawn Hypnotized Zombie": "Tạo thây ma bị thôi miên",
+      "Spawn Zomboss 1": "Tạo Zomboss 1",
+      "Spawn Zomboss 2": "Tạo Zomboss 2",
+      "Spawn Hypno Zomboss 1": "Tạo Zomboss thôi miên 1",
+      "Spawn Hypno Zomboss 2": "Tạo Zomboss thôi miên 2",
+      "Pots": "Chậu Cây (Pots)",
+      "Spawn Plant Pot": "Tạo chậu thực vật",
+      "Spawn Zombie Pot": "Tạo chậu thây ma",
+      "Spawn Hypno Zombie Pot": "Tạo chậu thây ma thôi miên",
+      "Spawn Zomboss 1 Pot": "Tạo chậu Zomboss 1",
+      "Spawn Zomboss 2 Pot": "Tạo chậu Zomboss 2",
+      "Spawn Hypno Zomboss 1 Pot": "Tạo chậu Zomboss thôi miên 1",
+      "Spawn Hypno Zomboss 2 Pot": "Tạo chậu Zomboss thôi miên 2",
+      "Spawn Pet Gargantuar": "Tạo thú cưng Khổng lồ (Gargantuar)",
+      "Spawn Pet Football": "Tạo thú cưng Cầu thủ (Football)",
+      "Spawn Pet Drown": "Tạo thú cưng Đuối nước",
+      "Spawn Pet Jackbox": "Tạo thú cưng Hộp hề (Jackbox)",
+      "Spawn Pet Snow Boss": "Tạo thú cưng Trùm tuyết (Snow Boss)",
+      "Spawn Pet Horse": "Tạo thú cưng Ngựa",
+      "Spawn Pet Imp": "Tạo thú cưng Quỷ lùn (Imp)",
+      "Spawn Pet Kirov": "Tạo thú cưng Kirov (Khí cầu)",
+      "Spawn Fertilizer": "Tạo bình phân bón",
+      "Spawn Bucket": "Tạo xô chậu",
+      "Spawn Helmet": "Tạo mũ bảo hiểm",
+      "Spawn Jackbox": "Tạo hộp hề (Jackbox)",
+      "Spawn Pickaxe": "Tạo cuốc chim",
+      "Spawn Machine": "Tạo máy móc",
+      "Spawn Super Machine": "Tạo siêu máy móc",
+      "Spawn Portal Heart": "Tạo lõi cổng dịch chuyển (Portal Heart)",
+      "Spawn Sprout Pot Prize": "Tạo chậu mầm thưởng",
+      "Spawn Zombie Fertilizer": "Tạo phân bón thây ma"
     }
   },
   "Unlimited Lawn Mowers": {
@@ -674,6 +715,20 @@
       "General": "Cài đặt chung",
       "Blacklisted": "Danh sách đen"
     }
-  }
-
+  },
+  "Quick setup": {
+    "Name": "Thiết lập nhanh",
+    "Description": "Lưu/tải bộ thiết lập tùy chỉnh.",
+    "Search Hints": "thietlapnhanh bo-thiet-lap quanlythietlap luubuild taibuild thietlap caidatsan quickload quicksave thietlapcayphongthu cauhinh quanlybuild caitdat caidatnhanh customsetup luuthietlap",
+    "settings": {
+      "Save": "Lưu",
+      "Name": "Tên",
+      "Save Current Setup": "Lưu thiết lập hiện tại",
+      "Load": "Tải",
+      "Clear Lawn Before Load": "Dọn sạch sân trước khi tải",
+      "Setup": "Thiết lập",
+      "Load Selected Setup": "Tải thiết lập đã chọn",
+      "Delete Selected Setup": "Xóa thiết lập đã chọn"
+    }
+}
 }

@@ -51,6 +51,9 @@
   "Delete": "Xóa",
   "Active": "Hoạt động",
   "Active Elements": "Các Thành phần Kích hoạt",
-  "Language": "Ngôn ngữ"
-
+  "Language": "Ngôn ngữ",
+  "GUI Scale": "Tỉ lệ giao diện (GUI)",
+  "Element Scale": "Tỉ lệ phần tử",
+  "Floating Icon": "Biểu tượng nổi",
+  "Mobile Close Buttons": "Nút đóng trên di động"
 }

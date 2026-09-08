@@ -514,11 +514,7 @@ namespace Magnetar_Client.Utils
             Prefrences.MagnetarCategory = MelonPreferences.CreateCategory("Magnetar Client", "Magnetar Client");
 
             Prefrences.ShowFloatingIconEntry = Prefrences.MagnetarCategory.CreateEntry<bool>("ShowFloatingIcon",
-#if ANDROID
-                true,
-#else
                 false,
-#endif
                 "Show Floating Icon", "Display floating draggable menu button.");
 
             if (Prefrences.ShowFloatingIconEntry != null)
@@ -527,11 +523,7 @@ namespace Magnetar_Client.Utils
             }
 
             Prefrences.ShowMobileButtonsEntry = Prefrences.MagnetarCategory.CreateEntry<bool>("ShowMobileButtons",
-#if ANDROID
-                true,
-#else
                 false,
-#endif
                 "Show Mobile Buttons", "Display top-right close buttons on popup windows.");
 
             if (Prefrences.ShowMobileButtonsEntry != null)
@@ -541,7 +533,7 @@ namespace Magnetar_Client.Utils
 #elif BEPINEX || RELEASE_BEPINEX
             try
             {
-                string configDir = Path.Combine(ModsDir, "Magnetar Config");
+                string configDir = ProfileManager.ConfigDir;
                 if (!Directory.Exists(configDir)) Directory.CreateDirectory(configDir);
                 string configFilePath = Path.Combine(configDir, "Magnetar_Client.cfg");
                 

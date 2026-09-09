@@ -44,8 +44,8 @@ Choose your preferred mod loader below and follow the respective instructions.
 
 1. **Download** the [latest MelonLoader release](https://github.com/Tproplay/Magnetar-Client/releases) `.zip` file.
 2. **Extract** the downloaded archive to a convenient location.
-3. **Copy** the contents of the `MagnetarBeta.MelonLoader\Mods` folder into `[Your Game Folder]\Mods`.
-4. **Copy** the contents of the `MagnetarBeta.MelonLoader\UserLibs` folder into `[Your Game Folder]\UserLibs`.
+3. **Copy** the contents of the `Mods` folder into `[Your Game Folder]\Mods`.
+4. **Copy** the contents of the `UserLibs` folder into `[Your Game Folder]\UserLibs`.
 5. **Launch** your game to activate the client!
 > **Optional:** Remove the `Blooms_QOL.dll` if you are installing on Multi-lang version, as it might conflict with it.
 
@@ -79,7 +79,7 @@ Game-Files/
 
 1. **Download** the [latest Bepinex release](https://github.com/Tproplay/Magnetar-Client/releases) `.zip` file.
 2. **Extract** the downloaded archive to a convenient location.
-3. **Copy** the contents of the `MagnetarBeta.Bepinex\BepInEx\plugins` folder into `[Your Game Folder]\BepInEx\plugins`.
+3. **Copy** the contents of the `BepInEx\plugins` folder into `[Your Game Folder]\BepInEx\plugins`.
 4. **Launch** your game to activate the client!
 
 ### 📂 Folder Structure

@@ -30,6 +30,7 @@ namespace Magnetar_Client.Modules
         public MultiSelectSetting GameObjectsSetting;
         public MultiSelectSetting BulletSetting;
         public MultiSelectSetting EffectSetting;
+        public MultiSelectSetting OtherSetting;
 
         public BoolSetting ScreenShakeSetting;
 
@@ -115,8 +116,18 @@ namespace Magnetar_Client.Modules
                     { 4, "Doom shroom smoke cloud" }
                 }
             };
-
             AddSettings(EffectSetting);
+
+            OtherSetting = new MultiSelectSetting("Others")
+            {
+                Options = new Dictionary<int, string>
+                {
+                    { 0, "Falling Sun" },
+                    { 1, "Falling Coin" },
+                }
+            };
+
+            AddSettings(OtherSetting);
             EndCategory();
 
             CreateCategory("Extra");
@@ -407,5 +418,42 @@ namespace Magnetar_Client.Modules
                 position = new Vector2(999, 999);
             }
         }
+
+        [HarmonyPatch(typeof(CoinSun))]
+        public static class CoinSunPatch
+        {
+            [HarmonyPatch(nameof(CoinSun.Start))]
+            [HarmonyPostfix]
+            public static void StartPostfix(CoinSun __instance)
+            {
+                if (instance == null || !instance.Active || !instance.OtherSetting.IsSelected(0)) return;
+
+                var comps = __instance.GetComponentsInChildren<SpriteRenderer>();
+                foreach ( var comp in comps)
+                {
+                    comp.enabled = false;
+                }
+
+            }
+        }
+
+        [HarmonyPatch(typeof(CoinMoney))]
+        public static class CoinMoneyPatch
+        {
+            [HarmonyPatch(nameof(CoinMoney.Start))]
+            [HarmonyPostfix]
+            public static void StartPostfix(CoinMoney __instance)
+            {
+                if (instance == null || !instance.Active || !instance.OtherSetting.IsSelected(1)) return;
+
+                var comps = __instance.GetComponentsInChildren<SpriteRenderer>();
+                foreach (var comp in comps)
+                {
+                    comp.enabled = false;
+                }
+
+            }
+        }
+
     }
 }

@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Magnetar_Client.HUDElements
 {
+#if !ANDROID
     public class UpTime : HudElement
     {
         public UpTime() : base("Up Time",HudElement.NewRect(100))
@@ -23,4 +24,5 @@ namespace Magnetar_Client.HUDElements
             GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
         }
     }
+#endif
 }

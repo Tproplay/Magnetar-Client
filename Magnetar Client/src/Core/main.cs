@@ -5,9 +5,7 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 using Magnetar_Client.Utils;
 using Magnetar_Client;
 using Magnetar_Client.UI.WindowDrawing;
-
-
-
+using Magnetar_Client.Api;
 
 #if MELONLOADER || RELEASE_MELON
 using MelonLoader;
@@ -57,8 +55,10 @@ namespace Magnetar_Client.Core
         }
 #endif
 
-        private void InitializeCore()
+        public void InitializeCore()
         {
+            Api.Api.EarlyInitializeCore?.Invoke();
+
             SaveLoad.InitializePrefrences();
             Utils.Translator.LoadTranslations();
 
@@ -71,12 +71,25 @@ namespace Magnetar_Client.Core
 
             ProfileManager.Init();
             SaveLoad.Load();
+
+            Api.Api.LateInitializeCore?.Invoke();
+
             DebugLogger.Msg("Magnetar Client Loaded!");
         }
 
         public void CoreApplicationQuit()
         {
+            try
+            {
+                Api.Api.OnApplicationQuit?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                DebugLogger.Error($"[Api] Exception in OnApplicationQuit event: {ex}");
+            }
+
             SaveLoad.Save(true);
+            Api.Api.OnConfigSaved?.Invoke();
             DebugLogger.Msg("Magnetar Prefrences Saved!");
         }
 
@@ -104,28 +117,25 @@ namespace Magnetar_Client.Core
                     new Vector3(uniformScale, uniformScale, 1)
                 );
 
-                // Renders floating toggle button or top-right close button
                 MobileMenuUI.Render();
 
                 if (!hasWarmedUp)
                 {
                     WarmUp();
                     hasWarmedUp = true;
+                    Api.Api.OnGUIWarmUp?.Invoke();
                 }
 
-                // Keep theme font sizes/padding in sync with the current GUIScale.
-                // Cheap no-op when the scale hasn't changed since last frame.
                 UI.Themes.Magnetar_Default.Rescale();
-
-                // Render HUD
-
                 HUDManager.Render();
 
-                // Render Modules
                 foreach (var mod in ModuleManager.Modules)
                 {
                     mod.OnGUI();
                 }
+
+                // Fire custom OnGUI subscribers in the scaled matrix
+                Api.Api.OnGUI?.Invoke();
 
                 if (Magnetar_Client.Config.showgui)
                 {
@@ -158,6 +168,7 @@ namespace Magnetar_Client.Core
             {
                 Magnetar_Client.Config.showgui = !Magnetar_Client.Config.showgui;
                 SaveLoad.Save();
+                Api.Api.OnConfigSaved?.Invoke();
             }
 
             if (!Magnetar_Client.Config.showgui && !HUDManager.forceShow)
@@ -170,13 +181,18 @@ namespace Magnetar_Client.Core
                 if (mod != null) mod.OnUpdate();
             }
 
+            // Fire external update hooks
+            Api.Api.OnUpdate?.Invoke();
+
             if (!hasWarmedUp) return;
+
             #region handle Escape Key
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape && ModuleManager.showModules)
             {
                 Magnetar_Client.Config.showgui = false;
                 Event.current.Use();
                 SaveLoad.Save();
+                Api.Api.OnConfigSaved?.Invoke();
                 ResetInputBind();
             }
             else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape &&
@@ -217,7 +233,6 @@ namespace Magnetar_Client.Core
         public static void WarmUp()
         {
             Magnetar_Client.Utils.LoadFont.Init();
-
             UI.Themes.Magnetar_Default.Init();
 
             ModuleManager.Render();
@@ -286,6 +301,4 @@ namespace Magnetar_Client.Core
         void OnApplicationQuit() { if (main.Instance != null) main.Instance.CoreApplicationQuit(); }
     }
 #endif
-
-
 }

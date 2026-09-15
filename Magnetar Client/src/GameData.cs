@@ -1,8 +1,5 @@
 ﻿using HarmonyLib;
-using Magnetar_Client.Utils;
 using System.Collections.Generic;
-using System.Diagnostics;
-using UnityEngine;
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -276,46 +273,4 @@ namespace Magnetar_Client.Game
         }
         #endregion
     }
-
-
-    public static class AlmanacData
-    {
-        public static PlantType plantTypeSelected = PlantType.Nothing;
-        public static ZombieType zombieTypeSelected = ZombieType.Nothing;
-
-        public static System.Type latestSelectedCardType = null;
-    }
-
-
-    #region AlmanacData
-
-    [HarmonyPatch(typeof(AlmanacPlantMenu))]
-    public static class _AlmanacPlantMenu_SelectCard_Patch
-    {
-        [HarmonyPatch(nameof(AlmanacPlantMenu.SelectCard))]
-        [HarmonyPrefix]
-        public static void Prefix(AlmanacCardUI card)
-        {
-            if (card == null) return;
-            AlmanacData.plantTypeSelected = card.PlantType;
-            AlmanacData.latestSelectedCardType = typeof(PlantType);
-        }
-
-    }
-
-    [HarmonyPatch(typeof(AlmanacZombieMenu))]
-    public static class _AlmanacZombieMenu_SelectCard_Patch
-    {
-        [HarmonyPatch(nameof(AlmanacZombieMenu.SelectCard))]
-        [HarmonyPrefix]
-        public static void Prefix(AlmanacCardUI card)
-        {
-            if (card == null) return;
-            AlmanacData.zombieTypeSelected = card.ZombieType;
-            AlmanacData.latestSelectedCardType = typeof(ZombieType);
-        }
-
-    }
-
-    #endregion
 }

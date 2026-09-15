@@ -23,6 +23,7 @@ namespace Magnetar_Client.Modules
             "rpcpresence discordrp discordstat discordlive discordsync discordgame discordapi discrodrpc discordrcp discordrps " +
             "discordrich discordpresance discordpresense discordconection discordintigration rpcbot rpcclient rpcactive";
         public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
+        public override bool enableInVanillaMode { get; set; } = true;
 
         // Mod Data
         public static DiscordRPC instance;

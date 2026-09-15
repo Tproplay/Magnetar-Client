@@ -19,6 +19,7 @@ namespace Magnetar_Client.Modules
             " bullettime speedup speeddown velocitycontrol timingmultiplier timefactor";
 
         public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
+        public override bool enableInVanillaMode { get; set; } = true;
 
         // Mod data
         public static TimeScale instance;

@@ -24,20 +24,10 @@ namespace Magnetar_Client.Modules
             }
         }
 
+        public override bool enableInVanillaMode { get; set; } = true;
         // Mod Data
 
         public static VanillaMode instance;
-
-        static List<Type> AllowedModules = new List<Type>
-        {
-            typeof(VanillaMode), typeof(AntiLagSpawns), typeof(AutoCollect), typeof(CustomKeybind),
-            typeof(DebugMode), typeof(DimBackground), typeof(TimeScale),
-            typeof(BetterHealthDisplay), typeof(FPSLimit), typeof(SmallerProjectiles),
-            typeof(SoundMuffler),
-#if !ANDROID
-            typeof(NoRender), typeof(DiscordRPC),
-#endif
-        };
 
         public VanillaMode()
         {
@@ -53,7 +43,7 @@ namespace Magnetar_Client.Modules
             {
                 Type moduleType = module.GetType();
 
-                if (!AllowedModules.Contains(moduleType) && module.Active)
+                if (!module.enableInVanillaMode && module.Active)
                 {
                     module.Active = false;
                     module.OnDisable();
@@ -88,11 +78,8 @@ namespace Magnetar_Client.Modules
         {
             if (!Active) return true;
 
-            Type type = module.GetType();
+            return module.enableInVanillaMode;
 
-            if (AllowedModules.Contains(type)) return true;
-
-            return false;
         }
 
     }

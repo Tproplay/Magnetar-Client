@@ -14,6 +14,7 @@
         public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
 
         public override bool Active { get; set; } = true; // On by default
+        public override bool enableInVanillaMode { get; set; } = true;
 
         // Mod Data
 

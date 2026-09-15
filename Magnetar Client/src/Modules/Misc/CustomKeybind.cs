@@ -22,6 +22,7 @@ namespace Magnetar_Client.Modules
             " keyremapping settingskey binds bind";
 
         public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
+        public override bool enableInVanillaMode { get; set; } = true;
 
         // Mod Data
 

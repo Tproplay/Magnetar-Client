@@ -32,6 +32,7 @@ namespace Magnetar_Client.Modules
         public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
 
         public override bool Active { get; set; } = true; // On by default
+        public override bool enableInVanillaMode { get; set; } = true;
 
         // Mod Data
         public static BetterHealthDisplay instance;

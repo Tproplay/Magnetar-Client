@@ -18,6 +18,8 @@ namespace Magnetar_Client.Modules
             " counterbreak zombiecounter smoothspawn logicbreak massspawnfix antilagmod lagspawns antispawnlag laglessspawns";
         public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
 
+        public override bool enableInVanillaMode { get; set; } = true;
+
         public static AntiLagSpawns instance;
 
         public IntSetting FrameDelaySetting;

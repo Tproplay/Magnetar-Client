@@ -21,6 +21,7 @@ namespace Magnetar_Client.Modules
             "projectilesize projectil smallbullet clear screen projectilevisual smallammo ammoclutter pea size hitclutter tinyprojectiles " +
             "lagclutter projectils";
         public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
+        public override bool enableInVanillaMode { get; set; } = true;
 
         public static SmallerProjectiles instance;
 

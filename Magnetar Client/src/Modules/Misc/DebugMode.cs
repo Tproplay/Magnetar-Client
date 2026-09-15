@@ -30,6 +30,7 @@ namespace Magnetar_Client.Modules
             " debugtrace debugpanel infolog";
 
         public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
+        public override bool enableInVanillaMode { get; set; } = true;
 
         // Mod Data
 

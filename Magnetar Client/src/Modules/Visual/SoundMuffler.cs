@@ -15,6 +15,7 @@ namespace Magnetar_Client.Modules
             "soundblocker audiosettings volumecontrol soundmute noisecontrol disablesounds soundcleaner audioblock " +
             "soundfix muteeffects audiomute soundmanager customaudio soundfilter audiodampener soundkiller";
         public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
+        public override bool enableInVanillaMode { get; set; } = true;
 
         // Mod Data
 

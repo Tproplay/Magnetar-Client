@@ -41,6 +41,8 @@ namespace Magnetar_Client.Modules
         /// </summary>
         public abstract ModuleCategory Category { get; set; }
 
+        public virtual bool enableInVanillaMode { get; set; } = false;
+
         // These will be in Every ModuleManager.
         // Edit if you want a different default keybind or want it to be enabled by default.
 

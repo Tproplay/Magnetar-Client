@@ -32,6 +32,8 @@ namespace Magnetar_Client.Modules
 
         public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
         public override bool Active { get; set; } = true;
+        public override bool enableInVanillaMode { get; set; } = true;
+
         // Mod Data
 
         public static AutoCollect instance;

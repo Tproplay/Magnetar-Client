@@ -9,6 +9,9 @@ using BepInEx.Logging;
 
 namespace Magnetar_Client.Utils
 {
+    /// <summary>
+    /// A custom logger to support logs of both mod loaders
+    /// </summary>
     public class CustomLogger
     {
         private string _name;

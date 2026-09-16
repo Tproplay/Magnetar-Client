@@ -29,7 +29,7 @@ namespace Magnetar_Client.Modules
         public static FasterZombies instance;
 
         public MultiSelectSetting ZombieSelectedSetting;
-        public FloatSetting theSpeedSettig;
+        public FloatSetting theSpeedSetting;
         public override bool Active { get; set; } = false;
 
         public static Dictionary<IntPtr, float> originalSpeedData = new Dictionary<IntPtr, float>();
@@ -50,8 +50,8 @@ namespace Magnetar_Client.Modules
             ZombieSelectedSetting.Options.Keys.ToList().ForEach(ZombieSelectedSetting.Select);
             Settings.Add(ZombieSelectedSetting);
 
-            theSpeedSettig = new FloatSetting("Speed", 0.1f, 10f, 2f,3);
-            Settings.Add(theSpeedSettig);
+            theSpeedSetting = new FloatSetting("Speed", 0.1f, 10f, 2f,3);
+            Settings.Add(theSpeedSetting);
 
             EndCategory();
         }
@@ -66,7 +66,7 @@ namespace Magnetar_Client.Modules
         {
             if (BoardInstanceIsNull) return;
 
-            float currentMultiplier = theSpeedSettig.Value;
+            float currentMultiplier = theSpeedSetting.Value;
             var selectedZombies = ZombieSelectedSetting.SelectedValues;
 
             foreach (var zombie in GameData.zombieList)

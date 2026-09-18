@@ -345,23 +345,26 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             var options = activeMultiSelect.Options;
 
-            // --- 1. TITLE BANNER WITH CENTERED WORKING CLOSE BUTTON ---
-            float titleHeight = Config.S(34f);
+            // --- 1. TITLE BANNER WITH WORKING CLOSE BUTTON ---
+#if ANDROID
+            float titleHeight = Config.S(25f) * 1.30f; // 30% header size increase on Android
+#else
+            float titleHeight = Config.S(25f);        // Standard height on PC
+#endif
             Rect headerBgRect = new Rect(0, 0, multiSelectWindowRect.width, titleHeight);
             GUI.Box(headerBgRect, Translate("Select ") + Translate(activeMultiSelect.Name), Magnetar_Default.SettingsWindow);
 
             if (Config.ShowMobileButtons)
             {
-                float closeBtnSize = Config.S(22f);
+                float closeBtnSize = Config.S(20f);
                 float btnX = multiSelectWindowRect.width - Config.S(26f);
-                float btnY = Config.S(6f);
+                float btnY = (titleHeight - closeBtnSize) / 2f;
                 Rect closeButtonRect = new Rect(btnX, btnY, closeBtnSize, closeBtnSize);
 
                 bool isHovered = closeButtonRect.Contains(e.mousePosition);
 
                 if (isHovered) GUI.backgroundColor = Magnetar_Default.AccentColor;
 
-                // Direct MouseDown intercept before DragWindow or GUI internals can consume it
                 if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
                 {
                     e.Use();
@@ -373,13 +376,12 @@ namespace Magnetar_Client.UI.WindowDrawing
                     {
                         Core.ModuleManager.showSelectionGui = false;
                         Core.ModuleManager.showModules = true;
-                        Core.GUIManager.isSelectingLanguage = false;
+                        Core.GUIManager.isSelectingSubWindow = false;
                         Core.HUDManager.isSelectingElements = false;
                     }
                     return;
                 }
 
-                // Draw centered button visual
                 GUI.Box(closeButtonRect, "✕", Magnetar_Default.ModuleOnCentralized);
                 GUI.backgroundColor = Color.white;
             }

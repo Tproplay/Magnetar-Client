@@ -29,6 +29,8 @@ namespace Magnetar_Client
     {
         public static string CurrentProfile = "Default";
 
+        public static string Theme = "Magnetar Default";
+
         // Native canvas size used by the outer letterbox matrix (main.cs).
         // NOT scaled by GUIScale - it's the fixed reference resolution
         // everything else is authored against.

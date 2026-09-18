@@ -1,11 +1,33 @@
-﻿using UnityEngine;
+﻿using Magnetar_Client.Utils;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.UI.Themes
 {
+    [Serializable]
+    public struct ThemeData
+    {
+        public string Name;
+        public string BackgroundColor;
+        public string AccentColor;
+        public string LightBackgroundColor;
+        public string TextWhite;
+        public string TextDim;
+        public string HoverColor;
+        public string ActiveColor;
+        public string ActiveHoverColor;
+        public string DimColor;
+        public string NEFLineColor;
+        public string NEFNodeColor;
+    }
 
     public static class Magnetar_Default
     {
+        #region Styles
         public static GUIStyle TopBar;
         public static GUIStyle TopBarActive;
 
@@ -32,36 +54,58 @@ namespace Magnetar_Client.UI.Themes
 
         public static GUIStyle NEFLineStyle;
         public static GUIStyle NEFNodeStyle;
+        #endregion
 
+        #region Textures
         private static Texture2D BgTex;
         private static Texture2D BgLightTex;
         private static Texture2D AccentTex;
         private static Texture2D HoverTex;
         private static Texture2D ActiveTex;
         private static Texture2D ActiveHoverTex;
-
         private static Texture2D DimTex;
-
-        // Tracks the GUIScale that styles were last rescaled for, so Rescale()
-        // is a no-op (aside from the float compare) when nothing changed.
-        private static float lastScale = -1f;
-
-        #region Colors
-        public static readonly Color BackgroundColor = new Color(26 / 255f, 26 / 255f, 26 / 255f, 220 / 255f);
-        public static readonly Color AccentColor = new Color(255 / 255f, 61 / 255f, 61 / 255f, 255 / 255f);
-        public static readonly Color LightBackgroundColor = new Color(28 / 255f, 28 / 255f, 28 / 255f, 214 / 255f);
-        public static readonly Color TextWhite = new Color(230 / 255f, 230 / 255f, 230 / 255f, 255 / 255f);
-        public static readonly Color TextDim = new Color(174 / 255f, 174 / 255f, 174 / 255f, 255 / 255f);
-        public static readonly Color HoverColor = new Color(28 / 255f, 28 / 255f, 28 / 255f, 255 / 255f);
-        public static readonly Color ActiveColor = new Color(51 / 255f, 51 / 255f, 51 / 255f, 255 / 255f);
-        public static readonly Color ActiveHoverColor = new Color(240 / 255f, 51 / 255f, 51 / 255f, 255 / 255f);
-        public static readonly Color DimColor = new Color(26 / 255f, 26 / 255f, 26 / 255f, 102 / 255f);
+        private static Texture2D NefNodeTex;
+        private static Texture2D NefLineTex;
         #endregion
 
-        // Base (unscaled, GUIScale == 1) sizes. Init() builds every style from
-        // these, and Rescale() re-derives fontSize/padding/fixedHeight from
-        // these same numbers whenever Config.GUIScale changes, so there's a
-        // single source of truth for "what size is this at 1x".
+        #region Dynamic Theme Colors
+        public static Color BackgroundColor { get; private set; }
+        public static Color AccentColor { get; private set; }
+        public static Color LightBackgroundColor { get; private set; }
+        public static Color TextWhite { get; private set; }
+        public static Color TextDim { get; private set; }
+        public static Color HoverColor { get; private set; }
+        public static Color ActiveColor { get; private set; }
+        public static Color ActiveHoverColor { get; private set; }
+        public static Color DimColor { get; private set; }
+        public static Color NefLineColor { get; private set; }
+        public static Color NefNodeColor { get; private set; }
+        #endregion
+
+        #region Hardcoded Default Theme (Safety Fallback)
+        public static readonly ThemeData InternalDefaultTheme = new ThemeData
+        {
+            Name = "Magnetar Default",
+            BackgroundColor = "#1A1A1ADC",
+            AccentColor = "#FF3D3DFF",
+            LightBackgroundColor = "#1C1C1CD6",
+            TextWhite = "#E6E6E6FF",
+            TextDim = "#AEAEAEFF",
+            HoverColor = "#1C1C1CFF",
+            ActiveColor = "#333333FF",
+            ActiveHoverColor = "#F03333FF",
+            DimColor = "#1A1A1A66",
+            NEFLineColor = "#FFFFFFFF",
+            NEFNodeColor = "#FF3D3DFF"
+        };
+        #endregion
+
+        public static readonly Dictionary<string, ThemeData> LoadedThemes = new Dictionary<string, ThemeData>(StringComparer.OrdinalIgnoreCase);
+        public static string CurrentThemeName { get; private set; } = "Magnetar Default";
+
+        private static float lastScale = -1f;
+        private static float lastElementScale = -1f;
+
         #region Base Sizes
         private const int TopBarFontSize = 14;
         private const int TopBarPaddingLR = 10;
@@ -102,19 +146,190 @@ namespace Magnetar_Client.UI.Themes
 
         public static void Init()
         {
-            // Setup Textures
-            BgTex = CreateTex(BackgroundColor);
-            AccentTex = CreateTex(AccentColor);
-            HoverTex = CreateTex(HoverColor);
-            ActiveTex = CreateTex(ActiveColor);
+            LoadThemesFromJson();
 
-            ActiveHoverTex = CreateTex(ActiveHoverColor);
-            BgLightTex = CreateTex(LightBackgroundColor);
+            string requestedTheme = Config.Theme;
+            if (string.IsNullOrEmpty(requestedTheme) || !LoadedThemes.ContainsKey(requestedTheme))
+            {
+                requestedTheme = InternalDefaultTheme.Name;
+                Config.Theme = requestedTheme;
+            }
 
-            DimTex = CreateTex(DimColor);
+            BuildEmptyStyles();
+            ApplyTheme(requestedTheme);
 
-            #region TopBar
+            lastScale = -1f;
+            lastElementScale = -1f;
+            Rescale();
+
+            DebugLogger.Msg($"[Themes] Initialized with theme: '{CurrentThemeName}'");
+        }
+
+        public static void LoadThemesFromJson()
+        {
+            LoadedThemes.Clear();
+            LoadedThemes[InternalDefaultTheme.Name] = InternalDefaultTheme;
+
+            string dataDir = Path.Combine(SaveLoad.ModsDir, "Magnetar Data");
+            string themePath = Path.Combine(dataDir, "themes.json");
+
+            try
+            {
+                if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
+
+                if (!File.Exists(themePath))
+                {
+                    // Generate template JSON if not present
+                    var templateList = new List<ThemeData>
+                    {
+                        new ThemeData
+                        {
+                            Name = "Meteor Purple",
+                            BackgroundColor = "#11141BDC",
+                            AccentColor = "#A855F7FF",
+                            LightBackgroundColor = "#161B22D6",
+                            TextWhite = "#E6EDF3FF",
+                            TextDim = "#8B949EFF",
+                            HoverColor = "#21262DFF",
+                            ActiveColor = "#30363DFF",
+                            ActiveHoverColor = "#C084FCFF",
+                            DimColor = "#11141B66",
+                            NEFLineColor = "#FFFFFFFF",
+                            NEFNodeColor = "#A855F7FF"
+                        },
+                        new ThemeData
+                        {
+                            Name = "Cyber Green",
+                            BackgroundColor = "#0D1117DC",
+                            AccentColor = "#2EA043FF",
+                            LightBackgroundColor = "#161B22D6",
+                            TextWhite = "#F0F6FCFF",
+                            TextDim = "#7D8590FF",
+                            HoverColor = "#21262DFF",
+                            ActiveColor = "#30363DFF",
+                            ActiveHoverColor = "#3FB950FF",
+                            DimColor = "#0D111766",
+                            NEFLineColor = "#FFFFFFFF",
+                            NEFNodeColor = "#2EA043FF"
+                        }
+                    };
+
+                    string jsonTemplate = JsonConvert.SerializeObject(templateList, Formatting.Indented);
+                    File.WriteAllText(themePath, jsonTemplate);
+                }
+
+                string rawJson = File.ReadAllText(themePath);
+                var parsedThemes = JsonConvert.DeserializeObject<List<ThemeData>>(rawJson);
+
+                if (parsedThemes != null)
+                {
+                    foreach (var th in parsedThemes)
+                    {
+                        if (!string.IsNullOrEmpty(th.Name))
+                        {
+                            LoadedThemes[th.Name] = th;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugLogger.Error($"[Themes] Error loading themes.json, falling back to internal default: {ex.Message}");
+            }
+        }
+
+        public static void ApplyTheme(string themeName)
+        {
+            if (!LoadedThemes.TryGetValue(themeName, out var theme))
+            {
+                DebugLogger.Warning($"[Themes] Theme '{themeName}' not found. Falling back to default.");
+                theme = InternalDefaultTheme;
+                themeName = InternalDefaultTheme.Name;
+            }
+
+            CurrentThemeName = themeName;
+            Config.Theme = themeName;
+
+            BackgroundColor = ParseColor(theme.BackgroundColor, InternalDefaultTheme.BackgroundColor);
+            AccentColor = ParseColor(theme.AccentColor, InternalDefaultTheme.AccentColor);
+            LightBackgroundColor = ParseColor(theme.LightBackgroundColor, InternalDefaultTheme.LightBackgroundColor);
+            TextWhite = ParseColor(theme.TextWhite, InternalDefaultTheme.TextWhite);
+            TextDim = ParseColor(theme.TextDim, InternalDefaultTheme.TextDim);
+            HoverColor = ParseColor(theme.HoverColor, InternalDefaultTheme.HoverColor);
+            ActiveColor = ParseColor(theme.ActiveColor, InternalDefaultTheme.ActiveColor);
+            ActiveHoverColor = ParseColor(theme.ActiveHoverColor, InternalDefaultTheme.ActiveHoverColor);
+            DimColor = ParseColor(theme.DimColor, InternalDefaultTheme.DimColor);
+            NefLineColor = ParseColor(theme.NEFLineColor, InternalDefaultTheme.NEFLineColor);
+            NefNodeColor = ParseColor(theme.NEFNodeColor, AccentColor);
+
+            UpdateTextures();
+            BindStyles();
+        }
+
+        private static Color ParseColor(string hex, string defaultHex)
+        {
+            if (!string.IsNullOrEmpty(hex) && ColorUtility.TryParseHtmlString(hex, out Color col))
+                return col;
+
+            ColorUtility.TryParseHtmlString(defaultHex, out Color defCol);
+            return defCol;
+        }
+
+        private static Color ParseColor(string hex, Color fallback)
+        {
+            if (!string.IsNullOrEmpty(hex) && ColorUtility.TryParseHtmlString(hex, out Color col))
+                return col;
+            return fallback;
+        }
+
+        private static void UpdateTextures()
+        {
+            SetPixel(ref BgTex, BackgroundColor);
+            SetPixel(ref AccentTex, AccentColor);
+            SetPixel(ref HoverTex, HoverColor);
+            SetPixel(ref ActiveTex, ActiveColor);
+            SetPixel(ref ActiveHoverTex, ActiveHoverColor);
+            SetPixel(ref BgLightTex, LightBackgroundColor);
+            SetPixel(ref DimTex, DimColor);
+            SetPixel(ref NefNodeTex, NefNodeColor);
+            SetPixel(ref NefLineTex, NefLineColor);
+        }
+
+        private static void SetPixel(ref Texture2D tex, Color col)
+        {
+            if (tex == null)
+            {
+                tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            }
+            tex.SetPixel(0, 0, col);
+            tex.Apply();
+        }
+
+        private static void BuildEmptyStyles()
+        {
             TopBar = new GUIStyle();
+            TopBarActive = new GUIStyle();
+            ModuleOn = new GUIStyle();
+            ModuleOnCentralized = new GUIStyle();
+            ModuleOff = new GUIStyle();
+            ModuleWindow = new GUIStyle();
+            SettingsWindow = new GUIStyle();
+            SettingOn = new GUIStyle();
+            SettingOff = new GUIStyle();
+            DescriptionStyle = new GUIStyle();
+            SettingDescriptionStyle = new GUIStyle();
+            AuthorStyle = new GUIStyle();
+            SeparatorStyle = new GUIStyle();
+            DimStyle = new GUIStyle();
+            HUDElementStyle = new GUIStyle();
+            NEFLineStyle = new GUIStyle();
+            NEFNodeStyle = new GUIStyle();
+            TextStyle = new GUIStyle();
+            TextHighlightedStyle = new GUIStyle();
+        }
+
+        private static void BindStyles()
+        {
             TopBar.normal.textColor = TextDim;
             TopBar.hover.textColor = Color.white;
             TopBar.active.textColor = Color.white;
@@ -122,16 +337,7 @@ namespace Magnetar_Client.UI.Themes
             TopBar.hover.background = HoverTex;
             TopBar.active.background = ActiveTex;
             TopBar.alignment = TextAnchor.MiddleCenter;
-            TopBar.fontSize = TopBarFontSize;
 
-            TopBar.padding = new RectOffset();
-            TopBar.padding.left = TopBarPaddingLR;
-            TopBar.padding.right = TopBarPaddingLR;
-            TopBar.padding.top = TopBarPaddingTB;
-            TopBar.padding.bottom = TopBarPaddingTB;
-
-            // Style for the active tab in the top bar (when it's selected)
-            TopBarActive = new GUIStyle();
             TopBarActive.normal.textColor = Color.white;
             TopBarActive.hover.textColor = Color.white;
             TopBarActive.active.textColor = Color.white;
@@ -139,269 +345,98 @@ namespace Magnetar_Client.UI.Themes
             TopBarActive.hover.background = AccentTex;
             TopBarActive.active.background = AccentTex;
             TopBarActive.alignment = TextAnchor.MiddleCenter;
-            TopBarActive.fontSize = TopBarFontSize;
 
-            TopBarActive.padding = new RectOffset();
-            TopBarActive.padding.left = TopBarPaddingLR;
-            TopBarActive.padding.right = TopBarPaddingLR;
-            TopBarActive.padding.top = TopBarPaddingTB;
-            TopBarActive.padding.bottom = TopBarPaddingTB;
-
-            #endregion
-
-            #region ModuleOn
-            ModuleOn = new GUIStyle();
             ModuleOn.normal.background = AccentTex;
             ModuleOn.normal.textColor = Color.black;
-            ModuleOn.fontSize = ModuleFontSize;
             ModuleOn.alignment = TextAnchor.MiddleLeft;
             ModuleOn.hover.background = ActiveHoverTex;
-            ModuleOn.padding = new RectOffset();
-            ModuleOn.padding.left = ModulePaddingLeft;
-            #endregion
 
-            #region ModuleOnCentralized
-            ModuleOnCentralized = new GUIStyle();
             ModuleOnCentralized.normal.background = AccentTex;
             ModuleOnCentralized.normal.textColor = Color.black;
-            ModuleOnCentralized.fontSize = ModuleFontSize;
             ModuleOnCentralized.alignment = TextAnchor.MiddleCenter;
             ModuleOnCentralized.hover.background = ActiveHoverTex;
-            #endregion
 
-            #region ModuleOff
-            ModuleOff = new GUIStyle();
             ModuleOff.normal.background = BgLightTex;
             ModuleOff.normal.textColor = TextDim;
-            ModuleOff.fontSize = ModuleFontSize;
             ModuleOff.hover.background = HoverTex;
             ModuleOff.hover.textColor = Color.white;
-
             ModuleOff.alignment = TextAnchor.MiddleLeft;
-            ModuleOff.padding = new RectOffset();
-            ModuleOff.padding.left = ModulePaddingLeft;
-            #endregion
 
-            #region ModuleWindow
-            ModuleWindow = new GUIStyle();
             ModuleWindow.normal.background = BgTex;
             ModuleWindow.normal.textColor = Color.white;
-
             ModuleWindow.alignment = TextAnchor.UpperCenter;
-            ModuleWindow.fontSize = ModuleWindowFontSize;
             ModuleWindow.fontStyle = FontStyle.Bold;
 
-            ModuleWindow.padding = new RectOffset();
-            ModuleWindow.padding.top = ModuleWindowPaddingTop;
-            ModuleWindow.padding.bottom = 0;
-            ModuleWindow.padding.left = 0;
-            ModuleWindow.padding.right = 0;
-            #endregion
-
-            #region SettingsWindow
-            SettingsWindow = new GUIStyle();
             SettingsWindow.normal.background = AccentTex;
             SettingsWindow.normal.textColor = Color.black;
-
             SettingsWindow.alignment = TextAnchor.MiddleCenter;
-            SettingsWindow.fontSize = SettingsWindowFontSize;
             SettingsWindow.fontStyle = FontStyle.Bold;
 
-            SettingsWindow.padding = new RectOffset();
-            SettingsWindow.padding.top = 0;
-            SettingsWindow.padding.bottom = 0;
-            SettingsWindow.padding.left = 0;
-            SettingsWindow.padding.right = 0;
-            #endregion
-
-            #region SettingOn
-            SettingOn = new GUIStyle();
             SettingOn.normal.background = AccentTex;
             SettingOn.normal.textColor = Color.black;
-            SettingOn.fontSize = SettingFontSize;
             SettingOn.alignment = TextAnchor.MiddleLeft;
             SettingOn.hover.background = ActiveHoverTex;
-            SettingOn.padding = new RectOffset();
-            SettingOn.padding.left = SettingPaddingLeft;
-            #endregion
 
-            #region SettingOff
-            SettingOff = new GUIStyle();
             SettingOff.normal.background = BgLightTex;
             SettingOff.normal.textColor = TextDim;
-            SettingOff.fontSize = SettingFontSize;
             SettingOff.hover.background = HoverTex;
             SettingOff.hover.textColor = Color.white;
-
             SettingOff.alignment = TextAnchor.MiddleLeft;
-            SettingOff.padding = new RectOffset();
-            SettingOff.padding.left = SettingPaddingLeft;
-            #endregion
 
-            #region Description
-            DescriptionStyle = new GUIStyle();
-            DescriptionStyle.fontSize = DescriptionFontSize;
             DescriptionStyle.wordWrap = true;
             DescriptionStyle.alignment = TextAnchor.UpperLeft;
             DescriptionStyle.richText = true;
-
-            DescriptionStyle.normal = new GUIStyleState();
             DescriptionStyle.normal.textColor = new Color(0.75f, 0.75f, 0.75f);
 
-            DescriptionStyle.padding = new RectOffset();
-            DescriptionStyle.padding.left = DescriptionPaddingLR;
-            DescriptionStyle.padding.right = DescriptionPaddingLR;
-            DescriptionStyle.padding.top = DescriptionPaddingTB;
-            DescriptionStyle.padding.bottom = DescriptionPaddingTB;
-
-            #endregion
-
-            #region SettingDescriptionStyle
-            SettingDescriptionStyle = new GUIStyle();
-            SettingDescriptionStyle.fontSize = SettingDescriptionFontSize;
             SettingDescriptionStyle.wordWrap = true;
             SettingDescriptionStyle.alignment = TextAnchor.UpperLeft;
             SettingDescriptionStyle.richText = true;
-
-            SettingDescriptionStyle.normal = new GUIStyleState();
             SettingDescriptionStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f);
 
-            SettingDescriptionStyle.padding = new RectOffset();
-            SettingDescriptionStyle.padding.left = SettingDescriptionPaddingLR;
-            SettingDescriptionStyle.padding.right = SettingDescriptionPaddingLR;
-            SettingDescriptionStyle.padding.top = SettingDescriptionPaddingTB;
-            SettingDescriptionStyle.padding.bottom = SettingDescriptionPaddingTB;
-
-            #endregion
-
-            #region Author Style
-            AuthorStyle = new GUIStyle();
-            AuthorStyle.fontSize = AuthorFontSize;
             AuthorStyle.fontStyle = FontStyle.Italic;
             AuthorStyle.alignment = TextAnchor.MiddleLeft;
-            AuthorStyle.padding = new RectOffset();
-            AuthorStyle.padding.left = AuthorPaddingLeft;
             AuthorStyle.richText = true;
-
-            AuthorStyle.normal = new GUIStyleState();
             AuthorStyle.normal.textColor = new Color(0.5f, 0.5f, 0.5f);
 
-            #endregion
-
-            #region Seperator Style
-            SeparatorStyle = new GUIStyle();
-            SeparatorStyle.fixedHeight = SeparatorFixedHeight;
-            SeparatorStyle.margin = new RectOffset();
-            SeparatorStyle.padding = new RectOffset();
-            SeparatorStyle.normal = new GUIStyleState();
-
             SeparatorStyle.normal.background = Texture2D.whiteTexture;
-
-            #endregion
-
-            #region DimStyle
-
-            DimStyle = new GUIStyle();
             DimStyle.normal.background = DimTex;
 
-            #endregion
-
-            #region HudElement
-            HUDElementStyle = new GUIStyle();
-            HUDElementStyle.fontSize = HUDElementFontSize;
-            HUDElementStyle.alignment = TextAnchor.MiddleCenter; // Centers text horizontally and vertically
+            HUDElementStyle.alignment = TextAnchor.MiddleCenter;
             HUDElementStyle.wordWrap = false;
             HUDElementStyle.richText = true;
-
-            HUDElementStyle.padding = new RectOffset();
-            HUDElementStyle.padding.left = 0;
-            HUDElementStyle.padding.right = 0;
-            HUDElementStyle.padding.top = 0;
-            HUDElementStyle.padding.bottom = 0;
-
-            HUDElementStyle.normal = new GUIStyleState();
             HUDElementStyle.normal.textColor = Color.white;
-            #endregion
 
-            #region NEF Node Connection line
-
-            NEFLineStyle = new GUIStyle();
-            NEFLineStyle.normal.background = Texture2D.whiteTexture;
-
-            RectOffset offset = new RectOffset();
-            offset.left = 0; offset.right = 0; offset.top = 0; offset.bottom = 0;
-            NEFLineStyle.border = offset; NEFLineStyle.margin = offset;
-            NEFLineStyle.padding = offset; NEFLineStyle.overflow = offset;
-
-            #endregion
-
-            #region NEF Node Style
-            NEFNodeStyle = new GUIStyle();
-
-            NEFNodeStyle.normal.background = AccentTex;
-
-            NEFNodeStyle.font = Magnetar_Default.SettingOn.font;
-            NEFNodeStyle.wordWrap = Magnetar_Default.SettingOn.wordWrap;
-
+            NEFLineStyle.normal.background = NefLineTex;
+            NEFNodeStyle.normal.background = NefNodeTex;
             NEFNodeStyle.alignment = TextAnchor.LowerCenter;
-            NEFNodeStyle.padding = new RectOffset();
-            NEFNodeStyle.padding.left = NEFNodePaddingLR;
-            NEFNodeStyle.padding.right = NEFNodePaddingLR;
-            NEFNodeStyle.padding.top = NEFNodePaddingTop;
-            NEFNodeStyle.padding.bottom = NEFNodePaddingBottom;
-            #endregion
 
-            #region TextStyle Normal
-
-            TextStyle = new GUIStyle();
             TextStyle.wordWrap = false;
             TextStyle.alignment = TextAnchor.MiddleLeft;
             TextStyle.richText = false;
             TextStyle.clipping = TextClipping.Clip;
-            TextStyle.fontSize = TextFontSize;
-
             TextStyle.normal.textColor = Color.white;
 
-            #endregion
-
-            #region TextStyle Highlighted
-
-            TextHighlightedStyle = new GUIStyle();
             TextHighlightedStyle.wordWrap = TextStyle.wordWrap;
             TextHighlightedStyle.alignment = TextStyle.alignment;
             TextHighlightedStyle.richText = TextStyle.richText;
             TextHighlightedStyle.clipping = TextStyle.clipping;
-            TextHighlightedStyle.fontSize = TextStyle.fontSize;
             TextHighlightedStyle.normal.textColor = TextStyle.normal.textColor;
-
             TextHighlightedStyle.normal.background = AccentTex;
-
-            #endregion
-
-            // Apply current GUIScale immediately in case it isn't 1 at startup.
-            lastScale = -1f;
-            lastElementScale = -1f;
-            Rescale();
-
-            DebugLogger.Msg("Initialized the Theme 'Magnetar_Default'");
-
         }
 
-        private static float lastElementScale = -1f;
+        private static void SetOffset(RectOffset ro, int left, int right, int top, int bottom)
+        {
+            if (ro == null) return;
+            ro.left = left;
+            ro.right = right;
+            ro.top = top;
+            ro.bottom = bottom;
+        }
 
-        /// <summary>
-        /// Re-derives every style's fontSize/padding/fixedHeight from the base
-        /// (1x) sizes using the current Config.GUIScale. Cheap to call every
-        /// frame - it only mutates plain int/float fields on existing GUIStyle
-        /// instances, it never allocates new styles or textures, and it bails
-        /// out immediately if the scale hasn't changed since the last call.
-        /// </summary>
         public static void Rescale()
         {
-            if (!Magnetar_Client.Core.main.Instance.hasWarmedUp)
-            {
-                return;
-            }
+            if (!Magnetar_Client.Core.main.Instance.hasWarmedUp) return;
+
             float scale = Config.GUIScale;
             float elementScale = Config.ElementScale;
 
@@ -416,88 +451,55 @@ namespace Magnetar_Client.UI.Themes
 
             // TopBar / TopBarActive
             TopBar.fontSize = S(TopBarFontSize);
-            TopBar.padding.left = S(TopBarPaddingLR);
-            TopBar.padding.right = S(TopBarPaddingLR);
-            TopBar.padding.top = S(TopBarPaddingTB);
-            TopBar.padding.bottom = S(TopBarPaddingTB);
+            SetOffset(TopBar.padding, S(TopBarPaddingLR), S(TopBarPaddingLR), S(TopBarPaddingTB), S(TopBarPaddingTB));
 
             TopBarActive.fontSize = S(TopBarFontSize);
-            TopBarActive.padding.left = S(TopBarPaddingLR);
-            TopBarActive.padding.right = S(TopBarPaddingLR);
-            TopBarActive.padding.top = S(TopBarPaddingTB);
-            TopBarActive.padding.bottom = S(TopBarPaddingTB);
+            SetOffset(TopBarActive.padding, S(TopBarPaddingLR), S(TopBarPaddingLR), S(TopBarPaddingTB), S(TopBarPaddingTB));
 
             // ModuleOn / ModuleOff
             ModuleOn.fontSize = S(ModuleFontSize);
-            ModuleOn.padding.left = S(ModulePaddingLeft);
+            SetOffset(ModuleOn.padding, S(ModulePaddingLeft), 0, 0, 0);
 
             ModuleOnCentralized.fontSize = S(ModuleFontSize);
 
             ModuleOff.fontSize = S(ModuleFontSize);
-            ModuleOff.padding.left = S(ModulePaddingLeft);
+            SetOffset(ModuleOff.padding, S(ModulePaddingLeft), 0, 0, 0);
 
-            // ModuleWindow
+            // ModuleWindow / SettingsWindow
             ModuleWindow.fontSize = S(ModuleWindowFontSize);
-            ModuleWindow.padding.top = S(ModuleWindowPaddingTop);
+            SetOffset(ModuleWindow.padding, 0, 0, S(ModuleWindowPaddingTop), 0);
 
-            // SettingsWindow
             SettingsWindow.fontSize = S(SettingsWindowFontSize);
-            SettingsWindow.padding.top = 0;
-            SettingsWindow.padding.bottom = 0;
+            SetOffset(SettingsWindow.padding, 0, 0, 0, 0);
 
             // SettingOn / SettingOff
             SettingOn.fontSize = S(SettingFontSize);
-            SettingOn.padding.left = S(SettingPaddingLeft);
+            SetOffset(SettingOn.padding, S(SettingPaddingLeft), 0, 0, 0);
 
             SettingOff.fontSize = S(SettingFontSize);
-            SettingOff.padding.left = S(SettingPaddingLeft);
+            SetOffset(SettingOff.padding, S(SettingPaddingLeft), 0, 0, 0);
 
-            // DescriptionStyle
+            // Descriptions & Author
             DescriptionStyle.fontSize = S(DescriptionFontSize);
-            DescriptionStyle.padding.left = S(DescriptionPaddingLR);
-            DescriptionStyle.padding.right = S(DescriptionPaddingLR);
-            DescriptionStyle.padding.top = S(DescriptionPaddingTB);
-            DescriptionStyle.padding.bottom = S(DescriptionPaddingTB);
+            SetOffset(DescriptionStyle.padding, S(DescriptionPaddingLR), S(DescriptionPaddingLR), S(DescriptionPaddingTB), S(DescriptionPaddingTB));
 
-            // SettingDescriptionStyle
             SettingDescriptionStyle.fontSize = S(SettingDescriptionFontSize);
-            SettingDescriptionStyle.padding.left = S(SettingDescriptionPaddingLR);
-            SettingDescriptionStyle.padding.right = S(SettingDescriptionPaddingLR);
-            SettingDescriptionStyle.padding.top = S(SettingDescriptionPaddingTB);
-            SettingDescriptionStyle.padding.bottom = S(SettingDescriptionPaddingTB);
+            SetOffset(SettingDescriptionStyle.padding, S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingTB), S(SettingDescriptionPaddingTB));
 
-            // AuthorStyle
             AuthorStyle.fontSize = S(AuthorFontSize);
-            AuthorStyle.padding.left = S(AuthorPaddingLeft);
+            SetOffset(AuthorStyle.padding, S(AuthorPaddingLeft), 0, 0, 0);
 
-            // SeparatorStyle
+            // Separator & HUD
             SeparatorStyle.fixedHeight = Sf(SeparatorFixedHeight);
 
-            // HUDElementStyle scales strictly by ElementScale
             HUDElementStyle.fontSize = Mathf.Max(1, Mathf.RoundToInt(HUDElementFontSize * elementScale));
-            HUDElementStyle.alignment = TextAnchor.MiddleCenter;
-            HUDElementStyle.padding.left = 0;
-            HUDElementStyle.padding.right = 0;
-            HUDElementStyle.padding.top = 0;
-            HUDElementStyle.padding.bottom = 0;
+            SetOffset(HUDElementStyle.padding, 0, 0, 0, 0);
 
-            // NEFNodeStyle
-            NEFNodeStyle.padding.left = S(NEFNodePaddingLR);
-            NEFNodeStyle.padding.right = S(NEFNodePaddingLR);
-            NEFNodeStyle.padding.top = S(NEFNodePaddingTop);
-            NEFNodeStyle.padding.bottom = S(NEFNodePaddingBottom);
+            // NEF Nodes & Text
+            SetOffset(NEFNodeStyle.padding, S(NEFNodePaddingLR), S(NEFNodePaddingLR), S(NEFNodePaddingTop), S(NEFNodePaddingBottom));
 
-            // TextStyle, then mirror into TextHighlightedStyle
             TextStyle.fontSize = S(TextFontSize);
             TextHighlightedStyle.fontSize = TextStyle.fontSize;
-        }
-
-        private static Texture2D CreateTex(Color col)
-        {
-            Texture2D tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            tex.SetPixel(0, 0, col);
-            tex.Apply();
-            return tex;
         }
     }
 }

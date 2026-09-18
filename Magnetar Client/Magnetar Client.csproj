@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<!-- PC builds (Melon / BepInEx) target net6.0; Android targets net10.0 -->
+		<TargetFramework Condition="'$(Configuration)' != 'Android'">net6.0</TargetFramework>
+		<TargetFramework Condition="'$(Configuration)' == 'Android'">net10.0</TargetFramework>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<RootNamespace>Magnetar_Client</RootNamespace>
 		<AssemblyName>Magnetar Client</AssemblyName>
@@ -9,6 +11,13 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<Configurations>melonloader;Release_Melon;Bepinex;Release_bepinex;Android</Configurations>
+	</PropertyGroup>
+
+	<!-- Suppress higher-version framework conflict warnings across interop stubs -->
+	<PropertyGroup Condition="'$(Configuration)' == 'Android'">
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+		<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+		<NoWarn>$(NoWarn);MSB3277;CS1701;CS1702</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -103,8 +112,8 @@
 		</Reference>
 	</ItemGroup>
 
-	<!-- BepInEx / Android References -->
-	<ItemGroup Condition="$(Configuration.Contains('Bepinex')) or $(Configuration.Contains('bepinex')) or '$(Configuration)' == 'Android'">
+	<!-- BepInEx References -->
+	<ItemGroup Condition="$(Configuration.Contains('bepinex')) or $(Configuration.Contains('Bepinex'))">
 		<Reference Include="BepInEx.Core">
 			<HintPath>References\Bepinex\BepInEx.Core.dll</HintPath>
 		</Reference>
@@ -161,6 +170,67 @@
 		</Reference>
 		<Reference Include="UnityEngine.ImageConversionModule">
 			<HintPath>References\Bepinex\Il2Cpp\UnityEngine.ImageConversionModule.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<!-- Android References -->
+	<ItemGroup Condition="'$(Configuration)' == 'Android'">
+		<Reference Include="BepInEx.Core">
+			<HintPath>References\Android\BepInEx.Core.dll</HintPath>
+		</Reference>
+		<Reference Include="BepInEx.Unity.IL2CPP">
+			<HintPath>References\Android\BepInEx.Unity.IL2CPP.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppInterop.Runtime">
+			<HintPath>References\Android\Il2CppInterop.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="Assembly-CSharp">
+			<HintPath>References\Android\Il2Cpp\Assembly-CSharp.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2Cppmscorlib">
+			<HintPath>References\Android\Il2Cpp\Il2Cppmscorlib.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine">
+			<HintPath>References\Android\Il2Cpp\UnityEngine.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.TextMeshPro">
+			<HintPath>References\Android\Il2Cpp\Unity.TextMeshPro.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.AnimationModule">
+			<HintPath>References\Android\Il2Cpp\UnityEngine.AnimationModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.AssetBundleModule">
+			<HintPath>References\Android\Il2Cpp\UnityEngine.AssetBundleModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>References\Android\Il2Cpp\UnityEngine.CoreModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.IMGUIModule">
+			<HintPath>References\Android\Il2Cpp\UnityEngine.IMGUIModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.InputLegacyModule">
+			<HintPath>References\Android\Il2Cpp\UnityEngine.InputLegacyModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.ParticleSystemModule">
+			<HintPath>References\Android\Il2Cpp\UnityEngine.ParticleSystemModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.Physics2DModule">
+			<HintPath>References\Android\Il2Cpp\UnityEngine.Physics2DModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.TextRenderingModule">
+			<HintPath>References\Android\Il2Cpp\UnityEngine.TextRenderingModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UI">
+			<HintPath>References\Android\Il2Cpp\UnityEngine.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UIModule">
+			<HintPath>References\Android\Il2Cpp\UnityEngine.UIModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UniTask">
+			<HintPath>References\Android\Il2Cpp\UniTask.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.ImageConversionModule">
+			<HintPath>References\Android\Il2Cpp\UnityEngine.ImageConversionModule.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 

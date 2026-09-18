@@ -132,8 +132,8 @@ namespace Magnetar_Client.Modules
                     Glove.Instance.OnClick(Mouse.Instance);
                 if (GetKeyComboDown(PickUpHammer.BindKeys) && Hammer.Instance != null)
                     Hammer.Instance.OnClick(Mouse.Instance);
-                if (GetKeyComboDown(PickUpWheel.BindKeys) && wheel != null)
-                    wheel.OnClick(Mouse.Instance);
+                if (GetKeyComboDown(PickUpWheel.BindKeys) && WheelInstance != null)
+                    WheelInstance.OnClick(Mouse.Instance);
 
                 if (GetKeyComboDown(CoffeeBean.BindKeys) && itemBtn != null) 
                     Mouse.Instance.theItemOnMouse = itemBtn.Clicked();
@@ -165,8 +165,8 @@ namespace Magnetar_Client.Modules
 
 
                 }  
-                if (GetKeyComboDown(ShowPlantHP.BindKeys)) board.ShowPlantHealth();
-                if (GetKeyComboDown(ShowZombieHP.BindKeys)) board.ShowZombieHealth();
+                if (GetKeyComboDown(ShowPlantHP.BindKeys)) BoardInstance.ShowPlantHealth();
+                if (GetKeyComboDown(ShowZombieHP.BindKeys)) BoardInstance.ShowZombieHealth();
 
             }
 

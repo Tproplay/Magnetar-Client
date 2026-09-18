@@ -26,7 +26,7 @@ namespace Magnetar_Client.HUDElements
         {
             if (!AppData.BoardInstanceIsNull)
             {
-                value = AppData.board.boardStatistics.sunProduced;
+                value = AppData.BoardInstance.boardStatistics.sunProduced;
             }
 
             displayText = $"Sun Obtained: {FormatInternational(value)}";
@@ -56,7 +56,7 @@ namespace Magnetar_Client.HUDElements
         {
             if (!AppData.BoardInstanceIsNull)
             {
-                value = AppData.board.boardStatistics.sunConsumed;
+                value = AppData.BoardInstance.boardStatistics.sunConsumed;
             }
             displayText = $"Sun Spent: {FormatInternational(value)}";
 
@@ -84,7 +84,7 @@ namespace Magnetar_Client.HUDElements
         {
             if (!AppData.BoardInstanceIsNull)
             {
-                value = AppData.board.boardStatistics.moneyEarned;
+                value = AppData.BoardInstance.boardStatistics.moneyEarned;
             }
 
             displayText = $"Money Obtained: {FormatInternational(value)}";
@@ -113,7 +113,7 @@ namespace Magnetar_Client.HUDElements
         {
             if (!AppData.BoardInstanceIsNull)
             {
-                value = AppData.board.boardStatistics.moneyConsumed;
+                value = AppData.BoardInstance.boardStatistics.moneyConsumed;
             }
 
             displayText = $"Money Spent: {FormatInternational(value)}";
@@ -140,7 +140,7 @@ namespace Magnetar_Client.HUDElements
         public override void OnUpdateActive()
         {
             if (!BoardInstanceIsNull)
-                displayText = $"Auto Sun: {FormatTime((int)board.theFallingSunCountDown)}";
+                displayText = $"Auto Sun: {FormatTime((int)BoardInstance.theFallingSunCountDown)}";
             else
                 displayText = "Auto Sun: 0s";
             AdjustWidthToText(displayText, HUDElementStyle, 10);

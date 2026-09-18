@@ -35,7 +35,7 @@ namespace Magnetar_Client.Modules
             if (BoardInstanceIsNull) // Out of the game
             { wasAlreadyEnabled = null; return; }
             if
-                (!board.boardTag.isColumn) // Reset Level
+                (!BoardInstance.boardTag.isColumn) // Reset Level
             {
                 wasAlreadyEnabled = null;
             }
@@ -43,12 +43,12 @@ namespace Magnetar_Client.Modules
 
             if (wasAlreadyEnabled != null) return;
 
-            wasAlreadyEnabled = board.boardTag.enableAllTravelPlant ? "Yes" : "No";
+            wasAlreadyEnabled = BoardInstance.boardTag.enableAllTravelPlant ? "Yes" : "No";
 
-            Board.BoardTag boardTags = board.boardTag;
+            Board.BoardTag boardTags = BoardInstance.boardTag;
             boardTags.enableAllTravelPlant = true;
 
-            board.boardTag = boardTags;
+            BoardInstance.boardTag = boardTags;
 
         }
 
@@ -56,10 +56,10 @@ namespace Magnetar_Client.Modules
         {
             if (BoardInstanceIsNull || wasAlreadyEnabled == null || wasAlreadyEnabled == "Yes") { wasAlreadyEnabled = null; return; }
 
-            Board.BoardTag boardTags = board.boardTag;
+            Board.BoardTag boardTags = BoardInstance.boardTag;
             boardTags.enableAllTravelPlant = false;
 
-            board.boardTag = boardTags;
+            BoardInstance.boardTag = boardTags;
             wasAlreadyEnabled = null;
         }
     }

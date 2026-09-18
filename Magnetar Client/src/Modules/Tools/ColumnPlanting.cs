@@ -71,26 +71,26 @@ namespace Magnetar_Client.Modules
                 switch (instance.Mode.Value)
                 {
                     case 0: // Column
-                        for (int i = 0; i < board.rowNum; i++)
+                        for (int i = 0; i < BoardInstance.rowNum; i++)
                         {
                             if (i == newRow) continue;
                             __instance.SetPlant(newColumn, i, theSeedType);
                         }
                         break;
                     case 1: // Row
-                        for (int i = 0; i < board.columnNum; i++)
+                        for (int i = 0; i < BoardInstance.columnNum; i++)
                         {
                             if (i == newColumn) continue;
                             __instance.SetPlant(i, newRow, theSeedType);
                         }
                         break;
                     case 2: // Rook
-                        for (int i = 0; i < board.rowNum; i++)
+                        for (int i = 0; i < BoardInstance.rowNum; i++)
                         {
                             if (i == newRow) continue;
                             __instance.SetPlant(newColumn, i, theSeedType);
                         }
-                        for (int i = 0; i < board.columnNum; i++)
+                        for (int i = 0; i < BoardInstance.columnNum; i++)
                         {
                             if (i == newColumn) continue;
                             __instance.SetPlant(i, newRow, theSeedType);
@@ -107,8 +107,8 @@ namespace Magnetar_Client.Modules
                         break;
                     case 4: // Full Lawn
 
-                        int r_num = board.rowNum;
-                        int c_num = board.columnNum;
+                        int r_num = BoardInstance.rowNum;
+                        int c_num = BoardInstance.columnNum;
 
                         int n = r_num * c_num;
 

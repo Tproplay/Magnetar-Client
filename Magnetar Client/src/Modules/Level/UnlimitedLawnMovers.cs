@@ -40,26 +40,26 @@ namespace Magnetar_Client.Modules
 
         public override void OnEnable()
         {
-            if (BoardInstanceIsNull || CreateMower.Instance == null || board == null || board.mowerArray == null)
+            if (BoardInstanceIsNull || CreateMower.Instance == null || BoardInstance == null || BoardInstance.mowerArray == null)
                 return;
-            bool[] rowHasMower = new bool[board.rowNum];
+            bool[] rowHasMower = new bool[BoardInstance.rowNum];
 
-            for (int i = 0; i < board.mowerArray.Count; i++)
+            for (int i = 0; i < BoardInstance.mowerArray.Count; i++)
             {
-                Mower m = board.mowerArray[i];
-                if (m != null && m.theMowerRow >= 0 && m.theMowerRow < board.rowNum)
+                Mower m = BoardInstance.mowerArray[i];
+                if (m != null && m.theMowerRow >= 0 && m.theMowerRow < BoardInstance.rowNum)
                 {
                     rowHasMower[m.theMowerRow] = true;
                 }
             }
-            for (int i = 0; i < board.rowNum; i++)
+            for (int i = 0; i < BoardInstance.rowNum; i++)
             {
                 if (!rowHasMower[i])
                 {
-                    CreateMower.Instance.SetMowerOnRoad(board.roadType[i], i);
-                    for (int j = 0; j < board.mowerArray.Count; j++)
+                    CreateMower.Instance.SetMowerOnRoad(BoardInstance.roadType[i], i);
+                    for (int j = 0; j < BoardInstance.mowerArray.Count; j++)
                     {
-                        Mower newMower = board.mowerArray[j];
+                        Mower newMower = BoardInstance.mowerArray[j];
                         if (newMower != null && newMower.theMowerRow == i && !newMower.started)
                         {
                             newMower.transform.position = new UnityEngine.Vector3(

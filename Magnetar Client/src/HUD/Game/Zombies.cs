@@ -76,7 +76,7 @@ namespace Magnetar_Client.HUDElements
         {
             if (AppData.BoardInstanceIsNull) return;
 
-            displayText = $"Zombies Spawned: {AppData.board.boardStatistics.zombiesKilled + GameData.zombieList.Count}";
+            displayText = $"Zombies Spawned: {AppData.BoardInstance.boardStatistics.zombiesKilled + GameData.zombieList.Count}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
         }
@@ -127,7 +127,7 @@ namespace Magnetar_Client.HUDElements
         {
             if (AppData.BoardInstanceIsNull) return;
 
-            displayText = $"Zombies Killed: {AppData.board.boardStatistics.zombiesKilled}";
+            displayText = $"Zombies Killed: {AppData.BoardInstance.boardStatistics.zombiesKilled}";
 
             AdjustWidthToText(displayText, HUDElementStyle, 10f);
         }
@@ -180,8 +180,8 @@ namespace Magnetar_Client.HUDElements
             if (!AppData.BoardInstanceIsNull)
             {
                 displayText = 
-                    $"Wave Health: {FormatInternational(AppData.board.zombieCurrentWaveHealth)}/" +
-                    $"{FormatInternational(AppData.board.zombieSpawnHealth)}";
+                    $"Wave Health: {FormatInternational(AppData.BoardInstance.zombieCurrentWaveHealth)}/" +
+                    $"{FormatInternational(AppData.BoardInstance.zombieSpawnHealth)}";
             }
             else
             {
@@ -286,7 +286,7 @@ namespace Magnetar_Client.HUDElements
         {
             if (!AppData.BoardInstanceIsNull)
             {
-                displayText = $"Wave: {AppData.board.theWave}/{AppData.board.theMaxWave}";
+                displayText = $"Wave: {AppData.BoardInstance.theWave}/{AppData.BoardInstance.theMaxWave}";
             }
             else
             {

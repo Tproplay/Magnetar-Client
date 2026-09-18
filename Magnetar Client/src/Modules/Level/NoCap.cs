@@ -63,12 +63,12 @@ namespace Magnetar_Client.Modules
 
             if (originalSunLimit != -1)
             {
-                board.maxSun = originalSunLimit;
+                BoardInstance.maxSun = originalSunLimit;
                 originalSunLimit = -1;
             }
             if (originalMoneyLimit != -1)
             {
-                board.maxMoney = originalMoneyLimit;
+                BoardInstance.maxMoney = originalMoneyLimit;
                 originalMoneyLimit = -1;
             }
 
@@ -77,13 +77,13 @@ namespace Magnetar_Client.Modules
         void SetSunLimit(int value)
         {
             if (BoardInstanceIsNull) return;
-            board.maxSun = value;
+            BoardInstance.maxSun = value;
         }
 
         void SetMoneyLimit(int value)
         {
             if (BoardInstanceIsNull) return;
-            board.maxMoney = value;
+            BoardInstance.maxMoney = value;
         }
 
         [HarmonyPatch(typeof(Board))]

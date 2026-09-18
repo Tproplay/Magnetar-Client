@@ -43,7 +43,7 @@ namespace Magnetar_Client.HUDElements
         {
             if (!BoardInstanceIsNull)
             {
-                value = board.boardStatistics.plantsPlanted;
+                value = BoardInstance.boardStatistics.plantsPlanted;
             }
 
             displayText = $"Plants Placed: {value}";
@@ -71,7 +71,7 @@ namespace Magnetar_Client.HUDElements
         {
             if (!BoardInstanceIsNull)
             {
-                value = board.boardStatistics.plantsDeath;
+                value = BoardInstance.boardStatistics.plantsDeath;
             }
 
             displayText = $"Plant Death: {value}";

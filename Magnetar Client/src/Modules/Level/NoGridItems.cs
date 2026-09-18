@@ -60,11 +60,11 @@ namespace Magnetar_Client.Modules
         }
         public override void OnEnable()
         {
-            if (BoardInstanceIsNull || board.griditemArray == null) return;
+            if (BoardInstanceIsNull || BoardInstance.griditemArray == null) return;
 
-            for (int i = board.griditemArray.Count - 1; i >= 0; i--)
+            for (int i = BoardInstance.griditemArray.Count - 1; i >= 0; i--)
             {
-                GridItem item = board.griditemArray[i];
+                GridItem item = BoardInstance.griditemArray[i];
                 if (item == null) continue;
                 if (item.theItemType == GridItemType.CraterDay || item.theItemType == GridItemType.CraterNight)
                     item.Die();
@@ -161,7 +161,7 @@ namespace Magnetar_Client.Modules
         }
         public override void OnEnable()
         {
-            if (BoardInstanceIsNull || board.griditemArray == null) return;
+            if (BoardInstanceIsNull || BoardInstance.griditemArray == null) return;
 
 #if MELONLOADER || BEPINEX
             if (DebugMode.Value)
@@ -170,12 +170,12 @@ namespace Magnetar_Client.Modules
             }
 #endif
 
-            for (int i = board.griditemArray.Count - 1; i >= 0; i--)
+            for (int i = BoardInstance.griditemArray.Count - 1; i >= 0; i--)
             {
 #if MELONLOADER || BEPINEX
                 if (DebugMode.Value) DebugLogger.Msg($"Checking Grid Item at index {i}");
 #endif
-                GridItem item = board.griditemArray[i];
+                GridItem item = BoardInstance.griditemArray[i];
                 if (item == null) continue;
                 if (selectedGridItems.IsSelected((int)item.theItemType))
                 { 

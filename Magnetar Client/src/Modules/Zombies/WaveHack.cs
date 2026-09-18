@@ -69,16 +69,16 @@ namespace Magnetar_Client.Modules
             {
                 if (last_val <= 0) last_val = 1f;
 
-                board.timeUntilNextWave = last_val;
+                BoardInstance.timeUntilNextWave = last_val;
             }
 
             if (instance.Active_WaveCooldownSetting.Value)
             {
-                if (board.timeUntilNextWave > Math.Min(last_val, instance.WaveCooldownSetting.Value))
-                    board.timeUntilNextWave = instance.WaveCooldownSetting.Value;
+                if (BoardInstance.timeUntilNextWave > Math.Min(last_val, instance.WaveCooldownSetting.Value))
+                    BoardInstance.timeUntilNextWave = instance.WaveCooldownSetting.Value;
             }
 
-            last_val = board.timeUntilNextWave;
+            last_val = BoardInstance.timeUntilNextWave;
         }
 
         [HarmonyPatch(typeof(BoardSpawner))]

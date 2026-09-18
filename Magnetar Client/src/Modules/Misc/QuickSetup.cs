@@ -84,7 +84,7 @@ namespace Magnetar_Client.Modules
             string code = GenerateSetupCode();
             if (string.IsNullOrEmpty(code))
             {
-                DebugLogger.Error("[QuickSetup] Failed to encode current board setup.");
+                DebugLogger.Error("[QuickSetup] Failed to encode current BoardInstance setup.");
                 return;
             }
 

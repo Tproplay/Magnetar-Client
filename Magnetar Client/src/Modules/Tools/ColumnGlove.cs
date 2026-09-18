@@ -50,7 +50,7 @@ namespace Magnetar_Client.Modules
                     }
                 }
 
-                // Replicate movement across the board
+                // Replicate movement across the BoardInstance
                 foreach (var plant in plants)
                 {
                     Plant gameObject = CreatePlant.Instance.SetPlant(newCol, plant.thePlantRow, plant.thePlantType);

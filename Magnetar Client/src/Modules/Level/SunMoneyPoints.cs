@@ -90,12 +90,12 @@ namespace Magnetar_Client.Modules
             {
                 if (UnlimitedSun.Value) // Just turned ON
                 {
-                    originalSunAmount = board.theSun;
+                    originalSunAmount = BoardInstance.theSun;
                 }
                 else // Just turned OFF
                 {
                     if (originalSunAmount >= 0 && preserveOriginalSetting.Value)
-                        board.theSun = originalSunAmount;
+                        BoardInstance.theSun = originalSunAmount;
 
                     originalSunAmount = -1_853_721_342;
                 }
@@ -105,7 +105,7 @@ namespace Magnetar_Client.Modules
             // Execution
             if (UnlimitedSun.Value)
             {
-                board.theSun = sunSetting.Value;
+                BoardInstance.theSun = sunSetting.Value;
             }
 
             // --- Sun Multiplier ---
@@ -113,11 +113,11 @@ namespace Magnetar_Client.Modules
             {
                 if (SunMultipier.Value) // Just turned ON
                 {
-                    _originalSunEfficiency = board.sunEfficiency;
+                    _originalSunEfficiency = BoardInstance.sunEfficiency;
                 }
                 else // Just turned OFF
                 {
-                    board.sunEfficiency = _originalSunEfficiency;
+                    BoardInstance.sunEfficiency = _originalSunEfficiency;
                 }
                 _lastMultiplierState = SunMultipier.Value;
             }
@@ -125,36 +125,36 @@ namespace Magnetar_Client.Modules
             // Execution
             if (SunMultipier.Value)
             {
-                board.sunEfficiency = sunMultiplierSetting.Value;
+                BoardInstance.sunEfficiency = sunMultiplierSetting.Value;
             }
 
             // Auto Sun Drop
 
             if (Active_AutoSunCD.Value)
             {
-                if (board.theFallingSunCountDown > Math.Min(AutoSunCD.Value,last_fallsuncd))
-                    board.theFallingSunCountDown = AutoSunCD.Value;
+                if (BoardInstance.theFallingSunCountDown > Math.Min(AutoSunCD.Value,last_fallsuncd))
+                    BoardInstance.theFallingSunCountDown = AutoSunCD.Value;
 
                 // Update fall sun cd manually (if allow sun drop anywhere)
-                if (AllowSunDropAnywhere.Value && last_fallsuncd == board.theFallingSunCountDown && Time.timeScale !=0)
-                    board.theFallingSunCountDown -= Time.deltaTime;
+                if (AllowSunDropAnywhere.Value && last_fallsuncd == BoardInstance.theFallingSunCountDown && Time.timeScale !=0)
+                    BoardInstance.theFallingSunCountDown -= Time.deltaTime;
 
-                last_fallsuncd = board.theFallingSunCountDown;
+                last_fallsuncd = BoardInstance.theFallingSunCountDown;
             }
 
             if (AllowSunDropAnywhere.Value)
             {
-                if (!board.fallSun)
+                if (!BoardInstance.fallSun)
                 {
                     wasAutoSun = false;
-                    board.fallSun = true;
+                    BoardInstance.fallSun = true;
                 }
 
-                if (board.theFallingSunCountDown <= 0 && GameAPP.theGameStatus == GameStatus.InGame)
+                if (BoardInstance.theFallingSunCountDown <= 0 && GameAPP.theGameStatus == GameStatus.InGame)
                 {
                     int col = UnityEngine.Random.RandomRangeInt(3, 10);
                     createManualFallSun(col);
-                    board.theFallingSunCountDown = 7.5f;
+                    BoardInstance.theFallingSunCountDown = 7.5f;
                 }
             }
         }
@@ -167,7 +167,7 @@ namespace Magnetar_Client.Modules
                 if (_lastUnlimitedState)
                 {
                     if (originalSunAmount >= 0 && preserveOriginalSetting.Value)
-                        board.theSun = originalSunAmount;
+                        BoardInstance.theSun = originalSunAmount;
 
                     originalSunAmount = -1_853_721_342;
                     _lastUnlimitedState = false;
@@ -176,7 +176,7 @@ namespace Magnetar_Client.Modules
                 // Clean up Multiplier
                 if (_lastMultiplierState)
                 {
-                    board.sunEfficiency = _originalSunEfficiency;
+                    BoardInstance.sunEfficiency = _originalSunEfficiency;
                     _lastMultiplierState = false;
                 }
 
@@ -190,7 +190,7 @@ namespace Magnetar_Client.Modules
         {
             if (enable) return;
 
-            if (!BoardInstanceIsNull) board.fallSun = wasAutoSun;
+            if (!BoardInstanceIsNull) BoardInstance.fallSun = wasAutoSun;
             wasAutoSun = true;
         }
 
@@ -270,7 +270,7 @@ namespace Magnetar_Client.Modules
             if (_lastUnlimitedState)
             {
                 if (originalMoneyAmount >= 0 && preserveOriginalSetting.Value)
-                    board.theMoney = originalMoneyAmount;
+                    BoardInstance.theMoney = originalMoneyAmount;
 
                 originalMoneyAmount = -1_853_721_342;
                 _lastUnlimitedState = false;
@@ -279,7 +279,7 @@ namespace Magnetar_Client.Modules
             // Clean up Multiplier
             if (_lastMultiplierState)
             {
-                board.moneyEfficiency = _originalMoneyEfficiency;
+                BoardInstance.moneyEfficiency = _originalMoneyEfficiency;
                 _lastMultiplierState = false;
             }
         }
@@ -293,12 +293,12 @@ namespace Magnetar_Client.Modules
             {
                 if (UnlimitedMoney.Value) // Just turned ON
                 {
-                    originalMoneyAmount = board.theMoney;
+                    originalMoneyAmount = BoardInstance.theMoney;
                 }
                 else // Just turned OFF
                 {
                     if (originalMoneyAmount >= 0 && preserveOriginalSetting.Value)
-                        board.theMoney = originalMoneyAmount;
+                        BoardInstance.theMoney = originalMoneyAmount;
 
                     originalMoneyAmount = -1_853_721_342;
                 }
@@ -308,7 +308,7 @@ namespace Magnetar_Client.Modules
             // Execution
             if (UnlimitedMoney.Value)
             {
-                board.theMoney = moneySetting.Value;
+                BoardInstance.theMoney = moneySetting.Value;
             }
 
             // --- Money Multiplier ---
@@ -316,11 +316,11 @@ namespace Magnetar_Client.Modules
             {
                 if (MoneyMultiplier.Value) // Just turned ON
                 {
-                    _originalMoneyEfficiency = board.moneyEfficiency;
+                    _originalMoneyEfficiency = BoardInstance.moneyEfficiency;
                 }
                 else // Just turned OFF
                 {
-                    board.moneyEfficiency = _originalMoneyEfficiency;
+                    BoardInstance.moneyEfficiency = _originalMoneyEfficiency;
                 }
                 _lastMultiplierState = MoneyMultiplier.Value;
             }
@@ -328,7 +328,7 @@ namespace Magnetar_Client.Modules
             // Execution
             if (MoneyMultiplier.Value)
             {
-                board.moneyEfficiency = moneyMultiplierSetting.Value;
+                BoardInstance.moneyEfficiency = moneyMultiplierSetting.Value;
             }
         }
     }
@@ -392,7 +392,7 @@ namespace Magnetar_Client.Modules
             if (_lastUnlimitedState)
             {
                 if (originalPointsAmount >= 0 && preserveOriginalSetting.Value)
-                    board.thePoints = originalPointsAmount;
+                    BoardInstance.thePoints = originalPointsAmount;
 
                 originalPointsAmount = -1_853_721_342;
                 _lastUnlimitedState = false;
@@ -412,12 +412,12 @@ namespace Magnetar_Client.Modules
             {
                 if (UnlimitedPoints.Value) // Just turned ON
                 {
-                    originalPointsAmount = board.thePoints;
+                    originalPointsAmount = BoardInstance.thePoints;
                 }
                 else // Just turned OFF
                 {
                     if (originalPointsAmount >= 0 && preserveOriginalSetting.Value)
-                        board.thePoints = originalPointsAmount;
+                        BoardInstance.thePoints = originalPointsAmount;
 
                     originalPointsAmount = -1_853_721_342;
                 }
@@ -427,7 +427,7 @@ namespace Magnetar_Client.Modules
             // Execution
             if (UnlimitedPoints.Value)
             {
-                board.thePoints = pointsSetting.Value;
+                BoardInstance.thePoints = pointsSetting.Value;
             }
 
             // --- Points Multiplier ---
@@ -435,7 +435,7 @@ namespace Magnetar_Client.Modules
             {
                 if (PointsMultiplier.Value) // Just turned ON
                 {
-                    _pointsAmount = board.thePoints;
+                    _pointsAmount = BoardInstance.thePoints;
                 }
                 else // Just turned OFF
                 {
@@ -447,7 +447,7 @@ namespace Magnetar_Client.Modules
             // Execution (Since Points don't have an efficiency field)
             if (PointsMultiplier.Value)
             {
-                float points = board.thePoints;
+                float points = BoardInstance.thePoints;
 
                 if (_pointsAmount == -9476224.35443f || points == pointsSetting.Value)
                     _pointsAmount = points;
@@ -455,9 +455,9 @@ namespace Magnetar_Client.Modules
                 if (points != _pointsAmount)
                 {
                     if ((points - _pointsAmount) > 0)
-                        board.thePoints += (points - _pointsAmount) * (pointsMultiplierSetting.Value - 1);
+                        BoardInstance.thePoints += (points - _pointsAmount) * (pointsMultiplierSetting.Value - 1);
 
-                    _pointsAmount = board.thePoints;
+                    _pointsAmount = BoardInstance.thePoints;
                 }
             }
         }

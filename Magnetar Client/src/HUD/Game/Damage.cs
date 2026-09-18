@@ -26,7 +26,7 @@ namespace Magnetar_Client.HUDElements
         {
             if (!AppData.BoardInstanceIsNull)
             {
-                value = AppData.board.boardStatistics.totalZombieDamage;
+                value = AppData.BoardInstance.boardStatistics.totalZombieDamage;
             }
 
             displayText = $"Plant Damage: {FormatInternational((long)value)}";
@@ -53,7 +53,7 @@ namespace Magnetar_Client.HUDElements
         {
             if (BoardInstanceIsNull) return;
 
-            damageHistory.Add((long)AppData.board.boardStatistics.totalZombieDamage);
+            damageHistory.Add((long)AppData.BoardInstance.boardStatistics.totalZombieDamage);
 
             // Keep only the last 10 snapshots (covering 5 second of gameplay)
             if (damageHistory.Count > 10)

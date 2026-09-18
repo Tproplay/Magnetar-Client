@@ -140,7 +140,7 @@ namespace Magnetar_Client.Modules
                 if (SpawnedPets == 0)
                 {
                     Vector2 centerWorldPos = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.nearClipPlane));
-                    MiniPet pet = MiniPet.SetPet(board, centerWorldPos, (PetType)PetTypeSetting.SelectedValues.First());
+                    MiniPet pet = MiniPet.SetPet(BoardInstance, centerWorldPos, (PetType)PetTypeSetting.SelectedValues.First());
                     SpawnedPets++;
 
                     DebugLogger.Msg("[Better Osu] Spawned Pet");
@@ -202,7 +202,7 @@ namespace Magnetar_Client.Modules
             public static void UpdatePatch(Bullet __instance)
             {
                 if (BoardInstanceIsNull || instance == null) return;
-                if (!instance.Active || !board.boardTag.rhythmGame) return;
+                if (!instance.Active || !BoardInstance.boardTag.rhythmGame) return;
 
                 if (instance.BulletsDamageIncreaseSetting.Value <= instance.currentCombo)
                 {

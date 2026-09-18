@@ -54,7 +54,7 @@ namespace Magnetar_Client.HUDElements
         public override void OnUpdateActive()
         {
             if (!BoardInstanceIsNull)
-                displayText = $"Next Wave arrival: {FormatTime((int)board.timeUntilNextWave >= 0 ? (int)board.timeUntilNextWave : 0)}";
+                displayText = $"Next Wave arrival: {FormatTime((int)BoardInstance.timeUntilNextWave >= 0 ? (int)BoardInstance.timeUntilNextWave : 0)}";
             else
                 displayText = "Next Wave arrival: Na";
             AdjustWidthToText(displayText, HUDElementStyle, 10);
@@ -78,7 +78,7 @@ namespace Magnetar_Client.HUDElements
         public override void OnUpdateActive()
         {
             if (!BoardInstanceIsNull)
-                displayText = $"Active Star drop: {FormatTime((int)board.bigStarActiveCountDown)}";
+                displayText = $"Active Star drop: {FormatTime((int)BoardInstance.bigStarActiveCountDown)}";
             else
                 displayText = "Active Star drop: Na";
             AdjustWidthToText(displayText, HUDElementStyle, 10);
@@ -102,7 +102,7 @@ namespace Magnetar_Client.HUDElements
         public override void OnUpdateActive()
         {
             if (!BoardInstanceIsNull)
-                displayText = $"Passive Star drop: {FormatTime((int)board.bigStarPassiveCountDown)}";
+                displayText = $"Passive Star drop: {FormatTime((int)BoardInstance.bigStarPassiveCountDown)}";
             else
                 displayText = "Passive Star drop: Na";
             AdjustWidthToText(displayText, HUDElementStyle, 10);

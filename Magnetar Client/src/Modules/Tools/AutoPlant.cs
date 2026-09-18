@@ -159,7 +159,7 @@ namespace Magnetar_Client.Modules
                 if (card != null && card.onCardBank)
                 {
                     if (card.isExtra && !UseExtraPlant.Value) continue;
-                    if (card.CD >= card.fullCD && AppData.board.theSun >= card.theSeedCost)
+                    if (card.CD >= card.fullCD && AppData.BoardInstance.theSun >= card.theSeedCost)
                     {
                         availableCards.Add(card);
                     }
@@ -184,7 +184,7 @@ namespace Magnetar_Client.Modules
             {
                 CardUI card = availableCards[i];
 
-                if (AppData.board.theSun < card.theSeedCost) continue;
+                if (AppData.BoardInstance.theSun < card.theSeedCost) continue;
 
                 List<GhostPlantRequest> candidates = new List<GhostPlantRequest>();
                 foreach (var req in activeGhostsByTile.Values)
@@ -209,7 +209,7 @@ namespace Magnetar_Client.Modules
                     {
                         card.CD = 0f;
                         card.isAvailable = false;
-                        AppData.board.UseSun(card.theSeedCost);
+                        AppData.BoardInstance.UseSun(card.theSeedCost);
 
                         chosen.targetPlantTypes.RemoveAt(0);
 
@@ -592,7 +592,7 @@ namespace Magnetar_Client.Modules
                 CardUI heldCard = __instance.theCardOnMouse;
                 if (heldCard == null || Board.Instance == null) return true;
 
-                if (heldCard.CD > 0f || AppData.board.theSun < heldCard.theSeedCost)
+                if (heldCard.CD > 0f || AppData.BoardInstance.theSun < heldCard.theSeedCost)
                 {
                     int col = __instance.theMouseColumn;
                     int row = __instance.theMouseRow;

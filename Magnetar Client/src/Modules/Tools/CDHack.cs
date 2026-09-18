@@ -231,7 +231,7 @@ namespace Magnetar_Client.Modules
 
         public override void OnUpdateActive()
         {
-            if (wheel==null)
+            if (WheelInstance==null)
             {
                 originalCD = -1f;
                 return;
@@ -239,15 +239,15 @@ namespace Magnetar_Client.Modules
             
 
             // Save Original CD
-            if (originalCD == -1f) originalCD = wheel.fullCD;
+            if (originalCD == -1f) originalCD = WheelInstance.fullCD;
 
-            if (wheel.CD > CustomCD.Value)
+            if (WheelInstance.CD > CustomCD.Value)
             {
-                wheel.CD = CustomCD.Value;
-                wheel.CDUpdate();
+                WheelInstance.CD = CustomCD.Value;
+                WheelInstance.CDUpdate();
             }
 
-            wheel.fullCD = CustomCD.Value;
+            WheelInstance.fullCD = CustomCD.Value;
 
 
         }
@@ -255,21 +255,21 @@ namespace Magnetar_Client.Modules
         public override void OnDisable()
         {
 
-            if (wheel == null) return;
+            if (WheelInstance == null) return;
 
             if (originalCD >= 0 && preserveOriginal.Value)
             {
-                wheel.fullCD = originalCD;
+                WheelInstance.fullCD = originalCD;
             }
             originalCD = -1f;
         }
 
         public override void OnEnable()
         {
-            if (wheel == null) return;
+            if (WheelInstance == null) return;
             if (resetCDonEnable.Value)
             {
-                wheel.CD = CustomCD.Value;
+                WheelInstance.CD = CustomCD.Value;
             }
         }
     }

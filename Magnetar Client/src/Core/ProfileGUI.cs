@@ -115,7 +115,7 @@ namespace Magnetar_Client.Core
             float contentHeight = profilesList.Count * (elementHeight + rowSpacing);
             float maxScroll = Mathf.Max(0f, contentHeight - scrollAreaHeight);
 
-            // Process mouse scroll wheel on the list area
+            // Process mouse scroll WheelInstance on the list area
             if (scrollOuterRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
             {
                 scrollY += e.delta.y * Config.S(20f);

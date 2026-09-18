@@ -116,11 +116,11 @@ namespace Magnetar_Client.Modules
                     sb.AppendLine("Dumping boardTag Fields:");
 
                     // Grab all public, instance fields from the boardTag object
-                    FieldInfo[] fields = board.boardTag.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+                    FieldInfo[] fields = BoardInstance.boardTag.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
                     foreach (FieldInfo field in fields)
                     {
-                        object value = field.GetValue(board.boardTag);
+                        object value = field.GetValue(BoardInstance.boardTag);
 
                         sb.AppendLine($"   -> {field.Name}: {value}");
                     }

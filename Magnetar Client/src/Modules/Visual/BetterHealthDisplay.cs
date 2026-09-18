@@ -218,7 +218,7 @@ namespace Magnetar_Client.Modules
                             finalText = $"{formattedCurrent} / {formattedMax}";
                         }
 
-                        if (instance.ShowControlledPlant.Value && board.controledPlant == __instance)
+                        if (instance.ShowControlledPlant.Value && BoardInstance.controledPlant == __instance)
                         {
                             finalText = $"<size=200%><color=yellow>★</color>\n{finalText}</size>";
                         }

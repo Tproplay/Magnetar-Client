@@ -15,7 +15,7 @@ namespace Magnetar_Client.Game
     /// </summary>
     public static class AppData
     {
-        public static Board board;
+        public static Board BoardInstance;
         public static bool BoardInstanceIsNull = true;
 
         [HarmonyPatch(typeof(Board))]
@@ -25,23 +25,23 @@ namespace Magnetar_Client.Game
             [HarmonyPostfix]
             public static void AwakePostfix(Board __instance)
             {
-                board = __instance;
+                BoardInstance = __instance;
                 BoardInstanceIsNull = false;
             }
 
             [HarmonyPatch(nameof(Board.OnDestroy))]
-            [HarmonyPostfix]
-            public static void OnDestroyPostfix(Board __instance)
+            [HarmonyPrefix]
+            public static void OnDestroyPrefix(Board __instance)
             {
-                if (board != null && board.Pointer == __instance.Pointer)
+                if (BoardInstance != null && BoardInstance.Pointer == __instance.Pointer)
                 {
-                    board = null;
+                    BoardInstance = null;
                     BoardInstanceIsNull = true;
                 }
             }
         }
 
-        public static Wheel wheel;
+        public static Wheel WheelInstance;
 
         [HarmonyPatch(typeof(InGameTool))]
         public static class WheelPatch
@@ -55,7 +55,7 @@ namespace Magnetar_Client.Game
                 var wheelInstance = __instance.TryCast<Wheel>();
                 if (wheelInstance != null)
                 {
-                    wheel = wheelInstance;
+                    WheelInstance = wheelInstance;
                 }
             }
         }
@@ -70,13 +70,13 @@ namespace Magnetar_Client.Game
     {
         #region PlantList
         /// <summary>
-        /// Sorted List of the current active plants on the board.
+        /// Sorted List of the current active plants on the BoardInstance.
         /// </summary>
-        public static List<Plant> plantList = new List<Plant>();
+        public static List<Plant> plantList = new();
 
 
         [HarmonyPatch(typeof(Plant))]
-        private class plantListPatch
+        private static class PlantListPatch
         {
             [HarmonyPatch(nameof(Plant.Start))]
             [HarmonyPostfix]
@@ -89,8 +89,8 @@ namespace Magnetar_Client.Game
             }
 
             [HarmonyPatch(nameof(Plant.Die))]
-            [HarmonyPostfix]
-            public static void DiePostFix(Plant __instance)
+            [HarmonyPrefix]
+            public static void DiePreFix(Plant __instance)
             {
                 if (AppData.BoardInstanceIsNull) return;
 
@@ -100,14 +100,27 @@ namespace Magnetar_Client.Game
             }
         }
 
+        [HarmonyPatch(typeof(CreatePlant))]
+        private static class CreatePlantPatch
+        {
+            [HarmonyPatch(nameof(CreatePlant.SetPlant))]
+            [HarmonyPostfix]
+            public static void SetPlantPostfix(Plant __result)
+            {
+                if (!plantList.Contains(__result))
+                    plantList.Add(__result);
+
+            }
+        }
+
         #endregion 
 
         #region ZombieList
         /// <summary>
-        /// Sorted List of the current active (non-idle) zombies on the board.
+        /// Sorted List of the current active (non-idle) zombies on the BoardInstance.
         /// </summary>
         public static List<Zombie> zombieList => GetZombies();
-        private static List<Zombie> _zombieList = new List<Zombie>();
+        private static List<Zombie> _zombieList = new();
         static int _currentFrame;
         static List<Zombie> GetZombies()
         {
@@ -131,7 +144,7 @@ namespace Magnetar_Client.Game
 
 
         [HarmonyPatch(typeof(Zombie))]
-        private class ZombieListPatch
+        private static class ZombieListPatch
         {
             [HarmonyPatch(nameof(Zombie.Start))]
             [HarmonyPostfix]
@@ -167,6 +180,18 @@ namespace Magnetar_Client.Game
             }
         }
 
+        [HarmonyPatch(typeof(CreateZombie))]
+        private static class CreateZombiePatch
+        {
+            [HarmonyPatch(nameof(CreateZombie.SetZombie))]
+            [HarmonyPostfix]
+            public static void SetZombiePostfix(Zombie __result)
+            {
+                if (!zombieList.Contains(__result))
+                    zombieList.Add(__result);
+
+            }
+        }
 
         #endregion
 

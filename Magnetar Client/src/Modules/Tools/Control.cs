@@ -60,9 +60,9 @@ namespace Magnetar_Client.Modules
                     Plant plant = cast.collider.gameObject.GetComponent<Plant>();
                     if (plant!= null)
                     {
-                        var current_plant = board.controledPlant;
-                        if (board.controledPlant != plant) { board.controledPlant = plant; current_plant?.UpdateText(); }
-                        else board.controledPlant = null;
+                        var current_plant = BoardInstance.controledPlant;
+                        if (BoardInstance.controledPlant != plant) { BoardInstance.controledPlant = plant; current_plant?.UpdateText(); }
+                        else BoardInstance.controledPlant = null;
                         plant.UpdateText();
                     }
                 }
@@ -70,14 +70,14 @@ namespace Magnetar_Client.Modules
 
             if (SinglePlantMode.Value)
             {
-                if (board.controledPlant == null) board.controledPlant = Lawnf.GetAllPlants()?.Count > 0 ? Lawnf.GetAllPlants()[0] : null;
+                if (BoardInstance.controledPlant == null) BoardInstance.controledPlant = Lawnf.GetAllPlants()?.Count > 0 ? Lawnf.GetAllPlants()[0] : null;
             }
         }
 
         public override void OnDisable()
         {
             if (BoardInstanceIsNull) return;
-            board.controledPlant = null;
+            BoardInstance.controledPlant = null;
         }
 
     }

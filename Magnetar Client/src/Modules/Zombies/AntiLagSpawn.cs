@@ -8,6 +8,7 @@ using HarmonyLib;
 
 namespace Magnetar_Client.Modules
 {
+#if !Android
     public class AntiLagSpawns : Module
     {
         // Mod Info
@@ -141,9 +142,10 @@ namespace Magnetar_Client.Modules
             }
         }
 
-        [HarmonyPatch(typeof(PauseMenu_Btn), nameof(PauseMenu_Btn.Restart))]
+        [HarmonyPatch(typeof(PauseMenu_Btn))]
         public static class PauseMenuRestartPatch
         {
+            [HarmonyPatch(nameof(PauseMenu_Btn.Restart))]
             [HarmonyPrefix]
             public static void Prefix()
             {
@@ -155,4 +157,5 @@ namespace Magnetar_Client.Modules
             }
         }
     }
+#endif
 }

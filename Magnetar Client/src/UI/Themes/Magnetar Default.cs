@@ -40,7 +40,6 @@ namespace Magnetar_Client.UI.Themes
         private static Texture2D ActiveTex;
         private static Texture2D ActiveHoverTex;
 
-        private static Texture2D TransparentTex;
         private static Texture2D DimTex;
 
         // Tracks the GUIScale that styles were last rescaled for, so Rescale()
@@ -56,7 +55,6 @@ namespace Magnetar_Client.UI.Themes
         public static readonly Color HoverColor = new Color(28 / 255f, 28 / 255f, 28 / 255f, 255 / 255f);
         public static readonly Color ActiveColor = new Color(51 / 255f, 51 / 255f, 51 / 255f, 255 / 255f);
         public static readonly Color ActiveHoverColor = new Color(240 / 255f, 51 / 255f, 51 / 255f, 255 / 255f);
-        public static readonly Color Transparent = new Color(128 / 255f, 128 / 255f, 128 / 255f, 0 / 255f);
         public static readonly Color DimColor = new Color(26 / 255f, 26 / 255f, 26 / 255f, 102 / 255f);
         #endregion
 
@@ -76,7 +74,6 @@ namespace Magnetar_Client.UI.Themes
         private const int ModuleWindowPaddingTop = 3;
 
         private const int SettingsWindowFontSize = 21;
-        private const int SettingsWindowPaddingTop = 1;
 
         private const int SettingFontSize = 12;
         private const int SettingPaddingLeft = 10;
@@ -112,7 +109,6 @@ namespace Magnetar_Client.UI.Themes
             ActiveTex = CreateTex(ActiveColor);
 
             ActiveHoverTex = CreateTex(ActiveHoverColor);
-            TransparentTex = CreateTex(Transparent);
             BgLightTex = CreateTex(LightBackgroundColor);
 
             DimTex = CreateTex(DimColor);

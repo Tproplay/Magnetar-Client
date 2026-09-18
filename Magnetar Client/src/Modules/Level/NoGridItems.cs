@@ -166,7 +166,7 @@ namespace Magnetar_Client.Modules
 #if MELONLOADER || BEPINEX
             if (DebugMode.Value)
             {
-                DebugLogger.Msg("Found " + board.griditemArray.Count + " grid items.");
+                DebugLogger.Msg("Found " + BoardInstance.griditemArray.Count + " grid items.");
             }
 #endif
 

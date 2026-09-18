@@ -11,7 +11,7 @@ namespace Magnetar_Client.Core
 {
     public static class MobileMenuUI
     {
-        private static Rect _btnRect = new Rect(40f, 200f, 68f, 68f);
+        private static Rect _btnRect = new Rect(40f, 200f, 120f, 120f);
         private static Vector2 _dragStartMousePos;
         private static Vector2 _dragStartBtnPos;
         private static bool _isPointerDown = false;
@@ -259,7 +259,7 @@ namespace Magnetar_Client.Core
 
         private static void EnsureResources()
         {
-            float currentSize = Config.S(68f);
+            float currentSize = Config.S(120f);
             if (Mathf.Abs(_btnRect.width - currentSize) > 0.5f)
             {
                 _btnRect.width = currentSize;

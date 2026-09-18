@@ -245,13 +245,13 @@ namespace Magnetar_Client.Modules
                 Magnetar_Info.Version);
             result = result.Replace("{Game_Version}", Application.version);
             result = result.Replace("{Level_Name}", GetLevelName());
-            result = result.Replace("{Sun}", FormatInternational(board.theSun));
-            result = result.Replace("{Money}", FormatInternational(board.theMoney));
-            result = result.Replace("{Current_Wave}", board.theWave.ToString());
-            result = result.Replace("{Max_Wave}", board.theMaxWave.ToString());
+            result = result.Replace("{Sun}", FormatInternational(BoardInstance.theSun));
+            result = result.Replace("{Money}", FormatInternational(BoardInstance.theMoney));
+            result = result.Replace("{Current_Wave}", BoardInstance.theWave.ToString());
+            result = result.Replace("{Max_Wave}", BoardInstance.theMaxWave.ToString());
             result = result.Replace("{number_of_plants}", plantList.Count.ToString());
             result = result.Replace("{number_of_zombies}", zombieList.Count.ToString());
-            result = result.Replace("{movers_left}", board.mowerArray.Count.ToString());
+            result = result.Replace("{movers_left}", BoardInstance.mowerArray.Count.ToString());
             return result;
         }
 

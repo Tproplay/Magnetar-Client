@@ -75,11 +75,13 @@ namespace Magnetar_Client.Core
 
         // Long Press / Hold Tracking for Mobile
         private static Modules.Module _pressedModule = null;
+#if ANDROID
         private static float _pressStartTime = 0f;
         private static Vector2 _pressStartScreenPos = Vector2.zero;
         private static bool _hasTriggeredLongPress = false;
         private const float LongPressThreshold = 0.40f; // 400ms hold opens settings
-        #endregion
+#endif
+#endregion
 
         public static void Init()
         {

@@ -26,7 +26,7 @@ namespace Magnetar_Client.Core
 #endif
     {
         public static main Instance;
-        public static HarmonyLib.Harmony HarmonyInstance;
+        public static new HarmonyLib.Harmony HarmonyInstance;
 
         private readonly float nativeWidth = 1920f;
         private readonly float nativeHeight = 1080f;

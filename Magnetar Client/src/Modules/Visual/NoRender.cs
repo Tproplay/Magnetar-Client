@@ -36,7 +36,7 @@ namespace Magnetar_Client.Modules
         public BoolSetting ScreenShakeSetting;
 
         private Dictionary<int, string> fxDatabase = new Dictionary<int, string>();
-        private string filePath;
+        private readonly string filePath;
         private int nextId = 0;
 
         public enum ParticleTypes { Empty }
@@ -56,7 +56,7 @@ namespace Magnetar_Client.Modules
                 Directory.CreateDirectory(dirPath);
             }
 
-            string filePath = Path.Combine(dirPath, "FxData.json");
+            filePath = Path.Combine(dirPath, "FxData.json");
             Dictionary<int, string> menuNames = new Dictionary<int, string>();
 
             // 2. Load the JSON

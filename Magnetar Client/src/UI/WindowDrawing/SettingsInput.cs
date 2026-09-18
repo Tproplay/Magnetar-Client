@@ -790,6 +790,15 @@ namespace Magnetar_Client.UI.WindowDrawing
 
         private static void ToggleWithLimit(dynamic activeMultiSelect, int val)
         {
+            // If single-selection mode, replace the current selection immediately
+            if (activeMultiSelect.MaxSelection == 1)
+            {
+                activeMultiSelect.SelectedValues.Clear();
+                activeMultiSelect.Select(val);
+                return;
+            }
+
+            // Default multi-selection behavior
             if (activeMultiSelect.MaxSelection == -1 || activeMultiSelect.SelectedValues.Count < activeMultiSelect.MaxSelection)
             {
                 activeMultiSelect.Select(val);

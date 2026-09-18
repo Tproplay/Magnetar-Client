@@ -1,4 +1,7 @@
-﻿#if MELONLOADER || RELEASE_MELON
+﻿using System;
+#if MELONLOADER || RELEASE_MELON
+using Magnetar_Client.Utils;
+using Magnetar_Client.Core;
 using MelonLoader;
 using MelonLoader.Utils;
 #elif BEPINEX || RELEASE_BEPINEX
@@ -29,7 +32,22 @@ namespace Magnetar_Client
     {
         public static string CurrentProfile = "Default";
 
-        public static string Theme = "Magnetar Default";
+        private static string _theme = "Magnetar Default";
+
+        public static string Theme
+        {
+            get => _theme;
+            set
+            {
+                if (string.Equals(_theme, value, System.StringComparison.OrdinalIgnoreCase))
+                    return;
+
+                _theme = value;
+
+                // Apply theme colors, rebuild textures, and bind styles
+                Magnetar_Client.UI.Themes.Magnetar_Default.ApplyTheme(_theme);
+            }
+        }
 
         // Native canvas size used by the outer letterbox matrix (main.cs).
         // NOT scaled by GUIScale - it's the fixed reference resolution
@@ -127,7 +145,34 @@ namespace Magnetar_Client
         private const float BaseSelectButtonWidth = 70f;
         public static float selectButtonWidth => S(BaseSelectButtonWidth);
 
-        public static string Language = "English";
+        private static string _language = "English";
+
+        public static string Language
+        {
+            get => _language;
+            set
+            {
+                if (string.Equals(_language, value, StringComparison.OrdinalIgnoreCase))
+                    return;
+
+                _language = value;
+
+                // Perform language reload & event propagation
+                Translator.LoadTranslations();
+                Translator.DumpMissingStrings();
+
+                if (Core.ModuleManager.Modules != null)
+                {
+                    foreach (var mod in Core.ModuleManager.Modules)
+                    {
+                        mod.OnLanguageChanged();
+                    }
+                }
+
+                HUDManager.OnLanguageChange();
+                Magnetar_Client.NEF.NEFData.OnLanguageChanged();
+            }
+        }
 
         private static float _baseSettingWidth = 260f;
         public static float SettingWidth

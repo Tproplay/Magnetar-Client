@@ -62,15 +62,20 @@ namespace Magnetar_Client.Core
             SaveLoad.InitializePrefrences();
             Utils.Translator.LoadTranslations();
 
+            // Load theme definitions from JSON first so they are known to the system
+            UI.Themes.Magnetar_Default.LoadThemesFromJson();
+
             ModuleManager.Init();
             HUDRenderer.Init();
             NEFManager.Init();
-            GUIManager.Init();
-
             TopBar.TopBar.Init();
-
             ProfileManager.Init();
+
+            // Load saved configurations (Config.Theme, Language, etc.)
             SaveLoad.Load();
+
+            // Initialize GUIManager AFTER SaveLoad.Load so it picks up the loaded theme/language
+            GUIManager.Init();
 
             Api.Api.LateInitializeCore?.Invoke();
 
@@ -134,7 +139,6 @@ namespace Magnetar_Client.Core
                     mod.OnGUI();
                 }
 
-                // Fire custom OnGUI subscribers in the scaled matrix
                 Api.Api.OnGUI?.Invoke();
 
                 if (Magnetar_Client.Config.showgui)
@@ -181,7 +185,6 @@ namespace Magnetar_Client.Core
                 if (mod != null) mod.OnUpdate();
             }
 
-            // Fire external update hooks
             Api.Api.OnUpdate?.Invoke();
 
             if (!hasWarmedUp) return;

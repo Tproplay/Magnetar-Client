@@ -27,9 +27,11 @@ namespace Magnetar_Client.UI.Themes
 
     public static class Magnetar_Default
     {
+        public static bool IsInitialized { get; private set; } = false;
+
         #region Styles
         public static GUIStyle TopBar;
-        public static GUIStyle TopBarActive;
+        public static GUIStyle TopBarButtonActive;
 
         public static GUIStyle ModuleWindow;
         public static GUIStyle ModuleOn;
@@ -146,16 +148,22 @@ namespace Magnetar_Client.UI.Themes
 
         public static void Init()
         {
+            // 1. Load custom JSON themes from disk
             LoadThemesFromJson();
 
+            // 2. Set up all GUIStyle instances first so BindStyles doesn't hit null references
+            BuildEmptyStyles();
+
+            // 3. Mark ready before calling ApplyTheme
+            IsInitialized = true;
+
+            // 4. Resolve theme from Config (or fall back to default)
             string requestedTheme = Config.Theme;
             if (string.IsNullOrEmpty(requestedTheme) || !LoadedThemes.ContainsKey(requestedTheme))
             {
                 requestedTheme = InternalDefaultTheme.Name;
-                Config.Theme = requestedTheme;
             }
 
-            BuildEmptyStyles();
             ApplyTheme(requestedTheme);
 
             lastScale = -1f;
@@ -179,7 +187,6 @@ namespace Magnetar_Client.UI.Themes
 
                 if (!File.Exists(themePath))
                 {
-                    // Generate template JSON if not present
                     var templateList = new List<ThemeData>
                     {
                         new ThemeData
@@ -240,6 +247,12 @@ namespace Magnetar_Client.UI.Themes
 
         public static void ApplyTheme(string themeName)
         {
+            if (!IsInitialized)
+            {
+                CurrentThemeName = themeName;
+                return;
+            }
+
             if (!LoadedThemes.TryGetValue(themeName, out var theme))
             {
                 DebugLogger.Warning($"[Themes] Theme '{themeName}' not found. Falling back to default.");
@@ -248,7 +261,6 @@ namespace Magnetar_Client.UI.Themes
             }
 
             CurrentThemeName = themeName;
-            Config.Theme = themeName;
 
             BackgroundColor = ParseColor(theme.BackgroundColor, InternalDefaultTheme.BackgroundColor);
             AccentColor = ParseColor(theme.AccentColor, InternalDefaultTheme.AccentColor);
@@ -308,7 +320,7 @@ namespace Magnetar_Client.UI.Themes
         private static void BuildEmptyStyles()
         {
             TopBar = new GUIStyle();
-            TopBarActive = new GUIStyle();
+            TopBarButtonActive = new GUIStyle();
             ModuleOn = new GUIStyle();
             ModuleOnCentralized = new GUIStyle();
             ModuleOff = new GUIStyle();
@@ -330,6 +342,8 @@ namespace Magnetar_Client.UI.Themes
 
         private static void BindStyles()
         {
+            if (TopBar == null) BuildEmptyStyles();
+
             TopBar.normal.textColor = TextDim;
             TopBar.hover.textColor = Color.white;
             TopBar.active.textColor = Color.white;
@@ -338,13 +352,13 @@ namespace Magnetar_Client.UI.Themes
             TopBar.active.background = ActiveTex;
             TopBar.alignment = TextAnchor.MiddleCenter;
 
-            TopBarActive.normal.textColor = Color.white;
-            TopBarActive.hover.textColor = Color.white;
-            TopBarActive.active.textColor = Color.white;
-            TopBarActive.normal.background = AccentTex;
-            TopBarActive.hover.background = AccentTex;
-            TopBarActive.active.background = AccentTex;
-            TopBarActive.alignment = TextAnchor.MiddleCenter;
+            TopBarButtonActive.normal.textColor = Color.white;
+            TopBarButtonActive.hover.textColor = Color.white;
+            TopBarButtonActive.active.textColor = Color.white;
+            TopBarButtonActive.normal.background = AccentTex;
+            TopBarButtonActive.hover.background = AccentTex;
+            TopBarButtonActive.active.background = AccentTex;
+            TopBarButtonActive.alignment = TextAnchor.MiddleCenter;
 
             ModuleOn.normal.background = AccentTex;
             ModuleOn.normal.textColor = Color.black;
@@ -435,7 +449,7 @@ namespace Magnetar_Client.UI.Themes
 
         public static void Rescale()
         {
-            if (!Magnetar_Client.Core.main.Instance.hasWarmedUp) return;
+            if (!Magnetar_Client.Core.main.Instance.hasWarmedUp || !IsInitialized) return;
 
             float scale = Config.GUIScale;
             float elementScale = Config.ElementScale;
@@ -449,12 +463,12 @@ namespace Magnetar_Client.UI.Themes
             int S(int baseValue) => Mathf.Max(1, Mathf.RoundToInt(Config.S(baseValue)));
             float Sf(float baseValue) => Mathf.Max(0f, Config.S(baseValue));
 
-            // TopBar / TopBarActive
+            // TopBar / TopBarButtonActive
             TopBar.fontSize = S(TopBarFontSize);
             SetOffset(TopBar.padding, S(TopBarPaddingLR), S(TopBarPaddingLR), S(TopBarPaddingTB), S(TopBarPaddingTB));
 
-            TopBarActive.fontSize = S(TopBarFontSize);
-            SetOffset(TopBarActive.padding, S(TopBarPaddingLR), S(TopBarPaddingLR), S(TopBarPaddingTB), S(TopBarPaddingTB));
+            TopBarButtonActive.fontSize = S(TopBarFontSize);
+            SetOffset(TopBarButtonActive.padding, S(TopBarPaddingLR), S(TopBarPaddingLR), S(TopBarPaddingTB), S(TopBarPaddingTB));
 
             // ModuleOn / ModuleOff
             ModuleOn.fontSize = S(ModuleFontSize);

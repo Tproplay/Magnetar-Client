@@ -26,7 +26,8 @@ namespace Magnetar_Client.Utils
         public class MagnetarSaveData
         {
             public bool ShowGui = false;
-            public int Language;
+            public string Language;
+            public string Theme;
             public float GUIScale = 1f;
             public float ElementScale = 1f;
             public bool HudEnabled = true;
@@ -148,10 +149,6 @@ namespace Magnetar_Client.Utils
             if (HUDRenderer.HudToggles != null && HUDRenderer.HudToggles.SelectedValues != null)
                 safeHudElements = new List<int>(HUDRenderer.HudToggles.SelectedValues);
 
-            int safeLanguage = 0;
-            if (GUIManager.LanguageSetting != null && GUIManager.LanguageSetting.SelectedValues != null && GUIManager.LanguageSetting.SelectedValues.Count > 0)
-                safeLanguage = GUIManager.LanguageSetting.SelectedValues.First();
-
             // ==========================================
             // 1. SAVE MAIN MAGNETAR CONFIG
             // ==========================================
@@ -164,7 +161,8 @@ namespace Magnetar_Client.Utils
                 HudPositions = new Dictionary<string, SimpleRect>(),
                 CategoryPositions = new Dictionary<string, SimpleRect>(),
                 Modules = new Dictionary<string, ModuleSaveData>(),
-                Language = safeLanguage,
+                Language = Config.Language,
+                Theme = Config.Theme,
                 GUIScale = Config.GUIScale,
                 ElementScale = Config.ElementScale,
                 ShowFloatingIcon = Config.ShowFloatingIcon
@@ -331,14 +329,29 @@ namespace Magnetar_Client.Utils
                             Config.showgui = data.ShowGui;
                             Config.ShowFloatingIcon = data.ShowFloatingIcon;
 
+                            if (!string.IsNullOrEmpty(data.Theme))
+                            {
+                                Config.Theme = data.Theme;
+                            }
+
                             // 1. Language Setting
                             if (GUIManager.LanguageSetting != null && GUIManager.LanguageSetting.Options != null)
                             {
-                                if (GUIManager.LanguageSetting.SelectedValues != null)
+                                foreach (var key in GUIManager.LanguageSetting.Options)
                                 {
                                     GUIManager.LanguageSetting.Deselect(0);
-                                    GUIManager.LanguageSetting.Select(data.Language);
+                                    if (key.Value == data.Language)
+                                    {
+                                        GUIManager.LanguageSetting.Select(key.Key);
+                                        break;
+                                    }
                                 }
+                            }
+
+                            // 1.1 Refresh Theme Setting in GUIManager if it exists
+                            if (GUIManager.ThemeSetting != null)
+                            {
+                                GUIManager.RefreshThemeOptions();
                             }
 
                             // 2. Category Window Positions

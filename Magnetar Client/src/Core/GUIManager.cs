@@ -246,23 +246,12 @@ namespace Magnetar_Client.Core
                     currentLangName = LanguageSetting.Options[selectedId];
             }
 
-            if (Config.Language != currentLangName)
-            {
-                Config.Language = currentLangName;
-                Translator.LoadTranslations();
-                Translator.DumpMissingStrings();
+            Config.Language = currentLangName;
 
-                if (ModuleManager.Modules != null)
-                {
-                    foreach (var mod in ModuleManager.Modules)
-                        mod.OnLanguageChanged();
-                }
+            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight),
+                $"Language: <color=yellow>{Config.Language}</color>",
+                Magnetar_Default.SettingDescriptionStyle);
 
-                HUDManager.OnLanguageChange();
-                Magnetar_Client.NEF.NEFData.OnLanguageChanged();
-            }
-
-            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), $"Language: <color=yellow>{currentLangName}</color>", Magnetar_Default.SettingDescriptionStyle);
             Rect langBtnRect = new Rect(w * 0.5f, y, w * 0.45f, elementHeight);
 
             if (langBtnRect.Contains(e.mousePosition)) GUI.backgroundColor = Magnetar_Default.AccentColor;
@@ -286,21 +275,24 @@ namespace Magnetar_Client.Core
                 }
             }
 
-            if (Config.Theme != currentTheme)
-            {
-                Magnetar_Default.ApplyTheme(currentTheme);
-            }
+            Config.Theme = currentTheme;
 
-            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), $"Theme: <color=yellow>{currentTheme}</color>", Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight),
+                $"Theme: <color=yellow>{Config.Theme}</color>",
+                Magnetar_Default.SettingDescriptionStyle);
+
             Rect themeBtnRect = new Rect(w * 0.5f, y, w * 0.45f, elementHeight);
 
-            if (themeBtnRect.Contains(e.mousePosition)) GUI.backgroundColor = Magnetar_Default.AccentColor;
+            if (themeBtnRect.Contains(e.mousePosition))
+                GUI.backgroundColor = Magnetar_Default.AccentColor;
+
             if (e.type == EventType.MouseDown && e.button == 0 && themeBtnRect.Contains(e.mousePosition))
             {
                 e.Use();
                 RefreshThemeOptions();
                 OpenSubSelector(ThemeSetting);
             }
+
             GUI.Box(themeBtnRect, "Change", Magnetar_Default.SettingOff);
             GUI.backgroundColor = Color.white;
             y += elementHeight + Config.S(10f);

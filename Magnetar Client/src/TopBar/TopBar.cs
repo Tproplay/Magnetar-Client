@@ -94,7 +94,7 @@ namespace Magnetar_Client.TopBar
                 GUI.BeginGroup(GroupRect);
 
 
-                if (GUI.Button(rect, name, Config.CurrentTab == tab ? Magnetar_Default.TopBarActive : Magnetar_Default.TopBar))
+                if (GUI.Button(rect, name, Config.CurrentTab == tab ? Magnetar_Default.TopBarButtonActive : Magnetar_Default.TopBar))
                 {
                     Config.CurrentTab = tab;
                     Event.current.Use();

@@ -46,7 +46,7 @@ namespace Magnetar_Client.Core
                 WindowRect,
                 (GUI.WindowFunction)DrawProfileWindow,
                 "",
-                Magnetar_Default.ModuleWindow
+                Magnetar_Default.CategoryWindowStyle
             );
         }
 
@@ -58,19 +58,19 @@ namespace Magnetar_Client.Core
             float y = Config.S(35f);
 
             Rect headerBgRect = new Rect(0, 0, w, y - indent);
-            GUI.Box(headerBgRect, Translator.Translate("Profile Manager"), Magnetar_Default.SettingsWindow);
+            GUI.Box(headerBgRect, Translator.Translate("Profile Manager"), Magnetar_Default.SettingsWndowStyle);
 
             GUI.Label(
                 new Rect(indent, y, w - (indent * 2), elementHeight),
                 $"{Translator.Translate("Current Active Profile")}: <color=yellow>{Config.CurrentProfile}</color>",
-                Magnetar_Default.SettingDescriptionStyle
+                Magnetar_Default.SettingLabelStyle
             );
 
             y += elementHeight + Config.S(10f);
 
             // CREATE NEW PROFILE INPUT
 
-            GUI.Label(new Rect(indent, y, Config.S(100f), elementHeight), Translator.Translate("New Profile:"), Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(indent, y, Config.S(100f), elementHeight), Translator.Translate("New Profile:"), Magnetar_Default.SettingLabelStyle);
 
             Rect inputRect = new Rect(indent + Config.S(95f), y, w - Config.S(215f), elementHeight);
             newProfileInput = DrawSetting.DrawManualTextField(inputRect, newProfileInput, Translator.Translate("Enter profile name..."));
@@ -99,12 +99,12 @@ namespace Magnetar_Client.Core
             y += elementHeight + Config.S(15f);
 
             // Separator
-            GUI.Box(new Rect(indent, y, w - (indent * 2), Config.S(1f)), "", Magnetar_Default.SettingsWindow);
+            GUI.Box(new Rect(indent, y, w - (indent * 2), Config.S(1f)), "", Magnetar_Default.SettingsWndowStyle);
             y += Config.S(10f);
 
             //  AVAILABLE PROFILES LIST
 
-            GUI.Label(new Rect(indent, y, w - (indent * 2), elementHeight), Translator.Translate("Available Profiles:"), Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(indent, y, w - (indent * 2), elementHeight), Translator.Translate("Available Profiles:"), Magnetar_Default.SettingLabelStyle);
             y += elementHeight + Config.S(5f);
 
             float scrollAreaHeight = WindowRect.height - y - Config.S(15f);
@@ -144,7 +144,7 @@ namespace Magnetar_Client.Core
                     // Entry bar highlight on hover/active
                     if (isActive)
                     {
-                        GUI.Box(itemRect, "", Magnetar_Default.SettingsWindow);
+                        GUI.Box(itemRect, "", Magnetar_Default.SettingsWndowStyle);
                     }
                     else if (isItemHovered && !isDeleteHovered)
                     {
@@ -154,12 +154,12 @@ namespace Magnetar_Client.Core
                     }
                     else
                     {
-                        GUI.Box(itemRect, "", Magnetar_Default.ModuleOff);
+                        GUI.Box(itemRect, "", Magnetar_Default.CategoryModuleOffStyle);
                     }
 
                     string labelText = isActive ? $"<b><color=yellow>{profileName}</color> ({Translator.Translate("Active")})</b>" : profileName;
                     float textWidth = !isDefault ? itemRect.width - Config.S(90f) : itemRect.width - Config.S(20f);
-                    GUI.Label(new Rect(Config.S(10f), itemY + Config.S(3f), textWidth, elementHeight), labelText, Magnetar_Default.SettingDescriptionStyle);
+                    GUI.Label(new Rect(Config.S(10f), itemY + Config.S(3f), textWidth, elementHeight), labelText, Magnetar_Default.SettingLabelStyle);
 
                     // Delete Button
                     if (!isDefault)

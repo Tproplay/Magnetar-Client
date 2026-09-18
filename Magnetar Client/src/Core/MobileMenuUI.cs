@@ -323,14 +323,14 @@ namespace Magnetar_Client.Core
                 _closeBtnStyle.overflow = new RectOffset();
             }
 
-            if (Magnetar_Default.ModuleOn != null)
+            if (Magnetar_Default.CategoryModuleOnStyle != null)
             {
-                _closeBtnStyle.normal.background = Magnetar_Default.ModuleOn.normal.background;
-                _closeBtnStyle.normal.textColor = Magnetar_Default.ModuleOn.normal.textColor;
-                _closeBtnStyle.hover.background = Magnetar_Default.ModuleOn.hover.background;
-                _closeBtnStyle.hover.textColor = Magnetar_Default.ModuleOn.hover.textColor;
-                _closeBtnStyle.active.background = Magnetar_Default.ModuleOn.active.background;
-                _closeBtnStyle.active.textColor = Magnetar_Default.ModuleOn.active.textColor;
+                _closeBtnStyle.normal.background = Magnetar_Default.CategoryModuleOnStyle.normal.background;
+                _closeBtnStyle.normal.textColor = Magnetar_Default.CategoryModuleOnStyle.normal.textColor;
+                _closeBtnStyle.hover.background = Magnetar_Default.CategoryModuleOnStyle.hover.background;
+                _closeBtnStyle.hover.textColor = Magnetar_Default.CategoryModuleOnStyle.hover.textColor;
+                _closeBtnStyle.active.background = Magnetar_Default.CategoryModuleOnStyle.active.background;
+                _closeBtnStyle.active.textColor = Magnetar_Default.CategoryModuleOnStyle.active.textColor;
             }
             _closeBtnStyle.fontSize = Mathf.RoundToInt(Config.S(20f));
 

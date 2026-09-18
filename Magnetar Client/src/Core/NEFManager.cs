@@ -35,7 +35,7 @@ namespace Magnetar_Client.Core
                 windowRect,
                 (GUI.WindowFunction)NEFGUI.DrawNEFWindow,
                 "Not Enough Fusions",
-                Magnetar_Default.ModuleWindow
+                Magnetar_Default.CategoryWindowStyle
             );
         }
     }

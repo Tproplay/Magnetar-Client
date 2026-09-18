@@ -103,9 +103,9 @@ namespace Magnetar_Client.Core
                     GUI.matrix = Matrix4x4.identity;
 
                     Rect fullScreenRect = new Rect(0, 0, Screen.width, Screen.height);
-                    if (Magnetar_Default.DimStyle != null)
+                    if (Magnetar_Default.DimBackgroundStyle != null)
                     {
-                        GUI.Box(fullScreenRect, "", Magnetar_Default.DimStyle);
+                        GUI.Box(fullScreenRect, "", Magnetar_Default.DimBackgroundStyle);
                     }
                     GUI.matrix = backupMatrix;
 
@@ -146,7 +146,7 @@ namespace Magnetar_Client.Core
                             selectorRect,
                             GetSelectorDelegate(),
                             "",
-                            Magnetar_Default.ModuleWindow
+                            Magnetar_Default.CategoryWindowStyle
                         );
                     }
                     else
@@ -156,7 +156,7 @@ namespace Magnetar_Client.Core
                             windowRect,
                             GetControlsDelegate(),
                             "",
-                            Magnetar_Default.ModuleWindow
+                            Magnetar_Default.CategoryWindowStyle
                         );
                     }
                 }
@@ -176,11 +176,11 @@ namespace Magnetar_Client.Core
             {
                 _exitBtnStyle = new GUIStyle();
 
-                if (Magnetar_Default.SettingsWindow != null)
+                if (Magnetar_Default.SettingsWndowStyle != null)
                 {
-                    _exitBtnStyle.normal.background = Magnetar_Default.SettingsWindow.normal.background;
-                    _exitBtnStyle.normal.textColor = Magnetar_Default.SettingsWindow.normal.textColor;
-                    _exitBtnStyle.fontStyle = Magnetar_Default.SettingsWindow.fontStyle;
+                    _exitBtnStyle.normal.background = Magnetar_Default.SettingsWndowStyle.normal.background;
+                    _exitBtnStyle.normal.textColor = Magnetar_Default.SettingsWndowStyle.normal.textColor;
+                    _exitBtnStyle.fontStyle = Magnetar_Default.SettingsWndowStyle.fontStyle;
                 }
 
                 _exitBtnStyle.alignment = TextAnchor.MiddleCenter;
@@ -255,12 +255,12 @@ namespace Magnetar_Client.Core
             float y = Config.S(35f);
 
             Rect headerBgRect = new Rect(0, 0, width, y - indent);
-            GUI.Box(headerBgRect, Translator.Translate("Customize HUD"), Magnetar_Default.SettingsWindow);
+            GUI.Box(headerBgRect, Translator.Translate("Customize HUD"), Magnetar_Default.SettingsWndowStyle);
 
             int activeCount = HUDRenderer.HudToggles != null ? HUDRenderer.HudToggles.SelectedValues.Count : 0;
             GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight),
                 Translator.Translate("Elements") + $" ({activeCount})",
-                Magnetar_Default.SettingDescriptionStyle);
+                Magnetar_Default.SettingLabelStyle);
 
             Rect selectBtnRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
 
@@ -293,7 +293,7 @@ namespace Magnetar_Client.Core
             y += elementHeight + Config.S(5f);
 
             GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Layout"),
-                Magnetar_Default.SettingDescriptionStyle);
+                Magnetar_Default.SettingLabelStyle);
 
             Rect configBtnRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
 
@@ -314,13 +314,13 @@ namespace Magnetar_Client.Core
             y += elementHeight + Config.S(5f);
 
             GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Background"),
-                Magnetar_Default.SettingDescriptionStyle);
+                Magnetar_Default.SettingLabelStyle);
             Rect bgRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
             bool bgHover = bgRect.Contains(e.mousePosition);
 
             if (bgHover) GUI.backgroundColor = Magnetar_Default.AccentColor;
             GUI.Box(bgRect, showBackground ? Translator.Translate("ON") : Translator.Translate("OFF"),
-                showBackground ? Magnetar_Default.ModuleOn : Magnetar_Default.SettingOff);
+                showBackground ? Magnetar_Default.CategoryModuleOnStyle : Magnetar_Default.SettingOff);
             GUI.backgroundColor = Color.white;
 
             if (bgHover && e.type == EventType.MouseDown && e.button == 0)
@@ -332,7 +332,7 @@ namespace Magnetar_Client.Core
             y += elementHeight + Config.S(5f);
 
             GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Enabled"),
-                Magnetar_Default.SettingDescriptionStyle);
+                Magnetar_Default.SettingLabelStyle);
             Rect enabledRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
             bool enabledHover = enabledRect.Contains(e.mousePosition);
 

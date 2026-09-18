@@ -39,7 +39,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             Rect labelRect = new Rect(Config.indent, y, labelW, elemH);
             Rect inputRect = new Rect(width - Config.indent - controlW, y, controlW, elemH);
 
-            GUI.Label(labelRect, translatedName, Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(labelRect, translatedName, Magnetar_Default.SettingLabelStyle);
             strSet.Value = DrawManualTextField(inputRect, strSet.Value, "", strSet.AutocompleteVars);
         }
 
@@ -82,7 +82,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
 
             string translatedName = Magnetar_Client.Utils.Translator.Translate(name);
-            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingLabelStyle);
 
             float LogConvert(float v) => Mathf.Sign(v) * Mathf.Log10(Mathf.Abs(v) + 1.0f);
             float ExpConvert(float l) => Mathf.Sign(l) * (Mathf.Pow(10.0f, Mathf.Abs(l)) - 1.0f);
@@ -227,7 +227,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             float labelWidth = Mathf.Max(width * 0.45f, width - Config.indent * 2 - Config.SettingWidth);
 
             GUI.Label(new Rect(Config.indent, y, labelWidth, Config.elementHeight),
-                translatedName, Magnetar_Default.SettingDescriptionStyle);
+                translatedName, Magnetar_Default.SettingLabelStyle);
 
             string bindText = bSet.IsBinding ? "[...]" : bSet.GetBindString();
             Rect bindRect = new Rect(width - Config.indent - Config.SettingWidth, y,
@@ -288,7 +288,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             float labelWidth = Mathf.Max(width * 0.45f, width - Config.indent * 2 - Config.SettingWidth);
 
             GUI.Label(new Rect(Config.indent, y, labelWidth, Config.elementHeight),
-                translatedName, Magnetar_Default.SettingDescriptionStyle);
+                translatedName, Magnetar_Default.SettingLabelStyle);
 
             Rect btnRect = new Rect(width - Config.indent - Config.SettingWidth, y,
                 Config.SettingWidth, Config.elementHeight);
@@ -352,7 +352,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             float titleHeight = Config.S(25f);        // Standard height on PC
 #endif
             Rect headerBgRect = new Rect(0, 0, multiSelectWindowRect.width, titleHeight);
-            GUI.Box(headerBgRect, Translate("Select ") + Translate(activeMultiSelect.Name), Magnetar_Default.SettingsWindow);
+            GUI.Box(headerBgRect, Translate("Select ") + Translate(activeMultiSelect.Name), Magnetar_Default.SettingsWndowStyle);
 
             if (Config.ShowMobileButtons)
             {
@@ -382,7 +382,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                     return;
                 }
 
-                GUI.Box(closeButtonRect, "✕", Magnetar_Default.ModuleOnCentralized);
+                GUI.Box(closeButtonRect, "✕", Magnetar_Default.CloseButtonStyle);
                 GUI.backgroundColor = Color.white;
             }
 
@@ -814,7 +814,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             int controlId = selSet.GetHashCode();
 
             string translatedName = Translator.Translate(selSet.Name);
-            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingLabelStyle);
 
             string currentValName = "Unknown";
             if (selSet.Options.ContainsKey(selSet.Value))
@@ -1294,7 +1294,7 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             if (string.IsNullOrEmpty(text) && activeTextFieldId != controlId)
             {
-                GUI.Label(new Rect(5, 0, rect.width, rect.height), defaultText, Magnetar_Default.SettingDescriptionStyle);
+                GUI.Label(new Rect(5, 0, rect.width, rect.height), defaultText, Magnetar_Default.SettingLabelStyle);
             }
             else
             {
@@ -1409,7 +1409,7 @@ namespace Magnetar_Client.UI.WindowDrawing
         {
             Event e = Event.current;
             string translatedName = Translator.Translate(btnSet.Name);
-            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingLabelStyle);
 
             Rect btnRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
             bool isHovered = btnRect.Contains(e.mousePosition);
@@ -1432,7 +1432,7 @@ namespace Magnetar_Client.UI.WindowDrawing
         {
             string displayText = Translator.Translate(!string.IsNullOrEmpty(lblSet.Text) ? lblSet.Text : lblSet.Name);
             Rect labelRect = new Rect(Config.indent, y, width - (Config.indent * 2), Config.elementHeight);
-            GUI.Label(labelRect, displayText, Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(labelRect, displayText, Magnetar_Default.SettingLabelStyle);
         }
     }
 }

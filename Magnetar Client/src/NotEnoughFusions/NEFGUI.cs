@@ -89,7 +89,7 @@ namespace Magnetar_Client.NEF
             float rightPanelWidth = NEFManager.windowRect.width * 0.3f;
 
             // Dynamic top indent scaled with GUI font size to prevent overlapping the title bar
-            float titleFontSize = Magnetar_Default.ModuleWindow != null ? Magnetar_Default.ModuleWindow.fontSize : Config.S(18f);
+            float titleFontSize = Magnetar_Default.CategoryWindowStyle != null ? Magnetar_Default.CategoryWindowStyle.fontSize : Config.S(18f);
             float topIndent = Mathf.Max(Config.S(48f), titleFontSize + Config.S(18f));
 
             float pad = Config.S(10f);
@@ -102,7 +102,7 @@ namespace Magnetar_Client.NEF
             // ==========================================
             // 1. LEFT PANEL: VISUALIZER
             // ==========================================
-            GUI.Box(pyramidBoxRect, "", Magnetar_Default.ModuleWindow);
+            GUI.Box(pyramidBoxRect, "", Magnetar_Default.CategoryWindowStyle);
 
             if (showUsagesView)
             {
@@ -247,7 +247,7 @@ namespace Magnetar_Client.NEF
             float ry = rightPanelRect.y;
 
             string searchLabelText = Translator.Translate("Search:");
-            GUIStyle labelStyle = Magnetar_Default.SettingDescriptionStyle ?? GUI.skin.label;
+            GUIStyle labelStyle = Magnetar_Default.SettingLabelStyle ?? GUI.skin.label;
             float searchLabelWidth = labelStyle.CalcSize(new GUIContent(searchLabelText)).x + Config.S(8f);
 
             GUI.Label(new Rect(rx, ry, searchLabelWidth, NEFManager.elementHeight), searchLabelText, labelStyle);
@@ -267,7 +267,7 @@ namespace Magnetar_Client.NEF
             Rect clearBtnRect = new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight);
             bool clearHover = clearBtnRect.Contains(e.mousePosition);
 
-            GUI.Box(clearBtnRect, Translator.Translate("Clear Search"), Magnetar_Default.ModuleOff);
+            GUI.Box(clearBtnRect, Translator.Translate("Clear Search"), Magnetar_Default.CategoryModuleOffStyle);
             GUI.backgroundColor = Color.white;
 
             if (clearHover && e.type == EventType.MouseDown && e.button == 0)
@@ -424,7 +424,7 @@ namespace Magnetar_Client.NEF
                 e.Use();
             }
 
-            GUI.Box(backBtnRect, Translator.Translate("Back to Tree"), Magnetar_Default.ModuleOff);
+            GUI.Box(backBtnRect, Translator.Translate("Back to Tree"), Magnetar_Default.CategoryModuleOffStyle);
             GUI.backgroundColor = Color.white;
 
             if (NEFData.currentUsages.Count == 0)

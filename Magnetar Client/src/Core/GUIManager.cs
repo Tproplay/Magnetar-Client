@@ -191,7 +191,7 @@ namespace Magnetar_Client.Core
                     selectorRect,
                     SelectorDelegate,
                     "",
-                    Magnetar_Default.ModuleWindow
+                    Magnetar_Default.CategoryWindowStyle
                 );
             }
             else
@@ -201,7 +201,7 @@ namespace Magnetar_Client.Core
                     windowRect,
                     GuiControlsDelegate,
                     "",
-                    Magnetar_Default.ModuleWindow
+                    Magnetar_Default.CategoryWindowStyle
                 );
             }
         }
@@ -235,7 +235,7 @@ namespace Magnetar_Client.Core
             float y = Config.S(35f);
 
             Rect headerBgRect = new Rect(0, 0, w, y - indent);
-            GUI.Box(headerBgRect, Translator.Translate("GUI Configuration"), Magnetar_Default.SettingsWindow);
+            GUI.Box(headerBgRect, Translator.Translate("GUI Configuration"), Magnetar_Default.SettingsWndowStyle);
 
             // --- 1. Language Row ---
             string currentLangName = "English";
@@ -250,7 +250,7 @@ namespace Magnetar_Client.Core
 
             GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight),
                 $"Language: <color=yellow>{Config.Language}</color>",
-                Magnetar_Default.SettingDescriptionStyle);
+                Magnetar_Default.SettingLabelStyle);
 
             Rect langBtnRect = new Rect(w * 0.5f, y, w * 0.45f, elementHeight);
 
@@ -279,7 +279,7 @@ namespace Magnetar_Client.Core
 
             GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight),
                 $"Theme: <color=yellow>{Config.Theme}</color>",
-                Magnetar_Default.SettingDescriptionStyle);
+                Magnetar_Default.SettingLabelStyle);
 
             Rect themeBtnRect = new Rect(w * 0.5f, y, w * 0.45f, elementHeight);
 
@@ -322,13 +322,13 @@ namespace Magnetar_Client.Core
             }
 
             // --- 5. Floating Icon Toggle Row ---
-            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Floating Icon"), Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Floating Icon"), Magnetar_Default.SettingLabelStyle);
             Rect floatIconRect = new Rect(w * 0.5f, y, w * 0.45f, elementHeight);
 
             if (floatIconRect.Contains(e.mousePosition)) GUI.backgroundColor = Magnetar_Default.AccentColor;
             GUI.Box(floatIconRect,
                 Config.ShowFloatingIcon ? Translator.Translate("ON") : Translator.Translate("OFF"),
-                Config.ShowFloatingIcon ? Magnetar_Default.ModuleOn : Magnetar_Default.SettingOff);
+                Config.ShowFloatingIcon ? Magnetar_Default.CategoryModuleOnStyle : Magnetar_Default.SettingOff);
             GUI.backgroundColor = Color.white;
 
             if (floatIconRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
@@ -339,13 +339,13 @@ namespace Magnetar_Client.Core
             y += elementHeight + Config.S(10f);
 
             // --- 6. Mobile Buttons Toggle Row ---
-            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Mobile Close Buttons"), Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Mobile Close Buttons"), Magnetar_Default.SettingLabelStyle);
             Rect mobileBtnRect = new Rect(w * 0.5f, y, w * 0.45f, elementHeight);
 
             if (mobileBtnRect.Contains(e.mousePosition)) GUI.backgroundColor = Magnetar_Default.AccentColor;
             GUI.Box(mobileBtnRect,
                 Config.ShowMobileButtons ? Translator.Translate("ON") : Translator.Translate("OFF"),
-                Config.ShowMobileButtons ? Magnetar_Default.ModuleOn : Magnetar_Default.SettingOff);
+                Config.ShowMobileButtons ? Magnetar_Default.CategoryModuleOnStyle : Magnetar_Default.SettingOff);
             GUI.backgroundColor = Color.white;
 
             if (mobileBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)

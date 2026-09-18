@@ -210,7 +210,7 @@ namespace Magnetar_Client.Core
                     WindowPositions[cat],
                     CategoryDelegate,
                     Translate(cat.ToString()),
-                    Magnetar_Default.ModuleWindow
+                    Magnetar_Default.CategoryWindowStyle
                 );
 
                 WindowPositions[cat] = ScreenBoundaryHelper.Clamp(WindowPositions[cat]);
@@ -402,7 +402,7 @@ namespace Magnetar_Client.Core
 
                 if (currentY + thisButtonHeight < 0 || currentY > viewHeight) continue;
 
-                GUIStyle currentStyle = mod.Active ? Magnetar_Default.ModuleOn : Magnetar_Default.ModuleOff;
+                GUIStyle currentStyle = mod.Active ? Magnetar_Default.CategoryModuleOnStyle : Magnetar_Default.CategoryModuleOffStyle;
                 Rect btnRect = new Rect(0, currentY, contentWidth, thisButtonHeight);
 
                 if (ModuleManager.showModules)
@@ -459,7 +459,7 @@ namespace Magnetar_Client.Core
             float handleY = trackY + (scrollPct * (trackHeight - handleHeight));
 
             GUI.Box(new Rect(trackX + Config.S(1f), trackY, Config.S(2f), trackHeight), "", Magnetar_Default.SeparatorStyle);
-            GUI.Box(new Rect(trackX, handleY, Config.S(5f), handleHeight), "", Magnetar_Default.ModuleOff);
+            GUI.Box(new Rect(trackX, handleY, Config.S(5f), handleHeight), "", Magnetar_Default.CategoryModuleOffStyle);
         }
     }
 
@@ -527,7 +527,7 @@ namespace Magnetar_Client.Core
                     _settingsPositions[mod],
                     GetSettingsDelegate(mod),
                     "",
-                    Magnetar_Default.ModuleWindow
+                    Magnetar_Default.CategoryWindowStyle
                 );
             }
         }
@@ -551,7 +551,7 @@ namespace Magnetar_Client.Core
 
                     if (!string.IsNullOrEmpty(name))
                     {
-                        float w = Magnetar_Default.SettingDescriptionStyle.CalcSize(new GUIContent(Translate(name))).x;
+                        float w = Magnetar_Default.SettingLabelStyle.CalcSize(new GUIContent(Translate(name))).x;
                         if (w > maxNameWidth) maxNameWidth = w;
                     }
                 }
@@ -560,7 +560,7 @@ namespace Magnetar_Client.Core
             string[] builtIns = { "Hold Mode", "Enabled", "KeyBind" };
             foreach (var b in builtIns)
             {
-                float w = Magnetar_Default.SettingDescriptionStyle.CalcSize(new GUIContent(Translate(b))).x;
+                float w = Magnetar_Default.SettingLabelStyle.CalcSize(new GUIContent(Translate(b))).x;
                 if (w > maxNameWidth) maxNameWidth = w;
             }
 
@@ -587,7 +587,7 @@ namespace Magnetar_Client.Core
             if (!_settingsScrollPositions.ContainsKey(mod)) _settingsScrollPositions[mod] = Vector2.zero;
 
             Rect headerBgRect = new Rect(0, 0, windowWidth, headerHeight);
-            GUI.Box(headerBgRect, Translate(mod.Name), Magnetar_Default.SettingsWindow);
+            GUI.Box(headerBgRect, Translate(mod.Name), Magnetar_Default.SettingsWndowStyle);
 
             _moduleContentHeights[mod] = Mathf.Lerp(_moduleContentHeights[mod], _targetContentHeights[mod],
                 Time.unscaledDeltaTime * Config.ModuleManager.SettingsScrollLerpSpeed);
@@ -607,7 +607,7 @@ namespace Magnetar_Client.Core
                 float btnSize = Config.S(22f);
                 float btnY = (headerHeight - btnSize) / 2f;
                 Rect closeButtonRect = new Rect(windowWidth - Config.S(26f), btnY, btnSize, btnSize);
-                GUI.Box(closeButtonRect, "X", Magnetar_Default.ModuleOn);
+                GUI.Box(closeButtonRect, "X", Magnetar_Default.CategoryModuleOnStyle);
                 if (e.type == EventType.MouseDown && closeButtonRect.Contains(e.mousePosition))
                 {
                     ModuleManager.showSettings = false;
@@ -673,14 +673,14 @@ namespace Magnetar_Client.Core
             float descriptionWidth = width - (Config.indent * 2);
             string translatedDescription = Translate(mod.Description);
 
-            float calculatedHeight = Magnetar_Default.DescriptionStyle.CalcHeight(new GUIContent(translatedDescription), descriptionWidth);
-            GUI.Label(new Rect(Config.indent, y, descriptionWidth, calculatedHeight), translatedDescription, Magnetar_Default.DescriptionStyle);
+            float calculatedHeight = Magnetar_Default.SettingsDescriptionStyle.CalcHeight(new GUIContent(translatedDescription), descriptionWidth);
+            GUI.Label(new Rect(Config.indent, y, descriptionWidth, calculatedHeight), translatedDescription, Magnetar_Default.SettingsDescriptionStyle);
             y += calculatedHeight + Config.spacing;
 
             if (!string.IsNullOrEmpty(mod.Author))
             {
                 float authorLineHeight = Config.S(18f);
-                GUI.Label(new Rect(Config.indent, y, width - (Config.indent * 2), authorLineHeight), "by " + mod.Author, Magnetar_Default.AuthorStyle);
+                GUI.Label(new Rect(Config.indent, y, width - (Config.indent * 2), authorLineHeight), "by " + mod.Author, Magnetar_Default.SettingAuthorStyle);
                 y += authorLineHeight + Config.spacing;
             }
 
@@ -724,7 +724,7 @@ namespace Magnetar_Client.Core
             y += Config.elementHeight + Config.spacing;
 
             // Hold Mode Toggle
-            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), Translate("Hold Mode"), Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), Translate("Hold Mode"), Magnetar_Default.SettingLabelStyle);
             Rect holdRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
             GUI.Box(holdRect, mod.HoldMode ? Translate("ON") : Translate("OFF"), mod.HoldMode ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
             if (holdRect.Contains(e.mousePosition) && isLeftClick)
@@ -735,7 +735,7 @@ namespace Magnetar_Client.Core
             y += Config.elementHeight + Config.spacing;
 
             // Enabled Toggle
-            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), Translate("Enabled"), Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), Translate("Enabled"), Magnetar_Default.SettingLabelStyle);
             Rect enabledRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
             GUI.Box(enabledRect, mod.Active ? Translate("ON") : Translate("OFF"), mod.Active ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
             if (enabledRect.Contains(e.mousePosition) && isLeftClick)
@@ -759,7 +759,7 @@ namespace Magnetar_Client.Core
             float handleY = trackY + (scrollPct * (trackHeight - handleHeight));
 
             GUI.Box(new Rect(trackX + Config.S(5f), trackY, Config.S(2f), trackHeight), "", Magnetar_Default.SeparatorStyle);
-            GUI.Box(new Rect(trackX, handleY, Config.S(12f), handleHeight), "", Magnetar_Default.ModuleOff);
+            GUI.Box(new Rect(trackX, handleY, Config.S(12f), handleHeight), "", Magnetar_Default.CategoryModuleOffStyle);
         }
     }
 
@@ -837,7 +837,7 @@ namespace Magnetar_Client.Core
                 float currentX = (Config.WindowWidth / 2f) - (searchWidth / 2f);
 
                 SearchWindowRect = new Rect(currentX, currentY, searchWidth, searchHeight);
-                SearchWindowRect = GUI.Window(999, SearchWindowRect, SearchDelegate, "", Magnetar_Default.ModuleWindow);
+                SearchWindowRect = GUI.Window(999, SearchWindowRect, SearchDelegate, "", Magnetar_Default.CategoryWindowStyle);
             }
         }
 
@@ -906,7 +906,7 @@ namespace Magnetar_Client.Core
 
             if (ActiveMultiSelect != null)
             {
-                WindowRect = GUI.Window(1000, WindowRect, MultiSelectDelegate, "", Magnetar_Default.ModuleWindow);
+                WindowRect = GUI.Window(1000, WindowRect, MultiSelectDelegate, "", Magnetar_Default.CategoryWindowStyle);
 
                 if (currentEvent != null && WindowRect.Contains(currentEvent.mousePosition) && currentEvent.type == EventType.MouseDown)
                 {
@@ -943,10 +943,10 @@ namespace Magnetar_Client.Core
         public static void HandleMultiSelectSetting(MultiSelectSetting set, ref float y, float width)
         {
             Event e = Event.current;
-            GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), Translate(set.Name), Magnetar_Default.SettingDescriptionStyle);
+            GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), Translate(set.Name), Magnetar_Default.SettingLabelStyle);
 
             Rect btnRect = new Rect(width - Config.SettingWidth / 2f - Config.selectButtonWidth -
-                Magnetar_Default.SettingDescriptionStyle.CalcSize(new GUIContent('(' + Translate($"{set.SelectedValues.Count} selected") + ")")).x / 2, y,
+                Magnetar_Default.SettingLabelStyle.CalcSize(new GUIContent('(' + Translate($"{set.SelectedValues.Count} selected") + ")")).x / 2, y,
                 Config.selectButtonWidth, Config.elementHeight);
 
             if (btnRect.Contains(e.mousePosition))
@@ -969,7 +969,7 @@ namespace Magnetar_Client.Core
             Color originalColor = GUI.contentColor;
             GUI.contentColor = Magnetar_Default.TextDim;
             GUI.Label(new Rect(btnRect.x + Config.selectButtonWidth + Config.S(5f), y, width * 0.4f, Config.elementHeight),
-                '(' + Translate($"{set.SelectedValues.Count} selected") + ")", Magnetar_Default.SettingDescriptionStyle);
+                '(' + Translate($"{set.SelectedValues.Count} selected") + ")", Magnetar_Default.SettingLabelStyle);
             GUI.contentColor = originalColor;
         }
     }

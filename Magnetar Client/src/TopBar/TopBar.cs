@@ -44,7 +44,7 @@ namespace Magnetar_Client.TopBar
             }
             baseOffsets[Order.Count] = running;
 
-            DebugLogger.Msg("Initialized the TopBar");
+            DebugLogger.Msg("Initialized the TopBarStyle");
         }
 
         public static void Render()
@@ -94,7 +94,7 @@ namespace Magnetar_Client.TopBar
                 GUI.BeginGroup(GroupRect);
 
 
-                if (GUI.Button(rect, name, Config.CurrentTab == tab ? Magnetar_Default.TopBarButtonActive : Magnetar_Default.TopBar))
+                if (GUI.Button(rect, name, Config.CurrentTab == tab ? Magnetar_Default.TopBarActiveStyle : Magnetar_Default.TopBarStyle))
                 {
                     Config.CurrentTab = tab;
                     Event.current.Use();

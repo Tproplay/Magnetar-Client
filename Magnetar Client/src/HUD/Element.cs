@@ -112,7 +112,7 @@ namespace Magnetar_Client.HUDElements
             }
 
             // --- 2. RENDER THE ELEMENT ---
-            GUIStyle windowStyle = (HUDManager.forceShow || HUDManager.showBackground) ? Magnetar_Default.ModuleOff : GUIStyle.none;
+            GUIStyle windowStyle = (HUDManager.forceShow || HUDManager.showBackground) ? Magnetar_Default.CategoryModuleOffStyle : GUIStyle.none;
 
             if (HUDManager.forceShow)
             {
@@ -268,7 +268,7 @@ namespace Magnetar_Client.HUDElements
                 if ((localBounds.Contains(e.mousePosition) || ActiveDragId == WindowId) && HUDManager.forceShow)
                 {
                     GUI.backgroundColor = new Color(1f, 0f, 0f, 0.3f);
-                    GUI.Box(localBounds, "", Magnetar_Default.ModuleOn);
+                    GUI.Box(localBounds, "", Magnetar_Default.CategoryModuleOnStyle);
                     GUI.backgroundColor = Color.white;
                 }
             }

@@ -1,0 +1,139 @@
+[
+  {
+    "name": "Meteor Purple",
+    "TopBarOff": {
+      "text": {
+        "normal": "#e8e8e8",
+        "hover": "#e8e8e8",
+        "active": "#e8e8e8"
+      },
+      "background color": {
+        "normal": "#11141b94",
+        "hover": "#131721ca",
+        "active": "#131721ca"
+      }
+    },
+    "TopBarActive": {
+      "text": {
+        "normal": "#e8e8e8",
+        "hover": "#e8e8e8",
+        "active": "#e8e8e8"
+      },
+      "background color": {
+        "normal": "#131721ca",
+        "hover": "#131721ca",
+        "active": "#131721ca"
+      }
+    },
+    "CategoryHeader": {
+      "text": {
+        "normal": "#E6EDF3FF",
+        "hover": "#FFFFFFFF",
+        "active": "#FFFFFFFF"
+      },
+      "background color": {
+        "normal": "#7d00f1",
+        "hover": "#9a2eff",
+        "active": "#9a2eff"
+      }
+    },
+    "CategoryWindow": {
+      "text": "#FFFFFFFF",
+      "background color": "#100c14c0",
+      "window background": "#100c14c0"
+    },
+    "CategoryModuleOff": {
+      "text": {
+        "normal": "#8B949EFF",
+        "hover": "#e6e6e6ea",
+        "active": "#e6e6e6ea"
+      },
+      "background color": {
+        "normal": "#00000000",
+        "hover": "#22142594",
+        "active": "#22142594"
+      }
+    },
+    "CategoryModuleOn": {
+      "text": {
+        "normal": "#8B949EFF",
+        "hover": "#e6e6e6ea",
+        "active": "#e6e6e6ea"
+      },
+      "background color": {
+        "normal": "#22142594",
+        "hover": "#22142594",
+        "active": "#22142594"
+      }
+    },
+    "CloseButton": {
+      "text": {
+        "normal": "#000000FF",
+        "hover": "#000000FF",
+        "active": "#000000FF"
+      },
+      "background color": {
+        "normal": "#7d00f1",
+        "hover": "#A855F7FF",
+        "active": "#A855F7FF"
+      }
+    },
+    "SettingsWindow": {
+      "text": "#FFFFFFFF",
+      "background color": "#7d00f1",
+      "window background": "#11141bb6"
+    },
+    "SettingOff": {
+      "text": {
+        "normal": "#8B949EFF",
+        "hover": "#FFFFFFFF",
+        "active": "#FFFFFFFF"
+      },
+      "background color": {
+        "normal": "#02010271",
+        "hover": "#0000009d",
+        "active": "#0000009d"
+      }
+    },
+    "SettingOn": {
+      "text": {
+        "normal": "#000000FF",
+        "hover": "#000000FF",
+        "active": "#000000FF"
+      },
+      "background color": {
+        "normal": "#8B0FFFFF",
+        "hover": "#992cff",
+        "active": "#8B0FFFFF"
+      }
+    },
+    "Typography": {
+      "description": "#ec45ff",
+      "label": "#E6E6E6FF",
+      "author": "#808080FF",
+      "text": "#E6EDF3FF",
+      "highlight text": "#FFFFFFFF",
+      "highlight background": "#203e6ec4",
+      "secondary": "#8B949EFF",
+      "primary": "#E6EDF3FF"
+    },
+    "NEF": {
+      "line color": "#FFFFFFFF",
+      "node background": "#8B0FFFFF"
+    },
+    "HUD": {
+      "text color": "#FFFFFFFF"
+    },
+    "Misc": {
+      "dim background": "#1a1a1a5c",
+      "separator": "#ffffff",
+      "separator text": "#ffffff"
+    },
+    "Slider": {
+      "track off": "#1D212BFF",
+      "track on": "#00ff9d",
+      "thumb": "#00ff9d",
+      "thumb hover": "#00ff9d"
+    }
+  }
+]

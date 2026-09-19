@@ -6,24 +6,7 @@ namespace Magnetar_Client.UI.WindowDrawing
 {
     public static class MiscDrawing
     {
-        private static GUIStyle _cachedCategoryHeaderStyle;
-
-        private static GUIStyle GetCategoryHeaderStyle(Color color)
-        {
-            if (_cachedCategoryHeaderStyle == null)
-            {
-                _cachedCategoryHeaderStyle = new GUIStyle
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    fontStyle = FontStyle.Bold
-                };
-            }
-
-            _cachedCategoryHeaderStyle.fontSize = Mathf.Max(10, Mathf.RoundToInt(Config.S(12f)));
-            _cachedCategoryHeaderStyle.normal.textColor = color;
-            return _cachedCategoryHeaderStyle;
-        }
-
+        
         /// <summary>
         /// Draws a scalable horizontal separator spanning the full window width.
         /// </summary>

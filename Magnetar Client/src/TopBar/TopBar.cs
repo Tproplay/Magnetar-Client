@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using static Magnetar_Client.Utils.Magnetar_Logger;
-
 using Magnetar_Client.UI.Themes;
 
 namespace Magnetar_Client.TopBar
@@ -88,16 +87,22 @@ namespace Magnetar_Client.TopBar
                 Rect rect = new Rect(0, 0, scaledWidth, scaledHeight);
                 string name = tab.ToString();
 
-                // Create a new group for each button
                 Rect GroupRect = new Rect(startX + scaledOffsets[i], 0, scaledWidth, scaledHeight);
 
                 GUI.BeginGroup(GroupRect);
 
+                // If mouse is pressed over this tab, switch instantly
+                Event e = Event.current;
+                if (e.type == EventType.MouseDown && e.button == 0 && rect.Contains(e.mousePosition))
+                {
+                    Config.CurrentTab = tab;
+                    e.Use();
+                }
 
                 if (GUI.Button(rect, name, Config.CurrentTab == tab ? Magnetar_Default.TopBarActiveStyle : Magnetar_Default.TopBarStyle))
                 {
                     Config.CurrentTab = tab;
-                    Event.current.Use();
+                    e.Use();
                 }
 
                 GUI.EndGroup();

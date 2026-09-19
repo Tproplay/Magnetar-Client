@@ -576,9 +576,9 @@ namespace Magnetar_Client.Core
 
 #if ANDROID
             // 30% header size increase on Android
-            float headerHeight = Config.S(25f) * 1.30f;
+            float headerHeight = Config.S(26f) * 1.30f;
 #else
-            float headerHeight = Config.S(25f);
+            float headerHeight = Config.S(26f);
 #endif
             float maxWindowHeight = Config.WindowHeight * Config.ModuleManager.MaxSettingsWindowHeightPct;
             float maxViewHeight = maxWindowHeight - headerHeight;
@@ -668,8 +668,7 @@ namespace Magnetar_Client.Core
         private static float DrawSettingsBody(Modules.Module mod, float y, float width)
         {
             float startY = y;
-            MiscDrawing.SeperatorFull(ref y, width, Config.spacing);
-            y += Config.spacing;
+            y += 3 * Config.spacing;
 
             float descriptionWidth = width - (Config.indent * 2);
             string translatedDescription = Translate(mod.Description);

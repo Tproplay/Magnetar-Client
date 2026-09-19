@@ -99,15 +99,11 @@ namespace Magnetar_Client.Core
 
                 if (Config.dimBg && (Config.showgui || forceShow))
                 {
-                    Matrix4x4 backupMatrix = GUI.matrix;
-                    GUI.matrix = Matrix4x4.identity;
-
-                    Rect fullScreenRect = new Rect(0, 0, Screen.width, Screen.height);
-                    if (Magnetar_Default.DimBackgroundStyle != null)
+                    Rect fullScreenRect = new Rect(0, 0, Config.WindowWidth, Config.WindowHeight);
+                    if (e.type == EventType.Repaint && Magnetar_Default.DimBackgroundStyle != null)
                     {
                         GUI.Box(fullScreenRect, "", Magnetar_Default.DimBackgroundStyle);
                     }
-                    GUI.matrix = backupMatrix;
 
                     if (e.type == EventType.MouseDown && UI.WindowDrawing.DrawSetting.activeSliderId == -1 && UI.WindowDrawing.DrawSetting.activeDropdownId == -1)
                     {
@@ -137,6 +133,8 @@ namespace Magnetar_Client.Core
                     DrawExitLayoutButton();
                 }
 
+                GUIStyle windowBgStyle = Magnetar_Default.SettingsWndowBgStyle ?? Magnetar_Default.SettingsWndowStyle;
+
                 if (Config.CurrentTab == TabType.HUD && !forceShow && Config.showgui)
                 {
                     if (isSelectingElements)
@@ -146,7 +144,7 @@ namespace Magnetar_Client.Core
                             selectorRect,
                             GetSelectorDelegate(),
                             "",
-                            Magnetar_Default.CategoryWindowStyle
+                            windowBgStyle
                         );
                     }
                     else
@@ -156,7 +154,7 @@ namespace Magnetar_Client.Core
                             windowRect,
                             GetControlsDelegate(),
                             "",
-                            Magnetar_Default.CategoryWindowStyle
+                            windowBgStyle
                         );
                     }
                 }
@@ -169,39 +167,6 @@ namespace Magnetar_Client.Core
             }
         }
 
-        private static GUIStyle _exitBtnStyle;
-        private static GUIStyle GetExitBtnStyle()
-        {
-            if (_exitBtnStyle == null)
-            {
-                _exitBtnStyle = new GUIStyle();
-
-                if (Magnetar_Default.SettingsWndowStyle != null)
-                {
-                    _exitBtnStyle.normal.background = Magnetar_Default.SettingsWndowStyle.normal.background;
-                    _exitBtnStyle.normal.textColor = Magnetar_Default.SettingsWndowStyle.normal.textColor;
-                    _exitBtnStyle.fontStyle = Magnetar_Default.SettingsWndowStyle.fontStyle;
-                }
-
-                _exitBtnStyle.alignment = TextAnchor.MiddleCenter;
-
-                _exitBtnStyle.padding = new RectOffset();
-                _exitBtnStyle.padding.left = 0;
-                _exitBtnStyle.padding.right = 0;
-                _exitBtnStyle.padding.top = 0;
-                _exitBtnStyle.padding.bottom = 0;
-
-                _exitBtnStyle.margin = new RectOffset();
-                _exitBtnStyle.margin.left = 0;
-                _exitBtnStyle.margin.right = 0;
-                _exitBtnStyle.margin.top = 0;
-                _exitBtnStyle.margin.bottom = 0;
-            }
-
-            _exitBtnStyle.fontSize = Mathf.RoundToInt(Config.S(16f));
-            return _exitBtnStyle;
-        }
-
         private static void DrawExitLayoutButton()
         {
             if (Config.ShowMobileButtons)
@@ -212,10 +177,8 @@ namespace Magnetar_Client.Core
                 Rect exitRect = new Rect((Config.WindowWidth - btnWidth) / 2f, Config.S(16f), btnWidth, btnHeight);
 
                 bool isHovered = exitRect.Contains(e.mousePosition);
-                if (isHovered) GUI.backgroundColor = Magnetar_Default.AccentColor;
 
-                GUI.Box(exitRect, Translator.Translate("Exit Layout"), GetExitBtnStyle());
-                GUI.backgroundColor = Color.white;
+                GUI.Box(exitRect, Translator.Translate("Exit Layout"), Magnetar_Default.SettingOn);
 
                 if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
                 {
@@ -226,7 +189,6 @@ namespace Magnetar_Client.Core
                     e.Use();
                 }
             }
-            
         }
 
         private static void DrawElementSelector(int windowID)
@@ -264,9 +226,6 @@ namespace Magnetar_Client.Core
 
             Rect selectBtnRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
 
-            if (selectBtnRect.Contains(e.mousePosition))
-                GUI.backgroundColor = Magnetar_Default.AccentColor;
-
             if (e.type == EventType.MouseDown && e.button == 0 && selectBtnRect.Contains(e.mousePosition))
             {
                 e.Use();
@@ -288,7 +247,6 @@ namespace Magnetar_Client.Core
             }
 
             GUI.Box(selectBtnRect, Translator.Translate("Select"), Magnetar_Default.SettingOff);
-            GUI.backgroundColor = Color.white;
 
             y += elementHeight + Config.S(5f);
 
@@ -296,9 +254,6 @@ namespace Magnetar_Client.Core
                 Magnetar_Default.SettingLabelStyle);
 
             Rect configBtnRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
-
-            if (configBtnRect.Contains(e.mousePosition))
-                GUI.backgroundColor = Magnetar_Default.AccentColor;
 
             if (e.type == EventType.MouseDown && e.button == 0 && configBtnRect.Contains(e.mousePosition))
             {
@@ -309,7 +264,6 @@ namespace Magnetar_Client.Core
             }
 
             GUI.Box(configBtnRect, Translator.Translate("Edit"), Magnetar_Default.SettingOff);
-            GUI.backgroundColor = Color.white;
 
             y += elementHeight + Config.S(5f);
 
@@ -318,10 +272,8 @@ namespace Magnetar_Client.Core
             Rect bgRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
             bool bgHover = bgRect.Contains(e.mousePosition);
 
-            if (bgHover) GUI.backgroundColor = Magnetar_Default.AccentColor;
             GUI.Box(bgRect, showBackground ? Translator.Translate("ON") : Translator.Translate("OFF"),
-                showBackground ? Magnetar_Default.CategoryModuleOnStyle : Magnetar_Default.SettingOff);
-            GUI.backgroundColor = Color.white;
+                showBackground ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
 
             if (bgHover && e.type == EventType.MouseDown && e.button == 0)
             {
@@ -336,10 +288,8 @@ namespace Magnetar_Client.Core
             Rect enabledRect = new Rect(width * 0.5f, y, width * 0.45f, elementHeight);
             bool enabledHover = enabledRect.Contains(e.mousePosition);
 
-            if (enabledHover) GUI.backgroundColor = Magnetar_Default.AccentColor;
             GUI.Box(enabledRect, Enabled ? Translator.Translate("ON") : Translator.Translate("OFF"),
                 Enabled ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
-            GUI.backgroundColor = Color.white;
 
             if (enabledHover && e.type == EventType.MouseDown && e.button == 0)
             {

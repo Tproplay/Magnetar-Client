@@ -132,7 +132,6 @@ namespace Magnetar_Client.Core
         {
             if (ThemeSetting == null) return;
 
-            // Ensure JSON themes are loaded
             if (Magnetar_Default.LoadedThemes == null || Magnetar_Default.LoadedThemes.Count == 0)
             {
                 Magnetar_Default.LoadThemesFromJson();
@@ -154,7 +153,6 @@ namespace Magnetar_Client.Core
                 tIdx++;
             }
 
-            // Fallback safety if no themes matched
             if (ThemeSetting.Options.Count == 0)
             {
                 ThemeSetting.AddOption(0, Magnetar_Default.InternalDefaultTheme.Name);
@@ -184,6 +182,8 @@ namespace Magnetar_Client.Core
             float targetSelectorHeight = Mathf.Min(Config.S(BaseSelectorHeight), maxSelectorHeight);
             Config.RescaleAroundCenter(ref selectorRect, targetSelectorWidth, targetSelectorHeight);
 
+            GUIStyle windowBgStyle = Magnetar_Default.SettingsWndowBgStyle ?? Magnetar_Default.SettingsWndowStyle;
+
             if (isSelectingSubWindow)
             {
                 selectorRect = GUI.Window(
@@ -191,7 +191,7 @@ namespace Magnetar_Client.Core
                     selectorRect,
                     SelectorDelegate,
                     "",
-                    Magnetar_Default.CategoryWindowStyle
+                    windowBgStyle
                 );
             }
             else
@@ -201,7 +201,7 @@ namespace Magnetar_Client.Core
                     windowRect,
                     GuiControlsDelegate,
                     "",
-                    Magnetar_Default.CategoryWindowStyle
+                    windowBgStyle
                 );
             }
         }
@@ -254,14 +254,12 @@ namespace Magnetar_Client.Core
 
             Rect langBtnRect = new Rect(w * 0.5f, y, w * 0.45f, elementHeight);
 
-            if (langBtnRect.Contains(e.mousePosition)) GUI.backgroundColor = Magnetar_Default.AccentColor;
             if (e.type == EventType.MouseDown && e.button == 0 && langBtnRect.Contains(e.mousePosition))
             {
                 e.Use();
                 OpenSubSelector(LanguageSetting);
             }
-            GUI.Box(langBtnRect, "Change", Magnetar_Default.SettingOff);
-            GUI.backgroundColor = Color.white;
+            GUI.Box(langBtnRect, Translator.Translate("Change"), Magnetar_Default.SettingOff);
             y += elementHeight + Config.S(10f);
 
             // --- 2. Theme Row ---
@@ -283,9 +281,6 @@ namespace Magnetar_Client.Core
 
             Rect themeBtnRect = new Rect(w * 0.5f, y, w * 0.45f, elementHeight);
 
-            if (themeBtnRect.Contains(e.mousePosition))
-                GUI.backgroundColor = Magnetar_Default.AccentColor;
-
             if (e.type == EventType.MouseDown && e.button == 0 && themeBtnRect.Contains(e.mousePosition))
             {
                 e.Use();
@@ -293,8 +288,7 @@ namespace Magnetar_Client.Core
                 OpenSubSelector(ThemeSetting);
             }
 
-            GUI.Box(themeBtnRect, "Change", Magnetar_Default.SettingOff);
-            GUI.backgroundColor = Color.white;
+            GUI.Box(themeBtnRect, Translator.Translate("Change"), Magnetar_Default.SettingOff);
             y += elementHeight + Config.S(10f);
 
             // --- 3. GUI Scale Row ---
@@ -325,11 +319,9 @@ namespace Magnetar_Client.Core
             GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Floating Icon"), Magnetar_Default.SettingLabelStyle);
             Rect floatIconRect = new Rect(w * 0.5f, y, w * 0.45f, elementHeight);
 
-            if (floatIconRect.Contains(e.mousePosition)) GUI.backgroundColor = Magnetar_Default.AccentColor;
             GUI.Box(floatIconRect,
                 Config.ShowFloatingIcon ? Translator.Translate("ON") : Translator.Translate("OFF"),
-                Config.ShowFloatingIcon ? Magnetar_Default.CategoryModuleOnStyle : Magnetar_Default.SettingOff);
-            GUI.backgroundColor = Color.white;
+                Config.ShowFloatingIcon ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
 
             if (floatIconRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
             {
@@ -342,11 +334,9 @@ namespace Magnetar_Client.Core
             GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Mobile Close Buttons"), Magnetar_Default.SettingLabelStyle);
             Rect mobileBtnRect = new Rect(w * 0.5f, y, w * 0.45f, elementHeight);
 
-            if (mobileBtnRect.Contains(e.mousePosition)) GUI.backgroundColor = Magnetar_Default.AccentColor;
             GUI.Box(mobileBtnRect,
                 Config.ShowMobileButtons ? Translator.Translate("ON") : Translator.Translate("OFF"),
-                Config.ShowMobileButtons ? Magnetar_Default.CategoryModuleOnStyle : Magnetar_Default.SettingOff);
-            GUI.backgroundColor = Color.white;
+                Config.ShowMobileButtons ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
 
             if (mobileBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
             {

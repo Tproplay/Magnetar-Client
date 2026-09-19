@@ -20,25 +20,6 @@ namespace Magnetar_Client.UI.WindowDrawing
         public static int lastFocusedNumericControlId = -1;
 
         // Dedicated theme helper styles
-        private static GUIStyle _sliderThumbStyle;
-        private static GUIStyle SliderThumbStyle
-        {
-            get
-            {
-                if (_sliderThumbStyle == null)
-                {
-                    _sliderThumbStyle = new GUIStyle
-                    {
-                        alignment = TextAnchor.MiddleCenter,
-                        padding = new RectOffset()
-                    };
-                }
-                _sliderThumbStyle.fontSize = Config.SettingsInput.SliderThumbFontSize;
-                _sliderThumbStyle.normal.textColor = Magnetar_Default.AccentColor;
-                return _sliderThumbStyle;
-            }
-        }
-
         private static GUIStyle _placeholderStyle;
         private static GUIStyle PlaceholderStyle
         {
@@ -133,22 +114,32 @@ namespace Magnetar_Client.UI.WindowDrawing
             float logVal = LogConvert(visualVal);
             float percentage = Mathf.Clamp01((logVal - logMin) / (logMax - logMin));
 
+            // Input and slider dimensions
             float inputW = Config.SettingsInput.NumericInputWidth;
             float sliderW = Config.SettingWidth - inputW - 10f;
 
-            Rect sliderRect = new Rect(width - Config.indent - Config.SettingWidth, y + 10, sliderW, Config.SettingsInput.SliderHeight);
-            Rect sliderHitBox = new Rect(sliderRect.x, y, sliderRect.width, 22);
-            Rect inputRect = new Rect(width - Config.indent - inputW, y, inputW, 22);
+            float trackH = Config.SettingsInput.SliderHeight;
+            float thumbSize = Config.S(16f);
+
+            Rect sliderRect = new Rect(width - Config.indent - Config.SettingWidth, y + ((Config.elementHeight - trackH) / 2f), sliderW, trackH);
+            Rect sliderHitBox = new Rect(sliderRect.x, y, sliderRect.width, Config.elementHeight);
+            Rect inputRect = new Rect(width - Config.indent - inputW, y, inputW, Config.elementHeight);
             float fillWidth = sliderRect.width * percentage;
 
-            // Thumb with baseline offset
-            Rect thumbRect = new Rect(sliderRect.x + fillWidth - 10, y + Config.S(1f), 20, 20);
+            // Center circular thumb vertically with the track
+            float thumbX = sliderRect.x + fillWidth - (thumbSize / 2f);
+            float thumbY = sliderRect.y + (trackH / 2f) - (thumbSize / 2f);
+            Rect thumbRect = new Rect(thumbX, thumbY, thumbSize, thumbSize);
 
-            GUI.Box(sliderRect, "", Magnetar_Default.SettingOff);
-            if (fillWidth > 0) GUI.Box(new Rect(sliderRect.x, sliderRect.y, fillWidth, sliderRect.height), "", Magnetar_Default.SettingOn);
+            // Draw Track
+            GUI.Box(sliderRect, "", Magnetar_Default.SliderTrackOffStyle);
+            if (fillWidth > 0f)
+            {
+                GUI.Box(new Rect(sliderRect.x, sliderRect.y, fillWidth, sliderRect.height), "", Magnetar_Default.SliderTrackOnStyle);
+            }
 
-            // Clean isolated thumb render without mutating HUDElementStyle
-            GUI.Label(thumbRect, "●", SliderThumbStyle);
+            // Draw Circular Thumb using dedicated circular style (no text)
+            GUI.Box(thumbRect, "", Magnetar_Default.SliderThumbStyle);
 
             Event e = Event.current;
 
@@ -170,10 +161,8 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             bool inHitbox = sliderHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition);
 
-            // 1. Generate a stable IMGUI control ID based strictly on the setting's name hash
             int sliderControlId = GUIUtility.GetControlID(name.GetHashCode(), FocusType.Passive);
 
-            // 2. Click initiation
             if (e.type == EventType.MouseDown && e.button == 0 && inHitbox)
             {
                 GUIUtility.hotControl = sliderControlId;
@@ -186,7 +175,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                 e.Use();
             }
 
-            // 3. Drag Tracking
             if (GUIUtility.hotControl == sliderControlId)
             {
                 if (e.type == EventType.MouseDrag)
@@ -204,7 +192,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                 }
             }
 
-            // 4. Text Input Handling
+            // Text Input Handling
             int controlId = inputRect.GetHashCode();
             bool isFocused = (activeTextFieldId == controlId);
 
@@ -256,7 +244,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                 Config.SettingWidth, Config.elementHeight);
             bool bindHover = bindRect.Contains(e.mousePosition);
 
-            // Native style states handle background and hover colors directly
             GUI.Box(bindRect, bindText, bSet.IsBinding ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
 
             if (bindHover && isLeftClick)
@@ -326,7 +313,13 @@ namespace Magnetar_Client.UI.WindowDrawing
 
         public static MultiSelectSetting activeMultiSelect = null;
         public static string multiSelectSearchQuery = "";
+
+        // Smooth scroll state tracking
         public static float manualScrollY = 0f;
+        public static float targetScrollY = 0f;
+        private static float _scrollbarDragStartMouseY = 0f;
+        private static float _scrollbarDragStartScrollY = 0f;
+
         public static float totalContentHeight = 0f;
         public static float lastSliderUpdateTime = 0f;
 
@@ -426,6 +419,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             if (oldQuery != multiSelectSearchQuery)
             {
                 manualScrollY = 0f;
+                targetScrollY = 0f;
             }
 
             // --- 3. FILTER & CACHE VISIBLE ITEMS ---
@@ -493,17 +487,23 @@ namespace Magnetar_Client.UI.WindowDrawing
             float trackStartY = contentStartY;
             float trackHeight = viewHeight;
             float handleSize = Mathf.Max(Config.S(25f), (viewHeight / Mathf.Max(1f, totalContentHeight)) * trackHeight);
+            float usableTrackRange = Mathf.Max(1f, trackHeight - handleSize);
 
+            // Compute current handle rect for drag precision
+            float scrollPctCurrent = (maxScrollDist > 0) ? manualScrollY / maxScrollDist : 0f;
+            float handleY = trackStartY + (scrollPctCurrent * usableTrackRange);
+            Rect handleRect = new Rect(scrollX, handleY, scrollbarWidth, handleSize);
             Rect trackHitbox = new Rect(scrollX - Config.S(4f), trackStartY, scrollbarWidth + Config.S(8f), trackHeight);
 
-            // --- 5. SCROLLBAR DRAG ---
+            // --- 5. SCROLLBAR DRAG & MOUSE WHEEL ---
             if (activeSliderId == sliderId)
             {
-                if (e.type == EventType.MouseDrag || e.type == EventType.MouseDown)
+                if (e.type == EventType.MouseDrag)
                 {
-                    float localMouseY = e.mousePosition.y - trackStartY;
-                    float scrollPct = Mathf.Clamp01((localMouseY - (handleSize / 2f)) / (trackHeight - handleSize));
-                    manualScrollY = scrollPct * maxScrollDist;
+                    float mouseDeltaY = e.mousePosition.y - _scrollbarDragStartMouseY;
+                    float scrollDelta = (mouseDeltaY / usableTrackRange) * maxScrollDist;
+                    targetScrollY = Mathf.Clamp(_scrollbarDragStartScrollY + scrollDelta, 0f, maxScrollDist);
+                    manualScrollY = targetScrollY; // Immediate tracking during physical scrollbar drag
                     lastSliderUpdateTime = Time.time;
                     e.Use();
                 }
@@ -517,19 +517,43 @@ namespace Magnetar_Client.UI.WindowDrawing
             {
                 activeSliderId = sliderId;
                 focusedControlId = -1;
+                _scrollbarDragStartMouseY = e.mousePosition.y;
 
-                float localMouseY = e.mousePosition.y - trackStartY;
-                float scrollPct = Mathf.Clamp01((localMouseY - (handleSize / 2f)) / (trackHeight - handleSize));
-                manualScrollY = scrollPct * maxScrollDist;
+                if (handleRect.Contains(e.mousePosition))
+                {
+                    // Drag initiated directly on handle: lock anchor
+                    _scrollbarDragStartScrollY = targetScrollY;
+                }
+                else
+                {
+                    // Clicked track background: center handle to cursor smoothly
+                    float localMouseY = e.mousePosition.y - trackStartY;
+                    float scrollPct = Mathf.Clamp01((localMouseY - (handleSize / 2f)) / usableTrackRange);
+                    targetScrollY = scrollPct * maxScrollDist;
+                    manualScrollY = targetScrollY;
+                    _scrollbarDragStartScrollY = targetScrollY;
+                }
+
                 lastSliderUpdateTime = Time.time;
                 e.Use();
             }
 
+            // Smooth ScrollWheel handling
             if (e.type == EventType.ScrollWheel && new Rect(0, 0, multiSelectWindowRect.width, multiSelectWindowRect.height).Contains(e.mousePosition))
             {
-                manualScrollY = Mathf.Clamp(manualScrollY + (e.delta.y * 25f), 0, maxScrollDist);
+                targetScrollY = Mathf.Clamp(targetScrollY + (e.delta.y * Config.S(40f)), 0f, maxScrollDist);
                 lastSliderUpdateTime = Time.time;
                 e.Use();
+            }
+
+            // Framerate-independent interpolation smoothing
+            if (activeSliderId != sliderId && !_isListSwiping)
+            {
+                manualScrollY = Mathf.Lerp(manualScrollY, targetScrollY, 1f - Mathf.Exp(-20f * Time.unscaledDeltaTime));
+                if (Mathf.Abs(manualScrollY - targetScrollY) < 0.01f)
+                {
+                    manualScrollY = targetScrollY;
+                }
             }
 
             if (e.type == EventType.MouseUp || (e.type == EventType.Ignore && e.rawType == EventType.MouseUp))
@@ -590,6 +614,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                 {
                     _listTouchStart = mousePos;
                     _scrollStartVal = manualScrollY;
+                    targetScrollY = manualScrollY;
                     _isListSwiping = false;
 
                     float contentY = mousePos.y + manualScrollY;
@@ -650,7 +675,8 @@ namespace Magnetar_Client.UI.WindowDrawing
                     if (_isListSwiping && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove))
                     {
                         float deltaY = _listTouchStart.y - mousePos.y;
-                        manualScrollY = Mathf.Clamp(_scrollStartVal + deltaY, 0f, maxScrollDist);
+                        targetScrollY = Mathf.Clamp(_scrollStartVal + deltaY, 0f, maxScrollDist);
+                        manualScrollY = targetScrollY;
                         e.Use();
                     }
                 }
@@ -696,6 +722,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                 {
                     _listTouchStart = mousePos;
                     _scrollStartVal = manualScrollY;
+                    targetScrollY = manualScrollY;
                     _isListSwiping = false;
 
                     float contentY = mousePos.y + manualScrollY;
@@ -749,7 +776,8 @@ namespace Magnetar_Client.UI.WindowDrawing
                 if (_isListSwiping && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove))
                 {
                     float deltaY = _listTouchStart.y - mousePos.y;
-                    manualScrollY = Mathf.Clamp(_scrollStartVal + deltaY, 0f, maxScrollDist);
+                    targetScrollY = Mathf.Clamp(_scrollStartVal + deltaY, 0f, maxScrollDist);
+                    manualScrollY = targetScrollY;
                     e.Use();
                 }
 
@@ -808,11 +836,8 @@ namespace Magnetar_Client.UI.WindowDrawing
             // --- 7. SCROLLBAR VISUALS ---
             GUI.Box(new Rect(scrollX + (scrollbarWidth / 2f) - 1f, trackStartY, 2, trackHeight), "", Magnetar_Default.SeparatorStyle);
 
-            float scrollPctVisual = (maxScrollDist > 0) ? manualScrollY / maxScrollDist : 0f;
-            float handleY = trackStartY + (scrollPctVisual * (trackHeight - handleSize));
-
             bool shouldHighlight = (activeSliderId == sliderId) || (Time.time - lastSliderUpdateTime < 1.0f);
-            GUI.Box(new Rect(scrollX, handleY, scrollbarWidth, handleSize), "", shouldHighlight ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+            GUI.Box(handleRect, "", shouldHighlight ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
         }
 
         private static void ToggleWithLimit(dynamic activeMultiSelect, int val)
@@ -1434,7 +1459,6 @@ namespace Magnetar_Client.UI.WindowDrawing
             Rect btnRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
             bool isHovered = btnRect.Contains(e.mousePosition);
 
-            // SettingOff handles normal, hover, and active states natively without tint overrides
             GUI.Box(btnRect, Translator.Translate(btnSet.ButtonText), Magnetar_Default.SettingOff);
 
             if (isHovered && e.type == EventType.MouseDown && e.button == 0)

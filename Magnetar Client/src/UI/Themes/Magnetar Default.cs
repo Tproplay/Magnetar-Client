@@ -173,7 +173,27 @@ namespace Magnetar_Client.UI.Themes
 
         [JsonProperty("Misc")]
         public MiscTheme Misc { get; set; } = new MiscTheme();
+
+        [JsonProperty("Slider", NullValueHandling = NullValueHandling.Ignore)]
+        public SliderTheme Slider { get; set; }
     }
+
+    [Serializable]
+    public class SliderTheme
+    {
+        [JsonProperty("track off", NullValueHandling = NullValueHandling.Ignore)]
+        public string TrackOff { get; set; }
+
+        [JsonProperty("track on", NullValueHandling = NullValueHandling.Ignore)]
+        public string TrackOn { get; set; }
+
+        [JsonProperty("thumb", NullValueHandling = NullValueHandling.Ignore)]
+        public string Thumb { get; set; }
+
+        [JsonProperty("thumb hover", NullValueHandling = NullValueHandling.Ignore)]
+        public string ThumbHover { get; set; }
+    }
+
     #endregion
 
     public static class Magnetar_Default
@@ -182,186 +202,33 @@ namespace Magnetar_Client.UI.Themes
 
         #region Styles
 
-        // --- Top Bar ---
-
-        /// <summary>
-        /// TopBar buttons style configurations.
-        /// <para>• Text color: normal, hover, active</para>
-        /// <para>• Bg color: normal, hover, active</para>
-        /// </summary>
         public static GUIStyle TopBarStyle;
-
-        /// <summary>
-        /// TopBar active button style configurations (when selected/on).
-        /// <para>• Text color: normal, hover, active (highlighted)</para>
-        /// <para>• Bg color: normal, hover, active (accent background)</para>
-        /// </summary>
         public static GUIStyle TopBarActiveStyle;
-
-        // --- Category Window ---
-
-        /// <summary>
-        /// Category Window container and header title style configurations.
-        /// <para>• Text color: normal (title text)</para>
-        /// <para>• Bg color: normal (window background)</para>
-        /// <para>• Alignment: UpperCenter, Bold</para>
-        /// </summary>
         public static GUIStyle CategoryWindowStyle;
-
-        /// <summary>
-        /// Style for bg of name of the category window.
-        /// <para>• Text color: normal (dimmed), hover (highlighted white), active</para>
-        /// <para>• Bg color: normal (light background), hover (hover color), active</para>
-        /// <para>• Alignment: UpperCenter, Bold</para>
-        /// </summary>
         public static GUIStyle CategoryHeaderStyle;
-
-        /// <summary>
-        /// Style for an inactive module button on the category window (off state).
-        /// <para>• Text color: normal (dimmed), hover (highlighted white), active</para>
-        /// <para>• Bg color: normal (light background), hover (hover color), active</para>
-        /// <para>• Alignment: MiddleLeft</para>
-        /// </summary>
         public static GUIStyle CategoryModuleOffStyle;
-
-        /// <summary>
-        /// Style for an active module button on the category window (on state).
-        /// <para>• Text color: normal (contrasting dark), hover, active</para>
-        /// <para>• Bg color: normal (accent color), hover (active hover color), active</para>
-        /// <para>• Alignment: MiddleLeft</para>
-        /// </summary>
         public static GUIStyle CategoryModuleOnStyle;
-
-        // --- Mobile Buttons ---
-
-        /// <summary>
-        /// Style for the mobile window close buttons and compact icon controls.
-        /// <para>• Text color: normal (dark/contrasting), hover, active</para>
-        /// <para>• Bg color: normal (accent color), hover (active hover color), active</para>
-        /// <para>• Alignment: MiddleCenter</para>
-        /// </summary>
         public static GUIStyle CloseButtonStyle;
-
-        // --- Module Settings and HUD/GUI Managers ---
-
-        /// <summary>
-        /// Style for the base Module Setting background.
-        /// <para>• Bg color: normal</para>
-        /// </summary>
         public static GUIStyle SettingsWndowBgStyle;
-
-        /// <summary>
-        /// Style for the base Module Setting header banner and popup titles.
-        /// <para>• Text color: normal (dark contrasting)</para>
-        /// <para>• Bg color: normal (accent header background)</para>
-        /// <para>• Alignment: MiddleCenter, Bold</para>
-        /// </summary>
         public static GUIStyle SettingsWndowStyle;
-
-        /// <summary>
-        /// Style for the Module Setting's long-form description text at the top of setting windows.
-        /// <para>• Text color: normal (soft description color)</para>
-        /// <para>• Formatting: WordWrap enabled, RichText enabled</para>
-        /// <para>• Alignment: UpperLeft</para>
-        /// </summary>
         public static GUIStyle SettingsDescriptionStyle;
-
-        /// <summary>
-        /// Style for general read-only setting text and configuration values.
-        /// <para>• Text color: normal (primary text white)</para>
-        /// <para>• Formatting: Clipping enabled, RichText disabled</para>
-        /// <para>• Alignment: MiddleLeft</para>
-        /// </summary>
         public static GUIStyle SettingTextStyle;
-
-        /// <summary>
-        /// Style for the module author credit string.
-        /// <para>• Text color: normal (author/credit grey)</para>
-        /// <para>• Formatting: Italic, RichText enabled</para>
-        /// <para>• Alignment: MiddleLeft</para>
-        /// </summary>
         public static GUIStyle SettingAuthorStyle;
-
-        /// <summary>
-        /// Style for setting toggle and action buttons in their inactive/false state.
-        /// <para>• Text color: normal (dimmed text), hover (white), active</para>
-        /// <para>• Bg color: normal (light background), hover (hover color), active</para>
-        /// <para>• Alignment: MiddleLeft</para>
-        /// </summary>
         public static GUIStyle SettingOff;
-
-        /// <summary>
-        /// Style for setting toggle and action buttons in their active/true state.
-        /// <para>• Text color: normal (dark contrasting), hover, active</para>
-        /// <para>• Bg color: normal (accent background), hover (active hover color), active</para>
-        /// <para>• Alignment: MiddleLeft</para>
-        /// </summary>
         public static GUIStyle SettingOn;
-
-        /// <summary>
-        /// Style for individual setting option labels and names.
-        /// <para>• Text color: normal (label foreground)</para>
-        /// <para>• Formatting: WordWrap enabled, RichText enabled</para>
-        /// <para>• Alignment: UpperLeft</para>
-        /// </summary>
         public static GUIStyle SettingLabelStyle;
-
-        /// <summary>
-        /// Style for divider rules and layout separators.
-        /// <para>• Bg color: normal (solid separator color)</para>
-        /// <para>• Height: Fixed 1px scaled</para>
-        /// </summary>
         public static GUIStyle SeparatorStyle;
-
-        /// <summary>
-        /// Style for the text label rendered inside partitioned separators.
-        /// <para>• Text color: normal (separator label text color)</para>
-        /// <para>• Alignment: MiddleCenter</para>
-        /// </summary>
         public static GUIStyle SeparatorTextStyle;
-
-        /// <summary>
-        /// Style for text input fields and manual value editors.
-        /// <para>• Text color: normal (primary white)</para>
-        /// <para>• Formatting: Clipping enabled, WordWrap disabled</para>
-        /// <para>• Alignment: MiddleLeft</para>
-        /// </summary>
         public static GUIStyle TextStyle;
-
-        /// <summary>
-        /// Style for text input fields when selecting text or focusing via cursor.
-        /// <para>• Text color: normal (highlight text color)</para>
-        /// <para>• Bg color: normal (accent selection highlight)</para>
-        /// <para>• Alignment: MiddleLeft</para>
-        /// </summary>
         public static GUIStyle TextHighlightedStyle;
-
-        /// <summary>
-        /// Style for the fullscreen overlay background when Dim Background is enabled.
-        /// <para>• Bg color: normal (translucent dim color)</para>
-        /// </summary>
         public static GUIStyle DimBackgroundStyle;
-
-        /// <summary>
-        /// Style for on-screen HUD text overlays, coordinates, and statistics.
-        /// <para>• Text color: normal (HUD text color)</para>
-        /// <para>• Formatting: RichText enabled, WordWrap disabled</para>
-        /// <para>• Alignment: MiddleCenter</para>
-        /// </summary>
         public static GUIStyle HUDElementStyle;
-
-        /// <summary>
-        /// Style for connector lines inside the NEF node diagram view.
-        /// <para>• Bg color: normal (NEF line texture)</para>
-        /// </summary>
         public static GUIStyle NEFLineStyle;
-
-        /// <summary>
-        /// Style for individual node frames and entity backgrounds in the NEF tree.
-        /// <para>• Bg color: normal (NEF node texture)</para>
-        /// <para>• Alignment: LowerCenter</para>
-        /// </summary>
         public static GUIStyle NEFNodeStyle;
+        public static GUIStyle SliderTrackOffStyle;
+        public static GUIStyle SliderTrackOnStyle;
+        public static GUIStyle SliderThumbStyle;
+
         #endregion
 
         #region Dynamic Theme Colors
@@ -438,8 +305,16 @@ namespace Magnetar_Client.UI.Themes
             Misc = new MiscTheme
             {
                 DimBackground = "#1A1A1A66",
-                Separator = "#FFFFFFFF"
-            }
+                Separator = "#FFFFFFFF",
+                SeparatorText = "#FFFFFFFF"
+            },
+            Slider = new SliderTheme
+            {
+                TrackOff = "#22252FFF",
+                TrackOn = "#8B0FFFFF",
+                Thumb = "#A82BFFFF",
+                ThumbHover = "#C36BFFFF"
+            },
         };
         #endregion
 
@@ -530,47 +405,48 @@ namespace Magnetar_Client.UI.Themes
                         {
                             Name = "Meteor Purple",
                             TopBarOff = new ElementStyleTheme(
-                                new ColorState("#8B949EFF", "#FFFFFFFF", "#FFFFFFFF"),
-                                new ColorState("#11141BDC", "#21262DFF", "#30363DFF")
+                                new ColorState("#e8e8e8", "#e8e8e8", "#e8e8e8"),
+                                new ColorState("#11141b94", "#131721ca", "#131721ca")
                             ),
                             TopBarActive = new ElementStyleTheme(
-                                new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
-                                new ColorState("#8B0FFFFF", "#8B0FFFFF", "#8B0FFFFF")
+                                new ColorState("#e8e8e8", "#e8e8e8", "#e8e8e8"),
+                                new ColorState("#131721ca", "#131721ca", "#131721ca")
                             ),
                             CategoryHeader = new ElementStyleTheme(
                                 new ColorState("#E6EDF3FF", "#FFFFFFFF", "#FFFFFFFF"),
-                                new ColorState("#161B22E6", "#21262DFF", "#30363DFF")
+                                new ColorState("#7d00f1", "#9a2eff", "#9a2eff")
                             ),
-                            CategoryWindow = new WindowStyleTheme("#FFFFFFFF", "#11141BDC"),
+                            CategoryWindow = new WindowStyleTheme("#FFFFFFFF", "#100c14c0"),
                             CategoryModuleOff = new ElementStyleTheme(
-                                new ColorState("#8B949EFF", "#FFFFFFFF", "#FFFFFFFF"),
-                                new ColorState("#1E1622C8", "#21262DFF", "#21262DFF")
+                                new ColorState("#8B949EFF", "#e6e6e6ea", "#e6e6e6ea"),
+                                new ColorState("#00000000", "#22142594", "#22142594")
                             ),
                             CategoryModuleOn = new ElementStyleTheme(
-                                new ColorState("#000000FF", "#000000FF", "#000000FF"),
-                                new ColorState("#8B0FFFFF", "#A855F7FF", "#A855F7FF")
+                                new ColorState("#8B949EFF", "#e6e6e6ea", "#e6e6e6ea"),
+                                new ColorState("#22142594", "#22142594", "#22142594")
                             ),
                             CloseButton = new ElementStyleTheme(
                                 new ColorState("#000000FF", "#000000FF", "#000000FF"),
-                                new ColorState("#8B0FFFFF", "#A855F7FF", "#A855F7FF")
+                                new ColorState("#7d00f1", "#A855F7FF", "#A855F7FF")
                             ),
-                            SettingsWindow = new WindowStyleTheme("#000000FF", "#8B0FFFFF"),
+                            SettingsWindow = new WindowStyleTheme("#FFFFFFFF", "#7d00f1", "#11141bb6"),
                             SettingOff = new ElementStyleTheme(
                                 new ColorState("#8B949EFF", "#FFFFFFFF", "#FFFFFFFF"),
-                                new ColorState("#1E1622C8", "#21262DFF", "#21262DFF")
+                                new ColorState("#02010271", "#0000009d", "#0000009d")
                             ),
                             SettingOn = new ElementStyleTheme(
                                 new ColorState("#000000FF", "#000000FF", "#000000FF"),
-                                new ColorState("#8B0FFFFF", "#A855F7FF", "#A855F7FF")
+                                new ColorState("#8B0FFFFF", "#992cff", "#8B0FFFFF")
                             ),
                             Typography = new TypographyTheme
                             {
-                                Description = "#BFBFBFFF",
+                                Description = "#ec45ff",
                                 Label = "#E6E6E6FF",
                                 Author = "#808080FF",
                                 Text = "#E6EDF3FF",
+                                Secondary = "#8B949EFF",
                                 HighlightText = "#FFFFFFFF",
-                                HighlightBackground = "#8B0FFFFF"
+                                HighlightBackground = "#203e6ec4"
                             },
                             NEF = new NefTheme
                             {
@@ -583,8 +459,16 @@ namespace Magnetar_Client.UI.Themes
                             },
                             Misc = new MiscTheme
                             {
-                                DimBackground = "#1A1A1A66",
-                                Separator = "#FFFFFFFF"
+                                DimBackground = "#1a1a1a5c",
+                                Separator = "#ffffff",
+                                SeparatorText = "#ffffff"
+                            },
+                            Slider = new SliderTheme
+                            {
+                                TrackOff = "#1D212BFF",
+                                TrackOn = "#00ff9d",
+                                Thumb = "#00ff9d",
+                                ThumbHover = "#00ff9d"
                             }
                         }
                     };
@@ -651,7 +535,7 @@ namespace Magnetar_Client.UI.Themes
             TopBarActiveStyle.hover.background = GetTex(tbActBg.hover);
             TopBarActiveStyle.active.background = GetTex(tbActBg.active);
 
-            // --- 3. Category Header (Unique Color Entry) ---
+            // --- 3. Category Header ---
             var catHeadText = ResolveState(theme.CategoryHeader?.Text, d.CategoryHeader.Text);
             var catHeadBg = ResolveState(theme.CategoryHeader?.BackgroundColor, d.CategoryHeader.BackgroundColor);
             CategoryHeaderStyle.normal.textColor = catHeadText.normal;
@@ -696,7 +580,6 @@ namespace Magnetar_Client.UI.Themes
             CloseButtonStyle.active.background = GetTex(closeBg.active);
 
             // --- 8. Settings Window ---
-
             string rawWindowBg = theme.SettingsWindow?.WindowBackground
                                  ?? theme.CategoryWindow?.BackgroundColor
                                  ?? d.SettingsWindow.WindowBackground;
@@ -710,7 +593,7 @@ namespace Magnetar_Client.UI.Themes
             var setOffBg = ResolveState(theme.SettingOff?.BackgroundColor, d.SettingOff.BackgroundColor);
             SettingOff.normal.textColor = setOffText.normal;
             SettingOff.hover.textColor = setOffText.hover;
-            SettingOff.active.textColor = setOffText.active;    
+            SettingOff.active.textColor = setOffText.active;
             SettingOff.normal.background = GetTex(setOffBg.normal);
             SettingOff.hover.background = GetTex(setOffBg.hover);
             SettingOff.active.background = GetTex(setOffBg.active);
@@ -750,7 +633,20 @@ namespace Magnetar_Client.UI.Themes
             NEFNodeStyle.normal.background = GetTex(ParseColor(theme.NEF?.NodeBackground, d.NEF.NodeBackground));
             HUDElementStyle.normal.textColor = ParseColor(theme.HUD?.TextColor, d.HUD.TextColor);
 
-            // Update exposed dynamic properties
+            // --- 14. Slider ---
+            Color trackOffColor = ParseColor(theme.Slider?.TrackOff ?? theme.SettingOff?.BackgroundColor?.Normal, d.Slider.TrackOff);
+            Color trackOnColor = ParseColor(theme.Slider?.TrackOn ?? theme.SettingOn?.BackgroundColor?.Normal, d.Slider.TrackOn);
+            Color thumbColor = ParseColor(theme.Slider?.Thumb ?? theme.SettingOn?.BackgroundColor?.Normal, d.Slider.Thumb);
+            Color thumbHoverColor = ParseColor(theme.Slider?.ThumbHover ?? theme.Slider?.Thumb ?? theme.SettingOn?.BackgroundColor?.Hover, d.Slider.ThumbHover);
+
+            SliderTrackOffStyle.normal.background = GetTex(trackOffColor);
+            SliderTrackOnStyle.normal.background = GetTex(trackOnColor);
+
+            SliderThumbStyle.normal.background = GetCircleTex(thumbColor);
+            SliderThumbStyle.hover.background = GetCircleTex(thumbHoverColor);
+            SliderThumbStyle.active.background = GetCircleTex(thumbHoverColor);
+
+            // Exposed dynamic properties
             AccentColor = catModOnBg.normal;
             AccentHoverColor = catModOnBg.hover;
             BackgroundColor = ParseColor(theme.CategoryWindow?.BackgroundColor, d.CategoryWindow.BackgroundColor);
@@ -798,6 +694,40 @@ namespace Magnetar_Client.UI.Themes
             return newTex;
         }
 
+        private static readonly Dictionary<string, Texture2D> _circleTextureCache = new Dictionary<string, Texture2D>();
+
+        public static Texture2D GetCircleTex(Color color, int size = 64)
+        {
+            string key = $"{color.r}_{color.g}_{color.b}_{color.a}_{size}";
+            if (_circleTextureCache.TryGetValue(key, out var cached) && cached != null)
+                return cached;
+
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false)
+            {
+                filterMode = FilterMode.Bilinear,
+                wrapMode = TextureWrapMode.Clamp
+            };
+
+            float center = (size - 1) / 2f;
+            float radius = size / 2f;
+            float edgeThickness = 1.25f;
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+                    float alpha = Mathf.Clamp01((radius - dist) / edgeThickness);
+                    Color pixelColor = new Color(color.r, color.g, color.b, color.a * alpha);
+                    tex.SetPixel(x, y, pixelColor);
+                }
+            }
+
+            tex.Apply(false);
+            _circleTextureCache[key] = tex;
+            return tex;
+        }
+
         private static void BuildEmptyStyles()
         {
             TopBarStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
@@ -829,6 +759,9 @@ namespace Magnetar_Client.UI.Themes
             NEFNodeStyle = new GUIStyle { alignment = TextAnchor.LowerCenter };
             TextStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = false, clipping = TextClipping.Clip };
             TextHighlightedStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = false, clipping = TextClipping.Clip };
+            SliderTrackOffStyle = new GUIStyle();
+            SliderTrackOnStyle = new GUIStyle();
+            SliderThumbStyle = new GUIStyle();
         }
 
         private static void SetOffset(RectOffset ro, int left, int right, int top, int bottom)
@@ -840,13 +773,6 @@ namespace Magnetar_Client.UI.Themes
             ro.bottom = bottom;
         }
 
-        /// <summary>
-        /// Re-derives every style's fontSize/padding/fixedHeight from the base
-        /// (1x) sizes using the current Config.GUIScale. Cheap to call every
-        /// frame - it only mutates plain int/float fields on existing GUIStyle
-        /// instances, it never allocates new styles or textures, and it bails
-        /// out immediately if the scale hasn't changed since the last call.
-        /// </summary>
         public static void Rescale()
         {
             if (!Magnetar_Client.Core.main.Instance.hasWarmedUp || !IsInitialized) return;
@@ -921,6 +847,11 @@ namespace Magnetar_Client.UI.Themes
             SetOffset(NEFNodeStyle.padding, S(NEFNodePaddingLR), S(NEFNodePaddingLR), S(NEFNodePaddingTop), S(NEFNodePaddingBottom));
             TextStyle.fontSize = S(TextFontSize);
             TextHighlightedStyle.fontSize = TextStyle.fontSize;
+
+            // Slider
+            SetOffset(SliderTrackOffStyle.padding, 0, 0, 0, 0);
+            SetOffset(SliderTrackOnStyle.padding, 0, 0, 0, 0);
+            SetOffset(SliderThumbStyle.padding, 0, 0, 0, 0);
         }
     }
 }

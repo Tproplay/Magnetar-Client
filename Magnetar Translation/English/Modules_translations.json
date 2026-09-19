@@ -495,7 +495,8 @@
       "Effects": "Effects",
       "Extra": "Extra",
       "Disable Screen Shake effect": "Disable Screen Shake effect",
-      "Particle Types": "Particle Types"
+      "Particle Types": "Particle Types",
+      "Others": "Others"
     }
   },
   "Smaller Projectiles": {
@@ -729,6 +730,37 @@
       "Setup": "Setup",
       "Load Selected Setup": "Load Selected Setup",
       "Delete Selected Setup": "Delete Selected Setup"
+    }
+  },
+  "Smaller Plants": {
+    "Name": "Smaller Plants",
+    "Description": "Changes the size of selected plants.",
+    "Search Hints": "",
+    "settings": {
+      "General": "General",
+      "Scale multiplier": "Scale multiplier",
+      "Entities": "Entities"
+    }
+  },
+  "Smaller Zombies": {
+    "Name": "Smaller Zombies",
+    "Description": "Changes the size of selected zombies.\nNote: Changing size also affects zombie's speed.",
+    "Search Hints": "",
+    "settings": {
+      "General": "General",
+      "Scale multiplier": "Scale multiplier",
+      "Entities": "Entities"
+    }
+  },
+  "AI Assist": {
+    "Name": "AI Assist",
+    "Description": "Uses ML to suggest the best strategy for your game.",
+    "Search Hints": "aiplay aimode autoplay bot machinelearning mlplay aibotplay autonomousplay aiassist aidirector aiadvisor strategizer smartplay recommendations aihelp mladvisor tacticalai aihints strategyhelper aiassistant optimalplay smartsuggestions aicoach decisionmaker tactician aipredict advicebot aistrategy advisory",
+    "settings": {
+      "The Gods Evolved": "The Gods Evolved",
+      "Suggest buffs": "Suggest buffs",
+      "Auto pick best buff": "Auto pick best buff",
+      "Auto pick delay": "Auto pick delay"
     }
   }
 }

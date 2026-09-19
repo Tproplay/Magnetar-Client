@@ -495,7 +495,8 @@
       "Effects": "Hiệu ứng",
       "Extra": "Tính năng thêm",
       "Disable Screen Shake effect": "Vô hiệu hóa hiệu ứng rung màn hình",
-      "Particle Types": "Các loại hạt hiệu ứng"
+      "Particle Types": "Các loại hạt hiệu ứng",
+      "Others": "Others"
     }
   },
   "Smaller Projectiles": {
@@ -730,5 +731,36 @@
       "Load Selected Setup": "Tải thiết lập đã chọn",
       "Delete Selected Setup": "Xóa thiết lập đã chọn"
     }
-}
+  },
+  "Smaller Plants": {
+    "Name": "Smaller Plants",
+    "Description": "Changes the size of selected plants.",
+    "Search Hints": "",
+    "settings": {
+      "General": "General",
+      "Scale multiplier": "Scale multiplier",
+      "Entities": "Entities"
+    }
+  },
+  "Smaller Zombies": {
+    "Name": "Smaller Zombies",
+    "Description": "Changes the size of selected zombies.\nNote: Changing size also affects zombie's speed.",
+    "Search Hints": "",
+    "settings": {
+      "General": "General",
+      "Scale multiplier": "Scale multiplier",
+      "Entities": "Entities"
+    }
+  },
+  "AI Assist": {
+    "Name": "AI Assist",
+    "Description": "Uses ML to suggest the best strategy for your game.",
+    "Search Hints": "aiplay aimode autoplay bot machinelearning mlplay aibotplay autonomousplay aiassist aidirector aiadvisor strategizer smartplay recommendations aihelp mladvisor tacticalai aihints strategyhelper aiassistant optimalplay smartsuggestions aicoach decisionmaker tactician aipredict advicebot aistrategy advisory",
+    "settings": {
+      "The Gods Evolved": "The Gods Evolved",
+      "Suggest buffs": "Suggest buffs",
+      "Auto pick best buff": "Auto pick best buff",
+      "Auto pick delay": "Auto pick delay"
+    }
+  }
 }

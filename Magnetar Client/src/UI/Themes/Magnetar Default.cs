@@ -311,9 +311,9 @@ namespace Magnetar_Client.UI.Themes
             Slider = new SliderTheme
             {
                 TrackOff = "#22252FFF",
-                TrackOn = "#8B0FFFFF",
-                Thumb = "#A82BFFFF",
-                ThumbHover = "#C36BFFFF"
+                TrackOn = "#FF3D3DFF",
+                Thumb = "#FF3D3DFF",
+                ThumbHover = "#FF3D3DFF"
             },
         };
         #endregion
@@ -744,7 +744,7 @@ namespace Magnetar_Client.UI.Themes
             SettingsDescriptionStyle = new GUIStyle { wordWrap = true, alignment = TextAnchor.UpperLeft, richText = true };
             SettingLabelStyle = new GUIStyle { wordWrap = true, alignment = TextAnchor.UpperLeft, richText = true };
             SettingAuthorStyle = new GUIStyle { fontStyle = FontStyle.Italic, alignment = TextAnchor.MiddleLeft, richText = true };
-            SettingTextStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = false, clipping = TextClipping.Clip };
+            SettingTextStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = true, clipping = TextClipping.Clip };
             SeparatorStyle = new GUIStyle();
             SeparatorTextStyle = new GUIStyle
             {

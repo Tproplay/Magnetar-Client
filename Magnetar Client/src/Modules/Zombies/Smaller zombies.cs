@@ -16,7 +16,7 @@ namespace Magnetar_Client.Modules
     {
         // Mod Info
         public override string Name { get; set; } = "Smaller Zombies";
-        public override string Description { get; set; } = "Changes the size of selected zombies.+\n" +
+        public override string Description { get; set; } = "Changes the size of selected zombies.\n" +
             "Note: Changing size also affects zombie's speed.";
         public override string SearchHints { get; set; } = "";
 

@@ -1,13 +1,12 @@
 ﻿using System;
 #if MELONLOADER || RELEASE_MELON
-using Magnetar_Client.Utils;
-using Magnetar_Client.Core;
 using MelonLoader;
 using MelonLoader.Utils;
 #elif BEPINEX || RELEASE_BEPINEX
 using BepInEx.Configuration;
 #endif
-
+using Magnetar_Client.Utils;
+using Magnetar_Client.Core;
 using UnityEngine;
 
 namespace Magnetar_Client

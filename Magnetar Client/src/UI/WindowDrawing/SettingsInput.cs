@@ -19,6 +19,46 @@ namespace Magnetar_Client.UI.WindowDrawing
         public static object activeNumericSetting = null;
         public static int lastFocusedNumericControlId = -1;
 
+        // Dedicated theme helper styles
+        private static GUIStyle _sliderThumbStyle;
+        private static GUIStyle SliderThumbStyle
+        {
+            get
+            {
+                if (_sliderThumbStyle == null)
+                {
+                    _sliderThumbStyle = new GUIStyle
+                    {
+                        alignment = TextAnchor.MiddleCenter,
+                        padding = new RectOffset()
+                    };
+                }
+                _sliderThumbStyle.fontSize = Config.SettingsInput.SliderThumbFontSize;
+                _sliderThumbStyle.normal.textColor = Magnetar_Default.AccentColor;
+                return _sliderThumbStyle;
+            }
+        }
+
+        private static GUIStyle _placeholderStyle;
+        private static GUIStyle PlaceholderStyle
+        {
+            get
+            {
+                if (_placeholderStyle == null)
+                {
+                    _placeholderStyle = new GUIStyle
+                    {
+                        wordWrap = false,
+                        clipping = TextClipping.Clip,
+                        alignment = Magnetar_Default.TextStyle.alignment
+                    };
+                }
+                _placeholderStyle.fontSize = Magnetar_Default.TextStyle.fontSize;
+                _placeholderStyle.normal.textColor = Magnetar_Default.TextDim;
+                return _placeholderStyle;
+            }
+        }
+
 #if ANDROID
         private static TouchScreenKeyboard _mobileKeyboard = null;
         private static int _activeMobileKeyboardId = -1;
@@ -107,25 +147,8 @@ namespace Magnetar_Client.UI.WindowDrawing
             GUI.Box(sliderRect, "", Magnetar_Default.SettingOff);
             if (fillWidth > 0) GUI.Box(new Rect(sliderRect.x, sliderRect.y, fillWidth, sliderRect.height), "", Magnetar_Default.SettingOn);
 
-            GUIStyle thumbStyle = Magnetar_Default.HUDElementStyle ?? GUI.skin.label;
-            Color prevColor = thumbStyle.normal.textColor;
-            int prevFontSize = thumbStyle.fontSize;
-            TextAnchor prevAlignment = thumbStyle.alignment;
-            RectOffset prevPadding = thumbStyle.padding;
-
-            thumbStyle.alignment = TextAnchor.MiddleCenter;
-            if (thumbStyle.padding == null) thumbStyle.padding = new RectOffset();
-            thumbStyle.padding.left = 0; thumbStyle.padding.right = 0;
-            thumbStyle.padding.top = 0; thumbStyle.padding.bottom = 0;
-            thumbStyle.fontSize = Config.SettingsInput.SliderThumbFontSize;
-            thumbStyle.normal.textColor = Magnetar_Default.AccentColor;
-
-            GUI.Label(thumbRect, "●", thumbStyle);
-
-            thumbStyle.normal.textColor = prevColor;
-            thumbStyle.fontSize = prevFontSize;
-            thumbStyle.alignment = prevAlignment;
-            thumbStyle.padding = prevPadding;
+            // Clean isolated thumb render without mutating HUDElementStyle
+            GUI.Label(thumbRect, "●", SliderThumbStyle);
 
             Event e = Event.current;
 
@@ -150,7 +173,7 @@ namespace Magnetar_Client.UI.WindowDrawing
             // 1. Generate a stable IMGUI control ID based strictly on the setting's name hash
             int sliderControlId = GUIUtility.GetControlID(name.GetHashCode(), FocusType.Passive);
 
-            // 2. Click initiation (claim hotControl so Unity routes all drags here)
+            // 2. Click initiation
             if (e.type == EventType.MouseDown && e.button == 0 && inHitbox)
             {
                 GUIUtility.hotControl = sliderControlId;
@@ -163,19 +186,18 @@ namespace Magnetar_Client.UI.WindowDrawing
                 e.Use();
             }
 
-            // 3. Drag Tracking (Delivered directly because we own hotControl)
+            // 3. Drag Tracking
             if (GUIUtility.hotControl == sliderControlId)
             {
                 if (e.type == EventType.MouseDrag)
                 {
                     ApplyFromMouseX(e.mousePosition.x);
-                    e.Use(); // Consumes the drag so the window doesn't move
+                    e.Use();
                 }
-                // Only evaluate rawType if the event is actively being ignored (dragged off-screen)
                 else if (e.type == EventType.MouseUp || (e.type == EventType.Ignore && e.rawType == EventType.MouseUp))
                 {
                     CommitSettingValue();
-                    GUIUtility.hotControl = 0; // Releases capture back to Unity
+                    GUIUtility.hotControl = 0;
                     activeSliderId = -1;
                     activeNumericSetting = null;
                     e.Use();
@@ -234,9 +256,8 @@ namespace Magnetar_Client.UI.WindowDrawing
                 Config.SettingWidth, Config.elementHeight);
             bool bindHover = bindRect.Contains(e.mousePosition);
 
-            if (bindHover) GUI.backgroundColor = Magnetar_Default.AccentColor;
+            // Native style states handle background and hover colors directly
             GUI.Box(bindRect, bindText, bSet.IsBinding ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
-            GUI.backgroundColor = Color.white;
 
             if (bindHover && isLeftClick)
             {
@@ -319,13 +340,12 @@ namespace Magnetar_Client.UI.WindowDrawing
         private static bool _isListSwiping = false;
 
 #if ANDROID
-        // Mobile Hold-to-Shift-Drag & Tap tracking
         private static float _mobileHoldStartTime = 0f;
         private static Vector2 _mobileHoldStartPos = Vector2.zero;
         private static int _mobileHoldItemIdx = -1;
         private static bool _isMobileHolding = false;
         private static bool _mobileShiftDragActive = false;
-        private const float MobileShiftHoldThreshold = 0.50f; // 500ms hold triggers shift dragging
+        private const float MobileShiftHoldThreshold = 0.50f;
 #endif
 
         public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, dynamic activeMultiSelect, Action onClose = null)
@@ -347,9 +367,9 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             // --- 1. TITLE BANNER WITH WORKING CLOSE BUTTON ---
 #if ANDROID
-            float titleHeight = Config.S(25f) * 1.30f; // 30% header size increase on Android
+            float titleHeight = Config.S(25f) * 1.30f;
 #else
-            float titleHeight = Config.S(25f);        // Standard height on PC
+            float titleHeight = Config.S(25f);
 #endif
             Rect headerBgRect = new Rect(0, 0, multiSelectWindowRect.width, titleHeight);
             GUI.Box(headerBgRect, Translate("Select ") + Translate(activeMultiSelect.Name), Magnetar_Default.SettingsWndowStyle);
@@ -362,8 +382,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                 Rect closeButtonRect = new Rect(btnX, btnY, closeBtnSize, closeBtnSize);
 
                 bool isHovered = closeButtonRect.Contains(e.mousePosition);
-
-                if (isHovered) GUI.backgroundColor = Magnetar_Default.AccentColor;
 
                 if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
                 {
@@ -383,7 +401,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                 }
 
                 GUI.Box(closeButtonRect, "✕", Magnetar_Default.CloseButtonStyle);
-                GUI.backgroundColor = Color.white;
             }
 
             // --- 2. HEADER: SEARCH & TOGGLE ALL ---
@@ -530,7 +547,7 @@ namespace Magnetar_Client.UI.WindowDrawing
 #endif
             }
 
-            // --- 6. THE LIST VIEWPORT (Touch-Swipe Drag & Mobile Shift-Drag) ---
+            // --- 6. THE LIST VIEWPORT ---
             float listWidth = availWidth - scrollbarWidth - Config.S(6f);
             Rect listGroupRect = new Rect(padX, contentStartY, listWidth, viewHeight);
             GUI.BeginGroup(listGroupRect);
@@ -540,17 +557,14 @@ namespace Magnetar_Client.UI.WindowDrawing
                 bool isShiftHeld = e.shift || ((e.modifiers & EventModifiers.Shift) != 0) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
 #if ANDROID
-                // 1. Mobile 0.5s Hold Timer Update
                 if (_isMobileHolding && !_mobileShiftDragActive)
                 {
                     if (Vector2.Distance(mousePos, _mobileHoldStartPos) > Config.S(12f))
                     {
-                        // Moved finger beyond threshold before 0.5s -> regular swipe scroll
                         _isMobileHolding = false;
                     }
                     else if (Time.realtimeSinceStartup - _mobileHoldStartTime >= MobileShiftHoldThreshold)
                     {
-                        // 0.5s threshold reached: activate mobile shift-dragging
                         _mobileShiftDragActive = true;
                         _isMobileHolding = false;
 
@@ -572,7 +586,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     }
                 }
 
-                // 2. Mobile Touch Down
                 if (e.type == EventType.MouseDown && e.button == 0 && isMouseInsideList)
                 {
                     _listTouchStart = mousePos;
@@ -589,7 +602,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     _mobileShiftDragActive = false;
                 }
 
-                // 3. Mobile Drag (Swiping vs Shift-Paint)
                 if (_mobileShiftDragActive)
                 {
                     if (e.type == EventType.MouseDrag || e.type == EventType.MouseMove || e.type == EventType.Repaint)
@@ -643,7 +655,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     }
                 }
 
-                // 4. Mobile Touch Up (Release Selection)
                 if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
                 {
                     if (_mobileShiftDragActive)
@@ -656,14 +667,22 @@ namespace Magnetar_Client.UI.WindowDrawing
                     }
                     else if (_isMobileHolding && !_isListSwiping)
                     {
-                        // Clean tap without swiping or holding for 0.5s -> toggle single item
                         if (_mobileHoldItemIdx >= 0 && _mobileHoldItemIdx < filteredItems.Count)
                         {
                             int itemKey = filteredItems[_mobileHoldItemIdx].Key;
-                            if (activeMultiSelect.IsSelected(itemKey))
-                                activeMultiSelect.Deselect(itemKey);
+
+                            if (activeMultiSelect.MaxSelection == 1)
+                            {
+                                activeMultiSelect.SelectedValues.Clear();
+                                activeMultiSelect.Select(itemKey);
+                            }
                             else
-                                ToggleWithLimit(activeMultiSelect, itemKey);
+                            {
+                                if (activeMultiSelect.IsSelected(itemKey))
+                                    activeMultiSelect.Deselect(itemKey);
+                                else
+                                    ToggleWithLimit(activeMultiSelect, itemKey);
+                            }
 
                             e.Use();
                         }
@@ -673,7 +692,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                     _isListSwiping = false;
                 }
 #else
-                // PC Implementation (Unchanged)
                 if (e.type == EventType.MouseDown && e.button == 0 && isMouseInsideList)
                 {
                     _listTouchStart = mousePos;
@@ -688,7 +706,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                         int itemKey = filteredItems[clickedIdx].Key;
                         bool isCurrentlySelected = activeMultiSelect.IsSelected(itemKey);
 
-                        if (isShiftHeld)
+                        if (isShiftHeld && activeMultiSelect.MaxSelection != 1)
                         {
                             isShiftDragging = true;
                             dragTargetState = !isCurrentlySelected;
@@ -703,8 +721,17 @@ namespace Magnetar_Client.UI.WindowDrawing
                         else
                         {
                             isShiftDragging = false;
-                            if (isCurrentlySelected) activeMultiSelect.Deselect(itemKey);
-                            else ToggleWithLimit(activeMultiSelect, itemKey);
+
+                            if (activeMultiSelect.MaxSelection == 1)
+                            {
+                                activeMultiSelect.SelectedValues.Clear();
+                                activeMultiSelect.Select(itemKey);
+                            }
+                            else
+                            {
+                                if (isCurrentlySelected) activeMultiSelect.Deselect(itemKey);
+                                else ToggleWithLimit(activeMultiSelect, itemKey);
+                            }
                         }
 
                         e.Use();
@@ -790,7 +817,6 @@ namespace Magnetar_Client.UI.WindowDrawing
 
         private static void ToggleWithLimit(dynamic activeMultiSelect, int val)
         {
-            // If single-selection mode, replace the current selection immediately
             if (activeMultiSelect.MaxSelection == 1)
             {
                 activeMultiSelect.SelectedValues.Clear();
@@ -798,7 +824,6 @@ namespace Magnetar_Client.UI.WindowDrawing
                 return;
             }
 
-            // Default multi-selection behavior
             if (activeMultiSelect.MaxSelection == -1 || activeMultiSelect.SelectedValues.Count < activeMultiSelect.MaxSelection)
             {
                 activeMultiSelect.Select(val);
@@ -910,14 +935,9 @@ namespace Magnetar_Client.UI.WindowDrawing
                             }
 
                             bool isSelected = (selSet.Value == kvp.Key);
-                            bool isRowHovered = rowRect.Contains(Event.current.mousePosition);
-
                             GUIStyle style = isSelected ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff;
 
-                            if (isRowHovered && !isSelected) GUI.backgroundColor = Magnetar_Default.AccentColor;
-
                             GUI.Box(rowRect, displayName, style);
-                            GUI.backgroundColor = Color.white;
                         }
                         i++;
                     }
@@ -1294,7 +1314,7 @@ namespace Magnetar_Client.UI.WindowDrawing
 
             if (string.IsNullOrEmpty(text) && activeTextFieldId != controlId)
             {
-                GUI.Label(new Rect(5, 0, rect.width, rect.height), defaultText, Magnetar_Default.SettingLabelStyle);
+                GUI.Label(new Rect(5, 0, rect.width, rect.height), defaultText, PlaceholderStyle);
             }
             else
             {
@@ -1306,7 +1326,7 @@ namespace Magnetar_Client.UI.WindowDrawing
                     float endX = TextStyle.CalcSize(new GUIContent(text.Substring(0, selEnd))).x;
 
                     Rect selRect = new Rect(5 + startX - scrollOffset, 2, endX - startX, rect.height - 4);
-                    GUI.Box(selRect, "", Magnetar_Default.SettingOn);
+                    GUI.Box(selRect, "", Magnetar_Default.TextHighlightedStyle);
                 }
 
                 GUI.Label(new Rect(5 - scrollOffset, 0, 2000, rect.height), text, TextStyle);
@@ -1414,9 +1434,8 @@ namespace Magnetar_Client.UI.WindowDrawing
             Rect btnRect = new Rect(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
             bool isHovered = btnRect.Contains(e.mousePosition);
 
-            if (isHovered && !btnSet.IsDisabled) GUI.backgroundColor = Magnetar_Default.AccentColor;
+            // SettingOff handles normal, hover, and active states natively without tint overrides
             GUI.Box(btnRect, Translator.Translate(btnSet.ButtonText), Magnetar_Default.SettingOff);
-            GUI.backgroundColor = Color.white;
 
             if (isHovered && e.type == EventType.MouseDown && e.button == 0)
             {

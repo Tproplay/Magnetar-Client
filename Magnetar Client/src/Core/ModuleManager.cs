@@ -528,7 +528,7 @@ namespace Magnetar_Client.Core
                     _settingsPositions[mod],
                     GetSettingsDelegate(mod),
                     "",
-                    Magnetar_Default.CategoryWindowStyle
+                    Magnetar_Default.SettingsWndowBgStyle
                 );
             }
         }
@@ -608,7 +608,7 @@ namespace Magnetar_Client.Core
                 float btnSize = Config.S(22f);
                 float btnY = (headerHeight - btnSize) / 2f;
                 Rect closeButtonRect = new Rect(windowWidth - Config.S(26f), btnY, btnSize, btnSize);
-                GUI.Box(closeButtonRect, "X", Magnetar_Default.CategoryModuleOnStyle);
+                GUI.Box(closeButtonRect, "X", Magnetar_Default.CloseButtonStyle);
                 if (e.type == EventType.MouseDown && closeButtonRect.Contains(e.mousePosition))
                 {
                     ModuleManager.showSettings = false;
@@ -668,7 +668,7 @@ namespace Magnetar_Client.Core
         private static float DrawSettingsBody(Modules.Module mod, float y, float width)
         {
             float startY = y;
-            MiscDrawing.SeperatorFull(ref y, width, Config.spacing, Magnetar_Default.AccentColor);
+            MiscDrawing.SeperatorFull(ref y, width, Config.spacing);
             y += Config.spacing;
 
             float descriptionWidth = width - (Config.indent * 2);
@@ -690,7 +690,7 @@ namespace Magnetar_Client.Core
             {
                 if (setting is CategorySetting catSet)
                 {
-                    catSet.IsExpanded = MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Color.white, Translate(catSet.Name), true, catSet.IsExpanded);
+                    catSet.IsExpanded = MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Translate(catSet.Name), true, catSet.IsExpanded);
                     skipSettings = !catSet.IsExpanded;
                     if (skipSettings) y -= Config.spacing / 2;
                     continue;
@@ -716,7 +716,7 @@ namespace Magnetar_Client.Core
                 y += Config.elementHeight + Config.spacing;
             }
 
-            MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Color.white, Translate("KeyBind"));
+            MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Translate("KeyBind"));
 
             Event e = Event.current;
             bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;

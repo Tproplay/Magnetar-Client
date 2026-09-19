@@ -27,13 +27,11 @@ namespace Magnetar_Client.UI.WindowDrawing
         /// <summary>
         /// Draws a scalable horizontal separator spanning the full window width.
         /// </summary>
-        public static void SeperatorFull(ref float y, float width, float spacing, Color color)
+        public static void SeperatorFull(ref float y, float width, float spacing)
         {
             float lineThickness = Mathf.Max(1f, Config.S(1f));
 
-            GUI.backgroundColor = color;
             GUI.Box(new Rect(0, y, width, lineThickness), "", Magnetar_Default.SeparatorStyle);
-            GUI.backgroundColor = Color.white;
 
             y += (spacing * 2f);
         }
@@ -41,41 +39,39 @@ namespace Magnetar_Client.UI.WindowDrawing
         /// <summary>
         /// Draws a scalable separator with indent margins. Optionally draws a labeled, clickable category foldout.
         /// </summary>
-        public static bool Seperator(ref float y, float width, float indent, float spacing, Color color, string name = "", bool isCollapsible = false, bool isExpanded = true)
+        public static bool Seperator(ref float y, float width, float indent, float spacing, string name = "", bool isCollapsible = false, bool isExpanded = true, Color? customTextColor = null)
         {
             y += spacing;
             float lineThickness = Mathf.Max(1f, Config.S(1f));
 
             if (string.IsNullOrEmpty(name))
             {
-                GUI.backgroundColor = color;
                 GUI.Box(new Rect(indent, y, width - (indent * 2f), lineThickness), "", Magnetar_Default.SeparatorStyle);
-                GUI.backgroundColor = Color.white;
 
                 y += lineThickness + spacing;
                 return isExpanded;
             }
 
             // --- Labeled & Collapsible Category Separator ---
-            float elementH = Config.S(22f);
-            float lineY = y + (elementH / 2f) - (lineThickness / 2f);
+            float elementH = Config.elementHeight;
+            float lineY = Mathf.Round(y + (elementH / 2f) - (lineThickness / 2f));
 
-            GUIStyle style = GetCategoryHeaderStyle(color);
+            string displayName = isCollapsible ? (isExpanded ? $"▼ {name}" : $"▶ {name}") : name;
 
-            float textPadding = Config.S(10f);
-            float textWidth = style.CalcSize(new GUIContent(name)).x + textPadding;
+            float textPadding = Config.S(12f);
+            float textWidth = Magnetar_Default.SeparatorTextStyle.CalcSize(new GUIContent(displayName)).x + textPadding;
             float lineW = Mathf.Max(0f, (width - (indent * 2f) - textWidth) / 2f);
 
+            // 1. Draw Left & Right Horizontal Lines
             if (lineW > 0f)
             {
-                GUI.backgroundColor = color;
                 GUI.Box(new Rect(indent, lineY, lineW, lineThickness), "", Magnetar_Default.SeparatorStyle);
                 GUI.Box(new Rect(indent + lineW + textWidth, lineY, lineW, lineThickness), "", Magnetar_Default.SeparatorStyle);
-                GUI.backgroundColor = Color.white;
             }
 
             Rect textRect = new Rect(indent + lineW, y, textWidth, elementH);
 
+            // 2. Click-to-Fold Handling
             if (isCollapsible)
             {
                 Rect clickRect = new Rect(indent, y, width - (indent * 2f), elementH);
@@ -86,7 +82,19 @@ namespace Magnetar_Client.UI.WindowDrawing
                 }
             }
 
-            GUI.Label(textRect, name, style);
+            // 3. Draw Centered Title Text
+            Color prevColor = GUI.contentColor;
+            if (customTextColor.HasValue)
+            {
+                GUI.contentColor = customTextColor.Value;
+            }
+
+            GUI.Label(textRect, displayName, Magnetar_Default.SeparatorTextStyle);
+
+            if (customTextColor.HasValue)
+            {
+                GUI.contentColor = prevColor;
+            }
 
             y += elementH + spacing;
             return isExpanded;

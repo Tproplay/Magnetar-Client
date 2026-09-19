@@ -56,11 +56,15 @@ namespace Magnetar_Client.UI.Themes
         [JsonProperty("background color")]
         public string BackgroundColor { get; set; }
 
+        [JsonProperty("window background", NullValueHandling = NullValueHandling.Ignore)]
+        public string WindowBackground { get; set; }
+
         public WindowStyleTheme() { }
-        public WindowStyleTheme(string text, string bg)
+        public WindowStyleTheme(string text, string bg, string windowBg = null)
         {
             Text = text;
             BackgroundColor = bg;
+            WindowBackground = windowBg ?? bg;
         }
     }
 
@@ -84,6 +88,12 @@ namespace Magnetar_Client.UI.Themes
 
         [JsonProperty("highlight background")]
         public string HighlightBackground { get; set; }
+
+        [JsonProperty("secondary", NullValueHandling = NullValueHandling.Ignore)]
+        public string Secondary { get; set; }
+
+        [JsonProperty("primary", NullValueHandling = NullValueHandling.Ignore)]
+        public string Primary { get => Text; set => Text = value; }
     }
 
     [Serializable]
@@ -111,6 +121,9 @@ namespace Magnetar_Client.UI.Themes
 
         [JsonProperty("separator")]
         public string Separator { get; set; }
+
+        [JsonProperty("separator text", NullValueHandling = NullValueHandling.Ignore)]
+        public string SeparatorText { get; set; }
     }
 
     [Serializable]
@@ -232,6 +245,12 @@ namespace Magnetar_Client.UI.Themes
         // --- Module Settings and HUD/GUI Managers ---
 
         /// <summary>
+        /// Style for the base Module Setting background.
+        /// <para>• Bg color: normal</para>
+        /// </summary>
+        public static GUIStyle SettingsWndowBgStyle;
+
+        /// <summary>
         /// Style for the base Module Setting header banner and popup titles.
         /// <para>• Text color: normal (dark contrasting)</para>
         /// <para>• Bg color: normal (accent header background)</para>
@@ -295,6 +314,13 @@ namespace Magnetar_Client.UI.Themes
         public static GUIStyle SeparatorStyle;
 
         /// <summary>
+        /// Style for the text label rendered inside partitioned separators.
+        /// <para>• Text color: normal (separator label text color)</para>
+        /// <para>• Alignment: MiddleCenter</para>
+        /// </summary>
+        public static GUIStyle SeparatorTextStyle;
+
+        /// <summary>
         /// Style for text input fields and manual value editors.
         /// <para>• Text color: normal (primary white)</para>
         /// <para>• Formatting: Clipping enabled, WordWrap disabled</para>
@@ -336,19 +362,6 @@ namespace Magnetar_Client.UI.Themes
         /// <para>• Alignment: LowerCenter</para>
         /// </summary>
         public static GUIStyle NEFNodeStyle;
-
-        // Legacy / Cross-Compatibility Aliases
-        public static GUIStyle TopBar { get => TopBarStyle; set => TopBarStyle = value; }
-        public static GUIStyle TopBarButtonActive { get => TopBarActiveStyle; set => TopBarActiveStyle = value; }
-        public static GUIStyle ModuleWindow { get => CategoryWindowStyle; set => CategoryWindowStyle = value; }
-        public static GUIStyle ModuleOn { get => CategoryModuleOnStyle; set => CategoryModuleOnStyle = value; }
-        public static GUIStyle ModuleOff { get => CategoryModuleOffStyle; set => CategoryModuleOffStyle = value; }
-        public static GUIStyle ModuleOnCentralized { get => CloseButtonStyle; set => CloseButtonStyle = value; }
-        public static GUIStyle SettingsWindow { get => SettingsWndowStyle; set => SettingsWndowStyle = value; }
-        public static GUIStyle DescriptionStyle { get => SettingsDescriptionStyle; set => SettingsDescriptionStyle = value; }
-        public static GUIStyle AuthorStyle { get => SettingAuthorStyle; set => SettingAuthorStyle = value; }
-        public static GUIStyle SettingDescriptionStyle { get => SettingLabelStyle; set => SettingLabelStyle = value; }
-        public static GUIStyle DimStyle { get => DimBackgroundStyle; set => DimBackgroundStyle = value; }
         #endregion
 
         #region Dynamic Theme Colors
@@ -394,7 +407,7 @@ namespace Magnetar_Client.UI.Themes
                 new ColorState("#000000FF", "#000000FF", "#000000FF"),
                 new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
             ),
-            SettingsWindow = new WindowStyleTheme("#000000FF", "#FF3D3DFF"),
+            SettingsWindow = new WindowStyleTheme("#000000FF", "#FF3D3DFF", "#1A1A1ADC"),
             SettingOff = new ElementStyleTheme(
                 new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
                 new ColorState("#1C1C1CD6", "#1C1C1CFF", "#1C1C1CFF")
@@ -409,6 +422,7 @@ namespace Magnetar_Client.UI.Themes
                 Label = "#E6E6E6FF",
                 Author = "#808080FF",
                 Text = "#E6E6E6FF",
+                Secondary = "#AEAEAEFF",
                 HighlightText = "#FFFFFFFF",
                 HighlightBackground = "#FF3D3DFF"
             },
@@ -682,6 +696,12 @@ namespace Magnetar_Client.UI.Themes
             CloseButtonStyle.active.background = GetTex(closeBg.active);
 
             // --- 8. Settings Window ---
+
+            string rawWindowBg = theme.SettingsWindow?.WindowBackground
+                                 ?? theme.CategoryWindow?.BackgroundColor
+                                 ?? d.SettingsWindow.WindowBackground;
+            SettingsWndowBgStyle.normal.background = GetTex(ParseColor(rawWindowBg, d.SettingsWindow.WindowBackground));
+
             SettingsWndowStyle.normal.textColor = ParseColor(theme.SettingsWindow?.Text, d.SettingsWindow.Text);
             SettingsWndowStyle.normal.background = GetTex(ParseColor(theme.SettingsWindow?.BackgroundColor, d.SettingsWindow.BackgroundColor));
 
@@ -690,7 +710,7 @@ namespace Magnetar_Client.UI.Themes
             var setOffBg = ResolveState(theme.SettingOff?.BackgroundColor, d.SettingOff.BackgroundColor);
             SettingOff.normal.textColor = setOffText.normal;
             SettingOff.hover.textColor = setOffText.hover;
-            SettingOff.active.textColor = setOffText.active;
+            SettingOff.active.textColor = setOffText.active;    
             SettingOff.normal.background = GetTex(setOffBg.normal);
             SettingOff.hover.background = GetTex(setOffBg.hover);
             SettingOff.active.background = GetTex(setOffBg.active);
@@ -719,6 +739,10 @@ namespace Magnetar_Client.UI.Themes
 
             // --- 12. Separator & Dim ---
             SeparatorStyle.normal.background = GetTex(ParseColor(theme.Misc?.Separator, d.Misc.Separator));
+
+            Color sepTextColor = ParseColor(theme.Misc?.SeparatorText ?? theme.Typography?.Secondary, d.Typography.Secondary);
+            SeparatorTextStyle.normal.textColor = sepTextColor;
+
             DimBackgroundStyle.normal.background = GetTex(ParseColor(theme.Misc?.DimBackground, d.Misc.DimBackground));
 
             // --- 13. NEF & HUD ---
@@ -783,6 +807,7 @@ namespace Magnetar_Client.UI.Themes
             CategoryHeaderStyle = new GUIStyle { alignment = TextAnchor.UpperCenter, fontStyle = FontStyle.Bold };
             CategoryModuleOffStyle = new GUIStyle { alignment = TextAnchor.MiddleLeft };
             CategoryWindowStyle = new GUIStyle { alignment = TextAnchor.UpperCenter, fontStyle = FontStyle.Bold };
+            SettingsWndowBgStyle = new GUIStyle();
             SettingsWndowStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
             SettingOn = new GUIStyle { alignment = TextAnchor.MiddleLeft };
             SettingOff = new GUIStyle { alignment = TextAnchor.MiddleLeft };
@@ -791,6 +816,13 @@ namespace Magnetar_Client.UI.Themes
             SettingAuthorStyle = new GUIStyle { fontStyle = FontStyle.Italic, alignment = TextAnchor.MiddleLeft, richText = true };
             SettingTextStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = false, clipping = TextClipping.Clip };
             SeparatorStyle = new GUIStyle();
+            SeparatorTextStyle = new GUIStyle
+            {
+                alignment = TextAnchor.MiddleCenter,
+                wordWrap = false,
+                richText = true,
+                clipping = TextClipping.Overflow
+            };
             DimBackgroundStyle = new GUIStyle();
             HUDElementStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, wordWrap = false, richText = true };
             NEFLineStyle = new GUIStyle();
@@ -851,6 +883,8 @@ namespace Magnetar_Client.UI.Themes
             SetOffset(CategoryModuleOffStyle.padding, S(ModulePaddingLeft), 0, 0, 0);
 
             // Windows
+            SetOffset(SettingsWndowBgStyle.padding, 0, 0, 0, 0);
+
             CategoryWindowStyle.fontSize = S(ModuleWindowFontSize);
             SetOffset(CategoryWindowStyle.padding, 0, 0, S(ModuleWindowPaddingTop), 0);
 
@@ -878,6 +912,8 @@ namespace Magnetar_Client.UI.Themes
 
             // Separators & HUD
             SeparatorStyle.fixedHeight = Sf(SeparatorFixedHeight);
+            SeparatorTextStyle.fontSize = S(SettingFontSize);
+            SetOffset(SeparatorTextStyle.padding, 0, 0, 0, 0);
             HUDElementStyle.fontSize = Mathf.Max(1, Mathf.RoundToInt(HUDElementFontSize * elementScale));
             SetOffset(HUDElementStyle.padding, 0, 0, 0, 0);
 

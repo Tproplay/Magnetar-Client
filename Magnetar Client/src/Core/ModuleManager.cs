@@ -209,7 +209,7 @@ namespace Magnetar_Client.Core
                     id,
                     WindowPositions[cat],
                     CategoryDelegate,
-                    Translate(cat.ToString()),
+                    "",
                     Magnetar_Default.CategoryWindowStyle
                 );
 
@@ -242,7 +242,10 @@ namespace Magnetar_Client.Core
 
                 Rect titleBarRect = new Rect(0, 0, windowWidth, headerHeight);
 
-                // --- 1. Invisible Background Triangle Fold Indicator ---
+                // --- 1. Dedicated Header Background Box & Title ---
+                GUI.Box(titleBarRect, Translate(category.ToString()), Magnetar_Default.CategoryHeaderStyle);
+
+                // --- 2. Invisible Background Triangle Fold Indicator ---
                 Rect foldBtnRect = new Rect(windowWidth - Config.S(24f), (headerHeight - Config.S(20f)) / 2f, Config.S(20f), Config.S(20f));
                 string foldIndicator = isFolded ? "▶" : "▼";
 
@@ -254,7 +257,7 @@ namespace Magnetar_Client.Core
                 };
                 GUI.Label(foldBtnRect, foldIndicator, arrowStyle);
 
-                // --- 2. Title Bar: Click to Collapse vs Drag to Move ---
+                // --- 3. Title Bar: Click to Collapse vs Drag to Move ---
                 if (e.type == EventType.MouseDown && e.button == 0 && titleBarRect.Contains(e.mousePosition))
                 {
                     _clickCategory = category;
@@ -269,7 +272,6 @@ namespace Magnetar_Client.Core
                         float mouseDelta = Vector2.Distance(e.mousePosition, _clickStartMousePos);
                         float windowDelta = Vector2.Distance(WindowPositions[category].position, _clickStartWindowPos);
 
-                        // If the window and cursor didn't move significantly, treat as a click
                         if (mouseDelta < Config.S(6f) && windowDelta < Config.S(4f))
                         {
                             CategoryFolded[category] = !isFolded;
@@ -281,7 +283,6 @@ namespace Magnetar_Client.Core
                 }
                 else if (e.type == EventType.MouseDown && e.button == 1 && titleBarRect.Contains(e.mousePosition))
                 {
-                    // Secondary right-click toggle for PC
                     CategoryFolded[category] = !isFolded;
                     isFolded = CategoryFolded[category];
                     e.Use();
@@ -295,7 +296,7 @@ namespace Magnetar_Client.Core
                     return;
                 }
 
-                // --- 3. 70% Max Screen Height Calculation ---
+                // --- 4. 70% Max Screen Height Calculation ---
                 float totalContentHeight = categoryModules.Count * buttonHeight;
                 float maxCategoryHeight = Config.WindowHeight * 0.70f;
                 float maxViewHeight = maxCategoryHeight - headerHeight;
@@ -311,17 +312,17 @@ namespace Magnetar_Client.Core
 
                 Rect viewRect = new Rect(0, headerHeight, windowWidth, viewHeight);
 
-                // --- 4. Scroll Input Handling ---
+                // --- 5. Scroll Input Handling ---
                 currentScroll = HandleScrollInput(category, viewRect, currentScroll, maxScroll, needsScroll, e);
                 CategoryScrollPositions[category] = currentScroll;
 
-                // --- 5. Render Scrollable Group ---
+                // --- 6. Render Scrollable Group ---
                 float contentWidth = needsScroll ? windowWidth - Config.S(8f) : windowWidth;
                 GUI.BeginGroup(viewRect);
                 DrawCategoryItems(category, categoryModules, buttonHeight, currentScroll, viewHeight, contentWidth, headerHeight, e);
                 GUI.EndGroup();
 
-                // --- 6. Scrollbar ---
+                // --- 7. Scrollbar ---
                 if (needsScroll)
                 {
                     DrawScrollbar(windowWidth, headerHeight, viewHeight, totalContentHeight, currentScroll, maxScroll);

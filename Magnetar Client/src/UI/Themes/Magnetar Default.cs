@@ -10,94 +10,156 @@ namespace Magnetar_Client.UI.Themes
 {
     #region Nested Theme Data Contracts
     [Serializable]
-    public class ThemeData
+    public class ColorState
     {
-        public string Name { get; set; } = "Custom Theme";
+        [JsonProperty("normal")]
+        public string Normal { get; set; }
 
-        public GeneralColors Colors { get; set; } = new GeneralColors();
-        public TypographyColors Typography { get; set; } = new TypographyColors();
-        public TopBarTheme TopBar { get; set; } = new TopBarTheme();
-        public CategoryTheme CategoryWindow { get; set; } = new CategoryTheme();
-        public SettingsTheme SettingsWindow { get; set; } = new SettingsTheme();
-        public ControlsTheme Controls { get; set; } = new ControlsTheme();
-        public NefTheme NEF { get; set; } = new NefTheme();
-        public HudTheme HUD { get; set; } = new HudTheme();
-    }
-
-    [Serializable]
-    public class GeneralColors
-    {
-        public string Accent { get; set; }
-        public string AccentHover { get; set; }
-        public string Background { get; set; }
-        public string BackgroundLight { get; set; }
+        [JsonProperty("hover", NullValueHandling = NullValueHandling.Ignore)]
         public string Hover { get; set; }
+
+        [JsonProperty("active", NullValueHandling = NullValueHandling.Ignore)]
         public string Active { get; set; }
-        public string Dim { get; set; }
-        public string Separator { get; set; }
+
+        public ColorState() { }
+        public ColorState(string normal, string hover = null, string active = null)
+        {
+            Normal = normal;
+            Hover = hover ?? normal;
+            Active = active ?? normal;
+        }
     }
 
     [Serializable]
-    public class TypographyColors
+    public class ElementStyleTheme
     {
-        public string Primary { get; set; }
-        public string Secondary { get; set; }
+        [JsonProperty("text")]
+        public ColorState Text { get; set; } = new ColorState();
+
+        [JsonProperty("background color")]
+        public ColorState BackgroundColor { get; set; } = new ColorState();
+
+        public ElementStyleTheme() { }
+        public ElementStyleTheme(ColorState text, ColorState bg)
+        {
+            Text = text;
+            BackgroundColor = bg;
+        }
+    }
+
+    [Serializable]
+    public class WindowStyleTheme
+    {
+        [JsonProperty("text")]
+        public string Text { get; set; }
+
+        [JsonProperty("background color")]
+        public string BackgroundColor { get; set; }
+
+        public WindowStyleTheme() { }
+        public WindowStyleTheme(string text, string bg)
+        {
+            Text = text;
+            BackgroundColor = bg;
+        }
+    }
+
+    [Serializable]
+    public class TypographyTheme
+    {
+        [JsonProperty("description")]
         public string Description { get; set; }
+
+        [JsonProperty("label")]
         public string Label { get; set; }
+
+        [JsonProperty("author")]
         public string Author { get; set; }
+
+        [JsonProperty("text")]
+        public string Text { get; set; }
+
+        [JsonProperty("highlight text")]
         public string HighlightText { get; set; }
-    }
 
-    [Serializable]
-    public class TopBarTheme
-    {
-        public string Background { get; set; }
-        public string ActiveBackground { get; set; }
-        public string TextColor { get; set; }
-        public string ActiveTextColor { get; set; }
-        public string HoverTextColor { get; set; }
-    }
-
-    [Serializable]
-    public class CategoryTheme
-    {
-        public string HeaderBackground { get; set; }
-        public string HeaderTextColor { get; set; }
-        public string ModuleOnBackground { get; set; }
-        public string ModuleOnTextColor { get; set; }
-        public string ModuleOffBackground { get; set; }
-        public string ModuleOffTextColor { get; set; }
-    }
-
-    [Serializable]
-    public class SettingsTheme
-    {
-        public string HeaderBackground { get; set; }
-        public string HeaderTextColor { get; set; }
-        public string SettingOnBackground { get; set; }
-        public string SettingOnTextColor { get; set; }
-        public string SettingOffBackground { get; set; }
-        public string SettingOffTextColor { get; set; }
-    }
-
-    [Serializable]
-    public class ControlsTheme
-    {
-        public string CloseButtonBackground { get; set; }
-        public string CloseButtonTextColor { get; set; }
+        [JsonProperty("highlight background")]
+        public string HighlightBackground { get; set; }
     }
 
     [Serializable]
     public class NefTheme
     {
+        [JsonProperty("line color")]
         public string LineColor { get; set; }
+
+        [JsonProperty("node background")]
         public string NodeBackground { get; set; }
     }
 
     [Serializable]
     public class HudTheme
     {
+        [JsonProperty("text color")]
         public string TextColor { get; set; }
+    }
+
+    [Serializable]
+    public class MiscTheme
+    {
+        [JsonProperty("dim background")]
+        public string DimBackground { get; set; }
+
+        [JsonProperty("separator")]
+        public string Separator { get; set; }
+    }
+
+    [Serializable]
+    public class ThemeData
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; } = "Custom Theme";
+
+        [JsonProperty("TopBarOff")]
+        public ElementStyleTheme TopBarOff { get; set; } = new ElementStyleTheme();
+
+        [JsonProperty("TopBarActive")]
+        public ElementStyleTheme TopBarActive { get; set; } = new ElementStyleTheme();
+
+        [JsonProperty("CategoryHeader")]
+        public ElementStyleTheme CategoryHeader { get; set; } = new ElementStyleTheme();
+
+        [JsonProperty("CategoryWindow")]
+        public WindowStyleTheme CategoryWindow { get; set; } = new WindowStyleTheme();
+
+        [JsonProperty("CategoryModuleOff")]
+        public ElementStyleTheme CategoryModuleOff { get; set; } = new ElementStyleTheme();
+
+        [JsonProperty("CategoryModuleOn")]
+        public ElementStyleTheme CategoryModuleOn { get; set; } = new ElementStyleTheme();
+
+        [JsonProperty("CloseButton")]
+        public ElementStyleTheme CloseButton { get; set; } = new ElementStyleTheme();
+
+        [JsonProperty("SettingsWindow")]
+        public WindowStyleTheme SettingsWindow { get; set; } = new WindowStyleTheme();
+
+        [JsonProperty("SettingOff")]
+        public ElementStyleTheme SettingOff { get; set; } = new ElementStyleTheme();
+
+        [JsonProperty("SettingOn")]
+        public ElementStyleTheme SettingOn { get; set; } = new ElementStyleTheme();
+
+        [JsonProperty("Typography")]
+        public TypographyTheme Typography { get; set; } = new TypographyTheme();
+
+        [JsonProperty("NEF")]
+        public NefTheme NEF { get; set; } = new NefTheme();
+
+        [JsonProperty("HUD")]
+        public HudTheme HUD { get; set; } = new HudTheme();
+
+        [JsonProperty("Misc")]
+        public MiscTheme Misc { get; set; } = new MiscTheme();
     }
     #endregion
 
@@ -134,17 +196,25 @@ namespace Magnetar_Client.UI.Themes
         public static GUIStyle CategoryWindowStyle;
 
         /// <summary>
+        /// Style for bg of name of the category window.
+        /// <para>• Text color: normal (dimmed), hover (highlighted white), active</para>
+        /// <para>• Bg color: normal (light background), hover (hover color), active</para>
+        /// <para>• Alignment: UpperCenter, Bold</para>
+        /// </summary>
+        public static GUIStyle CategoryHeaderStyle;
+
+        /// <summary>
         /// Style for an inactive module button on the category window (off state).
-        /// <para>• Text color: normal (dimmed), hover (highlighted white)</para>
-        /// <para>• Bg color: normal (light background), hover (hover color)</para>
+        /// <para>• Text color: normal (dimmed), hover (highlighted white), active</para>
+        /// <para>• Bg color: normal (light background), hover (hover color), active</para>
         /// <para>• Alignment: MiddleLeft</para>
         /// </summary>
         public static GUIStyle CategoryModuleOffStyle;
 
         /// <summary>
         /// Style for an active module button on the category window (on state).
-        /// <para>• Text color: normal (contrasting dark)</para>
-        /// <para>• Bg color: normal (accent color), hover (active hover color)</para>
+        /// <para>• Text color: normal (contrasting dark), hover, active</para>
+        /// <para>• Bg color: normal (accent color), hover (active hover color), active</para>
         /// <para>• Alignment: MiddleLeft</para>
         /// </summary>
         public static GUIStyle CategoryModuleOnStyle;
@@ -153,8 +223,8 @@ namespace Magnetar_Client.UI.Themes
 
         /// <summary>
         /// Style for the mobile window close buttons and compact icon controls.
-        /// <para>• Text color: normal (dark/contrasting)</para>
-        /// <para>• Bg color: normal (accent color), hover (active hover color)</para>
+        /// <para>• Text color: normal (dark/contrasting), hover, active</para>
+        /// <para>• Bg color: normal (accent color), hover (active hover color), active</para>
         /// <para>• Alignment: MiddleCenter</para>
         /// </summary>
         public static GUIStyle CloseButtonStyle;
@@ -195,16 +265,16 @@ namespace Magnetar_Client.UI.Themes
 
         /// <summary>
         /// Style for setting toggle and action buttons in their inactive/false state.
-        /// <para>• Text color: normal (dimmed text), hover (white)</para>
-        /// <para>• Bg color: normal (light background), hover (hover color)</para>
+        /// <para>• Text color: normal (dimmed text), hover (white), active</para>
+        /// <para>• Bg color: normal (light background), hover (hover color), active</para>
         /// <para>• Alignment: MiddleLeft</para>
         /// </summary>
         public static GUIStyle SettingOff;
 
         /// <summary>
         /// Style for setting toggle and action buttons in their active/true state.
-        /// <para>• Text color: normal (dark contrasting)</para>
-        /// <para>• Bg color: normal (accent background), hover (active hover color)</para>
+        /// <para>• Text color: normal (dark contrasting), hover, active</para>
+        /// <para>• Bg color: normal (accent background), hover (active hover color), active</para>
         /// <para>• Alignment: MiddleLeft</para>
         /// </summary>
         public static GUIStyle SettingOn;
@@ -266,6 +336,19 @@ namespace Magnetar_Client.UI.Themes
         /// <para>• Alignment: LowerCenter</para>
         /// </summary>
         public static GUIStyle NEFNodeStyle;
+
+        // Legacy / Cross-Compatibility Aliases
+        public static GUIStyle TopBar { get => TopBarStyle; set => TopBarStyle = value; }
+        public static GUIStyle TopBarButtonActive { get => TopBarActiveStyle; set => TopBarActiveStyle = value; }
+        public static GUIStyle ModuleWindow { get => CategoryWindowStyle; set => CategoryWindowStyle = value; }
+        public static GUIStyle ModuleOn { get => CategoryModuleOnStyle; set => CategoryModuleOnStyle = value; }
+        public static GUIStyle ModuleOff { get => CategoryModuleOffStyle; set => CategoryModuleOffStyle = value; }
+        public static GUIStyle ModuleOnCentralized { get => CloseButtonStyle; set => CloseButtonStyle = value; }
+        public static GUIStyle SettingsWindow { get => SettingsWndowStyle; set => SettingsWndowStyle = value; }
+        public static GUIStyle DescriptionStyle { get => SettingsDescriptionStyle; set => SettingsDescriptionStyle = value; }
+        public static GUIStyle AuthorStyle { get => SettingAuthorStyle; set => SettingAuthorStyle = value; }
+        public static GUIStyle SettingDescriptionStyle { get => SettingLabelStyle; set => SettingLabelStyle = value; }
+        public static GUIStyle DimStyle { get => DimBackgroundStyle; set => DimBackgroundStyle = value; }
         #endregion
 
         #region Dynamic Theme Colors
@@ -286,56 +369,48 @@ namespace Magnetar_Client.UI.Themes
         public static readonly ThemeData InternalDefaultTheme = new ThemeData
         {
             Name = "Magnetar Default",
-            Colors = new GeneralColors
+            TopBarOff = new ElementStyleTheme(
+                new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
+                new ColorState("#1A1A1ADC", "#1C1C1CFF", "#333333FF")
+            ),
+            TopBarActive = new ElementStyleTheme(
+                new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+                new ColorState("#FF3D3DFF", "#FF3D3DFF", "#FF3D3DFF")
+            ),
+            CategoryHeader = new ElementStyleTheme(
+                new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+                new ColorState("#1A1A1ADC", "#1C1C1CFF", "#333333FF")
+            ),
+            CategoryWindow = new WindowStyleTheme("#FFFFFFFF", "#1A1A1ADC"),
+            CategoryModuleOff = new ElementStyleTheme(
+                new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
+                new ColorState("#1C1C1CD6", "#1C1C1CFF", "#1C1C1CFF")
+            ),
+            CategoryModuleOn = new ElementStyleTheme(
+                new ColorState("#000000FF", "#000000FF", "#000000FF"),
+                new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+            ),
+            CloseButton = new ElementStyleTheme(
+                new ColorState("#000000FF", "#000000FF", "#000000FF"),
+                new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+            ),
+            SettingsWindow = new WindowStyleTheme("#000000FF", "#FF3D3DFF"),
+            SettingOff = new ElementStyleTheme(
+                new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
+                new ColorState("#1C1C1CD6", "#1C1C1CFF", "#1C1C1CFF")
+            ),
+            SettingOn = new ElementStyleTheme(
+                new ColorState("#000000FF", "#000000FF", "#000000FF"),
+                new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+            ),
+            Typography = new TypographyTheme
             {
-                Accent = "#FF3D3DFF",
-                AccentHover = "#F03333FF",
-                Background = "#1A1A1ADC",
-                BackgroundLight = "#1C1C1CD6",
-                Hover = "#1C1C1CFF",
-                Active = "#333333FF",
-                Dim = "#1A1A1A66",
-                Separator = "#FFFFFFFF"
-            },
-            Typography = new TypographyColors
-            {
-                Primary = "#E6E6E6FF",
-                Secondary = "#AEAEAEFF",
                 Description = "#BFBFBFFF",
                 Label = "#E6E6E6FF",
                 Author = "#808080FF",
-                HighlightText = "#FFFFFFFF"
-            },
-            TopBar = new TopBarTheme
-            {
-                Background = "#1A1A1ADC",
-                ActiveBackground = "#FF3D3DFF",
-                TextColor = "#AEAEAEFF",
-                ActiveTextColor = "#FFFFFFFF",
-                HoverTextColor = "#FFFFFFFF"
-            },
-            CategoryWindow = new CategoryTheme
-            {
-                HeaderBackground = "#1A1A1ADC",
-                HeaderTextColor = "#FFFFFFFF",
-                ModuleOnBackground = "#FF3D3DFF",
-                ModuleOnTextColor = "#000000FF",
-                ModuleOffBackground = "#1C1C1CD6",
-                ModuleOffTextColor = "#AEAEAEFF"
-            },
-            SettingsWindow = new SettingsTheme
-            {
-                HeaderBackground = "#FF3D3DFF",
-                HeaderTextColor = "#000000FF",
-                SettingOnBackground = "#FF3D3DFF",
-                SettingOnTextColor = "#000000FF",
-                SettingOffBackground = "#1C1C1CD6",
-                SettingOffTextColor = "#AEAEAEFF"
-            },
-            Controls = new ControlsTheme
-            {
-                CloseButtonBackground = "#FF3D3DFF",
-                CloseButtonTextColor = "#000000FF"
+                Text = "#E6E6E6FF",
+                HighlightText = "#FFFFFFFF",
+                HighlightBackground = "#FF3D3DFF"
             },
             NEF = new NefTheme
             {
@@ -345,6 +420,11 @@ namespace Magnetar_Client.UI.Themes
             HUD = new HudTheme
             {
                 TextColor = "#FFFFFFFF"
+            },
+            Misc = new MiscTheme
+            {
+                DimBackground = "#1A1A1A66",
+                Separator = "#FFFFFFFF"
             }
         };
         #endregion
@@ -435,55 +515,48 @@ namespace Magnetar_Client.UI.Themes
                         new ThemeData
                         {
                             Name = "Meteor Purple",
-                            Colors = new GeneralColors
+                            TopBarOff = new ElementStyleTheme(
+                                new ColorState("#8B949EFF", "#FFFFFFFF", "#FFFFFFFF"),
+                                new ColorState("#11141BDC", "#21262DFF", "#30363DFF")
+                            ),
+                            TopBarActive = new ElementStyleTheme(
+                                new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+                                new ColorState("#8B0FFFFF", "#8B0FFFFF", "#8B0FFFFF")
+                            ),
+                            CategoryHeader = new ElementStyleTheme(
+                                new ColorState("#E6EDF3FF", "#FFFFFFFF", "#FFFFFFFF"),
+                                new ColorState("#161B22E6", "#21262DFF", "#30363DFF")
+                            ),
+                            CategoryWindow = new WindowStyleTheme("#FFFFFFFF", "#11141BDC"),
+                            CategoryModuleOff = new ElementStyleTheme(
+                                new ColorState("#8B949EFF", "#FFFFFFFF", "#FFFFFFFF"),
+                                new ColorState("#1E1622C8", "#21262DFF", "#21262DFF")
+                            ),
+                            CategoryModuleOn = new ElementStyleTheme(
+                                new ColorState("#000000FF", "#000000FF", "#000000FF"),
+                                new ColorState("#8B0FFFFF", "#A855F7FF", "#A855F7FF")
+                            ),
+                            CloseButton = new ElementStyleTheme(
+                                new ColorState("#000000FF", "#000000FF", "#000000FF"),
+                                new ColorState("#8B0FFFFF", "#A855F7FF", "#A855F7FF")
+                            ),
+                            SettingsWindow = new WindowStyleTheme("#000000FF", "#8B0FFFFF"),
+                            SettingOff = new ElementStyleTheme(
+                                new ColorState("#8B949EFF", "#FFFFFFFF", "#FFFFFFFF"),
+                                new ColorState("#1E1622C8", "#21262DFF", "#21262DFF")
+                            ),
+                            SettingOn = new ElementStyleTheme(
+                                new ColorState("#000000FF", "#000000FF", "#000000FF"),
+                                new ColorState("#8B0FFFFF", "#A855F7FF", "#A855F7FF")
+                            ),
+                            Typography = new TypographyTheme
                             {
-                                Accent = "#8B0FFFFF",
-                                AccentHover = "#A855F7FF",
-                                Background = "#11141BDC",
-                                BackgroundLight = "#1E1622C8",
-                                Hover = "#21262DFF",
-                                Active = "#30363DFF",
-                                Dim = "#1A1A1A66",
-                                Separator = "#FFFFFFFF"
-                            },
-                            Typography = new TypographyColors
-                            {
-                                Primary = "#E6EDF3FF",
-                                Secondary = "#8B949EFF",
                                 Description = "#BFBFBFFF",
                                 Label = "#E6E6E6FF",
-                                Author = "#808080FF"
-                            },
-                            TopBar = new TopBarTheme
-                            {
-                                Background = "#11141BDC",
-                                ActiveBackground = "#8B0FFFFF",
-                                TextColor = "#8B949EFF",
-                                ActiveTextColor = "#FFFFFFFF",
-                                HoverTextColor = "#FFFFFFFF"
-                            },
-                            CategoryWindow = new CategoryTheme
-                            {
-                                HeaderBackground = "#11141BDC",
-                                HeaderTextColor = "#FFFFFFFF",
-                                ModuleOnBackground = "#8B0FFFFF",
-                                ModuleOnTextColor = "#000000FF",
-                                ModuleOffBackground = "#1E1622C8",
-                                ModuleOffTextColor = "#8B949EFF"
-                            },
-                            SettingsWindow = new SettingsTheme
-                            {
-                                HeaderBackground = "#8B0FFFFF",
-                                HeaderTextColor = "#000000FF",
-                                SettingOnBackground = "#8B0FFFFF",
-                                SettingOnTextColor = "#000000FF",
-                                SettingOffBackground = "#1E1622C8",
-                                SettingOffTextColor = "#8B949EFF"
-                            },
-                            Controls = new ControlsTheme
-                            {
-                                CloseButtonBackground = "#8B0FFFFF",
-                                CloseButtonTextColor = "#000000FF"
+                                Author = "#808080FF",
+                                Text = "#E6EDF3FF",
+                                HighlightText = "#FFFFFFFF",
+                                HighlightBackground = "#8B0FFFFF"
                             },
                             NEF = new NefTheme
                             {
@@ -493,6 +566,11 @@ namespace Magnetar_Client.UI.Themes
                             HUD = new HudTheme
                             {
                                 TextColor = "#FFFFFFFF"
+                            },
+                            Misc = new MiscTheme
+                            {
+                                DimBackground = "#1A1A1A66",
+                                Separator = "#FFFFFFFF"
                             }
                         }
                     };
@@ -537,124 +615,142 @@ namespace Magnetar_Client.UI.Themes
             }
 
             CurrentThemeName = themeName;
-
-            // 1. Resolve Base Colors
             var d = InternalDefaultTheme;
-            AccentColor = ParseColor(theme.Colors?.Accent, d.Colors.Accent);
-            AccentHoverColor = ParseColor(theme.Colors?.AccentHover, d.Colors.AccentHover);
-            BackgroundColor = ParseColor(theme.Colors?.Background, d.Colors.Background);
-            LightBackgroundColor = ParseColor(theme.Colors?.BackgroundLight, d.Colors.BackgroundLight);
-            HoverColor = ParseColor(theme.Colors?.Hover, d.Colors.Hover);
-            ActiveColor = ParseColor(theme.Colors?.Active, d.Colors.Active);
-            DimColor = ParseColor(theme.Colors?.Dim, d.Colors.Dim);
-            Color separatorColor = ParseColor(theme.Colors?.Separator, d.Colors.Separator);
 
-            // 2. Resolve Typography
-            TextWhite = ParseColor(theme.Typography?.Primary, d.Typography.Primary);
-            TextDim = ParseColor(theme.Typography?.Secondary, d.Typography.Secondary);
-            Color descColor = ParseColor(theme.Typography?.Description, d.Typography.Description);
-            Color labelColor = ParseColor(theme.Typography?.Label, d.Typography.Label);
-            Color authorColor = ParseColor(theme.Typography?.Author, d.Typography.Author);
-            Color highlightTextColor = ParseColor(theme.Typography?.HighlightText, TextWhite);
+            // --- 1. Top Bar Off ---
+            var tbOffText = ResolveState(theme.TopBarOff?.Text, d.TopBarOff.Text);
+            var tbOffBg = ResolveState(theme.TopBarOff?.BackgroundColor, d.TopBarOff.BackgroundColor);
+            TopBarStyle.normal.textColor = tbOffText.normal;
+            TopBarStyle.hover.textColor = tbOffText.hover;
+            TopBarStyle.active.textColor = tbOffText.active;
+            TopBarStyle.normal.background = GetTex(tbOffBg.normal);
+            TopBarStyle.hover.background = GetTex(tbOffBg.hover);
+            TopBarStyle.active.background = GetTex(tbOffBg.active);
 
-            // 3. Resolve TopBar
-            Color topBarBg = ParseColor(theme.TopBar?.Background, BackgroundColor);
-            Color topBarActiveBg = ParseColor(theme.TopBar?.ActiveBackground, AccentColor);
-            Color topBarText = ParseColor(theme.TopBar?.TextColor, TextDim);
-            Color topBarActiveText = ParseColor(theme.TopBar?.ActiveTextColor, Color.white);
-            Color topBarHoverText = ParseColor(theme.TopBar?.HoverTextColor, Color.white);
+            // --- 2. Top Bar Active ---
+            var tbActText = ResolveState(theme.TopBarActive?.Text, d.TopBarActive.Text);
+            var tbActBg = ResolveState(theme.TopBarActive?.BackgroundColor, d.TopBarActive.BackgroundColor);
+            TopBarActiveStyle.normal.textColor = tbActText.normal;
+            TopBarActiveStyle.hover.textColor = tbActText.hover;
+            TopBarActiveStyle.active.textColor = tbActText.active;
+            TopBarActiveStyle.normal.background = GetTex(tbActBg.normal);
+            TopBarActiveStyle.hover.background = GetTex(tbActBg.hover);
+            TopBarActiveStyle.active.background = GetTex(tbActBg.active);
 
-            // 4. Resolve Category Window
-            Color catHeaderBg = ParseColor(theme.CategoryWindow?.HeaderBackground, BackgroundColor);
-            Color catHeaderText = ParseColor(theme.CategoryWindow?.HeaderTextColor, Color.white);
-            Color catModOnBg = ParseColor(theme.CategoryWindow?.ModuleOnBackground, AccentColor);
-            Color catModOnText = ParseColor(theme.CategoryWindow?.ModuleOnTextColor, Color.black);
-            Color catModOffBg = ParseColor(theme.CategoryWindow?.ModuleOffBackground, LightBackgroundColor);
-            Color catModOffText = ParseColor(theme.CategoryWindow?.ModuleOffTextColor, TextDim);
+            // --- 3. Category Header (Unique Color Entry) ---
+            var catHeadText = ResolveState(theme.CategoryHeader?.Text, d.CategoryHeader.Text);
+            var catHeadBg = ResolveState(theme.CategoryHeader?.BackgroundColor, d.CategoryHeader.BackgroundColor);
+            CategoryHeaderStyle.normal.textColor = catHeadText.normal;
+            CategoryHeaderStyle.hover.textColor = catHeadText.hover;
+            CategoryHeaderStyle.active.textColor = catHeadText.active;
+            CategoryHeaderStyle.normal.background = GetTex(catHeadBg.normal);
+            CategoryHeaderStyle.hover.background = GetTex(catHeadBg.hover);
+            CategoryHeaderStyle.active.background = GetTex(catHeadBg.active);
 
-            // 5. Resolve Settings Window
-            Color setHeaderBg = ParseColor(theme.SettingsWindow?.HeaderBackground, AccentColor);
-            Color setHeaderText = ParseColor(theme.SettingsWindow?.HeaderTextColor, Color.black);
-            Color setOnBg = ParseColor(theme.SettingsWindow?.SettingOnBackground, AccentColor);
-            Color setOnText = ParseColor(theme.SettingsWindow?.SettingOnTextColor, Color.black);
-            Color setOffBg = ParseColor(theme.SettingsWindow?.SettingOffBackground, LightBackgroundColor);
-            Color setOffText = ParseColor(theme.SettingsWindow?.SettingOffTextColor, TextDim);
+            // --- 4. Category Window ---
+            CategoryWindowStyle.normal.textColor = ParseColor(theme.CategoryWindow?.Text, d.CategoryWindow.Text);
+            CategoryWindowStyle.normal.background = GetTex(ParseColor(theme.CategoryWindow?.BackgroundColor, d.CategoryWindow.BackgroundColor));
 
-            // 6. Resolve Controls & Extras
-            Color closeBtnBg = ParseColor(theme.Controls?.CloseButtonBackground, AccentColor);
-            Color closeBtnText = ParseColor(theme.Controls?.CloseButtonTextColor, Color.black);
+            // --- 5. Category Module Off ---
+            var catModOffText = ResolveState(theme.CategoryModuleOff?.Text, d.CategoryModuleOff.Text);
+            var catModOffBg = ResolveState(theme.CategoryModuleOff?.BackgroundColor, d.CategoryModuleOff.BackgroundColor);
+            CategoryModuleOffStyle.normal.textColor = catModOffText.normal;
+            CategoryModuleOffStyle.hover.textColor = catModOffText.hover;
+            CategoryModuleOffStyle.active.textColor = catModOffText.active;
+            CategoryModuleOffStyle.normal.background = GetTex(catModOffBg.normal);
+            CategoryModuleOffStyle.hover.background = GetTex(catModOffBg.hover);
+            CategoryModuleOffStyle.active.background = GetTex(catModOffBg.active);
 
+            // --- 6. Category Module On ---
+            var catModOnText = ResolveState(theme.CategoryModuleOn?.Text, d.CategoryModuleOn.Text);
+            var catModOnBg = ResolveState(theme.CategoryModuleOn?.BackgroundColor, d.CategoryModuleOn.BackgroundColor);
+            CategoryModuleOnStyle.normal.textColor = catModOnText.normal;
+            CategoryModuleOnStyle.hover.textColor = catModOnText.hover;
+            CategoryModuleOnStyle.active.textColor = catModOnText.active;
+            CategoryModuleOnStyle.normal.background = GetTex(catModOnBg.normal);
+            CategoryModuleOnStyle.hover.background = GetTex(catModOnBg.hover);
+            CategoryModuleOnStyle.active.background = GetTex(catModOnBg.active);
+
+            // --- 7. Close Button ---
+            var closeText = ResolveState(theme.CloseButton?.Text, d.CloseButton.Text);
+            var closeBg = ResolveState(theme.CloseButton?.BackgroundColor, d.CloseButton.BackgroundColor);
+            CloseButtonStyle.normal.textColor = closeText.normal;
+            CloseButtonStyle.hover.textColor = closeText.hover;
+            CloseButtonStyle.active.textColor = closeText.active;
+            CloseButtonStyle.normal.background = GetTex(closeBg.normal);
+            CloseButtonStyle.hover.background = GetTex(closeBg.hover);
+            CloseButtonStyle.active.background = GetTex(closeBg.active);
+
+            // --- 8. Settings Window ---
+            SettingsWndowStyle.normal.textColor = ParseColor(theme.SettingsWindow?.Text, d.SettingsWindow.Text);
+            SettingsWndowStyle.normal.background = GetTex(ParseColor(theme.SettingsWindow?.BackgroundColor, d.SettingsWindow.BackgroundColor));
+
+            // --- 9. Setting Off ---
+            var setOffText = ResolveState(theme.SettingOff?.Text, d.SettingOff.Text);
+            var setOffBg = ResolveState(theme.SettingOff?.BackgroundColor, d.SettingOff.BackgroundColor);
+            SettingOff.normal.textColor = setOffText.normal;
+            SettingOff.hover.textColor = setOffText.hover;
+            SettingOff.active.textColor = setOffText.active;
+            SettingOff.normal.background = GetTex(setOffBg.normal);
+            SettingOff.hover.background = GetTex(setOffBg.hover);
+            SettingOff.active.background = GetTex(setOffBg.active);
+
+            // --- 10. Setting On ---
+            var setOnText = ResolveState(theme.SettingOn?.Text, d.SettingOn.Text);
+            var setOnBg = ResolveState(theme.SettingOn?.BackgroundColor, d.SettingOn.BackgroundColor);
+            SettingOn.normal.textColor = setOnText.normal;
+            SettingOn.hover.textColor = setOnText.hover;
+            SettingOn.active.textColor = setOnText.active;
+            SettingOn.normal.background = GetTex(setOnBg.normal);
+            SettingOn.hover.background = GetTex(setOnBg.hover);
+            SettingOn.active.background = GetTex(setOnBg.active);
+
+            // --- 11. Typography ---
+            SettingsDescriptionStyle.normal.textColor = ParseColor(theme.Typography?.Description, d.Typography.Description);
+            SettingLabelStyle.normal.textColor = ParseColor(theme.Typography?.Label, d.Typography.Label);
+            SettingAuthorStyle.normal.textColor = ParseColor(theme.Typography?.Author, d.Typography.Author);
+
+            Color baseText = ParseColor(theme.Typography?.Text, d.Typography.Text);
+            SettingTextStyle.normal.textColor = baseText;
+            TextStyle.normal.textColor = baseText;
+
+            TextHighlightedStyle.normal.textColor = ParseColor(theme.Typography?.HighlightText, d.Typography.HighlightText);
+            TextHighlightedStyle.normal.background = GetTex(ParseColor(theme.Typography?.HighlightBackground, d.Typography.HighlightBackground));
+
+            // --- 12. Separator & Dim ---
+            SeparatorStyle.normal.background = GetTex(ParseColor(theme.Misc?.Separator, d.Misc.Separator));
+            DimBackgroundStyle.normal.background = GetTex(ParseColor(theme.Misc?.DimBackground, d.Misc.DimBackground));
+
+            // --- 13. NEF & HUD ---
+            NEFLineStyle.normal.background = GetTex(ParseColor(theme.NEF?.LineColor, d.NEF.LineColor));
+            NEFNodeStyle.normal.background = GetTex(ParseColor(theme.NEF?.NodeBackground, d.NEF.NodeBackground));
+            HUDElementStyle.normal.textColor = ParseColor(theme.HUD?.TextColor, d.HUD.TextColor);
+
+            // Update exposed dynamic properties
+            AccentColor = catModOnBg.normal;
+            AccentHoverColor = catModOnBg.hover;
+            BackgroundColor = ParseColor(theme.CategoryWindow?.BackgroundColor, d.CategoryWindow.BackgroundColor);
+            LightBackgroundColor = catModOffBg.normal;
+            TextWhite = baseText;
+            TextDim = catModOffText.normal;
+            HoverColor = catModOffBg.hover;
+            ActiveColor = tbOffBg.active;
+            DimColor = ParseColor(theme.Misc?.DimBackground, d.Misc.DimBackground);
             NefLineColor = ParseColor(theme.NEF?.LineColor, d.NEF.LineColor);
-            NefNodeColor = ParseColor(theme.NEF?.NodeBackground, AccentColor);
-            Color hudTextColor = ParseColor(theme.HUD?.TextColor, Color.white);
+            NefNodeColor = ParseColor(theme.NEF?.NodeBackground, d.NEF.NodeBackground);
+        }
 
-            // --- Apply To GUIStyles ---
+        private static (Color normal, Color hover, Color active) ResolveState(ColorState state, ColorState fallback)
+        {
+            string normHex = !string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Normal;
+            string hovHex = !string.IsNullOrEmpty(state?.Hover) ? state.Hover : (!string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Hover);
+            string actHex = !string.IsNullOrEmpty(state?.Active) ? state.Active : (!string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Active);
 
-            // Top Bar
-            TopBarStyle.normal.background = GetTex(topBarBg);
-            TopBarStyle.hover.background = GetTex(HoverColor);
-            TopBarStyle.active.background = GetTex(ActiveColor);
-            TopBarStyle.normal.textColor = topBarText;
-            TopBarStyle.hover.textColor = topBarHoverText;
-            TopBarStyle.active.textColor = topBarActiveText;
+            Color normal = ParseColor(normHex, fallback?.Normal ?? "#FFFFFFFF");
+            Color hover = ParseColor(hovHex, fallback?.Hover ?? normHex);
+            Color active = ParseColor(actHex, fallback?.Active ?? normHex);
 
-            TopBarActiveStyle.normal.background = GetTex(topBarActiveBg);
-            TopBarActiveStyle.hover.background = GetTex(topBarActiveBg);
-            TopBarActiveStyle.active.background = GetTex(topBarActiveBg);
-            TopBarActiveStyle.normal.textColor = topBarActiveText;
-            TopBarActiveStyle.hover.textColor = topBarActiveText;
-            TopBarActiveStyle.active.textColor = topBarActiveText;
-
-            // Category Window & Modules
-            CategoryWindowStyle.normal.background = GetTex(catHeaderBg);
-            CategoryWindowStyle.normal.textColor = catHeaderText;
-
-            CategoryModuleOnStyle.normal.background = GetTex(catModOnBg);
-            CategoryModuleOnStyle.normal.textColor = catModOnText;
-            CategoryModuleOnStyle.hover.background = GetTex(AccentHoverColor);
-
-            CategoryModuleOffStyle.normal.background = GetTex(catModOffBg);
-            CategoryModuleOffStyle.normal.textColor = catModOffText;
-            CategoryModuleOffStyle.hover.background = GetTex(HoverColor);
-            CategoryModuleOffStyle.hover.textColor = Color.white;
-
-            // Close Button
-            CloseButtonStyle.normal.background = GetTex(closeBtnBg);
-            CloseButtonStyle.normal.textColor = closeBtnText;
-            CloseButtonStyle.hover.background = GetTex(AccentHoverColor);
-
-            // Settings Window & Controls
-            SettingsWndowStyle.normal.background = GetTex(setHeaderBg);
-            SettingsWndowStyle.normal.textColor = setHeaderText;
-
-            SettingOn.normal.background = GetTex(setOnBg);
-            SettingOn.normal.textColor = setOnText;
-            SettingOn.hover.background = GetTex(AccentHoverColor);
-
-            SettingOff.normal.background = GetTex(setOffBg);
-            SettingOff.normal.textColor = setOffText;
-            SettingOff.hover.background = GetTex(HoverColor);
-            SettingOff.hover.textColor = Color.white;
-
-            // Typography & Descriptions
-            SettingsDescriptionStyle.normal.textColor = descColor;
-            SettingLabelStyle.normal.textColor = labelColor;
-            SettingAuthorStyle.normal.textColor = authorColor;
-            SettingTextStyle.normal.textColor = TextWhite;
-
-            // Separators & Backgrounds
-            SeparatorStyle.normal.background = GetTex(separatorColor);
-            DimBackgroundStyle.normal.background = GetTex(DimColor);
-
-            // HUD & NEF
-            HUDElementStyle.normal.textColor = hudTextColor;
-            NEFLineStyle.normal.background = GetTex(NefLineColor);
-            NEFNodeStyle.normal.background = GetTex(NefNodeColor);
-
-            // Text Fields
-            TextStyle.normal.textColor = TextWhite;
-            TextHighlightedStyle.normal.textColor = highlightTextColor;
-            TextHighlightedStyle.normal.background = GetTex(AccentColor);
+            return (normal, hover, active);
         }
 
         private static Color ParseColor(string hex, string defaultHex)
@@ -664,13 +760,6 @@ namespace Magnetar_Client.UI.Themes
 
             ColorUtility.TryParseHtmlString(defaultHex, out Color defCol);
             return defCol;
-        }
-
-        private static Color ParseColor(string hex, Color fallback)
-        {
-            if (!string.IsNullOrEmpty(hex) && ColorUtility.TryParseHtmlString(hex, out Color col))
-                return col;
-            return fallback;
         }
 
         private static Texture2D GetTex(Color col)
@@ -691,6 +780,7 @@ namespace Magnetar_Client.UI.Themes
             TopBarActiveStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
             CategoryModuleOnStyle = new GUIStyle { alignment = TextAnchor.MiddleLeft };
             CloseButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
+            CategoryHeaderStyle = new GUIStyle { alignment = TextAnchor.UpperCenter, fontStyle = FontStyle.Bold };
             CategoryModuleOffStyle = new GUIStyle { alignment = TextAnchor.MiddleLeft };
             CategoryWindowStyle = new GUIStyle { alignment = TextAnchor.UpperCenter, fontStyle = FontStyle.Bold };
             SettingsWndowStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
@@ -749,6 +839,9 @@ namespace Magnetar_Client.UI.Themes
             SetOffset(TopBarActiveStyle.padding, S(TopBarPaddingLR), S(TopBarPaddingLR), S(TopBarPaddingTB), S(TopBarPaddingTB));
 
             // Category Modules
+            CategoryHeaderStyle.fontSize = S(ModuleWindowFontSize);
+            SetOffset(CategoryHeaderStyle.padding, 0, 0, S(ModuleWindowPaddingTop), 0);
+
             CategoryModuleOnStyle.fontSize = S(ModuleFontSize);
             SetOffset(CategoryModuleOnStyle.padding, S(ModulePaddingLeft), 0, 0, 0);
 

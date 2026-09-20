@@ -79,34 +79,40 @@ namespace Magnetar_Client.TopBar
                 }
             }
 
+            Rect barGroupRect = new Rect(startX, 0, scaledTotalWidth, scaledHeight);
+            GUI.BeginGroup(barGroupRect);
+
+            Event e = Event.current;
+
             for (int i = 0; i < count; i++)
             {
                 TabType tab = Order[i];
-                float scaledWidth = scaledOffsets[i + 1] - scaledOffsets[i];
+                float btnX = scaledOffsets[i];
+                // Overlap by 1px on intermediate buttons to avoid subpixel seam bleeding
+                float btnW = (scaledOffsets[i + 1] - scaledOffsets[i]) + (i < count - 1 ? 1f : 0f);
 
-                Rect rect = new Rect(0, 0, scaledWidth, scaledHeight);
+                Rect btnRect = new Rect(btnX, 0, btnW, scaledHeight);
                 string name = tab.ToString();
 
-                Rect GroupRect = new Rect(startX + scaledOffsets[i], 0, scaledWidth, scaledHeight);
-
-                GUI.BeginGroup(GroupRect);
-
-                // If mouse is pressed over this tab, switch instantly
-                Event e = Event.current;
-                if (e.type == EventType.MouseDown && e.button == 0 && rect.Contains(e.mousePosition))
+                // MouseDown instant feedback
+                if (e.type == EventType.MouseDown && e.button == 0 && btnRect.Contains(e.mousePosition))
                 {
                     Config.CurrentTab = tab;
                     e.Use();
                 }
 
-                if (GUI.Button(rect, name, Config.CurrentTab == tab ? Magnetar_Default.TopBarActiveStyle : Magnetar_Default.TopBarStyle))
+                GUIStyle btnStyle = (Config.CurrentTab == tab)
+                    ? Magnetar_Default.TopBarActiveStyle
+                    : Magnetar_Default.TopBarStyle;
+
+                if (GUI.Button(btnRect, name, btnStyle))
                 {
                     Config.CurrentTab = tab;
                     e.Use();
                 }
-
-                GUI.EndGroup();
             }
+
+            GUI.EndGroup();
         }
     }
 }

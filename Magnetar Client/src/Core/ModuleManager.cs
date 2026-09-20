@@ -1055,12 +1055,29 @@ namespace Magnetar_Client.Core
     // =========================================================================
     // Boundary Helpers
     // =========================================================================
+    // =========================================================================
+    // Boundary Helpers
+    // =========================================================================
     internal static class ScreenBoundaryHelper
     {
         public static Rect Clamp(Rect rect)
         {
-            rect.x = Mathf.Clamp(rect.x, 0f, Mathf.Max(0f, Config.WindowWidth - rect.width));
-            rect.y = Mathf.Clamp(rect.y, 0f, Mathf.Max(0f, Config.WindowHeight - rect.height));
+            float scaleX = (float)Screen.width / Config.WindowWidth;
+            float scaleY = (float)Screen.height / Config.WindowHeight;
+            float uniformScale = Mathf.Min(scaleX, scaleY);
+
+            // Calculate the virtual coordinate range visible inside the transformed GUI.matrix
+            float virtualWidth = Screen.width / uniformScale;
+            float virtualHeight = Screen.height / uniformScale;
+
+            float minX = -(virtualWidth - Config.WindowWidth) * 0.5f;
+            float maxX = Config.WindowWidth + ((virtualWidth - Config.WindowWidth) * 0.5f) - rect.width;
+
+            float minY = -(virtualHeight - Config.WindowHeight) * 0.5f;
+            float maxY = Config.WindowHeight + ((virtualHeight - Config.WindowHeight) * 0.5f) - rect.height;
+
+            rect.x = Mathf.Clamp(rect.x, minX, Mathf.Max(minX, maxX));
+            rect.y = Mathf.Clamp(rect.y, minY, Mathf.Max(minY, maxY));
             return rect;
         }
     }

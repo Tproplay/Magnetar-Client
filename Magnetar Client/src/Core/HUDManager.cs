@@ -99,10 +99,14 @@ namespace Magnetar_Client.Core
 
                 if (Config.dimBg && (Config.showgui || forceShow))
                 {
-                    Rect fullScreenRect = new Rect(0, 0, Config.WindowWidth, Config.WindowHeight);
                     if (e.type == EventType.Repaint && Magnetar_Default.DimBackgroundStyle != null)
                     {
-                        GUI.Box(fullScreenRect, "", Magnetar_Default.DimBackgroundStyle);
+                        Matrix4x4 prevMatrix = GUI.matrix;
+                        GUI.matrix = Matrix4x4.identity;
+
+                        GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "", Magnetar_Default.DimBackgroundStyle);
+
+                        GUI.matrix = prevMatrix;
                     }
 
                     if (e.type == EventType.MouseDown && UI.WindowDrawing.DrawSetting.activeSliderId == -1 && UI.WindowDrawing.DrawSetting.activeDropdownId == -1)

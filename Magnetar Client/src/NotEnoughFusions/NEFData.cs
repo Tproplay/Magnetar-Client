@@ -163,8 +163,28 @@ namespace Magnetar_Client.NEF
 
         public static string GetEntityName(RecipeEntity ent)
         {
+#if MELONLOADER || BEPINEX
+            if (CustomNames.TryGetValue(ent.Id, out string customName)) return customName + $" ({ent.Id})";
+#else
             if (CustomNames.TryGetValue(ent.Id, out string customName)) return customName;
-            return ent.IsZombie ? ((ZombieType)ent.Id).ToString() : ((PlantType)ent.Id).ToString();
+#endif
+            if (ent.IsZombie)
+            {
+#if MELONLOADER || BEPINEX
+                return ((ZombieType)ent.Id).ToString() + $" ({ent.Id})";
+#else
+                return ((ZombieType)ent.Id).ToString();
+#endif
+            }
+            else
+            {
+#if MELONLOADER || BEPINEX
+                return ((PlantType)ent.Id).ToString() + $" ({ent.Id})";
+#else
+                return ((PlantType)ent.Id).ToString();
+#endif
+            }
+
         }
 
         public static void PerformSearch()

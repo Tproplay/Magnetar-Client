@@ -207,6 +207,30 @@ namespace Magnetar_Client.NEF.Data
                 ParentA = RecipeEntity.Plant(PlantType.SuperFurnace),
                 ParentB = RecipeEntity.Plant(PlantType.ThronsAloes)
             },
+            new CustomRecipe
+            {
+                Result = RecipeEntity.Plant(PlantType.ThornsFurnace),
+                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
+                ParentB = RecipeEntity.Plant(PlantType.Thorns)
+            },
+            new CustomRecipe
+            {
+                Result = RecipeEntity.Plant(PlantType.ShieldFurnace),
+                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
+                ParentB = RecipeEntity.Plant(PlantType.Shieldshroom)
+            },
+            new CustomRecipe
+            {
+                Result = RecipeEntity.Plant(PlantType.SwordFurnace),
+                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
+                ParentB = RecipeEntity.Plant(PlantType.Swordshroom)
+            },
+            new CustomRecipe
+            {
+                Result = RecipeEntity.Plant(PlantType.TumbleFurnace),
+                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
+                ParentB = RecipeEntity.Plant(PlantType.TumbleSnow)
+            },
         };
 
         public static List<CustomRecipe> MiscellaneousPlants = new List<CustomRecipe>

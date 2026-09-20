@@ -132,7 +132,6 @@ namespace Magnetar_Client.NEF
                 }
 
                 // --- PAN & ZOOM ---
-                // --- PAN & ZOOM ---
                 if (pyramidBoxRect.Contains(e.mousePosition))
                 {
                     // 1. Mouse Scroll Wheel Zoom (Desktop)

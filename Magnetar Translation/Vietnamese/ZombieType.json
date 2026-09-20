@@ -92,6 +92,14 @@
     "89": "ZombieLoonNut",
     "90": "RedZombieLoonNut",
     "91": "PolFootballZombie",
+    "92": "LostMachine",
+    "93": "LostMachineII",
+    "94": "LostMachineIII",
+    "95": "LostPenguin",
+    "96": "LostSnowMonster",
+    "97": "SnowCrab",
+    "98": "SnowBirdZombie",
+    "99": "LostMachineIV",
     "100": "Zombie Đậu Hà Lan",
     "101": "Zombie Đậu Anh Đào",
     "102": "Zombie Siêu Đậu Anh Đào",
@@ -188,6 +196,7 @@
     "259": "Thây ma ngọn lửa kết thúc tối thượng",
     "260": "Trùm bóng bầu dục",
     "261": "Trùm tài xế Jackson",
+    "262": "SnowFootballDrown",
     "300": "Liên Báo Anh Đào",
     "301": "Bão Tố Anh Pháo",
     "302": "Bão Tố Pháo Kích",
@@ -227,5 +236,4 @@
     "336": "Thây ma voi a",
     "337": "Thây ma voi b",
     "338": "Thây ma voi c"
-
 }

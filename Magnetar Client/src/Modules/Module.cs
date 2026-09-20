@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using System;
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.Modules
 {
@@ -164,6 +167,30 @@ namespace Magnetar_Client.Modules
             }
             return true;
         }
+
+        public struct Banned
+        {
+            public static HashSet<int> PlantTypeBanned = new HashSet<int>
+            {
+                // Not a plant
+                (int)PlantType.Nothing, (int)PlantType.MagnetInterface,
+                (int)PlantType.MagnetBox, (int)PlantType.Pit,
+                (int)PlantType.Refrash, (int)PlantType.Extract_single,
+                (int)PlantType.Extract_ten,
+
+                // EnumValueAsmResolver_002EDotNet_002ESerialized_002ESerializedConstant
+                261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,
+
+                // Unreleased
+                3000,
+            };
+            public static HashSet<int> ZombieTypeBanned = new HashSet<int>
+            {
+                // Not a zombie
+                (int)ZombieType.Nothing,
+            };
+        }
+
     }
 
     public abstract class Setting

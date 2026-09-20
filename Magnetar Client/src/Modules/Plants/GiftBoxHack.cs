@@ -38,7 +38,11 @@ namespace Magnetar_Client.Modules
             CreateCategory("Giftbox");
 
             ModifyNormalGiftbox = new BoolSetting("Modify Normal Giftbox",false);
-            NormalGiftboxAllowedPlants = new MultiSelectSetting("Allowed Plants",typeof(PlantType));
+            NormalGiftboxAllowedPlants = new MultiSelectSetting("Allowed Plants", typeof(PlantType))
+            {
+                CustomNames = TranslatedNames(typeof(PlantType)),
+                Blacklist = Banned.PlantTypeBanned,
+            };
 
             AddSettings(ModifyNormalGiftbox, NormalGiftboxAllowedPlants);
             EndCategory();
@@ -46,7 +50,11 @@ namespace Magnetar_Client.Modules
             CreateCategory("Snow Giftbox");
 
             ModifySnowGiftbox = new BoolSetting("Modify Snow Giftbox", false);
-            SnowGiftboxAllowedPlants = new MultiSelectSetting("Allowed Plants", typeof(PlantType));
+            SnowGiftboxAllowedPlants = new MultiSelectSetting("Allowed Plants", typeof(PlantType))
+            {
+                CustomNames = TranslatedNames(typeof(PlantType)),
+                Blacklist = Banned.PlantTypeBanned,
+            };
 
             AddSettings(ModifySnowGiftbox, SnowGiftboxAllowedPlants);
             EndCategory();

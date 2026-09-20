@@ -51,10 +51,7 @@ namespace Magnetar_Client.Modules
                     (int)ZombieType.ImpZombie,
                     (int)ZombieType.ObsidianImpZombie,
                 },
-                Blacklist = new HashSet<int>
-                {
-                    (int)ZombieType.Nothing,
-                }
+                Blacklist = Banned.ZombieTypeBanned,
             };
 
             AddSettings(UnaffectedZombies);

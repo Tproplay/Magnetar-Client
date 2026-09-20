@@ -72,11 +72,7 @@ namespace Magnetar_Client.Modules
             SelectedPlants = new MultiSelectSetting("Whitelist Plants", typeof(PlantType))
             {
                 CustomNames = TranslatedNames(typeof(PlantType)),
-                Blacklist = new HashSet<int> {
-                    (int)PlantType.Nothing,
-                    257,258,259,260,261,262,263,264,265,266,267,268,
-                    246,247,3000
-                },
+                Blacklist = Banned.PlantTypeBanned,
             };
             foreach (var item in SelectedPlants.Options.Keys)
             {
@@ -92,9 +88,7 @@ namespace Magnetar_Client.Modules
             SelectedZombies = new MultiSelectSetting("Whitelist Zombies", typeof(ZombieType))
             {
                 CustomNames = TranslatedNames(typeof(ZombieType)),
-                Blacklist = new HashSet<int> {
-                (int)ZombieType.Nothing
-                }
+                Blacklist = Banned.ZombieTypeBanned,
             };
             foreach (var item in SelectedZombies.Options.Keys)
             {

@@ -44,12 +44,8 @@ namespace Magnetar_Client.Modules
 
             ZombiesSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
             {
-                MaxSelection = -1,
                 CustomNames = TranslatedNames(typeof(ZombieType)),
-                Blacklist = new HashSet<int> {
-                    (int)ZombieType.Nothing,
-                    212,218,219,220,221,222,223,224,226,228,229,231,234,235,243,244
-                },
+                Blacklist = Banned.ZombieTypeBanned,
 
             };
             ZombiesSelectedSetting.Options.Keys.ToList().ForEach(ZombiesSelectedSetting.Select);

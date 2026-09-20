@@ -42,7 +42,7 @@ namespace Magnetar_Client.Modules
             {
                 MaxSelection = -1,
                 CustomNames = TranslatedNames(typeof(ZombieType)),
-                Blacklist = new HashSet<int> { (int)ZombieType.Nothing }
+                Blacklist = Banned.ZombieTypeBanned,
             };
             selectedZombies.Options.Keys.ToList().ForEach(selectedZombies.Select);
 

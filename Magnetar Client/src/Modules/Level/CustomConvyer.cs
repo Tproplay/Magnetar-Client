@@ -29,12 +29,7 @@ namespace Magnetar_Client.Modules
             ConveyorPlantsSetting = new MultiSelectSetting("Allowed Plants", typeof(PlantType))
             {
                 CustomNames = TranslatedNames(typeof(PlantType)),
-                Blacklist = new System.Collections.Generic.HashSet<int>
-                {
-                    (int)PlantType.Nothing,
-                    257,258,259,260,261,262,263,264,265,266,267,268,
-                    246,247,
-                }
+                Blacklist = Banned.PlantTypeBanned,
             };
             AddSettings(ConveyorPlantsSetting);
 

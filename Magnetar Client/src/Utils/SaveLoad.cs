@@ -335,6 +335,7 @@ namespace Magnetar_Client.Utils
                             }
 
                             // 1. Language Setting
+                            Config.Language = data.Language;
                             if (GUIManager.LanguageSetting != null && GUIManager.LanguageSetting.Options != null)
                             {
                                 foreach (var key in GUIManager.LanguageSetting.Options)

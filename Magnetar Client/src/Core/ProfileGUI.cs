@@ -13,8 +13,8 @@ namespace Magnetar_Client.Core
         private const float BaseElementHeight = 30f;
 
         public static Rect WindowRect = new Rect(
-            (Config.WindowWidth - Config.S(BaseWindowWidth)) / 2,
-            (Config.WindowHeight - Config.S(BaseWindowHeight)) / 2,
+            (Config.NativeWidth - Config.S(BaseWindowWidth)) / 2,
+            (Config.NativeHeight - Config.S(BaseWindowHeight)) / 2,
             Config.S(BaseWindowWidth),
             Config.S(BaseWindowHeight));
 

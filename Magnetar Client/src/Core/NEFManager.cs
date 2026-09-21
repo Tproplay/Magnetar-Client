@@ -27,8 +27,8 @@ namespace Magnetar_Client.Core
             float margin = Config.S(BaseMargin);
             windowRect.x = margin;
             windowRect.y = margin;
-            windowRect.width = Config.WindowWidth - margin * 2f;
-            windowRect.height = Config.WindowHeight - margin * 2f;
+            windowRect.width = Config.NativeWidth - margin * 2f;
+            windowRect.height = Config.NativeHeight - margin * 2f;
 
             windowRect = GUI.Window(
                 2002,

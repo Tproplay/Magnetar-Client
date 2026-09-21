@@ -59,6 +59,29 @@ namespace Magnetar_Client.Game
                 }
             }
         }
+
+        /// <summary>
+        /// Checks if the player is on the MainMenu
+        /// </summary>
+        public static bool InMainMenu 
+        { 
+            get 
+            {
+                return (GameAPP.canvas.Find("MainMenu(Clone)") != null ||
+                  GameAPP.canvas.Find("MainMenu_travel(Clone)") != null) && !InAlmanac;
+            } 
+        }
+
+        /// <summary>
+        /// Checks if the player is checking the Almanac
+        /// </summary>
+        public static bool InAlmanac
+        {
+            get
+            {
+                return GameAPP.canvasUp.Find("AlmanacMenu(Clone)") != null;
+            }
+        }
     }
 
 

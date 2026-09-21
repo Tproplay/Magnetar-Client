@@ -48,10 +48,10 @@ namespace Magnetar_Client.Core
 
         public static void Render()
         {
-            // Everything here is authored in native (Config.WindowWidth-relative) space.
+            // Everything here is authored in native (Config.NativeWidth-relative) space.
             // The outer GUI.matrix already handles converting that into real screen
             // pixels/letterboxing, so we must NOT mix in Screen.width/Input.mousePosition
-            // (real screen space) - use Config.WindowWidth and Event.current.mousePosition
+            // (real screen space) - use Config.NativeWidth and Event.current.mousePosition
             // (already matrix-transformed) instead.
 
             // Scale each cumulative boundary and round to whole pixels, then derive each
@@ -67,7 +67,7 @@ namespace Magnetar_Client.Core
 
             float scaledTotalWidth = scaledOffsets[count];
             float scaledHeight = Mathf.Round(Config.S(BaseHeight));
-            float startX = Mathf.Round(Config.WindowWidth / 2f - scaledTotalWidth / 2f);
+            float startX = Mathf.Round(Config.NativeWidth / 2f - scaledTotalWidth / 2f);
 
             Rect barArea = new Rect(startX, 0, scaledTotalWidth, scaledHeight);
 

@@ -48,11 +48,13 @@ namespace Magnetar_Client
             }
         }
 
+        public static float RainbowSpeed = 0.08f;
+
         // Native canvas size used by the outer letterbox matrix (main.cs).
         // NOT scaled by GUIScale - it's the fixed reference resolution
         // everything else is authored against.
-        public readonly static float WindowWidth = 1920;
-        public readonly static float WindowHeight = 1080;
+        public readonly static float NativeWidth = 1920;
+        public readonly static float NativeHeight = 1080;
 
         public static float GUIScale = 1f;
         public static float S(float value) => value * GUIScale;
@@ -221,7 +223,7 @@ namespace Magnetar_Client
             private static float _baseMultiSelectWindowHeight = 800f;
             public static float MultiSelectWindowHeight
             {
-                get => Mathf.Min(S(_baseMultiSelectWindowHeight), WindowHeight * 0.8f);
+                get => Mathf.Min(S(_baseMultiSelectWindowHeight), NativeHeight * 0.8f);
                 set => _baseMultiSelectWindowHeight = value;
             }
         }

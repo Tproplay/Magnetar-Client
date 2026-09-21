@@ -298,7 +298,7 @@ namespace Magnetar_Client.Core
 
                 // --- 4. 70% Max Screen Height Calculation ---
                 float totalContentHeight = categoryModules.Count * buttonHeight;
-                float maxCategoryHeight = Config.WindowHeight * 0.70f;
+                float maxCategoryHeight = Config.NativeHeight * 0.70f;
                 float maxViewHeight = maxCategoryHeight - headerHeight;
 
                 bool needsScroll = (headerHeight + totalContentHeight) > maxCategoryHeight;
@@ -500,8 +500,8 @@ namespace Magnetar_Client.Core
                     float popupHeight = Config.S(25f);
 
                     _settingsPositions[mod] = new Rect(
-                        (Config.WindowWidth / 2f) - (targetWidth / 2f),
-                        (Config.WindowHeight / 2f) - (popupHeight / 2f),
+                        (Config.NativeWidth / 2f) - (targetWidth / 2f),
+                        (Config.NativeHeight / 2f) - (popupHeight / 2f),
                         targetWidth,
                         popupHeight
                     );
@@ -580,7 +580,7 @@ namespace Magnetar_Client.Core
 #else
             float headerHeight = Config.S(26f);
 #endif
-            float maxWindowHeight = Config.WindowHeight * Config.ModuleManager.MaxSettingsWindowHeightPct;
+            float maxWindowHeight = Config.NativeHeight * Config.ModuleManager.MaxSettingsWindowHeightPct;
             float maxViewHeight = maxWindowHeight - headerHeight;
 
             if (!_moduleContentHeights.ContainsKey(mod)) _moduleContentHeights[mod] = 0f;
@@ -831,10 +831,10 @@ namespace Magnetar_Client.Core
                 float searchWidth = Config.ModuleWindowWidth * Config.ModuleManager.SearchWidthMultiplier;
                 float searchHeight = Config.S(30f);
 
-                float targetY = Config.WindowHeight - searchHeight - Config.S(20f);
-                float hiddenY = Config.WindowHeight + Config.S(10f);
+                float targetY = Config.NativeHeight - searchHeight - Config.S(20f);
+                float hiddenY = Config.NativeHeight + Config.S(10f);
                 float currentY = Mathf.Lerp(hiddenY, targetY, SearchAnimProgress);
-                float currentX = (Config.WindowWidth / 2f) - (searchWidth / 2f);
+                float currentX = (Config.NativeWidth / 2f) - (searchWidth / 2f);
 
                 SearchWindowRect = new Rect(currentX, currentY, searchWidth, searchHeight);
                 SearchWindowRect = GUI.Window(999, SearchWindowRect, SearchDelegate, "", Magnetar_Default.CategoryWindowStyle);
@@ -875,8 +875,8 @@ namespace Magnetar_Client.Core
         public static void InitializeLayout()
         {
             WindowRect = new Rect(
-                Config.WindowWidth / 2f - Config.ModuleManager.MultiSelectWindowWidth / 2f,
-                Config.WindowHeight / 2f - Config.ModuleManager.MultiSelectWindowHeight / 2f,
+                Config.NativeWidth / 2f - Config.ModuleManager.MultiSelectWindowWidth / 2f,
+                Config.NativeHeight / 2f - Config.ModuleManager.MultiSelectWindowHeight / 2f,
                 Config.ModuleManager.MultiSelectWindowWidth,
                 Config.ModuleManager.MultiSelectWindowHeight
             );
@@ -884,14 +884,14 @@ namespace Magnetar_Client.Core
 
         public static void Render(Event currentEvent)
         {
-            float targetW = Mathf.Min(Config.ModuleManager.MultiSelectWindowWidth, Config.WindowWidth * 0.95f);
-            float targetH = Mathf.Min(Config.ModuleManager.MultiSelectWindowHeight, Config.WindowHeight * 0.8f);
+            float targetW = Mathf.Min(Config.ModuleManager.MultiSelectWindowWidth, Config.NativeWidth * 0.95f);
+            float targetH = Mathf.Min(Config.ModuleManager.MultiSelectWindowHeight, Config.NativeHeight * 0.8f);
 
             if (ModuleManager.resetWindowPos)
             {
                 WindowRect = new Rect(
-                    (Config.WindowWidth - targetW) / 2f,
-                    (Config.WindowHeight - targetH) / 2f,
+                    (Config.NativeWidth - targetW) / 2f,
+                    (Config.NativeHeight - targetH) / 2f,
                     targetW,
                     targetH
                 );
@@ -1062,19 +1062,19 @@ namespace Magnetar_Client.Core
     {
         public static Rect Clamp(Rect rect)
         {
-            float scaleX = (float)Screen.width / Config.WindowWidth;
-            float scaleY = (float)Screen.height / Config.WindowHeight;
+            float scaleX = (float)Screen.width / Config.NativeWidth;
+            float scaleY = (float)Screen.height / Config.NativeHeight;
             float uniformScale = Mathf.Min(scaleX, scaleY);
 
             // Calculate the virtual coordinate range visible inside the transformed GUI.matrix
             float virtualWidth = Screen.width / uniformScale;
             float virtualHeight = Screen.height / uniformScale;
 
-            float minX = -(virtualWidth - Config.WindowWidth) * 0.5f;
-            float maxX = Config.WindowWidth + ((virtualWidth - Config.WindowWidth) * 0.5f) - rect.width;
+            float minX = -(virtualWidth - Config.NativeWidth) * 0.5f;
+            float maxX = Config.NativeWidth + ((virtualWidth - Config.NativeWidth) * 0.5f) - rect.width;
 
-            float minY = -(virtualHeight - Config.WindowHeight) * 0.5f;
-            float maxY = Config.WindowHeight + ((virtualHeight - Config.WindowHeight) * 0.5f) - rect.height;
+            float minY = -(virtualHeight - Config.NativeHeight) * 0.5f;
+            float maxY = Config.NativeHeight + ((virtualHeight - Config.NativeHeight) * 0.5f) - rect.height;
 
             rect.x = Mathf.Clamp(rect.x, minX, Mathf.Max(minX, maxX));
             rect.y = Mathf.Clamp(rect.y, minY, Mathf.Max(minY, maxY));

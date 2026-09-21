@@ -8,6 +8,8 @@ using System.Reflection;
 using UnityEngine;
 using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using Magnetar_Client.UI;
+using Magnetar_Client.Game;
 
 namespace Magnetar_Client.Core
 {
@@ -41,20 +43,20 @@ namespace Magnetar_Client.Core
         private static void EnsureRects()
         {
             float targetSelectorWidth = Config.S(BaseSelectorWidth);
-            float maxSelectorHeight = Config.WindowHeight * 0.8f;
+            float maxSelectorHeight = Config.NativeHeight * 0.8f;
             float targetSelectorHeight = Mathf.Min(Config.S(BaseSelectorHeight), maxSelectorHeight);
 
             if (!_rectsInitialized)
             {
                 windowRect = new Rect(
-                    (Config.WindowWidth - Config.S(BaseWidth)) / 2f,
-                    (Config.WindowHeight - Config.S(BaseHeight)) / 2f,
+                    (Config.NativeWidth - Config.S(BaseWidth)) / 2f,
+                    (Config.NativeHeight - Config.S(BaseHeight)) / 2f,
                     Config.S(BaseWidth),
                     Config.S(BaseHeight));
 
                 selectorRect = new Rect(
-                    (Config.WindowWidth - targetSelectorWidth) / 2f,
-                    (Config.WindowHeight - targetSelectorHeight) / 2f,
+                    (Config.NativeWidth - targetSelectorWidth) / 2f,
+                    (Config.NativeHeight - targetSelectorHeight) / 2f,
                     targetSelectorWidth,
                     targetSelectorHeight);
 
@@ -64,8 +66,8 @@ namespace Magnetar_Client.Core
             Config.RescaleAroundCenter(ref windowRect, Config.S(BaseWidth), windowRect.height);
             Config.RescaleAroundCenter(ref selectorRect, targetSelectorWidth, targetSelectorHeight);
 
-            selectorRect.x = Mathf.Clamp(selectorRect.x, 0f, Mathf.Max(0f, Config.WindowWidth - selectorRect.width));
-            selectorRect.y = Mathf.Clamp(selectorRect.y, 0f, Mathf.Max(0f, Config.WindowHeight - selectorRect.height));
+            selectorRect.x = Mathf.Clamp(selectorRect.x, 0f, Mathf.Max(0f, Config.NativeWidth - selectorRect.width));
+            selectorRect.y = Mathf.Clamp(selectorRect.y, 0f, Mathf.Max(0f, Config.NativeHeight - selectorRect.height));
         }
 
         private static GUI.WindowFunction _cachedSelectorDelegate;
@@ -96,6 +98,8 @@ namespace Magnetar_Client.Core
             try
             {
                 Event e = Event.current;
+
+                RenderModCredit();
 
                 if (Config.dimBg && (Config.showgui || forceShow))
                 {
@@ -178,7 +182,7 @@ namespace Magnetar_Client.Core
                 Event e = Event.current;
                 float btnWidth = Config.S(180f);
                 float btnHeight = Config.S(36f);
-                Rect exitRect = new Rect((Config.WindowWidth - btnWidth) / 2f, Config.S(16f), btnWidth, btnHeight);
+                Rect exitRect = new Rect((Config.NativeWidth - btnWidth) / 2f, Config.S(16f), btnWidth, btnHeight);
 
                 bool isHovered = exitRect.Contains(e.mousePosition);
 
@@ -238,11 +242,11 @@ namespace Magnetar_Client.Core
                 UI.WindowDrawing.DrawSetting.manualScrollY = 0f;
 
                 float targetW = Config.S(BaseSelectorWidth);
-                float targetH = Mathf.Min(Config.S(BaseSelectorHeight), Config.WindowHeight * 0.8f);
+                float targetH = Mathf.Min(Config.S(BaseSelectorHeight), Config.NativeHeight * 0.8f);
 
                 selectorRect = new Rect(
-                    (Config.WindowWidth - targetW) / 2f,
-                    (Config.WindowHeight - targetH) / 2f,
+                    (Config.NativeWidth - targetW) / 2f,
+                    (Config.NativeHeight - targetH) / 2f,
                     targetW,
                     targetH
                 );
@@ -321,6 +325,36 @@ namespace Magnetar_Client.Core
             {
                 HUDRenderer.HudToggles.CustomNames[keypair.Key] = Translator.Translate(keypair.Value);
             }
+        }
+
+        public static void RenderModCredit()
+        {
+            if (Config.showgui || HUDManager.forceShow) return;
+
+            if (!AppData.InMainMenu) return;
+
+            string Text = "Magnetar Client <color=white>by</color> <color=red>Tproplay</color>";
+
+            GUIContent content = new(Text);
+
+            GUIStyle style = new()
+            {
+                alignment = TextAnchor.UpperRight,
+                richText = true,
+            };
+            style.normal.textColor = Color.white;
+            style.fontStyle = FontStyle.Bold;
+            style.fontSize = (int)Config.NativeHeight / 36;
+
+            float width = style.CalcSize(content).x;
+
+            Rect rect = new()
+            {
+                x = Config.NativeWidth * 0.995f - width,
+                width = width
+            };
+
+            GUIHelper.DrawBoxWithOutlinedText(rect, Text, style, GUIHelper.RainbowColor, Color.black);
         }
     }
 

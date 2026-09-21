@@ -345,7 +345,7 @@ namespace Magnetar_Client.UI.WindowDrawing
         {
             if (activeMultiSelect == null) return;
 
-            float maxAllowedHeight = Config.WindowHeight * 0.8f;
+            float maxAllowedHeight = Config.NativeHeight * 0.8f;
             if (multiSelectWindowRect.height > maxAllowedHeight)
             {
                 multiSelectWindowRect.height = maxAllowedHeight;

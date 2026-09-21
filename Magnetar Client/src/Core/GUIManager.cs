@@ -28,14 +28,14 @@ namespace Magnetar_Client.Core
         public static float elementHeight => Config.S(BaseElementHeight);
 
         public static Rect windowRect = new Rect(
-            (Config.WindowWidth - Config.S(BaseWidth)) / 2,
-            (Config.WindowHeight - Config.S(BaseHeight)) / 2,
+            (Config.NativeWidth - Config.S(BaseWidth)) / 2,
+            (Config.NativeHeight - Config.S(BaseHeight)) / 2,
             Config.S(BaseWidth),
             Config.S(BaseHeight));
 
         public static Rect selectorRect = new Rect(
-            (Config.WindowWidth - Config.S(BaseSelectorWidth)) / 2,
-            (Config.WindowHeight - Config.S(BaseSelectorHeight)) / 2,
+            (Config.NativeWidth - Config.S(BaseSelectorWidth)) / 2,
+            (Config.NativeHeight - Config.S(BaseSelectorHeight)) / 2,
             Config.S(BaseSelectorWidth),
             Config.S(BaseSelectorHeight));
 
@@ -178,7 +178,7 @@ namespace Magnetar_Client.Core
             Config.RescaleAroundCenter(ref windowRect, Config.S(BaseWidth), windowRect.height);
 
             float targetSelectorWidth = Config.S(BaseSelectorWidth);
-            float maxSelectorHeight = Config.WindowHeight * 0.8f;
+            float maxSelectorHeight = Config.NativeHeight * 0.8f;
             float targetSelectorHeight = Mathf.Min(Config.S(BaseSelectorHeight), maxSelectorHeight);
             Config.RescaleAroundCenter(ref selectorRect, targetSelectorWidth, targetSelectorHeight);
 
@@ -369,8 +369,8 @@ namespace Magnetar_Client.Core
             UI.WindowDrawing.DrawSetting.manualScrollY = 0f;
 
             float targetW = Config.S(BaseSelectorWidth);
-            float targetH = Mathf.Min(Config.S(BaseSelectorHeight), Config.WindowHeight * 0.8f);
-            selectorRect = new Rect((Config.WindowWidth - targetW) / 2f, (Config.WindowHeight - targetH) / 2f, targetW, targetH);
+            float targetH = Mathf.Min(Config.S(BaseSelectorHeight), Config.NativeHeight * 0.8f);
+            selectorRect = new Rect((Config.NativeWidth - targetW) / 2f, (Config.NativeHeight - targetH) / 2f, targetW, targetH);
 
             isSelectingSubWindow = true;
         }

@@ -27,9 +27,6 @@ namespace Magnetar_Client.Core
     {
         public static main Instance;
         public static new HarmonyLib.Harmony HarmonyInstance;
-
-        private readonly float nativeWidth = 1920f;
-        private readonly float nativeHeight = 1080f;
         public bool hasWarmedUp = false;
 
 #if MELONLOADER || RELEASE_MELON
@@ -109,20 +106,18 @@ namespace Magnetar_Client.Core
 
             try
             {
-                float scaleX = (float)Screen.width / nativeWidth;
-                float scaleY = (float)Screen.height / nativeHeight;
+                float scaleX = (float)Screen.width / Config.NativeWidth;
+                float scaleY = (float)Screen.height / Config.NativeHeight;
                 float uniformScale = Mathf.Min(scaleX, scaleY);
 
-                float offsetX = (Screen.width - (nativeWidth * uniformScale)) * 0.5f;
-                float offsetY = (Screen.height - (nativeHeight * uniformScale)) * 0.5f;
+                float offsetX = (Screen.width - (Config.NativeWidth * uniformScale)) * 0.5f;
+                float offsetY = (Screen.height - (Config.NativeHeight * uniformScale)) * 0.5f;
 
                 GUI.matrix = Matrix4x4.TRS(
                     new Vector3(offsetX, offsetY, 0),
                     Quaternion.identity,
                     new Vector3(uniformScale, uniformScale, 1)
                 );
-
-                MobileMenuUI.Render();
 
                 if (!hasWarmedUp)
                 {
@@ -132,6 +127,8 @@ namespace Magnetar_Client.Core
                 }
 
                 UI.Themes.Magnetar_Default.Rescale();
+
+                MobileMenuUI.Render();
                 HUDManager.Render();
 
                 foreach (var mod in ModuleManager.Modules)
@@ -163,6 +160,8 @@ namespace Magnetar_Client.Core
 
         public void CoreUpdate()
         {
+            UI.GUIHelper._UpdateRainbowColor();
+
             if (HUDRenderer.Elements.Count != 0)
                 HUDRenderer.UpdateElements();
 

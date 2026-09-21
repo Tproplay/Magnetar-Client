@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using Magnetar_Client.UI.Themes;
 
-namespace Magnetar_Client.TopBar
+namespace Magnetar_Client.Core
 {
     public static class TopBar
     {

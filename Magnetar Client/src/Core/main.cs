@@ -68,7 +68,7 @@ namespace Magnetar_Client.Core
             ModuleManager.Init();
             HUDRenderer.Init();
             NEFManager.Init();
-            TopBar.TopBar.Init();
+            TopBar.Init();
             ProfileManager.Init();
 
             // Load saved configurations (Config.Theme, Language, etc.)
@@ -143,7 +143,7 @@ namespace Magnetar_Client.Core
 
                 if (Magnetar_Client.Config.showgui)
                 {
-                    TopBar.TopBar.Render();
+                    TopBar.Render();
 
                     if (Magnetar_Client.Config.CurrentTab == TabType.MODULES) ModuleManager.Render();
                     if (Magnetar_Client.Config.CurrentTab == TabType.NEF) NEFManager.Render();

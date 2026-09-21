@@ -660,7 +660,7 @@ namespace Magnetar_Client.Utils
                 try
                 {
                     var sortedNames = parsedNames.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
-                    string dumpJson = JsonConvert.SerializeObject(sortedNames);
+                    string dumpJson = JsonConvert.SerializeObject(sortedNames, Formatting.Indented);
 
                     File.WriteAllText(targetFile, dumpJson);
                 }

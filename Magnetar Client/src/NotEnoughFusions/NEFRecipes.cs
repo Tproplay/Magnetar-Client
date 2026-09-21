@@ -2,6 +2,8 @@
 using Magnetar_Client.Core;
 using System.Collections.Generic;
 using UnityEngine;
+using MelonLoader;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -49,65 +51,26 @@ namespace Magnetar_Client.NEF.Data
             public Color EdgeMessageColor = Color.white;
         }
 
-        public static List<CustomRecipe> TitanPlants = new List<CustomRecipe>
+        public static List<CustomRecipe> GetTitanRecipes()
         {
-            new CustomRecipe
+            List<CustomRecipe> recipies = new();
+
+            foreach (var pair in MixBomb.Recipe)
             {
-                Result = RecipeEntity.Plant(PlantType.BigGatling),
-                ParentA = RecipeEntity.Plant(PlantType.DoubleShooter),
-                ParentB = RecipeEntity.Plant(PlantType.ThreePeater),
-                ParentC = RecipeEntity.Plant(PlantType.DoubleShooter),
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.BigChomper),
-                ParentA = RecipeEntity.Plant(PlantType.Chomper),
-                ParentB = RecipeEntity.Plant(PlantType.Chomper),
-                ParentC = RecipeEntity.Plant(PlantType.Chomper),
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.BigPumpkin),
-                ParentA = RecipeEntity.Plant(PlantType.MagnetPumpkin),
-                ParentB = RecipeEntity.Plant(PlantType.Magnetshroom),
-                ParentC = RecipeEntity.Plant(PlantType.CherryPumpkin),
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.HugeWallNut),
-                ParentA = RecipeEntity.Plant(PlantType.WallNut),
-                ParentB = RecipeEntity.Plant(PlantType.TallNut),
-                ParentC = RecipeEntity.Plant(PlantType.WallNut),
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.BigGloom),
-                ParentA = RecipeEntity.Plant(PlantType.SmallPuff),
-                ParentB = RecipeEntity.Plant(PlantType.FumeShroom),
-                ParentC = RecipeEntity.Plant(PlantType.SmallPuff),
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.CabbageCannon),
-                ParentA = RecipeEntity.Plant(PlantType.Cabbagepult),
-                ParentB = RecipeEntity.Plant(PlantType.Cabbagepult),
-                ParentC = RecipeEntity.Plant(PlantType.Cabbagepult),
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.BigSeaShroom),
-                ParentA = RecipeEntity.Plant(PlantType.Tanglekelp),
-                ParentB = RecipeEntity.Plant(PlantType.SeaShroom),
-                ParentC = RecipeEntity.Plant(PlantType.Tanglekelp),
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.MelonCannon),
-                ParentA = RecipeEntity.Plant(PlantType.Melonpult),
-                ParentB = RecipeEntity.Plant(PlantType.Cornpult),
-                ParentC = RecipeEntity.Plant(PlantType.Melonpult),
+                recipies.Add(
+                    new CustomRecipe
+                    {
+                        Result = RecipeEntity.Plant(pair.value[2]),
+                        ParentA = RecipeEntity.Plant(pair.value[0]),
+                        ParentB = RecipeEntity.Plant(pair.Key),
+                        ParentC = RecipeEntity.Plant(pair.value[1]),
+                    }
+                    );
             }
-        };
+
+            return recipies;
+
+        }
 
         public static List<CustomRecipe> SpawnedPlants = new List<CustomRecipe>
         {
@@ -163,75 +126,25 @@ namespace Magnetar_Client.NEF.Data
             },
         };
 
-        public static List<CustomRecipe> AbsorptionPlants = new List<CustomRecipe>
+        public static List<CustomRecipe> GetFurnanceRecipes()
         {
-            new CustomRecipe
+            List<CustomRecipe> recipies = new();
+
+            foreach (var pair in PineFurnace.mixDic)
             {
-                Result = RecipeEntity.Plant(PlantType.SpruceFurnace),
-                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
-                ParentB = RecipeEntity.Plant(PlantType.SpruceShooter)
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.Shulkflower),
-                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
-                ParentB = RecipeEntity.Plant(PlantType.Shulkflower)
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.BambooFurnace),
-                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
-                ParentB = RecipeEntity.Plant(PlantType.Bamboo)
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.IceFurnace),
-                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
-                ParentB = RecipeEntity.Plant(PlantType.IceLotus)
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.WaterFurnace),
-                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
-                ParentB = RecipeEntity.Plant(PlantType.WaterAloes)
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.SuperFurnace),
-                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
-                ParentB = RecipeEntity.Plant(PlantType.LotusAloes)
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.UltimateFurnace),
-                ParentA = RecipeEntity.Plant(PlantType.SuperFurnace),
-                ParentB = RecipeEntity.Plant(PlantType.ThronsAloes)
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.ThornsFurnace),
-                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
-                ParentB = RecipeEntity.Plant(PlantType.Thorns)
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.ShieldFurnace),
-                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
-                ParentB = RecipeEntity.Plant(PlantType.Shieldshroom)
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.SwordFurnace),
-                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
-                ParentB = RecipeEntity.Plant(PlantType.Swordshroom)
-            },
-            new CustomRecipe
-            {
-                Result = RecipeEntity.Plant(PlantType.TumbleFurnace),
-                ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
-                ParentB = RecipeEntity.Plant(PlantType.TumbleSnow)
-            },
-        };
+                recipies.Add(
+                    new CustomRecipe
+                    {
+                        Result = RecipeEntity.Plant(pair.Value),
+                        ParentA = RecipeEntity.Plant(PlantType.PineFurnace),
+                        ParentB = RecipeEntity.Plant(pair.Key),
+                    }
+                    );
+            }
+
+            return recipies;
+
+        }
 
         public static List<CustomRecipe> MiscellaneousPlants = new List<CustomRecipe>
         {
@@ -265,7 +178,7 @@ namespace Magnetar_Client.NEF.Data
 
         public static void InitRecipes()
         {
-            foreach (CustomRecipe plantRecipe in TitanPlants)
+            foreach (CustomRecipe plantRecipe in GetTitanRecipes())
             {
                 AddToList(plantRecipe);
             }
@@ -280,7 +193,7 @@ namespace Magnetar_Client.NEF.Data
                 AddToList(plantRecipe);
             }
 
-            foreach (CustomRecipe plantRecipe in AbsorptionPlants)
+            foreach (CustomRecipe plantRecipe in GetFurnanceRecipes())
             {
                 AddToList(plantRecipe);
             }

@@ -49,6 +49,8 @@ public static class Config
 
     public static float RainbowSpeed = 0.08f;
 
+    public static bool ShowMainMenuCredits = true;
+
     // Native canvas size used by the outer letterbox matrix (main.cs).
     // NOT scaled by GUIScale - it's the fixed reference resolution
     // everything else is authored against.

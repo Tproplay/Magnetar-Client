@@ -329,6 +329,7 @@ public static class HUDManager
 
     public static void RenderModCredit()
     {
+        if (!Config.ShowMainMenuCredits) return;
         if (Config.showgui || HUDManager.forceShow) return;
 
         if (!AppData.InMainMenu) return;

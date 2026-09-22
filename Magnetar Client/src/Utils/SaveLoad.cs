@@ -32,6 +32,7 @@ public static class SaveLoad
         public bool HudEnabled = true;
         public bool ShowBackground = false;
         public bool ShowFloatingIcon = true;
+        public bool ShowMainMenuCredits = true;
         public List<int> SelectedHudElements = new();
         public Dictionary<string, SimpleRect> HudPositions = new();
         public Dictionary<string, SimpleRect> CategoryPositions = new();
@@ -164,7 +165,8 @@ public static class SaveLoad
             Theme = Config.Theme,
             GUIScale = Config.GUIScale,
             ElementScale = Config.ElementScale,
-            ShowFloatingIcon = Config.ShowFloatingIcon
+            ShowFloatingIcon = Config.ShowFloatingIcon,
+            ShowMainMenuCredits = Config.ShowMainMenuCredits,
         };
 
         if (HUDRenderer.Elements != null)
@@ -327,6 +329,7 @@ public static class SaveLoad
                     {
                         Config.showgui = data.ShowGui;
                         Config.ShowFloatingIcon = data.ShowFloatingIcon;
+                        Config.ShowMainMenuCredits = data.ShowMainMenuCredits;
 
                         if (!string.IsNullOrEmpty(data.Theme))
                         {

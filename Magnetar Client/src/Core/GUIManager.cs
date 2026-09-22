@@ -345,6 +345,21 @@ public static class GUIManager
         }
         y += elementHeight + Config.S(10f);
 
+        // --- 7. Show Main Menu Credits ---
+        GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Show Main Menu Credits"), Magnetar_Default.SettingLabelStyle);
+        Rect showMainMenuCredits = new(w * 0.5f, y, w * 0.45f, elementHeight);
+
+        GUI.Box(showMainMenuCredits,
+            Config.ShowMainMenuCredits ? Translator.Translate("ON") : Translator.Translate("OFF"),
+            Config.ShowMainMenuCredits ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+
+        if (showMainMenuCredits.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+        {
+            Config.ShowMainMenuCredits = !Config.ShowMainMenuCredits;
+            e.Use();
+        }
+        y += elementHeight + Config.S(10f);
+
         if (UI.WindowDrawing.DrawSetting.OnPostDraw != null)
         {
             UI.WindowDrawing.DrawSetting.OnPostDraw.Invoke();

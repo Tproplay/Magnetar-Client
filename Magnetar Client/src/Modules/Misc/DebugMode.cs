@@ -8,8 +8,9 @@ using static Magnetar_Client.Game.AppData;
 using Magnetar_Client.Game;
 using System;
 using System.Runtime.InteropServices;
-using Il2CppInterop.Runtime;
 using HarmonyLib;
+using Magnetar_Client.NEF;
+
 
 
 
@@ -215,6 +216,17 @@ namespace Magnetar_Client.Modules
             if (selected.IsSelected((int)Options.AllRecipes))
             {
                 selected.Deselect((int)Options.AllRecipes);
+
+                foreach (var recipe in NEFData.AddedRecipes)
+                {
+                    if (recipe.IsSingle || recipe.IsTriple) continue;
+                    DebugModeLogger.Msg(
+                        $"Found recipe: " +
+                        $"{(PlantType)recipe.ParentA.Id} ({recipe.ParentA.Id}) + " +
+                        $"{(PlantType)recipe.ParentB.Id} ({recipe.ParentB.Id}) " +
+                        $"-> {(PlantType)recipe.Result.Id} ({recipe.Result.Id})");
+
+                }
 
                 if (MixData._recipes != null)
                 {

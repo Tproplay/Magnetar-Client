@@ -19,7 +19,7 @@ namespace Magnetar_Client.NEF
         public static Dictionary<int, string> CustomNames = new Dictionary<int, string>();
         public static List<CustomRecipe> AddedRecipes = new List<CustomRecipe>();
 
-        public static int NextCustomPlantId = 3000;
+        public static int NextCustomPlantId = 30000;
 
         // Internal Data State
         public static bool hasSyncedCustomizeLib = false;

@@ -9,299 +9,296 @@ using Magnetar_Client.Game;
 using Il2Cpp;
 #endif
 
-namespace Magnetar_Client.HUDElements
+namespace Magnetar_Client.HUDElements;
+
+public class NumberOfZombies : HudElement
 {
-    public class NumberOfZombies : HudElement
+    public NumberOfZombies() : base("Zombies On Lawn", HudElement.NewRect(100))
+    { UpdateInterval = 0.2f; }
+    string displayText = "Zombies On Lawn: Na";
+    protected override void DrawContent(float width, float height)
     {
-        public NumberOfZombies() : base("Zombies On Lawn", HudElement.NewRect(100))
-        { UpdateInterval = 0.2f; }
-        string displayText = "Zombies On Lawn: Na";
-        protected override void DrawContent(float width, float height)
-        {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
-
-        public override void OnUpdateActive()
-        {
-            if (AppData.BoardInstanceIsNull) return;
-
-            displayText = $"Zombies On Lawn: {zombieList.Count(z => !z.isMindControlled)}";
-
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    public class NumberOfHypnotizedZombies : HudElement
+    public override void OnUpdateActive()
     {
-        public NumberOfHypnotizedZombies() : base("Hypnotized Zombies On Lawn", HudElement.NewRect(100))
-        { UpdateInterval = 0.2f; }
+        if (AppData.BoardInstanceIsNull) return;
 
-        string displayText = "Hypno Zombies On Lawn: Na";
-        protected override void DrawContent(float width, float height)
-        {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
+        displayText = $"Zombies On Lawn: {zombieList.Count(z => !z.isMindControlled)}";
 
-        public override void OnUpdateActive()
-        {
-            if (AppData.BoardInstanceIsNull) return;
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+}
 
-            displayText = $"Hypno Zombies On Lawn: {zombieList.Count(z => z.isMindControlled)}";
+public class NumberOfHypnotizedZombies : HudElement
+{
+    public NumberOfHypnotizedZombies() : base("Hypnotized Zombies On Lawn", HudElement.NewRect(100))
+    { UpdateInterval = 0.2f; }
 
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+    string displayText = "Hypno Zombies On Lawn: Na";
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    public class NumberOfZombiesSpawned : HudElement
+    public override void OnUpdateActive()
     {
-        public NumberOfZombiesSpawned() : base("Zombies Spawned", HudElement.NewRect(100))
-        { UpdateInterval = 0.2f; }
+        if (AppData.BoardInstanceIsNull) return;
 
-        string displayText = "Zombies Spawned: Na";
+        displayText = $"Hypno Zombies On Lawn: {zombieList.Count(z => z.isMindControlled)}";
 
-        protected override void DrawContent(float width, float height)
-        {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+}
 
-        public override void OnUpdateActive()
-        {
-            if (AppData.BoardInstanceIsNull) return;
+public class NumberOfZombiesSpawned : HudElement
+{
+    public NumberOfZombiesSpawned() : base("Zombies Spawned", HudElement.NewRect(100))
+    { UpdateInterval = 0.2f; }
 
-            displayText = $"Zombies Spawned: {AppData.BoardInstance.boardStatistics.zombiesKilled + GameData.zombieList.Count}";
+    string displayText = "Zombies Spawned: Na";
 
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    public class NumberOfHypnotizedZombiesSpawned : HudElement
+    public override void OnUpdateActive()
     {
-        public NumberOfHypnotizedZombiesSpawned() : base("Hypnotized Zombies Spawned", HudElement.NewRect(100))
-        { UpdateInterval = 0.2f; }
+        if (AppData.BoardInstanceIsNull) return;
 
-        string displayText = "Hypno Zombies Spawned: Na";
-        protected override void DrawContent(float width, float height)
-        {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
+        displayText = $"Zombies Spawned: {AppData.BoardInstance.boardStatistics.zombiesKilled + GameData.zombieList.Count}";
 
-        public override void OnUpdateActive()
-        {
-            if (AppData.BoardInstanceIsNull) return;
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+}
 
-            displayText = $"Hypno Zombies Spawned: {GameData.Hypno_Zombies_Spawned}";
+public class NumberOfHypnotizedZombiesSpawned : HudElement
+{
+    public NumberOfHypnotizedZombiesSpawned() : base("Hypnotized Zombies Spawned", HudElement.NewRect(100))
+    { UpdateInterval = 0.2f; }
 
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+    string displayText = "Hypno Zombies Spawned: Na";
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    public class NumberOfZombiesKilled : HudElement
+    public override void OnUpdateActive()
     {
-        public NumberOfZombiesKilled() : base("Zombies Killed", HudElement.NewRect(220))
-        { UpdateInterval = 0.2f; }
+        if (AppData.BoardInstanceIsNull) return;
 
-        string displayText = "Zombies Killed: Na";
+        displayText = $"Hypno Zombies Spawned: {GameData.Hypno_Zombies_Spawned}";
 
-        protected override void DrawContent(float width, float height)
-        {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+}
 
-        public override void OnUpdateActive()
-        {
-            if (AppData.BoardInstanceIsNull) return;
+public class NumberOfZombiesKilled : HudElement
+{
+    public NumberOfZombiesKilled() : base("Zombies Killed", HudElement.NewRect(220))
+    { UpdateInterval = 0.2f; }
 
-            displayText = $"Zombies Killed: {AppData.BoardInstance.boardStatistics.zombiesKilled}";
+    string displayText = "Zombies Killed: Na";
 
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    public class NumberOfHypnotizedZombiesKilled : HudElement
+    public override void OnUpdateActive()
     {
-        public NumberOfHypnotizedZombiesKilled() : base("Hypnotized Zombies Killed", HudElement.NewRect(220))
-        { UpdateInterval = 0.2f; }
+        if (AppData.BoardInstanceIsNull) return;
 
-        string displayText = "Hypno Zombies Killed: Na";
+        displayText = $"Zombies Killed: {AppData.BoardInstance.boardStatistics.zombiesKilled}";
 
-        protected override void DrawContent(float width, float height)
-        {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+}
 
-        public override void OnUpdateActive()
-        {
-            if (AppData.BoardInstanceIsNull) return;
+public class NumberOfHypnotizedZombiesKilled : HudElement
+{
+    public NumberOfHypnotizedZombiesKilled() : base("Hypnotized Zombies Killed", HudElement.NewRect(220))
+    { UpdateInterval = 0.2f; }
 
-            displayText = $"Hypno Zombies Killed: {GameData.Hypno_Zombies_Killed}";
+    string displayText = "Hypno Zombies Killed: Na";
 
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    public class ZombieWaveHealth : HudElement
+    public override void OnUpdateActive()
     {
-        public ZombieWaveHealth() : base("Current Zombie Wave Health", HudElement.NewRect(235))
-        { UpdateInterval = 0.2f; }
+        if (AppData.BoardInstanceIsNull) return;
 
-        string displayText = "Wave Health: Na";
+        displayText = $"Hypno Zombies Killed: {GameData.Hypno_Zombies_Killed}";
+
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+}
+
+public class ZombieWaveHealth : HudElement
+{
+    public ZombieWaveHealth() : base("Current Zombie Wave Health", HudElement.NewRect(235))
+    { UpdateInterval = 0.2f; }
+
+    string displayText = "Wave Health: Na";
+    
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+    }
+
+    public override void OnUpdateActive()
+    {
+        if (!AppData.BoardInstanceIsNull)
+        {
+            displayText = 
+                $"Wave Health: {FormatInternational(AppData.BoardInstance.zombieCurrentWaveHealth)}/" +
+                $"{FormatInternational(AppData.BoardInstance.zombieSpawnHealth)}";
+        }
+        else
+        {
+            displayText = $"Wave Health: Na";
+        }
         
-        protected override void DrawContent(float width, float height)
-        {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
-
-        public override void OnUpdateActive()
-        {
-            if (!AppData.BoardInstanceIsNull)
-            {
-                displayText = 
-                    $"Wave Health: {FormatInternational(AppData.BoardInstance.zombieCurrentWaveHealth)}/" +
-                    $"{FormatInternational(AppData.BoardInstance.zombieSpawnHealth)}";
-            }
-            else
-            {
-                displayText = $"Wave Health: Na";
-            }
-            
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
-
-    public class TotalZombieHealth : HudElement
+    public override void OnEnable()
     {
-        public TotalZombieHealth() : base("Total Zombies Health", HudElement.NewRect(235))
-        { UpdateInterval = 0.2f; }
-
-        string displayText = "Total Zombies Health: Na";
-        protected override void DrawContent(float width, float height)
-        {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
-
-        long GetZombieHealth()
-        {
-            long health = 0;
-            foreach (Zombie zombie in zombieList)
-            {
-                if (zombie.isMindControlled) continue;
-                health += zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
-
-            }
-            return health > 0 ? health : 0;
-        }
-
-        public override void OnUpdateActive()
-        {
-            if (AppData.BoardInstanceIsNull) return;
-
-            displayText = $"Total Zombies Health: {FormatInternational(GetZombieHealth())}";
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 
-    public class TotalHypnotizedZombieHealth : HudElement
+}
+
+public class TotalZombieHealth : HudElement
+{
+    public TotalZombieHealth() : base("Total Zombies Health", HudElement.NewRect(235))
+    { UpdateInterval = 0.2f; }
+
+    string displayText = "Total Zombies Health: Na";
+    protected override void DrawContent(float width, float height)
     {
-        public TotalHypnotizedZombieHealth() : base("Hypnotized Zombies Health", HudElement.NewRect(235))
-        { UpdateInterval = 0.2f; }
-
-        string displayText = "Hypno Zombies Health: Na";
-
-        protected override void DrawContent(float width, float height)
-        {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
-
-
-        long GetZombieHealth()
-        {
-            long health = 0;
-            foreach (Zombie zombie in zombieList)
-            {
-                if (!zombie.isMindControlled) continue;
-                health += zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
-
-            }
-            return health > 0 ? health : 0;
-        }
-
-        public override void OnUpdateActive()
-        {
-            if (AppData.BoardInstanceIsNull) return;
-            displayText = $"Hypno Zombies Health: {FormatInternational(GetZombieHealth())}";
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    public class CurrentWave : HudElement
+    long GetZombieHealth()
     {
-        public CurrentWave() : base("Current Wave", HudElement.NewRect(235))
-        { UpdateInterval = 1f; }
-
-        string displayText = "Wave: Na";
-        protected override void DrawContent(float width, float height)
+        long health = 0;
+        foreach (Zombie zombie in zombieList)
         {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+            if (zombie.isMindControlled) continue;
+            health += zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
+
         }
-
-        public override void OnUpdateActive()
-        {
-            if (!AppData.BoardInstanceIsNull)
-            {
-                displayText = $"Wave: {AppData.BoardInstance.theWave}/{AppData.BoardInstance.theMaxWave}";
-            }
-            else
-            {
-                displayText = "Wave: Na";
-            }
-
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-
+        return health > 0 ? health : 0;
     }
 
+    public override void OnUpdateActive()
+    {
+        if (AppData.BoardInstanceIsNull) return;
+
+        displayText = $"Total Zombies Health: {FormatInternational(GetZombieHealth())}";
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+
+}
+
+public class TotalHypnotizedZombieHealth : HudElement
+{
+    public TotalHypnotizedZombieHealth() : base("Hypnotized Zombies Health", HudElement.NewRect(235))
+    { UpdateInterval = 0.2f; }
+
+    string displayText = "Hypno Zombies Health: Na";
+
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+    }
+
+
+    long GetZombieHealth()
+    {
+        long health = 0;
+        foreach (Zombie zombie in zombieList)
+        {
+            if (!zombie.isMindControlled) continue;
+            health += zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
+
+        }
+        return health > 0 ? health : 0;
+    }
+
+    public override void OnUpdateActive()
+    {
+        if (AppData.BoardInstanceIsNull) return;
+        displayText = $"Hypno Zombies Health: {FormatInternational(GetZombieHealth())}";
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+}
+
+public class CurrentWave : HudElement
+{
+    public CurrentWave() : base("Current Wave", HudElement.NewRect(235))
+    { UpdateInterval = 1f; }
+
+    string displayText = "Wave: Na";
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+    }
+
+    public override void OnUpdateActive()
+    {
+        if (!AppData.BoardInstanceIsNull)
+        {
+            displayText = $"Wave: {AppData.BoardInstance.theWave}/{AppData.BoardInstance.theMaxWave}";
+        }
+        else
+        {
+            displayText = "Wave: Na";
+        }
+
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
 
 }

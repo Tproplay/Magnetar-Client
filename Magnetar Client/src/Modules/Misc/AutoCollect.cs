@@ -17,133 +17,132 @@ using System.Collections.Generic;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
-namespace Magnetar_Client.Modules
+namespace Magnetar_Client.Modules;
+
+public class AutoCollect : Module
 {
-    public class AutoCollect : Module
+    // Mod Info
+
+    public override string Name { get; set; } = "Auto Collect";
+    public override string Description { get; set; } = "Collects the selected item(s) if they apprear in the game.";
+    public override string SearchHints { get; set; } = "collectgiftbox giftboxcollector gitbox giftboxcollect getgiftbox giftboxpicker " +
+        "autocollectgiftbox giftboxes giftboxs giftboxget gitboxcollect giftboxget giftboxer giftbox-collect giftbix giftvox giftboxe" +
+        " giftbx collectgift giftboxauto gift-box giftcollect boxcollect giftboxhunter giftboxgrabber giftboxgrab giftgraber giftgrab " +
+        "giftbux";
+
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
+    public override bool Active { get; set; } = true;
+    public override bool enableInVanillaMode { get; set; } = true;
+
+    // Mod Data
+
+    public static AutoCollect instance;
+
+    public MultiSelectSetting selectedItems;
+
+
+    public AutoCollect()
     {
-        // Mod Info
+        instance = this;
 
-        public override string Name { get; set; } = "Auto Collect";
-        public override string Description { get; set; } = "Collects the selected item(s) if they apprear in the game.";
-        public override string SearchHints { get; set; } = "collectgiftbox giftboxcollector gitbox giftboxcollect getgiftbox giftboxpicker " +
-            "autocollectgiftbox giftboxes giftboxs giftboxget gitboxcollect giftboxget giftboxer giftbox-collect giftbix giftvox giftboxe" +
-            " giftbx collectgift giftboxauto gift-box giftcollect boxcollect giftboxhunter giftboxgrabber giftboxgrab giftgraber giftgrab " +
-            "giftbux";
+        CreateCategory("General");
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
-        public override bool Active { get; set; } = true;
-        public override bool enableInVanillaMode { get; set; } = true;
-
-        // Mod Data
-
-        public static AutoCollect instance;
-
-        public MultiSelectSetting selectedItems;
-
-
-        public AutoCollect()
+        selectedItems = new MultiSelectSetting("Items")
         {
-            instance = this;
-
-            CreateCategory("General");
-
-            selectedItems = new MultiSelectSetting("Items")
+            Options = new Dictionary<int, string>
             {
-                Options = new Dictionary<int, string>
-                {
-                    { 0, "Gift Box" },
-                    { 1, "Trophy" }
-                }
-            };
-            selectedItems.Select(0);
-            Settings.Add(selectedItems);
-
-            EndCategory();
-        }
-
-        // Mod Logic
-
-        public override void OnEnable()
-        {
-            if (selectedItems.IsSelected(0))
-            {
-                var objects = UnityEngine.Object.FindObjectsOfType<GardenPrize>();
-                foreach (GardenPrize obj in objects)
-                {
-                    if (obj != null) obj.Active();
-                }
+                { 0, "Gift Box" },
+                { 1, "Trophy" }
             }
+        };
+        selectedItems.Select(0);
+        Settings.Add(selectedItems);
 
-            if (selectedItems.IsSelected(1))
+        EndCategory();
+    }
+
+    // Mod Logic
+
+    public override void OnEnable()
+    {
+        if (selectedItems.IsSelected(0))
+        {
+            var objects = UnityEngine.Object.FindObjectsOfType<GardenPrize>();
+            foreach (GardenPrize obj in objects)
             {
-                var objects = UnityEngine.Object.FindObjectsOfType<PrizeMgr>();
-                foreach (PrizeMgr obj in objects)
-                {
-                    if (obj != null)
-                    {
-#if MELONLOADER || RELEASE_MELON
-                        MelonCoroutines.Start(AutoTrophyCollector.WaitAndCollectTrophy(obj));
-#elif BEPINEX || RELEASE_BEPINEX
-                        MonoBehaviourExtensions.StartCoroutine(obj, AutoTrophyCollector.WaitAndCollectTrophy(obj));
-#endif
-                    }
-                }
+                if (obj != null) obj.Active();
             }
         }
 
-
-        [HarmonyPatch(typeof(GardenPrize))]
-        public static class GardenPrizeCollectPatch
+        if (selectedItems.IsSelected(1))
         {
-            [HarmonyPatch(nameof(GardenPrize.Awake))]
-            [HarmonyPostfix]
-            public static void Postfix(GardenPrize __instance)
+            var objects = UnityEngine.Object.FindObjectsOfType<PrizeMgr>();
+            foreach (PrizeMgr obj in objects)
             {
-                if (instance == null || !instance.Active) return;
-                if (instance.selectedItems.IsSelected(0))
-                    __instance.Active();
-            }
-        }
-
-        [HarmonyPatch(typeof(PrizeMgr))]
-        public static class AutoTrophyCollector
-        {
-            [HarmonyPatch(nameof(PrizeMgr.Start))]
-            [HarmonyPostfix]
-            public static void Postfix(PrizeMgr __instance)
-            {
-                if (instance == null || !instance.Active) return;
-
-                if (instance.selectedItems.IsSelected(1))
+                if (obj != null)
                 {
 #if MELONLOADER || RELEASE_MELON
-                    MelonCoroutines.Start(WaitAndCollectTrophy(__instance));
+                    MelonCoroutines.Start(AutoTrophyCollector.WaitAndCollectTrophy(obj));
 #elif BEPINEX || RELEASE_BEPINEX
-                    MonoBehaviourExtensions.StartCoroutine(__instance, WaitAndCollectTrophy(__instance));
+                    MonoBehaviourExtensions.StartCoroutine(obj, AutoTrophyCollector.WaitAndCollectTrophy(obj));
 #endif
                 }
             }
+        }
+    }
 
-            public static System.Collections.IEnumerator WaitAndCollectTrophy(PrizeMgr trophyInstance)
+
+    [HarmonyPatch(typeof(GardenPrize))]
+    public static class GardenPrizeCollectPatch
+    {
+        [HarmonyPatch(nameof(GardenPrize.Awake))]
+        [HarmonyPostfix]
+        public static void Postfix(GardenPrize __instance)
+        {
+            if (instance == null || !instance.Active) return;
+            if (instance.selectedItems.IsSelected(0))
+                __instance.Active();
+        }
+    }
+
+    [HarmonyPatch(typeof(PrizeMgr))]
+    public static class AutoTrophyCollector
+    {
+        [HarmonyPatch(nameof(PrizeMgr.Start))]
+        [HarmonyPostfix]
+        public static void Postfix(PrizeMgr __instance)
+        {
+            if (instance == null || !instance.Active) return;
+
+            if (instance.selectedItems.IsSelected(1))
             {
-                while (trophyInstance != null && !trophyInstance.isLand)
-                {
-                    yield return new WaitForSeconds(0.1f);
-                }
+#if MELONLOADER || RELEASE_MELON
+                MelonCoroutines.Start(WaitAndCollectTrophy(__instance));
+#elif BEPINEX || RELEASE_BEPINEX
+                MonoBehaviourExtensions.StartCoroutine(__instance, WaitAndCollectTrophy(__instance));
+#endif
+            }
+        }
 
-                if (trophyInstance == null) yield break;
-                if (!trophyInstance.isClicked)
+        public static System.Collections.IEnumerator WaitAndCollectTrophy(PrizeMgr trophyInstance)
+        {
+            while (trophyInstance != null && !trophyInstance.isLand)
+            {
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            if (trophyInstance == null) yield break;
+            if (!trophyInstance.isClicked)
+            {
+                try
                 {
-                    try
-                    {
-                        trophyInstance.Click();
-                        trophyInstance.Clicked();
-                    }
-                    catch (Exception ex)
-                    {
-                        DebugLogger.Error($"[AutoCollect] Failed to auto-click Trophy: {ex}");
-                        trophyInstance.isClicked = true;
-                    }
+                    trophyInstance.Click();
+                    trophyInstance.Clicked();
+                }
+                catch (Exception ex)
+                {
+                    DebugLogger.Error($"[AutoCollect] Failed to auto-click Trophy: {ex}");
+                    trophyInstance.isClicked = true;
                 }
             }
         }

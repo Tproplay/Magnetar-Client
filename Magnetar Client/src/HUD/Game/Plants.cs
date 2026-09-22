@@ -1,85 +1,84 @@
-﻿using Newtonsoft.Json.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.UI.Themes.Magnetar_Default;
-namespace Magnetar_Client.HUDElements
+
+namespace Magnetar_Client.HUDElements;
+
+public class NumberOfPlants : HudElement
 {
-    public class NumberOfPlants : HudElement
+    public NumberOfPlants() : base("Total Plants", HudElement.NewRect(150))
+    { UpdateInterval = 1f; }
+
+    string displayText = "Total Plants: Na";
+    protected override void DrawContent(float width, float height)
     {
-        public NumberOfPlants() : base("Total Plants", HudElement.NewRect(150))
-        { UpdateInterval = 1f; }
-
-        string displayText = "Total Plants: Na";
-        protected override void DrawContent(float width, float height)
-        {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
-
-        public override void OnUpdateActive()
-        {
-            displayText = $"Total Plants: {plantList.Count}";
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    public class NumberOfPlantsSpawned : HudElement
+    public override void OnUpdateActive()
     {
-        public NumberOfPlantsSpawned() : base("Plants Placed", HudElement.NewRect(100))
-        { UpdateInterval = 1f; }
+        displayText = $"Total Plants: {plantList.Count}";
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+}
 
-        int value;
-        string displayText = "Plants Placed: Na";
-        protected override void DrawContent(float width, float height)
-        {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
+public class NumberOfPlantsSpawned : HudElement
+{
+    public NumberOfPlantsSpawned() : base("Plants Placed", HudElement.NewRect(100))
+    { UpdateInterval = 1f; }
 
-        public override void OnUpdateActive()
-        {
-            if (!BoardInstanceIsNull)
-            {
-                value = BoardInstance.boardStatistics.plantsPlanted;
-            }
-
-            displayText = $"Plants Placed: {value}";
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+    int value;
+    string displayText = "Plants Placed: Na";
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    public class NumberOfPlantsKilled : HudElement
+    public override void OnUpdateActive()
     {
-        public NumberOfPlantsKilled() : base("Plant Deaths", HudElement.NewRect(100))
-        { UpdateInterval = 1f; }
-
-        int value;
-        string displayText = "Plant Death: Na";
-        protected override void DrawContent(float width, float height)
+        if (!BoardInstanceIsNull)
         {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+            value = BoardInstance.boardStatistics.plantsPlanted;
         }
 
-        public override void OnUpdateActive()
-        {
-            if (!BoardInstanceIsNull)
-            {
-                value = BoardInstance.boardStatistics.plantsDeath;
-            }
+        displayText = $"Plants Placed: {value}";
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+}
 
-            displayText = $"Plant Death: {value}";
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
+public class NumberOfPlantsKilled : HudElement
+{
+    public NumberOfPlantsKilled() : base("Plant Deaths", HudElement.NewRect(100))
+    { UpdateInterval = 1f; }
+
+    int value;
+    string displayText = "Plant Death: Na";
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+    }
+
+    public override void OnUpdateActive()
+    {
+        if (!BoardInstanceIsNull)
         {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
+            value = BoardInstance.boardStatistics.plantsDeath;
         }
+
+        displayText = $"Plant Death: {value}";
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }

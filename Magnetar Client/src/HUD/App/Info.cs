@@ -1,26 +1,24 @@
 ﻿using UnityEngine;
 using static Magnetar_Client.UI.Themes.Magnetar_Default;
 
-namespace Magnetar_Client.HUDElements
+namespace Magnetar_Client.HUDElements;
+
+
+public class GameVersion : HudElement
 {
+    public GameVersion() : base("Game Name and Version", HudElement.NewRect(90))
+    { }
+    private static string displayText;
 
-    public class GameVersion : HudElement
+    protected override void DrawContent(float width, float height)
     {
-        public GameVersion() : base("Game Name and Version", HudElement.NewRect(90))
-        { }
-        private static string displayText;
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+    }
 
-        protected override void DrawContent(float width, float height)
-        {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
-
-        public override void OnEnable()
-        {
-            displayText = $"Plants Vs. Zombies Fusion v{Application.version}";
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-
+    public override void OnEnable()
+    {
+        displayText = $"Plants Vs. Zombies Fusion v{Application.version}";
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 
 }

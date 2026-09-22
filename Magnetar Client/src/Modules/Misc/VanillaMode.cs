@@ -2,85 +2,84 @@
 using System.Collections.Generic;
 using static Magnetar_Client.Game.AppData;
 
-namespace Magnetar_Client.Modules
+namespace Magnetar_Client.Modules;
+
+public class VanillaMode : Module
 {
-    public class VanillaMode : Module
+    // Mod Info
+    public override string Name { get; set; } = "Vanilla Mode";
+    public override string Description { get; set; } = "Disables all the modules that provide any kind of gameplay" +
+        " advantage until the level is quitted.";
+    public override string SearchHints { get; set; } = "vanillamode vanilla puremode vanilla-mode disablecheats" +
+        " legitmode cleanmode unmodded vanillaexperience fairplay anticheat legitclean vanilla-game baseline" +
+        " disableadvantages fairmode vanilla-rules vanilla-toggle";
+
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
+
+    public override bool Active {
+        get => base.Active;
+        set
+        {
+            if (BoardInstanceIsNull) base.Active = value;
+        }
+    }
+
+    public override bool enableInVanillaMode { get; set; } = true;
+    // Mod Data
+
+    public static VanillaMode instance;
+
+    public VanillaMode()
     {
-        // Mod Info
-        public override string Name { get; set; } = "Vanilla Mode";
-        public override string Description { get; set; } = "Disables all the modules that provide any kind of gameplay" +
-            " advantage until the level is quitted.";
-        public override string SearchHints { get; set; } = "vanillamode vanilla puremode vanilla-mode disablecheats" +
-            " legitmode cleanmode unmodded vanillaexperience fairplay anticheat legitclean vanilla-game baseline" +
-            " disableadvantages fairmode vanilla-rules vanilla-toggle";
+        instance = this;
+    }
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
+    List<Module> _classesDisabled = new();
 
-        public override bool Active {
-            get => base.Active;
-            set
-            {
-                if (BoardInstanceIsNull) base.Active = value;
-            }
-        }
-
-        public override bool enableInVanillaMode { get; set; } = true;
-        // Mod Data
-
-        public static VanillaMode instance;
-
-        public VanillaMode()
+    // Mod Logic
+    public override void OnEnable()
+    {
+        foreach (var module in Core.ModuleManager.Modules)
         {
-            instance = this;
-        }
+            Type moduleType = module.GetType();
 
-        List<Module> _classesDisabled = new List<Module>();
-
-        // Mod Logic
-        public override void OnEnable()
-        {
-            foreach (var module in Core.ModuleManager.Modules)
+            if (!module.enableInVanillaMode && module.Active)
             {
-                Type moduleType = module.GetType();
-
-                if (!module.enableInVanillaMode && module.Active)
-                {
-                    module.Active = false;
-                    module.OnDisable();
-                    _classesDisabled.Add(module);
-                }
-            }
-            if (HUDElements.VanillaMode.instance!=null)
-            { 
-                HUDElements.VanillaMode.instance.VanillaModeEnabled = Active;
-                HUDElements.VanillaMode.instance.UpdateText();
+                module.Active = false;
+                module.OnDisable();
+                _classesDisabled.Add(module);
             }
         }
+        if (HUDElements.VanillaMode.instance!=null)
+        { 
+            HUDElements.VanillaMode.instance.VanillaModeEnabled = Active;
+            HUDElements.VanillaMode.instance.UpdateText();
+        }
+    }
 
-        public override void OnDisable()
+    public override void OnDisable()
+    {
+        if (Active) return;
+
+        foreach (var module in _classesDisabled)
         {
-            if (Active) return;
-
-            foreach (var module in _classesDisabled)
-            {
-                module.Active = true;
-                module.OnEnable();
-            }
-            _classesDisabled.Clear();
-            if (HUDElements.VanillaMode.instance != null)
-            {
-                HUDElements.VanillaMode.instance.VanillaModeEnabled = Active;
-                HUDElements.VanillaMode.instance.UpdateText();
-            }
+            module.Active = true;
+            module.OnEnable();
         }
-
-        public bool IsAllowed(Module module)
+        _classesDisabled.Clear();
+        if (HUDElements.VanillaMode.instance != null)
         {
-            if (!Active) return true;
-
-            return module.enableInVanillaMode;
-
+            HUDElements.VanillaMode.instance.VanillaModeEnabled = Active;
+            HUDElements.VanillaMode.instance.UpdateText();
         }
+    }
+
+    public bool IsAllowed(Module module)
+    {
+        if (!Active) return true;
+
+        return module.enableInVanillaMode;
 
     }
+
 }

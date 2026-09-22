@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using Magnetar_Client.Game;
-using Magnetar_Client.Utils;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -9,125 +8,124 @@ using static Magnetar_Client.Game.AppData;
 using Il2Cpp;
 #endif
 
-namespace Magnetar_Client.Modules
+namespace Magnetar_Client.Modules;
+
+public class FasterZombies : Module
 {
-    public class FasterZombies : Module
+    // Mod Info
+    public override string Name { get; set; } = "Faster Zombies";
+    public override string Description { get; set; } = "Makes the selected zombie(s) faster while the module is active.";
+    public override string SearchHints { get; set; } = "fasterzombies speedzombies zombieboost zombiespeed fastzombies " +
+        "zombiespeedup quickzombies zombievelocity zombierun runzombies fastzombie zombiespeedmod zombiespeeder " +
+        "speedupzombies rapidzombies swiftzombies turbozombies zombieagility zombiequickness zombiealacrity " +
+        "zombiefast zombiesprint zombiesprinting zombieoverdrive zombiemovement fasterzombie speedyzombies " +
+        "fastmovezombies zombiehurry zombierapid";
+
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
+
+    // Mod Data
+
+    public static FasterZombies instance;
+
+    public MultiSelectSetting ZombieSelectedSetting;
+    public FloatSetting theSpeedSetting;
+    public override bool Active { get; set; } = false;
+
+    public static Dictionary<IntPtr, float> originalSpeedData = new();
+
+    public FasterZombies()
     {
-        // Mod Info
-        public override string Name { get; set; } = "Faster Zombies";
-        public override string Description { get; set; } = "Makes the selected zombie(s) faster while the module is active.";
-        public override string SearchHints { get; set; } = "fasterzombies speedzombies zombieboost zombiespeed fastzombies " +
-            "zombiespeedup quickzombies zombievelocity zombierun runzombies fastzombie zombiespeedmod zombiespeeder " +
-            "speedupzombies rapidzombies swiftzombies turbozombies zombieagility zombiequickness zombiealacrity " +
-            "zombiefast zombiesprint zombiesprinting zombieoverdrive zombiemovement fasterzombie speedyzombies " +
-            "fastmovezombies zombiehurry zombierapid";
+        instance = this;
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
+        CreateCategory("General");
 
-        // Mod Data
-
-        public static FasterZombies instance;
-
-        public MultiSelectSetting ZombieSelectedSetting;
-        public FloatSetting theSpeedSetting;
-        public override bool Active { get; set; } = false;
-
-        public static Dictionary<IntPtr, float> originalSpeedData = new Dictionary<IntPtr, float>();
-
-        public FasterZombies()
+        ZombieSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
         {
-            instance = this;
+            CustomNames = TranslatedNames(typeof(ZombieType)),
+            Blacklist = Banned.ZombieTypeBanned,
+        };
 
-            CreateCategory("General");
+        ZombieSelectedSetting.Options.Keys.ToList().ForEach(ZombieSelectedSetting.Select);
+        Settings.Add(ZombieSelectedSetting);
 
-            ZombieSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
+        theSpeedSetting = new FloatSetting("Speed", 0.1f, 10f, 2f,3);
+        Settings.Add(theSpeedSetting);
+
+        EndCategory();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        ZombieSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
+    }
+
+    // Mod Logic
+    public override void OnUpdateActive()
+    {
+        if (BoardInstanceIsNull) return;
+
+        float currentMultiplier = theSpeedSetting.Value;
+        var selectedZombies = ZombieSelectedSetting.SelectedValues;
+
+        foreach (var zombie in GameData.zombieList)
+        {
+            if (zombie == null || zombie.gameObject == null) continue;
+
+            IntPtr ptr = zombie.Pointer;
+            bool isSelected = selectedZombies.Contains((int)zombie.theZombieType);
+
+            bool hasStoredSpeed = originalSpeedData.TryGetValue(ptr, out float origSpeed);
+
+            if (isSelected)
             {
-                CustomNames = TranslatedNames(typeof(ZombieType)),
-                Blacklist = Banned.ZombieTypeBanned,
-            };
-
-            ZombieSelectedSetting.Options.Keys.ToList().ForEach(ZombieSelectedSetting.Select);
-            Settings.Add(ZombieSelectedSetting);
-
-            theSpeedSetting = new FloatSetting("Speed", 0.1f, 10f, 2f,3);
-            Settings.Add(theSpeedSetting);
-
-            EndCategory();
-        }
-
-        public override void OnLanguageChanged()
-        {
-            ZombieSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
-        }
-
-        // Mod Logic
-        public override void OnUpdateActive()
-        {
-            if (BoardInstanceIsNull) return;
-
-            float currentMultiplier = theSpeedSetting.Value;
-            var selectedZombies = ZombieSelectedSetting.SelectedValues;
-
-            foreach (var zombie in GameData.zombieList)
-            {
-                if (zombie == null || zombie.gameObject == null) continue;
-
-                IntPtr ptr = zombie.Pointer;
-                bool isSelected = selectedZombies.Contains((int)zombie.theZombieType);
-
-                bool hasStoredSpeed = originalSpeedData.TryGetValue(ptr, out float origSpeed);
-
-                if (isSelected)
+                if (!hasStoredSpeed)
                 {
-                    if (!hasStoredSpeed)
-                    {
-                        origSpeed = zombie.uniqueSpeed;
-                        originalSpeedData[ptr] = origSpeed;
-                    }
-
-                    float targetSpeed = origSpeed * currentMultiplier;
-
-                    // Only assign if different to prevent redundant memory writing
-                    if (zombie.uniqueSpeed != targetSpeed)
-                    {
-                        zombie.uniqueSpeed = targetSpeed;
-                    }
+                    origSpeed = zombie.uniqueSpeed;
+                    originalSpeedData[ptr] = origSpeed;
                 }
-                else if (hasStoredSpeed)
+
+                float targetSpeed = origSpeed * currentMultiplier;
+
+                // Only assign if different to prevent redundant memory writing
+                if (zombie.uniqueSpeed != targetSpeed)
                 {
-                    // Zombie was deselected in the UI while the module is still active
-                    zombie.uniqueSpeed = origSpeed;
-                    originalSpeedData.Remove(ptr);
+                    zombie.uniqueSpeed = targetSpeed;
                 }
             }
-        }
-
-        public override void OnDisable()
-        {
-            foreach (var zombie in GameData.zombieList)
+            else if (hasStoredSpeed)
             {
-                if (zombie == null) continue;
-
-                IntPtr ptr = zombie.Pointer;
-                if (originalSpeedData.TryGetValue(ptr, out float origSpeed))
-                {
-                    zombie.uniqueSpeed = origSpeed;
-                }
+                // Zombie was deselected in the UI while the module is still active
+                zombie.uniqueSpeed = origSpeed;
+                originalSpeedData.Remove(ptr);
             }
-            originalSpeedData.Clear();
         }
+    }
 
-        [HarmonyPatch(typeof(Zombie))]
-        public static class ZombieCleanupPatch
+    public override void OnDisable()
+    {
+        foreach (var zombie in GameData.zombieList)
         {
-            [HarmonyPatch(nameof(Zombie.Die))]
-            [HarmonyPostfix]
-            public static void DiePostfix(Zombie __instance)
+            if (zombie == null) continue;
+
+            IntPtr ptr = zombie.Pointer;
+            if (originalSpeedData.TryGetValue(ptr, out float origSpeed))
             {
-                if (__instance != null)
-                {
-                    originalSpeedData.Remove(__instance.Pointer);
-                }
+                zombie.uniqueSpeed = origSpeed;
+            }
+        }
+        originalSpeedData.Clear();
+    }
+
+    [HarmonyPatch(typeof(Zombie))]
+    public static class ZombieCleanupPatch
+    {
+        [HarmonyPatch(nameof(Zombie.Die))]
+        [HarmonyPostfix]
+        public static void DiePostfix(Zombie __instance)
+        {
+            if (__instance != null)
+            {
+                originalSpeedData.Remove(__instance.Pointer);
             }
         }
     }

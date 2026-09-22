@@ -1,154 +1,149 @@
-﻿#if MELONLOADER || RELEASE_MELON
-using Il2Cpp;
-#endif
-using Magnetar_Client.Game;
+﻿using Magnetar_Client.Game;
 using UnityEngine;
 using static Magnetar_Client.Game.AppData;
-using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.UI.Themes.Magnetar_Default;
 using static Magnetar_Client.Utils.Maths;
-namespace Magnetar_Client.HUDElements
+
+namespace Magnetar_Client.HUDElements;
+
+public class SunObtained : HudElement
 {
-    public class SunObtained : HudElement
+    public SunObtained() : base("Total Sun Obtained", HudElement.NewRect(100))
+    { UpdateInterval = 0.5f; }
+
+    int value;
+    string displayText = "Sun Obtained: Na";
+
+    protected override void DrawContent(float width, float height)
     {
-        public SunObtained() : base("Total Sun Obtained", HudElement.NewRect(100))
-        { UpdateInterval = 0.5f; }
-
-        int value;
-        string displayText = "Sun Obtained: Na";
-
-        protected override void DrawContent(float width, float height)
-        {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
-        }
-
-        public override void OnUpdateActive()
-        {
-            if (!AppData.BoardInstanceIsNull)
-            {
-                value = AppData.BoardInstance.boardStatistics.sunProduced;
-            }
-
-            displayText = $"Sun Obtained: {FormatInternational(value)}";
-
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    public class SunSpent : HudElement
+    public override void OnUpdateActive()
     {
-        public SunSpent() : base("Total Sun Spent", HudElement.NewRect(100))
-        { UpdateInterval = 0.5f; }
-
-        int value;
-        string displayText = "Sun Spent: Na";
-
-        protected override void DrawContent(float width, float height)
+        if (!AppData.BoardInstanceIsNull)
         {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+            value = AppData.BoardInstance.boardStatistics.sunProduced;
         }
 
-        public override void OnUpdateActive()
-        {
-            if (!AppData.BoardInstanceIsNull)
-            {
-                value = AppData.BoardInstance.boardStatistics.sunConsumed;
-            }
-            displayText = $"Sun Spent: {FormatInternational(value)}";
+        displayText = $"Sun Obtained: {FormatInternational(value)}";
 
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+}
+
+public class SunSpent : HudElement
+{
+    public SunSpent() : base("Total Sun Spent", HudElement.NewRect(100))
+    { UpdateInterval = 0.5f; }
+
+    int value;
+    string displayText = "Sun Spent: Na";
+
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    public class MoneyObtained : HudElement
+    public override void OnUpdateActive()
     {
-        public MoneyObtained() : base("Total Money Obtained", HudElement.NewRect(100))
-        { UpdateInterval = 0.5f; }
-
-        int value;
-        string displayText = "Money Obtained: Na";
-        protected override void DrawContent(float width, float height)
+        if (!AppData.BoardInstanceIsNull)
         {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+            value = AppData.BoardInstance.boardStatistics.sunConsumed;
         }
+        displayText = $"Sun Spent: {FormatInternational(value)}";
 
-        public override void OnUpdateActive()
-        {
-            if (!AppData.BoardInstanceIsNull)
-            {
-                value = AppData.BoardInstance.boardStatistics.moneyEarned;
-            }
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+}
 
-            displayText = $"Money Obtained: {FormatInternational(value)}";
+public class MoneyObtained : HudElement
+{
+    public MoneyObtained() : base("Total Money Obtained", HudElement.NewRect(100))
+    { UpdateInterval = 0.5f; }
 
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+    int value;
+    string displayText = "Money Obtained: Na";
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    public class MoneySpent : HudElement
+    public override void OnUpdateActive()
     {
-        public MoneySpent() : base("Total Money Spent", HudElement.NewRect(100))
-        { UpdateInterval = 0.5f; }
-
-        int value;
-        string displayText = "Money Spent: Na";
-        protected override void DrawContent(float width, float height)
+        if (!AppData.BoardInstanceIsNull)
         {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+            value = AppData.BoardInstance.boardStatistics.moneyEarned;
         }
 
-        public override void OnUpdateActive()
-        {
-            if (!AppData.BoardInstanceIsNull)
-            {
-                value = AppData.BoardInstance.boardStatistics.moneyConsumed;
-            }
+        displayText = $"Money Obtained: {FormatInternational(value)}";
 
-            displayText = $"Money Spent: {FormatInternational(value)}";
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+}
 
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+public class MoneySpent : HudElement
+{
+    public MoneySpent() : base("Total Money Spent", HudElement.NewRect(100))
+    { UpdateInterval = 0.5f; }
+
+    int value;
+    string displayText = "Money Spent: Na";
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    public class FallSunCD : HudElement
+    public override void OnUpdateActive()
     {
-        public FallSunCD() : base("Auto drop/fall sun timer", HudElement.NewRect(180))
-        { UpdateInterval = 0.5f; }
-
-        string displayText = "Auto Sun: Na";
-        protected override void DrawContent(float width, float height)
+        if (!AppData.BoardInstanceIsNull)
         {
-            GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+            value = AppData.BoardInstance.boardStatistics.moneyConsumed;
         }
 
-        public override void OnUpdateActive()
-        {
-            if (!BoardInstanceIsNull)
-                displayText = $"Auto Sun: {FormatTime((int)BoardInstance.theFallingSunCountDown)}";
-            else
-                displayText = "Auto Sun: 0s";
-            AdjustWidthToText(displayText, HUDElementStyle, 10);
-        }
-        public override void OnEnable()
-        {
-            AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        }
+        displayText = $"Money Spent: {FormatInternational(value)}";
+
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+}
+
+public class FallSunCD : HudElement
+{
+    public FallSunCD() : base("Auto drop/fall sun timer", HudElement.NewRect(180))
+    { UpdateInterval = 0.5f; }
+
+    string displayText = "Auto Sun: Na";
+    protected override void DrawContent(float width, float height)
+    {
+        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
+    public override void OnUpdateActive()
+    {
+        if (!BoardInstanceIsNull)
+            displayText = $"Auto Sun: {FormatTime((int)BoardInstance.theFallingSunCountDown)}";
+        else
+            displayText = "Auto Sun: 0s";
+        AdjustWidthToText(displayText, HUDElementStyle, 10);
+    }
+    public override void OnEnable()
+    {
+        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
 }

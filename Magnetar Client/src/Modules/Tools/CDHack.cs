@@ -1,417 +1,414 @@
 ﻿using HarmonyLib;
 using System.Linq;
 using System.Collections.Generic;
-using Magnetar_Client.Utils;
 using static Magnetar_Client.Game.AppData;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
 
-namespace Magnetar_Client.Modules
+namespace Magnetar_Client.Modules;
+
+public class CustomCDGlove : Module
 {
-    public class CustomCDGlove : Module
+    // Mod Info
+    public override string Name { get; set; } = "No Glove CD";
+    public override string Description { get; set; } = "Modifies the Ingame Glove's Cooldown.";
+    public override string SearchHints { get; set; } = "noglovecd glovecooldown customglovecd " +
+        "glovecd zeroglovecd noglovecoolndown glovecooldownreset fastglove instantglove glovebuff " +
+        "glovecdmod glovecdchanger glovecdremover glovecolldown glovecooldon glovecooldwn glovcd " +
+        "glovecooldoun glovecdtimer glovecdreducion glovecooldownreduction glovefast gloveready gloveunlimited " +
+        "gloveinfinite gloveinterval gloveperiod glovespeed glovespam glovefrequency";
+
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
+
+    // Mod Data
+    public static CustomCDGlove instance;
+
+    public FloatSetting CustomCDSetting;
+
+    private static float originalCD = -1f;
+
+    public BoolSetting preserveOriginal;
+
+    public BoolSetting resetCDonEnable;
+
+    public override bool Active { get; set; } = false;
+
+    public CustomCDGlove()
     {
-        // Mod Info
-        public override string Name { get; set; } = "No Glove CD";
-        public override string Description { get; set; } = "Modifies the Ingame Glove's Cooldown.";
-        public override string SearchHints { get; set; } = "noglovecd glovecooldown customglovecd " +
-            "glovecd zeroglovecd noglovecoolndown glovecooldownreset fastglove instantglove glovebuff " +
-            "glovecdmod glovecdchanger glovecdremover glovecolldown glovecooldon glovecooldwn glovcd " +
-            "glovecooldoun glovecdtimer glovecdreducion glovecooldownreduction glovefast gloveready gloveunlimited " +
-            "gloveinfinite gloveinterval gloveperiod glovespeed glovespam glovefrequency";
+        CreateCategory("General");
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
+        CustomCDSetting = new FloatSetting("Custom Glove Cooldown", 0, 60, 0, 3);
+        AddSettings(CustomCDSetting);
 
-        // Mod Data
-        public static CustomCDGlove instance;
+        EndCategory();
 
-        public FloatSetting CustomCDSetting;
+        CreateCategory("Extra");
 
-        private static float originalCD = -1f;
+        preserveOriginal = new BoolSetting("Preserve Original", true);
+        resetCDonEnable = new BoolSetting("Reset CD on Enable", false);
 
-        public BoolSetting preserveOriginal;
+        AddSettings(preserveOriginal, resetCDonEnable);
+        EndCategory();
+    }
 
-        public BoolSetting resetCDonEnable;
-
-        public override bool Active { get; set; } = false;
-
-        public CustomCDGlove()
+    // Mod Logic
+    public override void OnUpdateActive()
+    {
+        if (Glove.Instance == null) return;
+        if (originalCD < 0)
         {
-            CreateCategory("General");
-
-            CustomCDSetting = new FloatSetting("Custom Glove Cooldown", 0, 60, 0, 3);
-            AddSettings(CustomCDSetting);
-
-            EndCategory();
-
-            CreateCategory("Extra");
-
-            preserveOriginal = new BoolSetting("Preserve Original", true);
-            resetCDonEnable = new BoolSetting("Reset CD on Enable", false);
-
-            AddSettings(preserveOriginal, resetCDonEnable);
-            EndCategory();
+            originalCD = Glove.Instance.coolSpeed;
         }
+        Glove.Instance.fullCD = CustomCDSetting.Value;
+    }
 
-        // Mod Logic
-        public override void OnUpdateActive()
+    public override void OnDisable()
+    {
+        originalCD = -1f;
+        if (Glove.Instance == null) return;
+        if (originalCD >= 0 && preserveOriginal.Value)
         {
-            if (Glove.Instance == null) return;
-            if (originalCD < 0)
-            {
-                originalCD = Glove.Instance.coolSpeed;
-            }
-            Glove.Instance.fullCD = CustomCDSetting.Value;
-        }
-
-        public override void OnDisable()
-        {
-            originalCD = -1f;
-            if (Glove.Instance == null) return;
-            if (originalCD >= 0 && preserveOriginal.Value)
-            {
-                Glove.Instance.fullCD = originalCD;
-            }
-        }
-
-        public override void OnEnable()
-        {
-            if (Glove.Instance == null) return;
-            if (resetCDonEnable.Value)
-            {
-                Glove.Instance.CD = Glove.Instance.fullCD;
-            }
+            Glove.Instance.fullCD = originalCD;
         }
     }
 
-    public class CustomCDHammer : Module
+    public override void OnEnable()
     {
-        // Mod Info
-        public override string Name { get; set; } = "No Hammer CD";
-        public override string Description { get; set; } = "Modifies the Ingame Hammer's Cooldown.";
-        public override string SearchHints { get; set; } = "nohammercd hammercooldown customhammercd hammercd" +
-            " zerohammercd nohammercoolndown hammercooldownreset fasthammer instanthammer hammerbuff hammercdmod " +
-            "hammercdchanger hammercdremover hammercolldown hammercooldon hammercooldwn hamrcd hammercooldoun " +
-            "hammercdtimer hammercdreducion hammercooldownreduction hammerfast hammerready hammerunlimited hammerinfinite " +
-            "hammerinterval hammerperiod hammerspeed hammerspam hammerfrequency";
-
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
-
-        // Mod Data
-
-        public static CustomCDHammer instance;
-
-        public FloatSetting CustomCD;
-
-        private static float originalCD = -1f;
-
-        public BoolSetting preserveOriginal;
-
-        public BoolSetting resetCDonEnable;
-
-        public override bool Active { get; set; } = false;
-
-        public CustomCDHammer()
+        if (Glove.Instance == null) return;
+        if (resetCDonEnable.Value)
         {
-            instance = this;
-
-            CreateCategory("General");
-
-            CustomCD = new FloatSetting("Custom Hammer Cooldown", 0, 60, 0 ,3);
-            AddSettings(CustomCD);
-
-            EndCategory();
-
-            CreateCategory("Extra");
-
-            preserveOriginal = new BoolSetting("Preserve Original", true);
-            resetCDonEnable = new BoolSetting("Reset CD on Enable", false);
-
-            AddSettings(preserveOriginal, resetCDonEnable);
-            EndCategory();
-
-        }
-
-        // Mod Logic
-
-        public override void OnUpdateActive()
-        {
-            if (Hammer.Instance == null)
-            {
-                originalCD = -1f;
-                return;
-            }
-
-            // Save Original CD
-            if (originalCD == -1f) originalCD = Hammer.Instance.fullCD;
-
-            // BugFix: If the player has a higher CD than the one we set, we set it to our custom CD so
-            // it doesn't take longer than intended to use the hammer again. This can happen if the player
-            // has a CD increasing item and they enable this mod while the CD is still active.
-            if (Hammer.Instance.CD > CustomCD.Value)
-            {
-                Hammer.Instance.CD = CustomCD.Value;
-                Hammer.Instance.CDUpdate();
-            }
-
-            Hammer.Instance.fullCD = CustomCD.Value;
-
-
-        }
-
-        public override void OnDisable()
-        {
-
-            if (Hammer.Instance == null) return;
-
-            if (originalCD >= 0 && preserveOriginal.Value)
-            {
-                Hammer.Instance.fullCD = originalCD;
-            }
-            originalCD = -1f;
-        }
-
-        public override void OnEnable()
-        {
-            if (Hammer.Instance == null) return;
-            if (resetCDonEnable.Value)
-            {
-                Hammer.Instance.CD = CustomCD.Value;
-            }
+            Glove.Instance.CD = Glove.Instance.fullCD;
         }
     }
+}
 
-    public class CustomCDWheel : Module
+public class CustomCDHammer : Module
+{
+    // Mod Info
+    public override string Name { get; set; } = "No Hammer CD";
+    public override string Description { get; set; } = "Modifies the Ingame Hammer's Cooldown.";
+    public override string SearchHints { get; set; } = "nohammercd hammercooldown customhammercd hammercd" +
+        " zerohammercd nohammercoolndown hammercooldownreset fasthammer instanthammer hammerbuff hammercdmod " +
+        "hammercdchanger hammercdremover hammercolldown hammercooldon hammercooldwn hamrcd hammercooldoun " +
+        "hammercdtimer hammercdreducion hammercooldownreduction hammerfast hammerready hammerunlimited hammerinfinite " +
+        "hammerinterval hammerperiod hammerspeed hammerspam hammerfrequency";
+
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
+
+    // Mod Data
+
+    public static CustomCDHammer instance;
+
+    public FloatSetting CustomCD;
+
+    private static float originalCD = -1f;
+
+    public BoolSetting preserveOriginal;
+
+    public BoolSetting resetCDonEnable;
+
+    public override bool Active { get; set; } = false;
+
+    public CustomCDHammer()
     {
-        // Mod Info
-        public override string Name { get; set; } = "No Wheel Barrow CD";
-        public override string Description { get; set; } = "Modifies the Ingame Wheel Barrow's Cooldown.";
-        public override string SearchHints { get; set; } = "nowheelbarrowcd wheelbarrowcooldown wheelbarrowcd wheelbarrowinstant" +
-            " instantwheelbarrow cooldownhack cooldownremove wheelbarrow-cooldown wheelbarrowfix cd-remove wheelbarrowspeed " +
-            "wheelbarrowcooldownfix wheelbarrowinstantcooldown wheelbarrownocd nocd wheelbarrowmod wheelbarrowutility";
+        instance = this;
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
+        CreateCategory("General");
 
-        // Mod Data
+        CustomCD = new FloatSetting("Custom Hammer Cooldown", 0, 60, 0 ,3);
+        AddSettings(CustomCD);
 
-        public static CustomCDWheel instance;
+        EndCategory();
 
-        public FloatSetting CustomCD;
+        CreateCategory("Extra");
 
-        private static float originalCD = -1f;
+        preserveOriginal = new BoolSetting("Preserve Original", true);
+        resetCDonEnable = new BoolSetting("Reset CD on Enable", false);
 
-        public BoolSetting preserveOriginal;
+        AddSettings(preserveOriginal, resetCDonEnable);
+        EndCategory();
 
-        public BoolSetting resetCDonEnable;
-
-        public override bool Active { get; set; } = false;
-
-        public CustomCDWheel()
-        {
-            instance = this;
-
-            CreateCategory("General");
-
-            CustomCD = new FloatSetting("Custom Wheel Barrow Cooldown", 0, 60, 0, 3);
-
-            AddSettings(CustomCD);
-            EndCategory();
-
-            CreateCategory("Extra");
-
-            preserveOriginal = new BoolSetting("Preserve Original", true);
-            resetCDonEnable = new BoolSetting("Reset CD on Enable", false);
-
-            AddSettings(preserveOriginal, resetCDonEnable);
-            EndCategory();
-
-        }
-
-        // Mod Logic
-
-        public override void OnUpdateActive()
-        {
-            if (WheelInstance==null)
-            {
-                originalCD = -1f;
-                return;
-            }
-            
-
-            // Save Original CD
-            if (originalCD == -1f) originalCD = WheelInstance.fullCD;
-
-            if (WheelInstance.CD > CustomCD.Value)
-            {
-                WheelInstance.CD = CustomCD.Value;
-                WheelInstance.CDUpdate();
-            }
-
-            WheelInstance.fullCD = CustomCD.Value;
-
-
-        }
-
-        public override void OnDisable()
-        {
-
-            if (WheelInstance == null) return;
-
-            if (originalCD >= 0 && preserveOriginal.Value)
-            {
-                WheelInstance.fullCD = originalCD;
-            }
-            originalCD = -1f;
-        }
-
-        public override void OnEnable()
-        {
-            if (WheelInstance == null) return;
-            if (resetCDonEnable.Value)
-            {
-                WheelInstance.CD = CustomCD.Value;
-            }
-        }
     }
 
-    public class CustomCDCards : Module
+    // Mod Logic
+
+    public override void OnUpdateActive()
     {
-        // Mod Info
-        public override string Name { get; set; } = "No Cards CD";
-        public override string Description { get; set; } = "Modifies the Ingame SeedSlot Cards's Cooldown.";
-        public override string SearchHints { get; set; } = "nocardscd cardscooldown customcardscd cardscd " +
-            "zerocardscd nocardcoolndown cardcooldownreset fastcards instantcards cardbuff cardcdmod cardcdchanger " +
-            "cardcdremover cardcolldown cardcooldon cardcooldwn cardcd cardcooldoun cardcdtimer cardcdreducion " +
-            "cardcooldownreduction cardfast cardready cardunlimited cardinfinite cardinterval cardperiod cardspeed " +
-            "cardspam cardfrequency";
-
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
-
-        // Mod Data
-
-        public static CustomCDCards instance;
-
-        public FloatSetting CustomCDSetting;
-
-        public MultiSelectSetting selectedSeeds;
-        public MultiSelectSetting selectedSeeds_dup;
-
-        public CustomCDCards()
+        if (Hammer.Instance == null)
         {
-            instance = this;
-
-            CreateCategory("General");
-
-            selectedSeeds = new MultiSelectSetting(
-                "Cards", typeof(PlantType))
-            {
-                Blacklist = Banned.PlantTypeBanned,
-                CustomNames = TranslatedNames(typeof(PlantType))
-            };
-
-            selectedSeeds.Options.Keys.ToList().ForEach(selectedSeeds.Select);
-
-            selectedSeeds_dup = new MultiSelectSetting(
-                "Duplicate Cards", typeof(PlantType))
-            {
-                Blacklist = Banned.PlantTypeBanned,
-                CustomNames = TranslatedNames(typeof(PlantType))
-            };
-
-            selectedSeeds_dup.Options.Keys.ToList().ForEach(selectedSeeds_dup.Select);
-
-            CustomCDSetting = new FloatSetting("Custom CD Multiplier", 0.001f, 10, 1_000_000,3, 0.001f);
-
-            AddSettings(selectedSeeds,selectedSeeds_dup,CustomCDSetting);
-            EndCategory();
-
+            originalCD = -1f;
+            return;
         }
 
-        // Mod Logics
+        // Save Original CD
+        if (originalCD == -1f) originalCD = Hammer.Instance.fullCD;
 
-        private Dictionary<CardUI,float> originalCD = new Dictionary<CardUI,float>();
-        public override void OnUpdateActive()
+        // BugFix: If the player has a higher CD than the one we set, we set it to our custom CD so
+        // it doesn't take longer than intended to use the hammer again. This can happen if the player
+        // has a CD increasing item and they enable this mod while the CD is still active.
+        if (Hammer.Instance.CD > CustomCD.Value)
         {
-            if (BoardInstanceIsNull || InGameUI.Instance == null || InGameUI.Instance.Cards.Count == 0)
-            {
-                originalCD.Clear();
-                return;
-            }
-
-            float customCD = CustomCDSetting.Value;
-
-            foreach(CardUI card in InGameUI.Instance.Cards)
-            {
-                if (card == null) continue;
-
-                // Save original cd
-                if (!originalCD.ContainsKey(card))
-                {
-                    originalCD[card] = card.fullCD;
-
-                }
-
-                // If card is original
-                if (!card.isExtra)
-                {
-                    if (!selectedSeeds.IsSelected((int)card.thePlantType)) continue;
-
-                    if (!selectedSeeds.IsSelected((int)card.thePlantType) &&
-                        originalCD.ContainsKey(card))
-                    {
-                        card.fullCD = originalCD[card];
-                        originalCD.Remove(card);
-                    }
-                }
-
-                // If card is duplicate
-                if (card.isExtra)
-                {
-                    if (!selectedSeeds_dup.IsSelected((int)card.thePlantType)) continue;
-
-                    if (!selectedSeeds_dup.IsSelected((int)card.thePlantType) &&
-                        originalCD.ContainsKey(card))
-                    {
-                        card.fullCD = originalCD[card];
-                        originalCD.Remove(card);
-                    }
-                }
-              
-
-                if (card.fullCD != originalCD[card] / customCD)
-                {
-                    card.fullCD = originalCD[card] / customCD;
-                }
-
-            }
-
+            Hammer.Instance.CD = CustomCD.Value;
+            Hammer.Instance.CDUpdate();
         }
 
-        public override void OnDisable()
-        {
-            foreach(var card in originalCD)
-            {
-                card.Key.fullCD = card.Value;
-            }
+        Hammer.Instance.fullCD = CustomCD.Value;
 
+
+    }
+
+    public override void OnDisable()
+    {
+
+        if (Hammer.Instance == null) return;
+
+        if (originalCD >= 0 && preserveOriginal.Value)
+        {
+            Hammer.Instance.fullCD = originalCD;
+        }
+        originalCD = -1f;
+    }
+
+    public override void OnEnable()
+    {
+        if (Hammer.Instance == null) return;
+        if (resetCDonEnable.Value)
+        {
+            Hammer.Instance.CD = CustomCD.Value;
+        }
+    }
+}
+
+public class CustomCDWheel : Module
+{
+    // Mod Info
+    public override string Name { get; set; } = "No Wheel Barrow CD";
+    public override string Description { get; set; } = "Modifies the Ingame Wheel Barrow's Cooldown.";
+    public override string SearchHints { get; set; } = "nowheelbarrowcd wheelbarrowcooldown wheelbarrowcd wheelbarrowinstant" +
+        " instantwheelbarrow cooldownhack cooldownremove wheelbarrow-cooldown wheelbarrowfix cd-remove wheelbarrowspeed " +
+        "wheelbarrowcooldownfix wheelbarrowinstantcooldown wheelbarrownocd nocd wheelbarrowmod wheelbarrowutility";
+
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
+
+    // Mod Data
+
+    public static CustomCDWheel instance;
+
+    public FloatSetting CustomCD;
+
+    private static float originalCD = -1f;
+
+    public BoolSetting preserveOriginal;
+
+    public BoolSetting resetCDonEnable;
+
+    public override bool Active { get; set; } = false;
+
+    public CustomCDWheel()
+    {
+        instance = this;
+
+        CreateCategory("General");
+
+        CustomCD = new FloatSetting("Custom Wheel Barrow Cooldown", 0, 60, 0, 3);
+
+        AddSettings(CustomCD);
+        EndCategory();
+
+        CreateCategory("Extra");
+
+        preserveOriginal = new BoolSetting("Preserve Original", true);
+        resetCDonEnable = new BoolSetting("Reset CD on Enable", false);
+
+        AddSettings(preserveOriginal, resetCDonEnable);
+        EndCategory();
+
+    }
+
+    // Mod Logic
+
+    public override void OnUpdateActive()
+    {
+        if (WheelInstance==null)
+        {
+            originalCD = -1f;
+            return;
+        }
+        
+
+        // Save Original CD
+        if (originalCD == -1f) originalCD = WheelInstance.fullCD;
+
+        if (WheelInstance.CD > CustomCD.Value)
+        {
+            WheelInstance.CD = CustomCD.Value;
+            WheelInstance.CDUpdate();
+        }
+
+        WheelInstance.fullCD = CustomCD.Value;
+
+
+    }
+
+    public override void OnDisable()
+    {
+
+        if (WheelInstance == null) return;
+
+        if (originalCD >= 0 && preserveOriginal.Value)
+        {
+            WheelInstance.fullCD = originalCD;
+        }
+        originalCD = -1f;
+    }
+
+    public override void OnEnable()
+    {
+        if (WheelInstance == null) return;
+        if (resetCDonEnable.Value)
+        {
+            WheelInstance.CD = CustomCD.Value;
+        }
+    }
+}
+
+public class CustomCDCards : Module
+{
+    // Mod Info
+    public override string Name { get; set; } = "No Cards CD";
+    public override string Description { get; set; } = "Modifies the Ingame SeedSlot Cards's Cooldown.";
+    public override string SearchHints { get; set; } = "nocardscd cardscooldown customcardscd cardscd " +
+        "zerocardscd nocardcoolndown cardcooldownreset fastcards instantcards cardbuff cardcdmod cardcdchanger " +
+        "cardcdremover cardcolldown cardcooldon cardcooldwn cardcd cardcooldoun cardcdtimer cardcdreducion " +
+        "cardcooldownreduction cardfast cardready cardunlimited cardinfinite cardinterval cardperiod cardspeed " +
+        "cardspam cardfrequency";
+
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
+
+    // Mod Data
+
+    public static CustomCDCards instance;
+
+    public FloatSetting CustomCDSetting;
+
+    public MultiSelectSetting selectedSeeds;
+    public MultiSelectSetting selectedSeeds_dup;
+
+    public CustomCDCards()
+    {
+        instance = this;
+
+        CreateCategory("General");
+
+        selectedSeeds = new MultiSelectSetting(
+            "Cards", typeof(PlantType))
+        {
+            Blacklist = Banned.PlantTypeBanned,
+            CustomNames = TranslatedNames(typeof(PlantType))
+        };
+
+        selectedSeeds.Options.Keys.ToList().ForEach(selectedSeeds.Select);
+
+        selectedSeeds_dup = new MultiSelectSetting(
+            "Duplicate Cards", typeof(PlantType))
+        {
+            Blacklist = Banned.PlantTypeBanned,
+            CustomNames = TranslatedNames(typeof(PlantType))
+        };
+
+        selectedSeeds_dup.Options.Keys.ToList().ForEach(selectedSeeds_dup.Select);
+
+        CustomCDSetting = new FloatSetting("Custom CD Multiplier", 0.001f, 10, 1_000_000,3, 0.001f);
+
+        AddSettings(selectedSeeds,selectedSeeds_dup,CustomCDSetting);
+        EndCategory();
+
+    }
+
+    // Mod Logics
+
+    private Dictionary<CardUI,float> originalCD = new();
+    public override void OnUpdateActive()
+    {
+        if (BoardInstanceIsNull || InGameUI.Instance == null || InGameUI.Instance.Cards.Count == 0)
+        {
             originalCD.Clear();
+            return;
         }
 
+        float customCD = CustomCDSetting.Value;
 
-        [HarmonyPatch(typeof(CardUI))]
-        public static class CardUIPatch
+        foreach(CardUI card in InGameUI.Instance.Cards)
         {
-            [HarmonyPatch(nameof(CardUI.CDUpdate))]
-            [HarmonyPostfix]
-            public static void CCDUpdatePostfix(CardUI __instance)
+            if (card == null) continue;
+
+            // Save original cd
+            if (!originalCD.ContainsKey(card))
             {
-                if (__instance.CD > __instance.fullCD)
+                originalCD[card] = card.fullCD;
+
+            }
+
+            // If card is original
+            if (!card.isExtra)
+            {
+                if (!selectedSeeds.IsSelected((int)card.thePlantType)) continue;
+
+                if (!selectedSeeds.IsSelected((int)card.thePlantType) &&
+                    originalCD.ContainsKey(card))
                 {
-                    __instance.CD = __instance.fullCD;
+                    card.fullCD = originalCD[card];
+                    originalCD.Remove(card);
                 }
             }
+
+            // If card is duplicate
+            if (card.isExtra)
+            {
+                if (!selectedSeeds_dup.IsSelected((int)card.thePlantType)) continue;
+
+                if (!selectedSeeds_dup.IsSelected((int)card.thePlantType) &&
+                    originalCD.ContainsKey(card))
+                {
+                    card.fullCD = originalCD[card];
+                    originalCD.Remove(card);
+                }
+            }
+          
+
+            if (card.fullCD != originalCD[card] / customCD)
+            {
+                card.fullCD = originalCD[card] / customCD;
+            }
+
         }
 
+    }
+
+    public override void OnDisable()
+    {
+        foreach(var card in originalCD)
+        {
+            card.Key.fullCD = card.Value;
+        }
+
+        originalCD.Clear();
+    }
+
+
+    [HarmonyPatch(typeof(CardUI))]
+    public static class CardUIPatch
+    {
+        [HarmonyPatch(nameof(CardUI.CDUpdate))]
+        [HarmonyPostfix]
+        public static void CCDUpdatePostfix(CardUI __instance)
+        {
+            if (__instance.CD > __instance.fullCD)
+            {
+                __instance.CD = __instance.fullCD;
+            }
+        }
     }
 
 }

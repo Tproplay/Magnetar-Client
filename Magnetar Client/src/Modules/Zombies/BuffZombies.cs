@@ -1,5 +1,4 @@
 ﻿using Magnetar_Client.Game;
-using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -8,132 +7,131 @@ using static Magnetar_Client.Game.AppData;
 using Il2Cpp;
 #endif
 
-namespace Magnetar_Client.Modules
+namespace Magnetar_Client.Modules;
+
+public class BuffZombies : Module
 {
-    public class BuffZombies : Module
+    // Mod Info
+    public override string Name { get; set; } = "Buff Zombies";
+    public override string Description { get; set; } = "Buffs the selected zombie(s) while the module is active.";
+    public override string SearchHints { get; set; } = "buffzombies buffzombie bufzombie buffingzombies hpbuff healthboost " +
+        "strongzombies zombiehp morehealth tankyzombies zombiefy buffzombs biffzombies buffzombes hpup extrahealth " +
+        "buffedzombs healthup zombieboost buffmod buffactive buff-zombies hpplus zombiefying zombiebiff buffzom biffzom " +
+        "hpp boost buffzombiez";
+
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
+
+    // Mod Data
+
+    public static BuffZombies instance;
+
+    public MultiSelectSetting ZombieSelectedSetting;
+
+    public FloatSetting HpMultiplierSettig;
+
+    public override bool Active { get; set; } = false;
+    public BuffZombies()
     {
-        // Mod Info
-        public override string Name { get; set; } = "Buff Zombies";
-        public override string Description { get; set; } = "Buffs the selected zombie(s) while the module is active.";
-        public override string SearchHints { get; set; } = "buffzombies buffzombie bufzombie buffingzombies hpbuff healthboost " +
-            "strongzombies zombiehp morehealth tankyzombies zombiefy buffzombs biffzombies buffzombes hpup extrahealth " +
-            "buffedzombs healthup zombieboost buffmod buffactive buff-zombies hpplus zombiefying zombiebiff buffzom biffzom " +
-            "hpp boost buffzombiez";
+        instance = this;
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
+        CreateCategory("General");
 
-        // Mod Data
-
-        public static BuffZombies instance;
-
-        public MultiSelectSetting ZombieSelectedSetting;
-
-        public FloatSetting HpMultiplierSettig;
-
-        public override bool Active { get; set; } = false;
-        public BuffZombies()
+        ZombieSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
         {
-            instance = this;
+            CustomNames = TranslatedNames(typeof(ZombieType)),
+            Blacklist = Banned.ZombieTypeBanned,
 
-            CreateCategory("General");
+        };
 
-            ZombieSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
+        ZombieSelectedSetting.Options.Keys.ToList().ForEach(ZombieSelectedSetting.Select);
+
+        Settings.Add(ZombieSelectedSetting);
+
+        HpMultiplierSettig = new FloatSetting("Hp Multiply", 0.1f, 100, 2, 3);
+        Settings.Add(HpMultiplierSettig);
+
+        EndCategory();
+
+    }
+
+    public override void OnLanguageChanged()
+    {
+        ZombieSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
+    }
+
+    // Tracks the original max healths: [0] = Base, [1] = Armor1, [2] = Armor2
+    public static Dictionary<Zombie, List<long>> originalHpData = new();
+
+    // Mod Logic
+    public override void OnUpdateActive()
+    {
+        if (BoardInstanceIsNull) return;
+
+        float multiplier = HpMultiplierSettig.Value;
+
+        foreach (var zombie in GameData.zombieList)
+        {
+            if (zombie == null) continue;
+
+            // Only buff the zombie if it's selected in the UI
+            if (ZombieSelectedSetting.IsSelected((int)zombie.theZombieType))
             {
-                CustomNames = TranslatedNames(typeof(ZombieType)),
-                Blacklist = Banned.ZombieTypeBanned,
-
-            };
-
-            ZombieSelectedSetting.Options.Keys.ToList().ForEach(ZombieSelectedSetting.Select);
-
-            Settings.Add(ZombieSelectedSetting);
-
-            HpMultiplierSettig = new FloatSetting("Hp Multiply", 0.1f, 100, 2, 3);
-            Settings.Add(HpMultiplierSettig);
-
-            EndCategory();
-
-        }
-
-        public override void OnLanguageChanged()
-        {
-            ZombieSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
-        }
-
-        // Tracks the original max healths: [0] = Base, [1] = Armor1, [2] = Armor2
-        public static Dictionary<Zombie, List<long>> originalHpData = new Dictionary<Zombie, List<long>>();
-
-        // Mod Logic
-        public override void OnUpdateActive()
-        {
-            if (BoardInstanceIsNull) return;
-
-            float multiplier = HpMultiplierSettig.Value;
-
-            foreach (var zombie in GameData.zombieList)
-            {
-                if (zombie == null) continue;
-
-                // Only buff the zombie if it's selected in the UI
-                if (ZombieSelectedSetting.IsSelected((int)zombie.theZombieType))
+                if (!originalHpData.ContainsKey(zombie))
                 {
-                    if (!originalHpData.ContainsKey(zombie))
-                    {
-                        // 1. Store the original maximums
-                        originalHpData[zombie] = new List<long> {
-                            zombie.theMaxHealth,
-                            zombie.theFirstArmorMaxHealth,
-                            zombie.theSecondArmorMaxHealth
-                        };
+                    // 1. Store the original maximums
+                    originalHpData[zombie] = new List<long> {
+                        zombie.theMaxHealth,
+                        zombie.theFirstArmorMaxHealth,
+                        zombie.theSecondArmorMaxHealth
+                    };
 
-                    // 2. Multiply Max Healths
-                    zombie.theMaxHealth = Mathf.RoundToInt(zombie.theMaxHealth * multiplier);
-                    zombie.theFirstArmorMaxHealth = Mathf.RoundToInt(zombie.theFirstArmorMaxHealth * multiplier);
-                    zombie.theSecondArmorMaxHealth = Mathf.RoundToInt(zombie.theSecondArmorMaxHealth * multiplier);
+                // 2. Multiply Max Healths
+                zombie.theMaxHealth = Mathf.RoundToInt(zombie.theMaxHealth * multiplier);
+                zombie.theFirstArmorMaxHealth = Mathf.RoundToInt(zombie.theFirstArmorMaxHealth * multiplier);
+                zombie.theSecondArmorMaxHealth = Mathf.RoundToInt(zombie.theSecondArmorMaxHealth * multiplier);
 
-                    // 3. Multiply Current Healths
-                    zombie.theHealth = Mathf.RoundToInt(zombie.theHealth * multiplier);
-                    zombie.theFirstArmorHealth = Mathf.RoundToInt(zombie.theFirstArmorHealth * multiplier);
-                    zombie.theSecondArmorHealth = Mathf.RoundToInt(zombie.theSecondArmorHealth * multiplier);
+                // 3. Multiply Current Healths
+                zombie.theHealth = Mathf.RoundToInt(zombie.theHealth * multiplier);
+                zombie.theFirstArmorHealth = Mathf.RoundToInt(zombie.theFirstArmorHealth * multiplier);
+                zombie.theSecondArmorHealth = Mathf.RoundToInt(zombie.theSecondArmorHealth * multiplier);
 
-                    zombie.UpdateHealthText();
-                    }
+                zombie.UpdateHealthText();
                 }
             }
         }
+    }
 
-        public override void OnDisable()
+    public override void OnDisable()
+    {
+        foreach (var zombie in GameData.zombieList)
         {
-            foreach (var zombie in GameData.zombieList)
+            if (zombie == null) continue;
+
+            if (originalHpData.ContainsKey(zombie))
             {
-                if (zombie == null) continue;
+                List<long> origData = originalHpData[zombie];
+                long origMaxHp = origData[0];
+                long origFirstArmorMax = origData[1];
+                long origSecondArmorMax = origData[2];
 
-                if (originalHpData.ContainsKey(zombie))
-                {
-                    List<long> origData = originalHpData[zombie];
-                    long origMaxHp = origData[0];
-                    long origFirstArmorMax = origData[1];
-                    long origSecondArmorMax = origData[2];
+                // 1. Calculate current health ratios (safeguard against divide by zero for unarmored zombies)
+                float hpRatio = zombie.theMaxHealth > 0 ? (float)zombie.theHealth / zombie.theMaxHealth : 0f;
+                float armor1Ratio = zombie.theFirstArmorMaxHealth > 0 ? (float)zombie.theFirstArmorHealth / zombie.theFirstArmorMaxHealth : 0f;
+                float armor2Ratio = zombie.theSecondArmorMaxHealth > 0 ? (float)zombie.theSecondArmorHealth / zombie.theSecondArmorMaxHealth : 0f;
 
-                    // 1. Calculate current health ratios (safeguard against divide by zero for unarmored zombies)
-                    float hpRatio = zombie.theMaxHealth > 0 ? (float)zombie.theHealth / zombie.theMaxHealth : 0f;
-                    float armor1Ratio = zombie.theFirstArmorMaxHealth > 0 ? (float)zombie.theFirstArmorHealth / zombie.theFirstArmorMaxHealth : 0f;
-                    float armor2Ratio = zombie.theSecondArmorMaxHealth > 0 ? (float)zombie.theSecondArmorHealth / zombie.theSecondArmorMaxHealth : 0f;
+                // 2. Restore Original Max Healths
+                zombie.theMaxHealth = origMaxHp;
+                zombie.theFirstArmorMaxHealth = (int)origFirstArmorMax;
+                zombie.theSecondArmorMaxHealth = (int)origSecondArmorMax;
 
-                    // 2. Restore Original Max Healths
-                    zombie.theMaxHealth = origMaxHp;
-                    zombie.theFirstArmorMaxHealth = (int)origFirstArmorMax;
-                    zombie.theSecondArmorMaxHealth = (int)origSecondArmorMax;
-
-                    // 3. Scale Current Healths down using the preserved ratios
-                    zombie.theHealth = Mathf.RoundToInt(origMaxHp * hpRatio);
-                    zombie.theFirstArmorHealth = Mathf.RoundToInt(origFirstArmorMax * armor1Ratio);
-                    zombie.theSecondArmorHealth = Mathf.RoundToInt(origSecondArmorMax * armor2Ratio);
-                }
+                // 3. Scale Current Healths down using the preserved ratios
+                zombie.theHealth = Mathf.RoundToInt(origMaxHp * hpRatio);
+                zombie.theFirstArmorHealth = Mathf.RoundToInt(origFirstArmorMax * armor1Ratio);
+                zombie.theSecondArmorHealth = Mathf.RoundToInt(origSecondArmorMax * armor2Ratio);
             }
-
-            // Clean up memory
-            originalHpData.Clear();
         }
+
+        // Clean up memory
+        originalHpData.Clear();
     }
 }

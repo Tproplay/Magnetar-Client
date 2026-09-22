@@ -5,92 +5,90 @@ using static Il2Cpp.Plant;
 using static global::Plant;
 #endif
 
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 
-namespace Magnetar_Client.Modules
+namespace Magnetar_Client.Modules;
+
+public class KillPlants : Module
 {
-    public class KillPlants : Module
+    // Mod Info
+    public override string Name { get; set; } = "Kill All Plants";
+    public override string Description { get; set; } = "Kills the selected plant(s) while the module is active.";
+    public override string SearchHints { get; set; } = "killallplants killplants plantkiller removeplants " +
+        "deleteplants plantremoval plantslayer destroyplants exterminateplants plantexterminator plantclear " +
+        "clearplants wipeplants plantwipe plantdeath deathplants killallplant killalplants kilallplants " +
+        "killallplantes killallplantts plantdestructor plantdestroyer plantdeleter plantsmasher plantpurger " +
+        "plantexecutioner plantelimination plantterminator plantender planteraser plantvanisher";
+
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Plant;
+
+    // Mod Data
+
+    public static KillPlants instance;
+
+    public MultiSelectSetting PlantsSelectedSetting;
+
+    public bool TurnOffAfterUse = true;
+    public BoolSetting AutoTurnOff;
+    public override bool Active { get; set; } = false;
+    public static float deltaTime = 0;
+
+    public KillPlants()
     {
-        // Mod Info
-        public override string Name { get; set; } = "Kill All Plants";
-        public override string Description { get; set; } = "Kills the selected plant(s) while the module is active.";
-        public override string SearchHints { get; set; } = "killallplants killplants plantkiller removeplants " +
-            "deleteplants plantremoval plantslayer destroyplants exterminateplants plantexterminator plantclear " +
-            "clearplants wipeplants plantwipe plantdeath deathplants killallplant killalplants kilallplants " +
-            "killallplantes killallplantts plantdestructor plantdestroyer plantdeleter plantsmasher plantpurger " +
-            "plantexecutioner plantelimination plantterminator plantender planteraser plantvanisher";
+        instance = this;
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Plant;
+        CreateCategory("General");
 
-        // Mod Data
-
-        public static KillPlants instance;
-
-        public MultiSelectSetting PlantsSelectedSetting;
-
-        public bool TurnOffAfterUse = true;
-        public BoolSetting AutoTurnOff;
-        public override bool Active { get; set; } = false;
-        public static float deltaTime = 0;
-
-        public KillPlants()
+        PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
         {
-            instance = this;
+            Blacklist = Banned.PlantTypeBanned,
+            CustomNames = TranslatedNames(typeof(PlantType))
+        };
 
-            CreateCategory("General");
+        PlantsSelectedSetting.Options.Keys.ToList().ForEach(PlantsSelectedSetting.Select);
 
-            PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
+        Settings.Add(PlantsSelectedSetting);
+
+        EndCategory();
+        CreateCategory("Extra");
+
+        AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
+        Settings.Add(AutoTurnOff);
+
+        EndCategory();
+
+    }
+
+    public override void OnLanguageChanged()
+    {
+        PlantsSelectedSetting.CustomNames = TranslatedNames(typeof(PlantType));
+    }
+
+    // Mod Logic
+    public override void OnUpdateActive()
+    {
+        // Handle auto turn off
+        if (AutoTurnOff.Value)
+        {
+            deltaTime += Time.deltaTime;
+            if (deltaTime > 0.3f)
             {
-                Blacklist = Banned.PlantTypeBanned,
-                CustomNames = TranslatedNames(typeof(PlantType))
-            };
-
-            PlantsSelectedSetting.Options.Keys.ToList().ForEach(PlantsSelectedSetting.Select);
-
-            Settings.Add(PlantsSelectedSetting);
-
-            EndCategory();
-            CreateCategory("Extra");
-
-            AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
-            Settings.Add(AutoTurnOff);
-
-            EndCategory();
-
-        }
-
-        public override void OnLanguageChanged()
-        {
-            PlantsSelectedSetting.CustomNames = TranslatedNames(typeof(PlantType));
-        }
-
-        // Mod Logic
-        public override void OnUpdateActive()
-        {
-            // Handle auto turn off
-            if (AutoTurnOff.Value)
-            {
-                deltaTime += Time.deltaTime;
-                if (deltaTime > 0.3f)
-                {
-                    Active = false;
-                    deltaTime = 0;
-                }
+                Active = false;
+                deltaTime = 0;
             }
+        }
 
-            if (BoardInstanceIsNull) return;
+        if (BoardInstanceIsNull) return;
 
-            for (int i = plantList.Count - 1; i >= 0; i--)
+        for (int i = plantList.Count - 1; i >= 0; i--)
+        {
+            Plant plant = plantList[i];
+            if (plant != null)
             {
-                Plant plant = plantList[i];
-                if (plant != null)
-                {
-                    plant.Die(DieReason.BySelf);
-                }
+                plant.Die(DieReason.BySelf);
             }
         }
     }

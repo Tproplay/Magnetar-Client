@@ -3,159 +3,157 @@
 using UnityEngine;
 
 #if MELONLOADER || RELEASE_MELON
-using Il2Cpp;
 using Il2CppRhythmGame;
 #elif BEPINEX || RELEASE_BEPINEX
 using RhythmGame;
 #endif
 
-namespace Magnetar_Client.Modules
+namespace Magnetar_Client.Modules;
+
+public class AutoOsu: Module
 {
-    public class AutoOsu: Module
+    // Mod Info
+    public override string Name { get; set; } = "Auto Osu";
+    public override string Description { get; set; } = "Automatically plays the Explode-O-su mode.";
+    public override string SearchHints { get; set; } = "autoosu rhythmmaster explodeosu rhythmmaster explodosu " +
+        "auto-osu osuauto autorythm rhythmbot osuexplode osux2 rhythmsync osusync rythmmaster rhythm-master " +
+        "explode-o-su rhythmplayer osuhelper rhythmtrainer";
+
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
+
+
+
+    // Mod Data
+
+    public static AutoOsu instance;
+
+    public AutoOsu()
     {
-        // Mod Info
-        public override string Name { get; set; } = "Auto Osu";
-        public override string Description { get; set; } = "Automatically plays the Explode-O-su mode.";
-        public override string SearchHints { get; set; } = "autoosu rhythmmaster explodeosu rhythmmaster explodosu " +
-            "auto-osu osuauto autorythm rhythmbot osuexplode osux2 rhythmsync osusync rythmmaster rhythm-master " +
-            "explode-o-su rhythmplayer osuhelper rhythmtrainer";
+        instance = this;
+    }
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
+    // Mod Logic
+    public override void OnUpdateActive()
+    {
+        RhythmGameManager __instance = RhythmGameManager.Instance;
+        if (__instance == null || __instance.tracks == null) return;
 
+        float currentTime = __instance.CurrentTime;
 
-
-        // Mod Data
-
-        public static AutoOsu instance;
-
-        public AutoOsu()
+        for (int i = 0; i < __instance.tracks.Count; i++)
         {
-            instance = this;
-        }
+            var track = __instance.tracks[i];
+            if (track == null || track.activeNotes == null) continue;
 
-        // Mod Logic
-        public override void OnUpdateActive()
-        {
-            RhythmGameManager __instance = RhythmGameManager.Instance;
-            if (__instance == null || __instance.tracks == null) return;
-
-            float currentTime = __instance.CurrentTime;
-
-            for (int i = 0; i < __instance.tracks.Count; i++)
+            for (int j = track.activeNotes.Count - 1; j >= 0; j--)
             {
-                var track = __instance.tracks[i];
-                if (track == null || track.activeNotes == null) continue;
+                var note = track.activeNotes[j];
+                if (note == null) continue;
 
-                for (int j = track.activeNotes.Count - 1; j >= 0; j--)
+                float targetTime = note.targetTime;
+
+                // --- 1. NORMAL / SKILL NOTES ---
+                if (note.noteType == NoteType.Normal || note.noteType == NoteType.Skill)
                 {
-                    var note = track.activeNotes[j];
-                    if (note == null) continue;
-
-                    float targetTime = note.targetTime;
-
-                    // --- 1. NORMAL / SKILL NOTES ---
-                    if (note.noteType == NoteType.Normal || note.noteType == NoteType.Skill)
+                    if (currentTime >= targetTime)
                     {
-                        if (currentTime >= targetTime)
+                        try
                         {
-                            try
-                            {
-                                note.OnClick();
-                                __instance.IsHoldKeyPressed(i);
-                            }
-                            catch { }
+                            note.OnClick();
+                            __instance.IsHoldKeyPressed(i);
+                        }
+                        catch { }
+                    }
+                }
+                // --- 2. HOLD NOTES ---
+                else if (note.noteType == NoteType.Hold)
+                {
+                    float endTime = targetTime + note.holdDuration;
+
+                    if (currentTime >= targetTime && currentTime < endTime)
+                    {
+                        if (!note.isHolding)
+                        {
+                            note.OnHoldStart();
+                            __instance.IsHoldKeyPressed(i);
                         }
                     }
-                    // --- 2. HOLD NOTES ---
-                    else if (note.noteType == NoteType.Hold)
+                    else if (currentTime >= endTime)
                     {
-                        float endTime = targetTime + note.holdDuration;
-
-                        if (currentTime >= targetTime && currentTime < endTime)
+                        if (note.isHolding)
                         {
-                            if (!note.isHolding)
-                            {
-                                note.OnHoldStart();
-                                __instance.IsHoldKeyPressed(i);
-                            }
-                        }
-                        else if (currentTime >= endTime)
-                        {
-                            if (note.isHolding)
-                            {
-                                note.OnHoldComplete();
-                            }
+                            note.OnHoldComplete();
                         }
                     }
                 }
             }
         }
+    }
 
-        [HarmonyPatch(typeof(RhythmGameManager))]
-        public static class RhythmGameManagerOverride
+    [HarmonyPatch(typeof(RhythmGameManager))]
+    public static class RhythmGameManagerOverride
+    {
+        [HarmonyPatch(nameof(RhythmGameManager.Shoot))]
+        [HarmonyPrefix]
+        public static void ForceShootPerfect(ref NoteJudgeSystem.JudgeResult result)
         {
-            [HarmonyPatch(nameof(RhythmGameManager.Shoot))]
-            [HarmonyPrefix]
-            public static void ForceShootPerfect(ref NoteJudgeSystem.JudgeResult result)
+            if ( instance==null || !instance.Active) return;
+            result = NoteJudgeSystem.JudgeResult.Perfect;
+        }
+
+        [HarmonyPatch(nameof(RhythmGameManager.OnNoteClicked))]
+        [HarmonyPrefix]
+        public static void PerfectClickTiming(FallingNote note, ref float clickTime)
+        {
+            if (instance == null || !instance.Active) return;
+            if (note != null)
             {
-                if ( instance==null || !instance.Active) return;
-                result = NoteJudgeSystem.JudgeResult.Perfect;
-            }
-
-            [HarmonyPatch(nameof(RhythmGameManager.OnNoteClicked))]
-            [HarmonyPrefix]
-            public static void PerfectClickTiming(FallingNote note, ref float clickTime)
-            {
-                if (instance == null || !instance.Active) return;
-                if (note != null)
-                {
-                    clickTime = note.targetTime;
-                }
-            }
-
-            [HarmonyPatch(nameof(RhythmGameManager.OnNoteMissed))]
-            [HarmonyPrefix]
-            public static bool IgnoreMisses(RhythmGameManager __instance, FallingNote note)
-            {
-                if (instance == null || !instance.Active) return true;
-
-                __instance.Shoot(NoteJudgeSystem.JudgeResult.Perfect);
-
-                if (note != null && note.gameObject != null)
-                {
-                    Object.Destroy(note.gameObject);
-                }
-
-                return false; 
+                clickTime = note.targetTime;
             }
         }
 
-        [HarmonyPatch(typeof(NoteJudgeSystem))]
-        public static class NoteJudgeSystemOverride
+        [HarmonyPatch(nameof(RhythmGameManager.OnNoteMissed))]
+        [HarmonyPrefix]
+        public static bool IgnoreMisses(RhythmGameManager __instance, FallingNote note)
         {
-            [HarmonyPatch(nameof(NoteJudgeSystem.Judge))]
-            [HarmonyPrefix]
-            public static bool ForcePerfectEnum(ref NoteJudgeSystem.JudgeResult __result)
-            {
-                if (instance == null || !instance.Active) return true;
-                __result = NoteJudgeSystem.JudgeResult.Perfect;
+            if (instance == null || !instance.Active) return true;
 
-                return false;
-            }
-        }
+            __instance.Shoot(NoteJudgeSystem.JudgeResult.Perfect);
 
-        [HarmonyPatch(typeof(FallingNote))]
-        public static class FallingNotePatch
-        {
-            [HarmonyPatch(nameof(FallingNote.hasMissed),(MethodType.Setter))]
-            public static void HasMissedPatch(ref bool __bool)
+            if (note != null && note.gameObject != null)
             {
-                if (instance == null || !instance.Active) return;
-                __bool = false;
+                Object.Destroy(note.gameObject);
             }
 
-
+            return false; 
         }
+    }
+
+    [HarmonyPatch(typeof(NoteJudgeSystem))]
+    public static class NoteJudgeSystemOverride
+    {
+        [HarmonyPatch(nameof(NoteJudgeSystem.Judge))]
+        [HarmonyPrefix]
+        public static bool ForcePerfectEnum(ref NoteJudgeSystem.JudgeResult __result)
+        {
+            if (instance == null || !instance.Active) return true;
+            __result = NoteJudgeSystem.JudgeResult.Perfect;
+
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(FallingNote))]
+    public static class FallingNotePatch
+    {
+        [HarmonyPatch(nameof(FallingNote.hasMissed),(MethodType.Setter))]
+        public static void HasMissedPatch(ref bool __bool)
+        {
+            if (instance == null || !instance.Active) return;
+            __bool = false;
+        }
+
 
     }
+
 }

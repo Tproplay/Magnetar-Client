@@ -6,852 +6,850 @@ using System.IO;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
-namespace Magnetar_Client.UI.Themes
+namespace Magnetar_Client.UI.Themes;
+
+#region Nested Theme Data Contracts
+[Serializable]
+public class ColorState
 {
-    #region Nested Theme Data Contracts
-    [Serializable]
-    public class ColorState
+    [JsonProperty("normal")]
+    public string Normal { get; set; }
+
+    [JsonProperty("hover", NullValueHandling = NullValueHandling.Ignore)]
+    public string Hover { get; set; }
+
+    [JsonProperty("active", NullValueHandling = NullValueHandling.Ignore)]
+    public string Active { get; set; }
+
+    public ColorState() { }
+    public ColorState(string normal, string hover = null, string active = null)
     {
-        [JsonProperty("normal")]
-        public string Normal { get; set; }
-
-        [JsonProperty("hover", NullValueHandling = NullValueHandling.Ignore)]
-        public string Hover { get; set; }
-
-        [JsonProperty("active", NullValueHandling = NullValueHandling.Ignore)]
-        public string Active { get; set; }
-
-        public ColorState() { }
-        public ColorState(string normal, string hover = null, string active = null)
-        {
-            Normal = normal;
-            Hover = hover ?? normal;
-            Active = active ?? normal;
-        }
+        Normal = normal;
+        Hover = hover ?? normal;
+        Active = active ?? normal;
     }
+}
 
-    [Serializable]
-    public class ElementStyleTheme
+[Serializable]
+public class ElementStyleTheme
+{
+    [JsonProperty("text")]
+    public ColorState Text { get; set; } = new ColorState();
+
+    [JsonProperty("background color")]
+    public ColorState BackgroundColor { get; set; } = new ColorState();
+
+    public ElementStyleTheme() { }
+    public ElementStyleTheme(ColorState text, ColorState bg)
     {
-        [JsonProperty("text")]
-        public ColorState Text { get; set; } = new ColorState();
-
-        [JsonProperty("background color")]
-        public ColorState BackgroundColor { get; set; } = new ColorState();
-
-        public ElementStyleTheme() { }
-        public ElementStyleTheme(ColorState text, ColorState bg)
-        {
-            Text = text;
-            BackgroundColor = bg;
-        }
+        Text = text;
+        BackgroundColor = bg;
     }
+}
 
-    [Serializable]
-    public class WindowStyleTheme
+[Serializable]
+public class WindowStyleTheme
+{
+    [JsonProperty("text")]
+    public string Text { get; set; }
+
+    [JsonProperty("background color")]
+    public string BackgroundColor { get; set; }
+
+    [JsonProperty("window background", NullValueHandling = NullValueHandling.Ignore)]
+    public string WindowBackground { get; set; }
+
+    public WindowStyleTheme() { }
+    public WindowStyleTheme(string text, string bg, string windowBg = null)
     {
-        [JsonProperty("text")]
-        public string Text { get; set; }
-
-        [JsonProperty("background color")]
-        public string BackgroundColor { get; set; }
-
-        [JsonProperty("window background", NullValueHandling = NullValueHandling.Ignore)]
-        public string WindowBackground { get; set; }
-
-        public WindowStyleTheme() { }
-        public WindowStyleTheme(string text, string bg, string windowBg = null)
-        {
-            Text = text;
-            BackgroundColor = bg;
-            WindowBackground = windowBg ?? bg;
-        }
+        Text = text;
+        BackgroundColor = bg;
+        WindowBackground = windowBg ?? bg;
     }
+}
 
-    [Serializable]
-    public class TypographyTheme
-    {
-        [JsonProperty("description")]
-        public string Description { get; set; }
+[Serializable]
+public class TypographyTheme
+{
+    [JsonProperty("description")]
+    public string Description { get; set; }
 
-        [JsonProperty("label")]
-        public string Label { get; set; }
+    [JsonProperty("label")]
+    public string Label { get; set; }
 
-        [JsonProperty("author")]
-        public string Author { get; set; }
+    [JsonProperty("author")]
+    public string Author { get; set; }
 
-        [JsonProperty("text")]
-        public string Text { get; set; }
+    [JsonProperty("text")]
+    public string Text { get; set; }
 
-        [JsonProperty("highlight text")]
-        public string HighlightText { get; set; }
+    [JsonProperty("highlight text")]
+    public string HighlightText { get; set; }
 
-        [JsonProperty("highlight background")]
-        public string HighlightBackground { get; set; }
+    [JsonProperty("highlight background")]
+    public string HighlightBackground { get; set; }
 
-        [JsonProperty("secondary", NullValueHandling = NullValueHandling.Ignore)]
-        public string Secondary { get; set; }
+    [JsonProperty("secondary", NullValueHandling = NullValueHandling.Ignore)]
+    public string Secondary { get; set; }
 
-        [JsonProperty("primary", NullValueHandling = NullValueHandling.Ignore)]
-        public string Primary { get => Text; set => Text = value; }
-    }
+    [JsonProperty("primary", NullValueHandling = NullValueHandling.Ignore)]
+    public string Primary { get => Text; set => Text = value; }
+}
 
-    [Serializable]
-    public class NefTheme
-    {
-        [JsonProperty("line color")]
-        public string LineColor { get; set; }
+[Serializable]
+public class NefTheme
+{
+    [JsonProperty("line color")]
+    public string LineColor { get; set; }
 
-        [JsonProperty("node background")]
-        public string NodeBackground { get; set; }
-    }
+    [JsonProperty("node background")]
+    public string NodeBackground { get; set; }
+}
 
-    [Serializable]
-    public class HudTheme
-    {
-        [JsonProperty("text color")]
-        public string TextColor { get; set; }
-    }
+[Serializable]
+public class HudTheme
+{
+    [JsonProperty("text color")]
+    public string TextColor { get; set; }
+}
 
-    [Serializable]
-    public class MiscTheme
-    {
-        [JsonProperty("dim background")]
-        public string DimBackground { get; set; }
+[Serializable]
+public class MiscTheme
+{
+    [JsonProperty("dim background")]
+    public string DimBackground { get; set; }
 
-        [JsonProperty("separator")]
-        public string Separator { get; set; }
+    [JsonProperty("separator")]
+    public string Separator { get; set; }
 
-        [JsonProperty("separator text", NullValueHandling = NullValueHandling.Ignore)]
-        public string SeparatorText { get; set; }
-    }
+    [JsonProperty("separator text", NullValueHandling = NullValueHandling.Ignore)]
+    public string SeparatorText { get; set; }
+}
 
-    [Serializable]
-    public class ThemeData
-    {
-        [JsonProperty("name")]
-        public string Name { get; set; } = "Custom Theme";
+[Serializable]
+public class ThemeData
+{
+    [JsonProperty("name")]
+    public string Name { get; set; } = "Custom Theme";
 
-        [JsonProperty("TopBarOff")]
-        public ElementStyleTheme TopBarOff { get; set; } = new ElementStyleTheme();
+    [JsonProperty("TopBarOff")]
+    public ElementStyleTheme TopBarOff { get; set; } = new ElementStyleTheme();
 
-        [JsonProperty("TopBarActive")]
-        public ElementStyleTheme TopBarActive { get; set; } = new ElementStyleTheme();
+    [JsonProperty("TopBarActive")]
+    public ElementStyleTheme TopBarActive { get; set; } = new ElementStyleTheme();
 
-        [JsonProperty("CategoryHeader")]
-        public ElementStyleTheme CategoryHeader { get; set; } = new ElementStyleTheme();
+    [JsonProperty("CategoryHeader")]
+    public ElementStyleTheme CategoryHeader { get; set; } = new ElementStyleTheme();
 
-        [JsonProperty("CategoryWindow")]
-        public WindowStyleTheme CategoryWindow { get; set; } = new WindowStyleTheme();
+    [JsonProperty("CategoryWindow")]
+    public WindowStyleTheme CategoryWindow { get; set; } = new WindowStyleTheme();
 
-        [JsonProperty("CategoryModuleOff")]
-        public ElementStyleTheme CategoryModuleOff { get; set; } = new ElementStyleTheme();
+    [JsonProperty("CategoryModuleOff")]
+    public ElementStyleTheme CategoryModuleOff { get; set; } = new ElementStyleTheme();
 
-        [JsonProperty("CategoryModuleOn")]
-        public ElementStyleTheme CategoryModuleOn { get; set; } = new ElementStyleTheme();
+    [JsonProperty("CategoryModuleOn")]
+    public ElementStyleTheme CategoryModuleOn { get; set; } = new ElementStyleTheme();
 
-        [JsonProperty("CloseButton")]
-        public ElementStyleTheme CloseButton { get; set; } = new ElementStyleTheme();
+    [JsonProperty("CloseButton")]
+    public ElementStyleTheme CloseButton { get; set; } = new ElementStyleTheme();
 
-        [JsonProperty("SettingsWindow")]
-        public WindowStyleTheme SettingsWindow { get; set; } = new WindowStyleTheme();
+    [JsonProperty("SettingsWindow")]
+    public WindowStyleTheme SettingsWindow { get; set; } = new WindowStyleTheme();
 
-        [JsonProperty("SettingOff")]
-        public ElementStyleTheme SettingOff { get; set; } = new ElementStyleTheme();
+    [JsonProperty("SettingOff")]
+    public ElementStyleTheme SettingOff { get; set; } = new ElementStyleTheme();
 
-        [JsonProperty("SettingOn")]
-        public ElementStyleTheme SettingOn { get; set; } = new ElementStyleTheme();
+    [JsonProperty("SettingOn")]
+    public ElementStyleTheme SettingOn { get; set; } = new ElementStyleTheme();
 
-        [JsonProperty("Typography")]
-        public TypographyTheme Typography { get; set; } = new TypographyTheme();
+    [JsonProperty("Typography")]
+    public TypographyTheme Typography { get; set; } = new TypographyTheme();
 
-        [JsonProperty("NEF")]
-        public NefTheme NEF { get; set; } = new NefTheme();
+    [JsonProperty("NEF")]
+    public NefTheme NEF { get; set; } = new NefTheme();
 
-        [JsonProperty("HUD")]
-        public HudTheme HUD { get; set; } = new HudTheme();
+    [JsonProperty("HUD")]
+    public HudTheme HUD { get; set; } = new HudTheme();
 
-        [JsonProperty("Misc")]
-        public MiscTheme Misc { get; set; } = new MiscTheme();
+    [JsonProperty("Misc")]
+    public MiscTheme Misc { get; set; } = new MiscTheme();
 
-        [JsonProperty("Slider", NullValueHandling = NullValueHandling.Ignore)]
-        public SliderTheme Slider { get; set; }
-    }
+    [JsonProperty("Slider", NullValueHandling = NullValueHandling.Ignore)]
+    public SliderTheme Slider { get; set; }
+}
 
-    [Serializable]
-    public class SliderTheme
-    {
-        [JsonProperty("track off", NullValueHandling = NullValueHandling.Ignore)]
-        public string TrackOff { get; set; }
+[Serializable]
+public class SliderTheme
+{
+    [JsonProperty("track off", NullValueHandling = NullValueHandling.Ignore)]
+    public string TrackOff { get; set; }
 
-        [JsonProperty("track on", NullValueHandling = NullValueHandling.Ignore)]
-        public string TrackOn { get; set; }
+    [JsonProperty("track on", NullValueHandling = NullValueHandling.Ignore)]
+    public string TrackOn { get; set; }
 
-        [JsonProperty("thumb", NullValueHandling = NullValueHandling.Ignore)]
-        public string Thumb { get; set; }
+    [JsonProperty("thumb", NullValueHandling = NullValueHandling.Ignore)]
+    public string Thumb { get; set; }
 
-        [JsonProperty("thumb hover", NullValueHandling = NullValueHandling.Ignore)]
-        public string ThumbHover { get; set; }
-    }
+    [JsonProperty("thumb hover", NullValueHandling = NullValueHandling.Ignore)]
+    public string ThumbHover { get; set; }
+}
+
+#endregion
+
+public static class Magnetar_Default
+{
+    public static bool IsInitialized { get; private set; } = false;
+
+    #region Styles
+
+    public static GUIStyle TopBarStyle;
+    public static GUIStyle TopBarActiveStyle;
+    public static GUIStyle CategoryWindowStyle;
+    public static GUIStyle CategoryHeaderStyle;
+    public static GUIStyle CategoryModuleOffStyle;
+    public static GUIStyle CategoryModuleOnStyle;
+    public static GUIStyle CloseButtonStyle;
+    public static GUIStyle SettingsWndowBgStyle;
+    public static GUIStyle SettingsWndowStyle;
+    public static GUIStyle SettingsDescriptionStyle;
+    public static GUIStyle SettingTextStyle;
+    public static GUIStyle SettingAuthorStyle;
+    public static GUIStyle SettingOff;
+    public static GUIStyle SettingOn;
+    public static GUIStyle SettingLabelStyle;
+    public static GUIStyle SeparatorStyle;
+    public static GUIStyle SeparatorTextStyle;
+    public static GUIStyle TextStyle;
+    public static GUIStyle TextHighlightedStyle;
+    public static GUIStyle DimBackgroundStyle;
+    public static GUIStyle HUDElementStyle;
+    public static GUIStyle NEFLineStyle;
+    public static GUIStyle NEFNodeStyle;
+    public static GUIStyle SliderTrackOffStyle;
+    public static GUIStyle SliderTrackOnStyle;
+    public static GUIStyle SliderThumbStyle;
 
     #endregion
 
-    public static class Magnetar_Default
+    #region Dynamic Theme Colors
+    public static Color BackgroundColor { get; private set; }
+    public static Color AccentColor { get; private set; }
+    public static Color AccentHoverColor { get; private set; }
+    public static Color LightBackgroundColor { get; private set; }
+    public static Color TextWhite { get; private set; }
+    public static Color TextDim { get; private set; }
+    public static Color HoverColor { get; private set; }
+    public static Color ActiveColor { get; private set; }
+    public static Color DimColor { get; private set; }
+    public static Color NefLineColor { get; private set; }
+    public static Color NefNodeColor { get; private set; }
+    #endregion
+
+    #region Hardcoded Default Theme (Safety Fallback)
+    public static readonly ThemeData InternalDefaultTheme = new()
     {
-        public static bool IsInitialized { get; private set; } = false;
-
-        #region Styles
-
-        public static GUIStyle TopBarStyle;
-        public static GUIStyle TopBarActiveStyle;
-        public static GUIStyle CategoryWindowStyle;
-        public static GUIStyle CategoryHeaderStyle;
-        public static GUIStyle CategoryModuleOffStyle;
-        public static GUIStyle CategoryModuleOnStyle;
-        public static GUIStyle CloseButtonStyle;
-        public static GUIStyle SettingsWndowBgStyle;
-        public static GUIStyle SettingsWndowStyle;
-        public static GUIStyle SettingsDescriptionStyle;
-        public static GUIStyle SettingTextStyle;
-        public static GUIStyle SettingAuthorStyle;
-        public static GUIStyle SettingOff;
-        public static GUIStyle SettingOn;
-        public static GUIStyle SettingLabelStyle;
-        public static GUIStyle SeparatorStyle;
-        public static GUIStyle SeparatorTextStyle;
-        public static GUIStyle TextStyle;
-        public static GUIStyle TextHighlightedStyle;
-        public static GUIStyle DimBackgroundStyle;
-        public static GUIStyle HUDElementStyle;
-        public static GUIStyle NEFLineStyle;
-        public static GUIStyle NEFNodeStyle;
-        public static GUIStyle SliderTrackOffStyle;
-        public static GUIStyle SliderTrackOnStyle;
-        public static GUIStyle SliderThumbStyle;
-
-        #endregion
-
-        #region Dynamic Theme Colors
-        public static Color BackgroundColor { get; private set; }
-        public static Color AccentColor { get; private set; }
-        public static Color AccentHoverColor { get; private set; }
-        public static Color LightBackgroundColor { get; private set; }
-        public static Color TextWhite { get; private set; }
-        public static Color TextDim { get; private set; }
-        public static Color HoverColor { get; private set; }
-        public static Color ActiveColor { get; private set; }
-        public static Color DimColor { get; private set; }
-        public static Color NefLineColor { get; private set; }
-        public static Color NefNodeColor { get; private set; }
-        #endregion
-
-        #region Hardcoded Default Theme (Safety Fallback)
-        public static readonly ThemeData InternalDefaultTheme = new ThemeData
+        Name = "Magnetar Default",
+        TopBarOff = new ElementStyleTheme(
+            new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#1A1A1ADC", "#1C1C1CFF", "#333333FF")
+        ),
+        TopBarActive = new ElementStyleTheme(
+            new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#FF3D3DFF", "#FF3D3DFF", "#FF3D3DFF")
+        ),
+        CategoryHeader = new ElementStyleTheme(
+            new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#1A1A1ADC", "#1C1C1CFF", "#333333FF")
+        ),
+        CategoryWindow = new WindowStyleTheme("#FFFFFFFF", "#1A1A1ADC"),
+        CategoryModuleOff = new ElementStyleTheme(
+            new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#1C1C1CD6", "#1C1C1CFF", "#1C1C1CFF")
+        ),
+        CategoryModuleOn = new ElementStyleTheme(
+            new ColorState("#000000FF", "#000000FF", "#000000FF"),
+            new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+        ),
+        CloseButton = new ElementStyleTheme(
+            new ColorState("#000000FF", "#000000FF", "#000000FF"),
+            new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+        ),
+        SettingsWindow = new WindowStyleTheme("#000000FF", "#FF3D3DFF", "#1A1A1ADC"),
+        SettingOff = new ElementStyleTheme(
+            new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#1C1C1CD6", "#1C1C1CFF", "#1C1C1CFF")
+        ),
+        SettingOn = new ElementStyleTheme(
+            new ColorState("#000000FF", "#000000FF", "#000000FF"),
+            new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+        ),
+        Typography = new TypographyTheme
         {
-            Name = "Magnetar Default",
-            TopBarOff = new ElementStyleTheme(
-                new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
-                new ColorState("#1A1A1ADC", "#1C1C1CFF", "#333333FF")
-            ),
-            TopBarActive = new ElementStyleTheme(
-                new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
-                new ColorState("#FF3D3DFF", "#FF3D3DFF", "#FF3D3DFF")
-            ),
-            CategoryHeader = new ElementStyleTheme(
-                new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
-                new ColorState("#1A1A1ADC", "#1C1C1CFF", "#333333FF")
-            ),
-            CategoryWindow = new WindowStyleTheme("#FFFFFFFF", "#1A1A1ADC"),
-            CategoryModuleOff = new ElementStyleTheme(
-                new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
-                new ColorState("#1C1C1CD6", "#1C1C1CFF", "#1C1C1CFF")
-            ),
-            CategoryModuleOn = new ElementStyleTheme(
-                new ColorState("#000000FF", "#000000FF", "#000000FF"),
-                new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
-            ),
-            CloseButton = new ElementStyleTheme(
-                new ColorState("#000000FF", "#000000FF", "#000000FF"),
-                new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
-            ),
-            SettingsWindow = new WindowStyleTheme("#000000FF", "#FF3D3DFF", "#1A1A1ADC"),
-            SettingOff = new ElementStyleTheme(
-                new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
-                new ColorState("#1C1C1CD6", "#1C1C1CFF", "#1C1C1CFF")
-            ),
-            SettingOn = new ElementStyleTheme(
-                new ColorState("#000000FF", "#000000FF", "#000000FF"),
-                new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
-            ),
-            Typography = new TypographyTheme
-            {
-                Description = "#BFBFBFFF",
-                Label = "#E6E6E6FF",
-                Author = "#808080FF",
-                Text = "#E6E6E6FF",
-                Secondary = "#AEAEAEFF",
-                HighlightText = "#FFFFFFFF",
-                HighlightBackground = "#FF3D3DFF"
-            },
-            NEF = new NefTheme
-            {
-                LineColor = "#FFFFFFFF",
-                NodeBackground = "#FF3D3DFF"
-            },
-            HUD = new HudTheme
-            {
-                TextColor = "#FFFFFFFF"
-            },
-            Misc = new MiscTheme
-            {
-                DimBackground = "#1A1A1A66",
-                Separator = "#FFFFFFFF",
-                SeparatorText = "#FFFFFFFF"
-            },
-            Slider = new SliderTheme
-            {
-                TrackOff = "#22252FFF",
-                TrackOn = "#FF3D3DFF",
-                Thumb = "#FF3D3DFF",
-                ThumbHover = "#FF3D3DFF"
-            },
-        };
-        #endregion
-
-        public static readonly Dictionary<string, ThemeData> LoadedThemes = new Dictionary<string, ThemeData>(StringComparer.OrdinalIgnoreCase);
-        public static string CurrentThemeName { get; private set; } = "Magnetar Default";
-
-        private static readonly Dictionary<Color, Texture2D> _texCache = new Dictionary<Color, Texture2D>();
-        private static float lastScale = -1f;
-        private static float lastElementScale = -1f;
-
-        #region Base Sizes
-        private const int TopBarFontSize = 14;
-        private const int TopBarPaddingLR = 10;
-        private const int TopBarPaddingTB = 5;
-
-        private const int ModuleFontSize = 12;
-        private const int ModulePaddingLeft = 10;
-
-        private const int ModuleWindowFontSize = 21;
-        private const int ModuleWindowPaddingTop = 3;
-
-        private const int SettingsWindowFontSize = 21;
-
-        private const int SettingFontSize = 12;
-        private const int SettingPaddingLeft = 10;
-
-        private const int DescriptionFontSize = 18;
-        private const int DescriptionPaddingLR = 5;
-        private const int DescriptionPaddingTB = 2;
-
-        private const int SettingDescriptionFontSize = 14;
-        private const int SettingDescriptionPaddingLR = 5;
-        private const int SettingDescriptionPaddingTB = 2;
-
-        private const int AuthorFontSize = 15;
-        private const int AuthorPaddingLeft = 10;
-
-        private const float SeparatorFixedHeight = 1;
-
-        private const int HUDElementFontSize = 18;
-
-        private const int NEFNodePaddingLR = 2;
-        private const int NEFNodePaddingTop = 2;
-        private const int NEFNodePaddingBottom = 5;
-
-        private const int TextFontSize = 13;
-        #endregion
-
-        public static void Init()
+            Description = "#BFBFBFFF",
+            Label = "#E6E6E6FF",
+            Author = "#808080FF",
+            Text = "#E6E6E6FF",
+            Secondary = "#AEAEAEFF",
+            HighlightText = "#FFFFFFFF",
+            HighlightBackground = "#FF3D3DFF"
+        },
+        NEF = new NefTheme
         {
-            LoadThemesFromJson();
-            BuildEmptyStyles();
+            LineColor = "#FFFFFFFF",
+            NodeBackground = "#FF3D3DFF"
+        },
+        HUD = new HudTheme
+        {
+            TextColor = "#FFFFFFFF"
+        },
+        Misc = new MiscTheme
+        {
+            DimBackground = "#1A1A1A66",
+            Separator = "#FFFFFFFF",
+            SeparatorText = "#FFFFFFFF"
+        },
+        Slider = new SliderTheme
+        {
+            TrackOff = "#22252FFF",
+            TrackOn = "#FF3D3DFF",
+            Thumb = "#FF3D3DFF",
+            ThumbHover = "#FF3D3DFF"
+        },
+    };
+    #endregion
 
-            IsInitialized = true;
+    public static readonly Dictionary<string, ThemeData> LoadedThemes = new(StringComparer.OrdinalIgnoreCase);
+    public static string CurrentThemeName { get; private set; } = "Magnetar Default";
 
-            string requestedTheme = Config.Theme;
-            if (string.IsNullOrEmpty(requestedTheme) || !LoadedThemes.ContainsKey(requestedTheme))
-            {
-                requestedTheme = InternalDefaultTheme.Name;
-            }
+    private static readonly Dictionary<Color, Texture2D> _texCache = new();
+    private static float lastScale = -1f;
+    private static float lastElementScale = -1f;
 
-            ApplyTheme(requestedTheme);
+    #region Base Sizes
+    private const int TopBarFontSize = 14;
+    private const int TopBarPaddingLR = 10;
+    private const int TopBarPaddingTB = 5;
 
-            lastScale = -1f;
-            lastElementScale = -1f;
-            Rescale();
+    private const int ModuleFontSize = 12;
+    private const int ModulePaddingLeft = 10;
 
-            DebugLogger.Msg($"[Themes] Initialized with theme: '{CurrentThemeName}'");
+    private const int ModuleWindowFontSize = 21;
+    private const int ModuleWindowPaddingTop = 3;
+
+    private const int SettingsWindowFontSize = 21;
+
+    private const int SettingFontSize = 12;
+    private const int SettingPaddingLeft = 10;
+
+    private const int DescriptionFontSize = 18;
+    private const int DescriptionPaddingLR = 5;
+    private const int DescriptionPaddingTB = 2;
+
+    private const int SettingDescriptionFontSize = 14;
+    private const int SettingDescriptionPaddingLR = 5;
+    private const int SettingDescriptionPaddingTB = 2;
+
+    private const int AuthorFontSize = 15;
+    private const int AuthorPaddingLeft = 10;
+
+    private const float SeparatorFixedHeight = 1;
+
+    private const int HUDElementFontSize = 18;
+
+    private const int NEFNodePaddingLR = 2;
+    private const int NEFNodePaddingTop = 2;
+    private const int NEFNodePaddingBottom = 5;
+
+    private const int TextFontSize = 13;
+    #endregion
+
+    public static void Init()
+    {
+        LoadThemesFromJson();
+        BuildEmptyStyles();
+
+        IsInitialized = true;
+
+        string requestedTheme = Config.Theme;
+        if (string.IsNullOrEmpty(requestedTheme) || !LoadedThemes.ContainsKey(requestedTheme))
+        {
+            requestedTheme = InternalDefaultTheme.Name;
         }
 
-        public static void LoadThemesFromJson()
+        ApplyTheme(requestedTheme);
+
+        lastScale = -1f;
+        lastElementScale = -1f;
+        Rescale();
+
+        DebugLogger.Msg($"[Themes] Initialized with theme: '{CurrentThemeName}'");
+    }
+
+    public static void LoadThemesFromJson()
+    {
+        LoadedThemes.Clear();
+        LoadedThemes[InternalDefaultTheme.Name] = InternalDefaultTheme;
+
+        string dataDir = Path.Combine(SaveLoad.ModsDir, "Magnetar Data");
+        string themePath = Path.Combine(dataDir, "themes.json");
+
+        try
         {
-            LoadedThemes.Clear();
-            LoadedThemes[InternalDefaultTheme.Name] = InternalDefaultTheme;
+            if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
 
-            string dataDir = Path.Combine(SaveLoad.ModsDir, "Magnetar Data");
-            string themePath = Path.Combine(dataDir, "themes.json");
-
-            try
+            if (!File.Exists(themePath))
             {
-                if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
-
-                if (!File.Exists(themePath))
+                var templateList = new List<ThemeData>
                 {
-                    var templateList = new List<ThemeData>
-                    {
-                        new ThemeData
+                    new() {
+                        Name = "Meteor Purple",
+                        TopBarOff = new ElementStyleTheme(
+                            new ColorState("#e8e8e8", "#e8e8e8", "#e8e8e8"),
+                            new ColorState("#11141b94", "#131721ca", "#131721ca")
+                        ),
+                        TopBarActive = new ElementStyleTheme(
+                            new ColorState("#e8e8e8", "#e8e8e8", "#e8e8e8"),
+                            new ColorState("#131721ca", "#131721ca", "#131721ca")
+                        ),
+                        CategoryHeader = new ElementStyleTheme(
+                            new ColorState("#E6EDF3FF", "#FFFFFFFF", "#FFFFFFFF"),
+                            new ColorState("#7d00f1", "#9a2eff", "#9a2eff")
+                        ),
+                        CategoryWindow = new WindowStyleTheme("#FFFFFFFF", "#100c14c0"),
+                        CategoryModuleOff = new ElementStyleTheme(
+                            new ColorState("#8B949EFF", "#e6e6e6ea", "#e6e6e6ea"),
+                            new ColorState("#00000000", "#22142594", "#22142594")
+                        ),
+                        CategoryModuleOn = new ElementStyleTheme(
+                            new ColorState("#8B949EFF", "#e6e6e6ea", "#e6e6e6ea"),
+                            new ColorState("#22142594", "#22142594", "#22142594")
+                        ),
+                        CloseButton = new ElementStyleTheme(
+                            new ColorState("#000000FF", "#000000FF", "#000000FF"),
+                            new ColorState("#7d00f1", "#A855F7FF", "#A855F7FF")
+                        ),
+                        SettingsWindow = new WindowStyleTheme("#FFFFFFFF", "#7d00f1", "#11141bb6"),
+                        SettingOff = new ElementStyleTheme(
+                            new ColorState("#8B949EFF", "#FFFFFFFF", "#FFFFFFFF"),
+                            new ColorState("#02010271", "#0000009d", "#0000009d")
+                        ),
+                        SettingOn = new ElementStyleTheme(
+                            new ColorState("#000000FF", "#000000FF", "#000000FF"),
+                            new ColorState("#8B0FFFFF", "#992cff", "#8B0FFFFF")
+                        ),
+                        Typography = new TypographyTheme
                         {
-                            Name = "Meteor Purple",
-                            TopBarOff = new ElementStyleTheme(
-                                new ColorState("#e8e8e8", "#e8e8e8", "#e8e8e8"),
-                                new ColorState("#11141b94", "#131721ca", "#131721ca")
-                            ),
-                            TopBarActive = new ElementStyleTheme(
-                                new ColorState("#e8e8e8", "#e8e8e8", "#e8e8e8"),
-                                new ColorState("#131721ca", "#131721ca", "#131721ca")
-                            ),
-                            CategoryHeader = new ElementStyleTheme(
-                                new ColorState("#E6EDF3FF", "#FFFFFFFF", "#FFFFFFFF"),
-                                new ColorState("#7d00f1", "#9a2eff", "#9a2eff")
-                            ),
-                            CategoryWindow = new WindowStyleTheme("#FFFFFFFF", "#100c14c0"),
-                            CategoryModuleOff = new ElementStyleTheme(
-                                new ColorState("#8B949EFF", "#e6e6e6ea", "#e6e6e6ea"),
-                                new ColorState("#00000000", "#22142594", "#22142594")
-                            ),
-                            CategoryModuleOn = new ElementStyleTheme(
-                                new ColorState("#8B949EFF", "#e6e6e6ea", "#e6e6e6ea"),
-                                new ColorState("#22142594", "#22142594", "#22142594")
-                            ),
-                            CloseButton = new ElementStyleTheme(
-                                new ColorState("#000000FF", "#000000FF", "#000000FF"),
-                                new ColorState("#7d00f1", "#A855F7FF", "#A855F7FF")
-                            ),
-                            SettingsWindow = new WindowStyleTheme("#FFFFFFFF", "#7d00f1", "#11141bb6"),
-                            SettingOff = new ElementStyleTheme(
-                                new ColorState("#8B949EFF", "#FFFFFFFF", "#FFFFFFFF"),
-                                new ColorState("#02010271", "#0000009d", "#0000009d")
-                            ),
-                            SettingOn = new ElementStyleTheme(
-                                new ColorState("#000000FF", "#000000FF", "#000000FF"),
-                                new ColorState("#8B0FFFFF", "#992cff", "#8B0FFFFF")
-                            ),
-                            Typography = new TypographyTheme
-                            {
-                                Description = "#ec45ff",
-                                Label = "#E6E6E6FF",
-                                Author = "#808080FF",
-                                Text = "#E6EDF3FF",
-                                Secondary = "#8B949EFF",
-                                HighlightText = "#FFFFFFFF",
-                                HighlightBackground = "#203e6ec4"
-                            },
-                            NEF = new NefTheme
-                            {
-                                LineColor = "#FFFFFFFF",
-                                NodeBackground = "#8B0FFFFF"
-                            },
-                            HUD = new HudTheme
-                            {
-                                TextColor = "#FFFFFFFF"
-                            },
-                            Misc = new MiscTheme
-                            {
-                                DimBackground = "#1a1a1a5c",
-                                Separator = "#ffffff",
-                                SeparatorText = "#ffffff"
-                            },
-                            Slider = new SliderTheme
-                            {
-                                TrackOff = "#1D212BFF",
-                                TrackOn = "#00ff9d",
-                                Thumb = "#00ff9d",
-                                ThumbHover = "#00ff9d"
-                            }
+                            Description = "#ec45ff",
+                            Label = "#E6E6E6FF",
+                            Author = "#808080FF",
+                            Text = "#E6EDF3FF",
+                            Secondary = "#8B949EFF",
+                            HighlightText = "#FFFFFFFF",
+                            HighlightBackground = "#203e6ec4"
+                        },
+                        NEF = new NefTheme
+                        {
+                            LineColor = "#FFFFFFFF",
+                            NodeBackground = "#8B0FFFFF"
+                        },
+                        HUD = new HudTheme
+                        {
+                            TextColor = "#FFFFFFFF"
+                        },
+                        Misc = new MiscTheme
+                        {
+                            DimBackground = "#1a1a1a5c",
+                            Separator = "#ffffff",
+                            SeparatorText = "#ffffff"
+                        },
+                        Slider = new SliderTheme
+                        {
+                            TrackOff = "#1D212BFF",
+                            TrackOn = "#00ff9d",
+                            Thumb = "#00ff9d",
+                            ThumbHover = "#00ff9d"
                         }
-                    };
+                    }
+                };
 
-                    string jsonTemplate = JsonConvert.SerializeObject(templateList, Formatting.Indented);
-                    File.WriteAllText(themePath, jsonTemplate);
-                }
+                string jsonTemplate = JsonConvert.SerializeObject(templateList, Formatting.Indented);
+                File.WriteAllText(themePath, jsonTemplate);
+            }
 
-                string rawJson = File.ReadAllText(themePath);
-                var parsedThemes = JsonConvert.DeserializeObject<List<ThemeData>>(rawJson);
+            string rawJson = File.ReadAllText(themePath);
+            var parsedThemes = JsonConvert.DeserializeObject<List<ThemeData>>(rawJson);
 
-                if (parsedThemes != null)
+            if (parsedThemes != null)
+            {
+                foreach (var th in parsedThemes)
                 {
-                    foreach (var th in parsedThemes)
+                    if (!string.IsNullOrEmpty(th.Name))
                     {
-                        if (!string.IsNullOrEmpty(th.Name))
-                        {
-                            LoadedThemes[th.Name] = th;
-                        }
+                        LoadedThemes[th.Name] = th;
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                DebugLogger.Error($"[Themes] Error loading themes.json, falling back to internal default: {ex.Message}");
-            }
         }
-
-        public static void ApplyTheme(string themeName)
+        catch (Exception ex)
         {
-            if (!IsInitialized)
-            {
-                CurrentThemeName = themeName;
-                return;
-            }
+            DebugLogger.Error($"[Themes] Error loading themes.json, falling back to internal default: {ex.Message}");
+        }
+    }
 
-            if (!LoadedThemes.TryGetValue(themeName, out var theme))
-            {
-                DebugLogger.Warning($"[Themes] Theme '{themeName}' not found. Falling back to default.");
-                theme = InternalDefaultTheme;
-                themeName = InternalDefaultTheme.Name;
-            }
-
+    public static void ApplyTheme(string themeName)
+    {
+        if (!IsInitialized)
+        {
             CurrentThemeName = themeName;
-            var d = InternalDefaultTheme;
-
-            // --- 1. Top Bar Off ---
-            var tbOffText = ResolveState(theme.TopBarOff?.Text, d.TopBarOff.Text);
-            var tbOffBg = ResolveState(theme.TopBarOff?.BackgroundColor, d.TopBarOff.BackgroundColor);
-            TopBarStyle.normal.textColor = tbOffText.normal;
-            TopBarStyle.hover.textColor = tbOffText.hover;
-            TopBarStyle.active.textColor = tbOffText.active;
-            TopBarStyle.normal.background = GetTex(tbOffBg.normal);
-            TopBarStyle.hover.background = GetTex(tbOffBg.hover);
-            TopBarStyle.active.background = GetTex(tbOffBg.active);
-
-            // --- 2. Top Bar Active ---
-            var tbActText = ResolveState(theme.TopBarActive?.Text, d.TopBarActive.Text);
-            var tbActBg = ResolveState(theme.TopBarActive?.BackgroundColor, d.TopBarActive.BackgroundColor);
-            TopBarActiveStyle.normal.textColor = tbActText.normal;
-            TopBarActiveStyle.hover.textColor = tbActText.hover;
-            TopBarActiveStyle.active.textColor = tbActText.active;
-            TopBarActiveStyle.normal.background = GetTex(tbActBg.normal);
-            TopBarActiveStyle.hover.background = GetTex(tbActBg.hover);
-            TopBarActiveStyle.active.background = GetTex(tbActBg.active);
-
-            // --- 3. Category Header ---
-            var catHeadText = ResolveState(theme.CategoryHeader?.Text, d.CategoryHeader.Text);
-            var catHeadBg = ResolveState(theme.CategoryHeader?.BackgroundColor, d.CategoryHeader.BackgroundColor);
-            CategoryHeaderStyle.normal.textColor = catHeadText.normal;
-            CategoryHeaderStyle.hover.textColor = catHeadText.hover;
-            CategoryHeaderStyle.active.textColor = catHeadText.active;
-            CategoryHeaderStyle.normal.background = GetTex(catHeadBg.normal);
-            CategoryHeaderStyle.hover.background = GetTex(catHeadBg.hover);
-            CategoryHeaderStyle.active.background = GetTex(catHeadBg.active);
-
-            // --- 4. Category Window ---
-            CategoryWindowStyle.normal.textColor = ParseColor(theme.CategoryWindow?.Text, d.CategoryWindow.Text);
-            CategoryWindowStyle.normal.background = GetTex(ParseColor(theme.CategoryWindow?.BackgroundColor, d.CategoryWindow.BackgroundColor));
-
-            // --- 5. Category Module Off ---
-            var catModOffText = ResolveState(theme.CategoryModuleOff?.Text, d.CategoryModuleOff.Text);
-            var catModOffBg = ResolveState(theme.CategoryModuleOff?.BackgroundColor, d.CategoryModuleOff.BackgroundColor);
-            CategoryModuleOffStyle.normal.textColor = catModOffText.normal;
-            CategoryModuleOffStyle.hover.textColor = catModOffText.hover;
-            CategoryModuleOffStyle.active.textColor = catModOffText.active;
-            CategoryModuleOffStyle.normal.background = GetTex(catModOffBg.normal);
-            CategoryModuleOffStyle.hover.background = GetTex(catModOffBg.hover);
-            CategoryModuleOffStyle.active.background = GetTex(catModOffBg.active);
-
-            // --- 6. Category Module On ---
-            var catModOnText = ResolveState(theme.CategoryModuleOn?.Text, d.CategoryModuleOn.Text);
-            var catModOnBg = ResolveState(theme.CategoryModuleOn?.BackgroundColor, d.CategoryModuleOn.BackgroundColor);
-            CategoryModuleOnStyle.normal.textColor = catModOnText.normal;
-            CategoryModuleOnStyle.hover.textColor = catModOnText.hover;
-            CategoryModuleOnStyle.active.textColor = catModOnText.active;
-            CategoryModuleOnStyle.normal.background = GetTex(catModOnBg.normal);
-            CategoryModuleOnStyle.hover.background = GetTex(catModOnBg.hover);
-            CategoryModuleOnStyle.active.background = GetTex(catModOnBg.active);
-
-            // --- 7. Close Button ---
-            var closeText = ResolveState(theme.CloseButton?.Text, d.CloseButton.Text);
-            var closeBg = ResolveState(theme.CloseButton?.BackgroundColor, d.CloseButton.BackgroundColor);
-            CloseButtonStyle.normal.textColor = closeText.normal;
-            CloseButtonStyle.hover.textColor = closeText.hover;
-            CloseButtonStyle.active.textColor = closeText.active;
-            CloseButtonStyle.normal.background = GetTex(closeBg.normal);
-            CloseButtonStyle.hover.background = GetTex(closeBg.hover);
-            CloseButtonStyle.active.background = GetTex(closeBg.active);
-
-            // --- 8. Settings Window ---
-            string rawWindowBg = theme.SettingsWindow?.WindowBackground
-                                 ?? theme.CategoryWindow?.BackgroundColor
-                                 ?? d.SettingsWindow.WindowBackground;
-            SettingsWndowBgStyle.normal.background = GetTex(ParseColor(rawWindowBg, d.SettingsWindow.WindowBackground));
-
-            SettingsWndowStyle.normal.textColor = ParseColor(theme.SettingsWindow?.Text, d.SettingsWindow.Text);
-            SettingsWndowStyle.normal.background = GetTex(ParseColor(theme.SettingsWindow?.BackgroundColor, d.SettingsWindow.BackgroundColor));
-
-            // --- 9. Setting Off ---
-            var setOffText = ResolveState(theme.SettingOff?.Text, d.SettingOff.Text);
-            var setOffBg = ResolveState(theme.SettingOff?.BackgroundColor, d.SettingOff.BackgroundColor);
-            SettingOff.normal.textColor = setOffText.normal;
-            SettingOff.hover.textColor = setOffText.hover;
-            SettingOff.active.textColor = setOffText.active;
-            SettingOff.normal.background = GetTex(setOffBg.normal);
-            SettingOff.hover.background = GetTex(setOffBg.hover);
-            SettingOff.active.background = GetTex(setOffBg.active);
-
-            // --- 10. Setting On ---
-            var setOnText = ResolveState(theme.SettingOn?.Text, d.SettingOn.Text);
-            var setOnBg = ResolveState(theme.SettingOn?.BackgroundColor, d.SettingOn.BackgroundColor);
-            SettingOn.normal.textColor = setOnText.normal;
-            SettingOn.hover.textColor = setOnText.hover;
-            SettingOn.active.textColor = setOnText.active;
-            SettingOn.normal.background = GetTex(setOnBg.normal);
-            SettingOn.hover.background = GetTex(setOnBg.hover);
-            SettingOn.active.background = GetTex(setOnBg.active);
-
-            // --- 11. Typography ---
-            SettingsDescriptionStyle.normal.textColor = ParseColor(theme.Typography?.Description, d.Typography.Description);
-            SettingLabelStyle.normal.textColor = ParseColor(theme.Typography?.Label, d.Typography.Label);
-            SettingAuthorStyle.normal.textColor = ParseColor(theme.Typography?.Author, d.Typography.Author);
-
-            Color baseText = ParseColor(theme.Typography?.Text, d.Typography.Text);
-            SettingTextStyle.normal.textColor = baseText;
-            TextStyle.normal.textColor = baseText;
-
-            TextHighlightedStyle.normal.textColor = ParseColor(theme.Typography?.HighlightText, d.Typography.HighlightText);
-            TextHighlightedStyle.normal.background = GetTex(ParseColor(theme.Typography?.HighlightBackground, d.Typography.HighlightBackground));
-
-            // --- 12. Separator & Dim ---
-            SeparatorStyle.normal.background = GetTex(ParseColor(theme.Misc?.Separator, d.Misc.Separator));
-
-            Color sepTextColor = ParseColor(theme.Misc?.SeparatorText ?? theme.Typography?.Secondary, d.Typography.Secondary);
-            SeparatorTextStyle.normal.textColor = sepTextColor;
-
-            DimBackgroundStyle.normal.background = GetTex(ParseColor(theme.Misc?.DimBackground, d.Misc.DimBackground));
-
-            // --- 13. NEF & HUD ---
-            NEFLineStyle.normal.background = GetTex(ParseColor(theme.NEF?.LineColor, d.NEF.LineColor));
-            NEFNodeStyle.normal.background = GetTex(ParseColor(theme.NEF?.NodeBackground, d.NEF.NodeBackground));
-            HUDElementStyle.normal.textColor = ParseColor(theme.HUD?.TextColor, d.HUD.TextColor);
-
-            // --- 14. Slider ---
-            Color trackOffColor = ParseColor(theme.Slider?.TrackOff ?? theme.SettingOff?.BackgroundColor?.Normal, d.Slider.TrackOff);
-            Color trackOnColor = ParseColor(theme.Slider?.TrackOn ?? theme.SettingOn?.BackgroundColor?.Normal, d.Slider.TrackOn);
-            Color thumbColor = ParseColor(theme.Slider?.Thumb ?? theme.SettingOn?.BackgroundColor?.Normal, d.Slider.Thumb);
-            Color thumbHoverColor = ParseColor(theme.Slider?.ThumbHover ?? theme.Slider?.Thumb ?? theme.SettingOn?.BackgroundColor?.Hover, d.Slider.ThumbHover);
-
-            SliderTrackOffStyle.normal.background = GetTex(trackOffColor);
-            SliderTrackOnStyle.normal.background = GetTex(trackOnColor);
-
-            SliderThumbStyle.normal.background = GetCircleTex(thumbColor);
-            SliderThumbStyle.hover.background = GetCircleTex(thumbHoverColor);
-            SliderThumbStyle.active.background = GetCircleTex(thumbHoverColor);
-
-            // Exposed dynamic properties
-            AccentColor = catModOnBg.normal;
-            AccentHoverColor = catModOnBg.hover;
-            BackgroundColor = ParseColor(theme.CategoryWindow?.BackgroundColor, d.CategoryWindow.BackgroundColor);
-            LightBackgroundColor = catModOffBg.normal;
-            TextWhite = baseText;
-            TextDim = catModOffText.normal;
-            HoverColor = catModOffBg.hover;
-            ActiveColor = tbOffBg.active;
-            DimColor = ParseColor(theme.Misc?.DimBackground, d.Misc.DimBackground);
-            NefLineColor = ParseColor(theme.NEF?.LineColor, d.NEF.LineColor);
-            NefNodeColor = ParseColor(theme.NEF?.NodeBackground, d.NEF.NodeBackground);
+            return;
         }
 
-        private static (Color normal, Color hover, Color active) ResolveState(ColorState state, ColorState fallback)
+        if (!LoadedThemes.TryGetValue(themeName, out var theme))
         {
-            string normHex = !string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Normal;
-            string hovHex = !string.IsNullOrEmpty(state?.Hover) ? state.Hover : (!string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Hover);
-            string actHex = !string.IsNullOrEmpty(state?.Active) ? state.Active : (!string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Active);
-
-            Color normal = ParseColor(normHex, fallback?.Normal ?? "#FFFFFFFF");
-            Color hover = ParseColor(hovHex, fallback?.Hover ?? normHex);
-            Color active = ParseColor(actHex, fallback?.Active ?? normHex);
-
-            return (normal, hover, active);
+            DebugLogger.Warning($"[Themes] Theme '{themeName}' not found. Falling back to default.");
+            theme = InternalDefaultTheme;
+            themeName = InternalDefaultTheme.Name;
         }
 
-        private static Color ParseColor(string hex, string defaultHex)
-        {
-            if (!string.IsNullOrEmpty(hex) && ColorUtility.TryParseHtmlString(hex, out Color col))
-                return col;
+        CurrentThemeName = themeName;
+        var d = InternalDefaultTheme;
 
-            ColorUtility.TryParseHtmlString(defaultHex, out Color defCol);
-            return defCol;
-        }
+        // --- 1. Top Bar Off ---
+        var tbOffText = ResolveState(theme.TopBarOff?.Text, d.TopBarOff.Text);
+        var tbOffBg = ResolveState(theme.TopBarOff?.BackgroundColor, d.TopBarOff.BackgroundColor);
+        TopBarStyle.normal.textColor = tbOffText.normal;
+        TopBarStyle.hover.textColor = tbOffText.hover;
+        TopBarStyle.active.textColor = tbOffText.active;
+        TopBarStyle.normal.background = GetTex(tbOffBg.normal);
+        TopBarStyle.hover.background = GetTex(tbOffBg.hover);
+        TopBarStyle.active.background = GetTex(tbOffBg.active);
 
-        private static Texture2D GetTex(Color col)
-        {
-            if (_texCache.TryGetValue(col, out var tex) && tex != null)
-                return tex;
+        // --- 2. Top Bar Active ---
+        var tbActText = ResolveState(theme.TopBarActive?.Text, d.TopBarActive.Text);
+        var tbActBg = ResolveState(theme.TopBarActive?.BackgroundColor, d.TopBarActive.BackgroundColor);
+        TopBarActiveStyle.normal.textColor = tbActText.normal;
+        TopBarActiveStyle.hover.textColor = tbActText.hover;
+        TopBarActiveStyle.active.textColor = tbActText.active;
+        TopBarActiveStyle.normal.background = GetTex(tbActBg.normal);
+        TopBarActiveStyle.hover.background = GetTex(tbActBg.hover);
+        TopBarActiveStyle.active.background = GetTex(tbActBg.active);
 
-            Texture2D newTex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            newTex.SetPixel(0, 0, col);
-            newTex.Apply();
-            _texCache[col] = newTex;
-            return newTex;
-        }
+        // --- 3. Category Header ---
+        var catHeadText = ResolveState(theme.CategoryHeader?.Text, d.CategoryHeader.Text);
+        var catHeadBg = ResolveState(theme.CategoryHeader?.BackgroundColor, d.CategoryHeader.BackgroundColor);
+        CategoryHeaderStyle.normal.textColor = catHeadText.normal;
+        CategoryHeaderStyle.hover.textColor = catHeadText.hover;
+        CategoryHeaderStyle.active.textColor = catHeadText.active;
+        CategoryHeaderStyle.normal.background = GetTex(catHeadBg.normal);
+        CategoryHeaderStyle.hover.background = GetTex(catHeadBg.hover);
+        CategoryHeaderStyle.active.background = GetTex(catHeadBg.active);
 
-        private static readonly Dictionary<string, Texture2D> _circleTextureCache = new Dictionary<string, Texture2D>();
+        // --- 4. Category Window ---
+        CategoryWindowStyle.normal.textColor = ParseColor(theme.CategoryWindow?.Text, d.CategoryWindow.Text);
+        CategoryWindowStyle.normal.background = GetTex(ParseColor(theme.CategoryWindow?.BackgroundColor, d.CategoryWindow.BackgroundColor));
 
-        public static Texture2D GetCircleTex(Color color, int size = 64)
-        {
-            string key = $"{color.r}_{color.g}_{color.b}_{color.a}_{size}";
-            if (_circleTextureCache.TryGetValue(key, out var cached) && cached != null)
-                return cached;
+        // --- 5. Category Module Off ---
+        var catModOffText = ResolveState(theme.CategoryModuleOff?.Text, d.CategoryModuleOff.Text);
+        var catModOffBg = ResolveState(theme.CategoryModuleOff?.BackgroundColor, d.CategoryModuleOff.BackgroundColor);
+        CategoryModuleOffStyle.normal.textColor = catModOffText.normal;
+        CategoryModuleOffStyle.hover.textColor = catModOffText.hover;
+        CategoryModuleOffStyle.active.textColor = catModOffText.active;
+        CategoryModuleOffStyle.normal.background = GetTex(catModOffBg.normal);
+        CategoryModuleOffStyle.hover.background = GetTex(catModOffBg.hover);
+        CategoryModuleOffStyle.active.background = GetTex(catModOffBg.active);
 
-            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false)
-            {
-                filterMode = FilterMode.Bilinear,
-                wrapMode = TextureWrapMode.Clamp
-            };
+        // --- 6. Category Module On ---
+        var catModOnText = ResolveState(theme.CategoryModuleOn?.Text, d.CategoryModuleOn.Text);
+        var catModOnBg = ResolveState(theme.CategoryModuleOn?.BackgroundColor, d.CategoryModuleOn.BackgroundColor);
+        CategoryModuleOnStyle.normal.textColor = catModOnText.normal;
+        CategoryModuleOnStyle.hover.textColor = catModOnText.hover;
+        CategoryModuleOnStyle.active.textColor = catModOnText.active;
+        CategoryModuleOnStyle.normal.background = GetTex(catModOnBg.normal);
+        CategoryModuleOnStyle.hover.background = GetTex(catModOnBg.hover);
+        CategoryModuleOnStyle.active.background = GetTex(catModOnBg.active);
 
-            float center = (size - 1) / 2f;
-            float radius = size / 2f;
-            float edgeThickness = 1.25f;
+        // --- 7. Close Button ---
+        var closeText = ResolveState(theme.CloseButton?.Text, d.CloseButton.Text);
+        var closeBg = ResolveState(theme.CloseButton?.BackgroundColor, d.CloseButton.BackgroundColor);
+        CloseButtonStyle.normal.textColor = closeText.normal;
+        CloseButtonStyle.hover.textColor = closeText.hover;
+        CloseButtonStyle.active.textColor = closeText.active;
+        CloseButtonStyle.normal.background = GetTex(closeBg.normal);
+        CloseButtonStyle.hover.background = GetTex(closeBg.hover);
+        CloseButtonStyle.active.background = GetTex(closeBg.active);
 
-            for (int y = 0; y < size; y++)
-            {
-                for (int x = 0; x < size; x++)
-                {
-                    float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
-                    float alpha = Mathf.Clamp01((radius - dist) / edgeThickness);
-                    Color pixelColor = new Color(color.r, color.g, color.b, color.a * alpha);
-                    tex.SetPixel(x, y, pixelColor);
-                }
-            }
+        // --- 8. Settings Window ---
+        string rawWindowBg = theme.SettingsWindow?.WindowBackground
+                             ?? theme.CategoryWindow?.BackgroundColor
+                             ?? d.SettingsWindow.WindowBackground;
+        SettingsWndowBgStyle.normal.background = GetTex(ParseColor(rawWindowBg, d.SettingsWindow.WindowBackground));
 
-            tex.Apply(false);
-            _circleTextureCache[key] = tex;
+        SettingsWndowStyle.normal.textColor = ParseColor(theme.SettingsWindow?.Text, d.SettingsWindow.Text);
+        SettingsWndowStyle.normal.background = GetTex(ParseColor(theme.SettingsWindow?.BackgroundColor, d.SettingsWindow.BackgroundColor));
+
+        // --- 9. Setting Off ---
+        var setOffText = ResolveState(theme.SettingOff?.Text, d.SettingOff.Text);
+        var setOffBg = ResolveState(theme.SettingOff?.BackgroundColor, d.SettingOff.BackgroundColor);
+        SettingOff.normal.textColor = setOffText.normal;
+        SettingOff.hover.textColor = setOffText.hover;
+        SettingOff.active.textColor = setOffText.active;
+        SettingOff.normal.background = GetTex(setOffBg.normal);
+        SettingOff.hover.background = GetTex(setOffBg.hover);
+        SettingOff.active.background = GetTex(setOffBg.active);
+
+        // --- 10. Setting On ---
+        var setOnText = ResolveState(theme.SettingOn?.Text, d.SettingOn.Text);
+        var setOnBg = ResolveState(theme.SettingOn?.BackgroundColor, d.SettingOn.BackgroundColor);
+        SettingOn.normal.textColor = setOnText.normal;
+        SettingOn.hover.textColor = setOnText.hover;
+        SettingOn.active.textColor = setOnText.active;
+        SettingOn.normal.background = GetTex(setOnBg.normal);
+        SettingOn.hover.background = GetTex(setOnBg.hover);
+        SettingOn.active.background = GetTex(setOnBg.active);
+
+        // --- 11. Typography ---
+        SettingsDescriptionStyle.normal.textColor = ParseColor(theme.Typography?.Description, d.Typography.Description);
+        SettingLabelStyle.normal.textColor = ParseColor(theme.Typography?.Label, d.Typography.Label);
+        SettingAuthorStyle.normal.textColor = ParseColor(theme.Typography?.Author, d.Typography.Author);
+
+        Color baseText = ParseColor(theme.Typography?.Text, d.Typography.Text);
+        SettingTextStyle.normal.textColor = baseText;
+        TextStyle.normal.textColor = baseText;
+
+        TextHighlightedStyle.normal.textColor = ParseColor(theme.Typography?.HighlightText, d.Typography.HighlightText);
+        TextHighlightedStyle.normal.background = GetTex(ParseColor(theme.Typography?.HighlightBackground, d.Typography.HighlightBackground));
+
+        // --- 12. Separator & Dim ---
+        SeparatorStyle.normal.background = GetTex(ParseColor(theme.Misc?.Separator, d.Misc.Separator));
+
+        Color sepTextColor = ParseColor(theme.Misc?.SeparatorText ?? theme.Typography?.Secondary, d.Typography.Secondary);
+        SeparatorTextStyle.normal.textColor = sepTextColor;
+
+        DimBackgroundStyle.normal.background = GetTex(ParseColor(theme.Misc?.DimBackground, d.Misc.DimBackground));
+
+        // --- 13. NEF & HUD ---
+        NEFLineStyle.normal.background = GetTex(ParseColor(theme.NEF?.LineColor, d.NEF.LineColor));
+        NEFNodeStyle.normal.background = GetTex(ParseColor(theme.NEF?.NodeBackground, d.NEF.NodeBackground));
+        HUDElementStyle.normal.textColor = ParseColor(theme.HUD?.TextColor, d.HUD.TextColor);
+
+        // --- 14. Slider ---
+        Color trackOffColor = ParseColor(theme.Slider?.TrackOff ?? theme.SettingOff?.BackgroundColor?.Normal, d.Slider.TrackOff);
+        Color trackOnColor = ParseColor(theme.Slider?.TrackOn ?? theme.SettingOn?.BackgroundColor?.Normal, d.Slider.TrackOn);
+        Color thumbColor = ParseColor(theme.Slider?.Thumb ?? theme.SettingOn?.BackgroundColor?.Normal, d.Slider.Thumb);
+        Color thumbHoverColor = ParseColor(theme.Slider?.ThumbHover ?? theme.Slider?.Thumb ?? theme.SettingOn?.BackgroundColor?.Hover, d.Slider.ThumbHover);
+
+        SliderTrackOffStyle.normal.background = GetTex(trackOffColor);
+        SliderTrackOnStyle.normal.background = GetTex(trackOnColor);
+
+        SliderThumbStyle.normal.background = GetCircleTex(thumbColor);
+        SliderThumbStyle.hover.background = GetCircleTex(thumbHoverColor);
+        SliderThumbStyle.active.background = GetCircleTex(thumbHoverColor);
+
+        // Exposed dynamic properties
+        AccentColor = catModOnBg.normal;
+        AccentHoverColor = catModOnBg.hover;
+        BackgroundColor = ParseColor(theme.CategoryWindow?.BackgroundColor, d.CategoryWindow.BackgroundColor);
+        LightBackgroundColor = catModOffBg.normal;
+        TextWhite = baseText;
+        TextDim = catModOffText.normal;
+        HoverColor = catModOffBg.hover;
+        ActiveColor = tbOffBg.active;
+        DimColor = ParseColor(theme.Misc?.DimBackground, d.Misc.DimBackground);
+        NefLineColor = ParseColor(theme.NEF?.LineColor, d.NEF.LineColor);
+        NefNodeColor = ParseColor(theme.NEF?.NodeBackground, d.NEF.NodeBackground);
+    }
+
+    private static (Color normal, Color hover, Color active) ResolveState(ColorState state, ColorState fallback)
+    {
+        string normHex = !string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Normal;
+        string hovHex = !string.IsNullOrEmpty(state?.Hover) ? state.Hover : (!string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Hover);
+        string actHex = !string.IsNullOrEmpty(state?.Active) ? state.Active : (!string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Active);
+
+        Color normal = ParseColor(normHex, fallback?.Normal ?? "#FFFFFFFF");
+        Color hover = ParseColor(hovHex, fallback?.Hover ?? normHex);
+        Color active = ParseColor(actHex, fallback?.Active ?? normHex);
+
+        return (normal, hover, active);
+    }
+
+    private static Color ParseColor(string hex, string defaultHex)
+    {
+        if (!string.IsNullOrEmpty(hex) && ColorUtility.TryParseHtmlString(hex, out Color col))
+            return col;
+
+        ColorUtility.TryParseHtmlString(defaultHex, out Color defCol);
+        return defCol;
+    }
+
+    private static Texture2D GetTex(Color col)
+    {
+        if (_texCache.TryGetValue(col, out var tex) && tex != null)
             return tex;
-        }
 
-        private static void BuildEmptyStyles()
+        Texture2D newTex = new(1, 1, TextureFormat.RGBA32, false);
+        newTex.SetPixel(0, 0, col);
+        newTex.Apply();
+        _texCache[col] = newTex;
+        return newTex;
+    }
+
+    private static readonly Dictionary<string, Texture2D> _circleTextureCache = new();
+
+    public static Texture2D GetCircleTex(Color color, int size = 64)
+    {
+        string key = $"{color.r}_{color.g}_{color.b}_{color.a}_{size}";
+        if (_circleTextureCache.TryGetValue(key, out var cached) && cached != null)
+            return cached;
+
+        Texture2D tex = new(size, size, TextureFormat.RGBA32, false)
         {
-            TopBarStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
-            TopBarActiveStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
-            CategoryModuleOnStyle = new GUIStyle { alignment = TextAnchor.MiddleLeft };
-            CloseButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
-            CategoryHeaderStyle = new GUIStyle { alignment = TextAnchor.UpperCenter, fontStyle = FontStyle.Bold };
-            CategoryModuleOffStyle = new GUIStyle { alignment = TextAnchor.MiddleLeft };
-            CategoryWindowStyle = new GUIStyle { alignment = TextAnchor.UpperCenter, fontStyle = FontStyle.Bold };
-            SettingsWndowBgStyle = new GUIStyle();
-            SettingsWndowStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
-            SettingOn = new GUIStyle { alignment = TextAnchor.MiddleLeft };
-            SettingOff = new GUIStyle { alignment = TextAnchor.MiddleLeft };
-            SettingsDescriptionStyle = new GUIStyle { wordWrap = true, alignment = TextAnchor.UpperLeft, richText = true };
-            SettingLabelStyle = new GUIStyle { wordWrap = true, alignment = TextAnchor.UpperLeft, richText = true };
-            SettingAuthorStyle = new GUIStyle { fontStyle = FontStyle.Italic, alignment = TextAnchor.MiddleLeft, richText = true };
-            SettingTextStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = true, clipping = TextClipping.Clip };
-            SeparatorStyle = new GUIStyle();
-            SeparatorTextStyle = new GUIStyle
+            filterMode = FilterMode.Bilinear,
+            wrapMode = TextureWrapMode.Clamp
+        };
+
+        float center = (size - 1) / 2f;
+        float radius = size / 2f;
+        float edgeThickness = 1.25f;
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
             {
-                alignment = TextAnchor.MiddleCenter,
-                wordWrap = false,
-                richText = true,
-                clipping = TextClipping.Overflow
-            };
-            DimBackgroundStyle = new GUIStyle();
-            HUDElementStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, wordWrap = false, richText = true };
-            NEFLineStyle = new GUIStyle();
-            NEFNodeStyle = new GUIStyle { alignment = TextAnchor.LowerCenter };
-            TextStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = false, clipping = TextClipping.Clip };
-            TextHighlightedStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = false, clipping = TextClipping.Clip };
-            SliderTrackOffStyle = new GUIStyle();
-            SliderTrackOnStyle = new GUIStyle();
-            SliderThumbStyle = new GUIStyle();
+                float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+                float alpha = Mathf.Clamp01((radius - dist) / edgeThickness);
+                Color pixelColor = new(color.r, color.g, color.b, color.a * alpha);
+                tex.SetPixel(x, y, pixelColor);
+            }
         }
 
-        private static void SetOffset(RectOffset ro, int left, int right, int top, int bottom)
+        tex.Apply(false);
+        _circleTextureCache[key] = tex;
+        return tex;
+    }
+
+    private static void BuildEmptyStyles()
+    {
+        TopBarStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
+        TopBarActiveStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
+        CategoryModuleOnStyle = new GUIStyle { alignment = TextAnchor.MiddleLeft };
+        CloseButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
+        CategoryHeaderStyle = new GUIStyle { alignment = TextAnchor.UpperCenter, fontStyle = FontStyle.Bold };
+        CategoryModuleOffStyle = new GUIStyle { alignment = TextAnchor.MiddleLeft };
+        CategoryWindowStyle = new GUIStyle { alignment = TextAnchor.UpperCenter, fontStyle = FontStyle.Bold };
+        SettingsWndowBgStyle = new GUIStyle();
+        SettingsWndowStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
+        SettingOn = new GUIStyle { alignment = TextAnchor.MiddleLeft };
+        SettingOff = new GUIStyle { alignment = TextAnchor.MiddleLeft };
+        SettingsDescriptionStyle = new GUIStyle { wordWrap = true, alignment = TextAnchor.UpperLeft, richText = true };
+        SettingLabelStyle = new GUIStyle { wordWrap = true, alignment = TextAnchor.UpperLeft, richText = true };
+        SettingAuthorStyle = new GUIStyle { fontStyle = FontStyle.Italic, alignment = TextAnchor.MiddleLeft, richText = true };
+        SettingTextStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = true, clipping = TextClipping.Clip };
+        SeparatorStyle = new GUIStyle();
+        SeparatorTextStyle = new GUIStyle
         {
-            if (ro == null) return;
-            ro.left = left;
-            ro.right = right;
-            ro.top = top;
-            ro.bottom = bottom;
-        }
+            alignment = TextAnchor.MiddleCenter,
+            wordWrap = false,
+            richText = true,
+            clipping = TextClipping.Overflow
+        };
+        DimBackgroundStyle = new GUIStyle();
+        HUDElementStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, wordWrap = false, richText = true };
+        NEFLineStyle = new GUIStyle();
+        NEFNodeStyle = new GUIStyle { alignment = TextAnchor.LowerCenter };
+        TextStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = false, clipping = TextClipping.Clip };
+        TextHighlightedStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = false, clipping = TextClipping.Clip };
+        SliderTrackOffStyle = new GUIStyle();
+        SliderTrackOnStyle = new GUIStyle();
+        SliderThumbStyle = new GUIStyle();
+    }
 
-        public static void Rescale()
-        {
-            if (!Magnetar_Client.Core.main.Instance.hasWarmedUp || !IsInitialized) return;
+    private static void SetOffset(RectOffset ro, int left, int right, int top, int bottom)
+    {
+        if (ro == null) return;
+        ro.left = left;
+        ro.right = right;
+        ro.top = top;
+        ro.bottom = bottom;
+    }
 
-            float scale = Config.GUIScale;
-            float elementScale = Config.ElementScale;
+    public static void Rescale()
+    {
+        if (!Magnetar_Client.Core.main.Instance.hasWarmedUp || !IsInitialized) return;
 
-            if (Mathf.Approximately(scale, lastScale) && Mathf.Approximately(elementScale, lastElementScale))
-                return;
+        float scale = Config.GUIScale;
+        float elementScale = Config.ElementScale;
 
-            lastScale = scale;
-            lastElementScale = elementScale;
+        if (Mathf.Approximately(scale, lastScale) && Mathf.Approximately(elementScale, lastElementScale))
+            return;
 
-            int S(int baseValue) => Mathf.Max(1, Mathf.RoundToInt(Config.S(baseValue)));
-            float Sf(float baseValue) => Mathf.Max(0f, Config.S(baseValue));
+        lastScale = scale;
+        lastElementScale = elementScale;
 
-            // TopBar
-            TopBarStyle.fontSize = S(TopBarFontSize);
-            SetOffset(TopBarStyle.padding, S(TopBarPaddingLR), S(TopBarPaddingLR), S(TopBarPaddingTB), S(TopBarPaddingTB));
+        int S(int baseValue) => Mathf.Max(1, Mathf.RoundToInt(Config.S(baseValue)));
+        float Sf(float baseValue) => Mathf.Max(0f, Config.S(baseValue));
 
-            TopBarActiveStyle.fontSize = S(TopBarFontSize);
-            SetOffset(TopBarActiveStyle.padding, S(TopBarPaddingLR), S(TopBarPaddingLR), S(TopBarPaddingTB), S(TopBarPaddingTB));
+        // TopBar
+        TopBarStyle.fontSize = S(TopBarFontSize);
+        SetOffset(TopBarStyle.padding, S(TopBarPaddingLR), S(TopBarPaddingLR), S(TopBarPaddingTB), S(TopBarPaddingTB));
 
-            // Category Modules
-            CategoryHeaderStyle.fontSize = S(ModuleWindowFontSize);
-            SetOffset(CategoryHeaderStyle.padding, 0, 0, S(ModuleWindowPaddingTop), 0);
+        TopBarActiveStyle.fontSize = S(TopBarFontSize);
+        SetOffset(TopBarActiveStyle.padding, S(TopBarPaddingLR), S(TopBarPaddingLR), S(TopBarPaddingTB), S(TopBarPaddingTB));
 
-            CategoryModuleOnStyle.fontSize = S(ModuleFontSize);
-            SetOffset(CategoryModuleOnStyle.padding, S(ModulePaddingLeft), 0, 0, 0);
+        // Category Modules
+        CategoryHeaderStyle.fontSize = S(ModuleWindowFontSize);
+        SetOffset(CategoryHeaderStyle.padding, 0, 0, S(ModuleWindowPaddingTop), 0);
 
-            CloseButtonStyle.fontSize = S(ModuleFontSize);
+        CategoryModuleOnStyle.fontSize = S(ModuleFontSize);
+        SetOffset(CategoryModuleOnStyle.padding, S(ModulePaddingLeft), 0, 0, 0);
 
-            CategoryModuleOffStyle.fontSize = S(ModuleFontSize);
-            SetOffset(CategoryModuleOffStyle.padding, S(ModulePaddingLeft), 0, 0, 0);
+        CloseButtonStyle.fontSize = S(ModuleFontSize);
 
-            // Windows
-            SetOffset(SettingsWndowBgStyle.padding, 0, 0, 0, 0);
+        CategoryModuleOffStyle.fontSize = S(ModuleFontSize);
+        SetOffset(CategoryModuleOffStyle.padding, S(ModulePaddingLeft), 0, 0, 0);
 
-            CategoryWindowStyle.fontSize = S(ModuleWindowFontSize);
-            SetOffset(CategoryWindowStyle.padding, 0, 0, S(ModuleWindowPaddingTop), 0);
+        // Windows
+        SetOffset(SettingsWndowBgStyle.padding, 0, 0, 0, 0);
 
-            SettingsWndowStyle.fontSize = S(SettingsWindowFontSize);
-            SetOffset(SettingsWndowStyle.padding, 0, 0, 0, 0);
+        CategoryWindowStyle.fontSize = S(ModuleWindowFontSize);
+        SetOffset(CategoryWindowStyle.padding, 0, 0, S(ModuleWindowPaddingTop), 0);
 
-            // Controls
-            SettingOn.fontSize = S(SettingFontSize);
-            SetOffset(SettingOn.padding, S(SettingPaddingLeft), 0, 0, 0);
+        SettingsWndowStyle.fontSize = S(SettingsWindowFontSize);
+        SetOffset(SettingsWndowStyle.padding, 0, 0, 0, 0);
 
-            SettingOff.fontSize = S(SettingFontSize);
-            SetOffset(SettingOff.padding, S(SettingPaddingLeft), 0, 0, 0);
+        // Controls
+        SettingOn.fontSize = S(SettingFontSize);
+        SetOffset(SettingOn.padding, S(SettingPaddingLeft), 0, 0, 0);
 
-            // Typography
-            SettingsDescriptionStyle.fontSize = S(DescriptionFontSize);
-            SetOffset(SettingsDescriptionStyle.padding, S(DescriptionPaddingLR), S(DescriptionPaddingLR), S(DescriptionPaddingTB), S(DescriptionPaddingTB));
+        SettingOff.fontSize = S(SettingFontSize);
+        SetOffset(SettingOff.padding, S(SettingPaddingLeft), 0, 0, 0);
 
-            SettingLabelStyle.fontSize = S(SettingDescriptionFontSize);
-            SetOffset(SettingLabelStyle.padding, S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingTB), S(SettingDescriptionPaddingTB));
+        // Typography
+        SettingsDescriptionStyle.fontSize = S(DescriptionFontSize);
+        SetOffset(SettingsDescriptionStyle.padding, S(DescriptionPaddingLR), S(DescriptionPaddingLR), S(DescriptionPaddingTB), S(DescriptionPaddingTB));
 
-            SettingAuthorStyle.fontSize = S(AuthorFontSize);
-            SetOffset(SettingAuthorStyle.padding, S(AuthorPaddingLeft), 0, 0, 0);
+        SettingLabelStyle.fontSize = S(SettingDescriptionFontSize);
+        SetOffset(SettingLabelStyle.padding, S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingTB), S(SettingDescriptionPaddingTB));
 
-            SettingTextStyle.fontSize = S(TextFontSize);
+        SettingAuthorStyle.fontSize = S(AuthorFontSize);
+        SetOffset(SettingAuthorStyle.padding, S(AuthorPaddingLeft), 0, 0, 0);
 
-            // Separators & HUD
-            SeparatorStyle.fixedHeight = Sf(SeparatorFixedHeight);
-            SeparatorTextStyle.fontSize = S(SettingFontSize);
-            SetOffset(SeparatorTextStyle.padding, 0, 0, 0, 0);
-            HUDElementStyle.fontSize = Mathf.Max(1, Mathf.RoundToInt(HUDElementFontSize * elementScale));
-            SetOffset(HUDElementStyle.padding, 0, 0, 0, 0);
+        SettingTextStyle.fontSize = S(TextFontSize);
 
-            // NEF & Text
-            SetOffset(NEFNodeStyle.padding, S(NEFNodePaddingLR), S(NEFNodePaddingLR), S(NEFNodePaddingTop), S(NEFNodePaddingBottom));
-            TextStyle.fontSize = S(TextFontSize);
-            TextHighlightedStyle.fontSize = TextStyle.fontSize;
+        // Separators & HUD
+        SeparatorStyle.fixedHeight = Sf(SeparatorFixedHeight);
+        SeparatorTextStyle.fontSize = S(SettingFontSize);
+        SetOffset(SeparatorTextStyle.padding, 0, 0, 0, 0);
+        HUDElementStyle.fontSize = Mathf.Max(1, Mathf.RoundToInt(HUDElementFontSize * elementScale));
+        SetOffset(HUDElementStyle.padding, 0, 0, 0, 0);
 
-            // Slider
-            SetOffset(SliderTrackOffStyle.padding, 0, 0, 0, 0);
-            SetOffset(SliderTrackOnStyle.padding, 0, 0, 0, 0);
-            SetOffset(SliderThumbStyle.padding, 0, 0, 0, 0);
-        }
+        // NEF & Text
+        SetOffset(NEFNodeStyle.padding, S(NEFNodePaddingLR), S(NEFNodePaddingLR), S(NEFNodePaddingTop), S(NEFNodePaddingBottom));
+        TextStyle.fontSize = S(TextFontSize);
+        TextHighlightedStyle.fontSize = TextStyle.fontSize;
+
+        // Slider
+        SetOffset(SliderTrackOffStyle.padding, 0, 0, 0, 0);
+        SetOffset(SliderTrackOnStyle.padding, 0, 0, 0, 0);
+        SetOffset(SliderThumbStyle.padding, 0, 0, 0, 0);
     }
 }

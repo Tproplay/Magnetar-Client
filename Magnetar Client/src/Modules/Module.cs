@@ -7,648 +7,647 @@ using System;
 using Il2Cpp;
 #endif
 
-namespace Magnetar_Client.Modules
+namespace Magnetar_Client.Modules;
+
+public enum ModuleCategory
 {
-    public enum ModuleCategory
+    Level,
+    Tools,
+    Plant,
+    Zombie,
+    Misc,
+    Visual,
+    Addon
+}
+
+
+public abstract class Module
+{
+    /// <summary>
+    /// Name to be displayed
+    /// </summary>
+    public abstract string Name { get; set; }
+    /// <summary>
+    /// Search hints to be used when searching for the module
+    /// </summary>
+    public abstract string SearchHints { get; set; }
+    /// <summary>
+    /// Optional name for mod author. Supports rich text.
+    /// </summary>
+    public virtual string Author { get; set; } = "";
+    /// <summary>
+    /// Description for the module. Supports rich text.
+    /// </summary>
+    public abstract string Description { get; set; }
+    /// <summary>
+    /// The category to put the module in.
+    /// </summary>
+    public abstract ModuleCategory Category { get; set; }
+
+    public virtual bool enableInVanillaMode { get; set; } = false;
+
+    // These will be in Every ModuleManager.
+    // Edit if you want a different default keybind or want it to be enabled by default.
+
+    public BindSetting KeyBind = new("Keybind");
+
+    public string GetBindString() => KeyBind.GetBindString();
+
+    public List<KeyCode> BindKeys => KeyBind.BindKeys;
+    public virtual bool HoldMode { get; set; } = false;
+    public virtual bool Active { get; set; } = false;
+    /// <summary>
+    /// Used to determine whether the setting window of the module is opened.
+    /// </summary>
+    public virtual bool ShowSettings { get; set; } = false;
+
+
+    /// <summary>
+    /// Used to store all the settings for the module.
+    /// </summary>
+    public List<Setting> Settings = new();
+
+    public void Toggle()
     {
-        Level,
-        Tools,
-        Plant,
-        Zombie,
-        Misc,
-        Visual,
-        Addon
+        Active = !Active;
+        if (Active) OnEnable();
+        else OnDisable();
     }
 
+    /// <summary>
+    /// Runs once when the module is enabled. Runs Before OnUpdateActive.
+    /// </summary>
+    public virtual void OnEnable() { }
+    /// <summary>
+    /// Runs once when the module is disabled. Runs After OnUpdateActive.
+    /// </summary>
+    public virtual void OnDisable() { }
 
-    public abstract class Module
+
+    /// <summary>
+    /// Runs every frame regardless of whether the module is active or not.
+    /// </summary>
+    public virtual void OnUpdate() { if (Active) OnUpdateActive(); }
+
+    /// <summary>
+    /// Runs every frame only when the module is active. Will not run if OnUpdate is overridden without calling base.OnUpdate().
+    /// </summary>
+    public virtual void OnUpdateActive() { }
+
+    /// <summary>
+    /// Runs every frame on UnityEngine.OnGUI
+    /// </summary>
+    public virtual void OnGUI() { }
+
+    /// <summary>
+    /// Static method to add settings to the module. Call this in the constructor of your module with all the settings you want to add.
+    /// </summary>
+    public void AddSettings(params Setting[] settings)
     {
-        /// <summary>
-        /// Name to be displayed
-        /// </summary>
-        public abstract string Name { get; set; }
-        /// <summary>
-        /// Search hints to be used when searching for the module
-        /// </summary>
-        public abstract string SearchHints { get; set; }
-        /// <summary>
-        /// Optional name for mod author. Supports rich text.
-        /// </summary>
-        public virtual string Author { get; set; } = "";
-        /// <summary>
-        /// Description for the module. Supports rich text.
-        /// </summary>
-        public abstract string Description { get; set; }
-        /// <summary>
-        /// The category to put the module in.
-        /// </summary>
-        public abstract ModuleCategory Category { get; set; }
+        Settings.AddRange(settings);
+    }
+    public virtual bool Initialized { get; set; } = false;
 
-        public virtual bool enableInVanillaMode { get; set; } = false;
+    /// <summary>
+    /// Runs When a the mod's language is changed
+    /// </summary>
+    public virtual void OnLanguageChanged() { }
 
-        // These will be in Every ModuleManager.
-        // Edit if you want a different default keybind or want it to be enabled by default.
+    public static Dictionary<int, string> TranslatedNames(System.Type enumType)
+    {
+        if (enumType == null || !enumType.IsEnum) return new Dictionary<int, string>();
 
-        public BindSetting KeyBind = new BindSetting("Keybind");
-
-        public string GetBindString() => KeyBind.GetBindString();
-
-        public List<KeyCode> BindKeys => KeyBind.BindKeys;
-        public virtual bool HoldMode { get; set; } = false;
-        public virtual bool Active { get; set; } = false;
-        /// <summary>
-        /// Used to determine whether the setting window of the module is opened.
-        /// </summary>
-        public virtual bool ShowSettings { get; set; } = false;
-
-
-        /// <summary>
-        /// Used to store all the settings for the module.
-        /// </summary>
-        public List<Setting> Settings = new List<Setting>();
-
-        public void Toggle()
-        {
-            Active = !Active;
-            if (Active) OnEnable();
-            else OnDisable();
-        }
-
-        /// <summary>
-        /// Runs once when the module is enabled. Runs Before OnUpdateActive.
-        /// </summary>
-        public virtual void OnEnable() { }
-        /// <summary>
-        /// Runs once when the module is disabled. Runs After OnUpdateActive.
-        /// </summary>
-        public virtual void OnDisable() { }
-
-
-        /// <summary>
-        /// Runs every frame regardless of whether the module is active or not.
-        /// </summary>
-        public virtual void OnUpdate() { if (Active) OnUpdateActive(); }
-
-        /// <summary>
-        /// Runs every frame only when the module is active. Will not run if OnUpdate is overridden without calling base.OnUpdate().
-        /// </summary>
-        public virtual void OnUpdateActive() { }
-
-        /// <summary>
-        /// Runs every frame on UnityEngine.OnGUI
-        /// </summary>
-        public virtual void OnGUI() { }
-
-        /// <summary>
-        /// Static method to add settings to the module. Call this in the constructor of your module with all the settings you want to add.
-        /// </summary>
-        public void AddSettings(params Setting[] settings)
-        {
-            Settings.AddRange(settings);
-        }
-        public virtual bool Initialized { get; set; } = false;
-
-        /// <summary>
-        /// Runs When a the mod's language is changed
-        /// </summary>
-        public virtual void OnLanguageChanged() { }
-
-        public static Dictionary<int, string> TranslatedNames(System.Type enumType)
-        {
-            if (enumType == null || !enumType.IsEnum) return new Dictionary<int, string>();
-
-            Dictionary<int, string> names = new Dictionary<int, string>();
+        Dictionary<int, string> names = new();
 
 #if ANDROID
-            foreach (var val in System.Enum.GetValues(enumType))
-            {
-                int key = System.Convert.ToInt32(val);
-                string name = System.Enum.GetName(enumType, val) ?? val.ToString();
-                names[key] = $"{name} ({key})";
-            }
+        foreach (var val in System.Enum.GetValues(enumType))
+        {
+            int key = System.Convert.ToInt32(val);
+            string name = System.Enum.GetName(enumType, val) ?? val.ToString();
+            names[key] = $"{name} ({key})";
+        }
 #else
-            names = Translator.TranslateEnum(enumType);
+        names = Translator.TranslateEnum(enumType);
 
-            foreach (var kvp in names.ToList())
-            {
-                names[kvp.Key] = $"{kvp.Value} ({kvp.Key})";
-    }
+        foreach (var kvp in names.ToList())
+        {
+            names[kvp.Key] = $"{kvp.Value} ({kvp.Key})";
+}
 #endif
 
-            return names;
-        }
-
-        public virtual float SettingsWidth { get; set; } = Config.ModuleManager.SettingsWidth;
-
-        // Add these category helper methods anywhere inside the ModuleManager class
-        public void CreateCategory(string name, bool defaultExpanded = true)
-        {
-            Settings.Add(new CategorySetting(name, defaultExpanded));
-        }
-
-        public void EndCategory()
-        {
-            Settings.Add(new EndCategorySetting());
-        }
-
-        public static bool GetKeyComboDown(List<KeyCode> keyCodes)
-        {
-            if (keyCodes == null || keyCodes.Count == 0) return false;
-
-            KeyCode triggerKey = keyCodes[keyCodes.Count - 1];
-            if (!Input.GetKeyDown(triggerKey)) return false;
-
-            for (int i = 0; i < keyCodes.Count - 1; i++)
-            {
-                if (!Input.GetKey(keyCodes[i]))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        public struct Banned
-        {
-            public static HashSet<int> PlantTypeBanned = new HashSet<int>
-            {
-                // Not a plant
-                (int)PlantType.Nothing, (int)PlantType.MagnetInterface,
-                (int)PlantType.MagnetBox, (int)PlantType.Pit,
-                (int)PlantType.Refrash, (int)PlantType.Extract_single,
-                (int)PlantType.Extract_ten,
-
-                // EnumValueAsmResolver_002EDotNet_002ESerialized_002ESerializedConstant
-                261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,
-
-                // Unreleased
-                3000,
-            };
-            public static HashSet<int> ZombieTypeBanned = new HashSet<int>
-            {
-                // Not a zombie
-                (int)ZombieType.Nothing,
-            };
-        }
-
+        return names;
     }
 
-    public abstract class Setting
+    public virtual float SettingsWidth { get; set; } = Config.ModuleManager.SettingsWidth;
+
+    // Add these category helper methods anywhere inside the ModuleManager class
+    public void CreateCategory(string name, bool defaultExpanded = true)
     {
-        public string Name;
-        public bool IsDisabled { get; set; } = false;
+        Settings.Add(new CategorySetting(name, defaultExpanded));
     }
 
-    public class StringSetting : Setting
+    public void EndCategory()
     {
-        private string _value;
-        public string DefaultValue;
-        public List<string> AutocompleteVars;
-
-        // Callbacks
-        public Action<string> OnValueChanging { get; set; }
-        public Action<string> OnValueChanged { get; set; }
-
-        public string Value
-        {
-            get => _value;
-            set
-            {
-                if (IsDisabled) return;
-
-                if (_value != value)
-                {
-                    OnValueChanging?.Invoke(value); // Pre
-                    _value = value;
-                    OnValueChanged?.Invoke(_value); // Post
-                }
-            }
-        }
-
-        public StringSetting(string name, string defaultValue, List<string> autocompleteVars = null)
-        {
-            Name = name;
-            _value = defaultValue;
-            DefaultValue = defaultValue;
-            AutocompleteVars = autocompleteVars;
-        }
+        Settings.Add(new EndCategorySetting());
     }
 
-    public class IntSetting : Setting
+    public static bool GetKeyComboDown(List<KeyCode> keyCodes)
     {
-        private int _value;
-        public int DefaultValue;
-        public bool InstantUpdate = false;
-        public int? PendingValue = null;
+        if (keyCodes == null || keyCodes.Count == 0) return false;
 
-        public int Min;
-        public int Max;
-        public int TrueMin;
-        public int TrueMax;
+        KeyCode triggerKey = keyCodes[keyCodes.Count - 1];
+        if (!Input.GetKeyDown(triggerKey)) return false;
 
-        // Callbacks
-        public Action<int> OnValueChanging { get; set; }
-        public Action<int> OnValueChanged { get; set; }
-
-        public int DisplayValue => PendingValue ?? _value;
-
-        public int Value
+        for (int i = 0; i < keyCodes.Count - 1; i++)
         {
-            get => _value;
-            set
+            if (!Input.GetKey(keyCodes[i]))
             {
-                if (IsDisabled) return;
-
-                if (_value != value)
-                {
-                    OnValueChanging?.Invoke(value); // Pre
-                    _value = value;
-                    OnValueChanged?.Invoke(_value); // Post
-                }
+                return false;
             }
         }
-
-        public void SetPending(int val)
-        {
-            if (InstantUpdate)
-            {
-                Value = val;
-                PendingValue = null;
-            }
-            else
-            {
-                PendingValue = val;
-            }
-        }
-
-        public void Commit()
-        {
-            if (PendingValue.HasValue)
-            {
-                Value = PendingValue.Value;
-                PendingValue = null;
-            }
-        }
-
-        public IntSetting(string name, int min, int max, int defaultValue, int trueMin = int.MinValue, int trueMax = int.MaxValue, bool instantUpdate = false)
-        {
-            Name = name;
-            Min = min;
-            Max = max;
-            TrueMin = trueMin;
-            TrueMax = trueMax;
-            InstantUpdate = instantUpdate;
-            _value = System.Math.Max(TrueMin, System.Math.Min(defaultValue, TrueMax));
-            DefaultValue = _value;
-        }
+        return true;
     }
 
-    public class FloatSetting : Setting
+    public struct Banned
     {
-        private float _value;
-        public float DefaultValue;
-        public bool InstantUpdate = false;
-        public float? PendingValue = null;
-
-        public float Min;
-        public float Max;
-        public float TrueMin;
-        public float TrueMax;
-        public int DecimalPlaces;
-
-        // Callbacks
-        public Action<float> OnValueChanging { get; set; }
-        public Action<float> OnValueChanged { get; set; }
-
-        public float DisplayValue => PendingValue ?? _value;
-
-        public float Value
+        public static HashSet<int> PlantTypeBanned = new()
         {
-            get => _value;
-            set
-            {
-                if (IsDisabled) return;
+            // Not a plant
+            (int)PlantType.Nothing, (int)PlantType.MagnetInterface,
+            (int)PlantType.MagnetBox, (int)PlantType.Pit,
+            (int)PlantType.Refrash, (int)PlantType.Extract_single,
+            (int)PlantType.Extract_ten,
 
-                if (_value != value)
-                {
-                    OnValueChanging?.Invoke(value); // Pre
-                    _value = value;
-                    OnValueChanged?.Invoke(_value); // Post
-                }
-            }
-        }
+            // EnumValueAsmResolver_002EDotNet_002ESerialized_002ESerializedConstant
+            261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,
 
-        public void SetPending(float val)
+            // Unreleased
+            3000,
+        };
+        public static HashSet<int> ZombieTypeBanned = new()
         {
-            if (InstantUpdate)
-            {
-                Value = val;
-                PendingValue = null;
-            }
-            else
-            {
-                PendingValue = val;
-            }
-        }
-
-        public void Commit()
-        {
-            if (PendingValue.HasValue)
-            {
-                Value = PendingValue.Value;
-                PendingValue = null;
-            }
-        }
-
-        public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces = 1, float trueMin = float.MinValue, float trueMax = float.MaxValue, bool instantUpdate = false)
-        {
-            Name = name;
-            Min = min;
-            Max = max;
-            TrueMin = trueMin;
-            TrueMax = trueMax;
-            DecimalPlaces = decimalPlaces;
-            InstantUpdate = instantUpdate;
-            _value = UnityEngine.Mathf.Clamp(defaultValue, TrueMin, TrueMax);
-            DefaultValue = _value;
-        }
+            // Not a zombie
+            (int)ZombieType.Nothing,
+        };
     }
 
-    public class BoolSetting : Setting
+}
+
+public abstract class Setting
+{
+    public string Name;
+    public bool IsDisabled { get; set; } = false;
+}
+
+public class StringSetting : Setting
+{
+    private string _value;
+    public string DefaultValue;
+    public List<string> AutocompleteVars;
+
+    // Callbacks
+    public Action<string> OnValueChanging { get; set; }
+    public Action<string> OnValueChanged { get; set; }
+
+    public string Value
     {
-        private bool _value;
-        public bool DefaultValue;
-
-        // Callbacks
-        public Action<bool> OnValueChanging { get; set; }
-        public Action<bool> OnValueChanged { get; set; }
-
-        public bool Value
-        {
-            get => _value;
-            set
-            {
-                if (IsDisabled) return;
-
-                if (_value != value)
-                {
-                    OnValueChanging?.Invoke(value); // Pre
-                    _value = value;
-                    OnValueChanged?.Invoke(_value); // Post
-                }
-            }
-        }
-
-        public BoolSetting(string name, bool defaultValue)
-        {
-            Name = name;
-            _value = defaultValue;
-            DefaultValue = defaultValue;
-        }
-    }
-
-    public class BindSetting : Setting
-    {
-        private List<KeyCode> _bindKeys = new List<KeyCode>();
-        public List<KeyCode> DefaultKeys { get; private set; } = new List<KeyCode>();
-
-        public bool IsBinding = false;
-
-        // Callbacks
-        public Action<List<KeyCode>> OnValueChanging { get; set; }
-        public Action<List<KeyCode>> OnValueChanged { get; set; }
-
-        public List<KeyCode> BindKeys
-        {
-            get => _bindKeys;
-            set
-            {
-                if (IsDisabled) return;
-
-                if (value == null) value = new List<KeyCode>();
-
-                if (!_bindKeys.SequenceEqual(value))
-                {
-                    OnValueChanging?.Invoke(value); // Pre
-                    _bindKeys = value;
-                    OnValueChanged?.Invoke(_bindKeys); // Post
-                }
-            }
-        }
-
-        public BindSetting(string name, List<KeyCode> defaultKeys = null)
-        {
-            Name = name;
-            if (defaultKeys != null)
-            {
-                DefaultKeys = defaultKeys;
-                _bindKeys = new List<KeyCode>(defaultKeys);
-            }
-        }
-
-        public string GetBindString()
-        {
-            if (BindKeys == null || BindKeys.Count == 0) return "None";
-            return string.Join(" + ", BindKeys.Select(k => k.ToString()).ToArray());
-        }
-    }
-
-    public class MultiSelectSetting : Setting
-    {
-        public int MaxSelection = -1;
-        public Dictionary<int, string> Options { get; set; }
-        public HashSet<int> SelectedValues = new HashSet<int>();
-        public HashSet<int> Blacklist = new HashSet<int>();
-        public HashSet<string> NameBlacklist = new HashSet<string>();
-        public System.Type EnumType { get; private set; }
-
-        // Callback passes: (int optionId, bool isSelected)
-        public Action<int, bool> OnSelectionChanged { get; set; }
-
-        private Dictionary<int, string> _customNames;
-        public Dictionary<int, string> CustomNames
-        {
-            get => _customNames;
-            set
-            {
-                _customNames = value;
-                if (_customNames != null)
-                {
-                    foreach (var kvp in _customNames) Options[kvp.Key] = kvp.Value;
-                }
-            }
-        }
-
-        public MultiSelectSetting(string name)
-        {
-            Name = name;
-            Options = new Dictionary<int, string>();
-        }
-
-        public MultiSelectSetting(string name, System.Type enumType)
-        {
-            Name = name;
-            EnumType = enumType;
-            Options = new Dictionary<int, string>();
-
-            if (enumType != null && enumType.IsEnum)
-            {
-                foreach (var val in System.Enum.GetValues(enumType))
-                {
-                    Options[System.Convert.ToInt32(val)] = val.ToString();
-                }
-            }
-        }
-
-        public string GetDisplayName(int id, string fallbackName) => Options.ContainsKey(id) ? Options[id] : fallbackName;
-        public void AddOption(int id, string displayName) => Options[id] = displayName;
-
-        public void RemoveOption(int id)
+        get => _value;
+        set
         {
             if (IsDisabled) return;
 
-            if (Options.ContainsKey(id))
+            if (_value != value)
             {
-                Options.Remove(id);
-                if (SelectedValues.Contains(id))
-                {
-                    SelectedValues.Remove(id);
-                    OnSelectionChanged?.Invoke(id, false);
-                }
+                OnValueChanging?.Invoke(value); // Pre
+                _value = value;
+                OnValueChanged?.Invoke(_value); // Post
             }
         }
+    }
 
-        public void Toggle(int id)
+    public StringSetting(string name, string defaultValue, List<string> autocompleteVars = null)
+    {
+        Name = name;
+        _value = defaultValue;
+        DefaultValue = defaultValue;
+        AutocompleteVars = autocompleteVars;
+    }
+}
+
+public class IntSetting : Setting
+{
+    private int _value;
+    public int DefaultValue;
+    public bool InstantUpdate = false;
+    public int? PendingValue = null;
+
+    public int Min;
+    public int Max;
+    public int TrueMin;
+    public int TrueMax;
+
+    // Callbacks
+    public Action<int> OnValueChanging { get; set; }
+    public Action<int> OnValueChanged { get; set; }
+
+    public int DisplayValue => PendingValue ?? _value;
+
+    public int Value
+    {
+        get => _value;
+        set
         {
             if (IsDisabled) return;
 
-            if (IsSelected(id)) Deselect(id);
-            else Select(id);
-        }
-
-        public void Select(int id)
-        {
-            if (IsDisabled) return;
-
-            if (!SelectedValues.Contains(id) && !Blacklist.Contains(id))
+            if (_value != value)
             {
-                if (MaxSelection == -1 || SelectedValues.Count < MaxSelection)
-                {
-                    SelectedValues.Add(id);
-                    OnSelectionChanged?.Invoke(id, true);
-                }
+                OnValueChanging?.Invoke(value); // Pre
+                _value = value;
+                OnValueChanged?.Invoke(_value); // Post
             }
         }
+    }
 
-        public void Deselect(int id)
+    public void SetPending(int val)
+    {
+        if (InstantUpdate)
+        {
+            Value = val;
+            PendingValue = null;
+        }
+        else
+        {
+            PendingValue = val;
+        }
+    }
+
+    public void Commit()
+    {
+        if (PendingValue.HasValue)
+        {
+            Value = PendingValue.Value;
+            PendingValue = null;
+        }
+    }
+
+    public IntSetting(string name, int min, int max, int defaultValue, int trueMin = int.MinValue, int trueMax = int.MaxValue, bool instantUpdate = false)
+    {
+        Name = name;
+        Min = min;
+        Max = max;
+        TrueMin = trueMin;
+        TrueMax = trueMax;
+        InstantUpdate = instantUpdate;
+        _value = System.Math.Max(TrueMin, System.Math.Min(defaultValue, TrueMax));
+        DefaultValue = _value;
+    }
+}
+
+public class FloatSetting : Setting
+{
+    private float _value;
+    public float DefaultValue;
+    public bool InstantUpdate = false;
+    public float? PendingValue = null;
+
+    public float Min;
+    public float Max;
+    public float TrueMin;
+    public float TrueMax;
+    public int DecimalPlaces;
+
+    // Callbacks
+    public Action<float> OnValueChanging { get; set; }
+    public Action<float> OnValueChanged { get; set; }
+
+    public float DisplayValue => PendingValue ?? _value;
+
+    public float Value
+    {
+        get => _value;
+        set
         {
             if (IsDisabled) return;
 
+            if (_value != value)
+            {
+                OnValueChanging?.Invoke(value); // Pre
+                _value = value;
+                OnValueChanged?.Invoke(_value); // Post
+            }
+        }
+    }
+
+    public void SetPending(float val)
+    {
+        if (InstantUpdate)
+        {
+            Value = val;
+            PendingValue = null;
+        }
+        else
+        {
+            PendingValue = val;
+        }
+    }
+
+    public void Commit()
+    {
+        if (PendingValue.HasValue)
+        {
+            Value = PendingValue.Value;
+            PendingValue = null;
+        }
+    }
+
+    public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces = 1, float trueMin = float.MinValue, float trueMax = float.MaxValue, bool instantUpdate = false)
+    {
+        Name = name;
+        Min = min;
+        Max = max;
+        TrueMin = trueMin;
+        TrueMax = trueMax;
+        DecimalPlaces = decimalPlaces;
+        InstantUpdate = instantUpdate;
+        _value = UnityEngine.Mathf.Clamp(defaultValue, TrueMin, TrueMax);
+        DefaultValue = _value;
+    }
+}
+
+public class BoolSetting : Setting
+{
+    private bool _value;
+    public bool DefaultValue;
+
+    // Callbacks
+    public Action<bool> OnValueChanging { get; set; }
+    public Action<bool> OnValueChanged { get; set; }
+
+    public bool Value
+    {
+        get => _value;
+        set
+        {
+            if (IsDisabled) return;
+
+            if (_value != value)
+            {
+                OnValueChanging?.Invoke(value); // Pre
+                _value = value;
+                OnValueChanged?.Invoke(_value); // Post
+            }
+        }
+    }
+
+    public BoolSetting(string name, bool defaultValue)
+    {
+        Name = name;
+        _value = defaultValue;
+        DefaultValue = defaultValue;
+    }
+}
+
+public class BindSetting : Setting
+{
+    private List<KeyCode> _bindKeys = new();
+    public List<KeyCode> DefaultKeys { get; private set; } = new List<KeyCode>();
+
+    public bool IsBinding = false;
+
+    // Callbacks
+    public Action<List<KeyCode>> OnValueChanging { get; set; }
+    public Action<List<KeyCode>> OnValueChanged { get; set; }
+
+    public List<KeyCode> BindKeys
+    {
+        get => _bindKeys;
+        set
+        {
+            if (IsDisabled) return;
+
+            if (value == null) value = new List<KeyCode>();
+
+            if (!_bindKeys.SequenceEqual(value))
+            {
+                OnValueChanging?.Invoke(value); // Pre
+                _bindKeys = value;
+                OnValueChanged?.Invoke(_bindKeys); // Post
+            }
+        }
+    }
+
+    public BindSetting(string name, List<KeyCode> defaultKeys = null)
+    {
+        Name = name;
+        if (defaultKeys != null)
+        {
+            DefaultKeys = defaultKeys;
+            _bindKeys = new List<KeyCode>(defaultKeys);
+        }
+    }
+
+    public string GetBindString()
+    {
+        if (BindKeys == null || BindKeys.Count == 0) return "None";
+        return string.Join(" + ", BindKeys.Select(k => k.ToString()).ToArray());
+    }
+}
+
+public class MultiSelectSetting : Setting
+{
+    public int MaxSelection = -1;
+    public Dictionary<int, string> Options { get; set; }
+    public HashSet<int> SelectedValues = new();
+    public HashSet<int> Blacklist = new();
+    public HashSet<string> NameBlacklist = new();
+    public System.Type EnumType { get; private set; }
+
+    // Callback passes: (int optionId, bool isSelected)
+    public Action<int, bool> OnSelectionChanged { get; set; }
+
+    private Dictionary<int, string> _customNames;
+    public Dictionary<int, string> CustomNames
+    {
+        get => _customNames;
+        set
+        {
+            _customNames = value;
+            if (_customNames != null)
+            {
+                foreach (var kvp in _customNames) Options[kvp.Key] = kvp.Value;
+            }
+        }
+    }
+
+    public MultiSelectSetting(string name)
+    {
+        Name = name;
+        Options = new Dictionary<int, string>();
+    }
+
+    public MultiSelectSetting(string name, System.Type enumType)
+    {
+        Name = name;
+        EnumType = enumType;
+        Options = new Dictionary<int, string>();
+
+        if (enumType != null && enumType.IsEnum)
+        {
+            foreach (var val in System.Enum.GetValues(enumType))
+            {
+                Options[System.Convert.ToInt32(val)] = val.ToString();
+            }
+        }
+    }
+
+    public string GetDisplayName(int id, string fallbackName) => Options.ContainsKey(id) ? Options[id] : fallbackName;
+    public void AddOption(int id, string displayName) => Options[id] = displayName;
+
+    public void RemoveOption(int id)
+    {
+        if (IsDisabled) return;
+
+        if (Options.ContainsKey(id))
+        {
+            Options.Remove(id);
             if (SelectedValues.Contains(id))
             {
                 SelectedValues.Remove(id);
                 OnSelectionChanged?.Invoke(id, false);
             }
         }
-
-        public bool IsSelected(int id) => SelectedValues.Contains(id);
     }
 
-    public class SelectSetting : Setting
+    public void Toggle(int id)
     {
-        private int _value;
-        public int DefaultValue;
-        public Dictionary<int, string> Options { get; set; }
-        public System.Type EnumType { get; private set; }
-        public Dictionary<int, string> CustomNames { get; set; }
+        if (IsDisabled) return;
 
-        // Selection Callback
-        public Action<int> OnSelectionChanged { get; set; }
+        if (IsSelected(id)) Deselect(id);
+        else Select(id);
+    }
 
-        public int Value
+    public void Select(int id)
+    {
+        if (IsDisabled) return;
+
+        if (!SelectedValues.Contains(id) && !Blacklist.Contains(id))
         {
-            get => _value;
-            set
+            if (MaxSelection == -1 || SelectedValues.Count < MaxSelection)
             {
-                if (IsDisabled) return;
-
-                if (_value != value)
-                {
-                    _value = value;
-                    OnSelectionChanged?.Invoke(_value);
-                }
+                SelectedValues.Add(id);
+                OnSelectionChanged?.Invoke(id, true);
             }
         }
+    }
 
-        public SelectSetting(string name, int defaultValue)
+    public void Deselect(int id)
+    {
+        if (IsDisabled) return;
+
+        if (SelectedValues.Contains(id))
         {
-            Name = name;
-            _value = defaultValue;
-            DefaultValue = defaultValue;
-            Options = new Dictionary<int, string>();
-            CustomNames = new Dictionary<int, string>();
+            SelectedValues.Remove(id);
+            OnSelectionChanged?.Invoke(id, false);
         }
+    }
 
-        public SelectSetting(string name, System.Type enumType, int defaultValue)
+    public bool IsSelected(int id) => SelectedValues.Contains(id);
+}
+
+public class SelectSetting : Setting
+{
+    private int _value;
+    public int DefaultValue;
+    public Dictionary<int, string> Options { get; set; }
+    public System.Type EnumType { get; private set; }
+    public Dictionary<int, string> CustomNames { get; set; }
+
+    // Selection Callback
+    public Action<int> OnSelectionChanged { get; set; }
+
+    public int Value
+    {
+        get => _value;
+        set
         {
-            Name = name;
-            _value = defaultValue;
-            DefaultValue = defaultValue;
-            EnumType = enumType;
-            Options = new Dictionary<int, string>();
-            CustomNames = new Dictionary<int, string>();
+            if (IsDisabled) return;
 
-            if (enumType != null && enumType.IsEnum)
+            if (_value != value)
             {
-                foreach (var val in System.Enum.GetValues(enumType))
-                {
-                    Options[System.Convert.ToInt32(val)] = val.ToString();
-                }
+                _value = value;
+                OnSelectionChanged?.Invoke(_value);
             }
         }
-
-        public void AddOption(int id, string displayName) => Options[id] = displayName;
     }
 
-    public class CategorySetting : Setting
+    public SelectSetting(string name, int defaultValue)
     {
-        public bool IsExpanded;
-        public CategorySetting(string name, bool defaultExpanded = true)
+        Name = name;
+        _value = defaultValue;
+        DefaultValue = defaultValue;
+        Options = new Dictionary<int, string>();
+        CustomNames = new Dictionary<int, string>();
+    }
+
+    public SelectSetting(string name, System.Type enumType, int defaultValue)
+    {
+        Name = name;
+        _value = defaultValue;
+        DefaultValue = defaultValue;
+        EnumType = enumType;
+        Options = new Dictionary<int, string>();
+        CustomNames = new Dictionary<int, string>();
+
+        if (enumType != null && enumType.IsEnum)
         {
-            Name = name;
-            IsExpanded = defaultExpanded;
+            foreach (var val in System.Enum.GetValues(enumType))
+            {
+                Options[System.Convert.ToInt32(val)] = val.ToString();
+            }
         }
     }
 
-    public class EndCategorySetting : Setting { }
+    public void AddOption(int id, string displayName) => Options[id] = displayName;
+}
 
-    public class ButtonSetting : Setting
+public class CategorySetting : Setting
+{
+    public bool IsExpanded;
+    public CategorySetting(string name, bool defaultExpanded = true)
     {
-        public string ButtonText;
-        public Action OnClick;
+        Name = name;
+        IsExpanded = defaultExpanded;
+    }
+}
 
-        public ButtonSetting(string name, Action onClick, string buttonText = "Click")
-        {
-            Name = name;
-            OnClick = onClick;
-            ButtonText = buttonText;
-        }
+public class EndCategorySetting : Setting { }
+
+public class ButtonSetting : Setting
+{
+    public string ButtonText;
+    public Action OnClick;
+
+    public ButtonSetting(string name, Action onClick, string buttonText = "Click")
+    {
+        Name = name;
+        OnClick = onClick;
+        ButtonText = buttonText;
+    }
+}
+
+public class LabelSetting : Setting
+{
+    public string Text;
+
+    public LabelSetting(string text)
+    {
+        Name = text;
+        Text = text;
     }
 
-    public class LabelSetting : Setting
+    public LabelSetting(string name, string text)
     {
-        public string Text;
-
-        public LabelSetting(string text)
-        {
-            Name = text;
-            Text = text;
-        }
-
-        public LabelSetting(string name, string text)
-        {
-            Name = name;
-            Text = text;
-        }
+        Name = name;
+        Text = text;
     }
 }

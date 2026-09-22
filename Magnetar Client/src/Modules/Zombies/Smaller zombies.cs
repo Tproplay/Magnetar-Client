@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using HarmonyLib;
 using static Magnetar_Client.Game.AppData;
 using Magnetar_Client.Game;
 using UnityEngine;
@@ -10,104 +9,103 @@ using UnityEngine;
 using Il2Cpp;
 #endif
 
-namespace Magnetar_Client.Modules
+namespace Magnetar_Client.Modules;
+
+public class SmallerZombies : Module
 {
-    public class SmallerZombies : Module
+    // Mod Info
+    public override string Name { get; set; } = "Smaller Zombies";
+    public override string Description { get; set; } = "Changes the size of selected zombies.\n" +
+        "Note: Changing size also affects zombie's speed.";
+    public override string SearchHints { get; set; } = "";
+
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
+
+    // Mod Data
+
+    public static SmallerZombies instance;
+
+    public FloatSetting sizeMultiplier;
+    public MultiSelectSetting selectedZombies;
+
+
+    public SmallerZombies()
     {
-        // Mod Info
-        public override string Name { get; set; } = "Smaller Zombies";
-        public override string Description { get; set; } = "Changes the size of selected zombies.\n" +
-            "Note: Changing size also affects zombie's speed.";
-        public override string SearchHints { get; set; } = "";
+        instance = this;
 
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
+        CreateCategory("General");
 
-        // Mod Data
+        sizeMultiplier = new FloatSetting("Scale multiplier", 0.5f, 2f, 0.75f, 3, 0f);
 
-        public static SmallerZombies instance;
-
-        public FloatSetting sizeMultiplier;
-        public MultiSelectSetting selectedZombies;
-
-
-        public SmallerZombies()
+        selectedZombies = new MultiSelectSetting("Entities", typeof(ZombieType))
         {
-            instance = this;
+            MaxSelection = -1,
+            CustomNames = TranslatedNames(typeof(ZombieType)),
+            Blacklist = Banned.ZombieTypeBanned,
+        };
+        selectedZombies.Options.Keys.ToList().ForEach(selectedZombies.Select);
 
-            CreateCategory("General");
+        AddSettings(sizeMultiplier, selectedZombies);
 
-            sizeMultiplier = new FloatSetting("Scale multiplier", 0.5f, 2f, 0.75f, 3, 0f);
+        EndCategory();
 
-            selectedZombies = new MultiSelectSetting("Entities", typeof(ZombieType))
+
+    }
+
+    public override void OnLanguageChanged()
+    {
+        selectedZombies.CustomNames = TranslatedNames(typeof(ZombieType));
+    }
+
+    // Mod Logic
+
+    Dictionary<Zombie, Vector3> originaltheZombieScale = new();
+    public override void OnUpdateActive()
+    {
+        if (BoardInstanceIsNull) return;
+
+        foreach (var zombie in GameData.zombieList)
+        {
+
+            // Check if the zombie is selected and if we haven't already stored its original scale
+            if (selectedZombies.IsSelected((int)zombie.theZombieType) &&
+                !originaltheZombieScale.ContainsKey(zombie))
             {
-                MaxSelection = -1,
-                CustomNames = TranslatedNames(typeof(ZombieType)),
-                Blacklist = Banned.ZombieTypeBanned,
-            };
-            selectedZombies.Options.Keys.ToList().ForEach(selectedZombies.Select);
-
-            AddSettings(sizeMultiplier, selectedZombies);
-
-            EndCategory();
-
-
-        }
-
-        public override void OnLanguageChanged()
-        {
-            selectedZombies.CustomNames = TranslatedNames(typeof(ZombieType));
-        }
-
-        // Mod Logic
-
-        Dictionary<Zombie, Vector3> originaltheZombieScale = new Dictionary<Zombie, Vector3>();
-        public override void OnUpdateActive()
-        {
-            if (BoardInstanceIsNull) return;
-
-            foreach (var zombie in GameData.zombieList)
-            {
-
-                // Check if the zombie is selected and if we haven't already stored its original scale
-                if (selectedZombies.IsSelected((int)zombie.theZombieType) &&
-                    !originaltheZombieScale.ContainsKey(zombie))
-                {
-                    originaltheZombieScale[zombie] = zombie.transform.localScale;
-                }
-
-                // Check if the zombie is deselected while the module is running 
-                if (!selectedZombies.IsSelected((int)zombie.theZombieType) &&
-                    originaltheZombieScale.ContainsKey(zombie))
-                {
-                    zombie.transform.localScale = originaltheZombieScale[zombie];
-                    originaltheZombieScale.Remove(zombie);
-                }
-
-                // Update the Scale
-                if (originaltheZombieScale.ContainsKey(zombie))
-                {
-                    if (zombie.transform.localScale != originaltheZombieScale[zombie] * sizeMultiplier.Value)
-                    {
-                        zombie.transform.localScale = originaltheZombieScale[zombie] * sizeMultiplier.Value;
-                    }
-                }
-
+                originaltheZombieScale[zombie] = zombie.transform.localScale;
             }
 
-        }
-
-        public override void OnDisable()
-        {
-            foreach (var zombie in GameData.zombieList)
+            // Check if the zombie is deselected while the module is running 
+            if (!selectedZombies.IsSelected((int)zombie.theZombieType) &&
+                originaltheZombieScale.ContainsKey(zombie))
             {
-                if (originaltheZombieScale.ContainsKey(zombie))
+                zombie.transform.localScale = originaltheZombieScale[zombie];
+                originaltheZombieScale.Remove(zombie);
+            }
+
+            // Update the Scale
+            if (originaltheZombieScale.ContainsKey(zombie))
+            {
+                if (zombie.transform.localScale != originaltheZombieScale[zombie] * sizeMultiplier.Value)
                 {
-                    zombie.transform.localScale = originaltheZombieScale[zombie];
+                    zombie.transform.localScale = originaltheZombieScale[zombie] * sizeMultiplier.Value;
                 }
             }
 
-            originaltheZombieScale.Clear();
         }
 
     }
+
+    public override void OnDisable()
+    {
+        foreach (var zombie in GameData.zombieList)
+        {
+            if (originaltheZombieScale.ContainsKey(zombie))
+            {
+                zombie.transform.localScale = originaltheZombieScale[zombie];
+            }
+        }
+
+        originaltheZombieScale.Clear();
+    }
+
 }

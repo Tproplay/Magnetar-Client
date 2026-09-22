@@ -6,6 +6,9 @@
     <BuildType Name="Release_bepinex" />
     <BuildType Name="Release_melon" />
   </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
   <Project Path="Magnetar Client/Magnetar Client.csproj" Id="432ac7a5-ce0b-4cbb-87e8-1bdc6887c091">
     <BuildType Solution="Melonloader|*" Project="melonloader" />
   </Project>

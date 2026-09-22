@@ -10,319 +10,257 @@ using System.Linq;
 using Il2Cpp;
 #endif
 
-namespace Magnetar_Client.Modules
+namespace Magnetar_Client.Modules;
+
+public class NoRender : Module
 {
-    public class NoRender : Module
+    public override string Name { get; set; } = "No Render";
+    public override string Description { get; set; } = "Now you can see your lawn.";
+    public override string SearchHints { get; set; } = "norender blank lawn invisible invisibleplants novisual" +
+        " clear lawn invisiblezombies hiderender hidedisplay nographics seelawn hidden lawnclear hidetexture " +
+        "graphicsoff renderdisable norendering invisibletextures clearfield plantshide zombieshide blankfield " +
+        "hidelawn seebackground hiderenderer seeground norend hidedraw no particles remove particles particletypes remove" +
+        "particles disable particles clear particles";
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
+    public override bool enableInVanillaMode { get; set; } = true;
+
+    public static NoRender instance;
+
+    public MultiSelectSetting ParticlesSetting;
+    public MultiSelectSetting ParticleTypeSetting;
+    public MultiSelectSetting GameObjectsSetting;
+    public MultiSelectSetting BulletSetting;
+    public MultiSelectSetting EffectSetting;
+    public MultiSelectSetting OtherSetting;
+
+    public BoolSetting ScreenShakeSetting;
+
+    private Dictionary<int, string> fxDatabase = new();
+    private readonly string filePath;
+    private int nextId = 0;
+
+    public enum ParticleTypes { Empty }
+    public NoRender()
     {
-        public override string Name { get; set; } = "No Render";
-        public override string Description { get; set; } = "Now you can see your lawn.";
-        public override string SearchHints { get; set; } = "norender blank lawn invisible invisibleplants novisual" +
-            " clear lawn invisiblezombies hiderender hidedisplay nographics seelawn hidden lawnclear hidetexture " +
-            "graphicsoff renderdisable norendering invisibletextures clearfield plantshide zombieshide blankfield " +
-            "hidelawn seebackground hiderenderer seeground norend hidedraw no particles remove particles particletypes remove" +
-            "particles disable particles clear particles";
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
-        public override bool enableInVanillaMode { get; set; } = true;
+        instance = this;
 
-        public static NoRender instance;
+        CreateCategory("General");
 
-        public MultiSelectSetting ParticlesSetting;
-        public MultiSelectSetting ParticleTypeSetting;
-        public MultiSelectSetting GameObjectsSetting;
-        public MultiSelectSetting BulletSetting;
-        public MultiSelectSetting EffectSetting;
-        public MultiSelectSetting OtherSetting;
+        #region Particle
+        // 1. Setup Path & Ensure Directory Exists
+        string baseModsDir = SaveLoad.ModsDir;
+        string dirPath = Path.Combine(baseModsDir, "Magnetar Data");
 
-        public BoolSetting ScreenShakeSetting;
-
-        private Dictionary<int, string> fxDatabase = new Dictionary<int, string>();
-        private readonly string filePath;
-        private int nextId = 0;
-
-        public enum ParticleTypes { Empty }
-        public NoRender()
+        if (!Directory.Exists(dirPath))
         {
-            instance = this;
+            Directory.CreateDirectory(dirPath);
+        }
 
-            CreateCategory("General");
+        filePath = Path.Combine(dirPath, "FxData.json");
+        Dictionary<int, string> menuNames = new();
 
-            #region Particle
-            // 1. Setup Path & Ensure Directory Exists
-            string baseModsDir = SaveLoad.ModsDir;
-            string dirPath = Path.Combine(baseModsDir, "Magnetar Data");
-
-            if (!Directory.Exists(dirPath))
+        // 2. Load the JSON
+        if (File.Exists(filePath))
+        {
+            try
             {
-                Directory.CreateDirectory(dirPath);
-            }
+                string json = File.ReadAllText(filePath);
+                List<string> loadedEffects = Newtonsoft.Json.JsonConvert.DeserializeObject<List<string>>(json);
 
-            filePath = Path.Combine(dirPath, "FxData.json");
-            Dictionary<int, string> menuNames = new Dictionary<int, string>();
-
-            // 2. Load the JSON
-            if (File.Exists(filePath))
-            {
-                try
+                if (loadedEffects != null)
                 {
-                    string json = File.ReadAllText(filePath);
-                    List<string> loadedEffects = Newtonsoft.Json.JsonConvert.DeserializeObject<List<string>>(json);
-
-                    if (loadedEffects != null)
+                    foreach (string effect in loadedEffects)
                     {
-                        foreach (string effect in loadedEffects)
-                        {
-                            fxDatabase.Add(nextId, effect);
-                            menuNames.Add(nextId, effect);
-                            nextId++;
-                        }
+                        fxDatabase.Add(nextId, effect);
+                        menuNames.Add(nextId, effect);
+                        nextId++;
                     }
                 }
-                catch { }
             }
-
-            // 3. Menu
-            ParticlesSetting = new MultiSelectSetting("Particles", typeof(ParticleTypes))
-            {
-                CustomNames = menuNames
-            };
-
-            AddSettings(ParticlesSetting);
-            #endregion
-
-            ParticleTypeSetting = new MultiSelectSetting("Particle Types", typeof(ParticleType))
-            {
-                CustomNames = TranslatedNames(typeof(ParticleType))
-            };
-            AddSettings(ParticleTypeSetting);
-
-            GameObjectsSetting = new MultiSelectSetting("Game Objects", typeof(BucketType))
-            {
-                CustomNames = TranslatedNames(typeof(BucketType))
-            };
-            AddSettings(GameObjectsSetting);
-
-            BulletSetting = new MultiSelectSetting("Bullets", typeof(BulletType))
-            {
-                CustomNames = TranslatedNames(typeof(BulletType))
-            };
-            AddSettings(BulletSetting);
-
-            EffectSetting = new MultiSelectSetting("Effects")
-            {
-                Options = new Dictionary<int, string>
-                {
-                    { 1, "Ice shroom effect" },
-                    { 2, "Doom shroom effect" },
-                    { 3, "Jalapeno fire line" },
-                    { 4, "Doom shroom smoke cloud" }
-                }
-            };
-            AddSettings(EffectSetting);
-
-            OtherSetting = new MultiSelectSetting("Others")
-            {
-                Options = new Dictionary<int, string>
-                {
-                    { 0, "Falling Sun" },
-                    { 1, "Falling Coin" },
-                }
-            };
-
-            AddSettings(OtherSetting);
-            EndCategory();
-
-            CreateCategory("Extra");
-
-            ScreenShakeSetting = new BoolSetting("Disable Screen Shake effect", false);
-
-            AddSettings(ScreenShakeSetting);
-            EndCategory();
-
+            catch { }
         }
 
-        public override void OnLanguageChanged()
+        // 3. Menu
+        ParticlesSetting = new MultiSelectSetting("Particles", typeof(ParticleTypes))
         {
-            GameObjectsSetting.CustomNames = TranslatedNames(typeof(BucketType));
-            BulletSetting.CustomNames = TranslatedNames(typeof(BulletType));
+            CustomNames = menuNames
+        };
 
-            EffectSetting.Options = EffectSetting.Options
-                .ToDictionary(kvp => kvp.Key, kvp => Translator.Translate(kvp.Value));
-        }
+        AddSettings(ParticlesSetting);
+        #endregion
 
-        public override void OnUpdateActive()
+        ParticleTypeSetting = new MultiSelectSetting("Particle Types", typeof(ParticleType))
         {
-            if (Game.AppData.BoardInstanceIsNull) return;
+            CustomNames = TranslatedNames(typeof(ParticleType))
+        };
+        AddSettings(ParticleTypeSetting);
 
-            // Particles
-            if (ParticlesSetting.SelectedValues.Count != 0)
+        GameObjectsSetting = new MultiSelectSetting("Game Objects", typeof(BucketType))
+        {
+            CustomNames = TranslatedNames(typeof(BucketType))
+        };
+        AddSettings(GameObjectsSetting);
+
+        BulletSetting = new MultiSelectSetting("Bullets", typeof(BulletType))
+        {
+            CustomNames = TranslatedNames(typeof(BulletType))
+        };
+        AddSettings(BulletSetting);
+
+        EffectSetting = new MultiSelectSetting("Effects")
+        {
+            Options = new Dictionary<int, string>
             {
-                bool isFileDirty = false;
-                var allParticleSystems = UnityEngine.Object.FindObjectsOfType<ParticleSystem>();
-
-                foreach (var ps in allParticleSystems)
-                {
-                    if (ps == null || ps.gameObject == null) continue;
-
-                    string name = ps.gameObject.name;
-                    if (name.EndsWith("(Clone)")) name = name.Substring(0, name.Length - 7);
-
-                    // Fetch the ID, and automatically register it if it is new
-                    int effectId = GetOrRegisterEffect(name, ref isFileDirty);
-
-                    if (ParticlesSetting.IsSelected(effectId))
-                    {
-                        ps.emission.enabled = false;
-                        ps.Clear();
-                    }
-                }
-
-                if (isFileDirty) SaveToJson();
+                { 1, "Ice shroom effect" },
+                { 2, "Doom shroom effect" },
+                { 3, "Jalapeno fire line" },
+                { 4, "Doom shroom smoke cloud" }
             }
-        }
+        };
+        AddSettings(EffectSetting);
 
-        private int GetOrRegisterEffect(string effectName, ref bool isFileDirty)
+        OtherSetting = new MultiSelectSetting("Others")
         {
-            foreach (var pair in fxDatabase)
+            Options = new Dictionary<int, string>
             {
-                if (string.Equals(pair.Value, effectName, System.StringComparison.OrdinalIgnoreCase))
-                {
-                    return pair.Key;
-                }
+                { 0, "Falling Sun" },
+                { 1, "Falling Coin" },
             }
+        };
 
-            int newId = nextId++;
-            fxDatabase.Add(newId, effectName);
-            ParticlesSetting.Options.Add(newId, effectName);
+        AddSettings(OtherSetting);
+        EndCategory();
 
-            isFileDirty = true;
-            return newId;
-        }
+        CreateCategory("Extra");
 
-        private void SaveToJson()
+        ScreenShakeSetting = new BoolSetting("Disable Screen Shake effect", false);
+
+        AddSettings(ScreenShakeSetting);
+        EndCategory();
+
+    }
+
+    public override void OnLanguageChanged()
+    {
+        GameObjectsSetting.CustomNames = TranslatedNames(typeof(BucketType));
+        BulletSetting.CustomNames = TranslatedNames(typeof(BulletType));
+
+        EffectSetting.Options = EffectSetting.Options
+            .ToDictionary(kvp => kvp.Key, kvp => Translator.Translate(kvp.Value));
+    }
+
+    public override void OnUpdateActive()
+    {
+        if (Game.AppData.BoardInstanceIsNull) return;
+
+        // Particles
+        if (ParticlesSetting.SelectedValues.Count != 0)
         {
-            List<string> effectsList = new List<string>(fxDatabase.Values);
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(effectsList, Newtonsoft.Json.Formatting.Indented);
-            File.WriteAllText(filePath, json);
-        }
-
-        public override void OnDisable()
-        {
-            // Particles
+            bool isFileDirty = false;
             var allParticleSystems = UnityEngine.Object.FindObjectsOfType<ParticleSystem>();
+
             foreach (var ps in allParticleSystems)
             {
-                if (ps != null && 
-                    ParticlesSetting.IsSelected(
-                        ParticlesSetting.Options.FirstOrDefault(key=>key.Value==ps.gameObject.name).Key
-                        )
-                    ) ps.emission.enabled = true;
+                if (ps == null || ps.gameObject == null) continue;
+
+                string name = ps.gameObject.name;
+                if (name.EndsWith("(Clone)")) name = name.Substring(0, name.Length - 7);
+
+                // Fetch the ID, and automatically register it if it is new
+                int effectId = GetOrRegisterEffect(name, ref isFileDirty);
+
+                if (ParticlesSetting.IsSelected(effectId))
+                {
+                    ps.emission.enabled = false;
+                    ps.Clear();
+                }
             }
 
-            // Buckets
-            var Buckets = GameObject.FindObjectsOfType<Bucket>();
+            if (isFileDirty) SaveToJson();
+        }
+    }
 
-            foreach (var bucket in Buckets)
+    private int GetOrRegisterEffect(string effectName, ref bool isFileDirty)
+    {
+        foreach (var pair in fxDatabase)
+        {
+            if (string.Equals(pair.Value, effectName, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return pair.Key;
+            }
+        }
+
+        int newId = nextId++;
+        fxDatabase.Add(newId, effectName);
+        ParticlesSetting.Options.Add(newId, effectName);
+
+        isFileDirty = true;
+        return newId;
+    }
+
+    private void SaveToJson()
+    {
+        List<string> effectsList = new(fxDatabase.Values);
+        string json = Newtonsoft.Json.JsonConvert.SerializeObject(effectsList, Newtonsoft.Json.Formatting.Indented);
+        File.WriteAllText(filePath, json);
+    }
+
+    public override void OnDisable()
+    {
+        // Particles
+        var allParticleSystems = UnityEngine.Object.FindObjectsOfType<ParticleSystem>();
+        foreach (var ps in allParticleSystems)
+        {
+            if (ps != null && 
+                ParticlesSetting.IsSelected(
+                    ParticlesSetting.Options.FirstOrDefault(key=>key.Value==ps.gameObject.name).Key
+                    )
+                ) ps.emission.enabled = true;
+        }
+
+        // Buckets
+        var Buckets = GameObject.FindObjectsOfType<Bucket>();
+
+        foreach (var bucket in Buckets)
+        {
+            var renderers = bucket.GetComponentsInChildren<Renderer>(true);
+            foreach (var renderer in renderers)
+            {
+                if (renderer != null && renderer.Pointer != IntPtr.Zero)
+                {
+                    renderer.enabled = true;
+                }
+            }
+        }
+
+        // Bullets
+
+        var Bullets = GameObject.FindObjectsOfType<Bullet>();
+
+        foreach (var bullet in Bullets)
+        {
+            var renderers = bullet.GetComponentsInChildren<Renderer>(true);
+            foreach (var renderer in renderers)
+            {
+                if (renderer != null && renderer.Pointer != IntPtr.Zero)
+                {
+                    renderer.enabled = true;
+                }
+            }
+        }
+    }
+
+    public override void OnEnable()
+    {
+        // Buckets
+        var Buckets = GameObject.FindObjectsOfType<Bucket>();
+
+        foreach (var bucket in Buckets)
+        {
+            if (GameObjectsSetting.IsSelected((int)bucket.theBucketType))
             {
                 var renderers = bucket.GetComponentsInChildren<Renderer>(true);
                 foreach (var renderer in renderers)
-                {
-                    if (renderer != null && renderer.Pointer != IntPtr.Zero)
-                    {
-                        renderer.enabled = true;
-                    }
-                }
-            }
-
-            // Bullets
-
-            var Bullets = GameObject.FindObjectsOfType<Bullet>();
-
-            foreach (var bullet in Bullets)
-            {
-                var renderers = bullet.GetComponentsInChildren<Renderer>(true);
-                foreach (var renderer in renderers)
-                {
-                    if (renderer != null && renderer.Pointer != IntPtr.Zero)
-                    {
-                        renderer.enabled = true;
-                    }
-                }
-            }
-        }
-
-        public override void OnEnable()
-        {
-            // Buckets
-            var Buckets = GameObject.FindObjectsOfType<Bucket>();
-
-            foreach (var bucket in Buckets)
-            {
-                if (GameObjectsSetting.IsSelected((int)bucket.theBucketType))
-                {
-                    var renderers = bucket.GetComponentsInChildren<Renderer>(true);
-                    foreach (var renderer in renderers)
-                    {
-                        if (renderer != null && renderer.Pointer != IntPtr.Zero)
-                        {
-                            renderer.enabled = false;
-                        }
-                    }
-                }
-            }
-
-            // Bullets
-
-            var Bullets = GameObject.FindObjectsOfType<Bullet>();
-
-            foreach (var bullet in Bullets)
-            {
-                if (BulletSetting.IsSelected((int)bullet.theBulletType))
-                {
-                    var renderers = bullet.GetComponentsInChildren<Renderer>(true);
-                    foreach (var renderer in renderers)
-                    {
-                        if (renderer != null && renderer.Pointer != IntPtr.Zero)
-                        {
-                            renderer.enabled = false;
-                        }
-                    }
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(Bucket))]
-        public class BucketPatch
-        {
-            [HarmonyPatch(nameof(Bucket.Start))]
-            [HarmonyPostfix]
-            public static void StartPatch(Bucket __instance)
-            {
-                if (instance == null || !instance.Active ||
-                    !instance.GameObjectsSetting.IsSelected((int)__instance.theBucketType)) return;
-
-                var renderers = __instance.GetComponentsInChildren<Renderer>();
-
-                foreach (var renderer in renderers)
-                {
-                    renderer.enabled = false;
-                }
-            }
-
-        }
-
-        [HarmonyPatch(typeof(Bullet))]
-        public static class BulletPatch
-        {
-            [HarmonyPatch(nameof(Bullet.InitData))]
-            [HarmonyPostfix]
-            public static void InitDataPatch(Bullet __instance)
-            {
-                if (instance == null || !instance.Active || 
-                    !instance.BulletSetting.IsSelected((int)__instance.theBulletType)) return;
-
-                var comp = __instance.GetComponentsInChildren<Renderer>(true);
-
-                foreach (var renderer in comp)
                 {
                     if (renderer != null && renderer.Pointer != IntPtr.Zero)
                     {
@@ -332,129 +270,190 @@ namespace Magnetar_Client.Modules
             }
         }
 
-        [HarmonyPatch(typeof(IceExplodeControl))]
-        public static class IceExplodeControlPatch
+        // Bullets
+
+        var Bullets = GameObject.FindObjectsOfType<Bullet>();
+
+        foreach (var bullet in Bullets)
         {
-            [HarmonyPatch(nameof(IceExplodeControl.Start))]
-            [HarmonyPostfix]
-            public static void StartPostfix(IceExplodeControl __instance)
+            if (BulletSetting.IsSelected((int)bullet.theBulletType))
             {
-                if (instance == null || !instance.Active || __instance==null || !instance.EffectSetting.IsSelected(1)) return;
-                
-                var effect = __instance.GetComponent<SpriteRenderer>();
-                if (effect != null)
+                var renderers = bullet.GetComponentsInChildren<Renderer>(true);
+                foreach (var renderer in renderers)
                 {
-                    effect.enabled = false;
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(Doom))]
-        public static class DoomPatch
-        {
-            [HarmonyPatch(nameof(Doom.Start))]
-            [HarmonyPostfix]
-            public static void StartPostfix(Doom __instance)
-            {
-                if (instance==null || !instance.Active) return;
-
-                if (instance.EffectSetting.IsSelected(2))
-                {
-                    var effect = __instance.transform.Find("sprit");
-                    if (effect != null)
+                    if (renderer != null && renderer.Pointer != IntPtr.Zero)
                     {
-                        effect.gameObject.active = false;
-                    }
-                }
-                if (instance.EffectSetting.IsSelected(4))
-                {
-                    for (int i = 0; i < __instance.transform.childCount; i++)
-                    {
-                        Transform child = __instance.transform.GetChild(i);
-
-                        if (child != null && child.gameObject != null)
-                        {
-                            child.gameObject.active = false;
-                        }
+                        renderer.enabled = false;
                     }
                 }
             }
         }
+    }
 
-        [HarmonyPatch(typeof(BoardAction))]
-        public static class BoardActionPatch
+    [HarmonyPatch(typeof(Bucket))]
+    public class BucketPatch
+    {
+        [HarmonyPatch(nameof(Bucket.Start))]
+        [HarmonyPostfix]
+        public static void StartPatch(Bucket __instance)
         {
-            [HarmonyPatch(nameof(BoardAction.CreateFireAnim))]
-            [HarmonyPrefix]
-            public static bool CreateFireAnim(GameObject __instance)
+            if (instance == null || !instance.Active ||
+                !instance.GameObjectsSetting.IsSelected((int)__instance.theBucketType)) return;
+
+            var renderers = __instance.GetComponentsInChildren<Renderer>();
+
+            foreach (var renderer in renderers)
             {
-                if (instance == null || !instance.Active || !instance.EffectSetting.IsSelected(3)) return true;
-                return false;
-            }
-
-        }
-
-        [HarmonyPatch(typeof(ScreenShake))]
-        public static class ScreenShakePatch
-        {
-            [HarmonyPatch(nameof(ScreenShake.TriggerShake))]
-            [HarmonyPrefix]
-            public static bool TriggerShakePrefix()
-            {
-                if (instance == null || !instance.Active || !instance.ScreenShakeSetting.Value) return true;
-
-                return false;
-            }
-        }
-
-        [HarmonyPatch(typeof(ParticleManager))]
-        public static class ParticleManagerPatch
-        {
-            [HarmonyPatch(nameof(ParticleManager.SetParticle))]
-            [HarmonyPrefix]
-            public static void SetParticlePrefix(ParticleType particleType, ref Vector2 position)
-            {
-                if (instance == null || !instance.Active || !instance.ParticleTypeSetting.IsSelected((int)particleType)) return;
-
-                position = new Vector2(999, 999);
-            }
-        }
-
-        [HarmonyPatch(typeof(CoinSun))]
-        public static class CoinSunPatch
-        {
-            [HarmonyPatch(nameof(CoinSun.Start))]
-            [HarmonyPostfix]
-            public static void StartPostfix(CoinSun __instance)
-            {
-                if (instance == null || !instance.Active || !instance.OtherSetting.IsSelected(0)) return;
-
-                var comps = __instance.GetComponentsInChildren<SpriteRenderer>();
-                foreach ( var comp in comps)
-                {
-                    comp.enabled = false;
-                }
-
-            }
-        }
-
-        [HarmonyPatch(typeof(CoinMoney))]
-        public static class CoinMoneyPatch
-        {
-            [HarmonyPatch(nameof(CoinMoney.Start))]
-            [HarmonyPostfix]
-            public static void StartPostfix(CoinMoney __instance)
-            {
-                if (instance == null || !instance.Active || !instance.OtherSetting.IsSelected(1)) return;
-
-                var comps = __instance.GetComponentsInChildren<SpriteRenderer>();
-                foreach (var comp in comps)
-                {
-                    comp.enabled = false;
-                }
-
+                renderer.enabled = false;
             }
         }
 
     }
+
+    [HarmonyPatch(typeof(Bullet))]
+    public static class BulletPatch
+    {
+        [HarmonyPatch(nameof(Bullet.InitData))]
+        [HarmonyPostfix]
+        public static void InitDataPatch(Bullet __instance)
+        {
+            if (instance == null || !instance.Active || 
+                !instance.BulletSetting.IsSelected((int)__instance.theBulletType)) return;
+
+            var comp = __instance.GetComponentsInChildren<Renderer>(true);
+
+            foreach (var renderer in comp)
+            {
+                if (renderer != null && renderer.Pointer != IntPtr.Zero)
+                {
+                    renderer.enabled = false;
+                }
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(IceExplodeControl))]
+    public static class IceExplodeControlPatch
+    {
+        [HarmonyPatch(nameof(IceExplodeControl.Start))]
+        [HarmonyPostfix]
+        public static void StartPostfix(IceExplodeControl __instance)
+        {
+            if (instance == null || !instance.Active || __instance==null || !instance.EffectSetting.IsSelected(1)) return;
+            
+            var effect = __instance.GetComponent<SpriteRenderer>();
+            if (effect != null)
+            {
+                effect.enabled = false;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Doom))]
+    public static class DoomPatch
+    {
+        [HarmonyPatch(nameof(Doom.Start))]
+        [HarmonyPostfix]
+        public static void StartPostfix(Doom __instance)
+        {
+            if (instance==null || !instance.Active) return;
+
+            if (instance.EffectSetting.IsSelected(2))
+            {
+                var effect = __instance.transform.Find("sprit");
+                if (effect != null)
+                {
+                    effect.gameObject.active = false;
+                }
+            }
+            if (instance.EffectSetting.IsSelected(4))
+            {
+                for (int i = 0; i < __instance.transform.childCount; i++)
+                {
+                    Transform child = __instance.transform.GetChild(i);
+
+                    if (child != null && child.gameObject != null)
+                    {
+                        child.gameObject.active = false;
+                    }
+                }
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(BoardAction))]
+    public static class BoardActionPatch
+    {
+        [HarmonyPatch(nameof(BoardAction.CreateFireAnim))]
+        [HarmonyPrefix]
+        public static bool CreateFireAnim(GameObject __instance)
+        {
+            if (instance == null || !instance.Active || !instance.EffectSetting.IsSelected(3)) return true;
+            return false;
+        }
+
+    }
+
+    [HarmonyPatch(typeof(ScreenShake))]
+    public static class ScreenShakePatch
+    {
+        [HarmonyPatch(nameof(ScreenShake.TriggerShake))]
+        [HarmonyPrefix]
+        public static bool TriggerShakePrefix()
+        {
+            if (instance == null || !instance.Active || !instance.ScreenShakeSetting.Value) return true;
+
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(ParticleManager))]
+    public static class ParticleManagerPatch
+    {
+        [HarmonyPatch(nameof(ParticleManager.SetParticle))]
+        [HarmonyPrefix]
+        public static void SetParticlePrefix(ParticleType particleType, ref Vector2 position)
+        {
+            if (instance == null || !instance.Active || !instance.ParticleTypeSetting.IsSelected((int)particleType)) return;
+
+            position = new Vector2(999, 999);
+        }
+    }
+
+    [HarmonyPatch(typeof(CoinSun))]
+    public static class CoinSunPatch
+    {
+        [HarmonyPatch(nameof(CoinSun.Start))]
+        [HarmonyPostfix]
+        public static void StartPostfix(CoinSun __instance)
+        {
+            if (instance == null || !instance.Active || !instance.OtherSetting.IsSelected(0)) return;
+
+            var comps = __instance.GetComponentsInChildren<SpriteRenderer>();
+            foreach ( var comp in comps)
+            {
+                comp.enabled = false;
+            }
+
+        }
+    }
+
+    [HarmonyPatch(typeof(CoinMoney))]
+    public static class CoinMoneyPatch
+    {
+        [HarmonyPatch(nameof(CoinMoney.Start))]
+        [HarmonyPostfix]
+        public static void StartPostfix(CoinMoney __instance)
+        {
+            if (instance == null || !instance.Active || !instance.OtherSetting.IsSelected(1)) return;
+
+            var comps = __instance.GetComponentsInChildren<SpriteRenderer>();
+            foreach (var comp in comps)
+            {
+                comp.enabled = false;
+            }
+
+        }
+    }
+
 }

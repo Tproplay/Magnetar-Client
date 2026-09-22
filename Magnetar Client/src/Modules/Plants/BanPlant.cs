@@ -1,150 +1,146 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
-using static Magnetar_Client.Game.AppData;
-
-using UnityEngine;
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
 
-namespace Magnetar_Client.Modules
+namespace Magnetar_Client.Modules;
+
+public class BanPlant : Module
 {
-    public class BanPlant : Module
+    // Mod Info
+    public override string Name { get; set; } = "Ban Plants";
+    public override string Description { get; set; } = "Bans the selected Plant(s) in the seed selection phase.";
+    public override string SearchHints { get; set; } = "banplants plantban seedban banseed disableplants " +
+        "removeplants plantremoval plantblock blockplants seedblock banplant plantbanmod seedfilter" +
+        " filterplants disableseed blockseed plantselectionban banlist plantblacklist banselections " +
+        "seedbanmod banplantsmod plantblocker banselected removeplant seedlimit banplantselect banfeature";
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Plant;
+
+    // Mod Data
+    public static BanPlant instance;
+    public MultiSelectSetting selectedPlants;
+
+    // Fast O(1) Cache for active card instances
+    public static readonly HashSet<CardUI> ActiveCards = new();
+
+    public BanPlant()
     {
-        // Mod Info
-        public override string Name { get; set; } = "Ban Plants";
-        public override string Description { get; set; } = "Bans the selected Plant(s) in the seed selection phase.";
-        public override string SearchHints { get; set; } = "banplants plantban seedban banseed disableplants " +
-            "removeplants plantremoval plantblock blockplants seedblock banplant plantbanmod seedfilter" +
-            " filterplants disableseed blockseed plantselectionban banlist plantblacklist banselections " +
-            "seedbanmod banplantsmod plantblocker banselected removeplant seedlimit banplantselect banfeature";
-        public override ModuleCategory Category { get; set; } = ModuleCategory.Plant;
+        instance = this;
 
-        // Mod Data
-        public static BanPlant instance;
-        public MultiSelectSetting selectedPlants;
+        CreateCategory("General");
 
-        // Fast O(1) Cache for active card instances
-        public static readonly HashSet<CardUI> ActiveCards = new HashSet<CardUI>();
-
-        public BanPlant()
+        selectedPlants = new MultiSelectSetting("Entities", typeof(PlantType))
         {
-            instance = this;
+            CustomNames = TranslatedNames(typeof(PlantType)),
+            Blacklist = Banned.PlantTypeBanned,
+            OnSelectionChanged = UpdateSelection
+        };
 
-            CreateCategory("General");
+        AddSettings(selectedPlants);
+        EndCategory();
+    }
 
-            selectedPlants = new MultiSelectSetting("Entities", typeof(PlantType))
+    public override void OnLanguageChanged()
+    {
+        selectedPlants.CustomNames = TranslatedNames(typeof(PlantType));
+    }
+
+    private void UpdateSelection(int id, bool val)
+    {
+        if (!Active) return;
+
+        // Iterate only over cached active cards without scene traversal
+        foreach (var card in ActiveCards)
+        {
+            if (card != null && (int)card.thePlantType == id)
             {
-                CustomNames = TranslatedNames(typeof(PlantType)),
-                Blacklist = Banned.PlantTypeBanned,
-                OnSelectionChanged = UpdateSelection
-            };
-
-            AddSettings(selectedPlants);
-            EndCategory();
+                BanCard(card, val);
+            }
         }
+    }
 
-        public override void OnLanguageChanged()
+    public override void OnEnable()
+    {
+        ApplyAllCards(true);
+    }
+
+    public override void OnDisable()
+    {
+        ApplyAllCards(false);
+    }
+
+    private void ApplyAllCards(bool isEnabling)
+    {
+        foreach (var card in ActiveCards)
         {
-            selectedPlants.CustomNames = TranslatedNames(typeof(PlantType));
+            if (card == null) continue;
+
+            bool shouldBan = isEnabling && selectedPlants.IsSelected((int)card.thePlantType);
+            BanCard(card, shouldBan);
         }
+    }
 
-        private void UpdateSelection(int id, bool val)
+    public static void BanCard(CardUI card, bool value)
+    {
+        if (card == null) return;
+
+        var shadow = card.transform.Find("Shadow");
+        if (shadow != null)
         {
-            if (!Active) return;
+            shadow.gameObject.SetActive(value);
+        }
+    }
 
-            // Iterate only over cached active cards without scene traversal
-            foreach (var card in ActiveCards)
+    // ==========================================
+    // Harmony Patches
+    // ==========================================
+
+    [HarmonyPatch(typeof(CardUI))]
+    public static class CardUIPatches
+    {
+        // Register card into cache on creation and apply ban state immediately
+        [HarmonyPatch(nameof(CardUI.Awake))]
+        [HarmonyPostfix]
+        public static void AwakePostfix(CardUI __instance)
+        {
+            if (__instance == null) return;
+
+            ActiveCards.Add(__instance);
+
+            if (instance != null && instance.Active)
             {
-                if (card != null && (int)card.thePlantType == id)
-                {
-                    BanCard(card, val);
-                }
+                bool shouldBan = instance.selectedPlants.IsSelected((int)__instance.thePlantType);
+                BanCard(__instance, shouldBan);
             }
         }
 
-        public override void OnEnable()
+        // Deregister card from cache when destroyed
+        [HarmonyPatch(nameof(CardUI.OnDestroy))]
+        [HarmonyPrefix]
+        public static void OnDestroyPrefix(CardUI __instance)
         {
-            ApplyAllCards(true);
-        }
-
-        public override void OnDisable()
-        {
-            ApplyAllCards(false);
-        }
-
-        private void ApplyAllCards(bool isEnabling)
-        {
-            foreach (var card in ActiveCards)
+            if (__instance != null)
             {
-                if (card == null) continue;
-
-                bool shouldBan = isEnabling && selectedPlants.IsSelected((int)card.thePlantType);
-                BanCard(card, shouldBan);
+                ActiveCards.Remove(__instance);
             }
         }
 
-        public static void BanCard(CardUI card, bool value)
+        // Block click execution on banned cards
+        [HarmonyPatch(nameof(CardUI.OnMouseDown))]
+        [HarmonyPrefix]
+        public static bool OnMouseDownPrefix(CardUI __instance)
         {
-            if (card == null) return;
+            if (__instance == null || instance == null || !instance.Active) return true;
 
-            var shadow = card.transform.Find("Shadow");
-            if (shadow != null)
+            if (instance.selectedPlants.IsSelected((int)__instance.thePlantType))
             {
-                shadow.gameObject.SetActive(value);
-            }
-        }
-
-        // ==========================================
-        // Harmony Patches
-        // ==========================================
-
-        [HarmonyPatch(typeof(CardUI))]
-        public static class CardUIPatches
-        {
-            // Register card into cache on creation and apply ban state immediately
-            [HarmonyPatch(nameof(CardUI.Awake))]
-            [HarmonyPostfix]
-            public static void AwakePostfix(CardUI __instance)
-            {
-                if (__instance == null) return;
-
-                ActiveCards.Add(__instance);
-
-                if (instance != null && instance.Active)
-                {
-                    bool shouldBan = instance.selectedPlants.IsSelected((int)__instance.thePlantType);
-                    BanCard(__instance, shouldBan);
-                }
+                GameAPP.PlaySound(SoundType.Buzzer);
+                return false;
             }
 
-            // Deregister card from cache when destroyed
-            [HarmonyPatch(nameof(CardUI.OnDestroy))]
-            [HarmonyPrefix]
-            public static void OnDestroyPrefix(CardUI __instance)
-            {
-                if (__instance != null)
-                {
-                    ActiveCards.Remove(__instance);
-                }
-            }
-
-            // Block click execution on banned cards
-            [HarmonyPatch(nameof(CardUI.OnMouseDown))]
-            [HarmonyPrefix]
-            public static bool OnMouseDownPrefix(CardUI __instance)
-            {
-                if (__instance == null || instance == null || !instance.Active) return true;
-
-                if (instance.selectedPlants.IsSelected((int)__instance.thePlantType))
-                {
-                    GameAPP.PlaySound(SoundType.Buzzer);
-                    return false;
-                }
-
-                return true;
-            }
+            return true;
         }
     }
 }

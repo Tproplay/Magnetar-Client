@@ -9,6 +9,7 @@ using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
+using Magnetar_Client.Core;
 
 #if !ANDROID
 namespace Magnetar_Client.Modules
@@ -53,7 +54,7 @@ namespace Magnetar_Client.Modules
         public enum Status
         {
             InGame, Menu, Transition, Selecting, Big_Garden,
-            Magnetar_GUI
+            Magnetar_GUI, InAlamanc
         }
 
         public static Status status = Status.Menu;
@@ -169,20 +170,21 @@ namespace Magnetar_Client.Modules
                 status = Status.InGame; 
             }
 
-            else if ((Gamestatus == GameStatus.InGame) || (Gamestatus == GameStatus.OutGame)
-                && BoardInstanceIsNull && Config.showgui) // Menu & Magnetar GUI
+            else if (InMainMenu && (Config.showgui || HUDManager.forceShow)) // Menu & Magnetar GUI
             {
                 status = Status.Magnetar_GUI;
                 Line1Cycle.Add(Translator.Translate("Browsing Magnetar's GUI"));
             }
 
-            else if ((Gamestatus == GameStatus.InGame) || (Gamestatus == GameStatus.OutGame)
-                && BoardInstanceIsNull) // Menu
+            else if (InMainMenu) // Menu
             {
                 status = Status.Menu;
-
-                Line1Cycle.Add(Translator.Translate("Browsing levels to play"));
                 Line1Cycle.Add(Translator.Translate("Looking at the Main Menu"));
+            }
+            else if (InAlmanac)
+            {
+                status = Status.InAlamanc;
+                Line1Cycle.Add(Translator.Translate("Checking out the almanac"));
             }
 
             else if (Gamestatus == GameStatus.InInterlude) // In Transition

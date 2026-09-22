@@ -161,6 +161,7 @@ PVZRH_Launcher/com.LanPiaoPiao.PlantsVsZombiesRH/BepInEx/
 * 🧪 **gaotmaster** — Playtester
 * 🦇 **The Dark Knight** — Playtester
 * 🧪 **Lêthāl_₵Ø₦QɄɆⱤɆⱤ** - Playtester
+* 🧪 **Arch Chomp ( Sin of Chomping )** - Playtester
 ---
 
 ## 🙏 Special Thanks

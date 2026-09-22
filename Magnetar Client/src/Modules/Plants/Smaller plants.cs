@@ -16,7 +16,9 @@ public class SmallerPlants : Module
     // Mod Info
     public override string Name { get; set; } = "Smaller Plants";
     public override string Description { get; set; } = "Changes the size of selected plants.";
-    public override string SearchHints { get; set; } = "";
+    public override string SearchHints { get; set; } = "smallerplants miniplants tinyplants plantscale " +
+        "plantresize plantscaler minatureplants scaleplants compactplants microplants plantsize plantshrinker " +
+        "shrinkplants resizeplants miniplantmod plantzoom scaledplants tinyplantmod microplantmod sizechanger";
 
     public override ModuleCategory Category { get; set; } = ModuleCategory.Plant;
 

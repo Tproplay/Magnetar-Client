@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Magnetar_Client.UI.Setting;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 #if MELONLOADER || RELEASE_MELON

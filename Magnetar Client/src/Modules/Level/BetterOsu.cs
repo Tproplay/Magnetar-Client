@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 
+using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -11,6 +12,7 @@ using Il2Cpp;
 using Il2CppRhythmGame;
 #elif BEPINEX || RELEASE_BEPINEX
 using RhythmGame;
+using Magnetar_Client.UI.Setting;
 #endif
 namespace Magnetar_Client.Modules;
 

@@ -1,11 +1,11 @@
-﻿using Magnetar_Client.Modules;
-using Magnetar_Client.UI.Themes;
+﻿using Magnetar_Client.UI.Themes;
 using Magnetar_Client.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static Magnetar_Client.UI.Themes.Magnetar_Default;
 using static Magnetar_Client.Utils.Translator;
+using Magnetar_Client.UI.Setting;
 
 namespace Magnetar_Client.UI.WindowDrawing;
 
@@ -44,10 +44,10 @@ public static class DrawSetting
     private static int _activeMobileKeyboardId = -1;
 #endif
 
-    public static void HandleStringSetting(Magnetar_Client.Modules.StringSetting strSet, ref float y, float width)
+    public static void HandleStringSetting(StringSetting strSet, ref float y, float width)
     {
         float elemH = Config.elementHeight;
-        string translatedName = Magnetar_Client.Utils.Translator.Translate(strSet.Name);
+        string translatedName = Translate(strSet.Name);
 
         // 1. Responsive control width (caps at 55% of window width)
         float controlW = Mathf.Min(Config.SettingWidth * 1.25f, width * 0.55f);

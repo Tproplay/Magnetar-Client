@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Magnetar_Client.UI.Setting;
 using System.Linq;
 using System.Collections.Generic;
 using static Magnetar_Client.Game.AppData;

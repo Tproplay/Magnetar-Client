@@ -1,16 +1,18 @@
 ﻿using HarmonyLib;
 
+using Magnetar_Client.UI.Setting;
 #if MELONLOADER || RELEASE_MELON
 
 using Il2Cpp;
 using Il2CppZenGarden;
 using MelonLoader;
-
 #elif BEPINEX || RELEASE_BEPINEX
 
 using BepInEx.Unity.IL2CPP.Utils;
+using Magnetar_Client.UI.Setting;
 using ZenGarden;
 
+using Magnetar_Client.UI.Setting;
 #endif
 using System;
 using System.Collections.Generic;

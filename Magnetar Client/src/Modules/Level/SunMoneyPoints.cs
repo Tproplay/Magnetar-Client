@@ -1,11 +1,11 @@
 ﻿using System;
+using Magnetar_Client.UI.Setting;
 using static Magnetar_Client.Game.AppData;
 using HarmonyLib;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
 using UnityEngine;
-
 namespace Magnetar_Client.Modules;
 
 public class SunHack : Module

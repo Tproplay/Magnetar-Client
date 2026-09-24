@@ -1,5 +1,6 @@
 ﻿using static Magnetar_Client.Game.AppData;
 using System;
+using Magnetar_Client.UI.Setting;
 using HarmonyLib;
 using System.Collections;
 using UnityEngine;
@@ -8,6 +9,7 @@ using Il2Cpp;
 using MelonLoader;
 #elif BEPINEX || RELEASE_BEPINEX
 using BepInEx.Unity.IL2CPP.Utils;
+using Magnetar_Client.UI.Setting;
 #endif
 
 namespace Magnetar_Client.Modules;

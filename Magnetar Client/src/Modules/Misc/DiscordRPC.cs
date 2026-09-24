@@ -1,5 +1,6 @@
 ﻿#if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
+using Magnetar_Client.UI.Setting;
 #endif
 using DiscordRPC;
 using Magnetar_Client.Utils;
@@ -10,7 +11,6 @@ using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
 using Magnetar_Client.Core;
-
 #if !ANDROID
 namespace Magnetar_Client.Modules;
 

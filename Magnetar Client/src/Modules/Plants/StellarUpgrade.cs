@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using Magnetar_Client.UI.Setting;
 using UnityEngine;
-
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif

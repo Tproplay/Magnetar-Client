@@ -9,6 +9,7 @@ using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.UI.WindowDrawing.DrawSetting;
 using static Magnetar_Client.Utils.Translator;
+using Magnetar_Client.UI.Setting;
 
 namespace Magnetar_Client.Core;
 
@@ -540,21 +541,9 @@ internal static class SettingsWindowDrawer
         {
             foreach (var setting in mod.Settings)
             {
-                string name = "";
-                if (setting is FloatSetting fSet) name = fSet.Name;
-                else if (setting is IntSetting iSet) name = iSet.Name;
-                else if (setting is BoolSetting bSet) name = bSet.Name;
-                else if (setting is BindSetting bindSet) name = bindSet.Name;
-                else if (setting is MultiSelectSetting msSet) name = msSet.Name;
-                else if (setting is StringSetting strSet) name = strSet.Name;
-                else if (setting is SelectSetting selSet) name = selSet.Name;
-                else if (setting is CategorySetting catSet) name = catSet.Name;
-
-                if (!string.IsNullOrEmpty(name))
-                {
-                    float w = Magnetar_Default.SettingLabelStyle.CalcSize(new GUIContent(Translate(name))).x;
-                    if (w > maxNameWidth) maxNameWidth = w;
-                }
+                if (setting == null || string.IsNullOrEmpty(setting.Name)) continue;
+                float w = Magnetar_Default.SettingLabelStyle.CalcSize(new GUIContent(Translate(setting.Name))).x;
+                if (w > maxNameWidth) maxNameWidth = w;
             }
         }
 
@@ -565,7 +554,7 @@ internal static class SettingsWindowDrawer
             if (w > maxNameWidth) maxNameWidth = w;
         }
 
-        float calculatedWidth = Config.indent + maxNameWidth + Config.S(25f) + Config.SettingWidth + Config.indent;
+        float calculatedWidth = Config.indent + maxNameWidth + Config.S(35f) + Config.SettingWidth + Config.indent;
         return Mathf.Max(Config.ModuleManager.SettingsWidth, Mathf.Max(mod.SettingsWidth, calculatedWidth));
     }
 
@@ -702,17 +691,8 @@ internal static class SettingsWindowDrawer
 
             if (skipSettings) continue;
 
-            if (setting is FloatSetting floatSet) HandleNumericSetting(floatSet, ref y, width, true);
-            else if (setting is IntSetting intSet) HandleNumericSetting(intSet, ref y, width, false);
-            else if (setting is BoolSetting boolSet) HandleBoolSetting(boolSet, ref y, width);
-            else if (setting is BindSetting bindSet) HandleBindSetting(bindSet, ref y, width);
-            else if (setting is MultiSelectSetting multiSet) MultiSelectWindowDrawer.HandleMultiSelectSetting(multiSet, ref y, width);
-            else if (setting is StringSetting strSet) HandleStringSetting(strSet, ref y, width);
-            else if (setting is SelectSetting selSet) HandleSelectSetting(selSet, ref y, width);
-            else if (setting is ButtonSetting btnSet) HandleButtonSetting(btnSet, ref y, width);
-            else if (setting is LabelSetting lblSet) HandleLabelSetting(lblSet, ref y, width);
-
-            y += Config.elementHeight + Config.spacing;
+            // Direct polymorphic draw call
+            setting.Draw(ref y, width);
         }
 
         MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Translate("KeyBind"));
@@ -720,30 +700,58 @@ internal static class SettingsWindowDrawer
         Event e = Event.current;
         bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
 
-        HandleBindSetting(mod.KeyBind, ref y, width);
-        y += Config.elementHeight + Config.spacing;
+        // 1. Draw Keybind
+        mod.KeyBind.Draw(ref y, width);
 
-        // Hold Mode Toggle
-        GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), Translate("Hold Mode"), Magnetar_Default.SettingLabelStyle);
-        Rect holdRect = new(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
+        float resetBtnW = Config.S(22f);
+        float gap = Config.S(6f);
+        float elemH = Config.elementHeight;
+        float labelWidth = Mathf.Max(width * 0.40f, width - Config.indent * 2 - Config.SettingWidth - resetBtnW - gap);
+
+        // --- 2. Hold Mode Toggle Row ---
+        GUI.Label(new Rect(Config.indent, y, labelWidth, elemH), Translate("Hold Mode"), Magnetar_Default.SettingLabelStyle);
+
+        Rect holdRect = new(width - Config.indent - resetBtnW - gap - Config.SettingWidth, y, Config.SettingWidth, elemH);
+        Rect holdResetRect = new(width - Config.indent - resetBtnW, y, resetBtnW, elemH);
+
         GUI.Box(holdRect, mod.HoldMode ? Translate("ON") : Translate("OFF"), mod.HoldMode ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
         if (holdRect.Contains(e.mousePosition) && isLeftClick)
         {
             mod.HoldMode = !mod.HoldMode;
             e.Use();
         }
-        y += Config.elementHeight + Config.spacing;
 
-        // Enabled Toggle
-        GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), Translate("Enabled"), Magnetar_Default.SettingLabelStyle);
-        Rect enabledRect = new(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
+        if (GUI.Button(holdResetRect, Setting.ResetSymbol, Magnetar_Default.SettingOff))
+        {
+            mod.HoldMode = mod.defaultHoldMode;
+            e.Use();
+        }
+
+        y += elemH + Config.spacing;
+
+        // --- 3. Enabled Toggle Row ---
+        GUI.Label(new Rect(Config.indent, y, labelWidth, elemH), Translate("Enabled"), Magnetar_Default.SettingLabelStyle);
+
+        Rect enabledRect = new(width - Config.indent - resetBtnW - gap - Config.SettingWidth, y, Config.SettingWidth, elemH);
+        Rect enabledResetRect = new(width - Config.indent - resetBtnW, y, resetBtnW, elemH);
+
         GUI.Box(enabledRect, mod.Active ? Translate("ON") : Translate("OFF"), mod.Active ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
         if (enabledRect.Contains(e.mousePosition) && isLeftClick)
         {
             if (VanillaMode.instance.IsAllowed(mod)) mod.Toggle();
             e.Use();
         }
-        y += Config.elementHeight + Config.spacing / 2;
+
+        if (GUI.Button(enabledResetRect, Setting.ResetSymbol, Magnetar_Default.SettingOff))
+        {
+            if (mod.Active != mod.defaultActive)
+            {
+                if (VanillaMode.instance.IsAllowed(mod)) mod.Toggle();
+            }
+            e.Use();
+        }
+
+        y += elemH + Config.spacing / 2;
 
         return y - startY;
     }

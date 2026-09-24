@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using Magnetar_Client.Core;
-using Magnetar_Client.Modules;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using Magnetar_Client.UI.Setting;
+
 
 #if MELONLOADER || RELEASE_MELON
 using MelonLoader;
@@ -113,7 +114,6 @@ public static class ProfileManager
 
     public static void Init()
     {
-        // Resolve and create config directory before initialization
         _ = ConfigDir;
 
 #if MELONLOADER || RELEASE_MELON
@@ -243,7 +243,7 @@ public static class ProfileManager
     }
 
     /// <summary>
-    /// Disables all modules and resets all settings across every module to default values.
+    /// Disables all modules and resets every setting polymorphically to default values.
     /// </summary>
     public static void ResetAllModulesToDefault()
     {
@@ -257,11 +257,14 @@ public static class ProfileManager
 
             if (mod.KeyBind != null)
             {
-                mod.KeyBind.BindKeys = mod.KeyBind.DefaultKeys != null
-                    ? new List<KeyCode>(mod.KeyBind.DefaultKeys)
-                    : new List<KeyCode>();
+                mod.KeyBind.Reset();
             }
-            mod.HoldMode = false;
+
+            mod.HoldMode = mod.defaultHoldMode;
+            if (mod.Active != mod.defaultActive)
+            {
+                mod.Toggle();
+            }
 
             if (mod.Settings != null)
             {
@@ -271,25 +274,7 @@ public static class ProfileManager
 
                     try
                     {
-                        if (setting is BoolSetting b) b.Value = b.DefaultValue;
-                        else if (setting is FloatSetting f) f.Value = f.DefaultValue;
-                        else if (setting is IntSetting i) i.Value = i.DefaultValue;
-                        else if (setting is StringSetting s) s.Value = s.DefaultValue;
-                        else if (setting is SelectSetting sel) sel.Value = sel.DefaultValue;
-                        else if (setting is BindSetting bind)
-                        {
-                            bind.BindKeys = bind.DefaultKeys != null
-                                ? new List<KeyCode>(bind.DefaultKeys)
-                                : new List<KeyCode>();
-                        }
-                        else if (setting is MultiSelectSetting ms)
-                        {
-                            ms.SelectedValues.Clear();
-                        }
-                        else if (setting is CategorySetting cat)
-                        {
-                            cat.IsExpanded = true;
-                        }
+                        setting.Reset();
                     }
                     catch (Exception ex)
                     {
@@ -330,14 +315,14 @@ public static class ProfileManager
     }
 
     /// <summary>
-    /// Saves current configuration, disables active modules, updates preferences, and loads target profile.
+    /// Saves current profile, resets modules to clean defaults, and loads the target profile.
     /// </summary>
     public static void SwitchProfile(string targetProfile)
     {
         if (string.IsNullOrWhiteSpace(targetProfile) || string.Equals(Config.CurrentProfile, targetProfile, StringComparison.OrdinalIgnoreCase)) return;
 
         SaveLoad.Save(force: true);
-        DisableAllModules();
+        ResetAllModulesToDefault();
 
         if (!Profiles.Contains(targetProfile, StringComparer.OrdinalIgnoreCase))
         {
@@ -383,7 +368,7 @@ public static class ProfileManager
 
         if (string.Equals(Config.CurrentProfile, profileName, StringComparison.OrdinalIgnoreCase))
         {
-            DisableAllModules();
+            ResetAllModulesToDefault();
             Config.CurrentProfile = DefaultProfile;
             SaveCurrentProfileToPrefrences(DefaultProfile);
             SaveLoad.Load();

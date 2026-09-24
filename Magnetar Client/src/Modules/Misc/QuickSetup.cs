@@ -1,4 +1,5 @@
 ﻿using Magnetar_Client.Utils;
+using Magnetar_Client.UI.Setting;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

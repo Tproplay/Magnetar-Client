@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Magnetar_Client.UI.Setting;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,10 +11,6 @@ using System;
 using System.Runtime.InteropServices;
 using HarmonyLib;
 using Magnetar_Client.NEF;
-
-
-
-
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif

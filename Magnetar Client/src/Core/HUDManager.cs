@@ -1,5 +1,4 @@
-﻿using Magnetar_Client.Modules;
-using Magnetar_Client.HUDElements;
+﻿using Magnetar_Client.HUDElements;
 using Magnetar_Client.UI.Themes;
 using System;
 using System.Collections.Generic;
@@ -10,6 +9,7 @@ using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using Magnetar_Client.UI;
 using Magnetar_Client.Game;
+using Magnetar_Client.UI.Setting;
 
 namespace Magnetar_Client.Core;
 

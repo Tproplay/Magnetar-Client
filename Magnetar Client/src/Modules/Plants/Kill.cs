@@ -1,5 +1,6 @@
 ﻿#if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
+using Magnetar_Client.UI.Setting;
 using static Il2Cpp.Plant;
 #elif BEPINEX || RELEASE_BEPINEX
 using static global::Plant;

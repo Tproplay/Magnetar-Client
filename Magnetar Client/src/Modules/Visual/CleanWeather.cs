@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Magnetar_Client.UI.Setting;
 using HarmonyLib;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;

@@ -1,4 +1,5 @@
 ﻿using Magnetar_Client.Game;
+using Magnetar_Client.UI.Setting;
 using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.Game.AppData;

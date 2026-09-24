@@ -3,9 +3,6 @@ using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using System.Collections.Generic;
-
-
-
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif

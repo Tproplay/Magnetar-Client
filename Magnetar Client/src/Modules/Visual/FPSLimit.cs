@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+using Magnetar_Client.UI.Setting;
 namespace Magnetar_Client.Modules;
 
 public class FPSLimit : Module

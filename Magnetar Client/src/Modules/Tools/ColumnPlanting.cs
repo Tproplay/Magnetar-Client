@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
+using Magnetar_Client.UI.Setting;
 using HarmonyLib;
 using static Magnetar_Client.Game.AppData;
 using UnityEngine;
 using System.Linq;
 using Magnetar_Client.Utils;
-
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif

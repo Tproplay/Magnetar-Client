@@ -7,6 +7,8 @@ using System.IO;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.Setting;
+
 
 
 #if MELONLOADER || RELEASE_MELON
@@ -207,9 +209,31 @@ public static class SaveLoad
                         else if (setting is BindSetting bind) modData.Settings[bind.Name] = bind.BindKeys;
                         else if (setting is SelectSetting sel) modData.Settings[sel.Name] = sel.Value;
                         else if (setting is StringSetting str) modData.Settings[str.Name] = str.Value;
+                        else if (setting is ListStringSetting list) modData.Settings[list.Name] = list.Values;
                         else if (setting is BoolSetting b) modData.Settings[b.Name] = b.Value;
                         else if (setting is FloatSetting f) modData.Settings[f.Name] = f.Value;
                         else if (setting is IntSetting i) modData.Settings[i.Name] = i.Value;
+                        else if (setting is Vector2Setting v2) modData.Settings[v2.Name] = new float[] { v2.Value.x, v2.Value.y };
+                        else if (setting is Vector3Setting v3) modData.Settings[v3.Name] = new float[] { v3.Value.x, v3.Value.y, v3.Value.z };
+                        else if (setting is SectionSetting sec)
+                        {
+                            var secList = new List<Dictionary<string, object>>();
+                            foreach (var section in sec.Sections)
+                            {
+                                var sDict = new Dictionary<string, object>();
+                                foreach (var child in section.ChildSettings)
+                                {
+                                    if (child is StringSetting cs) sDict[cs.Name] = cs.Value;
+                                    else if (child is BoolSetting cb) sDict[cb.Name] = cb.Value;
+                                    else if (child is IntSetting ci) sDict[ci.Name] = ci.Value;
+                                    else if (child is FloatSetting cf) sDict[cf.Name] = cf.Value;
+                                    else if (child is Vector2Setting cv2) sDict[cv2.Name] = new float[] { cv2.Value.x, cv2.Value.y };
+                                    else if (child is Vector3Setting cv3) sDict[cv3.Name] = new float[] { cv3.Value.x, cv3.Value.y, cv3.Value.z };
+                                }
+                                secList.Add(sDict);
+                            }
+                            modData.Settings[sec.Name] = secList;
+                        }
                     }
                 }
                 data.Modules[mod.Name] = modData;
@@ -517,11 +541,52 @@ public static class SaveLoad
             }
             else if (setting is SelectSetting sel) sel.Value = Convert.ToInt32(rawValue);
             else if (setting is StringSetting str) str.Value = rawValue.ToString();
+            else if (setting is ListStringSetting list)
+            {
+                string jsonStr = JsonConvert.SerializeObject(rawValue);
+                list.Values = JsonConvert.DeserializeObject<List<string>>(jsonStr) ?? new List<string>();
+            }
             else if (setting is BoolSetting b) b.Value = Convert.ToBoolean(rawValue);
             else if (setting is FloatSetting f) f.Value = Convert.ToSingle(rawValue);
             else if (setting is IntSetting i) i.Value = Convert.ToInt32(rawValue);
+            else if (setting is Vector2Setting v2)
+            {
+                string jsonStr = JsonConvert.SerializeObject(rawValue);
+                float[] arr = JsonConvert.DeserializeObject<float[]>(jsonStr);
+                if (arr != null && arr.Length >= 2) v2.Value = new Vector2(arr[0], arr[1]);
+            }
+            else if (setting is Vector3Setting v3)
+            {
+                string jsonStr = JsonConvert.SerializeObject(rawValue);
+                float[] arr = JsonConvert.DeserializeObject<float[]>(jsonStr);
+                if (arr != null && arr.Length >= 3) v3.Value = new Vector3(arr[0], arr[1], arr[2]);
+            }
+            else if (setting is SectionSetting sec)
+            {
+                string jsonStr = JsonConvert.SerializeObject(rawValue);
+                var secData = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(jsonStr);
+                if (secData != null && sec.TemplateFactory != null)
+                {
+                    sec.Sections.Clear();
+                    for (int s = 0; s < secData.Count; s++)
+                    {
+                        var childList = sec.TemplateFactory(s);
+                        foreach (var child in childList)
+                        {
+                            if (secData[s].TryGetValue(child.Name, out var childVal))
+                            {
+                                RestoreSettingValue(child, childVal);
+                            }
+                        }
+                        sec.Sections.Add(new SectionInstance($"Section #{s + 1}", childList));
+                    }
+                }
+            }
         }
-        catch (Exception ex) { AutoSaveLogger.Error($"Error setting '{setting.Name}': {ex.Message}"); }
+        catch (Exception ex)
+        {
+            AutoSaveLogger.Error($"Error setting '{setting.Name}': {ex.Message}");
+        }
     }
 
     public static void InitializePrefrences()

@@ -1,11 +1,11 @@
 ﻿using HarmonyLib;
+using Magnetar_Client.UI.Setting;
 using Il2CppSystem;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using System.Linq;
-
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif

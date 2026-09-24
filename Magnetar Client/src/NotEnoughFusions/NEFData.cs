@@ -61,12 +61,10 @@ public static class NEFData
         {
             if (!CustomNames.ContainsKey((int)pt)) CustomNames[(int)pt] = pt.ToString();
         }
-#if RELEASE_MELON || RELEASE_BEPINEX
         foreach (var Entry in Translator.TranslateEnum(typeof(PlantType)))
         {
             CustomNames[Entry.Key] = Entry.Value;
         }
-#endif
         Magnetar_Client.NEF.Data.NEFBanned.InitBan();
         Magnetar_Client.NEF.Data.NEFBanned.InitHidden();
         Magnetar_Client.NEF.Data.NEFRecipes.InitRecipes();
@@ -162,26 +160,14 @@ public static class NEFData
 
     public static string GetEntityName(RecipeEntity ent)
     {
-#if MELONLOADER || BEPINEX
-        if (CustomNames.TryGetValue(ent.Id, out string customName)) return customName + $" ({ent.Id})";
-#else
         if (CustomNames.TryGetValue(ent.Id, out string customName)) return customName;
-#endif
         if (ent.IsZombie)
         {
-#if MELONLOADER || BEPINEX
-            return ((ZombieType)ent.Id).ToString() + $" ({ent.Id})";
-#else
             return ((ZombieType)ent.Id).ToString();
-#endif
         }
         else
         {
-#if MELONLOADER || BEPINEX
-            return ((PlantType)ent.Id).ToString() + $" ({ent.Id})";
-#else
             return ((PlantType)ent.Id).ToString();
-#endif
         }
 
     }

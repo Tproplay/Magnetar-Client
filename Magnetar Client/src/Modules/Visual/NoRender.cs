@@ -145,7 +145,7 @@ public class NoRender : Module
         GameObjectsSetting.CustomNames = TranslatedNames(typeof(BucketType));
         BulletSetting.CustomNames = TranslatedNames(typeof(BulletType));
 
-        EffectSetting.Options = EffectSetting.Options
+        EffectSetting.CustomNames = EffectSetting.Options
             .ToDictionary(kvp => kvp.Key, kvp => Translator.Translate(kvp.Value));
     }
 

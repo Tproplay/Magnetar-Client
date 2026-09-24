@@ -2,6 +2,8 @@
 using HarmonyLib;
 using static Magnetar_Client.Game.AppData;
 using UnityEngine;
+using System.Linq;
+using Magnetar_Client.Utils;
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -50,6 +52,11 @@ public class MultiPlanting : Module
         EndCategory();
     }
 
+    public override void OnLanguageChanged()
+    {
+        Mode.CustomNames = Mode.Options
+            .ToDictionary(kvp => kvp.Key, kvp => Translator.Translate(kvp.Value));
+    }
 
     // Mod Logic
 

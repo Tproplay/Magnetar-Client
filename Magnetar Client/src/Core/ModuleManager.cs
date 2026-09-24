@@ -721,7 +721,7 @@ internal static class SettingsWindowDrawer
             e.Use();
         }
 
-        if (GUI.Button(holdResetRect, Setting.ResetSymbol, Magnetar_Default.SettingOff))
+        if (GUI.Button(holdResetRect, Setting.ResetSymbol, Magnetar_Default.ResetButtonStyle))
         {
             mod.HoldMode = mod.defaultHoldMode;
             e.Use();
@@ -742,7 +742,7 @@ internal static class SettingsWindowDrawer
             e.Use();
         }
 
-        if (GUI.Button(enabledResetRect, Setting.ResetSymbol, Magnetar_Default.SettingOff))
+        if (GUI.Button(enabledResetRect, Setting.ResetSymbol, Magnetar_Default.ResetButtonStyle))
         {
             if (mod.Active != mod.defaultActive)
             {

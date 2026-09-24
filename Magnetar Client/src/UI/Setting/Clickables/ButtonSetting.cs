@@ -25,7 +25,7 @@ public class ButtonSetting : Setting
         GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingLabelStyle);
 
         Rect btnRect = new(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
-        GUI.Box(btnRect, Translator.Translate(ButtonText), Magnetar_Default.SettingOff);
+        GUI.Box(btnRect, Translator.Translate(ButtonText), Magnetar_Default.ButtonSettingStyle);
 
         if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {

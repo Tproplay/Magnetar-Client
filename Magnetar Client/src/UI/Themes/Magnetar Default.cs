@@ -162,6 +162,18 @@ public class ThemeData
     [JsonProperty("SettingOn")]
     public ElementStyleTheme SettingOn { get; set; } = new ElementStyleTheme();
 
+    [JsonProperty("ButtonSetting", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme ButtonSetting { get; set; }
+
+    [JsonProperty("ResetButton", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme ResetButton { get; set; }
+
+    [JsonProperty("ListAddButton", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme ListAddButton { get; set; }
+
+    [JsonProperty("ListRemoveButton", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme ListRemoveButton { get; set; }
+
     [JsonProperty("Typography")]
     public TypographyTheme Typography { get; set; } = new TypographyTheme();
 
@@ -217,6 +229,11 @@ public static class Magnetar_Default
     public static GUIStyle SettingOff;
     public static GUIStyle SettingOn;
     public static GUIStyle SettingLabelStyle;
+    public static GUIStyle ButtonSettingStyle;
+    public static GUIStyle ResetButtonStyle;
+    public static GUIStyle ListAddButtonStyle;
+    public static GUIStyle ListRemoveButtonStyle;
+
     public static GUIStyle SeparatorStyle;
     public static GUIStyle SeparatorTextStyle;
     public static GUIStyle TextStyle;
@@ -282,6 +299,22 @@ public static class Magnetar_Default
         SettingOn = new ElementStyleTheme(
             new ColorState("#000000FF", "#000000FF", "#000000FF"),
             new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+        ),
+        ButtonSetting = new ElementStyleTheme(
+            new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#2A2A2ADD", "#3A3A3AFF", "#222222FF")
+        ),
+        ResetButton = new ElementStyleTheme(
+            new ColorState("#D0D0D0FF", "#FFFFFFFF", "#FF5555FF"),
+            new ColorState("#242424DC", "#333333FF", "#1C1C1CFF")
+        ),
+        ListAddButton = new ElementStyleTheme(
+            new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#107800DC", "#18b300FF", "#1dbf04FF")
+        ),
+        ListRemoveButton = new ElementStyleTheme(
+            new ColorState("#FF6B6BFF", "#FF8E8EFF", "#FF3D3DFF"),
+            new ColorState("#2B1818DC", "#3D1E1EFF", "#201212FF")
         ),
         Typography = new TypographyTheme
         {
@@ -437,6 +470,22 @@ public static class Magnetar_Default
                             new ColorState("#000000FF", "#000000FF", "#000000FF"),
                             new ColorState("#8B0FFFFF", "#992cff", "#8B0FFFFF")
                         ),
+                        ButtonSetting = new ElementStyleTheme(
+                            new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+                            new ColorState("#2A123DCC", "#441D63FF", "#1F0A2FFF")
+                        ),
+                        ResetButton = new ElementStyleTheme(
+                            new ColorState("#D4C2F0FF", "#FFFFFFFF", "#A855F7FF"),
+                            new ColorState("#1D1226CC", "#2C173DFF", "#150B1EFF")
+                        ),
+                        ListAddButton = new ElementStyleTheme(
+                            new ColorState("#E6EDF3FF", "#FFFFFFFF", "#FFFFFFFF"),
+                            new ColorState("#1E1128CC", "#2F1940FF", "#140A1CFF")
+                        ),
+                        ListRemoveButton = new ElementStyleTheme(
+                            new ColorState("#FF77BCFF", "#FFA6D2FF", "#E11D48FF"),
+                            new ColorState("#2D1022CC", "#4A1835FF", "#1F0A17FF")
+                        ),
                         Typography = new TypographyTheme
                         {
                             Description = "#ec45ff",
@@ -514,71 +563,35 @@ public static class Magnetar_Default
         CurrentThemeName = themeName;
         var d = InternalDefaultTheme;
 
-        // --- 1. Top Bar Off ---
-        var tbOffText = ResolveState(theme.TopBarOff?.Text, d.TopBarOff.Text);
-        var tbOffBg = ResolveState(theme.TopBarOff?.BackgroundColor, d.TopBarOff.BackgroundColor);
-        TopBarStyle.normal.textColor = tbOffText.normal;
-        TopBarStyle.hover.textColor = tbOffText.hover;
-        TopBarStyle.active.textColor = tbOffText.active;
-        TopBarStyle.normal.background = GetTex(tbOffBg.normal);
-        TopBarStyle.hover.background = GetTex(tbOffBg.hover);
-        TopBarStyle.active.background = GetTex(tbOffBg.active);
+        void ApplyElement(GUIStyle style, ElementStyleTheme t, ElementStyleTheme fallback)
+        {
+            var text = ResolveState(t?.Text, fallback?.Text);
+            var bg = ResolveState(t?.BackgroundColor, fallback?.BackgroundColor);
+            style.normal.textColor = text.normal;
+            style.hover.textColor = text.hover;
+            style.active.textColor = text.active;
+            style.normal.background = GetTex(bg.normal);
+            style.hover.background = GetTex(bg.hover);
+            style.active.background = GetTex(bg.active);
+        }
 
-        // --- 2. Top Bar Active ---
-        var tbActText = ResolveState(theme.TopBarActive?.Text, d.TopBarActive.Text);
-        var tbActBg = ResolveState(theme.TopBarActive?.BackgroundColor, d.TopBarActive.BackgroundColor);
-        TopBarActiveStyle.normal.textColor = tbActText.normal;
-        TopBarActiveStyle.hover.textColor = tbActText.hover;
-        TopBarActiveStyle.active.textColor = tbActText.active;
-        TopBarActiveStyle.normal.background = GetTex(tbActBg.normal);
-        TopBarActiveStyle.hover.background = GetTex(tbActBg.hover);
-        TopBarActiveStyle.active.background = GetTex(tbActBg.active);
+        // --- 1. Top Bar ---
+        ApplyElement(TopBarStyle, theme.TopBarOff, d.TopBarOff);
+        ApplyElement(TopBarActiveStyle, theme.TopBarActive, d.TopBarActive);
 
-        // --- 3. Category Header ---
-        var catHeadText = ResolveState(theme.CategoryHeader?.Text, d.CategoryHeader.Text);
-        var catHeadBg = ResolveState(theme.CategoryHeader?.BackgroundColor, d.CategoryHeader.BackgroundColor);
-        CategoryHeaderStyle.normal.textColor = catHeadText.normal;
-        CategoryHeaderStyle.hover.textColor = catHeadText.hover;
-        CategoryHeaderStyle.active.textColor = catHeadText.active;
-        CategoryHeaderStyle.normal.background = GetTex(catHeadBg.normal);
-        CategoryHeaderStyle.hover.background = GetTex(catHeadBg.hover);
-        CategoryHeaderStyle.active.background = GetTex(catHeadBg.active);
-
-        // --- 4. Category Window ---
+        // --- 2. Category Header & Window ---
+        ApplyElement(CategoryHeaderStyle, theme.CategoryHeader, d.CategoryHeader);
         CategoryWindowStyle.normal.textColor = ParseColor(theme.CategoryWindow?.Text, d.CategoryWindow.Text);
         CategoryWindowStyle.normal.background = GetTex(ParseColor(theme.CategoryWindow?.BackgroundColor, d.CategoryWindow.BackgroundColor));
 
-        // --- 5. Category Module Off ---
-        var catModOffText = ResolveState(theme.CategoryModuleOff?.Text, d.CategoryModuleOff.Text);
-        var catModOffBg = ResolveState(theme.CategoryModuleOff?.BackgroundColor, d.CategoryModuleOff.BackgroundColor);
-        CategoryModuleOffStyle.normal.textColor = catModOffText.normal;
-        CategoryModuleOffStyle.hover.textColor = catModOffText.hover;
-        CategoryModuleOffStyle.active.textColor = catModOffText.active;
-        CategoryModuleOffStyle.normal.background = GetTex(catModOffBg.normal);
-        CategoryModuleOffStyle.hover.background = GetTex(catModOffBg.hover);
-        CategoryModuleOffStyle.active.background = GetTex(catModOffBg.active);
+        // --- 3. Category Modules ---
+        ApplyElement(CategoryModuleOffStyle, theme.CategoryModuleOff, d.CategoryModuleOff);
+        ApplyElement(CategoryModuleOnStyle, theme.CategoryModuleOn, d.CategoryModuleOn);
 
-        // --- 6. Category Module On ---
-        var catModOnText = ResolveState(theme.CategoryModuleOn?.Text, d.CategoryModuleOn.Text);
-        var catModOnBg = ResolveState(theme.CategoryModuleOn?.BackgroundColor, d.CategoryModuleOn.BackgroundColor);
-        CategoryModuleOnStyle.normal.textColor = catModOnText.normal;
-        CategoryModuleOnStyle.hover.textColor = catModOnText.hover;
-        CategoryModuleOnStyle.active.textColor = catModOnText.active;
-        CategoryModuleOnStyle.normal.background = GetTex(catModOnBg.normal);
-        CategoryModuleOnStyle.hover.background = GetTex(catModOnBg.hover);
-        CategoryModuleOnStyle.active.background = GetTex(catModOnBg.active);
+        // --- 4. Close Button ---
+        ApplyElement(CloseButtonStyle, theme.CloseButton, d.CloseButton);
 
-        // --- 7. Close Button ---
-        var closeText = ResolveState(theme.CloseButton?.Text, d.CloseButton.Text);
-        var closeBg = ResolveState(theme.CloseButton?.BackgroundColor, d.CloseButton.BackgroundColor);
-        CloseButtonStyle.normal.textColor = closeText.normal;
-        CloseButtonStyle.hover.textColor = closeText.hover;
-        CloseButtonStyle.active.textColor = closeText.active;
-        CloseButtonStyle.normal.background = GetTex(closeBg.normal);
-        CloseButtonStyle.hover.background = GetTex(closeBg.hover);
-        CloseButtonStyle.active.background = GetTex(closeBg.active);
-
-        // --- 8. Settings Window ---
+        // --- 5. Settings Window ---
         string rawWindowBg = theme.SettingsWindow?.WindowBackground
                              ?? theme.CategoryWindow?.BackgroundColor
                              ?? d.SettingsWindow.WindowBackground;
@@ -587,27 +600,17 @@ public static class Magnetar_Default
         SettingsWndowStyle.normal.textColor = ParseColor(theme.SettingsWindow?.Text, d.SettingsWindow.Text);
         SettingsWndowStyle.normal.background = GetTex(ParseColor(theme.SettingsWindow?.BackgroundColor, d.SettingsWindow.BackgroundColor));
 
-        // --- 9. Setting Off ---
-        var setOffText = ResolveState(theme.SettingOff?.Text, d.SettingOff.Text);
-        var setOffBg = ResolveState(theme.SettingOff?.BackgroundColor, d.SettingOff.BackgroundColor);
-        SettingOff.normal.textColor = setOffText.normal;
-        SettingOff.hover.textColor = setOffText.hover;
-        SettingOff.active.textColor = setOffText.active;
-        SettingOff.normal.background = GetTex(setOffBg.normal);
-        SettingOff.hover.background = GetTex(setOffBg.hover);
-        SettingOff.active.background = GetTex(setOffBg.active);
+        // --- 6. Setting Toggles ---
+        ApplyElement(SettingOff, theme.SettingOff, d.SettingOff);
+        ApplyElement(SettingOn, theme.SettingOn, d.SettingOn);
 
-        // --- 10. Setting On ---
-        var setOnText = ResolveState(theme.SettingOn?.Text, d.SettingOn.Text);
-        var setOnBg = ResolveState(theme.SettingOn?.BackgroundColor, d.SettingOn.BackgroundColor);
-        SettingOn.normal.textColor = setOnText.normal;
-        SettingOn.hover.textColor = setOnText.hover;
-        SettingOn.active.textColor = setOnText.active;
-        SettingOn.normal.background = GetTex(setOnBg.normal);
-        SettingOn.hover.background = GetTex(setOnBg.hover);
-        SettingOn.active.background = GetTex(setOnBg.active);
+        // --- 7. Button Settings, Reset, and List Operations ---
+        ApplyElement(ButtonSettingStyle, theme.ButtonSetting, d.ButtonSetting);
+        ApplyElement(ResetButtonStyle, theme.ResetButton, d.ResetButton);
+        ApplyElement(ListAddButtonStyle, theme.ListAddButton, d.ListAddButton);
+        ApplyElement(ListRemoveButtonStyle, theme.ListRemoveButton, d.ListRemoveButton);
 
-        // --- 11. Typography ---
+        // --- 8. Typography ---
         SettingsDescriptionStyle.normal.textColor = ParseColor(theme.Typography?.Description, d.Typography.Description);
         SettingLabelStyle.normal.textColor = ParseColor(theme.Typography?.Label, d.Typography.Label);
         SettingAuthorStyle.normal.textColor = ParseColor(theme.Typography?.Author, d.Typography.Author);
@@ -619,7 +622,7 @@ public static class Magnetar_Default
         TextHighlightedStyle.normal.textColor = ParseColor(theme.Typography?.HighlightText, d.Typography.HighlightText);
         TextHighlightedStyle.normal.background = GetTex(ParseColor(theme.Typography?.HighlightBackground, d.Typography.HighlightBackground));
 
-        // --- 12. Separator & Dim ---
+        // --- 9. Separator & Dim ---
         SeparatorStyle.normal.background = GetTex(ParseColor(theme.Misc?.Separator, d.Misc.Separator));
 
         Color sepTextColor = ParseColor(theme.Misc?.SeparatorText ?? theme.Typography?.Secondary, d.Typography.Secondary);
@@ -627,12 +630,12 @@ public static class Magnetar_Default
 
         DimBackgroundStyle.normal.background = GetTex(ParseColor(theme.Misc?.DimBackground, d.Misc.DimBackground));
 
-        // --- 13. NEF & HUD ---
+        // --- 10. NEF & HUD ---
         NEFLineStyle.normal.background = GetTex(ParseColor(theme.NEF?.LineColor, d.NEF.LineColor));
         NEFNodeStyle.normal.background = GetTex(ParseColor(theme.NEF?.NodeBackground, d.NEF.NodeBackground));
         HUDElementStyle.normal.textColor = ParseColor(theme.HUD?.TextColor, d.HUD.TextColor);
 
-        // --- 14. Slider ---
+        // --- 11. Slider ---
         Color trackOffColor = ParseColor(theme.Slider?.TrackOff ?? theme.SettingOff?.BackgroundColor?.Normal, d.Slider.TrackOff);
         Color trackOnColor = ParseColor(theme.Slider?.TrackOn ?? theme.SettingOn?.BackgroundColor?.Normal, d.Slider.TrackOn);
         Color thumbColor = ParseColor(theme.Slider?.Thumb ?? theme.SettingOn?.BackgroundColor?.Normal, d.Slider.Thumb);
@@ -646,6 +649,11 @@ public static class Magnetar_Default
         SliderThumbStyle.active.background = GetCircleTex(thumbHoverColor);
 
         // Exposed dynamic properties
+        var catModOffBg = ResolveState(theme.CategoryModuleOff?.BackgroundColor, d.CategoryModuleOff.BackgroundColor);
+        var catModOnBg = ResolveState(theme.CategoryModuleOn?.BackgroundColor, d.CategoryModuleOn.BackgroundColor);
+        var catModOffText = ResolveState(theme.CategoryModuleOff?.Text, d.CategoryModuleOff.Text);
+        var tbOffBg = ResolveState(theme.TopBarOff?.BackgroundColor, d.TopBarOff.BackgroundColor);
+
         AccentColor = catModOnBg.normal;
         AccentHoverColor = catModOnBg.hover;
         BackgroundColor = ParseColor(theme.CategoryWindow?.BackgroundColor, d.CategoryWindow.BackgroundColor);
@@ -740,6 +748,13 @@ public static class Magnetar_Default
         SettingsWndowStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
         SettingOn = new GUIStyle { alignment = TextAnchor.MiddleLeft };
         SettingOff = new GUIStyle { alignment = TextAnchor.MiddleLeft };
+
+        // Action Buttons
+        ButtonSettingStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
+        ResetButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
+        ListAddButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
+        ListRemoveButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
+
         SettingsDescriptionStyle = new GUIStyle { wordWrap = true, alignment = TextAnchor.UpperLeft, richText = true };
         SettingLabelStyle = new GUIStyle { wordWrap = true, alignment = TextAnchor.UpperLeft, richText = true };
         SettingAuthorStyle = new GUIStyle { fontStyle = FontStyle.Italic, alignment = TextAnchor.MiddleLeft, richText = true };
@@ -822,6 +837,19 @@ public static class Magnetar_Default
 
         SettingOff.fontSize = S(SettingFontSize);
         SetOffset(SettingOff.padding, S(SettingPaddingLeft), 0, 0, 0);
+
+        // New Action Buttons font scaling
+        ButtonSettingStyle.fontSize = S(SettingFontSize);
+        SetOffset(ButtonSettingStyle.padding, 0, 0, 0, 0);
+
+        ResetButtonStyle.fontSize = S(SettingFontSize);
+        SetOffset(ResetButtonStyle.padding, 0, 0, 0, 0);
+
+        ListAddButtonStyle.fontSize = S(SettingFontSize);
+        SetOffset(ListAddButtonStyle.padding, 0, 0, 0, 0);
+
+        ListRemoveButtonStyle.fontSize = S(SettingFontSize);
+        SetOffset(ListRemoveButtonStyle.padding, 0, 0, 0, 0);
 
         // Typography
         SettingsDescriptionStyle.fontSize = S(DescriptionFontSize);

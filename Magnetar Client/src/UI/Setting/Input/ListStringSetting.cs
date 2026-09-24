@@ -61,7 +61,7 @@ public class ListStringSetting : Setting
 
             Values[i] = DrawSetting.DrawManualTextField(rowRect, Values[i] ?? "", "", AutocompleteVars);
 
-            GUI.Box(delRect, "—", Magnetar_Default.SettingOff);
+            GUI.Box(delRect, "—", Magnetar_Default.ListRemoveButtonStyle);
             if (delRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
             {
                 removeIndex = i;
@@ -82,7 +82,7 @@ public class ListStringSetting : Setting
         Rect addBtnRect = new(resetRect.x - gap - addBtnW, y, addBtnW, elemH);
 
         bool canAdd = Values.Count < MaxCount;
-        GUIStyle addStyle = canAdd ? Magnetar_Default.SettingOff : Magnetar_Default.CategoryModuleOffStyle;
+        GUIStyle addStyle = canAdd ? Magnetar_Default.ListAddButtonStyle : Magnetar_Default.CategoryModuleOffStyle;
 
         GUI.Box(addBtnRect, canAdd ? Translator.Translate("Add") : Translator.Translate("Max Reached"), addStyle);
 

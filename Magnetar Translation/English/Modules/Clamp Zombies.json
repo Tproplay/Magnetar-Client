@@ -1,0 +1,13 @@
+{
+  "Name": "Clamp Zombies",
+  "Description": "Maintains stable FPS by merging the HP of nearby identical zombies when the spawn limit is exceeded.\nMay Break the Damage Counter.",
+  "Search Hints": "clampzombies clampzombie limitfps maxfps fpsoptimize fixlag mergezombies combinezombies zombiehp healthmerge mergespawn performanceboost memoryfix stackzombies zombieclamp hpstack zombielimit fpsboost lagfix clusterspawns clumpzombies mergehp optimizefps lowfps hpfusion zombiemerge lagprevent clampzomb",
+  "settings": {
+    "General": "General",
+    "Max Zombies": "Max Zombies",
+    "Apply Speed Reduction": "Apply Speed Reduction",
+    "Add % of Hp": "Add % of Hp",
+    "Extra": "Extra",
+    "Visual Scale": "Visual Scale"
+  }
+}

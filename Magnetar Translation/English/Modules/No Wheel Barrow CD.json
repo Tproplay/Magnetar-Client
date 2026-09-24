@@ -1,0 +1,12 @@
+{
+  "Name": "No Wheel Barrow CD",
+  "Description": "Modifies the Ingame Wheel Barrow's Cooldown.",
+  "Search Hints": "nowheelbarrowcd wheelbarrowcooldown wheelbarrowcd wheelbarrowinstant instantwheelbarrow cooldownhack cooldownremove wheelbarrow-cooldown wheelbarrowfix cd-remove wheelbarrowspeed wheelbarrowcooldownfix wheelbarrowinstantcooldown wheelbarrownocd nocd wheelbarrowmod wheelbarrowutility",
+  "settings": {
+    "General": "General",
+    "Custom Wheel Barrow Cooldown": "Custom Wheel Barrow Cooldown",
+    "Extra": "Extra",
+    "Preserve Original": "Preserve Original",
+    "Reset CD on Enable": "Reset CD on Enable"
+  }
+}

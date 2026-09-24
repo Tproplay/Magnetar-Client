@@ -1,0 +1,16 @@
+{
+  "Name": "No Render",
+  "Description": "Now you can see your lawn.",
+  "Search Hints": "norender blank lawn invisible invisibleplants novisual clear lawn invisiblezombies hiderender hidedisplay nographics seelawn hidden lawnclear hidetexture graphicsoff renderdisable norendering invisibletextures clearfield plantshide zombieshide blankfield hidelawn seebackground hiderenderer seeground norend hidedraw no particles remove particles particletypes removeparticles disable particles clear particles",
+  "settings": {
+    "General": "General",
+    "Particles": "Particles",
+    "Particle Types": "Particle Types",
+    "Game Objects": "Game Objects",
+    "Bullets": "Bullets",
+    "Effects": "Effects",
+    "Others": "Others",
+    "Extra": "Extra",
+    "Disable Screen Shake effect": "Disable Screen Shake effect"
+  }
+}

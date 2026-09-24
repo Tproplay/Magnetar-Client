@@ -1,0 +1,12 @@
+{
+  "Name": "Xe Cút Kít Không Hồi Chiêu",
+  "Description": "Thiết lập thời gian hồi chiêu tùy chỉnh cho vật phẩm Xe Cút Kít (Xe rùa chuyển cây) trong game.",
+  "Search Hints": "nowheelbarrowcd wheelbarrowcooldown wheelbarrowcd wheelbarrowinstant instantwheelbarrow cooldownhack cooldownremove wheelbarrow-cooldown wheelbarrowfix cd-remove wheelbarrowspeed wheelbarrowcooldownfix wheelbarrowinstantcooldown wheelbarrownocd nocd wheelbarrowmod wheelbarrowutility",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Custom Wheel Barrow Cooldown": "Thời Gian Hồi Xe Cút Kít Tùy Chỉnh",
+    "Extra": "Mở Rộng",
+    "Preserve Original": "Giữ Nguyên Chỉ Số Gốc",
+    "Reset CD on Enable": "Đặt Lại Hồi Chiêu Khi Bật Tính Năng"
+  }
+}

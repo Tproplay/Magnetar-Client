@@ -1,0 +1,9 @@
+{
+  "Name": "Đạn Tầm Nhiệt (Đuổi Theo Mục Tiêu)",
+  "Description": "Giúp đạn bắn ra từ cây tự động chuyển hướng, tìm và đuổi theo các Zombie.",
+  "Search Hints": "đạn tầm nhiệt đạn đuổi mục tiêu đạn định vị đạn thông minh đạn tự đuổi khóa mục tiêu đạn tự hướng đạn dẫn đường",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Projectiles": "Các Loại Đạn / Vật Thể Bắn"
+  }
+}

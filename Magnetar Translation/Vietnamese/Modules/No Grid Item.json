@@ -1,0 +1,12 @@
+{
+  "Name": "Không Chướng Ngại Vật",
+  "Description": "Loại bỏ tất cả các chướng ngại vật được chọn trên ô đất khi tính năng này đang hoạt động.",
+  "Search Hints": "không vật cản ô đất xóa vật cản ô đất dọn vật cản xóa bia mộ không bia mộ không thang không băng không bình gốm dọn bia mộ dọn thang dọn tảng băng dọn bình ma phá bia mộ gỡ thang đập bình xóa vật thể ô đất",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Grid Items": "Các Chướng Ngại Vật",
+    "Extra": "Mở Rộng",
+    "Auto Turn Off": "Tự Động Tắt",
+    "Debug Mode": "Chế Độ Gỡ Lỗi (Debug)"
+  }
+}

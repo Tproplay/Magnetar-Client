@@ -1,0 +1,12 @@
+{
+  "Name": "No Hammer CD",
+  "Description": "Modifies the Ingame Hammer's Cooldown.",
+  "Search Hints": "nohammercd hammercooldown customhammercd hammercd zerohammercd nohammercoolndown hammercooldownreset fasthammer instanthammer hammerbuff hammercdmod hammercdchanger hammercdremover hammercolldown hammercooldon hammercooldwn hamrcd hammercooldoun hammercdtimer hammercdreducion hammercooldownreduction hammerfast hammerready hammerunlimited hammerinfinite hammerinterval hammerperiod hammerspeed hammerspam hammerfrequency",
+  "settings": {
+    "General": "General",
+    "Custom Hammer Cooldown": "Custom Hammer Cooldown",
+    "Extra": "Extra",
+    "Preserve Original": "Preserve Original",
+    "Reset CD on Enable": "Reset CD on Enable"
+  }
+}

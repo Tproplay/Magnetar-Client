@@ -1,0 +1,14 @@
+{
+  "Name": "Wave Hack",
+  "Description": "Allows you to modify wave spawn logic.",
+  "Search Hints": "wavehack wavemod wavespawn wavemodify wavespawnlogic spawnlogic waveeditor wavemanager customwaves waveconfig wavespawnrate wavecontrol wavespawnsettings modifyspawn wavespawncontrol wavecheat wavespawner wavechanger wavesize wavemanager wavebypass waveflow dontsendzombies pause zombiespause wavepause pausewave removewave",
+  "settings": {
+    "Cooldown": "Cooldown",
+    "Custom Wave Cooldown": "Custom Wave Cooldown",
+    "Wave Cooldown": "Wave Cooldown",
+    "Freeze Wave Timer": "Freeze Wave Timer",
+    "Spawn Rate": "Spawn Rate",
+    "Zombies count multiplier": "Zombies count multiplier",
+    "Spawn Delay": "Spawn Delay"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "Name": "Làm Sạch Thời Tiết",
+  "Description": "Xóa tan sương mù và tuyết rơi trên sân.",
+  "Search Hints": "cleanweather clearweather nofog nosnow weatherclear weatherfix removefog removesnow clearfog clearsnow weathercontrol weatherclean skyclear fogremover snowremover no-weather weather-clear clear-weather visibilityfix clearweather-mod weather-mod weatherhack",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Clear Fog": "Xóa Sương Mù",
+    "Clear SnowFall": "Xóa Tuyết Rơi"
+  }
+}

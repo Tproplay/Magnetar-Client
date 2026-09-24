@@ -1,0 +1,9 @@
+{
+  "Name": "Bộ Giảm Âm Thanh",
+  "Description": "Ngăn chặn một số âm thanh nhất định phát ra.",
+  "Search Hints": "soundmuffler audiofilter soundmuffle muteaudio soundblocker audiosettings volumecontrol soundmute noisecontrol disablesounds soundcleaner audioblock soundfix muteeffects audiomute soundmanager customaudio soundfilter audiodampener soundkiller",
+  "settings": {
+    "General": "Cài đặt chung",
+    "Blacklisted": "Danh sách đen"
+  }
+}

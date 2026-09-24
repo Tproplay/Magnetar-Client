@@ -1,0 +1,9 @@
+{
+  "Name": "No FPS Limit",
+  "Description": "Set a custom FPS limit or break the current fps limit.",
+  "Search Hints": "fpslimit fpscap limitfps framespersecond fpsbreaker unlockfps capfps customfps maxfps fpsfix fpsunlocked framecap framepersecond fpslimiter fpxlimit fpaslimit fps-limit fpsbypass bypassfps nofpslimit unlimitedfps fpsset setfps fps-cap morefps fpsboost lagfix frameslimit",
+  "settings": {
+    "General": "General",
+    "Max FPS": "Max FPS"
+  }
+}

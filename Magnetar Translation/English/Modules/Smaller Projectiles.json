@@ -1,0 +1,10 @@
+{
+  "Name": "Smaller Projectiles",
+  "Description": "Reduces the visual size of selected Projectile(s) to reduce screen clutter.",
+  "Search Hints": "smallerprojectiles smallprojectiles projectile size visual reduce screen clutter tiny peas bullet bulletsize smallpea lessclutter screenclutter projectile size visualreduce projectileclutter shrinking projectilesize projectil smallbullet clear screen projectilevisual smallammo ammoclutter pea size hitclutter tinyprojectiles lagclutter projectils",
+  "settings": {
+    "General": "General",
+    "Bullet Types": "Bullet Types",
+    "Scale Multiplier": "Scale Multiplier"
+  }
+}

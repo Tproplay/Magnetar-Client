@@ -1,0 +1,10 @@
+{
+  "Name": "Clean Weather",
+  "Description": "Clears fog/snowfall",
+  "Search Hints": "cleanweather clearweather nofog nosnow weatherclear weatherfix removefog removesnow clearfog clearsnow weathercontrol weatherclean skyclear fogremover snowremover no-weather weather-clear clear-weather visibilityfix clearweather-mod weather-mod weatherhack",
+  "settings": {
+    "General": "General",
+    "Clear Fog": "Clear Fog",
+    "Clear SnowFall": "Clear SnowFall"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "Name": "Tiêu Diệt Tất Cả Cây Trồng",
+  "Description": "Lập tức xóa sạch và tiêu diệt các cây trồng được chọn trên sân đấu.",
+  "Search Hints": "xóa tất cả cây giết sạch cây phá hủy cây dọn dẹp sân quét sạch cây tiêu diệt cây dọn bãi cỏ xóa toàn bộ cây trồng",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Entities": "Thực Thể",
+    "Extra": "Mở Rộng",
+    "Auto Turn Off": "Tự Động Tắt"
+  }
+}

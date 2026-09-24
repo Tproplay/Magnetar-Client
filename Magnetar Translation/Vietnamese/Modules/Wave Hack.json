@@ -1,0 +1,14 @@
+{
+  "Name": "Hack Các Đợt Tấn Công (Wave)",
+  "Description": "Cho phép bạn thay đổi logic xuất hiện của các đợt Zombie.",
+  "Search Hints": "wavehack wavemod wavespawn wavemodify wavespawnlogic spawnlogic waveeditor wavemanager customwaves waveconfig wavespawnrate wavecontrol wavespawnsettings modifyspawn wavespawncontrol wavecheat wavespawner wavechanger wavesize wavemanager wavebypass waveflow dontsendzombies pause zombiespause wavepause pausewave removewave",
+  "settings": {
+    "Cooldown": "Thời Gian Hồi (Cooldown)",
+    "Custom Wave Cooldown": "Hồi Chiêu Đợt Tấn Công Tùy Chỉnh",
+    "Wave Cooldown": "Thời Gian Chờ Giữa Các Đợt",
+    "Freeze Wave Timer": "Đóng Băng Thời Gian Đợt Tấn Công",
+    "Spawn Rate": "Tốc Độ Xuất Hiện",
+    "Zombies count multiplier": "Hệ Số Nhân Số Lượng Zombie",
+    "Spawn Delay": "Thời Gian Trễ Xuất Hiện"
+  }
+}

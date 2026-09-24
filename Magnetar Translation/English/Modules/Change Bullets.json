@@ -1,0 +1,9 @@
+{
+  "Name": "Change Bullets",
+  "Description": "Changes the Bullet Plant(s) shoot.",
+  "Search Hints": "changebullets bulletchanger projectilechanger bulletswap projectileswap changebullet switchbullets bulletskins bullettype projectiletype bulletmodifier changeammo ammoswitch bulleteditor bulletcustomizer projectilecustomizer changebulletts changebullits changebullits changebulits projectilemod ammomod bulletvariant projectileskin bulletoverride ammovariant shootchange bulletprojectile bullettransformation bulletreplace",
+  "settings": {
+    "General": "General",
+    "Allowed bullets": "Allowed bullets"
+  }
+}

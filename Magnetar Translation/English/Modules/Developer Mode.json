@@ -1,0 +1,6 @@
+{
+  "Name": "Developer Mode",
+  "Description": "Developer Mode is used by game devs during game testing",
+  "Search Hints": "developermode devmode devmod developer devtools developmentmode debugmode debugdev devtesting gametesting dev-tools devfeatures adminmode devconsole cheatsdev devsettings testingmode developeroptions devtoolsenabled devaccess devmenu developeraccess devbuild testingtool",
+  "settings": {}
+}

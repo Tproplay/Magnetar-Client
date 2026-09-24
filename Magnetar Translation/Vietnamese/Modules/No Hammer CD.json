@@ -1,0 +1,12 @@
+{
+  "Name": "Búa không hồi chiêu",
+  "Description": "Búa Không Hồi Chiêu",
+  "Search Hints": "búa không hồi chiêu hồi chiêu búa thời gian hồi búa đập búa liên tục xóa hồi chiêu búa búa tức thì búa thần tốc búa vô hạn",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Custom Hammer Cooldown": "Thời Gian Hồi Búa Tùy Chỉnh",
+    "Extra": "Mở Rộng",
+    "Preserve Original": "Giữ Nguyên Chỉ Số Gốc",
+    "Reset CD on Enable": "Đặt Lại Hồi Chiêu Khi Bật Tính Năng"
+  }
+}

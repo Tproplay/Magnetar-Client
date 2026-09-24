@@ -1,0 +1,10 @@
+{
+  "Name": "No Cap",
+  "Description": "Bypasses the ingame sun/money cap.",
+  "Search Hints": "nocap suncap moneycap bypasscap capremove infinite sun money unlimitedsun unlimitedmoney capbreak nosuncap nomoneycap caplimit moneyfix sunfix capoverride unlimitedcurrency nosunlimit nomoneylimit capbypass maxsun maxmoney currencycap removecap moneycheat suncheat nocapmod",
+  "settings": {
+    "General": "General",
+    "Sun Cap": "Sun Cap",
+    "Money Cap": "Money Cap"
+  }
+}

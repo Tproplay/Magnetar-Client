@@ -1,0 +1,9 @@
+{
+  "Name": "Custom Board Tags",
+  "Description": "Allows you to modify the BoardTag of the current level.",
+  "Search Hints": "customboardtags boardtag boardtagger boardtagmod leveltags boardtageditor boardtagmodifier customtags leveltagger boardtagchanger tagmanager tageditor leveltagmod tagmodifier boardproperties tagoverride boardconfig levelproperties tagselector boardtagsettings boardtagcheat",
+  "settings": {
+    "General": "General",
+    "Tags": "Tags"
+  }
+}

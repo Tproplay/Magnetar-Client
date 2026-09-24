@@ -1,0 +1,13 @@
+{
+  "Name": "Repick Plants",
+  "Description": "Allows you to repick your plants mid-game.",
+  "Search Hints": "repickplants reselectplants changeplants midgameplants plantswitch plantrepick reselect seedbankreset pickagain repickseed re-pick changeseed midgameselector plantchange plantmenu seedreselect selectagain reselectseeds plantselection repickmode changeplant midgamepick resetplants repickselection seedsrepick re-select repick plantreselector",
+  "settings": {
+    "General": "General",
+    "Force Show Repick button": "Force Show Repick button",
+    "Card Groups": "Card Groups",
+    "Allow all plant cards": "Allow all plant cards",
+    "Allow Odyssey plant cards (Ensure Odyssey Plant is enabled before entering the level)": "Allow Odyssey plant cards (Ensure Odyssey Plant is enabled before entering the level)",
+    "Debug Mode": "Debug Mode"
+  }
+}

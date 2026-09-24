@@ -1,0 +1,10 @@
+{
+  "Name": "Smaller Zombies",
+  "Description": "Changes the size of selected zombies.\nNote: Changing size also affects zombie's speed.",
+  "Search Hints": "",
+  "settings": {
+    "General": "General",
+    "Scale multiplier": "Scale multiplier",
+    "Entities": "Entities"
+  }
+}

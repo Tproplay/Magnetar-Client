@@ -1,0 +1,10 @@
+{
+  "Name": "Debug Mode (for devs)",
+  "Description": "Logs debug info onto the console.",
+  "Search Hints": "debugmode debuginfo consolelog loginfo debuglog debugconsole logger debugshow debugdata logs debugtools debugconsolelog devlog devmode debugprint systemlog debugdump printdebug debugmonitor showlogs debugmessages debugview debugactive loggingmode debugtrace debugpanel infolog",
+  "settings": {
+    "General": "General",
+    "elements": "elements",
+    "Time between Logs": "Time between Logs"
+  }
+}

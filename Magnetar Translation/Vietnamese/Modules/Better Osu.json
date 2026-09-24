@@ -1,0 +1,14 @@
+{
+  "Name": "Tối Ưu Chế Độ Osu",
+  "Description": "Cải tiến chế độ Explode-O-su.\nTự động gia tăng chỉ số sức mạnh của đạn dựa trên số chuỗi Combo hiện tại của bạn.",
+  "Search Hints": "tối ưu osu osu tốt hơn tăng sát thương combo osu nâng cấp osu cải tiến osu chuẩn combo osu chuyên nghiệp",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Increase Damage": "Gia Tăng Sát Thương",
+    "Spawn Helper Pet": "Triệu Hồi Thú Nuôi Trợ Thủ",
+    "Pet Type": "Loại Thú Nuôi",
+    "Random Bullets": "Bắn Đạn Ngẫu Nhiên",
+    "Allowed bullets": "Các Loại Đạn Được Cho Phép",
+    "DebugMode": "ChếĐộDebug"
+  }
+}

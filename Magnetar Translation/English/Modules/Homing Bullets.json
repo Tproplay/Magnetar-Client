@@ -1,0 +1,9 @@
+{
+  "Name": "Homing Bullets",
+  "Description": "Makes Plants fire Homing rounds.",
+  "Search Hints": "homingbullets homingrounds trackingbullets targetingsystem trackingrounds smartbullets seekerbullets seekershells seekerprojectiles bullettracking homingmod homingplugin homingattack hommingbullets hommingrounds hominbullets homingbulits homingbullits targetbullets targettingbullets autobullets guidedbullets guidedrounds missilebullets curvebullets magneticbullets stickybullets lockonbullets lockonrounds precisionbullets",
+  "settings": {
+    "General": "General",
+    "Projectiles": "Projectiles"
+  }
+}

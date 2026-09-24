@@ -1,0 +1,10 @@
+{
+  "Name": "Buff Zombies",
+  "Description": "Buffs the selected zombie(s) while the module is active.",
+  "Search Hints": "buffzombies buffzombie bufzombie buffingzombies hpbuff healthboost strongzombies zombiehp morehealth tankyzombies zombiefy buffzombs biffzombies buffzombes hpup extrahealth buffedzombs healthup zombieboost buffmod buffactive buff-zombies hpplus zombiefying zombiebiff buffzom biffzom hpp boost buffzombiez",
+  "settings": {
+    "General": "General",
+    "Entities": "Entities",
+    "Hp Multiply": "Hp Multiply"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "Name": "Column Glove",
+  "Description": "Moving a plant with the glove moves all identical plants in that column simultaneously.",
+  "Search Hints": "columnglove glovecol columnmove movecolumn identicalplants moveplants columnglovemod simultaneousmove massmove multi-move gloveswap plantglove plantcolumn glovemove multijmove plantmover glovecolumn moveall rowmove quickmove glovecopy columncopy columnsync gloveplant columnshift movemulti plantshift glovesync syncmove identicalmove",
+  "settings": {}
+}

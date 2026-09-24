@@ -1,0 +1,6 @@
+{
+  "Name": "Chế độ nhà phát triển",
+  "Description": "Chế độ nhà phát triển được nhà phát triển dùng khi test game",
+  "Search Hints": "developermode devmode devmod developer devtools developmentmode debugmode debugdev devtesting gametesting dev-tools devfeatures adminmode devconsole cheatsdev devsettings testingmode developeroptions devtoolsenabled devaccess devmenu developeraccess devbuild testingtool",
+  "settings": {}
+}

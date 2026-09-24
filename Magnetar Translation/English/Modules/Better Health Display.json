@@ -1,0 +1,18 @@
+{
+  "Name": "Better Health Display",
+  "Description": "Converts long health texts to a much more clear shorter form.",
+  "Search Hints": "healthdisplay healthtext healthshow hpdisplay hptext betterhealth clearhealth shorthealth healthform shorthp clearhp healthconverter texthp hpconverter shorttext healthui hpui hpvisual healthvisual betterhp displayhealth healthshortener hp-display health-display texthp health-txt hptxt healthtxt",
+  "settings": {
+    "General": "General",
+    "Combine HP and Shield": "Combine HP and Shield",
+    "Plants": "Plants",
+    "Whitelist Plants": "Whitelist Plants",
+    "Show Max Health": "Show Max Health",
+    "Zombies": "Zombies",
+    "Whitelist Zombies": "Whitelist Zombies",
+    "Extra": "Extra",
+    "Auto Enable Plant Hp": "Auto Enable Plant Hp",
+    "Auto Enable Zombie Hp": "Auto Enable Zombie Hp",
+    "Show Star icon on Controlled Plant": "Show Star icon on Controlled Plant"
+  }
+}

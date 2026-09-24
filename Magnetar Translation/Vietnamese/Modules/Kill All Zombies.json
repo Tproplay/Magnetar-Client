@@ -1,0 +1,12 @@
+{
+  "Name": "Tiêu Diệt Tất Cả Zombie",
+  "Description": "Lập tức quét sạch và tiêu diệt toàn bộ các Zombie được chọn đang có trên sân.",
+  "Search Hints": "giết tất cả zombie xóa sạch zombie dọn sạch zombie tiêu diệt zombie diệt quái lập tức thắng quét sạch xác sống hạ gục toàn bộ zombie",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Entities": "Thực Thể",
+    "Hypnotized Entities": "Các Thực Thể Đã Bị Thôi Miên",
+    "Extra": "Mở Rộng",
+    "Auto Turn Off": "Tự Động Tắt"
+  }
+}

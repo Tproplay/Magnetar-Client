@@ -1,0 +1,23 @@
+{
+  "Name": "Trạng Thái Discord (RPC)",
+  "Description": "Hiện thị cập nhật trạng thái chơi game liên tục trên Discord.",
+  "Search Hints": "trạng thái discord hiển thị discord kết nối discord hoạt động discord liên kết discord hiển thị đang chơi game kết nối rpc discord",
+  "settings": {
+    "General": "Cài đặt chung",
+    "Switch Speed (s)": "Tốc Độ Chuyển Đổi (giây)",
+    "In Game": "Trong trận đấu",
+    "Line 1 Message 1": "Dòng 1 Tin nhắn 1",
+    "Line 1 Message 2": "Dòng 1 Tin nhắn 2",
+    "Line 1 Message 3": "Dòng 1 Tin nhắn 3",
+    "Line 1 Message 4": "Dòng 1 Tin nhắn 4",
+    "Line 1 Message 5": "Dòng 1 Tin nhắn 5",
+    "Line 1 Message 6": "Dòng 1 Tin nhắn 6",
+    "Line 2 Message 1": "Dòng 2 Tin nhắn 1",
+    "Line 2 Message 2": "Dòng 2 Tin nhắn 2",
+    "Line 2 Message 3": "Dòng 2 Tin nhắn 3",
+    "Line 2 Message 4": "Dòng 2 Tin nhắn 4",
+    "Line 2 Message 5": "Dòng 2 Tin nhắn 5",
+    "Line 2 Message 6": "Dòng 2 Tin nhắn 6",
+    "Iteration Mode": "Chế độ lặp"
+  }
+}

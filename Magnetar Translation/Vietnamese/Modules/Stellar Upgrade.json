@@ -1,0 +1,9 @@
+{
+  "Name": "Nâng Cấp Tinh Tú (Stellar)",
+  "Description": "Cho phép bạn nâng cấp các loại cây cụ thể lên phiên bản Tinh Tú (StarBound) của chúng.",
+  "Search Hints": "starboundupgrade starbound starupgrade starplant plantupgrade starboundmode starboundconversion upgradeplant plant-starbound star-bound upgrade-starbound starboundmod starboundplants starboundify starboundchanger plantstar upgrade-to-starbound starversion starboundlevel starboundtool starboundlogic stellarupgrade stellarplants",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Upgrade Key": "Phím Nâng Cấp"
+  }
+}

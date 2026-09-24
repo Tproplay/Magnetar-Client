@@ -1,0 +1,10 @@
+{
+  "Name": "Băng Chuyền Tùy Chỉnh",
+  "Description": "Bắt buộc các loại cây cụ thể xuất hiện trên băng chuyền. Nếu không có cây nào được chọn, hệ thống sẽ nạp tất cả các loại cây vào.",
+  "Search Hints": "băng chuyền tùy chỉnh băng truyền cây tùy chỉnh ép cây xuất hiện lực ép băng chuyền băng chuyền cây trồng chọn băng chuyền sửa băng chuyền bộ nạp băng chuyền nạp cây vào ghi đè băng chuyền băng chuyền tự chế băng tải nạp cây trồng nạp tất cả sinh cây trồng băng tải tùy biến ép băng chuyền băng chuyền tùy biến ép cây trồng tất cả cây trồng vật phẩm băng chuyền tạo thẻ cây bể chứa cây băng chuyền bể chứa tùy chỉnh danh sách cây băng chuyền",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Force enable conveyer": "Force enable conveyer",
+    "Allowed Plants": "Cây Trồng Được Cho Phép"
+  }
+}

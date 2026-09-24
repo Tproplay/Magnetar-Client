@@ -1,0 +1,10 @@
+{
+  "Name": "Column Shovel",
+  "Description": "Shoveling a plant, also shovel all identical plants in that column simultaneously.",
+  "Search Hints": "columnshovel shovelcolumn columnremove massshovel shovelall removecolumn identicalshovel multi-shovel shovelidentical columnclear clearsameplants removeallshovel columncleanup shovelplants shovelmod columnshovelmod clearcolumn multi-remove shovelrow rowshovel clearsamecolumn plantshovel column-shovel shovelidenticalplants massremove shovelgroup shovelmulti shovelsync colshovel",
+  "settings": {
+    "General": "General",
+    "Mode": "Mode",
+    "Only Similar Plants": "Only Similar Plants"
+  }
+}

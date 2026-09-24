@@ -1,0 +1,13 @@
+{
+  "Name": "Tự động đặt cây",
+  "Description": "Cho phép bạn đặt phiên bản bóng ma của cây trồng cái mà sẽ được thay thế bằng cây trồng thực tế theo thời gian.\nSử dụng Chuột Phải để xóa Cây Bóng Ma",
+  "Search Hints": "tựđộngtrồng câybóngma trồngcâybóngma tựđộngtrồng câybóngma sinhbóngma tựđộngtrồngcâybóngma xâybóngma bộđặtbóngma vịtríbóngma câybóngma bộtựđộngtrồng modcâybóngma trồngcâybóngma tựđộngđiền hạtgiốngbóngma pháttriểnbóngma xâybóngma câybóngma modtựđộngtrồng tựđộngbóngma bóngma hạtgiốngbóngma bộđếmthờigianbóngma sinhbóngma bộđặtbóngma đặtbóngma côngcụtrồngcâybóngma",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Render Ghost Plant": "Hiển Thị Đồ Họa Cây Bóng Ma",
+    "Ghost Opacity": "Độ Mờ Của Bóng Ma",
+    "Multi Plant": "Trồng Nhiều Cây",
+    "Use Extra Plant": "Sử Dụng Cây Thêm",
+    "Planting Order": "Thứ Tự Trồng Cây"
+  }
+}

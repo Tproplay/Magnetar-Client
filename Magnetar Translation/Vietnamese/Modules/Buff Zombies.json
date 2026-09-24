@@ -1,0 +1,10 @@
+{
+  "Name": "Tăng Sức Mạnh Zombie",
+  "Description": "Gia tăng chỉ số sức mạnh cho các Zombie được chọn khi tính năng này đang hoạt động.",
+  "Search Hints": "buff zombie zombie mạnh hơn tăng máu zombie tăng hp zombie zombie trâu bò zombie siêu khỏe cường hóa zombie tăng sức mạnh quái",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Entities": "Thực Thể",
+    "Hp Multiply": "Hệ Số Nhân Máu (HP)"
+  }
+}

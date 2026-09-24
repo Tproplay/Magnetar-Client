@@ -1,0 +1,12 @@
+{
+  "Name": "Găng Tay Không Hồi Chiêu",
+  "Description": "Thiết lập thời gian hồi chiêu tùy chỉnh cho vật phẩm Găng Tay.",
+  "Search Hints": "găng tay không hồi chiêu hồi chiêu găng tay thời gian hồi găng tay găng tay dùng liên tục xóa hồi chiêu găng tay găng tay tức thì",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Custom Glove Cooldown": "Thời Gian Hồi Găng Tay Tùy Chỉnh",
+    "Extra": "Mở Rộng",
+    "Preserve Original": "Giữ Nguyên Chỉ Số Gốc",
+    "Reset CD on Enable": "Đặt Lại Hồi Chiêu Khi Bật Tính Năng"
+  }
+}

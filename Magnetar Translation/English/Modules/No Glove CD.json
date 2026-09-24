@@ -1,0 +1,12 @@
+{
+  "Name": "No Glove CD",
+  "Description": "Modifies the Ingame Glove's Cooldown.",
+  "Search Hints": "noglovecd glovecooldown customglovecd glovecd zeroglovecd noglovecoolndown glovecooldownreset fastglove instantglove glovebuff glovecdmod glovecdchanger glovecdremover glovecolldown glovecooldon glovecooldwn glovcd glovecooldoun glovecdtimer glovecdreducion glovecooldownreduction glovefast gloveready gloveunlimited gloveinfinite gloveinterval gloveperiod glovespeed glovespam glovefrequency",
+  "settings": {
+    "General": "General",
+    "Custom Glove Cooldown": "Custom Glove Cooldown",
+    "Extra": "Extra",
+    "Preserve Original": "Preserve Original",
+    "Reset CD on Enable": "Reset CD on Enable"
+  }
+}

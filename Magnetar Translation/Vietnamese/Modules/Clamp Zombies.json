@@ -1,0 +1,13 @@
+{
+  "Name": "Gom Cụm Gộp Máu Zombie",
+  "Description": "Duy trì FPS ổn định bằng cách gộp lượng máu của các Zombie giống nhau đứng gần lại làm một khi số lượng quái vượt quá giới hạn.\n*Lưu ý: Có thể làm lỗi bộ đếm sát thương.*",
+  "Search Hints": "gom cụm zombie gộp zombie tối ưu fps gộp máu zombie kết hợp zombie gộp quái zombie chồng lên nhau giới hạn zombie gộp hp zombie fusion",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Max Zombies": "Số Lượng Zombie Tối Đa",
+    "Apply Speed Reduction": "Áp Dụng Giảm Tốc Độ",
+    "Add % of Hp": "Cộng Thêm % Lượng Máu",
+    "Extra": "Mở Rộng",
+    "Visual Scale": "Tỷ Lệ Hiển Thị Kích Thước"
+  }
+}

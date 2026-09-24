@@ -1,0 +1,10 @@
+{
+  "Name": "Chế Độ Gỡ Lỗi (Cho Nhà Phát Triển)",
+  "Description": "Ghi lại các thông tin gỡ lỗi (debug) vào bảng điều khiển console.",
+  "Search Hints": "chế độ debug thông tin gỡ lỗi log console nhật ký lỗi nhật ký hệ thống công cụ dev chế độ dev in debug theo dõi hệ thống hiển thị nhật ký",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "elements": "Các Thành Phần",
+    "Time between Logs": "Thời Gian Giữa Các Lần Log"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "Name": "Volley",
+  "Description": "Makes Plants fire multiple rounds of bullets.",
+  "Search Hints": "homingbullets homingrounds trackingbullets targetingsystem trackingrounds smartbullets seekerbullets seekershells seekerprojectiles bullettracking homingmod homingplugin homingattack hommingbullets hommingrounds hominbullets homingbulits homingbullits targetbullets targettingbullets autobullets guidedbullets guidedrounds missilebullets curvebullets magneticbullets stickybullets lockonbullets lockonrounds precisionbullets",
+  "settings": {
+    "General": "General",
+    "Bullet multiplier": "Bullet multiplier",
+    "Projectiles": "Projectiles",
+    "Bullet Spawn": "Bullet Spawn",
+    "Vertical Spread (unit)": "Vertical Spread (unit)"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "Name": "No Grid Item",
+  "Description": "Removes all the selected Grid Item(s) while the module is active.",
+  "Search Hints": "nogriditem removegriditem griditemremover cleargriditems deletegriditems nogriditems nogriditemmod nogriditemfix nograve noladder noiceblock noscarypot nograves noladders noiceblocks noscarypots anti-grave anti-ladder anti-iceblock anti-pot removegraves removeladders removeiceblocks removescarypots graveclearer ladderclearer iceblockclearer potclearer nogriditemm nogrditem nogrititem nogriditme nogriditemz removegridobjects deletegridobjects",
+  "settings": {
+    "General": "General",
+    "Grid Items": "Grid Items",
+    "Extra": "Extra",
+    "Auto Turn Off": "Auto Turn Off",
+    "Debug Mode": "Debug Mode"
+  }
+}

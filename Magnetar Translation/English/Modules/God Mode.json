@@ -1,0 +1,12 @@
+{
+  "Name": "God Mode",
+  "Description": "Makes Plants Invincible.",
+  "Search Hints": "godmode godmod invincibilty invinsible invincabel unkillable nodamage immortal immortel invincibillity goddmode godmdoe invuln invulnerable invunrable invun invinc plantgod plantinvincibility invensible invonceable invinci godmodecheat no-die infinitelife god-mode invinciblity godmodde",
+  "settings": {
+    "General": "General",
+    "Entities": "Entities",
+    "Immune To Damage": "Immune To Damage",
+    "Immune To Vehicle": "Immune To Vehicle",
+    "Immune To Shovel": "Immune To Shovel"
+  }
+}

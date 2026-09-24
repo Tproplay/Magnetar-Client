@@ -1,0 +1,12 @@
+{
+  "Name": "Cây Tấn Công Nhanh",
+  "Description": "Giúp các cây trồng được chọn hành động và tấn công nhanh hơn nhiều lần khi tính năng đang bật.",
+  "Search Hints": "cây bắn nhanh cây tốc độ tăng tốc cây cây tấn công nhanh giảm hồi chiêu cây tốc độ đánh tốc độ bắn của cây tăng tốc độ đánh",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Entities": "Thực Thể",
+    "Attack Interval": "Khoảng Cách Giữa Các Đòn Tấn Công",
+    "Animation Speed": "Tốc Độ Hoạt Ảnh (Animation)",
+    "Produce Speed": "Tốc Độ Sản Xuất (Mặt Trời/Tiền)"
+  }
+}

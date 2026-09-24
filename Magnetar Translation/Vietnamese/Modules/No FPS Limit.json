@@ -1,0 +1,9 @@
+{
+  "Name": "Mở Khóa Giới Hạn FPS",
+  "Description": "Thiết lập giới hạn FPS tùy chỉnh hoặc phá vỡ giới hạn khung hình hiện tại của game",
+  "Search Hints": "giới hạn fps khóa fps khung hình trên giây phá giới hạn fps mở khóa fps fps tùy chỉnh fps tối đa sửa fps gỡ giới hạn khung hình mượt game tăng tốc fps sửa lag",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Max FPS": "FPS Tối Đa"
+  }
+}

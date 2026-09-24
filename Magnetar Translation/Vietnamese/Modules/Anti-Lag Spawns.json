@@ -1,0 +1,10 @@
+{
+  "Name": "Sinh Zombie Chống Lag",
+  "Description": "Giãn cách thời gian xuất hiện của các đợt Zombie đông nghẹt để tránh bị khựng/lag game đột ngột.\n*Lưu ý: Tính năng này có thể làm lỗi logic của trò chơi và bộ đếm số lượng Zombie.*",
+  "Search Hints": "chống lag sinh zombie giảm lag sửa lag zombie ra giãn cách zombie ra từ từ giảm đứng máy mượt game sửa lỗi bộ đếm lỗi đếm zombie sinh zombie mượt",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Frames Between Spawns": "Số Khung Hình Cách Nhau Giữa Mỗi Lần Sinh",
+    "Unaffected Entities": "Các Thực Thể Không Bị Ảnh Hưởng"
+  }
+}

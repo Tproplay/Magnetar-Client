@@ -1,0 +1,12 @@
+{
+  "Name": "Chế Độ Bất Tử",
+  "Description": "Giúp toàn bộ cây trồng của bạn trở nên bất tử.",
+  "Search Hints": "bất tử chế độ thần thánh cây bất tử không nhận sát thương không thể bị giết không chết máu vô hạn thần thánh hack bất tử",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Entities": "Thực Thể",
+    "Immune To Damage": "Miễn Nhiễm Sát Thương",
+    "Immune To Vehicle": "Miễn Nhiễm Xe Đè (Xe Lu/Xe Cắt Cỏ)",
+    "Immune To Shovel": "Miễn Nhiễm Xẻng Đào"
+  }
+}

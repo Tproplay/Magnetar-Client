@@ -1,0 +1,10 @@
+{
+  "Name": "Anti-Lag Spawns",
+  "Description": "Staggers mass zombie spawns over time to prevent lag spikes.",
+  "Search Hints": "antilag antilagspawns lagspawn fixlag lagfix countersmasher stagger spawns staggerzombies staggeredspawns massspawn lagspike nolag spawnerlag zombielag lagprevent performanceboost spawnfix breakcounter counterbreak zombiecounter smoothspawn logicbreak massspawnfix antilagmod lagspawns antispawnlag laglessspawns",
+  "settings": {
+    "General": "General",
+    "Frames Between Spawns": "Frames Between Spawns",
+    "Unaffected Entities": "Unaffected Entities"
+  }
+}

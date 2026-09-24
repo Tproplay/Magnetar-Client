@@ -1,0 +1,9 @@
+{
+  "Name": "Tự Động Thu Thập",
+  "Description": "Tự động thu thập các vật phẩm được chọn nếu chúng xuất hiện trong trận đấu.",
+  "Search Hints": "thu thập hộp quà bộ thu thập hộp quà hộp quà thu thập hộp quà lấy hộp quà bộ chọn hộp quà tự động thu thập hộp quà các hộp quà các hộp quà lấy hộp quà thu thập hộp quà lấy hộp quà người săn hộp quà thu thập hộp quà hộp quà hộp quà hộp quà hộp quà thu thập hộp tự động lấy hộp quà quà hộp thu thập hộp thu thập hộp thợ săn hộp quà bộ giật hộp quà giật lấy hộp quà bộ giật lấy hộp giật hộp hộp tiền",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Items": "Vật Phẩm"
+  }
+}

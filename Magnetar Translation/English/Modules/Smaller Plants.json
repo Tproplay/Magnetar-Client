@@ -1,0 +1,10 @@
+{
+  "Name": "Smaller Plants",
+  "Description": "Changes the size of selected plants.",
+  "Search Hints": "smallerplants miniplants tinyplants plantscale plantresize plantscaler minatureplants scaleplants compactplants microplants plantsize plantshrinker shrinkplants resizeplants miniplantmod plantzoom scaledplants tinyplantmod microplantmod sizechanger",
+  "settings": {
+    "General": "General",
+    "Scale multiplier": "Scale multiplier",
+    "Entities": "Entities"
+  }
+}

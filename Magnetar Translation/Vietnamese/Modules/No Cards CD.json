@@ -1,0 +1,11 @@
+{
+  "Name": "Thẻ Bài Không Hồi Chiêu",
+  "Description": "Thiết lập thời gian hồi chiêu tùy chỉnh cho các thẻ bài hạt giống.",
+  "Search Hints": "thẻ bài không hồi chiêu hồi chiêu thẻ cây trồng cây liên tục thẻ cây không hồi trồng cây tức thì xóa hồi chiêu thẻ bài trồng cây không chờ",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Cards": "Các Thẻ Bài Hạt Giống",
+    "Duplicate Cards": "Nhân Bản Thẻ Bài",
+    "Custom CD Multiplier": "Hệ Số Nhân Thời Gian Hồi Chiêu Tùy Chỉnh"
+  }
+}

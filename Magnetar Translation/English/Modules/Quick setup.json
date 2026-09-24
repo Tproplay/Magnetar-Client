@@ -1,0 +1,15 @@
+{
+  "Name": "Quick setup",
+  "Description": "Save/load a custom setup loadout.",
+  "Search Hints": "quicksetup loadout setupmanager savebuild loadbuild setup presetmanager quickload quicksave plantsetup configuration buildmanager setuploader loadouts quick-setup customsetup setupsaver presetload",
+  "settings": {
+    "Save": "Save",
+    "Name": "Name",
+    "Save Current Setup": "Save Current Setup",
+    "Load": "Load",
+    "Clear Lawn Before Load": "Clear Lawn Before Load",
+    "Setup": "Setup",
+    "Load Selected Setup": "Load Selected Setup",
+    "Delete Selected Setup": "Delete Selected Setup"
+  }
+}

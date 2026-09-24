@@ -1,0 +1,18 @@
+{
+  "Name": "Hiển Thị Máu Tối Ưu",
+  "Description": "Chuyển đổi văn bản hiển thị lượng máu (HP) dài dòng thành dạng rút gọn rõ ràng hơn",
+  "Search Hints": "hiển thị máu thanh máu hiện hp hiển thị hp rút gọn hp hp ngắn rõ ràng dạng máu giao diện máu nhìn rõ máu thanh hp tối ưu thanh máu",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Combine HP and Shield": "Kết Hợp Máu Và Khiên",
+    "Plants": "Cây trồng",
+    "Whitelist Plants": "Danh sách trắng Cây trồng",
+    "Show Max Health": "Hiện Máu Tối Đa",
+    "Zombies": "Thây ma",
+    "Whitelist Zombies": "Danh sách trắng Thây ma",
+    "Extra": "Mở Rộng",
+    "Auto Enable Plant Hp": "Tự Bật Thanh Máu Của Cây",
+    "Auto Enable Zombie Hp": "Tự Bật Thanh Máu Của Zombie",
+    "Show Star icon on Controlled Plant": "Hiện Biểu Tượng Ngôi Sao Trên Cây Đang Điều Khiển"
+  }
+}

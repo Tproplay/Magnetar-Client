@@ -1,0 +1,9 @@
+{
+  "Name": "Bắn Liên Tục Không Ngừng",
+  "Description": "Ép các cây trồng liên tục tấn công/bắn đạn ngay cả khi không có Zombie trên làn đường.",
+  "Search Hints": "bắn liên tục bắn không ngừng xả đạn liên tục tự động bắn sấy đạn spam đạn bắn vô hạn loop bắn xả đạn điên cuồng luôn luôn bắn",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Entities": "Thực Thể"
+  }
+}

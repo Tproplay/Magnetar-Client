@@ -1,0 +1,9 @@
+{
+  "Name": "Cấm Cây Trồng",
+  "Description": "Cấm (ẩn) các loại cây được chọn trong giai đoạn chọn thẻ hạt giống vào trận",
+  "Search Hints": "cấm cây cấm hạt giống khóa cây ẩn cây trồng chặn cây lọc cây danh sách cấm cây danh sách đen cây trồng giới hạn hạt giống tính năng cấm cây",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Entities": "Thực Thể"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "Name": "Faster Plants",
+  "Description": "Makes the selected plant(s) faster while the module is active.",
+  "Search Hints": "fasterplants speedplants plantattack speedup plantspeed fastplant plantspeedup plantcooldown plantrate quickplants plantfast plantaccelerator plantboost attackspeed fire-rate plantspeeder fasterplantsmod plantvelocity fasterplantsup fasterplantspeed faster-plants plantrapid plantswift plantspeedy plantturbo plantoverdrive plantbuff plantagility plantquickness plantalacrity fastattack",
+  "settings": {
+    "General": "General",
+    "Entities": "Entities",
+    "Attack Interval": "Attack Interval",
+    "Animation Speed": "Animation Speed",
+    "Produce Speed": "Produce Speed"
+  }
+}

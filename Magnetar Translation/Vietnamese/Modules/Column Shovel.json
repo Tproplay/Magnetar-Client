@@ -1,0 +1,10 @@
+{
+  "Name": "Xẻng Đào Theo Cột",
+  "Description": "Khi dùng xẻng xúc một cây, toàn bộ các cây cùng loại trên cột dọc đó cũng sẽ bị đào đi cùng lúc.",
+  "Search Hints": "xẻng theo cột đào theo cột xóa cột dọc đào hàng loạt đào tất cả đào cây giống nhau dọn dẹp cột dọc gỡ bỏ hàng loạt đào cây đồng bộ",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Mode": "Chế Độ",
+    "Only Similar Plants": "Chỉ Những Cây Giống Nhau"
+  }
+}

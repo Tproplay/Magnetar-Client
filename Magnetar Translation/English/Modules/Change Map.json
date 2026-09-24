@@ -1,0 +1,10 @@
+{
+  "Name": "Change Map",
+  "Description": "Allows you to change the background of the level.\nThis only changes the background map and won't change lanes.",
+  "Search Hints": "changemap mapchanger levelbackground backgroundchanger mapselector levelmap backgroundswitcher mapswap custommap backgroundmod mapmod stagechanger leveltheme backgroundpicker mapoverride stagetheme levelchanger mapeditor environmentchanger backgroundmanager",
+  "settings": {
+    "General": "General",
+    "Map": "Map",
+    "Change Map Now": "Change Map Now"
+  }
+}

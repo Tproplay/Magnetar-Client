@@ -1,0 +1,10 @@
+{
+  "Name": "Điều Khiển Cây",
+  "Description": "Cho phép bạn tự do điều khiển bất kỳ cây trồng nào bằng các phím WASD.\nNhấn <color=yellow>Phím Điều Khiển</color> để bắt đầu điều khiển cây tại vị trí con trỏ chuột.\nNhấn <color=yellow>Phím Điều Khiển</color> một lần nữa để hủy quyền kiểm soát.",
+  "Search Hints": "control wasdplant wasdcontrol moveplant plantcontrol plantmovement wasd controller plantwasd controlmod plantmover moveplants plantsteer wasdmove driveplant pilotplant steerplant wasdmovement plantdrive plantpilot manualcontrol plantcontrolmod movementmod movementhack wasdmode plantcontrolmode move",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Control Key": "Phím Điều Khiển",
+    "Single Plant mode": "Chế độ một Cây duy nhất"
+  }
+}

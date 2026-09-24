@@ -1,0 +1,16 @@
+{
+  "Name": "Ẩn Hiển Thị Đồ Họa",
+  "Description": "Giờ đây bạn có thể nhìn thấy bãi cỏ trống trải của mình.",
+  "Search Hints": "ẩn đồ họa ẩn sân cỏ cây tàng hình zombie tàng hình ẩn hiển thị tắt đồ họa sân cỏ trống ẩn texture ẩn hình ảnh tắt render ẩn cây ẩn zombie nhìn nền đất",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Particles": "Hiệu Ứng Hạt (Hạt Đạn/Khói/Nổ)",
+    "Particle Types": "Các loại hạt hiệu ứng",
+    "Game Objects": "Các Đối Tượng Trong Game",
+    "Bullets": "Các Viên Đạn",
+    "Effects": "Hiệu ứng",
+    "Others": "Others",
+    "Extra": "Tính năng thêm",
+    "Disable Screen Shake effect": "Vô hiệu hóa hiệu ứng rung màn hình"
+  }
+}

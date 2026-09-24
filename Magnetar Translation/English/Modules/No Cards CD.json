@@ -1,0 +1,11 @@
+{
+  "Name": "No Cards CD",
+  "Description": "Modifies the Ingame SeedSlot Cards's Cooldown.",
+  "Search Hints": "nocardscd cardscooldown customcardscd cardscd zerocardscd nocardcoolndown cardcooldownreset fastcards instantcards cardbuff cardcdmod cardcdchanger cardcdremover cardcolldown cardcooldon cardcooldwn cardcd cardcooldoun cardcdtimer cardcdreducion cardcooldownreduction cardfast cardready cardunlimited cardinfinite cardinterval cardperiod cardspeed cardspam cardfrequency",
+  "settings": {
+    "General": "General",
+    "Cards": "Cards",
+    "Duplicate Cards": "Duplicate Cards",
+    "Custom CD Multiplier": "Custom CD Multiplier"
+  }
+}

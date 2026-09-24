@@ -1,0 +1,11 @@
+{
+  "Name": "Xoay Chỉ Số Không Giới Hạn",
+  "Description": "Cho phép làm mới (reroll) các hiệu ứng chỉ số bổ trợ không giới hạn số lần",
+  "Search Hints": "xoay lại chỉ số xoay buff vô hạn xoay lại buff làm mới buff làm mới mod xoay mod không giới hạn buff ngẫu nhiên đổi chỉ số xúc xắc buff đổi hiệu ứng chỉ số vô hạn hack reroll",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Reroll Count": "Số Lần Reroll",
+    "Preserve Original Count": "Giữ Nguyên Số Lần Gốc",
+    "Debug Mode": "Chế Độ Gỡ Lỗi (Debug)"
+  }
+}

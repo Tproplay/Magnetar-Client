@@ -1,0 +1,23 @@
+{
+  "Name": "Discord RPC",
+  "Description": "Shows rolling Gamestatus updates on Discord.",
+  "Search Hints": "discordrpc discordrichpresence discordpresence discordactivity discordstatus discordintegration rpcstatus richpresence discordconnect discordlink discordinfo discorddisplay rpcpresence discordrp discordstat discordlive discordsync discordgame discordapi discrodrpc discordrcp discordrps discordrich discordpresance discordpresense discordconection discordintigration rpcbot rpcclient rpcactive",
+  "settings": {
+    "General": "General",
+    "Switch Speed (s)": "Switch Speed (s)",
+    "In Game": "In Game",
+    "Line 1 Message 1": "Line 1 Message 1",
+    "Line 1 Message 2": "Line 1 Message 2",
+    "Line 1 Message 3": "Line 1 Message 3",
+    "Line 1 Message 4": "Line 1 Message 4",
+    "Line 1 Message 5": "Line 1 Message 5",
+    "Line 1 Message 6": "Line 1 Message 6",
+    "Line 2 Message 1": "Line 2 Message 1",
+    "Line 2 Message 2": "Line 2 Message 2",
+    "Line 2 Message 3": "Line 2 Message 3",
+    "Line 2 Message 4": "Line 2 Message 4",
+    "Line 2 Message 5": "Line 2 Message 5",
+    "Line 2 Message 6": "Line 2 Message 6",
+    "Iteration Mode": "Iteration Mode"
+  }
+}

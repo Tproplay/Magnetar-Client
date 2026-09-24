@@ -1,0 +1,13 @@
+{
+  "Name": "Chọn Lại Cây Trồng",
+  "Description": "Cho phép bạn chọn lại danh sách cây trồng ngay giữa trận đấu.",
+  "Search Hints": "chọn lại cây chọn lại thẻ cây đổi cây đổi cây giữa trận hoán đổi cây đặt lại túi hạt giống chọn lại hạt giống menu chọn cây giữa trận đổi danh sách cây reset cây trồng",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Force Show Repick button": "Bắt Buộc Hiện Nút Chọn Lại",
+    "Card Groups": "Nhóm Thẻ Bài",
+    "Allow all plant cards": "Cho Phép Tất Cả Thẻ Cây Trồng",
+    "Allow Odyssey plant cards (Ensure Odyssey Plant is enabled before entering the level)": "Cho Phép Thẻ Cây Sử Thi (Đảm bảo 'Cây Trồng Sử Thi' đã bật trước khi vào màn)",
+    "Debug Mode": "Chế Độ Gỡ Lỗi (Debug)"
+  }
+}

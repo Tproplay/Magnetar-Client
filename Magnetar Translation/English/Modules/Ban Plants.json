@@ -1,0 +1,9 @@
+{
+  "Name": "Ban Plants",
+  "Description": "Bans the selected Plant(s) in the seed selection phase.",
+  "Search Hints": "banplants plantban seedban banseed disableplants removeplants plantremoval plantblock blockplants seedblock banplant plantbanmod seedfilter filterplants disableseed blockseed plantselectionban banlist plantblacklist banselections seedbanmod banplantsmod plantblocker banselected removeplant seedlimit banplantselect banfeature",
+  "settings": {
+    "General": "General",
+    "Entities": "Entities"
+  }
+}

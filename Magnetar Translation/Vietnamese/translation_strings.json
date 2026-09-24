@@ -17,7 +17,6 @@
   "KeyBind": "Cài đặt nút phím",
   "Select": "Chọn",
   "ON": "BẬT",
-  "Keybind": "Phím Tắt / Gán Phím",
   "OFF": "TẮT",
   "Customize HUD": "Tùy chỉnh HUD",
   "Elements": "Các thành phần",
@@ -56,5 +55,11 @@
   "Element Scale": "Tỉ lệ phần tử",
   "Floating Icon": "Biểu tượng nổi",
   "Mobile Close Buttons": "Nút đóng trên di động",
-  "Change": "Change"
+  "Change": "Change",
+  "Fusions requiring": "Fusions requiring",
+  "Back to Tree": "Back to Tree",
+  "Theme": "Theme",
+  "Show Main Menu Credits": "Show Main Menu Credits",
+  "Click": "Click",
+  "Keybind": "Keybind"
 }

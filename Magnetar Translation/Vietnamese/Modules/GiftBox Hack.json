@@ -1,0 +1,13 @@
+{
+  "Name": "Hack Hộp Quà (GiftBox)",
+  "Description": "Tùy chỉnh loại Cây Trồng sẽ được tạo ra khi mở Hộp Quà.",
+  "Search Hints": "giftboxhack giftboxmod giftboxeditor giftboxcustomizer plantgiftbox giftboxgift giftboxsettings giftboxinject giftboxoverride giftboxswap giftboxmanager giftboxpool giftboxrandomizer giftboxchange giftboxfix giftboxcheat giftboxselect giftboxspawn giftboxedit giftboxmodify",
+  "settings": {
+    "Giftbox": "Giftbox",
+    "Modify Normal Giftbox": "Modify Normal Giftbox",
+    "Allowed Plants": "Cây Trồng Được Cho Phép",
+    "Snow Giftbox": "Snow Giftbox",
+    "Modify Snow Giftbox": "Modify Snow Giftbox",
+    "General": "Cài Đặt Chung"
+  }
+}

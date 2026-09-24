@@ -1,0 +1,13 @@
+{
+  "Name": "Auto Plant",
+  "Description": "Allows you to place ghost version of plants which will be replaced with the actual plants overtime.\nUse Right Click to delete Ghost Plants",
+  "Search Hints": "autoplant ghostplant ghostplanting auto-plant plantghost ghostspawn ghostautoplant ghostbuild ghostplacer ghostplacement ghost-plant autoplanter ghostplantmod ghost-planting autofill ghostseeds ghostgrowth ghost-build ghostingplant autoplantmod ghostauto ghosting ghostseeds ghosttimer ghost-spawn ghostplacer ghostplacing ghostplantingtool",
+  "settings": {
+    "General": "General",
+    "Render Ghost Plant": "Render Ghost Plant",
+    "Ghost Opacity": "Ghost Opacity",
+    "Multi Plant": "Multi Plant",
+    "Use Extra Plant": "Use Extra Plant",
+    "Planting Order": "Planting Order"
+  }
+}

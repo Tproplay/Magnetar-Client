@@ -1,0 +1,9 @@
+{
+  "Name": "Sound Muffler",
+  "Description": "Disable certain sounds from being played.",
+  "Search Hints": "soundmuffler audiofilter soundmuffle muteaudio soundblocker audiosettings volumecontrol soundmute noisecontrol disablesounds soundcleaner audioblock soundfix muteeffects audiomute soundmanager customaudio soundfilter audiodampener soundkiller",
+  "settings": {
+    "General": "General",
+    "Blacklisted": "Blacklisted"
+  }
+}

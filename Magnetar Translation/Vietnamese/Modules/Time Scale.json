@@ -1,0 +1,26 @@
+{
+  "Name": "Tốc Độ Thời Gian (Tốc Độ Game)",
+  "Description": "Thay đổi tỷ lệ thời gian hệ thống (Tăng tốc/Tua nhanh hoặc làm chậm game).",
+  "Search Hints": "tốc độ game tua nhanh game làm chậm game quay chậm tăng tốc độ game nhân tốc độ điều khiển thời gian tua thời gian",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Time Scale (Engine)": "Tỷ Lệ Thời Gian (Engine)",
+    "Buttons": "Các Nút Bấm",
+    "Speed setting 1": "Cài đặt tốc độ 1",
+    "Control button 1": "Nút điều khiển 1",
+    "Speed setting 2": "Cài đặt tốc độ 2",
+    "Control button 2": "Nút điều khiển 2",
+    "Speed setting 3": "Cài đặt tốc độ 3",
+    "Control button 3": "Nút điều khiển 3",
+    "Speed setting 4": "Cài đặt tốc độ 4",
+    "Control button 4": "Nút điều khiển 4",
+    "Speed setting 5": "Cài đặt tốc độ 5",
+    "Control button 5": "Nút điều khiển 5",
+    "Extra": "Mở Rộng",
+    "Reset on double click": "Đặt lại khi nhấp đúp",
+    "Disable on game paused": "Vô hiệu hóa khi tạm dừng game",
+    "Re-enable after pause": "Bật lại sau khi hết tạm dừng",
+    "Time Scale": "Tốc Độ Thời Gian (Tốc Độ Game)",
+    "Auto Resume After Game Pause": "Tự Động Tiếp Tục Sau Khi Tạm Dừng Trò Chơi"
+  }
+}

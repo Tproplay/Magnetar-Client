@@ -1,0 +1,12 @@
+{
+  "Name": "Hack Điểm Số",
+  "Description": "Cấp cho bạn số lượng điểm số vô hạn trong các màn chơi.",
+  "Search Hints": "vô hạn điểm hack điểm số điểm vô tận nhân hệ số điểm tăng điểm số điểm cao kỷ lục điểm số vô hạn buff điểm",
+  "settings": {
+    "Unlimited Points": "Điểm Số Vô Hạn",
+    "Points Amount": "Số Lượng Điểm Số",
+    "Preserve Original": "Giữ Nguyên Chỉ Số Gốc",
+    "Points Multiplier": "Hệ Số Nhân Điểm Số",
+    "Multiplier": "Hệ Số Nhân"
+  }
+}

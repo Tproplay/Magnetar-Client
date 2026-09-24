@@ -1,0 +1,10 @@
+{
+  "Name": "Control",
+  "Description": "Allows you to control any plant using the WASD keys.\nPress the <color=yellow>Control Key</color> to control the plant at mouse position.\nPress the <color=yellow>Control Key</color> again to remove the plant from control.",
+  "Search Hints": "control wasdplant wasdcontrol moveplant plantcontrol plantmovement wasd controller plantwasd controlmod plantmover moveplants plantsteer wasdmove driveplant pilotplant steerplant wasdmovement plantdrive plantpilot manualcontrol plantcontrolmod movementmod movementhack wasdmode plantcontrolmode move",
+  "settings": {
+    "General": "General",
+    "Control Key": "Control Key",
+    "Single Plant mode": "Single Plant mode"
+  }
+}

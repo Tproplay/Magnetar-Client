@@ -1,0 +1,14 @@
+{
+  "Name": "Better Osu",
+  "Description": "Makes Explode-O-su Better.\nIncreases Stats of Bullets as the current combo Increases.",
+  "Search Hints": "betterosu osuplus osupro osuextended improvedosu bestosu osufix osutweak osulite osupremuim betterosuo betterossu betterosuu bedterosu betertosu bestterosu superosu eliteosu osuremastered perfectosu osunext osucustom osuoptimized osurefined osuadvanced osutools osugameplay osufaster osusmooth",
+  "settings": {
+    "General": "General",
+    "Increase Damage": "Increase Damage",
+    "Spawn Helper Pet": "Spawn Helper Pet",
+    "Pet Type": "Pet Type",
+    "Random Bullets": "Random Bullets",
+    "Allowed bullets": "Allowed bullets",
+    "DebugMode": "DebugMode"
+  }
+}

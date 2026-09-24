@@ -14,6 +14,9 @@
   "Magnetar Name and Version": {
     "Name": "Magnetar Name and Version"
   },
+  "Using Vanilla Mode": {
+    "Name": "Using Vanilla Mode"
+  },
   "Up Time": {
     "Name": "Up Time"
   },
@@ -115,8 +118,5 @@
   },
   "Current Time": {
     "Name": "Current Time"
-  },
-  "Using Vanilla Mode": {
-    "Name": "Using Vanilla Mode"
   }
 }

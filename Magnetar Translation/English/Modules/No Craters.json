@@ -1,0 +1,9 @@
+{
+  "Name": "No Craters",
+  "Description": "Removes all the craters while the module is active.",
+  "Search Hints": "nocraters removecraters craterremoval deletecraters nocrater craterless clearcraters craterclear anti-crater craterfix nocratermod craterblocker nocraeters nocraetors nocratars nocreaters nocreators nocratres nocraterss cratereraser craterslayer cratereraser craterterminator groundfix repairground smoothground cratergone craterhide hidecraters craterdisappear cratercancel craterbypass craternull",
+  "settings": {
+    "Extra": "Extra",
+    "Auto Turn Off": "Auto Turn Off"
+  }
+}

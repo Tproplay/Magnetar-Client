@@ -1,0 +1,10 @@
+{
+  "Name": "Zombie Di Chuyển Nhanh",
+  "Description": "Khiến các Zombie được chọn di chuyển và ăn cây nhanh hơn gấp nhiều lần khi bật tính năng này.",
+  "Search Hints": "zombie nhanh hơn tăng tốc zombie tốc độ zombie zombie thần tốc zombie chạy nhanh zombie tăng tốc quái vật chạy nhanh",
+  "settings": {
+    "General": "Cài Đặt Chung",
+    "Entities": "Thực Thể",
+    "Speed": "Tốc Độ"
+  }
+}

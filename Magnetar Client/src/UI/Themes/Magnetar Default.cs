@@ -310,7 +310,7 @@ public static class Magnetar_Default
         ),
         ListAddButton = new ElementStyleTheme(
             new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
-            new ColorState("#107800DC", "#18b300FF", "#1dbf04FF")
+            new ColorState("#005213DC", "#00751bFF", "#008f21FF")
         ),
         ListRemoveButton = new ElementStyleTheme(
             new ColorState("#FF6B6BFF", "#FF8E8EFF", "#FF3D3DFF"),

@@ -78,7 +78,7 @@ public class HypnotizeZombies : Module
 
         if (BoardInstanceIsNull) return;
 
-        foreach (var zombie in zombieList)
+        foreach (var zombie in ZombieList)
         {
             if (ZombiesSelectedSetting.IsSelected((int)zombie.theZombieType))
             {

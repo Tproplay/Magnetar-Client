@@ -97,11 +97,11 @@ public class AutoPlant : Module
 
     private bool HasRealPlant(int col, int row, PlantType type)
     {
-        if (Board.Instance != null && GameData.plantList != null)
+        if (Board.Instance != null && GameData.PlantList != null)
         {
-            for (int i = 0; i < GameData.plantList.Count; i++)
+            for (int i = 0; i < GameData.PlantList.Count; i++)
             {
-                Plant p = GameData.plantList[i];
+                Plant p = GameData.PlantList[i];
                 if (p != null && p.thePlantColumn == col && p.thePlantRow == row && p.thePlantHealth > 0 && p.thePlantType == type)
                 {
                     return true;
@@ -272,11 +272,11 @@ public class AutoPlant : Module
     private int GetPuffCount(int col, int row)
     {
         int count = 0;
-        if (!AppData.BoardInstanceIsNull && GameData.plantList != null)
+        if (!AppData.BoardInstanceIsNull && GameData.PlantList != null)
         {
-            for (int i = 0; i < GameData.plantList.Count; i++)
+            for (int i = 0; i < GameData.PlantList.Count; i++)
             {
-                Plant p = GameData.plantList[i];
+                Plant p = GameData.PlantList[i];
                 if (p != null && p.thePlantColumn == col && p.thePlantRow == row && p.thePlantHealth > 0 && TypeMgr.IsPuff(p.thePlantType))
                 {
                     count++;
@@ -438,11 +438,11 @@ public class AutoPlant : Module
         bool hasBasePlant = false;
         bool isLegalStack = true;
 
-        if (!AppData.BoardInstanceIsNull && GameData.plantList != null)
+        if (!AppData.BoardInstanceIsNull && GameData.PlantList != null)
         {
-            for (int i = 0; i < GameData.plantList.Count; i++)
+            for (int i = 0; i < GameData.PlantList.Count; i++)
             {
-                Plant p = GameData.plantList[i];
+                Plant p = GameData.PlantList[i];
                 if (p != null && p.thePlantColumn == col && p.thePlantRow == row && p.thePlantHealth > 0)
                 {
                     hasBasePlant = true;

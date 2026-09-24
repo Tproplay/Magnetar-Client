@@ -37,7 +37,7 @@ public class ColumnGlove : Module
             List<Plant> plants = new();
 
             // Find all identical plants in the original column
-            foreach (var plant in plantList)
+            foreach (var plant in PlantList)
             {
                 if (plant == null || plant.gameObject == null) continue;
 

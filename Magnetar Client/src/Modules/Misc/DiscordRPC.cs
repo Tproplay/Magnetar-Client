@@ -241,8 +241,8 @@ public class DiscordRPC : Module
         result = result.Replace("{Money}", FormatInternational(BoardInstance.theMoney));
         result = result.Replace("{Current_Wave}", BoardInstance.theWave.ToString());
         result = result.Replace("{Max_Wave}", BoardInstance.theMaxWave.ToString());
-        result = result.Replace("{number_of_plants}", plantList.Count.ToString());
-        result = result.Replace("{number_of_zombies}", zombieList.Count.ToString());
+        result = result.Replace("{number_of_plants}", PlantList.Count.ToString());
+        result = result.Replace("{number_of_zombies}", ZombieList.Count.ToString());
         result = result.Replace("{movers_left}", BoardInstance.mowerArray.Count.ToString());
         return result;
     }

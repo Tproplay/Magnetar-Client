@@ -18,7 +18,7 @@ public class NumberOfPlants : HudElement
 
     public override void OnUpdateActive()
     {
-        displayText = $"Total Plants: {plantList.Count}";
+        displayText = $"Total Plants: {PlantList.Count}";
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
     public override void OnEnable()

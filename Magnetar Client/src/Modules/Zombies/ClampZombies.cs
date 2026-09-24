@@ -62,7 +62,7 @@ public class ClampZombies : Module
 
         if (BoardInstanceIsNull) return;
 
-        int currentZombies = GameData.zombieList.Count;
+        int currentZombies = GameData.ZombieList.Count;
         int limit = MaxZombiesSetting.Value;
 
         if (currentZombies <= limit) return;
@@ -70,7 +70,7 @@ public class ClampZombies : Module
         int zombiesToMerge = currentZombies - limit;
 
         // 1. Group zombies by Lane and Type
-        var groupedZombies = GameData.zombieList
+        var groupedZombies = GameData.ZombieList
             .Where(z => z != null && z.Alive && z.gameObject != null)
             .GroupBy(z => new { z.theZombieRow, z.theZombieType })
             .ToList();  

@@ -82,7 +82,7 @@ public class FasterPlants : Module
     {
         if (BoardInstanceIsNull) return;
 
-        foreach (var plant in GameData.plantList)
+        foreach (var plant in GameData.PlantList)
         {
             #region Attack Interval Modification
 
@@ -171,7 +171,7 @@ public class FasterPlants : Module
     public override void OnDisable()
     {
         // Reset the attack cooldowns of all modified plants to their original values
-        foreach (var plant in GameData.plantList)
+        foreach (var plant in GameData.PlantList)
         {
             if (originalthePlantAttackInterval.ContainsKey(plant))
             {

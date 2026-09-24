@@ -63,7 +63,7 @@ public class SmallerZombies : Module
     {
         if (BoardInstanceIsNull) return;
 
-        foreach (var zombie in GameData.zombieList)
+        foreach (var zombie in GameData.ZombieList)
         {
 
             // Check if the zombie is selected and if we haven't already stored its original scale
@@ -96,7 +96,7 @@ public class SmallerZombies : Module
 
     public override void OnDisable()
     {
-        foreach (var zombie in GameData.zombieList)
+        foreach (var zombie in GameData.ZombieList)
         {
             if (originaltheZombieScale.ContainsKey(zombie))
             {

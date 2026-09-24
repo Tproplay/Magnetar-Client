@@ -131,7 +131,7 @@ public class DebugMode : Module
             DebugModeLogger.Msg(
                 string.Join(
                     Environment.NewLine,
-                    GameData.plantList.Select(kvp=>
+                    GameData.PlantList.Select(kvp=>
                         $"PlantType: {kvp.thePlantType}  " +
                         $"Tile: ({kvp.thePlantColumn},{kvp.thePlantRow})  " +
                         $"Health: {kvp.thePlantHealth}"
@@ -145,7 +145,7 @@ public class DebugMode : Module
             DebugModeLogger.Msg(
                 string.Join(
                     Environment.NewLine,
-                    GameData.zombieList.Select(kvp =>
+                    GameData.ZombieList.Select(kvp =>
                         $"ZombieType: {kvp.theZombieType}  " +
                         $"Coordinate: ({kvp.theZombieRow},{kvp.transform.position.x})  " +
                         $"Health: {kvp.CurrentAllHealth}"

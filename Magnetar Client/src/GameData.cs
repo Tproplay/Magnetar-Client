@@ -95,8 +95,29 @@ public static class GameData
     /// <summary>
     /// Sorted List of the current active plants on the BoardInstance.
     /// </summary>
-    public static List<Plant> plantList = new();
+    public static List<Plant> PlantList => GetPlants();
 
+    private static List<Plant> _plantList = new();
+    static int _currentPlantCheckFrame;
+    static List<Plant> GetPlants()
+    {
+        if (_currentPlantCheckFrame == UnityEngine.Time.frameCount) return _plantList;
+        else
+        {
+            _currentPlantCheckFrame = UnityEngine.Time.frameCount;
+
+            for (int i = _plantList.Count - 1; i >= 0; i--)
+            {
+                Plant plant = _plantList[i];
+
+                if (plant == null || plant.gameObject == null)
+                {
+                    _plantList.RemoveAt(i);
+                }
+            }
+            return _plantList;
+        }
+    }
 
     [HarmonyPatch(typeof(Plant))]
     private static class PlantListPatch
@@ -107,8 +128,8 @@ public static class GameData
         {
             if (AppData.BoardInstanceIsNull) return;
 
-            if (!plantList.Contains(__instance))
-                plantList.Add(__instance);
+            if (!PlantList.Contains(__instance))
+                PlantList.Add(__instance);
         }
 
         [HarmonyPatch(nameof(Plant.Die))]
@@ -117,8 +138,7 @@ public static class GameData
         {
             if (AppData.BoardInstanceIsNull) return;
 
-            if (plantList.Contains(__instance))
-                plantList.Remove(__instance);
+            PlantList.Remove(__instance);
             
         }
     }
@@ -130,9 +150,8 @@ public static class GameData
         [HarmonyPostfix]
         public static void SetPlantPostfix(Plant __result)
         {
-            if (!plantList.Contains(__result))
-                plantList.Add(__result);
-
+            if (!PlantList.Contains(__result))
+                PlantList.Add(__result);
         }
     }
 
@@ -142,15 +161,15 @@ public static class GameData
     /// <summary>
     /// Sorted List of the current active (non-idle) zombies on the BoardInstance.
     /// </summary>
-    public static List<Zombie> zombieList => GetZombies();
+    public static List<Zombie> ZombieList => GetZombies();
     private static List<Zombie> _zombieList = new();
-    static int _currentFrame;
+    static int _currentZombieCheckFrame;
     static List<Zombie> GetZombies()
     {
-        if (_currentFrame == UnityEngine.Time.frameCount) return _zombieList;
+        if (_currentZombieCheckFrame == UnityEngine.Time.frameCount) return _zombieList;
         else
         {
-            _currentFrame = UnityEngine.Time.frameCount;
+            _currentZombieCheckFrame = UnityEngine.Time.frameCount;
 
             for (int i = _zombieList.Count - 1; i >= 0; i--)
             {
@@ -210,14 +229,13 @@ public static class GameData
         [HarmonyPostfix]
         public static void SetZombiePostfix(Zombie __result)
         {
-            if (!zombieList.Contains(__result))
-                zombieList.Add(__result);
+            if (!ZombieList.Contains(__result))
+                ZombieList.Add(__result);
 
         }
     }
 
     #endregion
-
 
     #region Zombies
 
@@ -275,7 +293,7 @@ public static class GameData
         static void AwakePostFix(Board __instance)
         {
             // Things to be reset at the start of a level
-            plantList.Clear();
+            PlantList.Clear();
             _zombieList.Clear();
 
             TotalNumberOfBulletsSpawned = 0;
@@ -289,7 +307,7 @@ public static class GameData
         static void DiePostFix(Board __instance)
         {
             // Things to be reset at the end of a level
-            plantList.Clear();
+            PlantList.Clear();
             _zombieList.Clear();
 
         }

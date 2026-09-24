@@ -111,12 +111,12 @@ public class BetterHealthDisplay : Module
 
     static void UpdateTexts()
     {
-        foreach (Plant plant in plantList)
+        foreach (Plant plant in PlantList)
         {
             plant.UpdateText();
         }
 
-        foreach (Zombie zombie in zombieList)
+        foreach (Zombie zombie in ZombieList)
         {
             zombie.UpdateHealthText();
         }

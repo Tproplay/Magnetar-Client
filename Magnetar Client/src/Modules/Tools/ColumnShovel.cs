@@ -106,9 +106,9 @@ public class ColumnShovel : Module
             DieByMod = true;
 
             
-            for (int i = plantList.Count - 1; i >= 0; i--)
+            for (int i = PlantList.Count - 1; i >= 0; i--)
             {
-                Plant plant = plantList[i];
+                Plant plant = PlantList[i];
                 if (plant == __instance || (plant.thePlantType != __instance.thePlantType && 
                     instance.OnlySame.Value)) continue;
 

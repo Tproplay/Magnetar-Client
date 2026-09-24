@@ -68,7 +68,7 @@ public class FasterZombies : Module
         float currentMultiplier = theSpeedSetting.Value;
         var selectedZombies = ZombieSelectedSetting.SelectedValues;
 
-        foreach (var zombie in GameData.zombieList)
+        foreach (var zombie in GameData.ZombieList)
         {
             if (zombie == null || zombie.gameObject == null) continue;
 
@@ -104,7 +104,7 @@ public class FasterZombies : Module
 
     public override void OnDisable()
     {
-        foreach (var zombie in GameData.zombieList)
+        foreach (var zombie in GameData.ZombieList)
         {
             if (zombie == null) continue;
 

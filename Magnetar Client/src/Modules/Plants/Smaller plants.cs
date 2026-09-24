@@ -62,7 +62,7 @@ public class SmallerPlants : Module
     {
         if (BoardInstanceIsNull) return;
 
-        foreach (var plant in GameData.plantList)
+        foreach (var plant in GameData.PlantList)
         {
 
             // Check if the plant is selected and if we haven't already stored its original scale
@@ -95,7 +95,7 @@ public class SmallerPlants : Module
 
     public override void OnDisable()
     {
-        foreach (var plant in GameData.plantList)
+        foreach (var plant in GameData.PlantList)
         {
             if (originalthePlantScale.ContainsKey(plant))
             {

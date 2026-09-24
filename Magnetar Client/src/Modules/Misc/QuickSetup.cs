@@ -69,7 +69,7 @@ public class QuickSetup : Module
 
     public void SaveCurrentSetup()
     {
-        if (plantList == null || plantList.Count == 0)
+        if (PlantList == null || PlantList.Count == 0)
         {
             DebugLogger.Warning("[QuickSetup] No plants found on the lawn to save.");
             return;
@@ -93,7 +93,7 @@ public class QuickSetup : Module
         RefreshLoadOptions();
 
         NameOfSave.Value = "";
-        DebugLogger.Msg($"[QuickSetup] Saved '{saveName}' ({plantList.Count} plants).");
+        DebugLogger.Msg($"[QuickSetup] Saved '{saveName}' ({PlantList.Count} plants).");
     }
 
     public void LoadSelectedSetup()
@@ -123,10 +123,10 @@ public class QuickSetup : Module
             return;
         }
 
-        if (ClearBeforeLoad.Value && plantList != null)
+        if (ClearBeforeLoad.Value && PlantList != null)
         {
             // Snapshot to an array to prevent collection modification crashes during iteration
-            var currentPlants = plantList.ToArray();
+            var currentPlants = PlantList.ToArray();
             for (int i = 0; i < currentPlants.Length; i++)
             {
                 if (currentPlants[i] != null)
@@ -181,13 +181,13 @@ public class QuickSetup : Module
 
     public string GenerateSetupCode()
     {
-        if (plantList == null || plantList.Count == 0) return string.Empty;
+        if (PlantList == null || PlantList.Count == 0) return string.Empty;
 
-        StringBuilder sb = new(plantList.Count * 6);
+        StringBuilder sb = new(PlantList.Count * 6);
 
-        for (int i = 0; i < plantList.Count; i++)
+        for (int i = 0; i < PlantList.Count; i++)
         {
-            var plant = plantList[i];
+            var plant = PlantList[i];
             if (plant == null) continue;
 
             // Arithmetic encoding: (plantType * 10000) + (col * 100) + row

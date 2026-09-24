@@ -84,9 +84,9 @@ public class KillPlants : Module
 
         if (BoardInstanceIsNull) return;
 
-        for (int i = plantList.Count - 1; i >= 0; i--)
+        for (int i = PlantList.Count - 1; i >= 0; i--)
         {
-            Plant plant = plantList[i];
+            Plant plant = PlantList[i];
             if (plant != null)
             {
                 plant.Die(DieReason.BySelf);

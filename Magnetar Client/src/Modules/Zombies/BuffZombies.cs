@@ -70,7 +70,7 @@ public class BuffZombies : Module
 
         float multiplier = HpMultiplierSettig.Value;
 
-        foreach (var zombie in GameData.zombieList)
+        foreach (var zombie in GameData.ZombieList)
         {
             if (zombie == null) continue;
 
@@ -104,7 +104,7 @@ public class BuffZombies : Module
 
     public override void OnDisable()
     {
-        foreach (var zombie in GameData.zombieList)
+        foreach (var zombie in GameData.ZombieList)
         {
             if (zombie == null) continue;
 

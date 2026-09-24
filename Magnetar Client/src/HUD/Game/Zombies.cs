@@ -25,7 +25,7 @@ public class NumberOfZombies : HudElement
     {
         if (AppData.BoardInstanceIsNull) return;
 
-        displayText = $"Zombies On Lawn: {zombieList.Count(z => !z.isMindControlled)}";
+        displayText = $"Zombies On Lawn: {ZombieList.Count(z => !z.isMindControlled)}";
 
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
@@ -50,7 +50,7 @@ public class NumberOfHypnotizedZombies : HudElement
     {
         if (AppData.BoardInstanceIsNull) return;
 
-        displayText = $"Hypno Zombies On Lawn: {zombieList.Count(z => z.isMindControlled)}";
+        displayText = $"Hypno Zombies On Lawn: {ZombieList.Count(z => z.isMindControlled)}";
 
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
@@ -76,7 +76,7 @@ public class NumberOfZombiesSpawned : HudElement
     {
         if (AppData.BoardInstanceIsNull) return;
 
-        displayText = $"Zombies Spawned: {AppData.BoardInstance.boardStatistics.zombiesKilled + GameData.zombieList.Count}";
+        displayText = $"Zombies Spawned: {AppData.BoardInstance.boardStatistics.zombiesKilled + GameData.ZombieList.Count}";
 
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
@@ -211,7 +211,7 @@ public class TotalZombieHealth : HudElement
     long GetZombieHealth()
     {
         long health = 0;
-        foreach (Zombie zombie in zombieList)
+        foreach (Zombie zombie in ZombieList)
         {
             if (zombie.isMindControlled) continue;
             health += zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
@@ -250,7 +250,7 @@ public class TotalHypnotizedZombieHealth : HudElement
     long GetZombieHealth()
     {
         long health = 0;
-        foreach (Zombie zombie in zombieList)
+        foreach (Zombie zombie in ZombieList)
         {
             if (!zombie.isMindControlled) continue;
             health += zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;

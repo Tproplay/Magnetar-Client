@@ -39,7 +39,10 @@ public class ListStringSetting : Setting
         Event e = Event.current;
         float elemH = Config.elementHeight;
         float gap = Config.S(4f);
+        float resetBtnW = Config.S(22f);
         float actionBtnW = Config.S(24f);
+
+        float addBtnW = Config.SettingWidth;
 
         // 1. Label on top/left
         float labelW = Mathf.Max(width * 0.35f, Config.S(120f));
@@ -74,9 +77,9 @@ public class ListStringSetting : Setting
             OnValueChanged?.Invoke(Values);
         }
 
-        // 3. Bottom Row: 'Add' Button + '↺' Reset Button
-        Rect addBtnRect = new(startX, y, rightBoxW - actionBtnW - gap, elemH);
-        Rect resetRect = new(startX + rightBoxW - actionBtnW, y, actionBtnW, elemH);
+        // 3. Bottom Row
+        Rect resetRect = new(width - Config.indent - resetBtnW, y, resetBtnW, elemH);
+        Rect addBtnRect = new(resetRect.x - gap - addBtnW, y, addBtnW, elemH);
 
         bool canAdd = Values.Count < MaxCount;
         GUIStyle addStyle = canAdd ? Magnetar_Default.SettingOff : Magnetar_Default.CategoryModuleOffStyle;

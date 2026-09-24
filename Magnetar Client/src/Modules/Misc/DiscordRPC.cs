@@ -1,7 +1,7 @@
 ﻿#if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
-using Magnetar_Client.UI.Setting;
 #endif
+using Magnetar_Client.UI.Setting;
 using DiscordRPC;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
@@ -33,19 +33,8 @@ public class DiscordRPC : Module
 
     #region Lines
 
-    public StringSetting InGame_Line1_1;
-    public StringSetting InGame_Line1_2;
-    public StringSetting InGame_Line1_3;
-    public StringSetting InGame_Line1_4;
-    public StringSetting InGame_Line1_5;
-    public StringSetting InGame_Line1_6;
-
-    public StringSetting InGame_Line2_1;
-    public StringSetting InGame_Line2_2;
-    public StringSetting InGame_Line2_3;
-    public StringSetting InGame_Line2_4;
-    public StringSetting InGame_Line2_5;
-    public StringSetting InGame_Line2_6;
+    public ListStringSetting InGameLine1;
+    public ListStringSetting InGameLine2;
 
     public SelectSetting InGame_Randomizer_mode;
 
@@ -83,22 +72,26 @@ public class DiscordRPC : Module
 
         CreateCategory("In Game",true);
 
-        InGame_Line1_1 = new StringSetting("Line 1 Message 1", "Magnetar Client v{Magnetar_Version}", In_Game_AutoCompleteArgs);
-        InGame_Line1_2 = new StringSetting("Line 1 Message 2", "Playing: {Level_Name}", In_Game_AutoCompleteArgs);
-        InGame_Line1_3 = new StringSetting("Line 1 Message 3", "", In_Game_AutoCompleteArgs);
-        InGame_Line1_4 = new StringSetting("Line 1 Message 4", "", In_Game_AutoCompleteArgs);
-        InGame_Line1_5 = new StringSetting("Line 1 Message 5", "", In_Game_AutoCompleteArgs);
-        InGame_Line1_6 = new StringSetting("Line 1 Message 6", "", In_Game_AutoCompleteArgs);
+        InGameLine1 = new ListStringSetting("Line 1",
+            new List<string>
+            {
+                "Magnetar Client v{Magnetar_Version}",
+                "Playing: {Level_Name}",
+            },
+            15, In_Game_AutoCompleteArgs
+            );
 
-        InGame_Line2_1 = new StringSetting("Line 2 Message 1", "Sun: {Sun} | Money: {Money}", In_Game_AutoCompleteArgs);
-        InGame_Line2_2 = new StringSetting("Line 2 Message 2", "Wave: {Current_Wave}/{Max_Wave}", In_Game_AutoCompleteArgs);
-        InGame_Line2_3 = new StringSetting("Line 2 Message 3", "Plants: {number_of_plants} | Zombies: {number_of_zombies}", In_Game_AutoCompleteArgs);
-        InGame_Line2_4 = new StringSetting("Line 2 Message 4", "", In_Game_AutoCompleteArgs);
-        InGame_Line2_5 = new StringSetting("Line 2 Message 5", "", In_Game_AutoCompleteArgs);
-        InGame_Line2_6 = new StringSetting("Line 2 Message 6", "", In_Game_AutoCompleteArgs);
+        InGameLine2 = new ListStringSetting("Line 2",
+            new List<string>
+            {
+                "Sun: {Sun} | Money: {Money}",
+                "Wave: {Current_Wave}/{Max_Wave}",
+                "Plants: {number_of_plants} | Zombies: { number_of_zombies }",
+            },
+            15, In_Game_AutoCompleteArgs
+            );
 
-        AddSettings(InGame_Line1_1, InGame_Line1_2, InGame_Line1_3, InGame_Line1_4, InGame_Line1_5, InGame_Line1_6);
-        AddSettings(InGame_Line2_1, InGame_Line2_2, InGame_Line2_3, InGame_Line2_4, InGame_Line2_5, InGame_Line2_6);
+        AddSettings(InGameLine1, InGameLine2);
 
         InGame_Randomizer_mode = new SelectSetting("Iteration Mode", 0)
         {
@@ -211,19 +204,16 @@ public class DiscordRPC : Module
         {
             case Status.InGame:
                 {
-                    if (!string.IsNullOrWhiteSpace(InGame_Line1_1.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_1.Value));
-                    if (!string.IsNullOrWhiteSpace(InGame_Line1_2.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_2.Value));
-                    if (!string.IsNullOrWhiteSpace(InGame_Line1_3.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_3.Value));
-                    if (!string.IsNullOrWhiteSpace(InGame_Line1_4.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_4.Value));
-                    if (!string.IsNullOrWhiteSpace(InGame_Line1_5.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_5.Value));
-                    if (!string.IsNullOrWhiteSpace(InGame_Line1_6.Value)) Line1Cycle.Add(In_Game_FormatString(InGame_Line1_6.Value));
-
-                    if (!string.IsNullOrWhiteSpace(InGame_Line2_1.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_1.Value));
-                    if (!string.IsNullOrWhiteSpace(InGame_Line2_2.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_2.Value));
-                    if (!string.IsNullOrWhiteSpace(InGame_Line2_3.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_3.Value));
-                    if (!string.IsNullOrWhiteSpace(InGame_Line2_4.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_4.Value));
-                    if (!string.IsNullOrWhiteSpace(InGame_Line2_5.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_5.Value));
-                    if (!string.IsNullOrWhiteSpace(InGame_Line2_6.Value)) Line2Cycle.Add(In_Game_FormatString(InGame_Line2_6.Value));
+                    foreach (var line in InGameLine1.Values)
+                    {
+                        if (string.IsNullOrEmpty(line)) continue;
+                        Line1Cycle.Add(In_Game_FormatString(line));
+                    }
+                    foreach (var line in InGameLine2.Values)
+                    {
+                        if (string.IsNullOrEmpty(line)) continue;
+                        Line2Cycle.Add(In_Game_FormatString(line));
+                    }
                     break;
                 }
         }

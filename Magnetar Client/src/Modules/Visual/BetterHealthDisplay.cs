@@ -27,6 +27,7 @@ public class BetterHealthDisplay : Module
     public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
 
     public override bool Active { get; set; } = true; // On by default
+    public override bool defaultActive { get; set; } = true;
     public override bool enableInVanillaMode { get; set; } = true;
 
     // Mod Data

@@ -34,6 +34,7 @@ public class AutoCollect : Module
 
     public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
     public override bool Active { get; set; } = true;
+    public override bool defaultActive { get; set; } = true;
     public override bool enableInVanillaMode { get; set; } = true;
 
     // Mod Data
@@ -55,11 +56,12 @@ public class AutoCollect : Module
             {
                 { 0, "Gift Box" },
                 { 1, "Trophy" }
-            }
+            },
+            SelectedValues = new HashSet<int> { 0 },
         };
-        selectedItems.Select(0);
-        Settings.Add(selectedItems);
+        selectedItems.SetCurrentAsDefault();
 
+        AddSettings(selectedItems);
         EndCategory();
     }
 

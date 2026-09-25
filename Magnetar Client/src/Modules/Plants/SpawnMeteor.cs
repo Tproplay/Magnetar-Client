@@ -2,6 +2,8 @@
 using System.Collections;
 using static Magnetar_Client.Game.AppData;
 using UnityEngine;
+using System.Linq;
+using Magnetar_Client.Utils;
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -37,7 +39,7 @@ public class SpawnMeteor : Module
 
         CreateCategory("General");
 
-        MeteorSectionSetting = new("Prefrence",
+        MeteorSectionSetting = new("Prefrences",
             (index) => new List<Setting>
             {
                 new SelectSetting("Meteor Type", 0)
@@ -46,8 +48,8 @@ public class SpawnMeteor : Module
                     {
                         { 0, "Passive Meteorite" },
                         { 1, "Active Meteorite" },
-                        { 2, "Super Meteorite" },
-                        { 3, "Ultimate Meteorite" },
+                        { 2, "Ultimate Meteorite" },
+                        { 3, "Ultimate Meteorite (skin)" },
                     }
                 },
                 new BindSetting("Keybind"),
@@ -56,13 +58,17 @@ public class SpawnMeteor : Module
             }
             );
 
-        AddSettings( MeteorSectionSetting );
+        AddSettings(MeteorSectionSetting);
         EndCategory();
     }
 
     public override void OnLanguageChanged()
     {
-        
+        foreach (var instance in MeteorSectionSetting.Sections)
+        {
+            var select = (SelectSetting)instance.ChildSettings[0];
+            select.CustomNames = select.Options.ToDictionary(kvp =>  kvp.Key, kvp => Translator.Translate(kvp.Value));
+        }
     }
 
     // Mod Logic

@@ -8,8 +8,7 @@ using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.Setting;
-
-
+using System.Linq;
 
 #if MELONLOADER || RELEASE_MELON
 using MelonLoader;
@@ -64,7 +63,10 @@ public static class SaveLoad
 
     public class MultiSelectSaveData
     {
-        public List<int> SelectedValues;
+        // "Selected" = values in Values list are active.
+        // "Deselected" = all options are active EXCEPT values in Values list (if Values is empty, ALL are selected).
+        public string Mode { get; set; } = "Selected";
+        public List<int> Values { get; set; } = new List<int>();
     }
     #endregion
 
@@ -198,41 +200,13 @@ public static class SaveLoad
                 {
                     foreach (var setting in mod.Settings)
                     {
-                        if (string.IsNullOrEmpty(setting.Name)) continue;
+                        if (setting == null || string.IsNullOrEmpty(setting.Name)) continue;
                         string saveKey = setting is CategorySetting ? setting.Name + "_Category" : setting.Name;
 
-                        if (setting is CategorySetting cat) modData.Settings[saveKey] = cat.IsExpanded;
-                        else if (setting is MultiSelectSetting ms)
+                        object serializedValue = SerializeSettingValue(setting);
+                        if (serializedValue != null)
                         {
-                            modData.Settings[saveKey] = new MultiSelectSaveData { SelectedValues = new List<int>(ms.SelectedValues) };
-                        }
-                        else if (setting is BindSetting bind) modData.Settings[bind.Name] = bind.BindKeys;
-                        else if (setting is SelectSetting sel) modData.Settings[sel.Name] = sel.Value;
-                        else if (setting is StringSetting str) modData.Settings[str.Name] = str.Value;
-                        else if (setting is ListStringSetting list) modData.Settings[list.Name] = list.Values;
-                        else if (setting is BoolSetting b) modData.Settings[b.Name] = b.Value;
-                        else if (setting is FloatSetting f) modData.Settings[f.Name] = f.Value;
-                        else if (setting is IntSetting i) modData.Settings[i.Name] = i.Value;
-                        else if (setting is Vector2Setting v2) modData.Settings[v2.Name] = new float[] { v2.Value.x, v2.Value.y };
-                        else if (setting is Vector3Setting v3) modData.Settings[v3.Name] = new float[] { v3.Value.x, v3.Value.y, v3.Value.z };
-                        else if (setting is SectionSetting sec)
-                        {
-                            var secList = new List<Dictionary<string, object>>();
-                            foreach (var section in sec.Sections)
-                            {
-                                var sDict = new Dictionary<string, object>();
-                                foreach (var child in section.ChildSettings)
-                                {
-                                    if (child is StringSetting cs) sDict[cs.Name] = cs.Value;
-                                    else if (child is BoolSetting cb) sDict[cb.Name] = cb.Value;
-                                    else if (child is IntSetting ci) sDict[ci.Name] = ci.Value;
-                                    else if (child is FloatSetting cf) sDict[cf.Name] = cf.Value;
-                                    else if (child is Vector2Setting cv2) sDict[cv2.Name] = new float[] { cv2.Value.x, cv2.Value.y };
-                                    else if (child is Vector3Setting cv3) sDict[cv3.Name] = new float[] { cv3.Value.x, cv3.Value.y, cv3.Value.z };
-                                }
-                                secList.Add(sDict);
-                            }
-                            modData.Settings[sec.Name] = secList;
+                            modData.Settings[saveKey] = serializedValue;
                         }
                     }
                 }
@@ -298,6 +272,75 @@ public static class SaveLoad
         }
 
         if (!force) AutoSaveLogger.Msg("Saved the current Config Data");
+    }
+
+    private static object SerializeSettingValue(Setting setting)
+    {
+        if (setting == null) return null;
+
+        if (setting is CategorySetting cat) return cat.IsExpanded;
+        if (setting is MultiSelectSetting ms)
+        {
+            var validOptions = ms.Options.Keys
+                .Where(k => (ms.Blacklist == null || !ms.Blacklist.Contains(k)) &&
+                            (ms.NameBlacklist == null || !ms.NameBlacklist.Contains(ms.Options[k])))
+                .ToList();
+
+            int totalCount = validOptions.Count;
+            int selectedCount = ms.SelectedValues.Count;
+
+            // If ALL options are picked (or more than half are picked):
+            // Switch to "Deselected" mode so we only save the unpicked keys.
+            if (totalCount > 0 && selectedCount >= (totalCount / 2))
+            {
+                var unselected = validOptions.Where(k => !ms.SelectedValues.Contains(k)).ToList();
+                return new MultiSelectSaveData
+                {
+                    Mode = "Deselected",
+                    Values = unselected
+                };
+            }
+            else
+            {
+                return new MultiSelectSaveData
+                {
+                    Mode = "Selected",
+                    Values = ms.SelectedValues.ToList()
+                };
+            }
+        }
+        if (setting is BindSetting bind) return bind.BindKeys;
+        if (setting is SelectSetting sel) return sel.Value;
+        if (setting is StringSetting str) return str.Value;
+        if (setting is ListStringSetting list) return new List<string>(list.Values);
+        if (setting is BoolSetting b) return b.Value;
+        if (setting is FloatSetting f) return f.Value;
+        if (setting is IntSetting i) return i.Value;
+        if (setting is Vector2Setting v2) return new float[] { v2.Value.x, v2.Value.y };
+        if (setting is Vector3Setting v3) return new float[] { v3.Value.x, v3.Value.y, v3.Value.z };
+        if (setting is SectionSetting sec)
+        {
+            var secList = new List<Dictionary<string, object>>();
+            foreach (var section in sec.Sections)
+            {
+                var sDict = new Dictionary<string, object>();
+                foreach (var child in section.ChildSettings)
+                {
+                    if (child == null || string.IsNullOrEmpty(child.Name)) continue;
+                    string childKey = child is CategorySetting ? child.Name + "_Category" : child.Name;
+
+                    object childVal = SerializeSettingValue(child);
+                    if (childVal != null)
+                    {
+                        sDict[childKey] = childVal;
+                    }
+                }
+                secList.Add(sDict);
+            }
+            return secList;
+        }
+
+        return null;
     }
 
     private static readonly object _fileLock = new();
@@ -528,19 +571,51 @@ public static class SaveLoad
             {
                 string jsonStr = JsonConvert.SerializeObject(rawValue);
                 var proxy = JsonConvert.DeserializeObject<MultiSelectSaveData>(jsonStr);
-                if (proxy != null && proxy.SelectedValues != null)
+
+                if (proxy != null)
                 {
                     ms.SelectedValues.Clear();
-                    foreach (var val in proxy.SelectedValues) ms.SelectedValues.Add(val);
+
+                    var validOptions = ms.Options.Keys
+                        .Where(k => (ms.Blacklist == null || !ms.Blacklist.Contains(k)) &&
+                                    (ms.NameBlacklist == null || !ms.NameBlacklist.Contains(ms.Options[k])))
+                        .ToList();
+
+                    if (string.Equals(proxy.Mode, "Deselected", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // All options are selected EXCEPT those specified in proxy.Values
+                        var excluded = new HashSet<int>(proxy.Values ?? new List<int>());
+                        foreach (var opt in validOptions)
+                        {
+                            if (!excluded.Contains(opt))
+                            {
+                                ms.SelectedValues.Add(opt);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // "Selected" mode: only explicitly listed keys are selected
+                        if (proxy.Values != null)
+                        {
+                            foreach (var val in proxy.Values)
+                            {
+                                if (ms.Blacklist == null || !ms.Blacklist.Contains(val))
+                                {
+                                    ms.SelectedValues.Add(val);
+                                }
+                            }
+                        }
+                    }
                 }
             }
             else if (setting is BindSetting bind)
             {
                 string jsonStr = JsonConvert.SerializeObject(rawValue);
-                bind.BindKeys = JsonConvert.DeserializeObject<List<KeyCode>>(jsonStr);
+                bind.BindKeys = JsonConvert.DeserializeObject<List<KeyCode>>(jsonStr) ?? new List<KeyCode>();
             }
             else if (setting is SelectSetting sel) sel.Value = Convert.ToInt32(rawValue);
-            else if (setting is StringSetting str) str.Value = rawValue.ToString();
+            else if (setting is StringSetting str) str.Value = rawValue?.ToString() ?? "";
             else if (setting is ListStringSetting list)
             {
                 string jsonStr = JsonConvert.SerializeObject(rawValue);
@@ -573,7 +648,11 @@ public static class SaveLoad
                         var childList = sec.TemplateFactory(s);
                         foreach (var child in childList)
                         {
-                            if (secData[s].TryGetValue(child.Name, out var childVal))
+                            if (child == null || string.IsNullOrEmpty(child.Name)) continue;
+                            string loadKey = child is CategorySetting ? child.Name + "_Category" : child.Name;
+
+                            if (secData[s].TryGetValue(loadKey, out var childVal) ||
+                                secData[s].TryGetValue(child.Name, out childVal))
                             {
                                 RestoreSettingValue(child, childVal);
                             }
@@ -585,7 +664,7 @@ public static class SaveLoad
         }
         catch (Exception ex)
         {
-            AutoSaveLogger.Error($"Error setting '{setting.Name}': {ex.Message}");
+            AutoSaveLogger.Error($"Error restoring setting '{setting.Name}': {ex.Message}");
         }
     }
 

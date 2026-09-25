@@ -47,21 +47,14 @@ public class FasterPlants : Module
             Blacklist = Banned.PlantTypeBanned,
             CustomNames = TranslatedNames(typeof(PlantType))
         };
-
         PlantsSelectedSetting.SelectAll(setDefault: true);
 
-        Settings.Add(PlantsSelectedSetting);
-        
-
         AttackIntervalMultiplierSetting = new FloatSetting("Attack Interval", 0.01f, 50, 50,3);
-        Settings.Add(AttackIntervalMultiplierSetting);
-
         AnimationSpeedMultiplierSetting = new FloatSetting("Animation Speed", 0.01f, 50, 2, 3);
-        Settings.Add(AnimationSpeedMultiplierSetting);
-
         ProduceSpeedMultiplierSetting = new FloatSetting("Produce Speed", 0.01f, 50, 50, 3);
-        Settings.Add(ProduceSpeedMultiplierSetting);
 
+        AddSettings(PlantsSelectedSetting, AttackIntervalMultiplierSetting, AnimationSpeedMultiplierSetting,
+            ProduceSpeedMultiplierSetting);
         EndCategory();
     }
 

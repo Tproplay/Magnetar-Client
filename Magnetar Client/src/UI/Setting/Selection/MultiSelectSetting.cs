@@ -134,4 +134,35 @@ public class MultiSelectSetting : Setting
 
         y += Config.elementHeight + Config.spacing;
     }
+
+    /// <summary>
+    /// Selects all valid options (excluding blacklists) and optionally caches them as the default state.
+    /// </summary>
+    public void SelectAll(bool setDefault = true)
+    {
+        SelectedValues.Clear();
+        foreach (var key in Options.Keys)
+        {
+            if (Blacklist != null && Blacklist.Contains(key)) continue;
+            if (NameBlacklist != null && NameBlacklist.Contains(Options[key])) continue;
+
+            if (MaxSelection == -1 || SelectedValues.Count < MaxSelection)
+            {
+                SelectedValues.Add(key);
+            }
+        }
+
+        if (setDefault)
+        {
+            SetCurrentAsDefault();
+        }
+    }
+
+    /// <summary>
+    /// Saves the current selection state into DefaultSelectedValues for reset operations.
+    /// </summary>
+    public void SetCurrentAsDefault()
+    {
+        DefaultSelectedValues = new HashSet<int>(SelectedValues);
+    }
 }

@@ -127,6 +127,39 @@ public class MiscTheme
 }
 
 [Serializable]
+public class SliderTheme
+{
+    [JsonProperty("track off", NullValueHandling = NullValueHandling.Ignore)]
+    public string TrackOff { get; set; }
+
+    [JsonProperty("track on", NullValueHandling = NullValueHandling.Ignore)]
+    public string TrackOn { get; set; }
+
+    [JsonProperty("thumb", NullValueHandling = NullValueHandling.Ignore)]
+    public string Thumb { get; set; }
+
+    [JsonProperty("thumb hover", NullValueHandling = NullValueHandling.Ignore)]
+    public string ThumbHover { get; set; }
+}
+
+[Serializable]
+public class SectionSettingTheme
+{
+    [JsonProperty("group header", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme GroupHeader { get; set; }
+
+    [JsonProperty("section header", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme SectionHeader { get; set; }
+
+    [JsonProperty("remove button", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme RemoveButton { get; set; }
+
+    [JsonProperty("add button", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme AddButton { get; set; }
+}
+
+
+[Serializable]
 public class ThemeData
 {
     [JsonProperty("name")]
@@ -188,23 +221,11 @@ public class ThemeData
 
     [JsonProperty("Slider", NullValueHandling = NullValueHandling.Ignore)]
     public SliderTheme Slider { get; set; }
+
+    [JsonProperty("Section", NullValueHandling = NullValueHandling.Ignore)]
+    public SectionSettingTheme Section { get; set; }
 }
 
-[Serializable]
-public class SliderTheme
-{
-    [JsonProperty("track off", NullValueHandling = NullValueHandling.Ignore)]
-    public string TrackOff { get; set; }
-
-    [JsonProperty("track on", NullValueHandling = NullValueHandling.Ignore)]
-    public string TrackOn { get; set; }
-
-    [JsonProperty("thumb", NullValueHandling = NullValueHandling.Ignore)]
-    public string Thumb { get; set; }
-
-    [JsonProperty("thumb hover", NullValueHandling = NullValueHandling.Ignore)]
-    public string ThumbHover { get; set; }
-}
 
 #endregion
 
@@ -233,7 +254,6 @@ public static class Magnetar_Default
     public static GUIStyle ResetButtonStyle;
     public static GUIStyle ListAddButtonStyle;
     public static GUIStyle ListRemoveButtonStyle;
-
     public static GUIStyle SeparatorStyle;
     public static GUIStyle SeparatorTextStyle;
     public static GUIStyle TextStyle;
@@ -245,6 +265,10 @@ public static class Magnetar_Default
     public static GUIStyle SliderTrackOffStyle;
     public static GUIStyle SliderTrackOnStyle;
     public static GUIStyle SliderThumbStyle;
+    public static GUIStyle SectionGroupHeaderStyle;
+    public static GUIStyle SectionHeaderStyle;
+    public static GUIStyle SectionRemoveButtonStyle;
+    public static GUIStyle SectionAddButtonStyle;
 
     #endregion
 
@@ -316,6 +340,25 @@ public static class Magnetar_Default
             new ColorState("#FF6B6BFF", "#FF8E8EFF", "#FF3D3DFF"),
             new ColorState("#2B1818DC", "#3D1E1EFF", "#201212FF")
         ),
+        Section = new SectionSettingTheme
+        {
+            GroupHeader = new ElementStyleTheme(
+                new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+                new ColorState("#1A1A1ADC", "#242424FF", "#181818FF")
+            ),
+            SectionHeader = new ElementStyleTheme(
+                new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
+                new ColorState("#1C1C1CD6", "#2A2A2AFF", "#161616FF")
+            ),
+            RemoveButton = new ElementStyleTheme(
+                new ColorState("#FF6B6BFF", "#FF8E8EFF", "#FF3D3DFF"),
+                new ColorState("#2B1818DC", "#3D1E1EFF", "#201212FF")
+            ),
+            AddButton = new ElementStyleTheme(
+                new ColorState("#000000FF", "#000000FF", "#000000FF"),
+                new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+            )
+        },
         Typography = new TypographyTheme
         {
             Description = "#BFBFBFFF",
@@ -486,6 +529,25 @@ public static class Magnetar_Default
                             new ColorState("#FF77BCFF", "#FFA6D2FF", "#E11D48FF"),
                             new ColorState("#2D1022CC", "#4A1835FF", "#1F0A17FF")
                         ),
+                        Section = new SectionSettingTheme
+                        {
+                            GroupHeader = new ElementStyleTheme(
+                                new ColorState("#E6EDF3FF", "#FFFFFFFF", "#FFFFFFFF"),
+                                new ColorState("#7d00f1", "#9a2eff", "#9a2eff")
+                            ),
+                            SectionHeader = new ElementStyleTheme(
+                                new ColorState("#8B949EFF", "#e6e6e6ea", "#e6e6e6ea"),
+                                new ColorState("#1D1226CC", "#2C173DFF", "#22142594")
+                            ),
+                            RemoveButton = new ElementStyleTheme(
+                                new ColorState("#FF77BCFF", "#FFA6D2FF", "#E11D48FF"),
+                                new ColorState("#2D1022CC", "#4A1835FF", "#1F0A17FF")
+                            ),
+                            AddButton = new ElementStyleTheme(
+                                new ColorState("#000000FF", "#000000FF", "#000000FF"),
+                                new ColorState("#8B0FFFFF", "#992cff", "#8B0FFFFF")
+                            )
+                        },
                         Typography = new TypographyTheme
                         {
                             Description = "#ec45ff",
@@ -648,6 +710,12 @@ public static class Magnetar_Default
         SliderThumbStyle.hover.background = GetCircleTex(thumbHoverColor);
         SliderThumbStyle.active.background = GetCircleTex(thumbHoverColor);
 
+        // --- 12 Section Setting Styles ---
+        ApplyElement(SectionGroupHeaderStyle, theme.Section?.GroupHeader, d.Section?.GroupHeader ?? d.CategoryHeader);
+        ApplyElement(SectionHeaderStyle, theme.Section?.SectionHeader, d.Section?.SectionHeader ?? d.CategoryModuleOff);
+        ApplyElement(SectionRemoveButtonStyle, theme.Section?.RemoveButton, d.Section?.RemoveButton ?? d.ListRemoveButton ?? d.SettingOff);
+        ApplyElement(SectionAddButtonStyle, theme.Section?.AddButton, d.Section?.AddButton ?? d.SettingOn);
+
         // Exposed dynamic properties
         var catModOffBg = ResolveState(theme.CategoryModuleOff?.BackgroundColor, d.CategoryModuleOff.BackgroundColor);
         var catModOnBg = ResolveState(theme.CategoryModuleOn?.BackgroundColor, d.CategoryModuleOn.BackgroundColor);
@@ -776,6 +844,10 @@ public static class Magnetar_Default
         SliderTrackOffStyle = new GUIStyle();
         SliderTrackOnStyle = new GUIStyle();
         SliderThumbStyle = new GUIStyle();
+        SectionGroupHeaderStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
+        SectionHeaderStyle = new GUIStyle { alignment = TextAnchor.MiddleLeft };
+        SectionRemoveButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
+        SectionAddButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
     }
 
     private static void SetOffset(RectOffset ro, int left, int right, int top, int bottom)
@@ -879,5 +951,18 @@ public static class Magnetar_Default
         SetOffset(SliderTrackOffStyle.padding, 0, 0, 0, 0);
         SetOffset(SliderTrackOnStyle.padding, 0, 0, 0, 0);
         SetOffset(SliderThumbStyle.padding, 0, 0, 0, 0);
+
+        // Section Setting
+        SectionGroupHeaderStyle.fontSize = S(SettingDescriptionFontSize);
+        SetOffset(SectionGroupHeaderStyle.padding, S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingLR), 0, 0);
+
+        SectionHeaderStyle.fontSize = S(SettingFontSize);
+        SetOffset(SectionHeaderStyle.padding, S(SettingPaddingLeft), 0, 0, 0);
+
+        SectionRemoveButtonStyle.fontSize = S(SettingFontSize);
+        SetOffset(SectionRemoveButtonStyle.padding, 0, 0, 0, 0);
+
+        SectionAddButtonStyle.fontSize = S(SettingFontSize);
+        SetOffset(SectionAddButtonStyle.padding, 0, 0, 0, 0);
     }
 }

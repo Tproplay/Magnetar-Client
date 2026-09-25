@@ -78,7 +78,7 @@ public class SectionSetting : Setting
         // 1. Group Header
         string title = $"{Translator.Translate(Name)} ({Sections.Count})";
         Rect titleRect = new(Config.indent, y, width - (Config.indent * 2), elemH);
-        GUI.Box(titleRect, title, Magnetar_Default.CategoryHeaderStyle);
+        GUI.Box(titleRect, title, Magnetar_Default.SectionGroupHeaderStyle);
         y += elemH + gap;
 
         int removeIdx = -1;
@@ -89,19 +89,20 @@ public class SectionSetting : Setting
             var section = Sections[i];
             float sectionWidth = width - (Config.indent * 2);
 
-            // Sub-header bar
             Rect secHeaderRect = new(Config.indent, y, sectionWidth - actionBtnW - gap, Config.S(24f));
             Rect delRect = new(Config.indent + sectionWidth - actionBtnW, y, actionBtnW, Config.S(24f));
 
             string foldArrow = section.IsExpanded ? "▼ " : "▶ ";
             string secLabel = foldArrow + Translator.Translate(section.Title);
 
-            if (GUI.Button(secHeaderRect, secLabel, Magnetar_Default.CategoryModuleOffStyle))
+            // Sub-header bar
+            if (GUI.Button(secHeaderRect, secLabel, Magnetar_Default.SectionHeaderStyle))
             {
                 section.IsExpanded = !section.IsExpanded;
             }
 
-            GUI.Box(delRect, "—", Magnetar_Default.SettingOff);
+            // Remove button
+            GUI.Box(delRect, "—", Magnetar_Default.SectionRemoveButtonStyle);
             if (delRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
             {
                 removeIdx = i;
@@ -134,7 +135,7 @@ public class SectionSetting : Setting
         Rect addBtnRect = new(Config.indent, y, addBtnW, elemH);
         Rect resetRect = new(Config.indent + addBtnW + gap, y, actionBtnW, elemH);
 
-        GUIStyle addStyle = canAdd ? Magnetar_Default.SettingOn : Magnetar_Default.CategoryModuleOffStyle;
+        GUIStyle addStyle = canAdd ? Magnetar_Default.SectionAddButtonStyle : Magnetar_Default.CategoryModuleOffStyle;
         if (GUI.Button(addBtnRect, canAdd ? Translator.Translate("+ Add Section") : Translator.Translate("Max Sections Reached"), addStyle))
         {
             if (canAdd) AddSection();

@@ -45,7 +45,7 @@ public class Volley : Module
             CustomNames = TranslatedNames(typeof(BulletType)),
         };
 
-        selectedBulletsSetting.Options.Keys.ToList().ForEach(selectedBulletsSetting.Select);
+        selectedBulletsSetting.SelectAll(setDefault: true);
 
         AddSettings(BulletMultiplier, selectedBulletsSetting);
 

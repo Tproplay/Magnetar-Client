@@ -54,6 +54,8 @@ public class AntiLagSpawns : Module
             Blacklist = Banned.ZombieTypeBanned,
         };
 
+        UnaffectedZombies.SetCurrentAsDefault();
+
         AddSettings(UnaffectedZombies);
 
         EndCategory();

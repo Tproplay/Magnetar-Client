@@ -39,7 +39,7 @@ public class KeepShooting : Module
             CustomNames = TranslatedNames(typeof(PlantType))
         };
 
-        PlantsSelectedSetting.Options.Keys.ToList().ForEach(PlantsSelectedSetting.Select);
+        PlantsSelectedSetting.SelectAll(setDefault: true);
 
         Settings.Add(PlantsSelectedSetting);
 

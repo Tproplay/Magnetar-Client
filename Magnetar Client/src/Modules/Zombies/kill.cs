@@ -44,26 +44,24 @@ public class KillZombies : Module
         {
             CustomNames = TranslatedNames(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
-
         };
-        ZombiesSelectedSetting.Options.Keys.ToList().ForEach(ZombiesSelectedSetting.Select);
-        Settings.Add(ZombiesSelectedSetting);
+        ZombiesSelectedSetting.SelectAll(setDefault: true);
 
         HypnoZombiesSelectedSetting = new MultiSelectSetting("Hypnotized Entities", typeof(ZombieType))
         {
             CustomNames = TranslatedNames(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
-
         };
-        HypnoZombiesSelectedSetting.Options.Keys.ToList().ForEach(HypnoZombiesSelectedSetting.Select);
-        Settings.Add(HypnoZombiesSelectedSetting);
+        HypnoZombiesSelectedSetting.SelectAll(setDefault: true);
 
+        AddSettings(ZombiesSelectedSetting, HypnoZombiesSelectedSetting);
         EndCategory();
+
         CreateCategory("Extra");
 
         AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
-        Settings.Add(AutoTurnOff);
 
+        AddSettings(AutoTurnOff);
         EndCategory();
 
     }

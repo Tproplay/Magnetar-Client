@@ -34,7 +34,6 @@ public class HypnotizeZombies : Module
 
     public static float deltaTime = 0;
 
-
     public HypnotizeZombies()
     {
         instance = this;
@@ -47,12 +46,11 @@ public class HypnotizeZombies : Module
             Blacklist = Banned.ZombieTypeBanned,
 
         };
-        ZombiesSelectedSetting.Options.Keys.ToList().ForEach(ZombiesSelectedSetting.Select);
-        Settings.Add(ZombiesSelectedSetting);
+        ZombiesSelectedSetting.SelectAll(setDefault: true);
 
         AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
-        Settings.Add(AutoTurnOff);
 
+        AddSettings(ZombiesSelectedSetting, AutoTurnOff);
         EndCategory();
 
     }

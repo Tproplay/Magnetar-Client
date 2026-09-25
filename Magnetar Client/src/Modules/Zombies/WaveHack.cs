@@ -55,6 +55,7 @@ public class WaveHack : Module
 
         ZombiesCountMultiplier = new IntSetting("Zombies count multiplier", 1, 10, 1, 0);
         SpawnDelay = new FloatSetting("Spawn Delay", 0, 3, 0.5f, 3);
+
         AddSettings(ZombiesCountMultiplier,SpawnDelay);
         EndCategory();
 

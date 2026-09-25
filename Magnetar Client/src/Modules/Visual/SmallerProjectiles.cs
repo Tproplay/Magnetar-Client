@@ -40,11 +40,11 @@ public class SmallerProjectiles : Module
             CustomNames = TranslatedNames(typeof(BulletType)),
         };
 
-        BulletTypeSetting.Options.Keys.ToList().ForEach(BulletTypeSetting.Select);
-        Settings.Add(BulletTypeSetting);
+        BulletTypeSetting.SelectAll(setDefault: true);
+        AddSettings(BulletTypeSetting);
 
         ScaleSetting = new FloatSetting("Scale Multiplier", 0.1f, 2f, 0.5f, 3, 0);
-        Settings.Add(ScaleSetting);
+        AddSettings(ScaleSetting);
 
         EndCategory();
 

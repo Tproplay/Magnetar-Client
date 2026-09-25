@@ -49,15 +49,15 @@ public class KillPlants : Module
             CustomNames = TranslatedNames(typeof(PlantType))
         };
 
-        PlantsSelectedSetting.Options.Keys.ToList().ForEach(PlantsSelectedSetting.Select);
+        PlantsSelectedSetting.SelectAll(setDefault: true);
 
-        Settings.Add(PlantsSelectedSetting);
+        AddSettings(PlantsSelectedSetting);
 
         EndCategory();
         CreateCategory("Extra");
 
         AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
-        Settings.Add(AutoTurnOff);
+        AddSettings(AutoTurnOff);
 
         EndCategory();
 

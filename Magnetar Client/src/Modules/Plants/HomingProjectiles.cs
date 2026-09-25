@@ -36,7 +36,7 @@ public class HomingProjectiles : Module
             CustomNames = TranslatedNames(typeof(BulletType)),
         };
 
-        selectedBulletsSetting.Options.Keys.ToList().ForEach(selectedBulletsSetting.Select);
+        selectedBulletsSetting.SelectAll(setDefault: true);
 
         Settings.Add(selectedBulletsSetting);
 

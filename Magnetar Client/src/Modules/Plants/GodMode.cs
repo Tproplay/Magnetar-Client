@@ -40,7 +40,7 @@ public class GodMode : Module
             CustomNames = TranslatedNames(typeof(PlantType))
         };
 
-        PlantsSelectedSetting.Options.Keys.ToList().ForEach(PlantsSelectedSetting.Select);
+        PlantsSelectedSetting.SelectAll(setDefault: true);
 
         ImmuneToDamage = new BoolSetting("Immune To Damage", true);
         ImmuneToVehicle = new BoolSetting("Immune To Vehicle", true);

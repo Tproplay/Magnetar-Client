@@ -69,10 +69,7 @@ public class BetterHealthDisplay : Module
             CustomNames = TranslatedNames(typeof(PlantType)),
             Blacklist = Banned.PlantTypeBanned,
         };
-        foreach (var item in SelectedPlants.Options.Keys)
-        {
-            SelectedPlants.Select(item);
-        }
+        SelectedPlants.SelectAll(setDefault: true);
 
         AddSettings(SelectedPlants, ShowMaxHealth);
 
@@ -85,10 +82,7 @@ public class BetterHealthDisplay : Module
             CustomNames = TranslatedNames(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
         };
-        foreach (var item in SelectedZombies.Options.Keys)
-        {
-            SelectedZombies.Select(item);
-        }
+        SelectedZombies.SelectAll(setDefault: true);
 
         AddSettings(SelectedZombies);
 

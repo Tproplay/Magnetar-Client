@@ -38,13 +38,9 @@ public class ChangeBullet : Module
         selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
         {
             CustomNames = TranslatedNames(typeof(BulletType)),
-            Blacklist = new HashSet<int>
-            {
-                162,220
-            }
         };
 
-        selectBulletsSetting.Options.Keys.ToList().ForEach(selectBulletsSetting.Select);
+        selectBulletsSetting.SelectAll(setDefault: true);
 
         Settings.Add(selectBulletsSetting);
 

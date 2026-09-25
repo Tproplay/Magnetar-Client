@@ -38,11 +38,10 @@ public class SmallerZombies : Module
 
         selectedZombies = new MultiSelectSetting("Entities", typeof(ZombieType))
         {
-            MaxSelection = -1,
             CustomNames = TranslatedNames(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
         };
-        selectedZombies.Options.Keys.ToList().ForEach(selectedZombies.Select);
+        selectedZombies.SelectAll(setDefault: true);
 
         AddSettings(sizeMultiplier, selectedZombies);
 

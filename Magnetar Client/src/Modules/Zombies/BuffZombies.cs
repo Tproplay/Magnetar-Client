@@ -44,13 +44,11 @@ public class BuffZombies : Module
 
         };
 
-        ZombieSelectedSetting.Options.Keys.ToList().ForEach(ZombieSelectedSetting.Select);
-
-        Settings.Add(ZombieSelectedSetting);
+        ZombieSelectedSetting.SelectAll(setDefault: true);
 
         HpMultiplierSettig = new FloatSetting("Hp Multiply", 0.1f, 100, 2, 3);
-        Settings.Add(HpMultiplierSettig);
 
+        AddSettings(ZombieSelectedSetting, HpMultiplierSettig);
         EndCategory();
 
     }

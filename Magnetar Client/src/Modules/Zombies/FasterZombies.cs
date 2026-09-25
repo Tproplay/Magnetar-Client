@@ -45,13 +45,11 @@ public class FasterZombies : Module
             CustomNames = TranslatedNames(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
         };
-
-        ZombieSelectedSetting.Options.Keys.ToList().ForEach(ZombieSelectedSetting.Select);
-        Settings.Add(ZombieSelectedSetting);
+        ZombieSelectedSetting.SelectAll(setDefault: true);
 
         theSpeedSetting = new FloatSetting("Speed", 0.1f, 10f, 2f,3);
-        Settings.Add(theSpeedSetting);
 
+        AddSettings(ZombieSelectedSetting, theSpeedSetting);
         EndCategory();
     }
 

@@ -42,7 +42,7 @@ public class SmallerPlants : Module
             Blacklist = Banned.PlantTypeBanned,
             CustomNames = TranslatedNames(typeof(PlantType))
         };
-        selectedPlants.Options.Keys.ToList().ForEach(selectedPlants.Select);
+        selectedPlants.SelectAll(setDefault: true);
 
         AddSettings(plantSize, selectedPlants);
 

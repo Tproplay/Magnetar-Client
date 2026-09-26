@@ -424,23 +424,26 @@ public static class DrawSetting
         // --- 3. FILTER & CACHE VISIBLE ITEMS ---
         var filteredItems = new List<(int Key, string DisplayName)>();
         string cleanQuery = multiSelectSearchQuery?.Replace(" ", "") ?? "";
+        bool hasQuery = !string.IsNullOrEmpty(cleanQuery);
 
         foreach (var kvp in options)
         {
             int intVal = kvp.Key;
             string internalName = kvp.Value;
 
-            string displayName = internalName;
-            if (activeMultiSelect.CustomNames != null && activeMultiSelect.CustomNames.ContainsKey(intVal))
-            {
-                displayName = activeMultiSelect.CustomNames[intVal];
-            }
-
             if (activeMultiSelect.Blacklist != null && activeMultiSelect.Blacklist.Contains(intVal)) continue;
             if (activeMultiSelect.NameBlacklist != null && activeMultiSelect.NameBlacklist.Contains(internalName)) continue;
+            string displayName = activeMultiSelect.GetDisplayName(intVal, internalName);
 
-            if (!string.IsNullOrEmpty(cleanQuery) && displayName.Replace(" ", "").IndexOf(cleanQuery, StringComparison.OrdinalIgnoreCase) < 0)
-                continue;
+            if (hasQuery)
+            {
+                bool matchesDisplay = displayName.Replace(" ", "").IndexOf(cleanQuery, StringComparison.OrdinalIgnoreCase) >= 0;
+                bool matchesInternal = !string.IsNullOrEmpty(internalName) &&
+                                       internalName.Replace(" ", "").IndexOf(cleanQuery, StringComparison.OrdinalIgnoreCase) >= 0;
+
+                if (!matchesDisplay && !matchesInternal)
+                    continue;
+            }
 
             filteredItems.Add((intVal, displayName));
         }

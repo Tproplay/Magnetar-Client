@@ -20,19 +20,7 @@ public class MultiSelectSetting : Setting
 
     public Action<int, bool> OnSelectionChanged { get; set; }
 
-    private Dictionary<int, string> _customNames;
-    public Dictionary<int, string> CustomNames
-    {
-        get => _customNames;
-        set
-        {
-            _customNames = value;
-            if (_customNames != null)
-            {
-                foreach (var kvp in _customNames) Options[kvp.Key] = kvp.Value;
-            }
-        }
-    }
+    public Dictionary<int, string> CustomNames;
 
     public MultiSelectSetting(string name)
     {
@@ -51,7 +39,20 @@ public class MultiSelectSetting : Setting
         }
     }
 
-    public string GetDisplayName(int id, string fallbackName) => Options.ContainsKey(id) ? Options[id] : fallbackName;
+    public string GetDisplayName(int id, string fallbackName = null)
+    {
+        if (CustomNames != null && CustomNames.TryGetValue(id, out string customName))
+        {
+            return customName;
+        }
+
+        if (Options.TryGetValue(id, out string baseName))
+        {
+            return baseName;
+        }
+
+        return fallbackName ?? id.ToString();
+    }
     public void AddOption(int id, string displayName) => Options[id] = displayName;
 
     public void RemoveOption(int id)

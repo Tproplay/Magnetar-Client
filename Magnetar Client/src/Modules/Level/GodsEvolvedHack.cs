@@ -27,6 +27,8 @@ public class GodsEvolvedHack : Module
     // Mod Data
     public static GodsEvolvedHack instance;
 
+
+    public BoolSetting LockQualityWeights;
     public FloatSetting QualityDefaultWeight;
     public FloatSetting QualitySilverWeight;
     public FloatSetting QualityGoldtWeight;
@@ -67,6 +69,8 @@ public class GodsEvolvedHack : Module
 
         CreateCategory("Quality Weight");
 
+        LockQualityWeights = new("Lock Quality Weights", false);
+
         QualityDefaultWeight = new FloatSetting("Default Quality Weight", 0, 100, 50, 2, 0)
         {
             OnValueChanged = x => ApplySingleWeight(Quality.Default, x)
@@ -96,7 +100,8 @@ public class GodsEvolvedHack : Module
             OnValueChanged = x => ApplySingleWeight(Quality.random, x)
         };
 
-        AddSettings(QualityDefaultWeight, QualitySilverWeight, QualityGoldtWeight, QualityDiamondWeight,
+        AddSettings(LockQualityWeights,
+            QualityDefaultWeight, QualitySilverWeight, QualityGoldtWeight, QualityDiamondWeight,
             QualityCurseWeight, QualityIridescentWeight, QualityRandomWeight);
         EndCategory();
     }
@@ -178,7 +183,8 @@ public class GodsEvolvedHack : Module
 
         if (ShootingManager.Instance == null) return;
 
-        SyncFromGame(ShootingManager.Instance);
+        if (LockQualityWeights.Value) ApplyToGame(ShootingManager.Instance);
+        else SyncFromGame(ShootingManager.Instance);
     }
 
     public override void OnUpdateActive()

@@ -1475,8 +1475,19 @@ public static class DrawSetting
 
     public static void HandleLabelSetting(LabelSetting lblSet, ref float y, float width)
     {
-        string displayText = Translator.Translate(!string.IsNullOrEmpty(lblSet.Text) ? lblSet.Text : lblSet.Name);
-        Rect labelRect = new(Config.indent, y, width - (Config.indent * 2), Config.elementHeight);
-        GUI.Label(labelRect, displayText, Magnetar_Default.SettingLabelStyle);
+        if (lblSet == null || string.IsNullOrEmpty(lblSet.Name)) return;
+
+        string displayText = Translator.Translate(lblSet.Name);
+
+        float labelWidth = width - (Config.indent * 2f);
+        float calculatedHeight = Magnetar_Default.SettingsDescriptionStyle.CalcHeight(
+            new GUIContent(displayText),
+            labelWidth
+        );
+
+        Rect labelRect = new(Config.indent, y, labelWidth, calculatedHeight);
+        GUI.Label(labelRect, displayText, Magnetar_Default.SettingsDescriptionStyle);
+
+        y += calculatedHeight + Config.spacing;
     }
 }

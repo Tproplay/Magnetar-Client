@@ -22,11 +22,40 @@ public class SectionInstance
     /// </summary>
     public Setting Find(string name)
     {
+        if (ChildSettings == null || string.IsNullOrEmpty(name)) return null;
+
         foreach (var setting in ChildSettings)
         {
-            if (setting.Name == name) return setting;
+            if (setting != null && string.Equals(setting.Name, name, StringComparison.Ordinal))
+            {
+                return setting;
+            }
         }
         return null;
+    }
+    /// <summary>
+    /// Finds the first setting in ChildSettings by its name
+    /// </summary>
+    public bool Find(string name, out Setting setting)
+    {
+        setting = Find(name);
+
+        return setting != null;
+    }
+    /// <summary>
+    /// Finds the first setting in ChildSettings by its name
+    /// </summary>
+    public T Find<T>(string name) where T : Setting
+    {
+        return Find(name) as T;
+    }
+    /// <summary>
+    /// Finds the first setting in ChildSettings by its name
+    /// </summary>
+    public bool Find<T>(string name, out T setting) where T : Setting
+    {
+        setting = Find(name) as T;
+        return setting != null;
     }
 }
 

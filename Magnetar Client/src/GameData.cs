@@ -67,6 +67,7 @@ public static class AppData
     { 
         get 
         {
+            if (GameAPP.canvas == null) return true;
             return (GameAPP.canvas.Find("MainMenu(Clone)") != null ||
               GameAPP.canvas.Find("MainMenu_travel(Clone)") != null) && !InAlmanac;
         } 
@@ -79,6 +80,7 @@ public static class AppData
     {
         get
         {
+            if (GameAPP.canvasUp == null) return false;
             return GameAPP.canvasUp.Find("AlmanacMenu(Clone)") != null;
         }
     }

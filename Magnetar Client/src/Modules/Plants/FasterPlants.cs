@@ -117,7 +117,7 @@ public class FasterPlants : Module
                 return true;
             }
         }
-
+            
         if (PlantsSelectedSetting.IsSelected(plantId))
         {
             attackMult = AttackIntervalMultiplierSetting.Value;

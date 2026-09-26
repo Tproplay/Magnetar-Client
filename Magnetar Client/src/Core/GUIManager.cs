@@ -89,6 +89,7 @@ public static class GUIManager
                         activeIndex = idx;
                     }
                     idx++;
+                    TranslatorLogger.Msg($"Found language: {langName}");
                 }
                 LanguageSetting.SelectedValues.Add(activeIndex);
             }

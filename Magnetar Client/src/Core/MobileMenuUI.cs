@@ -78,14 +78,14 @@ public static class MobileMenuUI
                             Texture2D tex = uiBundle.LoadAsset<Texture2D>(name);
                             if (tex != null)
                             {
-                                Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Texture2D from magnetar_ui!");
+                                Magnetar_Logger.GUILogger.Msg($"Successfully loaded '{name}' as Texture2D from magnetar_ui!");
                                 return tex;
                             }
 
                             Sprite spr = uiBundle.LoadAsset<Sprite>(name);
                             if (spr != null)
                             {
-                                Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Sprite from magnetar_ui!");
+                                Magnetar_Logger.GUILogger.Msg($"Successfully loaded '{name}' as Sprite from magnetar_ui!");
                                 return ExtractSpriteTexture(spr);
                             }
 #elif BEPINEX || RELEASE_BEPINEX || ANDROID
@@ -95,7 +95,7 @@ public static class MobileMenuUI
                                 Texture2D tex = rawTex.TryCast<Texture2D>();
                                 if (tex != null)
                                 {
-                                    Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Texture2D from magnetar_ui!");
+                                    Magnetar_Logger.GUILogger.Msg($"Successfully loaded '{name}' as Texture2D from magnetar_ui!");
                                     return tex;
                                 }
                             }
@@ -106,7 +106,7 @@ public static class MobileMenuUI
                                 Sprite spr = rawSpr.TryCast<Sprite>();
                                 if (spr != null)
                                 {
-                                    Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded '{name}' as Sprite from magnetar_ui!");
+                                    Magnetar_Logger.GUILogger.Msg($"Successfully loaded '{name}' as Sprite from magnetar_ui!");
                                     return ExtractSpriteTexture(spr);
                                 }
                             }
@@ -126,7 +126,7 @@ public static class MobileMenuUI
         }
         catch (Exception ex)
         {
-            Magnetar_Logger.DebugLogger.Error($"[MobileMenuUI] Error loading from magnetar_ui bundle: {ex.Message}");
+            Magnetar_Logger.GUILogger.Error($"Error loading from magnetar_ui bundle: {ex.Message}");
         }
 
         // --- 2. Loose disk fallback (Magnetar Data/Magnetar_logo.png) ---
@@ -140,13 +140,13 @@ public static class MobileMenuUI
                 Texture2D diskTex = new(2, 2, TextureFormat.RGBA32, false);
                 if (ImageConversion.LoadImage(diskTex, rawBytes))
                 {
-                    Magnetar_Logger.DebugLogger.Msg($"[MobileMenuUI] Successfully loaded logo from disk: {path}");
+                    Magnetar_Logger.GUILogger.Msg($"Successfully loaded logo from disk: {path}");
                     return diskTex;
                 }
             }
             catch (Exception ex)
             {
-                Magnetar_Logger.DebugLogger.Error($"[MobileMenuUI] Failed reading disk logo: {ex.Message}");
+                Magnetar_Logger.GUILogger.Error($"Failed reading disk logo: {ex.Message}");
             }
         }
         
@@ -276,11 +276,11 @@ public static class MobileMenuUI
                 // Circularize and add accent border
                 _logoTex = CreateCircularBadgeTexture(rawLogo, Magnetar_Default.AccentColor, borderThickness);
 
-                Magnetar_Logger.DebugLogger.Msg("[MobileMenuUI] Successfully circularized logo with accent border!");
+                Magnetar_Logger.GUILogger.Msg("Successfully circularized logo with accent border!");
             }
             else
             {
-                Magnetar_Logger.DebugLogger.Warning("[MobileMenuUI] Logo 'Magnetar_logo' not found. Falling back to default badge.");
+                Magnetar_Logger.GUILogger.Warning("Logo 'Magnetar_logo' not found. Falling back to default badge.");
             }
         }
 

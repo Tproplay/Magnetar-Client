@@ -82,6 +82,7 @@ public static class Magnetar_Logger
     public static CustomLogger DebugLogger;
     public static CustomLogger AutoSaveLogger;
     public static CustomLogger DebugModeLogger;
+    public static CustomLogger GUILogger;
 
 #if !ANDROID && (BEPINEX || RELEASE_BEPINEX)
     // Completely strip P/Invoke declarations on Android
@@ -118,11 +119,13 @@ public static class Magnetar_Logger
         DebugLogger = new CustomLogger("Magnetar Debugger", ColorARGB.Cyan);
         AutoSaveLogger = new CustomLogger("Magnetar AutoSave", ColorARGB.Lime);
         DebugModeLogger = new CustomLogger("Debug Mode", ColorARGB.Red);
+        GUILogger = new CustomLogger("Magnetar GUI", ColorARGB.Purple);
 #elif BEPINEX || RELEASE_BEPINEX
         TranslatorLogger = new CustomLogger("Magnetar Translator", "\x1b[35m");
         DebugLogger = new CustomLogger("Magnetar Debugger", "\x1b[36m");
         AutoSaveLogger = new CustomLogger("Magnetar AutoSave", "\x1b[32m");
         DebugModeLogger = new CustomLogger("Debug Mode", "\x1b[31m");
+        GUILogger = new CustomLogger("Magnetar GUI", "\x1b[35m");
 #endif
     }
 }

@@ -497,11 +497,11 @@ public static class LoadFont
                         GUI.skin.toggle.font = customWineFont;
                         GUI.skin.window.font = customWineFont;
 
-                        DebugLogger.Msg("[Texture Loader] Successfully loaded and applied font!");
+                        GUILogger.Msg("[Texture Loader] Successfully loaded and applied font!");
                     }
                     else
                     {
-                        DebugLogger.Error("[Texture Loader] Found bundle, but 'Magnetar_font' asset was missing inside it.");
+                        GUILogger.Error("[Texture Loader] Found bundle, but 'Magnetar_font' asset was missing inside it.");
                     }
                 }
                 finally

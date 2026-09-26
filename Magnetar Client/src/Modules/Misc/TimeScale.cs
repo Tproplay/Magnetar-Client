@@ -26,7 +26,7 @@ public class TimeScale : Module
 
     public FloatSetting TimeScaleSetting;
 
-    public Dictionary<FloatSetting, BindSetting> Buttons = new();
+    public SectionSetting ButtonsSection;
     public BoolSetting ResetOnDoubleActive;
     public BoolSetting DisableOnGamePaused;
     public BoolSetting ReEnableAfterPause;
@@ -56,16 +56,16 @@ public class TimeScale : Module
         EndCategory();
         CreateCategory("Buttons");
 
-        for (int i = 1; i <= 5; i++)
-        {
-            Buttons[new FloatSetting($"Speed setting {i}", 0f, 10f, 1f, 3, 0)] = new BindSetting($"Control button {i}");
-        }
-
-        foreach (var button in Buttons)
-        {
-            AddSettings(button.Key, button.Value);
-        }
-
+        ButtonsSection = new("Prefrences",
+            (index) => new List<Setting>
+            {
+                new FloatSetting($"Speed setting", 0f, 10f, 1f, 3, 0),
+                new BindSetting($"Control button")
+            },
+            0
+            );
+        
+        AddSettings(ButtonsSection);
         EndCategory();
         CreateCategory("Extra");
 
@@ -85,18 +85,21 @@ public class TimeScale : Module
     public override void OnUpdateActive()
     {
         // Handle keybind shortcuts
-        foreach (var button in Buttons)
+        foreach (var section in ButtonsSection.Sections)
         {
-            if (GetKeyComboDown(button.Value.BindKeys))
+            var key = ((BindSetting)section.ChildSettings[1]).BindKeys;
+            if (GetKeyComboDown(key))
             {
-                if (Mathf.Approximately(TargetSpeed, button.Key.Value))
+                var speed = ((FloatSetting)section.ChildSettings[0]).Value;
+                if (Mathf.Approximately(TargetSpeed, speed))
                 {
                     if (ResetOnDoubleActive.Value) SetGameSpeed(1f);
                 }
                 else
                 {
-                    SetGameSpeed(button.Key.Value);
+                    SetGameSpeed(speed);
                 }
+
             }
         }
     }

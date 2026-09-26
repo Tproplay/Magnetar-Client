@@ -59,8 +59,8 @@ public class TimeScale : Module
         ButtonsSection = new("Prefrences",
             (index) => new List<Setting>
             {
-                new FloatSetting($"Speed setting", 0f, 10f, 1f, 3, 0),
-                new BindSetting($"Control button")
+                new FloatSetting("Speed setting", 0f, 10f, 1f, 3, 0),
+                new BindSetting("Control button"),
             },
             0
             );
@@ -87,10 +87,10 @@ public class TimeScale : Module
         // Handle keybind shortcuts
         foreach (var section in ButtonsSection.Sections)
         {
-            var key = ((BindSetting)section.ChildSettings[1]).BindKeys;
+            var key = ((BindSetting)section.Find("Control button")).BindKeys;
             if (GetKeyComboDown(key))
             {
-                var speed = ((FloatSetting)section.ChildSettings[0]).Value;
+                var speed = ((FloatSetting)section.Find("Speed setting")).Value;
                 if (Mathf.Approximately(TargetSpeed, speed))
                 {
                     if (ResetOnDoubleActive.Value) SetGameSpeed(1f);

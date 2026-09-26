@@ -17,6 +17,17 @@ public class SectionInstance
         Title = title;
         ChildSettings = settings ?? new List<Setting>();
     }
+    /// <summary>
+    /// Finds the first setting in ChildSettings by its name
+    /// </summary>
+    public Setting Find(string name)
+    {
+        foreach (var setting in ChildSettings)
+        {
+            if (setting.Name == name) return setting;
+        }
+        return null;
+    }
 }
 
 public class SectionSetting : Setting

@@ -65,9 +65,7 @@ public static class NEFData
         {
             CustomNames[Entry.Key] = Entry.Value;
         }
-        Magnetar_Client.NEF.Data.NEFBanned.InitBan();
-        Magnetar_Client.NEF.Data.NEFBanned.InitHidden();
-        Magnetar_Client.NEF.Data.NEFRecipes.InitRecipes();
+        
     }
 
     public static void SyncCustomizeLib()

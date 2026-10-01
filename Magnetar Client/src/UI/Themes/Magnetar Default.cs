@@ -933,7 +933,7 @@ public static class Magnetar_Default
 
     public static void Rescale()
     {
-        if (!Magnetar_Client.Core.main.Instance.hasWarmedUp || !IsInitialized) return;
+        if (!IsInitialized) return;
 
         float scale = Config.GUIScale;
         float elementScale = Config.ElementScale;

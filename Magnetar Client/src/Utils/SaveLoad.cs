@@ -690,7 +690,7 @@ public static class SaveLoad
         {
             Config.ShowMobileButtons = Preferences.ShowMobileButtonsEntry.Value;
         }
-#elif BEPINEX || RELEASE_BEPINEX
+#elif BEPINEX || RELEASE_BEPINEX || ANDROID
         try
         {
             string configDir = ProfileManager.ConfigDir;
@@ -730,5 +730,6 @@ public static class SaveLoad
             AutoSaveLogger.Error($"Failed to initialize BepInEx ConfigFile: {ex.Message}");
         }
 #endif
+        Api.Actions.SaveLoad.OnLateInitializePreferences?.Invoke();
     }
 }

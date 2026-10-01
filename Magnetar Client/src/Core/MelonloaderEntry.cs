@@ -12,7 +12,7 @@ public class MelonLoaderEntry : MelonMod
 {
     public override void OnInitializeMelon()
     {
-        Main.Initialize("com.tproplay.magnetar");
+        Main.Initialize();
     }
 
     public override void OnUpdate() => Main.Instance?.OnUpdate();

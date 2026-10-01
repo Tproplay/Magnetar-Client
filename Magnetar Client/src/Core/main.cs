@@ -4,6 +4,7 @@ using HarmonyLib;
 using UnityEngine;
 using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using System.Reflection;
 
 namespace Magnetar_Client.Core;
 
@@ -13,21 +14,60 @@ public class Main
     public static HarmonyLib.Harmony HarmonyInstance { get; private set; }
     public bool HasWarmedUp { get; private set; } = false;
 
-    public static void Initialize(string harmonyId)
+    public static void Initialize()
     {
-        if (Instance != null) return;
+        if (Instance != null)
+        {
+            DebugLogger.Error("[Core] Attempted to initialize Main multiple times! Aborting duplicate call.");
+            return;
+        }
         Instance = new Main();
 
-        Utils.Magnetar_Logger.Init();
-        HarmonyInstance = new(harmonyId);
+        Api.Actions.Core.OnEarlyInitialize?.Invoke();
 
-        Instance.SafePatchAll();
+        // Initialize the logger first so subsequent diagnostics are captured
+        Utils.Magnetar_Logger.Init();
+
+        DebugLogger.Msg($"[Core] Initializing Magnetar Client with Harmony ID: '{Magnetar_Info.HarmonyId}'...");
+
+        // Apply the harmony patches
+
+        Api.Actions.Core.OnPreApplyHarmonyPatches?.Invoke();
+
+        ApplyHarmonyPatches();
+
+        Api.Actions.Core.OnPostApplyHarmonyPatches?.Invoke();
+
+        // Initialize core systems and modules
+        DebugLogger.Msg("[Core] Proceeding to InitializeCore...");
         Instance.InitializeCore();
+    }
+
+    static void ApplyHarmonyPatches()
+    {
+        HarmonyInstance = new HarmonyLib.Harmony(Magnetar_Info.HarmonyId);
+
+        Assembly currentAssembly = typeof(Main).Assembly;
+
+        HarmonyPatchInfo patchInfo = HarmonyManager.HarmonyPatchAll(currentAssembly, HarmonyInstance);
+
+        DebugLogger.Msg($"[Harmony] Total classes checked: {patchInfo.TotalClassesEvaluated} | Succeeded: {patchInfo.SuccessCount} | Failed: {patchInfo.FailCount}");
+
+        // 3. Log detailed failure diagnostics and exceptions if any patch failed
+        if (patchInfo.HasFailures)
+        {
+            DebugLogger.Warning($"[Harmony] {patchInfo.FailCount} patch classes failed to apply:");
+            for (int i = 0; i < patchInfo.Failures.Count; i++)
+            {
+                var failure = patchInfo.Failures[i];
+                DebugLogger.Error($"[Harmony] -> Failure #{i + 1} on '{failure.ClassName}':\nException: {failure.Exception.GetType().Name} - {failure.Exception.Message}\nStack: {failure.Exception.StackTrace}");
+            }
+        }
     }
 
     public void InitializeCore()
     {
-        Api.Api.EarlyInitializeCore?.Invoke();
+        Api.Actions.Core.OnEarlyInitializeCore?.Invoke();
 
         SaveLoad.InitializePreferences();
         UI.Themes.Magnetar_Default.LoadThemesFromJson();
@@ -42,7 +82,7 @@ public class Main
         SaveLoad.Load();
         GUIManager.Init();
 
-        Api.Api.LateInitializeCore?.Invoke();
+        Api.Actions.Core.OnLateInitializeCore?.Invoke();
 
         DebugLogger.Msg("Magnetar Client Loaded!");
     }
@@ -212,44 +252,18 @@ public class Main
         UI.Themes.Magnetar_Default.Init();
 
         ModuleManager.Render();
+
+        Magnetar_Client.NEF.Data.NEFBanned.InitBan();
+        Magnetar_Client.NEF.Data.NEFBanned.InitHidden();
+        Magnetar_Client.NEF.Data.NEFRecipes.InitRecipes();
+
         NEFManager.Render();
         GUIManager.Render();
+
+
     }
 
-    public void SafePatchAll()
-    {
-        var assembly = typeof(Main).Assembly;
-        Type[] types;
-
-        try
-        {
-            types = assembly.GetTypes();
-        }
-        catch (System.Reflection.ReflectionTypeLoadException e)
-        {
-            types = e.Types.Where(t => t != null).ToArray();
-        }
-
-        int successCount = 0;
-        int failCount = 0;
-
-        foreach (var type in types)
-        {
-            if (type == null) continue;
-            try
-            {
-                var patchedMethods = HarmonyInstance.CreateClassProcessor(type).Patch();
-                if (patchedMethods != null && patchedMethods.Count > 0) successCount++;
-            }
-            catch (Exception ex)
-            {
-                DebugLogger.Error($"[Harmony] Failed to apply patch '{type.Name}'. Reason: {ex.Message}");
-                failCount++;
-            }
-        }
-
-        DebugLogger.Msg($"[Harmony] Successfully applied {successCount} patch classes! Failed patches: {failCount}");
-    }
+    
 
     [HarmonyPatch(typeof(Input), "GetKeyDown", new[] { typeof(KeyCode) })]
     public static class BlockSKeysPatch

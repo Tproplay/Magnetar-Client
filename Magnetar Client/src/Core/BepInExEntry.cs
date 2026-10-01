@@ -9,12 +9,12 @@ using Magnetar_Client.Core;
 
 namespace Magnetar_Client.Core;
 
-[BepInPlugin("com.tproplay.magnetar", Magnetar_Info.ModName, Magnetar_Info.Version)]
+[BepInPlugin(Magnetar_Info.HarmonyId, Magnetar_Info.ModName, Magnetar_Info.Version)]
 public class BepInExEntry : BasePlugin
 {
     public override void Load()
     {
-        Main.Initialize("com.tproplay.magnetar");
+        Main.Initialize();
 
         ClassInjector.RegisterTypeInIl2Cpp<MagnetarUnityHook>();
         AddComponent<MagnetarUnityHook>();

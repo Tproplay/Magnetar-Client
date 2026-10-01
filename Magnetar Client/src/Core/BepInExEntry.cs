@@ -14,9 +14,8 @@ public class BepInExEntry : BasePlugin
 {
     public override void Load()
     {
-        MainCore.Initialize("com.tproplay.magnetar");
+        Main.Initialize("com.tproplay.magnetar");
 
-        // Register and attach the MonoBehaviour driver to pump Update and OnGUI events
         ClassInjector.RegisterTypeInIl2Cpp<MagnetarUnityHook>();
         AddComponent<MagnetarUnityHook>();
     }
@@ -26,8 +25,8 @@ public class MagnetarUnityHook : MonoBehaviour
 {
     public MagnetarUnityHook(IntPtr ptr) : base(ptr) { }
 
-    private void Update() => MainCore.Instance?.OnUpdate();
-    private void OnGUI() => MainCore.Instance?.OnGUI();
-    private void OnApplicationQuit() => MainCore.Instance?.OnApplicationQuit();
+    private void Update() => Main.Instance?.OnUpdate();
+    private void OnGUI() => Main.Instance?.OnGUI();
+    private void OnApplicationQuit() => Main.Instance?.OnApplicationQuit();
 }
 #endif

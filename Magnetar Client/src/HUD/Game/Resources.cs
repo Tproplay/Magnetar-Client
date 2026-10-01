@@ -1,7 +1,7 @@
 ﻿using Magnetar_Client.Game;
 using UnityEngine;
 using static Magnetar_Client.Game.AppData;
-using static Magnetar_Client.UI.Themes.Magnetar_Default;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
 
 namespace Magnetar_Client.HUDElements;

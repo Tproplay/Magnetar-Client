@@ -44,7 +44,7 @@ public static class Config
             _theme = value;
 
             // Apply theme colors, rebuild textures, and bind styles
-            Magnetar_Client.UI.Themes.Magnetar_Default.ApplyTheme(_theme);
+            Magnetar_Client.UI.Themes.ThemeManager.ApplyTheme(_theme);
         }
     }
 

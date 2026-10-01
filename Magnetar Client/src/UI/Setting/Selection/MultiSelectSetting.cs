@@ -105,12 +105,12 @@ public class MultiSelectSetting : Setting
         float selectBtnW = Config.selectButtonWidth;
 
         string countText = '(' + Translator.Translate($"{SelectedValues.Count} selected") + ')';
-        float countTextW = Magnetar_Default.SettingLabelStyle.CalcSize(new GUIContent(countText)).x;
+        float countTextW = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(countText)).x;
 
         // Label fills the remaining space on the left
         float labelW = width - (indent * 2f) - selectBtnW - countTextW - (gap * 2f) - resetBtnW;
         Rect labelRect = new(indent, y, labelW, elemH);
-        GUI.Label(labelRect, Translator.Translate(Name), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(labelRect, Translator.Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Right-to-left layout: [Select Button] [gap] [Count Text] [gap] [Reset Button]
         float resetStartX = width - indent - resetBtnW;
@@ -133,11 +133,11 @@ public class MultiSelectSetting : Setting
             e.Use();
         }
 
-        GUI.Box(btnRect, Translator.Translate("Select"), Magnetar_Default.SettingOff);
+        GUI.Box(btnRect, Translator.Translate("Select"), ThemeManager.SettingOff);
 
         Color orig = GUI.contentColor;
-        GUI.contentColor = Magnetar_Default.TextDim;
-        GUI.Label(countRect, countText, Magnetar_Default.SettingLabelStyle);
+        GUI.contentColor = ThemeManager.TextDim;
+        GUI.Label(countRect, countText, ThemeManager.SettingLabelStyle);
         GUI.contentColor = orig;
 
         if (DrawResetButton(resetRect))

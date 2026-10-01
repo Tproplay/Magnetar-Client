@@ -3,7 +3,7 @@ using Magnetar_Client.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static Magnetar_Client.UI.Themes.Magnetar_Default;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Translator;
 using Magnetar_Client.UI.Setting;
 
@@ -30,11 +30,11 @@ public static class DrawSetting
                 {
                     wordWrap = false,
                     clipping = TextClipping.Clip,
-                    alignment = Magnetar_Default.TextStyle.alignment
+                    alignment = ThemeManager.TextStyle.alignment
                 };
             }
-            _placeholderStyle.fontSize = Magnetar_Default.TextStyle.fontSize;
-            _placeholderStyle.normal.textColor = Magnetar_Default.TextDim;
+            _placeholderStyle.fontSize = ThemeManager.TextStyle.fontSize;
+            _placeholderStyle.normal.textColor = ThemeManager.TextDim;
             return _placeholderStyle;
         }
     }
@@ -59,7 +59,7 @@ public static class DrawSetting
         Rect labelRect = new(Config.indent, y, labelW, elemH);
         Rect inputRect = new(width - Config.indent - controlW, y, controlW, elemH);
 
-        GUI.Label(labelRect, translatedName, Magnetar_Default.SettingLabelStyle);
+        GUI.Label(labelRect, translatedName, ThemeManager.SettingLabelStyle);
         strSet.Value = DrawManualTextField(inputRect, strSet.Value, "", strSet.AutocompleteVars);
     }
 
@@ -102,7 +102,7 @@ public static class DrawSetting
         string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
 
         string translatedName = Magnetar_Client.Utils.Translator.Translate(name);
-        GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
         float LogConvert(float v) => Mathf.Sign(v) * Mathf.Log10(Mathf.Abs(v) + 1.0f);
         float ExpConvert(float l) => Mathf.Sign(l) * (Mathf.Pow(10.0f, Mathf.Abs(l)) - 1.0f);
@@ -131,14 +131,14 @@ public static class DrawSetting
         Rect thumbRect = new(thumbX, thumbY, thumbSize, thumbSize);
 
         // Draw Track
-        GUI.Box(sliderRect, "", Magnetar_Default.SliderTrackOffStyle);
+        GUI.Box(sliderRect, "", ThemeManager.SliderTrackOffStyle);
         if (fillWidth > 0f)
         {
-            GUI.Box(new Rect(sliderRect.x, sliderRect.y, fillWidth, sliderRect.height), "", Magnetar_Default.SliderTrackOnStyle);
+            GUI.Box(new Rect(sliderRect.x, sliderRect.y, fillWidth, sliderRect.height), "", ThemeManager.SliderTrackOnStyle);
         }
 
         // Draw Circular Thumb using dedicated circular style (no text)
-        GUI.Box(thumbRect, "", Magnetar_Default.SliderThumbStyle);
+        GUI.Box(thumbRect, "", ThemeManager.SliderThumbStyle);
 
         Event e = Event.current;
 
@@ -236,14 +236,14 @@ public static class DrawSetting
         float labelWidth = Mathf.Max(width * 0.45f, width - Config.indent * 2 - Config.SettingWidth);
 
         GUI.Label(new Rect(Config.indent, y, labelWidth, Config.elementHeight),
-            translatedName, Magnetar_Default.SettingLabelStyle);
+            translatedName, ThemeManager.SettingLabelStyle);
 
         string bindText = bSet.IsBinding ? "[...]" : bSet.GetBindString();
         Rect bindRect = new(width - Config.indent - Config.SettingWidth, y,
             Config.SettingWidth, Config.elementHeight);
         bool bindHover = bindRect.Contains(e.mousePosition);
 
-        GUI.Box(bindRect, bindText, bSet.IsBinding ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+        GUI.Box(bindRect, bindText, bSet.IsBinding ? ThemeManager.SettingOn : ThemeManager.SettingOff);
 
         if (bindHover && isLeftClick)
         {
@@ -295,13 +295,13 @@ public static class DrawSetting
         float labelWidth = Mathf.Max(width * 0.45f, width - Config.indent * 2 - Config.SettingWidth);
 
         GUI.Label(new Rect(Config.indent, y, labelWidth, Config.elementHeight),
-            translatedName, Magnetar_Default.SettingLabelStyle);
+            translatedName, ThemeManager.SettingLabelStyle);
 
         Rect btnRect = new(width - Config.indent - Config.SettingWidth, y,
             Config.SettingWidth, Config.elementHeight);
 
         GUI.Box(btnRect, boolSet.Value ? Translator.Translate("ON") : Translator.Translate("OFF"),
-            boolSet.Value ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+            boolSet.Value ? ThemeManager.SettingOn : ThemeManager.SettingOff);
 
         if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
@@ -364,7 +364,7 @@ public static class DrawSetting
         float titleHeight = Config.S(25f);
 #endif
         Rect headerBgRect = new(0, 0, multiSelectWindowRect.width, titleHeight);
-        GUI.Box(headerBgRect, Translate("Select ") + Translate(activeMultiSelect.Name), Magnetar_Default.SettingsWndowStyle);
+        GUI.Box(headerBgRect, Translate("Select ") + Translate(activeMultiSelect.Name), ThemeManager.SettingsWndowStyle);
 
         if (Config.ShowMobileButtons)
         {
@@ -392,7 +392,7 @@ public static class DrawSetting
                 return;
             }
 
-            GUI.Box(closeButtonRect, "✕", Magnetar_Default.CloseButtonStyle);
+            GUI.Box(closeButtonRect, "✕", ThemeManager.CloseButtonStyle);
         }
 
         // --- 2. HEADER: SEARCH & TOGGLE ALL ---
@@ -460,7 +460,7 @@ public static class DrawSetting
 
         if (GUI.Button(toggleRect,
             allSelected ? Translator.Translate("Deselect All") : Translator.Translate("Select All"),
-            !allSelected ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff))
+            !allSelected ? ThemeManager.SettingOn : ThemeManager.SettingOff))
         {
             foreach (var item in filteredItems)
             {
@@ -830,16 +830,16 @@ public static class DrawSetting
                 Rect rowRect = new(0, drawY, listWidth, ROW_HEIGHT);
 
                 bool isSelected = activeMultiSelect.IsSelected(item.Key);
-                GUI.Box(rowRect, item.DisplayName, isSelected ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+                GUI.Box(rowRect, item.DisplayName, isSelected ? ThemeManager.SettingOn : ThemeManager.SettingOff);
             }
         }
         GUI.EndGroup();
 
         // --- 7. SCROLLBAR VISUALS ---
-        GUI.Box(new Rect(scrollX + (scrollbarWidth / 2f) - 1f, trackStartY, 2, trackHeight), "", Magnetar_Default.SeparatorStyle);
+        GUI.Box(new Rect(scrollX + (scrollbarWidth / 2f) - 1f, trackStartY, 2, trackHeight), "", ThemeManager.SeparatorStyle);
 
         bool shouldHighlight = (activeSliderId == sliderId) || (Time.time - lastSliderUpdateTime < 1.0f);
-        GUI.Box(handleRect, "", shouldHighlight ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+        GUI.Box(handleRect, "", shouldHighlight ? ThemeManager.SettingOn : ThemeManager.SettingOff);
     }
 
     private static void ToggleWithLimit(dynamic activeMultiSelect, int val)
@@ -866,7 +866,7 @@ public static class DrawSetting
         int controlId = selSet.GetHashCode();
 
         string translatedName = Translator.Translate(selSet.Name);
-        GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
         string currentValName = "Unknown";
         if (selSet.Options.ContainsKey(selSet.Value))
@@ -897,7 +897,7 @@ public static class DrawSetting
         }
 
         string arrow = (activeDropdownId == controlId) ? " ▲" : " ▼";
-        GUI.Box(btnRect, currentValName + arrow, Magnetar_Default.SettingOff);
+        GUI.Box(btnRect, currentValName + arrow, ThemeManager.SettingOff);
 
         if (activeDropdownId == controlId)
         {
@@ -943,7 +943,7 @@ public static class DrawSetting
 
             OnPostDraw += () =>
             {
-                GUI.Box(dropRect, "", Magnetar_Default.SettingOff);
+                GUI.Box(dropRect, "", ThemeManager.SettingOff);
                 GUI.BeginGroup(dropRect);
 
                 int i = 0;
@@ -962,7 +962,7 @@ public static class DrawSetting
                         }
 
                         bool isSelected = (selSet.Value == kvp.Key);
-                        GUIStyle style = isSelected ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff;
+                        GUIStyle style = isSelected ? ThemeManager.SettingOn : ThemeManager.SettingOff;
 
                         GUI.Box(rowRect, displayName, style);
                     }
@@ -977,7 +977,7 @@ public static class DrawSetting
                     float handleHeight = Mathf.Max(10f, dropHeight * (dropHeight / (itemCount * rowHeight)));
                     float handleY = dropRect.y + (scrollPct * (dropHeight - handleHeight));
 
-                    GUI.Box(new Rect(dropRect.x + dropRect.width - 4, handleY, 4, handleHeight), "", Magnetar_Default.SettingOn);
+                    GUI.Box(new Rect(dropRect.x + dropRect.width - 4, handleY, 4, handleHeight), "", ThemeManager.SettingOn);
                 }
             };
         }
@@ -1336,7 +1336,7 @@ public static class DrawSetting
         else scrollOffset = 0f;
 
         #region Input Text Field
-        GUI.Box(rect, "", Magnetar_Default.SettingOff);
+        GUI.Box(rect, "", ThemeManager.SettingOff);
         GUI.BeginGroup(rect);
 
         if (string.IsNullOrEmpty(text) && activeTextFieldId != controlId)
@@ -1353,7 +1353,7 @@ public static class DrawSetting
                 float endX = TextStyle.CalcSize(new GUIContent(text.Substring(0, selEnd))).x;
 
                 Rect selRect = new(5 + startX - scrollOffset, 2, endX - startX, rect.height - 4);
-                GUI.Box(selRect, "", Magnetar_Default.TextHighlightedStyle);
+                GUI.Box(selRect, "", ThemeManager.TextHighlightedStyle);
             }
 
             GUI.Label(new Rect(5 - scrollOffset, 0, 2000, rect.height), text, TextStyle);
@@ -1362,7 +1362,7 @@ public static class DrawSetting
             {
                 float cursorPixelX = TextStyle.CalcSize(new GUIContent(text.Substring(0, cursorIndex))).x;
                 Rect cursorRect = new(5 + cursorPixelX - scrollOffset, 3, 1, rect.height - 6);
-                GUI.Box(cursorRect, "", Magnetar_Default.SettingOn);
+                GUI.Box(cursorRect, "", ThemeManager.SettingOn);
             }
         }
         GUI.EndGroup();
@@ -1432,7 +1432,7 @@ public static class DrawSetting
 
             OnPostDraw = () =>
             {
-                GUI.Box(dropRect, "", Magnetar_Default.SettingOff);
+                GUI.Box(dropRect, "", ThemeManager.SettingOff);
                 GUI.BeginGroup(dropRect);
                 for (int i = 0; i < filteredVars.Count; i++)
                 {
@@ -1440,7 +1440,7 @@ public static class DrawSetting
                     if (drawY + rowHeight > 0 && drawY < dropHeight)
                     {
                         Rect rowRect = new(0, drawY, dropRect.width, rowHeight);
-                        GUIStyle rowStyle = (i == _autocompleteSelectedIndex) ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff;
+                        GUIStyle rowStyle = (i == _autocompleteSelectedIndex) ? ThemeManager.SettingOn : ThemeManager.SettingOff;
                         GUI.Box(rowRect, "{" + filteredVars[i] + "}", rowStyle);
                     }
                 }
@@ -1456,12 +1456,12 @@ public static class DrawSetting
     {
         Event e = Event.current;
         string translatedName = Translator.Translate(btnSet.Name);
-        GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
         Rect btnRect = new(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
         bool isHovered = btnRect.Contains(e.mousePosition);
 
-        GUI.Box(btnRect, Translator.Translate(btnSet.ButtonText), Magnetar_Default.SettingOff);
+        GUI.Box(btnRect, Translator.Translate(btnSet.ButtonText), ThemeManager.SettingOff);
 
         if (isHovered && e.type == EventType.MouseDown && e.button == 0)
         {
@@ -1480,13 +1480,13 @@ public static class DrawSetting
         string displayText = Translator.Translate(lblSet.Name);
 
         float labelWidth = width - (Config.indent * 2f);
-        float calculatedHeight = Magnetar_Default.SettingsDescriptionStyle.CalcHeight(
+        float calculatedHeight = ThemeManager.SettingsDescriptionStyle.CalcHeight(
             new GUIContent(displayText),
             labelWidth
         );
 
         Rect labelRect = new(Config.indent, y, labelWidth, calculatedHeight);
-        GUI.Label(labelRect, displayText, Magnetar_Default.SettingsDescriptionStyle);
+        GUI.Label(labelRect, displayText, ThemeManager.SettingsDescriptionStyle);
 
         y += calculatedHeight + Config.spacing;
     }

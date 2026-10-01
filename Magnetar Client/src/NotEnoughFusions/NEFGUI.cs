@@ -89,7 +89,7 @@ public static class NEFGUI
         float rightPanelWidth = NEFManager.windowRect.width * 0.3f;
 
         // Dynamic top indent scaled with GUI font size to prevent overlapping the title bar
-        float titleFontSize = Magnetar_Default.CategoryWindowStyle != null ? Magnetar_Default.CategoryWindowStyle.fontSize : Config.S(18f);
+        float titleFontSize = ThemeManager.CategoryWindowStyle != null ? ThemeManager.CategoryWindowStyle.fontSize : Config.S(18f);
         float topIndent = Mathf.Max(Config.S(48f), titleFontSize + Config.S(18f));
 
         float pad = Config.S(10f);
@@ -102,7 +102,7 @@ public static class NEFGUI
         // ==========================================
         // 1. LEFT PANEL: VISUALIZER
         // ==========================================
-        GUI.Box(pyramidBoxRect, "", Magnetar_Default.CategoryWindowStyle);
+        GUI.Box(pyramidBoxRect, "", ThemeManager.CategoryWindowStyle);
 
         if (showUsagesView)
         {
@@ -246,7 +246,7 @@ public static class NEFGUI
         float ry = rightPanelRect.y;
 
         string searchLabelText = Translator.Translate("Search:");
-        GUIStyle labelStyle = Magnetar_Default.SettingLabelStyle ?? GUI.skin.label;
+        GUIStyle labelStyle = ThemeManager.SettingLabelStyle ?? GUI.skin.label;
         float searchLabelWidth = labelStyle.CalcSize(new GUIContent(searchLabelText)).x + Config.S(8f);
 
         GUI.Label(new Rect(rx, ry, searchLabelWidth, NEFManager.elementHeight), searchLabelText, labelStyle);
@@ -266,7 +266,7 @@ public static class NEFGUI
         Rect clearBtnRect = new(rx, ry, rightPanelWidth, NEFManager.elementHeight);
         bool clearHover = clearBtnRect.Contains(e.mousePosition);
 
-        GUI.Box(clearBtnRect, Translator.Translate("Clear Search"), Magnetar_Default.CategoryModuleOffStyle);
+        GUI.Box(clearBtnRect, Translator.Translate("Clear Search"), ThemeManager.CategoryModuleOffStyle);
         GUI.backgroundColor = Color.white;
 
         if (clearHover && e.type == EventType.MouseDown && e.button == 0)
@@ -423,7 +423,7 @@ public static class NEFGUI
             e.Use();
         }
 
-        GUI.Box(backBtnRect, Translator.Translate("Back to Tree"), Magnetar_Default.CategoryModuleOffStyle);
+        GUI.Box(backBtnRect, Translator.Translate("Back to Tree"), ThemeManager.CategoryModuleOffStyle);
         GUI.backgroundColor = Color.white;
 
         if (NEFData.currentUsages.Count == 0)
@@ -624,9 +624,9 @@ public static class NEFGUI
 
     private static void DrawSquareNodeBox(Rect rect, RecipeEntity entity, float scale)
     {
-        Magnetar_Default.NEFNodeStyle.fontSize = Mathf.Max(1, (int)(Config.S(8f) * scale));
+        ThemeManager.NEFNodeStyle.fontSize = Mathf.Max(1, (int)(Config.S(8f) * scale));
         string displayName = NEFData.GetEntityName(entity);
-        GUI.Box(rect, displayName, Magnetar_Default.NEFNodeStyle);
+        GUI.Box(rect, displayName, ThemeManager.NEFNodeStyle);
 
         GUIStyle imgStyle = GetEntityStyle(entity);
 

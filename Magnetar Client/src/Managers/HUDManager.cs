@@ -103,12 +103,12 @@ public static class HUDManager
 
             if (Config.dimBg && (Config.showgui || forceShow))
             {
-                if (e.type == EventType.Repaint && Magnetar_Default.DimBackgroundStyle != null)
+                if (e.type == EventType.Repaint && ThemeManager.DimBackgroundStyle != null)
                 {
                     Matrix4x4 prevMatrix = GUI.matrix;
                     GUI.matrix = Matrix4x4.identity;
 
-                    GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "", Magnetar_Default.DimBackgroundStyle);
+                    GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "", ThemeManager.DimBackgroundStyle);
 
                     GUI.matrix = prevMatrix;
                 }
@@ -141,7 +141,7 @@ public static class HUDManager
                 DrawExitLayoutButton();
             }
 
-            GUIStyle windowBgStyle = Magnetar_Default.SettingsWndowBgStyle ?? Magnetar_Default.SettingsWndowStyle;
+            GUIStyle windowBgStyle = ThemeManager.SettingsWndowBgStyle ?? ThemeManager.SettingsWndowStyle;
 
             if (Config.CurrentTab == TabType.HUD && !forceShow && Config.showgui)
             {
@@ -186,7 +186,7 @@ public static class HUDManager
 
             bool isHovered = exitRect.Contains(e.mousePosition);
 
-            GUI.Box(exitRect, Translator.Translate("Exit Layout"), Magnetar_Default.SettingOn);
+            GUI.Box(exitRect, Translator.Translate("Exit Layout"), ThemeManager.SettingOn);
 
             if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
             {
@@ -225,12 +225,12 @@ public static class HUDManager
         float y = Config.S(35f);
 
         Rect headerBgRect = new(0, 0, width, y - indent);
-        GUI.Box(headerBgRect, Translator.Translate("Customize HUD"), Magnetar_Default.SettingsWndowStyle);
+        GUI.Box(headerBgRect, Translator.Translate("Customize HUD"), ThemeManager.SettingsWndowStyle);
 
         int activeCount = HUDRenderer.HudToggles != null ? HUDRenderer.HudToggles.SelectedValues.Count : 0;
         GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight),
             Translator.Translate("Elements") + $" ({activeCount})",
-            Magnetar_Default.SettingLabelStyle);
+            ThemeManager.SettingLabelStyle);
 
         Rect selectBtnRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
 
@@ -254,12 +254,12 @@ public static class HUDManager
             isSelectingElements = true;
         }
 
-        GUI.Box(selectBtnRect, Translator.Translate("Select"), Magnetar_Default.SettingOff);
+        GUI.Box(selectBtnRect, Translator.Translate("Select"), ThemeManager.SettingOff);
 
         y += elementHeight + Config.S(5f);
 
         GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Layout"),
-            Magnetar_Default.SettingLabelStyle);
+            ThemeManager.SettingLabelStyle);
 
         Rect configBtnRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
 
@@ -271,17 +271,17 @@ public static class HUDManager
             DebugLogger.Msg("Escape Triggered : Hud Window -> Edit Layout");
         }
 
-        GUI.Box(configBtnRect, Translator.Translate("Edit"), Magnetar_Default.SettingOff);
+        GUI.Box(configBtnRect, Translator.Translate("Edit"), ThemeManager.SettingOff);
 
         y += elementHeight + Config.S(5f);
 
         GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Background"),
-            Magnetar_Default.SettingLabelStyle);
+            ThemeManager.SettingLabelStyle);
         Rect bgRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
         bool bgHover = bgRect.Contains(e.mousePosition);
 
         GUI.Box(bgRect, showBackground ? Translator.Translate("ON") : Translator.Translate("OFF"),
-            showBackground ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+            showBackground ? ThemeManager.SettingOn : ThemeManager.SettingOff);
 
         if (bgHover && e.type == EventType.MouseDown && e.button == 0)
         {
@@ -292,12 +292,12 @@ public static class HUDManager
         y += elementHeight + Config.S(5f);
 
         GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Enabled"),
-            Magnetar_Default.SettingLabelStyle);
+            ThemeManager.SettingLabelStyle);
         Rect enabledRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
         bool enabledHover = enabledRect.Contains(e.mousePosition);
 
         GUI.Box(enabledRect, Enabled ? Translator.Translate("ON") : Translator.Translate("OFF"),
-            Enabled ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+            Enabled ? ThemeManager.SettingOn : ThemeManager.SettingOff);
 
         if (enabledHover && e.type == EventType.MouseDown && e.button == 0)
         {

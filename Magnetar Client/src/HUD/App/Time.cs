@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using static Magnetar_Client.UI.Themes.Magnetar_Default;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 using UnityEngine;
 
 namespace Magnetar_Client.HUDElements;

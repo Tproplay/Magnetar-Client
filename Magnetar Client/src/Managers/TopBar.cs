@@ -102,8 +102,8 @@ public static class TopBar
             }
 
             GUIStyle btnStyle = (Config.CurrentTab == tab)
-                ? Magnetar_Default.TopBarActiveStyle
-                : Magnetar_Default.TopBarStyle;
+                ? ThemeManager.TopBarActiveStyle
+                : ThemeManager.TopBarStyle;
 
             if (GUI.Button(btnRect, name, btnStyle))
             {

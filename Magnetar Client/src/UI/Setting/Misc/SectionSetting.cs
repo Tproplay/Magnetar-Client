@@ -122,7 +122,7 @@ public class SectionSetting : Setting
         // 1. Group Header
         string title = $"{Translator.Translate(Name)} ({Sections.Count})";
         Rect titleRect = new(indent, y, width - (indent * 2f), elemH);
-        GUI.Box(titleRect, title, Magnetar_Default.SectionGroupHeaderStyle);
+        GUI.Box(titleRect, title, ThemeManager.SectionGroupHeaderStyle);
         y += elemH + gap;
 
         int removeIdx = -1;
@@ -145,13 +145,13 @@ public class SectionSetting : Setting
             string secLabel = foldArrow + Translator.Translate(section.Title);
 
             // Sub-header bar
-            if (GUI.Button(secHeaderRect, secLabel, Magnetar_Default.SectionHeaderStyle))
+            if (GUI.Button(secHeaderRect, secLabel, ThemeManager.SectionHeaderStyle))
             {
                 section.IsExpanded = !section.IsExpanded;
             }
 
             // Remove button
-            GUI.Box(delRect, "—", Magnetar_Default.SectionRemoveButtonStyle);
+            GUI.Box(delRect, "—", ThemeManager.SectionRemoveButtonStyle);
             if (delRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
             {
                 removeIdx = i;
@@ -185,7 +185,7 @@ public class SectionSetting : Setting
         Rect addBtnRect = new(indent, y, addBtnW, elemH);
         Rect resetRect = new(resetStartX, y, actionBtnW, elemH);
 
-        GUIStyle addStyle = canAdd ? Magnetar_Default.SectionAddButtonStyle : Magnetar_Default.CategoryModuleOffStyle;
+        GUIStyle addStyle = canAdd ? ThemeManager.SectionAddButtonStyle : ThemeManager.CategoryModuleOffStyle;
         if (GUI.Button(addBtnRect, canAdd ? Translator.Translate("+ Add Section") : Translator.Translate("Max Sections Reached"), addStyle))
         {
             if (canAdd) AddSection();

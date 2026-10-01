@@ -301,7 +301,7 @@ public class ThemeData
 
 #endregion
 
-public static class Magnetar_Default
+public static class ThemeManager
 {
     public static bool IsInitialized { get; private set; } = false;
 
@@ -513,7 +513,7 @@ public static class Magnetar_Default
 
     public static void Init()
     {
-        LoadThemesFromJson();
+        LoadThemes();
         BuildEmptyStyles();
 
         IsInitialized = true;
@@ -533,9 +533,8 @@ public static class Magnetar_Default
         GUILogger.Msg($"[Themes] Initialized with theme: '{CurrentThemeName}'");
     }
 
-    public static void LoadThemesFromJson()
+    public static void LoadThemes()
     {
-        LoadedThemes.Clear();
         LoadedThemes[InternalDefaultTheme.Name] = InternalDefaultTheme;
 
         string dataDir = Path.Combine(SaveLoad.ModsDir, "Magnetar Data");
@@ -669,6 +668,7 @@ public static class Magnetar_Default
                     if (!string.IsNullOrEmpty(th.Name))
                     {
                         LoadedThemes[th.Name] = th;
+                        GUILogger.Msg($"[Themes] Loaded theme: {th.Name}");
                     }
                 }
             }

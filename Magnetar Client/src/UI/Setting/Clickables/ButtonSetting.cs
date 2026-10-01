@@ -28,13 +28,13 @@ public class ButtonSetting : Setting
         // Label
         float labelW = width - indent * 2 - Config.SettingWidth;
         Rect labelRect = new(indent, y, labelW, Config.elementHeight);
-        GUI.Label(labelRect, Translator.Translate(Name), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(labelRect, Translator.Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Button
         float btnW = Config.SettingWidth;
         float btnStartX = width - indent - btnW - gap - Config.SettingsInput.ResetButtonW;
         Rect btnRect = new(btnStartX, y, Config.SettingWidth, Config.elementHeight);
-        GUI.Box(btnRect, Translator.Translate(ButtonText), Magnetar_Default.ButtonSettingStyle);
+        GUI.Box(btnRect, Translator.Translate(ButtonText), ThemeManager.ButtonSettingStyle);
 
         if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {

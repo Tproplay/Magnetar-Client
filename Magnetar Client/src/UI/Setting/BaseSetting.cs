@@ -17,6 +17,6 @@ public abstract class Setting
 
     public static bool DrawResetButton(Rect rect)
     {
-        return GUI.Button(rect, ResetSymbol, Magnetar_Default.ResetButtonStyle);
+        return GUI.Button(rect, ResetSymbol, ThemeManager.ResetButtonStyle);
     }
 }

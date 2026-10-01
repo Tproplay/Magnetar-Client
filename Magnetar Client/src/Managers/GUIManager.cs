@@ -133,9 +133,9 @@ public static class GUIManager
     {
         if (ThemeSetting == null) return;
 
-        if (Magnetar_Default.LoadedThemes == null || Magnetar_Default.LoadedThemes.Count == 0)
+        if (ThemeManager.LoadedThemes == null || ThemeManager.LoadedThemes.Count == 0)
         {
-            Magnetar_Default.LoadThemesFromJson();
+            ThemeManager.LoadThemes();
         }
 
         ThemeSetting.Options.Clear();
@@ -144,7 +144,7 @@ public static class GUIManager
         int tIdx = 0;
         int activeThemeIdx = 0;
 
-        foreach (var kvp in Magnetar_Default.LoadedThemes)
+        foreach (var kvp in ThemeManager.LoadedThemes)
         {
             ThemeSetting.AddOption(tIdx, kvp.Key);
             if (string.Equals(Config.Theme, kvp.Key, StringComparison.OrdinalIgnoreCase))
@@ -156,7 +156,7 @@ public static class GUIManager
 
         if (ThemeSetting.Options.Count == 0)
         {
-            ThemeSetting.AddOption(0, Magnetar_Default.InternalDefaultTheme.Name);
+            ThemeSetting.AddOption(0, ThemeManager.InternalDefaultTheme.Name);
             activeThemeIdx = 0;
         }
 
@@ -165,7 +165,7 @@ public static class GUIManager
 
     public static void Render()
     {
-        Magnetar_Default.Rescale();
+        ThemeManager.Rescale();
 
         Event e = Event.current;
 
@@ -183,7 +183,7 @@ public static class GUIManager
         float targetSelectorHeight = Mathf.Min(Config.S(BaseSelectorHeight), maxSelectorHeight);
         Config.RescaleAroundCenter(ref selectorRect, targetSelectorWidth, targetSelectorHeight);
 
-        GUIStyle windowBgStyle = Magnetar_Default.SettingsWndowBgStyle ?? Magnetar_Default.SettingsWndowStyle;
+        GUIStyle windowBgStyle = ThemeManager.SettingsWndowBgStyle ?? ThemeManager.SettingsWndowStyle;
 
         if (isSelectingSubWindow)
         {
@@ -236,7 +236,7 @@ public static class GUIManager
         float y = Config.S(35f);
 
         Rect headerBgRect = new(0, 0, w, y - indent);
-        GUI.Box(headerBgRect, Translator.Translate("GUI Configuration"), Magnetar_Default.SettingsWndowStyle);
+        GUI.Box(headerBgRect, Translator.Translate("GUI Configuration"), ThemeManager.SettingsWndowStyle);
 
         // --- 1. Language Row ---
         string currentLangName = "English";
@@ -251,7 +251,7 @@ public static class GUIManager
 
         GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight),
             $"Language: <color=yellow>{Config.Language}</color>",
-            Magnetar_Default.SettingLabelStyle);
+            ThemeManager.SettingLabelStyle);
 
         Rect langBtnRect = new(w * 0.5f, y, w * 0.45f, elementHeight);
 
@@ -260,11 +260,11 @@ public static class GUIManager
             e.Use();
             OpenSubSelector(LanguageSetting);
         }
-        GUI.Box(langBtnRect, Translator.Translate("Change"), Magnetar_Default.SettingOff);
+        GUI.Box(langBtnRect, Translator.Translate("Change"), ThemeManager.SettingOff);
         y += elementHeight + Config.S(10f);
 
         // --- 2. Theme Row ---
-        string currentTheme = Magnetar_Default.CurrentThemeName;
+        string currentTheme = ThemeManager.CurrentThemeName;
         if (ThemeSetting?.SelectedValues != null && ThemeSetting.SelectedValues.Count > 0)
         {
             int selThemeId = ThemeSetting.SelectedValues.First();
@@ -278,7 +278,7 @@ public static class GUIManager
 
         GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight),
             $"Theme: <color=yellow>{Config.Theme}</color>",
-            Magnetar_Default.SettingLabelStyle);
+            ThemeManager.SettingLabelStyle);
 
         Rect themeBtnRect = new(w * 0.5f, y, w * 0.45f, elementHeight);
 
@@ -289,7 +289,7 @@ public static class GUIManager
             OpenSubSelector(ThemeSetting);
         }
 
-        GUI.Box(themeBtnRect, Translator.Translate("Change"), Magnetar_Default.SettingOff);
+        GUI.Box(themeBtnRect, Translator.Translate("Change"), ThemeManager.SettingOff);
         y += elementHeight + Config.S(10f);
 
         // --- 3. GUI Scale Row ---
@@ -317,12 +317,12 @@ public static class GUIManager
         }
 
         // --- 5. Floating Icon Toggle Row ---
-        GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Floating Icon"), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Floating Icon"), ThemeManager.SettingLabelStyle);
         Rect floatIconRect = new(w * 0.5f, y, w * 0.45f, elementHeight);
 
         GUI.Box(floatIconRect,
             Config.ShowFloatingIcon ? Translator.Translate("ON") : Translator.Translate("OFF"),
-            Config.ShowFloatingIcon ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+            Config.ShowFloatingIcon ? ThemeManager.SettingOn : ThemeManager.SettingOff);
 
         if (floatIconRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
@@ -332,12 +332,12 @@ public static class GUIManager
         y += elementHeight + Config.S(10f);
 
         // --- 6. Mobile Buttons Toggle Row ---
-        GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Mobile Close Buttons"), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Mobile Close Buttons"), ThemeManager.SettingLabelStyle);
         Rect mobileBtnRect = new(w * 0.5f, y, w * 0.45f, elementHeight);
 
         GUI.Box(mobileBtnRect,
             Config.ShowMobileButtons ? Translator.Translate("ON") : Translator.Translate("OFF"),
-            Config.ShowMobileButtons ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+            Config.ShowMobileButtons ? ThemeManager.SettingOn : ThemeManager.SettingOff);
 
         if (mobileBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
@@ -347,12 +347,12 @@ public static class GUIManager
         y += elementHeight + Config.S(10f);
 
         // --- 7. Show Main Menu Credits ---
-        GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Show Main Menu Credits"), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Show Main Menu Credits"), ThemeManager.SettingLabelStyle);
         Rect showMainMenuCredits = new(w * 0.5f, y, w * 0.45f, elementHeight);
 
         GUI.Box(showMainMenuCredits,
             Config.ShowMainMenuCredits ? Translator.Translate("ON") : Translator.Translate("OFF"),
-            Config.ShowMainMenuCredits ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+            Config.ShowMainMenuCredits ? ThemeManager.SettingOn : ThemeManager.SettingOff);
 
         if (showMainMenuCredits.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {

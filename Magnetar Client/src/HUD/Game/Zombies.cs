@@ -1,4 +1,4 @@
-﻿using static Magnetar_Client.UI.Themes.Magnetar_Default;
+﻿using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
 using UnityEngine;

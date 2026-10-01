@@ -1,70 +1,180 @@
-﻿using Magnetar_Client.Utils;
-using Magnetar_Client.UI.Setting;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Magnetar_Client.Core;
+using Magnetar_Client.UI.Setting;
+using Magnetar_Client.Utils;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
 
 namespace Magnetar_Client.Modules;
 
-public enum ModuleCategory
+public class ModuleCategory : IEquatable<ModuleCategory>
 {
-    Level,
-    Tools,
-    Plant,
-    Zombie,
-    Misc,
-    Visual,
-    Addon
-}
+    private static int _nextId = 0;
+    private static readonly Dictionary<string, ModuleCategory> _registeredCategories = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly List<ModuleCategory> _allCategories = new();
 
+    public static IReadOnlyList<ModuleCategory> AllCategories => _allCategories;
+
+
+    // built-in categories
+    public static readonly ModuleCategory Level = RegisterInternal("Level");
+    public static readonly ModuleCategory Tools = RegisterInternal("Tools");
+    public static readonly ModuleCategory Plant = RegisterInternal("Plant");
+    public static readonly ModuleCategory Zombie = RegisterInternal("Zombie");
+    public static readonly ModuleCategory Misc = RegisterInternal("Misc");
+    public static readonly ModuleCategory Visual = RegisterInternal("Visual");
+
+    // Instance variables
+    public int Id { get; }
+    public string Name { get; }
+    public bool IsCustom { get; }
+
+    private ModuleCategory(string name, int id, bool isCustom)
+    {
+        Name = name;
+        Id = id;
+        IsCustom = isCustom;
+    }
+
+    private static ModuleCategory RegisterInternal(string name)
+    {
+        if (_registeredCategories.TryGetValue(name, out var existing)) return existing;
+        var cat = new ModuleCategory(name, _nextId++, false);
+        _registeredCategories[name] = cat;
+        _allCategories.Add(cat);
+        return cat;
+    }
+
+    /// <summary>
+    /// Registers a new category or returns an existing one if already registered.
+    /// </summary>
+    public static ModuleCategory Register(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Category name cannot be null or empty.", nameof(name));
+
+        string cleanName = name.Trim();
+        if (_registeredCategories.TryGetValue(cleanName, out var existing))
+            return existing;
+
+        var cat = new ModuleCategory(cleanName, _nextId++, true);
+        _registeredCategories[cleanName] = cat;
+        _allCategories.Add(cat);
+
+        CategoryWindowDrawer.EnsureCategoryInitialized(cat);
+        return cat;
+    }
+
+    public static ModuleCategory Get(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return null;
+        _registeredCategories.TryGetValue(name.Trim(), out var cat);
+        return cat;
+    }
+
+    public static ModuleCategory GetOrCreate(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return Misc;
+        return Get(name) ?? Register(name);
+    }
+
+    public static bool TryGet(string name, out ModuleCategory category)
+    {
+        category = Get(name);
+        return category != null;
+    }
+
+    // --- Query Methods ---
+
+    /// <summary>
+    /// Returns all registered modules belonging to this category.
+    /// </summary>
+    public List<Module> GetAllModules()
+    {
+        return ModuleManager.Modules.Where(m => m.Category == this).ToList();
+    }
+
+    /// <summary>
+    /// Finds the first module in this category matching the given module name.
+    /// </summary>
+    public Module Find(string moduleName)
+    {
+        if (string.IsNullOrEmpty(moduleName)) return null;
+        return ModuleManager.Modules.FirstOrDefault(m =>
+            m.Category == this && string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Finds the first module in this category matching a predicate.
+    /// </summary>
+    public Module Find(Predicate<Module> match)
+    {
+        if (match == null) return null;
+        return ModuleManager.Modules.FirstOrDefault(m => m.Category == this && match(m));
+    }
+
+    /// <summary>
+    /// Finds all modules in this category matching a predicate.
+    /// </summary>
+    public List<Module> FindAll(Predicate<Module> match)
+    {
+        if (match == null) return new List<Module>();
+        return ModuleManager.Modules.Where(m => m.Category == this && match(m)).ToList();
+    }
+
+    // --- Conversion & Equality ---
+    public static implicit operator ModuleCategory(string name) => GetOrCreate(name);
+    public static implicit operator string(ModuleCategory cat) => cat?.Name;
+
+    public override string ToString() => Name;
+
+    public override bool Equals(object obj) => obj is ModuleCategory other && Equals(other);
+
+    public bool Equals(ModuleCategory other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Name);
+
+    public static bool operator ==(ModuleCategory left, ModuleCategory right)
+    {
+        if (ReferenceEquals(left, right)) return true;
+        if (ReferenceEquals(left, null) || ReferenceEquals(right, null)) return false;
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(ModuleCategory left, ModuleCategory right) => !(left == right);
+}
 
 public abstract class Module
 {
-    /// <summary>
-    /// Name to be displayed
-    /// </summary>
     public abstract string Name { get; set; }
-    /// <summary>
-    /// Search hints to be used when searching for the module
-    /// </summary>
     public abstract string SearchHints { get; set; }
-    /// <summary>
-    /// Optional name for mod author. Supports rich text.
-    /// </summary>
     public virtual string Author { get; set; } = "";
-    /// <summary>
-    /// Description for the module. Supports rich text.
-    /// </summary>
     public abstract string Description { get; set; }
+
     /// <summary>
-    /// The category to put the module in.
+    /// Category object. Can be assigned via `ModuleCategory.Plant` or as a string `"MyCategory"`.
     /// </summary>
     public abstract ModuleCategory Category { get; set; }
 
     public virtual bool enableInVanillaMode { get; set; } = false;
 
-    // These will be in Every ModuleManager.
-    // Edit if you want a different default keybind or want it to be enabled by default.
-
     public BindSetting KeyBind = new("Keybind");
-
     public string GetBindString() => KeyBind.GetBindString();
-
     public List<KeyCode> BindKeys => KeyBind.BindKeys;
     public virtual bool HoldMode { get; set; } = false;
     public virtual bool Active { get; set; } = false;
-    /// <summary>
-    /// Used to determine whether the setting window of the module is opened.
-    /// </summary>
     public virtual bool ShowSettings { get; set; } = false;
 
-
-    /// <summary>
-    /// Used to store all the settings for the module.
-    /// </summary>
     public List<Setting> Settings = new();
 
     public void Toggle()
@@ -74,82 +184,42 @@ public abstract class Module
         else OnDisable();
     }
 
-    /// <summary>
-    /// Runs once when the module is enabled. Runs Before OnUpdateActive.
-    /// </summary>
     public virtual void OnEnable() { }
-    /// <summary>
-    /// Runs once when the module is disabled. Runs After OnUpdateActive.
-    /// </summary>
     public virtual void OnDisable() { }
-
-
-    /// <summary>
-    /// Runs every frame regardless of whether the module is active or not.
-    /// </summary>
     public virtual void OnUpdate() { if (Active) OnUpdateActive(); }
-
-    /// <summary>
-    /// Runs every frame only when the module is active. Will not run if OnUpdate is overridden without calling base.OnUpdate().
-    /// </summary>
     public virtual void OnUpdateActive() { }
-
-    /// <summary>
-    /// Runs every frame on UnityEngine.OnGUI
-    /// </summary>
     public virtual void OnGUI() { }
 
-    /// <summary>
-    /// Static method to add settings to the module. Call this in the constructor of your module with all the settings you want to add.
-    /// </summary>
-    public void AddSettings(params Setting[] settings)
-    {
-        Settings.AddRange(settings);
-    }
+    public void AddSettings(params Setting[] settings) => Settings.AddRange(settings);
     public virtual bool Initialized { get; set; } = false;
-
-    /// <summary>
-    /// Runs When a the mod's language is changed
-    /// </summary>
     public virtual void OnLanguageChanged() { }
 
-    public static Dictionary<int, string> TranslatedNames(System.Type enumType)
+    public static Dictionary<int, string> TranslatedNames(Type enumType)
     {
         if (enumType == null || !enumType.IsEnum) return new Dictionary<int, string>();
 
         Dictionary<int, string> names = new();
-
 #if ANDROID
-        foreach (var val in System.Enum.GetValues(enumType))
+        foreach (var val in Enum.GetValues(enumType))
         {
-            int key = System.Convert.ToInt32(val);
-            string name = System.Enum.GetName(enumType, val) ?? val.ToString();
+            int key = Convert.ToInt32(val);
+            string name = Enum.GetName(enumType, val) ?? val.ToString();
             names[key] = $"{name} ({key})";
         }
 #else
         names = Translator.TranslateEnum(enumType);
-
         foreach (var kvp in names.ToList())
         {
             names[kvp.Key] = $"{kvp.Value} ({kvp.Key})";
-}
+        }
 #endif
-
         return names;
     }
 
     public virtual float SettingsWidth { get; set; } = Config.ModuleManager.SettingsWidth;
 
-    // Add these category helper methods anywhere inside the ModuleManager class
-    public void CreateCategory(string name, bool defaultExpanded = true)
-    {
-        Settings.Add(new CategorySetting(name, defaultExpanded));
-    }
-
-    public void EndCategory()
-    {
-        Settings.Add(new EndCategorySetting());
-    }
+    public void CreateCategory(string name, bool defaultExpanded = true) => Settings.Add(new CategorySetting(name, defaultExpanded));
+    public void EndCategory() => Settings.Add(new EndCategorySetting());
 
     public static bool GetKeyComboDown(List<KeyCode> keyCodes)
     {
@@ -160,33 +230,35 @@ public abstract class Module
 
         for (int i = 0; i < keyCodes.Count - 1; i++)
         {
-            if (!Input.GetKey(keyCodes[i]))
-            {
-                return false;
-            }
+            if (!Input.GetKey(keyCodes[i])) return false;
+        }
+        return true;
+    }
+
+    public static bool GetKeyCombo(List<KeyCode> keyCodes)
+    {
+        if (keyCodes == null || keyCodes.Count == 0) return false;
+
+        foreach(KeyCode keyCode in keyCodes)
+        {
+            if (!Input.GetKey(keyCode)) return false;
         }
         return true;
     }
 
     public struct Banned
     {
-        public static HashSet<int> PlantTypeBanned = new()
+        public static readonly HashSet<int> PlantTypeBanned = new()
         {
-            // Not a plant
             (int)PlantType.Nothing, (int)PlantType.MagnetInterface,
             (int)PlantType.MagnetBox, (int)PlantType.Pit,
             (int)PlantType.Refrash, (int)PlantType.Extract_single,
             (int)PlantType.Extract_ten,
-
-            // EnumValueAsmResolver_002EDotNet_002ESerialized_002ESerializedConstant
-            261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,
-
-            // Unreleased
+            261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275,
             3000,
         };
-        public static HashSet<int> ZombieTypeBanned = new()
+        public static readonly HashSet<int> ZombieTypeBanned = new()
         {
-            // Not a zombie
             (int)ZombieType.Nothing,
         };
     }
@@ -196,17 +268,8 @@ public abstract class Module
 
     public virtual void ResetBuiltIns()
     {
-        if (KeyBind != null)
-        {
-            KeyBind.Reset();
-        }
-
+        KeyBind?.Reset();
         HoldMode = defaultHoldMode;
-
-        if (Active != defaultActive)
-        {
-            Toggle();
-        }
+        if (Active != defaultActive) Toggle();
     }
-
 }

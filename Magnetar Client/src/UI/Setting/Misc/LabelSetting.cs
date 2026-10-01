@@ -20,13 +20,13 @@ public class LabelSetting : Setting
         string displayText = Translator.Translate(Name);
 
         float labelWidth = width - (Config.indent * 2f);
-        float calculatedHeight = Magnetar_Default.SettingsDescriptionStyle.CalcHeight(
+        float calculatedHeight = ThemeManager.SettingsDescriptionStyle.CalcHeight(
             new GUIContent(displayText),
             labelWidth
         );
 
         Rect labelRect = new(Config.indent, y, labelWidth, calculatedHeight);
-        GUI.Label(labelRect, displayText, Magnetar_Default.SettingsDescriptionStyle);
+        GUI.Label(labelRect, displayText, ThemeManager.SettingsDescriptionStyle);
 
         y += calculatedHeight + Config.spacing;
     }

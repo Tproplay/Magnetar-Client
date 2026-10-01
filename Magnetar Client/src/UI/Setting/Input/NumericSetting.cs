@@ -111,7 +111,7 @@ public class IntSetting : Setting
         Rect sliderRect = new(sliderStartX, y + ((elemH - trackH) / 2f), sliderW, trackH);
 
         float labelW = sliderStartX - indent - gap;
-        GUI.Label(new Rect(indent, y, labelW, elemH), translatedName, Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, labelW, elemH), translatedName, ThemeManager.SettingLabelStyle);
 
         Event e = Event.current;
 
@@ -125,10 +125,10 @@ public class IntSetting : Setting
         Rect thumbRect = new(thumbX, thumbY, thumbSize, thumbSize);
 
         // Draw track & thumb
-        GUI.Box(sliderRect, "", Magnetar_Default.SliderTrackOffStyle);
+        GUI.Box(sliderRect, "", ThemeManager.SliderTrackOffStyle);
         if (fillWidth > 0f)
-            GUI.Box(new Rect(sliderRect.x, sliderRect.y, fillWidth, sliderRect.height), "", Magnetar_Default.SliderTrackOnStyle);
-        GUI.Box(thumbRect, "", Magnetar_Default.SliderThumbStyle);
+            GUI.Box(new Rect(sliderRect.x, sliderRect.y, fillWidth, sliderRect.height), "", ThemeManager.SliderTrackOnStyle);
+        GUI.Box(thumbRect, "", ThemeManager.SliderThumbStyle);
 
         void CommitSettingValue()
         {

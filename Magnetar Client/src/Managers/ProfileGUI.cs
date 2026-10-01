@@ -36,7 +36,7 @@ public static class ProfileGUI
 
         Config.RescaleAroundCenter(ref WindowRect, Config.S(BaseWindowWidth), Config.S(BaseWindowHeight));
 
-        GUIStyle windowBgStyle = Magnetar_Default.SettingsWndowBgStyle ?? Magnetar_Default.CategoryWindowStyle;
+        GUIStyle windowBgStyle = ThemeManager.SettingsWndowBgStyle ?? ThemeManager.CategoryWindowStyle;
 
         WindowRect = GUI.Window(
             4002,
@@ -56,13 +56,13 @@ public static class ProfileGUI
 
         // Header Banner
         Rect headerBgRect = new(0, 0, w, y - indent);
-        GUI.Box(headerBgRect, Translator.Translate("Profile Manager"), Magnetar_Default.SettingsWndowStyle);
+        GUI.Box(headerBgRect, Translator.Translate("Profile Manager"), ThemeManager.SettingsWndowStyle);
 
         // Current Profile (Vertically Centered with SettingTextStyle)
         GUI.Label(
             new Rect(indent, y, w - (indent * 2), elementHeight),
             $"{Translator.Translate("Current Active Profile")}: <color=yellow>{Config.CurrentProfile}</color>",
-            Magnetar_Default.SettingTextStyle
+            ThemeManager.SettingTextStyle
         );
 
         y += elementHeight + Config.S(10f);
@@ -75,7 +75,7 @@ public static class ProfileGUI
 
         // 1. "New Profile:" Label aligned to MiddleLeft
         Rect labelRect = new(indent, y, labelW, elementHeight);
-        GUI.Label(labelRect, Translator.Translate("New Profile:"), Magnetar_Default.SettingTextStyle);
+        GUI.Label(labelRect, Translator.Translate("New Profile:"), ThemeManager.SettingTextStyle);
 
         // 2. Input Box aligned to MiddleLeft
         Rect inputRect = new(indent + labelW + gap, y, inputW, elementHeight);
@@ -98,17 +98,17 @@ public static class ProfileGUI
             e.Use();
         }
 
-        GUI.Box(createBtnRect, Translator.Translate("Create"), Magnetar_Default.SettingOff);
+        GUI.Box(createBtnRect, Translator.Translate("Create"), ThemeManager.SettingOff);
 
         y += elementHeight + Config.S(14f);
 
         // Separator Rule
         float lineThickness = Mathf.Max(1f, Config.S(1f));
-        GUI.Box(new Rect(indent, y, w - (indent * 2f), lineThickness), "", Magnetar_Default.SeparatorStyle);
+        GUI.Box(new Rect(indent, y, w - (indent * 2f), lineThickness), "", ThemeManager.SeparatorStyle);
         y += lineThickness + Config.S(10f);
 
         // --- AVAILABLE PROFILES LIST ---
-        GUI.Label(new Rect(indent, y, w - (indent * 2f), elementHeight), Translator.Translate("Available Profiles:"), Magnetar_Default.SettingTextStyle);
+        GUI.Label(new Rect(indent, y, w - (indent * 2f), elementHeight), Translator.Translate("Available Profiles:"), ThemeManager.SettingTextStyle);
         y += elementHeight + Config.S(5f);
 
         float scrollAreaHeight = WindowRect.height - y - Config.S(15f);
@@ -147,8 +147,8 @@ public static class ProfileGUI
 
                 // Row background
                 GUIStyle rowStyle = isActive
-                    ? Magnetar_Default.SettingOn
-                    : (isItemHovered && !isDeleteHovered ? Magnetar_Default.SettingOff : Magnetar_Default.CategoryModuleOffStyle);
+                    ? ThemeManager.SettingOn
+                    : (isItemHovered && !isDeleteHovered ? ThemeManager.SettingOff : ThemeManager.CategoryModuleOffStyle);
 
                 GUI.Box(itemRect, "", rowStyle);
 
@@ -160,14 +160,14 @@ public static class ProfileGUI
                 float textWidth = !isDefault ? itemRect.width - delBtnW - Config.S(20f) : itemRect.width - Config.S(20f);
                 Rect textRect = new(Config.S(10f), itemY, textWidth, elementHeight);
 
-                GUI.Label(textRect, labelText, Magnetar_Default.SettingTextStyle);
+                GUI.Label(textRect, labelText, ThemeManager.SettingTextStyle);
 
                 // Delete Button
                 if (!isDefault)
                 {
                     Color oldBg = GUI.backgroundColor;
                     GUI.backgroundColor = isDeleteHovered ? new Color(1f, 0.35f, 0.35f, 1f) : new Color(0.85f, 0.25f, 0.25f, 1f);
-                    GUI.Box(deleteBtnRect, Translator.Translate("Delete"), Magnetar_Default.SettingOff);
+                    GUI.Box(deleteBtnRect, Translator.Translate("Delete"), ThemeManager.SettingOff);
                     GUI.backgroundColor = oldBg;
                 }
 

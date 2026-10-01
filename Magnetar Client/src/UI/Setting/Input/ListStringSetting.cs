@@ -47,7 +47,7 @@ public class ListStringSetting : Setting
         // Label on the left
         float labelW = Mathf.Max(width * 0.35f, Config.S(120f));
         Rect labelRect = new(indent, y, labelW, elemH);
-        GUI.Label(labelRect, Translator.Translate(Name), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(labelRect, Translator.Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Input fields right column area
         float rightBoxW = width - (indent * 2f) - labelW - gap;
@@ -64,7 +64,7 @@ public class ListStringSetting : Setting
 
             Values[i] = DrawSetting.DrawManualTextField(rowRect, Values[i] ?? "", "", AutocompleteVars);
 
-            GUI.Box(delRect, "—", Magnetar_Default.ListRemoveButtonStyle);
+            GUI.Box(delRect, "—", ThemeManager.ListRemoveButtonStyle);
             if (delRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
             {
                 removeIndex = i;
@@ -88,7 +88,7 @@ public class ListStringSetting : Setting
         Rect addBtnRect = new(addStartX, y, addBtnW, elemH);
 
         bool canAdd = Values.Count < MaxCount;
-        GUIStyle addStyle = canAdd ? Magnetar_Default.ListAddButtonStyle : Magnetar_Default.CategoryModuleOffStyle;
+        GUIStyle addStyle = canAdd ? ThemeManager.ListAddButtonStyle : ThemeManager.CategoryModuleOffStyle;
 
         GUI.Box(addBtnRect, Translator.Translate(canAdd ? "Add" : "Max Reached"), addStyle);
 

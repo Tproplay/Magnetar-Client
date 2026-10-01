@@ -13,9 +13,6 @@ using Magnetar_Client.UI.Setting;
 
 namespace Magnetar_Client.Core;
 
-// =========================================================================
-// Main Coordinator
-// =========================================================================
 public static class ModuleManager
 {
     public static bool IsInitialized = false;
@@ -30,7 +27,6 @@ public static class ModuleManager
     public static bool resetWindowPos = false;
     public static int bindingModuleId = -1;
 
-    // Exposed properties for backward compatibility with other systems
     public static Dictionary<ModuleCategory, Rect> windowPositions => CategoryWindowDrawer.WindowPositions;
     public static string ModuleSearchQuery
     {
@@ -40,11 +36,25 @@ public static class ModuleManager
 
     public static void Init()
     {
-        var types = Assembly.GetExecutingAssembly().GetTypes()
-            .Where(t => t.Namespace != null && t.Namespace.StartsWith("Magnetar_Client.Modules")
-                        && t.IsSubclassOf(typeof(Magnetar_Client.Modules.Module)) && !t.IsAbstract);
+        Type[] exportedTypes;
+        try
+        {
+            exportedTypes = Assembly.GetExecutingAssembly().GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            exportedTypes = ex.Types.Where(t => t != null).ToArray();
+        }
 
-        foreach (var type in types)
+        var moduleTypes = exportedTypes
+            .Where(t => t.IsClass
+                        && !t.IsAbstract
+                        && typeof(Modules.Module).IsAssignableFrom(t)
+                        && t.Namespace != null
+                        && t.Namespace.StartsWith("Magnetar_Client.Modules", StringComparison.Ordinal))
+            .OrderBy(t => t.Name, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var type in moduleTypes)
         {
             RegisterModule(type);
         }
@@ -61,15 +71,47 @@ public static class ModuleManager
         DebugLogger.Msg($"Loaded {Modules.Count} modules");
     }
 
-    public static void RegisterModule(Type type)
+    public static void RegisterCategory(string categoryName)
     {
+        ModuleCategory.Register(categoryName);
+    }
+
+    internal static void RegisterModule(Type type)
+    {
+        if (type == null)
+        {
+            DebugLogger.Error("[ModuleManager] Cannot register a null module type.");
+            return;
+        }
+
+        if (!typeof(Modules.Module).IsAssignableFrom(type) || type.IsAbstract || !type.IsClass)
+        {
+            DebugLogger.Error($"[ModuleManager] Type '{type.FullName}' must be a non-abstract class derived from '{nameof(Magnetar_Client.Modules.Module)}'.");
+            return;
+        }
+
+        if (Modules.Exists(m => m.GetType() == type))
+        {
+            DebugLogger.Warning($"[ModuleManager] Module '{type.Name}' is already registered. Skipping.");
+            return;
+        }
+
         try
         {
-            Modules.Add((Magnetar_Client.Modules.Module)Activator.CreateInstance(type));
+            var instance = (Modules.Module)Activator.CreateInstance(type);
+            Modules.Add(instance);
+
+            // Automatically ensure the category window is mapped
+            if (instance.Category != null)
+            {
+                CategoryWindowDrawer.EnsureCategoryInitialized(instance.Category);
+            }
+
+            DebugLogger.Msg($"[ModuleManager] Registered module: {instance.Name ?? type.Name}");
         }
         catch (Exception ex)
         {
-            DebugLogger.Error("Failed to load ModuleManager: " + ex);
+            DebugLogger.Error($"[ModuleManager] Failed to instantiate and register '{type.FullName}': {ex}");
         }
     }
 
@@ -150,24 +192,20 @@ public static class ModuleManager
     }
 }
 
-// =========================================================================
-// Category Windows (Folding, 70% Height Scrolling & Boundary Clamping)
-// =========================================================================
 internal static class CategoryWindowDrawer
 {
     public static readonly Dictionary<ModuleCategory, Rect> WindowPositions = new();
     public static readonly Dictionary<ModuleCategory, bool> CategoryFolded = new();
     public static readonly Dictionary<ModuleCategory, float> CategoryScrollPositions = new();
 
-    // Click vs Drag detection state
-    private static ModuleCategory? _clickCategory = null;
+    private static ModuleCategory _clickCategory = null;
     private static Vector2 _clickStartMousePos = Vector2.zero;
     private static Vector2 _clickStartWindowPos = Vector2.zero;
 
 #if ANDROID
-    private static readonly Dictionary<ModuleCategory, float> _touchStartY = new Dictionary<ModuleCategory, float>();
-    private static readonly Dictionary<ModuleCategory, float> _touchStartScroll = new Dictionary<ModuleCategory, float>();
-    private static readonly Dictionary<ModuleCategory, bool> _isDragging = new Dictionary<ModuleCategory, bool>();
+    private static readonly Dictionary<ModuleCategory, float> _touchStartY = new();
+    private static readonly Dictionary<ModuleCategory, float> _touchStartScroll = new();
+    private static readonly Dictionary<ModuleCategory, bool> _isDragging = new();
 #endif
 
     private static GUI.WindowFunction _cachedCategoryDelegate;
@@ -177,26 +215,33 @@ internal static class CategoryWindowDrawer
     public static void InitializeLayout()
     {
         int index = 0;
-        foreach (ModuleCategory cat in Enum.GetValues(typeof(ModuleCategory)))
+        foreach (var cat in ModuleCategory.AllCategories)
         {
-            float initX = Config.S(20f) + (index * (Config.ModuleWindowWidth + Config.S(10f)));
-            float initY = Config.S(50f);
-            float w = Config.ModuleWindowWidth;
-            float h = Config.S(50f);
-
-            WindowPositions[cat] = ScreenBoundaryHelper.Clamp(new Rect(initX, initY, w, h));
-            CategoryFolded[cat] = false;
-            CategoryScrollPositions[cat] = 0f;
-            index++;
+            EnsureCategoryInitialized(cat, index++);
         }
+    }
+
+    public static void EnsureCategoryInitialized(ModuleCategory cat, int? indexHint = null)
+    {
+        if (cat == null || WindowPositions.ContainsKey(cat)) return;
+
+        int index = indexHint ?? WindowPositions.Count;
+        float initX = Config.S(20f) + (index * (Config.ModuleWindowWidth + Config.S(10f)));
+        float initY = Config.S(50f);
+        float w = Config.ModuleWindowWidth;
+        float h = Config.S(50f);
+
+        WindowPositions[cat] = ScreenBoundaryHelper.Clamp(new Rect(initX, initY, w, h));
+        CategoryFolded[cat] = false;
+        CategoryScrollPositions[cat] = 0f;
     }
 
     public static void Render()
     {
-        foreach (ModuleCategory cat in Enum.GetValues(typeof(ModuleCategory)))
+        foreach (var cat in ModuleCategory.AllCategories.ToList())
         {
-            if (cat == ModuleCategory.Addon && !ModuleManager.showAddonCategory) continue;
-            int id = (int)cat;
+
+            int id = cat.Id;
 
             Rect syncedPos = WindowPositions[cat];
             if (!Mathf.Approximately(syncedPos.width, Config.ModuleWindowWidth))
@@ -211,7 +256,7 @@ internal static class CategoryWindowDrawer
                 WindowPositions[cat],
                 CategoryDelegate,
                 "",
-                Magnetar_Default.CategoryWindowStyle
+                ThemeManager.CategoryWindowStyle
             );
 
             WindowPositions[cat] = ScreenBoundaryHelper.Clamp(WindowPositions[cat]);
@@ -230,7 +275,9 @@ internal static class CategoryWindowDrawer
     {
         try
         {
-            ModuleCategory category = (ModuleCategory)id;
+            ModuleCategory category = ModuleCategory.AllCategories.FirstOrDefault(c => c.Id == id);
+            if (category == null) return;
+
             var categoryModules = FilterModulesByCategory(category);
 
             float windowWidth = WindowPositions[category].width;
@@ -243,10 +290,10 @@ internal static class CategoryWindowDrawer
 
             Rect titleBarRect = new(0, 0, windowWidth, headerHeight);
 
-            // --- 1. Dedicated Header Background Box & Title ---
-            GUI.Box(titleBarRect, Translate(category.ToString()), Magnetar_Default.CategoryHeaderStyle);
+            // 1. Dedicated Header Background Box & Title
+            GUI.Box(titleBarRect, Translate(category.Name), ThemeManager.CategoryHeaderStyle);
 
-            // --- 2. Invisible Background Triangle Fold Indicator ---
+            // 2. Invisible Background Triangle Fold Indicator
             Rect foldBtnRect = new(windowWidth - Config.S(24f), (headerHeight - Config.S(20f)) / 2f, Config.S(20f), Config.S(20f));
             string foldIndicator = isFolded ? "▶" : "▼";
 
@@ -254,11 +301,11 @@ internal static class CategoryWindowDrawer
             {
                 alignment = TextAnchor.MiddleCenter,
                 fontSize = Mathf.RoundToInt(Config.S(11f)),
-                normal = { textColor = Magnetar_Default.TextWhite }
+                normal = { textColor = ThemeManager.TextWhite }
             };
             GUI.Label(foldBtnRect, foldIndicator, arrowStyle);
 
-            // --- 3. Title Bar: Click to Collapse vs Drag to Move ---
+            // 3. Title Bar: Click to Collapse vs Drag to Move
             if (e.type == EventType.MouseDown && e.button == 0 && titleBarRect.Contains(e.mousePosition))
             {
                 _clickCategory = category;
@@ -289,7 +336,6 @@ internal static class CategoryWindowDrawer
                 e.Use();
             }
 
-            // If collapsed, only render title bar
             if (isFolded)
             {
                 GUI.DragWindow(titleBarRect);
@@ -297,7 +343,7 @@ internal static class CategoryWindowDrawer
                 return;
             }
 
-            // --- 4. 70% Max Screen Height Calculation ---
+            // 4. 70% Max Screen Height Calculation
             float totalContentHeight = categoryModules.Count * buttonHeight;
             float maxCategoryHeight = Config.NativeHeight * 0.70f;
             float maxViewHeight = maxCategoryHeight - headerHeight;
@@ -313,17 +359,17 @@ internal static class CategoryWindowDrawer
 
             Rect viewRect = new(0, headerHeight, windowWidth, viewHeight);
 
-            // --- 5. Scroll Input Handling ---
+            // 5. Scroll Input Handling
             currentScroll = HandleScrollInput(category, viewRect, currentScroll, maxScroll, needsScroll, e);
             CategoryScrollPositions[category] = currentScroll;
 
-            // --- 6. Render Scrollable Group ---
+            // 6. Render Scrollable Group
             float contentWidth = needsScroll ? windowWidth - Config.S(8f) : windowWidth;
             GUI.BeginGroup(viewRect);
             DrawCategoryItems(category, categoryModules, buttonHeight, currentScroll, viewHeight, contentWidth, headerHeight, e);
             GUI.EndGroup();
 
-            // --- 7. Scrollbar ---
+            // 7. Scrollbar
             if (needsScroll)
             {
                 DrawScrollbar(windowWidth, headerHeight, viewHeight, totalContentHeight, currentScroll, maxScroll);
@@ -334,19 +380,22 @@ internal static class CategoryWindowDrawer
         }
         catch (Exception ex)
         {
-            DebugLogger.Error($"[DrawCategoryWindow] Error rendering category {id}: {ex}");
+            DebugLogger.Error($"[DrawCategoryWindow] Error rendering category ID {id}: {ex}");
         }
     }
 
     private static List<Modules.Module> FilterModulesByCategory(ModuleCategory category)
     {
-        string cleanSearch = SearchWindowDrawer.SearchQuery.Replace(" ", "").ToLower();
+        string cleanSearch = (SearchWindowDrawer.SearchQuery ?? "").Trim().Replace(" ", "").ToLower();
+
         return ModuleManager.Modules.Where(m =>
         {
-            if (string.IsNullOrEmpty(cleanSearch)) return m.Category == category;
-            string cleanHints = m.SearchHints.Replace(" ", "").ToLower();
-            string cleanName = m.Name.Replace(" ", "").ToLower();
-            return m.Category == category && (cleanName.Contains(cleanSearch) || cleanHints.Contains(cleanSearch));
+            if (m.Category != category) return false;
+            if (string.IsNullOrEmpty(cleanSearch)) return true;
+
+            // Search ONLY the search hints
+            string cleanHints = (m.SearchHints ?? "").Replace(" ", "").ToLower();
+            return cleanHints.Contains(cleanSearch);
         }).ToList();
     }
 
@@ -404,7 +453,7 @@ internal static class CategoryWindowDrawer
 
             if (currentY + thisButtonHeight < 0 || currentY > viewHeight) continue;
 
-            GUIStyle currentStyle = mod.Active ? Magnetar_Default.CategoryModuleOnStyle : Magnetar_Default.CategoryModuleOffStyle;
+            GUIStyle currentStyle = mod.Active ? ThemeManager.CategoryModuleOnStyle : ThemeManager.CategoryModuleOffStyle;
             Rect btnRect = new(0, currentY, contentWidth, thisButtonHeight);
 
             if (ModuleManager.showModules)
@@ -460,14 +509,11 @@ internal static class CategoryWindowDrawer
         float scrollPct = maxScroll > 0 ? currentScroll / maxScroll : 0f;
         float handleY = trackY + (scrollPct * (trackHeight - handleHeight));
 
-        GUI.Box(new Rect(trackX + Config.S(1f), trackY, Config.S(2f), trackHeight), "", Magnetar_Default.SeparatorStyle);
-        GUI.Box(new Rect(trackX, handleY, Config.S(5f), handleHeight), "", Magnetar_Default.CategoryModuleOffStyle);
+        GUI.Box(new Rect(trackX + Config.S(1f), trackY, Config.S(2f), trackHeight), "", ThemeManager.SeparatorStyle);
+        GUI.Box(new Rect(trackX, handleY, Config.S(5f), handleHeight), "", ThemeManager.CategoryModuleOffStyle);
     }
 }
 
-// =========================================================================
-// Settings Popup Window & Controls Drawing
-// =========================================================================
 internal static class SettingsWindowDrawer
 {
     private static readonly Dictionary<Modules.Module, Rect> _settingsPositions = new();
@@ -529,7 +575,7 @@ internal static class SettingsWindowDrawer
                 _settingsPositions[mod],
                 GetSettingsDelegate(mod),
                 "",
-                Magnetar_Default.SettingsWndowBgStyle
+                ThemeManager.SettingsWndowBgStyle
             );
         }
     }
@@ -542,7 +588,7 @@ internal static class SettingsWindowDrawer
             foreach (var setting in mod.Settings)
             {
                 if (setting == null || string.IsNullOrEmpty(setting.Name)) continue;
-                float w = Magnetar_Default.SettingLabelStyle.CalcSize(new GUIContent(Translate(setting.Name))).x;
+                float w = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(Translate(setting.Name))).x;
                 if (w > maxNameWidth) maxNameWidth = w;
             }
         }
@@ -550,7 +596,7 @@ internal static class SettingsWindowDrawer
         string[] builtIns = { "Hold Mode", "Enabled", "KeyBind" };
         foreach (var b in builtIns)
         {
-            float w = Magnetar_Default.SettingLabelStyle.CalcSize(new GUIContent(Translate(b))).x;
+            float w = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(Translate(b))).x;
             if (w > maxNameWidth) maxNameWidth = w;
         }
 
@@ -577,7 +623,7 @@ internal static class SettingsWindowDrawer
         if (!_settingsScrollPositions.ContainsKey(mod)) _settingsScrollPositions[mod] = Vector2.zero;
 
         Rect headerBgRect = new(0, 0, windowWidth, headerHeight);
-        GUI.Box(headerBgRect, Translate(mod.Name), Magnetar_Default.SettingsWndowStyle);
+        GUI.Box(headerBgRect, Translate(mod.Name), ThemeManager.SettingsWndowStyle);
 
         _moduleContentHeights[mod] = Mathf.Lerp(_moduleContentHeights[mod], _targetContentHeights[mod],
             Time.unscaledDeltaTime * Config.ModuleManager.SettingsScrollLerpSpeed);
@@ -597,7 +643,7 @@ internal static class SettingsWindowDrawer
             float btnSize = Config.S(22f);
             float btnY = (headerHeight - btnSize) / 2f;
             Rect closeButtonRect = new(windowWidth - Config.S(26f), btnY, btnSize, btnSize);
-            GUI.Box(closeButtonRect, "X", Magnetar_Default.CloseButtonStyle);
+            GUI.Box(closeButtonRect, "X", ThemeManager.CloseButtonStyle);
             if (e.type == EventType.MouseDown && closeButtonRect.Contains(e.mousePosition))
             {
                 ModuleManager.showSettings = false;
@@ -662,14 +708,14 @@ internal static class SettingsWindowDrawer
         float descriptionWidth = width - (Config.indent * 2);
         string translatedDescription = Translate(mod.Description);
 
-        float calculatedHeight = Magnetar_Default.SettingsDescriptionStyle.CalcHeight(new GUIContent(translatedDescription), descriptionWidth);
-        GUI.Label(new Rect(Config.indent, y, descriptionWidth, calculatedHeight), translatedDescription, Magnetar_Default.SettingsDescriptionStyle);
+        float calculatedHeight = ThemeManager.SettingsDescriptionStyle.CalcHeight(new GUIContent(translatedDescription), descriptionWidth);
+        GUI.Label(new Rect(Config.indent, y, descriptionWidth, calculatedHeight), translatedDescription, ThemeManager.SettingsDescriptionStyle);
         y += calculatedHeight + Config.spacing;
 
         if (!string.IsNullOrEmpty(mod.Author))
         {
             float authorLineHeight = Config.S(18f);
-            GUI.Label(new Rect(Config.indent, y, width - (Config.indent * 2), authorLineHeight), "by " + mod.Author, Magnetar_Default.SettingAuthorStyle);
+            GUI.Label(new Rect(Config.indent, y, width - (Config.indent * 2), authorLineHeight), "by " + mod.Author, ThemeManager.SettingAuthorStyle);
             y += authorLineHeight + Config.spacing;
         }
 
@@ -709,19 +755,19 @@ internal static class SettingsWindowDrawer
         float labelWidth = Mathf.Max(width * 0.40f, width - Config.indent * 2 - Config.SettingWidth - resetBtnW - gap);
 
         // --- 2. Hold Mode Toggle Row ---
-        GUI.Label(new Rect(Config.indent, y, labelWidth, elemH), Translate("Hold Mode"), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(Config.indent, y, labelWidth, elemH), Translate("Hold Mode"), ThemeManager.SettingLabelStyle);
 
         Rect holdRect = new(width - Config.indent - resetBtnW - gap - Config.SettingWidth, y, Config.SettingWidth, elemH);
         Rect holdResetRect = new(width - Config.indent - resetBtnW, y, resetBtnW, elemH);
 
-        GUI.Box(holdRect, mod.HoldMode ? Translate("ON") : Translate("OFF"), mod.HoldMode ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+        GUI.Box(holdRect, mod.HoldMode ? Translate("ON") : Translate("OFF"), mod.HoldMode ? ThemeManager.SettingOn : ThemeManager.SettingOff);
         if (holdRect.Contains(e.mousePosition) && isLeftClick)
         {
             mod.HoldMode = !mod.HoldMode;
             e.Use();
         }
 
-        if (GUI.Button(holdResetRect, Setting.ResetSymbol, Magnetar_Default.ResetButtonStyle))
+        if (GUI.Button(holdResetRect, Setting.ResetSymbol, ThemeManager.ResetButtonStyle))
         {
             mod.HoldMode = mod.defaultHoldMode;
             e.Use();
@@ -730,19 +776,19 @@ internal static class SettingsWindowDrawer
         y += elemH + Config.spacing;
 
         // --- 3. Enabled Toggle Row ---
-        GUI.Label(new Rect(Config.indent, y, labelWidth, elemH), Translate("Enabled"), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(Config.indent, y, labelWidth, elemH), Translate("Enabled"), ThemeManager.SettingLabelStyle);
 
         Rect enabledRect = new(width - Config.indent - resetBtnW - gap - Config.SettingWidth, y, Config.SettingWidth, elemH);
         Rect enabledResetRect = new(width - Config.indent - resetBtnW, y, resetBtnW, elemH);
 
-        GUI.Box(enabledRect, mod.Active ? Translate("ON") : Translate("OFF"), mod.Active ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+        GUI.Box(enabledRect, mod.Active ? Translate("ON") : Translate("OFF"), mod.Active ? ThemeManager.SettingOn : ThemeManager.SettingOff);
         if (enabledRect.Contains(e.mousePosition) && isLeftClick)
         {
             if (VanillaMode.instance.IsAllowed(mod)) mod.Toggle();
             e.Use();
         }
 
-        if (GUI.Button(enabledResetRect, Setting.ResetSymbol, Magnetar_Default.ResetButtonStyle))
+        if (GUI.Button(enabledResetRect, Setting.ResetSymbol, ThemeManager.ResetButtonStyle))
         {
             if (mod.Active != mod.defaultActive)
             {
@@ -766,14 +812,11 @@ internal static class SettingsWindowDrawer
         float scrollPct = maxScroll > 0 ? currentScroll / maxScroll : 0f;
         float handleY = trackY + (scrollPct * (trackHeight - handleHeight));
 
-        GUI.Box(new Rect(trackX + Config.S(5f), trackY, Config.S(2f), trackHeight), "", Magnetar_Default.SeparatorStyle);
-        GUI.Box(new Rect(trackX, handleY, Config.S(12f), handleHeight), "", Magnetar_Default.CategoryModuleOffStyle);
+        GUI.Box(new Rect(trackX + Config.S(5f), trackY, Config.S(2f), trackHeight), "", ThemeManager.SeparatorStyle);
+        GUI.Box(new Rect(trackX, handleY, Config.S(12f), handleHeight), "", ThemeManager.CategoryModuleOffStyle);
     }
 }
 
-// =========================================================================
-// Search Window & Text Field Logic
-// =========================================================================
 internal static class SearchWindowDrawer
 {
     public static string SearchQuery = "";
@@ -845,7 +888,7 @@ internal static class SearchWindowDrawer
             float currentX = (Config.NativeWidth / 2f) - (searchWidth / 2f);
 
             SearchWindowRect = new Rect(currentX, currentY, searchWidth, searchHeight);
-            SearchWindowRect = GUI.Window(999, SearchWindowRect, SearchDelegate, "", Magnetar_Default.CategoryWindowStyle);
+            SearchWindowRect = GUI.Window(999, SearchWindowRect, SearchDelegate, "", ThemeManager.CategoryWindowStyle);
         }
     }
 
@@ -868,9 +911,6 @@ internal static class SearchWindowDrawer
     }
 }
 
-// =========================================================================
-// MultiSelect Modal Window
-// =========================================================================
 internal static class MultiSelectWindowDrawer
 {
     public static MultiSelectSetting ActiveMultiSelect = null;
@@ -914,7 +954,7 @@ internal static class MultiSelectWindowDrawer
 
         if (ActiveMultiSelect != null)
         {
-            WindowRect = GUI.Window(1000, WindowRect, MultiSelectDelegate, "", Magnetar_Default.CategoryWindowStyle);
+            WindowRect = GUI.Window(1000, WindowRect, MultiSelectDelegate, "", ThemeManager.CategoryWindowStyle);
 
             if (currentEvent != null && WindowRect.Contains(currentEvent.mousePosition) && currentEvent.type == EventType.MouseDown)
             {
@@ -951,14 +991,14 @@ internal static class MultiSelectWindowDrawer
     public static void HandleMultiSelectSetting(MultiSelectSetting set, ref float y, float width)
     {
         Event e = Event.current;
-        GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), Translate(set.Name), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), Translate(set.Name), ThemeManager.SettingLabelStyle);
 
         Rect btnRect = new(width - Config.SettingWidth / 2f - Config.selectButtonWidth -
-            Magnetar_Default.SettingLabelStyle.CalcSize(new GUIContent('(' + Translate($"{set.SelectedValues.Count} selected") + ")")).x / 2, y,
+            ThemeManager.SettingLabelStyle.CalcSize(new GUIContent('(' + Translate($"{set.SelectedValues.Count} selected") + ")")).x / 2, y,
             Config.selectButtonWidth, Config.elementHeight);
 
         if (btnRect.Contains(e.mousePosition))
-            GUI.backgroundColor = Magnetar_Default.AccentColor;
+            GUI.backgroundColor = ThemeManager.AccentColor;
 
         if (e.type == EventType.MouseDown && e.button == 0 && btnRect.Contains(e.mousePosition))
         {
@@ -971,20 +1011,17 @@ internal static class MultiSelectWindowDrawer
             manualScrollY = 0f;
         }
 
-        GUI.Box(btnRect, Translate("Select"), Magnetar_Default.SettingOff);
+        GUI.Box(btnRect, Translate("Select"), ThemeManager.SettingOff);
         GUI.backgroundColor = Color.white;
 
         Color originalColor = GUI.contentColor;
-        GUI.contentColor = Magnetar_Default.TextDim;
+        GUI.contentColor = ThemeManager.TextDim;
         GUI.Label(new Rect(btnRect.x + Config.selectButtonWidth + Config.S(5f), y, width * 0.4f, Config.elementHeight),
-            '(' + Translate($"{set.SelectedValues.Count} selected") + ")", Magnetar_Default.SettingLabelStyle);
+            '(' + Translate($"{set.SelectedValues.Count} selected") + ")", ThemeManager.SettingLabelStyle);
         GUI.contentColor = originalColor;
     }
 }
 
-// =========================================================================
-// Mobile Touch & Long-Press Handler
-// =========================================================================
 internal static class MobileInputHandler
 {
     private static Modules.Module _pressedModule = null;
@@ -1060,12 +1097,6 @@ internal static class MobileInputHandler
     }
 }
 
-// =========================================================================
-// Boundary Helpers
-// =========================================================================
-// =========================================================================
-// Boundary Helpers
-// =========================================================================
 internal static class ScreenBoundaryHelper
 {
     public static Rect Clamp(Rect rect)

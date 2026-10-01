@@ -429,7 +429,8 @@ public static class SaveLoad
                         {
                             foreach (var entry in data.CategoryPositions)
                             {
-                                if (Enum.TryParse(entry.Key, out ModuleCategory category))
+                                // Changed from Enum.TryGet to ModuleCategory.TryGet
+                                if (ModuleCategory.TryGet(entry.Key, out ModuleCategory category))
                                 {
                                     ModuleManager.windowPositions[category] = new Rect(entry.Value.x, entry.Value.y, entry.Value.w, entry.Value.h);
                                 }
@@ -507,7 +508,7 @@ public static class SaveLoad
                             Config.ElementScale = data.ElementScale;
                         }
 
-                        Magnetar_Default.Rescale();
+                        ThemeManager.Rescale();
                         AutoSaveLogger.Msg($"Loaded Magnetar Profile '{Config.CurrentProfile}'");
                     }
                 }

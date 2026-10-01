@@ -70,7 +70,6 @@ public class Main
         Api.Actions.Core.OnEarlyInitializeCore?.Invoke();
 
         SaveLoad.InitializePreferences();
-        UI.Themes.Magnetar_Default.LoadThemesFromJson();
 
         ModuleManager.Init();
         HUDRenderer.Init();
@@ -101,7 +100,6 @@ public class Main
             BlockSKeysPatch.BlockEscKey = true;
             Config.showgui = !Config.showgui;
             SaveLoad.Save();
-            Api.Api.OnConfigSaved?.Invoke();
         }
 
         if (!Config.showgui && !HUDManager.forceShow)
@@ -114,7 +112,6 @@ public class Main
             mod?.OnUpdate();
         }
 
-        Api.Api.OnUpdate?.Invoke();
 
         if (!HasWarmedUp) return;
 
@@ -129,7 +126,6 @@ public class Main
                 Config.showgui = false;
                 currentEvent.Use();
                 SaveLoad.Save();
-                Api.Api.OnConfigSaved?.Invoke();
                 ResetInputBind();
             }
             else if (!ModuleManager.showModules && ModuleManager.showSettings)
@@ -187,10 +183,9 @@ public class Main
             {
                 WarmUp();
                 HasWarmedUp = true;
-                Api.Api.OnGUIWarmUp?.Invoke();
             }
 
-            UI.Themes.Magnetar_Default.Rescale();
+            UI.Themes.ThemeManager.Rescale();
 
             MobileMenuUI.Render();
             HUDManager.Render();
@@ -200,7 +195,6 @@ public class Main
                 mod.OnGUI();
             }
 
-            Api.Api.OnGUI?.Invoke();
 
             if (Config.showgui)
             {
@@ -226,7 +220,6 @@ public class Main
     {
         try
         {
-            Api.Api.OnApplicationQuit?.Invoke();
         }
         catch (Exception ex)
         {
@@ -234,7 +227,6 @@ public class Main
         }
 
         SaveLoad.Save(true);
-        Api.Api.OnConfigSaved?.Invoke();
         DebugLogger.Msg("Magnetar Preferences Saved!");
     }
 
@@ -249,7 +241,7 @@ public class Main
     public static void WarmUp()
     {
         LoadFont.Init();
-        UI.Themes.Magnetar_Default.Init();
+        UI.Themes.ThemeManager.Init();
 
         ModuleManager.Render();
 

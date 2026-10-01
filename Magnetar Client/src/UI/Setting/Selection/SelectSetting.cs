@@ -70,7 +70,7 @@ public class SelectSetting : Setting
         // Label on the left: fills remaining horizontal space
         float labelW = width - (indent * 2f) - btnW - gap - resetBtnW;
         Rect labelRect = new(indent, y, labelW, elemH);
-        GUI.Label(labelRect, Translator.Translate(Name), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(labelRect, Translator.Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Right-to-left layout: [Dropdown Button] [gap] [Reset Button]
         float resetStartX = width - indent - resetBtnW;
@@ -94,7 +94,7 @@ public class SelectSetting : Setting
         }
 
         string arrow = (DrawSetting.activeDropdownId == controlId) ? " ▲" : " ▼";
-        GUI.Box(btnRect, currentValName + arrow, Magnetar_Default.SettingOff);
+        GUI.Box(btnRect, currentValName + arrow, ThemeManager.SettingOff);
 
         if (DrawSetting.activeDropdownId == controlId)
         {
@@ -138,7 +138,7 @@ public class SelectSetting : Setting
             float scrollY = DrawSetting.dropdownScrollY;
             DrawSetting.OnPostDraw += () =>
             {
-                GUI.Box(dropRect, "", Magnetar_Default.SettingOff);
+                GUI.Box(dropRect, "", ThemeManager.SettingOff);
                 GUI.BeginGroup(dropRect);
                 int i = 0;
                 foreach (var kvp in Options)
@@ -148,7 +148,7 @@ public class SelectSetting : Setting
                     {
                         Rect row = new(0, drawY, dropRect.width, rowHeight);
                         string disp = (CustomNames != null && CustomNames.ContainsKey(kvp.Key)) ? CustomNames[kvp.Key] : kvp.Value;
-                        GUI.Box(row, disp, (Value == kvp.Key) ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+                        GUI.Box(row, disp, (Value == kvp.Key) ? ThemeManager.SettingOn : ThemeManager.SettingOff);
                     }
                     i++;
                 }

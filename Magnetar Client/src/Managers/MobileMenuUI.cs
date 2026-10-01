@@ -280,7 +280,7 @@ public static class MobileMenuUI
                 int borderThickness = Mathf.Max(4, Mathf.RoundToInt(rawLogo.width * 0.045f));
 
                 // Circularize and add accent border
-                _logoTex = CreateCircularBadgeTexture(rawLogo, Magnetar_Default.AccentColor, borderThickness);
+                _logoTex = CreateCircularBadgeTexture(rawLogo, ThemeManager.AccentColor, borderThickness);
 
                 Magnetar_Logger.GUILogger.Msg("Successfully circularized logo with accent border!");
             }
@@ -292,7 +292,7 @@ public static class MobileMenuUI
 
         if (_circleTex == null)
         {
-            _circleTex = CreateCircleTexture(128, Magnetar_Default.BackgroundColor, Magnetar_Default.AccentColor, 6);
+            _circleTex = CreateCircleTexture(128, ThemeManager.BackgroundColor, ThemeManager.AccentColor, 6);
         }
 
         Texture2D activeBadgeTex = _logoTex != null ? _logoTex : _circleTex;
@@ -302,7 +302,7 @@ public static class MobileMenuUI
             _circleBtnStyle = new GUIStyle();
             _circleBtnStyle.alignment = TextAnchor.MiddleCenter;
             _circleBtnStyle.fontStyle = FontStyle.Bold;
-            _circleBtnStyle.normal.textColor = Magnetar_Default.AccentColor;
+            _circleBtnStyle.normal.textColor = ThemeManager.AccentColor;
 
             _circleBtnStyle.border = new RectOffset();
             _circleBtnStyle.padding = new RectOffset();
@@ -326,14 +326,14 @@ public static class MobileMenuUI
             _closeBtnStyle.overflow = new RectOffset();
         }
 
-        if (Magnetar_Default.CategoryModuleOnStyle != null)
+        if (ThemeManager.CategoryModuleOnStyle != null)
         {
-            _closeBtnStyle.normal.background = Magnetar_Default.CategoryModuleOnStyle.normal.background;
-            _closeBtnStyle.normal.textColor = Magnetar_Default.CategoryModuleOnStyle.normal.textColor;
-            _closeBtnStyle.hover.background = Magnetar_Default.CategoryModuleOnStyle.hover.background;
-            _closeBtnStyle.hover.textColor = Magnetar_Default.CategoryModuleOnStyle.hover.textColor;
-            _closeBtnStyle.active.background = Magnetar_Default.CategoryModuleOnStyle.active.background;
-            _closeBtnStyle.active.textColor = Magnetar_Default.CategoryModuleOnStyle.active.textColor;
+            _closeBtnStyle.normal.background = ThemeManager.CategoryModuleOnStyle.normal.background;
+            _closeBtnStyle.normal.textColor = ThemeManager.CategoryModuleOnStyle.normal.textColor;
+            _closeBtnStyle.hover.background = ThemeManager.CategoryModuleOnStyle.hover.background;
+            _closeBtnStyle.hover.textColor = ThemeManager.CategoryModuleOnStyle.hover.textColor;
+            _closeBtnStyle.active.background = ThemeManager.CategoryModuleOnStyle.active.background;
+            _closeBtnStyle.active.textColor = ThemeManager.CategoryModuleOnStyle.active.textColor;
         }
         _closeBtnStyle.fontSize = Mathf.RoundToInt(Config.S(20f));
 
@@ -427,7 +427,7 @@ public static class MobileMenuUI
         bool isHover = closeRect.Contains(e.mousePosition);
         if (isHover)
         {
-            GUI.backgroundColor = Magnetar_Default.AccentColor;
+            GUI.backgroundColor = ThemeManager.AccentColor;
         }
 
         GUI.Box(closeRect, "✕", _closeBtnStyle);

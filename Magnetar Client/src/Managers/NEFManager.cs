@@ -35,7 +35,7 @@ public static class NEFManager
             windowRect,
             (GUI.WindowFunction)NEFGUI.DrawNEFWindow,
             "Not Enough Fusions",
-            Magnetar_Default.CategoryWindowStyle
+            ThemeManager.CategoryWindowStyle
         );
     }
 }

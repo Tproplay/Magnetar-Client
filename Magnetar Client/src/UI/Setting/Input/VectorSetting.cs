@@ -47,7 +47,7 @@ public class Vector2Setting : Setting
 
         // Label: Left space
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), Translator.Translate(Name), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, labelW, elemH), Translator.Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Component layout: [X] [box] [Y] [box]
         float itemW = (totalControlW - (gap * 3f) - (subLabelW * 2f)) / 2f;
@@ -56,14 +56,14 @@ public class Vector2Setting : Setting
         float currX = resetStartX - gap - totalControlW;
 
         // X component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", Magnetar_Default.TextStyle);
+        GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", ThemeManager.TextStyle);
         currX += subLabelW + gap;
         Rect xRect = new(currX, y, itemW, elemH);
         string newX = DrawSetting.DrawManualTextField(xRect, Value.x.ToString("0.##"), "0");
         currX += itemW + gap;
 
         // Y component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", Magnetar_Default.TextStyle);
+        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", ThemeManager.TextStyle);
         currX += subLabelW + gap;
         Rect yRect = new(currX, y, itemW, elemH);
         string newY = DrawSetting.DrawManualTextField(yRect, Value.y.ToString("0.##"), "0");
@@ -128,7 +128,7 @@ public class Vector2IntSetting : Setting
 
         // Label: Left space
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), Translator.Translate(Name), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, labelW, elemH), Translator.Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Component layout: [X] [box] [Y] [box]
         float itemW = (totalControlW - (gap * 3f) - (subLabelW * 2f)) / 2f;
@@ -137,14 +137,14 @@ public class Vector2IntSetting : Setting
         float currX = resetStartX - gap - totalControlW;
 
         // X component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", Magnetar_Default.TextStyle);
+        GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", ThemeManager.TextStyle);
         currX += subLabelW + gap;
         Rect xRect = new(currX, y, itemW, elemH);
         string newX = DrawSetting.DrawManualTextField(xRect, Value.x.ToString(), "0");
         currX += itemW + gap;
 
         // Y component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", Magnetar_Default.TextStyle);
+        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", ThemeManager.TextStyle);
         currX += subLabelW + gap;
         Rect yRect = new(currX, y, itemW, elemH);
         string newY = DrawSetting.DrawManualTextField(yRect, Value.y.ToString(), "0");
@@ -209,7 +209,7 @@ public class Vector3Setting : Setting
 
         // Label: Left space
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), Translator.Translate(Name), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, labelW, elemH), Translator.Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Component layout: [X] [box] [Y] [box] [Z] [box]
         float itemW = (totalControlW - (gap * 5f) - (subLabelW * 3f)) / 3f;
@@ -218,21 +218,21 @@ public class Vector3Setting : Setting
         float currX = resetStartX - gap - totalControlW;
 
         // X component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", Magnetar_Default.TextStyle);
+        GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", ThemeManager.TextStyle);
         currX += subLabelW + gap;
         Rect xRect = new(currX, y, itemW, elemH);
         string newX = DrawSetting.DrawManualTextField(xRect, Value.x.ToString("0.##"), "0");
         currX += itemW + gap;
 
         // Y component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", Magnetar_Default.TextStyle);
+        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", ThemeManager.TextStyle);
         currX += subLabelW + gap;
         Rect yRect = new(currX, y, itemW, elemH);
         string newY = DrawSetting.DrawManualTextField(yRect, Value.y.ToString("0.##"), "0");
         currX += itemW + gap;
 
         // Z component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Z", Magnetar_Default.TextStyle);
+        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Z", ThemeManager.TextStyle);
         currX += subLabelW + gap;
         Rect zRect = new(currX, y, itemW, elemH);
         string newZ = DrawSetting.DrawManualTextField(zRect, Value.z.ToString("0.##"), "0");
@@ -297,7 +297,7 @@ public class Vector3IntSetting : Setting
 
         // Label: Left space
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), Translator.Translate(Name), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, labelW, elemH), Translator.Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Component layout: [X] [box] [Y] [box] [Z] [box]
         float itemW = (totalControlW - (gap * 5f) - (subLabelW * 3f)) / 3f;
@@ -306,21 +306,21 @@ public class Vector3IntSetting : Setting
         float currX = resetStartX - gap - totalControlW;
 
         // X component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", Magnetar_Default.TextStyle);
+        GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", ThemeManager.TextStyle);
         currX += subLabelW + gap;
         Rect xRect = new(currX, y, itemW, elemH);
         string newX = DrawSetting.DrawManualTextField(xRect, Value.x.ToString(), "0");
         currX += itemW + gap;
 
         // Y component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", Magnetar_Default.TextStyle);
+        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", ThemeManager.TextStyle);
         currX += subLabelW + gap;
         Rect yRect = new(currX, y, itemW, elemH);
         string newY = DrawSetting.DrawManualTextField(yRect, Value.y.ToString(), "0");
         currX += itemW + gap;
 
         // Z component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Z", Magnetar_Default.TextStyle);
+        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Z", ThemeManager.TextStyle);
         currX += subLabelW + gap;
         Rect zRect = new(currX, y, itemW, elemH);
         string newZ = DrawSetting.DrawManualTextField(zRect, Value.z.ToString(), "0");

@@ -23,8 +23,8 @@ public class main : MelonMod
 public class main : BasePlugin
 #endif
 {
-    public static main Instance;
-    public static new HarmonyLib.Harmony HarmonyInstance;
+    public static main Instance { get; private set; }
+    public static new HarmonyLib.Harmony HarmonyInstance { get; private set; }
     public bool hasWarmedUp = false;
 
 #if MELONLOADER || RELEASE_MELON

@@ -186,9 +186,13 @@ public class SectionSetting : Setting
         Rect resetRect = new(resetStartX, y, actionBtnW, elemH);
 
         GUIStyle addStyle = canAdd ? ThemeManager.SectionAddButtonStyle : ThemeManager.CategoryModuleOffStyle;
-        if (GUI.Button(addBtnRect, canAdd ? Translator.Translate("+ Add Section") : Translator.Translate("Max Sections Reached"), addStyle))
+        string buttonText = canAdd ? Translator.Translate("+ Add Section") : Translator.Translate("Max Sections Reached");
+
+        GUI.Box(addBtnRect, buttonText, addStyle);
+        if (canAdd && e.type == EventType.MouseDown && e.button == 0 && addBtnRect.Contains(e.mousePosition))
         {
-            if (canAdd) AddSection();
+            e.Use();
+            AddSection();
         }
 
         if (DrawResetButton(resetRect))

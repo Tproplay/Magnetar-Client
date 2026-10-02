@@ -414,7 +414,7 @@ public class CustomDifficulty : Module
                 if (Board.Instance != null && Board.Instance.damageReporter != null)
                 {
                     float finalDamage = Mathf.Max(0f, totalZombieHp);
-                    Vector3 centerPos = __instance.CenterPosition;
+                    Vector3 centerPos = __instance.centerPosition;
                     Il2CppSystem.Nullable<Color> reportColor = new(new Color(1f, 1f, 1f, 0.55f));
 
                     Board.Instance.damageReporter.Report(reportType, (long)finalDamage, centerPos, reportColor);

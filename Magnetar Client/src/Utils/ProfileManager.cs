@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using Magnetar_Client.Core;
 using static Magnetar_Client.Utils.Magnetar_Logger;
-using static Magnetar_Client.Api.MagnetarApi;
+using static Magnetar_Client.Api.PathsManager;
 using static Magnetar_Client.Preferences;
 
 #if MELONLOADER || RELEASE_MELON

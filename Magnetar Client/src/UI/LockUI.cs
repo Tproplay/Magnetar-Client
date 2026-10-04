@@ -1,37 +1,27 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿#if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
+#endif
+using HarmonyLib;
+using Magnetar_Client.Core;
+using UnityEngine;
 
 namespace Magnetar_Client.UI;
 
 public static class LockUI
 {
-    public static void LockGameCanvas(bool locked)
+    [HarmonyPatch(typeof(Input), "GetKeyDown", new[] { typeof(KeyCode) })]
+    public static class BlockSKeysPatch
     {
-        if (GameAPP.canvas != null)
-            LockCanvas(GameAPP.canvas.GetComponent<Canvas>(), locked);
-
-        if (GameAPP.canvasUp != null)
-            LockCanvas(GameAPP.canvasUp.GetComponent<Canvas>(), locked);
-    }
-
-    static void LockCanvas(Canvas canvas, bool locked)
-    {
-        if (canvas == null) return;
-
-        CanvasGroup group = canvas.GetComponent<CanvasGroup>();
-        if (group == null)
+        public static bool BlockKeys;
+        public static bool Prefix(KeyCode key, ref bool __result)
         {
-            group = canvas.gameObject.AddComponent<CanvasGroup>();
-        }
+            if ((Config.showgui || HUDManager.forceShow) && BlockKeys)
+            {
+                __result = false;
+                return false;
+            }
 
-        group.blocksRaycasts = !locked;
-        group.interactable = !locked;
-
-        GraphicRaycaster raycaster = canvas.GetComponent<GraphicRaycaster>();
-        if (raycaster != null)
-        {
-            raycaster.enabled = !locked;
+            return true;
         }
     }
 }

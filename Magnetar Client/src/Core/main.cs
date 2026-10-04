@@ -96,76 +96,72 @@ public class Main
 
     public void OnUpdate()
     {
+        LockUI.BlockSKeysPatch.BlockKeys = false;
         UI.GUIHelper._UpdateRainbowColor();
 
-        if (HUDRenderer.Elements.Count != 0)
-            HUDRenderer.UpdateElements();
-
-        if (!ModuleManager.IsInitialized) return;
+        HUDRenderer.UpdateElements();
 
         if (Input.GetKeyDown(KeyCode.RightShift) && !HUDManager.forceShow)
         {
-            BlockSKeysPatch.BlockEscKey = true;
             Config.showgui = !Config.showgui;
-            LockUI.LockGameCanvas(Config.showgui);
-            SaveLoad.Save();
+            if (!Config.showgui) SaveLoad.Save();
         }
 
-        if (!Config.showgui && !HUDManager.forceShow)
-        {
-            ModuleManager.HandleHotkeys();
-        }
-
-        foreach (var mod in ModuleManager.Modules)
-        {
-            mod?.OnUpdate();
-        }
-
+        ModuleManager.OnUpdate();
 
         if (!HasWarmedUp) return;
 
         #region Handle Escape Key
-        if (!Config.showgui) BlockSKeysPatch.BlockEscKey = false;
-
-        Event currentEvent = Event.current;
-        if (currentEvent != null && currentEvent.type == EventType.KeyDown && currentEvent.keyCode == KeyCode.Escape)
+        if (Input.GetKeyDown(KeyCode.Escape) && Config.CurrentTab == TabType.MODULES)
         {
+            bool isInputBlocked = ModuleManager.bindingModuleId != -1
+                                  || UI.WindowDrawing.DrawSetting.focusedControlId != -1
+                                  || UI.WindowDrawing.DrawSetting.activeTextFieldId != -1;
+
             if (ModuleManager.showModules)
             {
                 Config.showgui = false;
-                currentEvent.Use();
                 SaveLoad.Save();
                 ResetInputBind();
+                Input.ResetInputAxes();
             }
-            else if (!ModuleManager.showModules && ModuleManager.showSettings)
+            else if (!isInputBlocked)
             {
-                if (ModuleManager.bindingModuleId == -1 && UI.WindowDrawing.DrawSetting.focusedControlId == -1)
+                if (ModuleManager.showSettings)
                 {
                     ModuleManager.showModules = true;
                     ModuleManager.showSettings = false;
                     ModuleManager.showSelectionGui = false;
-                    foreach (var m in ModuleManager.Modules) { m.ShowSettings = false; }
-                   
+
+                    if (ModuleManager.Modules != null)
+                    {
+                        foreach (var m in ModuleManager.Modules)
+                        {
+                            m.ShowSettings = false;
+                        }
+                    }
+
                     ResetInputBind();
-                    currentEvent.Use();
+                    Input.ResetInputAxes();
                 }
-            }
-            else if (!ModuleManager.showModules && !ModuleManager.showSettings && ModuleManager.showSelectionGui)
-            {
-                if (ModuleManager.bindingModuleId == -1 && UI.WindowDrawing.DrawSetting.focusedControlId == -1)
+                else if (ModuleManager.showSelectionGui)
                 {
                     ModuleManager.showSettings = true;
                     ModuleManager.showSelectionGui = false;
+
                     ResetInputBind();
-                    currentEvent.Use();
+                    Input.ResetInputAxes();
                 }
             }
         }
         #endregion
+
+        if (Config.showgui) LockUI.BlockSKeysPatch.BlockKeys = true;
     }
 
     public void OnGUI()
     {
+        LockUI.BlockSKeysPatch.BlockKeys = false;
         if (!ModuleManager.IsInitialized) return;
 
         Event e = Event.current;
@@ -223,19 +219,15 @@ public class Main
         {
             GUI.matrix = originalMatrix;
         }
+
+        if (Config.showgui) LockUI.BlockSKeysPatch.BlockKeys = true;
     }
 
     public void OnApplicationQuit()
     {
-        try
-        {
-        }
-        catch (Exception ex)
-        {
-            DebugLogger.Error($"[Api] Exception in OnApplicationQuit event: {ex}");
-        }
-
+        Api.Actions.Core.OnEarlyApplicationQuit?.Invoke();
         SaveLoad.Save(true);
+        Api.Actions.Core.OnLateApplicationQuit?.Invoke();
         DebugLogger.Msg("Magnetar Preferences Saved!");
     }
 
@@ -264,27 +256,4 @@ public class Main
 
     }
 
-    
-
-    [HarmonyPatch(typeof(Input), "GetKeyDown", new[] { typeof(KeyCode) })]
-    public static class BlockSKeysPatch
-    {
-        public static bool BlockEscKey;
-        public static bool Prefix(KeyCode key, ref bool __result)
-        {
-            if ((Config.showgui || HUDManager.forceShow) && key != KeyCode.RightShift)
-            {
-                __result = false;
-                return false;
-            }
-
-            if (BlockEscKey && key == KeyCode.Escape)
-            {
-                __result = false;
-                return false;
-            }
-
-            return true;
-        }
-    }
 }

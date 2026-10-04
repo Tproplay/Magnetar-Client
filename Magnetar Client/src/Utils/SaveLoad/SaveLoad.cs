@@ -10,6 +10,7 @@ using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Utils.SaveLoadData;
 using static Magnetar_Client.Api.MagnetarApi;
+using Magnetar_Client.Api;
 
 namespace Magnetar_Client.Utils;
 
@@ -17,10 +18,6 @@ public static class SaveLoad
 {
     private static float LastSaved;
     private static readonly object _fileLock = new();
-
-    public static string ProfilesDir => SaveLoadPlatform.ProfilesDir;
-
-    private static string TexturePath => Path.Combine(DataDir, "TextureData.json");
 
     public static void Save(bool force = false)
     {
@@ -103,7 +100,7 @@ public static class SaveLoad
             }
         }
 
-        string savePath = SaveLoadPlatform.GetSafeProfilePath(Config.CurrentProfile);
+        string savePath = PathsManager.GetSafeProfilePath(Config.CurrentProfile);
         string dir = Path.GetDirectoryName(savePath);
 
         try
@@ -119,6 +116,9 @@ public static class SaveLoad
         // ==========================================
         // 2. SAVE TEXTURE OVERRIDES
         // ==========================================
+
+        string TexturePath = PathsManager.TextureDataPath;
+
         try
         {
             if (File.Exists(TexturePath))
@@ -165,7 +165,7 @@ public static class SaveLoad
 
     public static void Load()
     {
-        string loadPath = SaveLoadPlatform.GetSafeProfilePath(Config.CurrentProfile);
+        string loadPath = PathsManager.GetSafeProfilePath(Config.CurrentProfile);
 
         lock (_fileLock)
         {
@@ -286,7 +286,7 @@ public static class SaveLoad
             }
 
             // 6. Texture Overrides Data
-            string texPath = SaveLoadPlatform.GetSafeTexturePath();
+            string texPath = PathsManager.TextureDataPath;
             if (File.Exists(texPath))
             {
                 try

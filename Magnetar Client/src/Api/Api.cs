@@ -60,13 +60,6 @@ public static class MagnetarApi
         Magnetar_Logger.DebugLogger.Error(msg);
     }
 
-    public static string ModsDir => PathsManager.ModsDir;
-    public static string AddonsDir => PathsManager.AddonsDir;
-    public static string ConfigDir => PathsManager.ConfigDir;
-    public static string TranslationRootDir => PathsManager.TranslationRootDir;
-    public static string GetProfilePath(string profileName) => PathsManager.GetProfilePath(profileName);
-
     public static void RegisterElement<T>() where T : HudElement => Magnetar_Client.Core.HUDRenderer.RegisterElement(typeof(T));
-    public static string DataDir => PathsManager.DataDir;
 
 }

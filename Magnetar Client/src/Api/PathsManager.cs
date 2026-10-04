@@ -7,10 +7,10 @@ using UnityEngine;
 
 namespace Magnetar_Client.Api;
 
-internal static class PathsManager
+public static class PathsManager
 {
     static string _cachedModsDir;
-    internal static string ModsDir
+    public static string ModsDir
     {
         get
         {
@@ -69,11 +69,11 @@ internal static class PathsManager
         }
     }
 
-    internal static string AddonsDir => Path.Combine(ModsDir, "Magnetar Addon");
+    public static string AddonsDir => Path.Combine(ModsDir, "Magnetar Addon");
 
     private static string _cachedConfigDir;
 
-    internal static string ConfigDir
+    public static string ConfigDir
     {
         get
         {
@@ -144,16 +144,41 @@ internal static class PathsManager
         }
     }
 
-    internal static string GetProfilePath(string profileName)
+    public static string ProfilesDir => GetProfilesDir();
+    static string GetProfilesDir()
     {
-        string safeName = string.Join("_", profileName.Split(Path.GetInvalidFileNameChars()));
-        return Path.Combine(ConfigDir, $"Magnetar_{safeName}.json");
+        var path = Path.Combine(ConfigDir, "Magnetar Profiles");
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+        return path;
     }
 
-    internal static string TranslationRootDir => Path.Combine(ModsDir, "Magnetar Translation");
+    public static string GetProfilePath(string profileName)
+    {
+        string safeName = string.Join("_", profileName.Split(Path.GetInvalidFileNameChars()));
+        return Path.Combine(ProfilesDir, $"Magnetar_{safeName}.json");
+    }
+    public static string GetSafeProfilePath(string profileName)
+    {
+        string path = GetProfilePath(profileName);
+        return path;
+    }
 
-    internal static string GetLanguageDir(string targetLanguage) => Path.Combine(TranslationRootDir, targetLanguage);
+    public static string TranslationRootDir => Path.Combine(ModsDir, "Magnetar Translation");
 
-    internal static string DataDir => Path.Combine(ModsDir, "Magnetar Data");
+    public static string GetLanguageDir(string targetLanguage) => Path.Combine(TranslationRootDir, targetLanguage);
 
+    public static string DataDir => GetSafeDataDir();
+    static string GetSafeDataDir()
+    {
+        var path = Path.Combine(ModsDir, "Magnetar Data");
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+        return Path.Combine(ModsDir, "Magnetar Data");
+    }
+
+    public static string TextureDataPath => GetSafeTexturePath();
+    static string GetSafeTexturePath()
+    {
+        if (!Directory.Exists(DataDir)) Directory.CreateDirectory(DataDir);
+        return Path.Combine(DataDir, "TextureData.json");
+    }
 }

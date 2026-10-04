@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using static Magnetar_Client.Api.MagnetarApi;
+using static Magnetar_Client.Api.PathsManager;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Core;

@@ -14,6 +14,9 @@ public static class Actions
 
         public static Action OnEarlyInitializeCore;
         public static Action OnLateInitializeCore;
+
+        public static Action OnEarlyApplicationQuit;
+        public static Action OnLateApplicationQuit;
     }
 
     public static class SaveLoad

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using Magnetar_Client.UI.Setting;
-using static Magnetar_Client.Api.MagnetarApi;
+using static Magnetar_Client.Api.PathsManager;
 
 namespace Magnetar_Client.Core;
 

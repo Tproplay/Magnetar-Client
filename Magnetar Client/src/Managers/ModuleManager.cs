@@ -145,7 +145,21 @@ public static class ModuleManager
         }
     }
 
-    public static void HandleHotkeys()
+    public static void OnUpdate()
+    {
+        if (!Config.showgui && !HUDManager.forceShow)
+        {
+            HandleHotkeys();
+        }
+
+        foreach (var mod in Modules)
+        {
+            mod?.OnUpdate();
+        }
+
+    }
+
+    static void HandleHotkeys()
     {
         if (focusedControlId != -1 || bindingModuleId != -1) return;
 

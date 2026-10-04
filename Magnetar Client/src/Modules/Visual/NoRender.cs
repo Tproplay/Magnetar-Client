@@ -48,7 +48,7 @@ public class NoRender : Module
 
         #region Particle
         // 1. Setup Path & Ensure Directory Exists
-        string dirPath = Api.MagnetarApi.DataDir;
+        string dirPath = Api.PathsManager.DataDir;
 
         if (!Directory.Exists(dirPath))
         {

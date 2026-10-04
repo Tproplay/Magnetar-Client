@@ -3,7 +3,7 @@ using Magnetar_Client.Utils;
 using System;
 using UnityEngine;
 using Il2CppSystem.IO;
-using static Magnetar_Client.Api.MagnetarApi;
+using static Magnetar_Client.Api.PathsManager;
 
 #if MELONLOADER || RELEASE_MELON
 

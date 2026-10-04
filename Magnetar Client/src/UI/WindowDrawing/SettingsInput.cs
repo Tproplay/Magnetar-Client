@@ -458,9 +458,19 @@ public static class DrawSetting
             allSelected = true;
         }
 
-        if (GUI.Button(toggleRect,
-            allSelected ? Translator.Translate("Deselect All") : Translator.Translate("Select All"),
-            !allSelected ? ThemeManager.SettingOn : ThemeManager.SettingOff))
+        string toggleLabel = allSelected
+            ? Translator.Translate("Deselect All")
+            : Translator.Translate("Select All");
+
+        GUIStyle toggleStyle = !allSelected
+            ? ThemeManager.SettingOn
+            : ThemeManager.SettingOff;
+
+        // Render visual element without internal GUI.Button hotControl interaction
+        GUI.Box(toggleRect, toggleLabel, toggleStyle);
+
+        // Manual click detection using Event.current
+        if (e.type == EventType.MouseDown && e.button == 0 && toggleRect.Contains(e.mousePosition))
         {
             foreach (var item in filteredItems)
             {

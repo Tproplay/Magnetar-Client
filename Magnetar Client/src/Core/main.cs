@@ -23,6 +23,9 @@ public class Main
         }
         Instance = new Main();
 
+        // Load the IAddons first so that they can register their actions
+        AddonManager.InitAddons();
+
         Api.Actions.Core.OnEarlyInitialize?.Invoke();
 
         // Initialize the logger first so subsequent diagnostics are captured
@@ -65,13 +68,14 @@ public class Main
         }
     }
 
-    public void InitializeCore()
+    void InitializeCore()
     {
         Api.Actions.Core.OnEarlyInitializeCore?.Invoke();
 
         SaveLoad.InitializePreferences();
 
         ModuleManager.Init();
+        AddonManager.InitModules();
         HUDRenderer.Init();
         NEFManager.Init();
         TopBar.Init();

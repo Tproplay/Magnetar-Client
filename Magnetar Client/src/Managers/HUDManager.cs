@@ -362,16 +362,14 @@ public static class HUDManager
 public static class HUDRenderer
 {
     public static List<HudElement> Elements = new();
-    public static MultiSelectSetting HudToggles;
-    private static bool isMasterVisible;
+    public static MultiSelectSetting HudToggles = new("Active Elements")
+    {
+        CustomNames = new Dictionary<int, string>()
+    };
+    private static bool isMasterVisible ;
 
     public static void Init()
     {
-        HudToggles = new MultiSelectSetting("Active Elements")
-        {
-            CustomNames = new Dictionary<int, string>()
-        };
-
         int currentWindowId = 4000;
 
         var types = Assembly.GetExecutingAssembly().GetTypes()

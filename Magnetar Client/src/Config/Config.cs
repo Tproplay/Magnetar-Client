@@ -10,15 +10,6 @@ using UnityEngine;
 
 namespace Magnetar_Client;
 
-public enum TabType
-{
-    MODULES,
-    HUD,
-    GUI,
-    NEF,
-    PROFILE,
-}
-
 public static class Magnetar_Info
 {
     public const string ModName = "Magnetar Client";

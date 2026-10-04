@@ -17,8 +17,6 @@ public static class ModuleManager
 {
     public static bool IsInitialized = false;
     public static List<Modules.Module> Modules = new();
-
-    public static bool showAddonCategory = false;
     public static bool showModules = true;
     public static bool showSettings = false;
     public static bool showSelectionGui = false;
@@ -36,6 +34,7 @@ public static class ModuleManager
 
     public static void Init()
     {
+        #region Register All Interal Modules
         Type[] exportedTypes;
         try
         {
@@ -59,6 +58,8 @@ public static class ModuleManager
             RegisterModule(type);
         }
 
+        #endregion
+
         CategoryWindowDrawer.InitializeLayout();
         MultiSelectWindowDrawer.InitializeLayout();
         SearchWindowDrawer.Initialize();
@@ -69,11 +70,6 @@ public static class ModuleManager
 
         IsInitialized = true;
         DebugLogger.Msg($"Loaded {Modules.Count} modules");
-    }
-
-    public static void RegisterCategory(string categoryName)
-    {
-        ModuleCategory.Register(categoryName);
     }
 
     internal static void RegisterModule(Type type)
@@ -106,8 +102,6 @@ public static class ModuleManager
             {
                 CategoryWindowDrawer.EnsureCategoryInitialized(instance.Category);
             }
-
-            DebugLogger.Msg($"[ModuleManager] Registered module: {instance.Name ?? type.Name}");
         }
         catch (Exception ex)
         {

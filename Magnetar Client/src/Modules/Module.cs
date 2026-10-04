@@ -263,8 +263,8 @@ public abstract class Module
         };
     }
 
-    public virtual bool defaultHoldMode { get; set; } = false;
-    public virtual bool defaultActive { get; set; } = false;
+    public virtual bool defaultHoldMode { get; } = false;
+    public virtual bool defaultActive { get; } = false;
 
     public virtual void ResetBuiltIns()
     {
@@ -272,4 +272,5 @@ public abstract class Module
         HoldMode = defaultHoldMode;
         if (Active != defaultActive) Toggle();
     }
+    public virtual bool SaveData { get; } = true;
 }

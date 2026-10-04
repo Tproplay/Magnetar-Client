@@ -364,33 +364,34 @@ public static class HUDRenderer
     public static List<HudElement> Elements = new();
     public static MultiSelectSetting HudToggles = new("Active Elements")
     {
-        CustomNames = new Dictionary<int, string>()
+        CustomNames = new Dictionary<int, string>(),
+        DisplayAlphabetically = true,
     };
     private static bool isMasterVisible ;
 
+    public static int currentWindowId = 4000;
+
     public static void Init()
     {
-        int currentWindowId = 4000;
-
         var types = Assembly.GetExecutingAssembly().GetTypes()
             .Where(t => t.IsSubclassOf(typeof(HudElement)) && !t.IsAbstract);
 
         foreach (var type in types)
         {
-            HudElement element = (HudElement)Activator.CreateInstance(type);
-            element.WindowId = currentWindowId;
-            RegisterElement(element);
-            currentWindowId++;
+            RegisterElement(type);
         }
 
         DebugLogger.Msg($"Registered {Elements.Count} HUD elements");
     }
 
-    public static void RegisterElement(HudElement element)
+    public static void RegisterElement(Type element)
     {
-        Elements.Add(element);
-        HudToggles.AddOption(element.WindowId, element.Name);
-        HudToggles.CustomNames[element.WindowId] = element.Name;
+        HudElement instance = (HudElement)Activator.CreateInstance(element);
+        instance.WindowId = currentWindowId;
+        Elements.Add(instance);
+        HudToggles.AddOption(instance.WindowId, element.Name);
+        HudToggles.CustomNames[instance.WindowId] = element.Name;
+        currentWindowId++;
     }
 
     public static void RenderOverlay()

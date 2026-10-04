@@ -6,59 +6,52 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using Magnetar_Client.UI.Setting;
-
-#if MELONLOADER || RELEASE_MELON
-
-#elif BEPINEX || RELEASE_BEPINEX
-#endif
+using static Magnetar_Client.Api.MagnetarApi;
 
 namespace Magnetar_Client.Utils;
 
-public class ModuleTranslationNode
+public static class TranslatorData
 {
-    [JsonProperty("Name")]
-    public string Name { get; set; }
+    public class ModuleTranslationNode
+    {
+        [JsonProperty("Name")]
+        public string Name { get; set; }
 
-    [JsonProperty("Description")]
-    public string Description { get; set; }
+        [JsonProperty("Description")]
+        public string Description { get; set; }
 
-    [JsonProperty("Search Hints", NullValueHandling = NullValueHandling.Ignore)]
-    public string SearchHints { get; set; }
+        [JsonProperty("Search Hints", NullValueHandling = NullValueHandling.Ignore)]
+        public string SearchHints { get; set; }
 
-    [JsonProperty("settings")]
-    public Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
-}
+        [JsonProperty("settings")]
+        public Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
+    }
 
-public class HudTranslationNode
-{
-    [JsonProperty("Name")]
-    public string Name { get; set; }
-}
+    public class HudTranslationNode
+    {
+        [JsonProperty("Name")]
+        public string Name { get; set; }
+    }
 
-public static class Translator
-{
-    private static bool _isLoaded = false;
-    private static bool _modulesLinked = false;
-    private static bool _hudLinked = false;
+    internal static bool IsLoaded = false;
+    internal static bool ModulesLinked = false;
+    internal static bool HudLinked = false;
 
-    private static Dictionary<string, string> _exactTranslations = new(StringComparer.Ordinal);
-    private static Dictionary<Regex, string> _regexTranslations = new();
-    private static Dictionary<System.Type, Dictionary<int, string>> _nameCache = new();
-    private static HashSet<string> _regexMatchedInputs = new(StringComparer.Ordinal);
-    private static HashSet<string> _knownEnglishStrings = new(StringComparer.Ordinal);
-    private static readonly HashSet<string> _dumpedUntranslated = new(StringComparer.Ordinal);
-    private static readonly object _untranslatedFileLock = new();
+    internal static Dictionary<string, string> ExactTranslations = new(StringComparer.Ordinal);
+    internal static Dictionary<Regex, string> RegexTranslations = new();
+    internal static Dictionary<System.Type, Dictionary<int, string>> NameCache = new();
+    internal static HashSet<string> RegexMatchedInputs = new(StringComparer.Ordinal);
+    internal static HashSet<string> KnownEnglishStrings = new(StringComparer.Ordinal);
+    internal static readonly HashSet<string> DumpedUntranslated = new(StringComparer.Ordinal);
+    internal static readonly object UntranslatedFileLock = new();
 
-    private static HashSet<string> _cachedBlacklist = new(StringComparer.Ordinal);
-    private static bool _blacklistDirty = true;
-    private static bool _missingStringsDirty = false;
+    internal static HashSet<string> CachedBlacklist = new(StringComparer.Ordinal);
+    internal static bool BlacklistDirty = true;
+    internal static bool MissingStringsDirty = false;
 
-    private static string ModsDir => SaveLoad.ModsDir;
-    private static string TranslationRootDir => Path.Combine(ModsDir, "Magnetar Translation");
+    public static string CurrentLanguage => string.IsNullOrWhiteSpace(Config.Language) ? "English" : Config.Language;
 
-    private static string CurrentLanguage => string.IsNullOrWhiteSpace(Config.Language) ? "English" : Config.Language;
-
-    private static string SanitizeFileName(string name)
+    public static string SanitizeFileName(string name)
     {
         string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()));
         string invalidRegStr = string.Format(@"[{0}]", invalidChars);
@@ -67,10 +60,10 @@ public static class Translator
 
     public static void InvalidateBlacklist()
     {
-        _blacklistDirty = true;
+        BlacklistDirty = true;
     }
 
-    private static void ExtractSettingNames(IEnumerable<Setting> settings, Action<string> onFoundName)
+    internal static void ExtractSettingNames(IEnumerable<Setting> settings, Action<string> onFoundName)
     {
         if (settings == null) return;
 
@@ -80,7 +73,6 @@ public static class Translator
 
             onFoundName(setting.Name);
 
-            // Traverse child settings inside SectionSetting instances
             if (setting is UI.Setting.SectionSetting sec)
             {
                 if (sec.Sections != null && sec.Sections.Count > 0)
@@ -95,7 +87,6 @@ public static class Translator
                 }
                 else if (sec.TemplateFactory != null)
                 {
-                    // Fallback to sample template if no sections are spawned yet
                     try
                     {
                         var sampleChildren = sec.TemplateFactory(0);
@@ -107,26 +98,26 @@ public static class Translator
         }
     }
 
-    private static HashSet<string> GetCachedBlacklist()
+    public static HashSet<string> GetCachedBlacklist()
     {
-        if (!_blacklistDirty && _cachedBlacklist.Count > 0)
-            return _cachedBlacklist;
+        if (!BlacklistDirty && CachedBlacklist.Count > 0)
+            return CachedBlacklist;
 
-        _cachedBlacklist.Clear();
+        CachedBlacklist.Clear();
 
-        // 1. Live modules in memory (including SectionSetting children)
+        // 1. Live modules in memory
         bool modulesReady = Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0;
         if (modulesReady)
         {
             foreach (var mod in Core.ModuleManager.Modules)
             {
-                if (!string.IsNullOrEmpty(mod.Name)) _cachedBlacklist.Add(mod.Name);
-                if (!string.IsNullOrEmpty(mod.Description)) _cachedBlacklist.Add(mod.Description);
-                if (!string.IsNullOrEmpty(mod.SearchHints)) _cachedBlacklist.Add(mod.SearchHints);
+                if (!string.IsNullOrEmpty(mod.Name)) CachedBlacklist.Add(mod.Name);
+                if (!string.IsNullOrEmpty(mod.Description)) CachedBlacklist.Add(mod.Description);
+                if (!string.IsNullOrEmpty(mod.SearchHints)) CachedBlacklist.Add(mod.SearchHints);
 
                 if (mod.Settings != null)
                 {
-                    ExtractSettingNames(mod.Settings, name => _cachedBlacklist.Add(name));
+                    ExtractSettingNames(mod.Settings, name => CachedBlacklist.Add(name));
                 }
             }
         }
@@ -138,7 +129,7 @@ public static class Translator
             foreach (var element in Core.HUDRenderer.Elements)
             {
                 if (!string.IsNullOrEmpty(element.Name))
-                    _cachedBlacklist.Add(element.Name);
+                    CachedBlacklist.Add(element.Name);
             }
         }
 
@@ -153,12 +144,12 @@ public static class Translator
                     var node = JsonConvert.DeserializeObject<ModuleTranslationNode>(File.ReadAllText(file));
                     if (node != null)
                     {
-                        if (!string.IsNullOrEmpty(node.Name)) _cachedBlacklist.Add(node.Name);
-                        if (!string.IsNullOrEmpty(node.Description)) _cachedBlacklist.Add(node.Description);
-                        if (!string.IsNullOrEmpty(node.SearchHints)) _cachedBlacklist.Add(node.SearchHints);
+                        if (!string.IsNullOrEmpty(node.Name)) CachedBlacklist.Add(node.Name);
+                        if (!string.IsNullOrEmpty(node.Description)) CachedBlacklist.Add(node.Description);
+                        if (!string.IsNullOrEmpty(node.SearchHints)) CachedBlacklist.Add(node.SearchHints);
                         if (node.Settings != null)
                         {
-                            foreach (var s in node.Settings) _cachedBlacklist.Add(s.Key);
+                            foreach (var s in node.Settings) CachedBlacklist.Add(s.Key);
                         }
                     }
                 }
@@ -177,9 +168,9 @@ public static class Translator
                 {
                     foreach (var kvp in hudDict)
                     {
-                        _cachedBlacklist.Add(kvp.Key);
+                        CachedBlacklist.Add(kvp.Key);
                         if (kvp.Value != null && !string.IsNullOrEmpty(kvp.Value.Name))
-                            _cachedBlacklist.Add(kvp.Value.Name);
+                            CachedBlacklist.Add(kvp.Value.Name);
                     }
                 }
             }
@@ -188,10 +179,10 @@ public static class Translator
 
         if (modulesReady || hudReady)
         {
-            _blacklistDirty = false;
+            BlacklistDirty = false;
         }
 
-        return _cachedBlacklist;
+        return CachedBlacklist;
     }
 
     public static void DumpEnglishTemplate()
@@ -221,7 +212,6 @@ public static class Translator
 
                     if (mod.Settings != null)
                     {
-                        // Recursively extract all names including SectionSetting children
                         ExtractSettingNames(mod.Settings, name =>
                         {
                             node.Settings[name] = name;
@@ -247,7 +237,7 @@ public static class Translator
                 File.WriteAllText(hudPath, JsonConvert.SerializeObject(engHud, Formatting.Indented));
             }
 
-            // General UI Strings Dump (purged against module and HUD blacklist)
+            // General UI Strings Dump
             HashSet<string> blacklist = GetCachedBlacklist();
 
             string stringsPath = Path.Combine(englishDir, "translation_strings.json");
@@ -268,7 +258,7 @@ public static class Translator
 
             bool dirtyStrings = cleanedEngStrings.Count != engStrings.Count;
 
-            foreach (var str in _knownEnglishStrings)
+            foreach (var str in KnownEnglishStrings)
             {
                 if (!blacklist.Contains(str) && !cleanedEngStrings.ContainsKey(str))
                 {
@@ -288,100 +278,7 @@ public static class Translator
         }
     }
 
-    public static void LoadTranslations()
-    {
-        try
-        {
-            string targetLanguage = CurrentLanguage;
-
-            InvalidateBlacklist();
-            DumpEnglishTemplate();
-
-            _exactTranslations.Clear();
-            _regexTranslations.Clear();
-            _nameCache.Clear();
-            _dumpedUntranslated.Clear();
-            _modulesLinked = false;
-            _hudLinked = false;
-
-            string baseDir = Path.Combine(TranslationRootDir, targetLanguage);
-            if (!Directory.Exists(baseDir))
-            {
-                Directory.CreateDirectory(baseDir);
-                TranslatorLogger.Msg($"Created Magnetar Translation directory for: {targetLanguage}");
-            }
-
-            SyncWithEnglishTemplate(targetLanguage);
-
-            // 1. Load exact translation strings
-            string stringsPath = Path.Combine(baseDir, "translation_strings.json");
-            if (File.Exists(stringsPath))
-            {
-                try
-                {
-                    string jsonContent = File.ReadAllText(stringsPath);
-                    _exactTranslations = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent) ?? new(StringComparer.Ordinal);
-                    TranslatorLogger.Msg($"Loaded {_exactTranslations.Count} exact strings for {targetLanguage}.");
-
-                    foreach (var key in _exactTranslations.Keys)
-                    {
-                        _dumpedUntranslated.Add(key);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    TranslatorLogger.Error($"Failed to load exact strings: {ex.Message}");
-                }
-            }
-
-            string untranslatedPath = Path.Combine(baseDir, "untranslated_strings.json");
-            if (File.Exists(untranslatedPath))
-            {
-                try
-                {
-                    var existingUntranslated = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(untranslatedPath));
-                    if (existingUntranslated != null)
-                    {
-                        foreach (var key in existingUntranslated.Keys)
-                        {
-                            _dumpedUntranslated.Add(key);
-                        }
-                    }
-                }
-                catch { }
-            }
-
-            // 2. Load regex rules
-            string regexPath = Path.Combine(baseDir, "translation_regexs.json");
-            if (File.Exists(regexPath))
-            {
-                try
-                {
-                    string jsonContent = File.ReadAllText(regexPath);
-                    var rawData = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent) ?? new();
-
-                    foreach (var entry in rawData)
-                    {
-                        _regexTranslations.Add(new Regex(entry.Key, RegexOptions.Compiled), entry.Value);
-                    }
-                    TranslatorLogger.Msg($"Loaded {_regexTranslations.Count} regex rules for {targetLanguage}.");
-                }
-                catch (Exception ex)
-                {
-                    TranslatorLogger.Error($"Failed to load regex strings: {ex.Message}");
-                }
-            }
-
-            _isLoaded = true;
-        }
-        catch (Exception ex)
-        {
-            TranslatorLogger.Error($"Load translations failed: {ex.Message}");
-            _isLoaded = true;
-        }
-    }
-
-    private static void SyncWithEnglishTemplate(string targetLanguage)
+    public static void SyncWithEnglishTemplate(string targetLanguage)
     {
         if (string.Equals(targetLanguage, "English", StringComparison.OrdinalIgnoreCase)) return;
 
@@ -435,7 +332,7 @@ public static class Translator
         }
     }
 
-    private static void SyncJsonDictionary(string engPath, string targetPath)
+    public static void SyncJsonDictionary(string engPath, string targetPath)
     {
         if (!File.Exists(engPath)) return;
 
@@ -473,7 +370,7 @@ public static class Translator
         }
     }
 
-    private static void SyncModulesDirectory(string engDir, string targetDir)
+    public static void SyncModulesDirectory(string engDir, string targetDir)
     {
         if (!Directory.Exists(engDir)) return;
         if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
@@ -531,7 +428,7 @@ public static class Translator
         }
     }
 
-    private static void SyncHudJson(string engPath, string targetPath)
+    public static void SyncHudJson(string engPath, string targetPath)
     {
         if (!File.Exists(engPath)) return;
 
@@ -564,7 +461,7 @@ public static class Translator
         }
     }
 
-    private static void SyncEnumJson(string engPath, string targetPath)
+    public static void SyncEnumJson(string engPath, string targetPath)
     {
         if (!File.Exists(engPath)) return;
 
@@ -593,86 +490,7 @@ public static class Translator
         }
     }
 
-    /// <summary>
-    /// Translates an input string. Only dumps to untranslated_strings.json if the string
-    /// is completely missing from translation_strings.json and regex translations.
-    /// </summary>
-    public static string Translate(string input)
-    {
-        if (string.IsNullOrEmpty(input)) return input;
-
-        if (!_isLoaded) LoadTranslations();
-
-        if (!_modulesLinked && Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
-        {
-            LinkModuleTranslations();
-            _modulesLinked = true;
-        }
-
-        if (!_hudLinked && Core.HUDRenderer.Elements != null && Core.HUDRenderer.Elements.Count > 0)
-        {
-            LinkHudTranslations();
-            _hudLinked = true;
-        }
-
-        if (string.IsNullOrWhiteSpace(input)) return input;
-
-        // 1. Exact translation
-        if (_exactTranslations.TryGetValue(input, out string exactMatch))
-        {
-            return exactMatch;
-        }
-
-        // 2. Regex
-        foreach (var rule in _regexTranslations)
-        {
-            Match match = rule.Key.Match(input);
-            if (match.Success)
-            {
-                string template = rule.Value;
-
-                for (int i = 1; i < match.Groups.Count; i++)
-                {
-                    if (match.Groups[i].Success)
-                    {
-                        string val = match.Groups[i].Value;
-                        if (string.IsNullOrWhiteSpace(val) || val == "：" || val == ":") continue;
-
-                        string finalWord = val;
-                        if (_exactTranslations.TryGetValue(val, out string translatedCapture))
-                        {
-                            finalWord = translatedCapture;
-                        }
-
-                        template = template.Replace($"{{{i}}}", finalWord);
-                    }
-                }
-
-                _regexMatchedInputs.Add(input);
-                _exactTranslations[input] = template;
-                return template;
-            }
-        }
-
-        _exactTranslations[input] = input;
-
-        if (string.Equals(CurrentLanguage, "English", StringComparison.OrdinalIgnoreCase))
-        {
-            return input;
-        }
-
-        HashSet<string> blacklist = GetCachedBlacklist();
-        if (!blacklist.Contains(input))
-        {
-            _knownEnglishStrings.Add(input);
-            _missingStringsDirty = true;
-            AppendUntranslatedStringToDisk(input);
-        }
-
-        return input;
-    }
-
-    private static void LinkModuleTranslations()
+    public static void LinkModuleTranslations()
     {
         string currentLang = CurrentLanguage;
         if (string.Equals(currentLang, "English", StringComparison.OrdinalIgnoreCase)) return;
@@ -716,9 +534,9 @@ public static class Translator
 
                     if (node != null)
                     {
-                        if (!string.IsNullOrEmpty(node.Name)) _exactTranslations[mod.Name] = node.Name;
-                        if (!string.IsNullOrEmpty(node.Description)) _exactTranslations[mod.Description] = node.Description;
-                        if (!string.IsNullOrEmpty(node.SearchHints) && !string.IsNullOrEmpty(mod.SearchHints)) _exactTranslations[mod.SearchHints] = node.SearchHints;
+                        if (!string.IsNullOrEmpty(node.Name)) ExactTranslations[mod.Name] = node.Name;
+                        if (!string.IsNullOrEmpty(node.Description)) ExactTranslations[mod.Description] = node.Description;
+                        if (!string.IsNullOrEmpty(node.SearchHints) && !string.IsNullOrEmpty(mod.SearchHints)) ExactTranslations[mod.SearchHints] = node.SearchHints;
 
                         if (mod.Settings != null && node.Settings != null)
                         {
@@ -728,7 +546,7 @@ public static class Translator
 
                                 if (node.Settings.TryGetValue(setting.Name, out var setTrans))
                                 {
-                                    _exactTranslations[setting.Name] = setTrans;
+                                    ExactTranslations[setting.Name] = setTrans;
                                 }
                             }
                         }
@@ -744,7 +562,7 @@ public static class Translator
         }
     }
 
-    private static void LinkHudTranslations()
+    public static void LinkHudTranslations()
     {
         string currentLang = CurrentLanguage;
         if (string.Equals(currentLang, "English", StringComparison.OrdinalIgnoreCase)) return;
@@ -763,7 +581,7 @@ public static class Translator
                 {
                     if (hudDict.TryGetValue(element.Name, out var node))
                     {
-                        if (!string.IsNullOrEmpty(node.Name)) _exactTranslations[element.Name] = node.Name;
+                        if (!string.IsNullOrEmpty(node.Name)) ExactTranslations[element.Name] = node.Name;
                     }
                 }
             }
@@ -775,14 +593,10 @@ public static class Translator
             TranslatorLogger.Error($"Failed to link HUD translations: {ex.Message}");
         }
     }
-    
 
-    /// <summary>
-    /// Writes the missing untranslated string directly to untranslated_strings.json.
-    /// </summary>
-    private static void AppendUntranslatedStringToDisk(string input)
+    public static void AppendUntranslatedStringToDisk(string input)
     {
-        if (!_dumpedUntranslated.Add(input)) return;
+        if (!DumpedUntranslated.Add(input)) return;
 
         try
         {
@@ -795,7 +609,7 @@ public static class Translator
             string untranslatedPath = Path.Combine(baseDir, "untranslated_strings.json");
             Dictionary<string, string> dict = new(StringComparer.Ordinal);
 
-            lock (_untranslatedFileLock)
+            lock (UntranslatedFileLock)
             {
                 if (File.Exists(untranslatedPath))
                 {
@@ -819,144 +633,5 @@ public static class Translator
         {
             TranslatorLogger.Error($"Failed to dump untranslated string '{input}': {ex.Message}");
         }
-    }
-
-    public static void DumpMissingStrings()
-    {
-        if (!_missingStringsDirty) return;
-
-        DumpEnglishTemplate();
-
-        string currentLang = CurrentLanguage;
-        if (string.Equals(currentLang, "English", StringComparison.OrdinalIgnoreCase))
-        {
-            _missingStringsDirty = false;
-            return;
-        }
-
-        try
-        {
-            SyncWithEnglishTemplate(currentLang);
-
-            string baseDir = Path.Combine(TranslationRootDir, currentLang);
-            string stringsPath = Path.Combine(baseDir, "translation_strings.json");
-
-            HashSet<string> blacklist = GetCachedBlacklist();
-
-            var cleanDict = _exactTranslations
-                .Where(kvp => !_regexMatchedInputs.Contains(kvp.Key) && !blacklist.Contains(kvp.Key))
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.Ordinal);
-
-            string generalDump = JsonConvert.SerializeObject(cleanDict, Formatting.Indented);
-            File.WriteAllText(stringsPath, generalDump);
-            _missingStringsDirty = false;
-        }
-        catch (Exception ex)
-        {
-            TranslatorLogger.Error($"Failed to dump missing translation strings: {ex.Message}");
-        }
-    }
-
-    public static Dictionary<int, string> TranslateEnum(Type enumType)
-    {
-        if (enumType == null)
-        {
-            TranslatorLogger.Error("TranslateEnum called with null enumType!");
-            return new Dictionary<int, string>();
-        }
-
-        if (_nameCache.TryGetValue(enumType, out var cachedDict))
-        {
-            return new Dictionary<int, string>(cachedDict);
-        }
-
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-
-        try
-        {
-            Dictionary<int, string> parsedNames = LoadEnumTranslations(enumType);
-            _nameCache[enumType] = parsedNames;
-            sw.Stop();
-
-            TranslatorLogger.Msg($"Loaded and cached enum '{enumType.Name}' with {parsedNames.Count} entries ({sw.ElapsedMilliseconds} ms).");
-            return new Dictionary<int, string>(parsedNames);
-        }
-        catch (Exception ex)
-        {
-            sw.Stop();
-            TranslatorLogger.Error($"Exception occurred while translating enum '{enumType.Name}': {ex}");
-            throw;
-        }
-    }
-
-    public static Dictionary<int, string> LoadEnumTranslations(Type enumType)
-    {
-        string englishEnumsDir = Path.Combine(TranslationRootDir, "English", "Enums");
-        if (!Directory.Exists(englishEnumsDir)) Directory.CreateDirectory(englishEnumsDir);
-
-        string englishEnumFile = Path.Combine(englishEnumsDir, $"{enumType.Name}.json");
-
-        Dictionary<int, string> englishEnumDict = new();
-        if (File.Exists(englishEnumFile))
-        {
-            try
-            {
-                englishEnumDict = JsonConvert.DeserializeObject<Dictionary<int, string>>(File.ReadAllText(englishEnumFile)) ?? new();
-            }
-            catch { }
-        }
-
-        bool dirtyEnglish = false;
-        Array values = Enum.GetValues(enumType);
-        foreach (object val in values)
-        {
-            int intVal = (int)val;
-            if (!englishEnumDict.ContainsKey(intVal))
-            {
-                englishEnumDict[intVal] = Enum.GetName(enumType, intVal) ?? intVal.ToString();
-                dirtyEnglish = true;
-            }
-        }
-
-        if (dirtyEnglish || !File.Exists(englishEnumFile))
-        {
-            var sortedEnglish = englishEnumDict.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
-            File.WriteAllText(englishEnumFile, JsonConvert.SerializeObject(sortedEnglish, Formatting.Indented));
-        }
-
-        string activeLang = CurrentLanguage;
-        string activeEnumsDir = Path.Combine(TranslationRootDir, activeLang, "Enums");
-        if (!Directory.Exists(activeEnumsDir)) Directory.CreateDirectory(activeEnumsDir);
-
-        string activeEnumFile = Path.Combine(activeEnumsDir, $"{enumType.Name}.json");
-
-        if (!string.Equals(activeLang, "English", StringComparison.OrdinalIgnoreCase))
-        {
-            SyncEnumJson(englishEnumFile, activeEnumFile);
-        }
-
-        Dictionary<int, string> parsedNames = new();
-
-        if (File.Exists(activeEnumFile))
-        {
-            try
-            {
-                string json = File.ReadAllText(activeEnumFile);
-                var rawData = JsonConvert.DeserializeObject<Dictionary<int, string>>(json);
-                if (rawData != null)
-                {
-                    foreach (var kvp in rawData)
-                    {
-                        parsedNames[kvp.Key] = Regex.Replace(kvp.Value ?? "", "<.*?>", string.Empty);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                TranslatorLogger.Error($"Failed to parse enum file {enumType.Name}.json: {ex.Message}");
-            }
-        }
-
-        return parsedNames;
     }
 }

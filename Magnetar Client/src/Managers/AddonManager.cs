@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Magnetar_Client.Api;
+using Magnetar_Client.HUDElements;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Magnetar_Client.Api;
-using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Api.MagnetarApi;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Core;
 
@@ -94,8 +95,6 @@ public static class AddonManager
                     DebugLogger.Error($"[AddonManager] Failed to load assembly '{fileName}': {ex}");
                 }
             }
-
-            DebugLogger.Msg($"[AddonManager] Finished initializing IAddons. Total loaded addon containers: {LoadedAddons.Count}");
         }
         catch (Exception ex)
         {
@@ -136,7 +135,7 @@ public static class AddonManager
                 {
                     try
                     {
-                        ModuleManager.RegisterModule(modType);
+                        MagnetarApi.RegisterModule(modType);
 
                         Modules.Module registeredInstance = ModuleManager.Modules.FirstOrDefault(m => m.GetType() == modType);
                         if (registeredInstance != null && !addonInfo.RegisteredModules.Contains(registeredInstance))
@@ -156,12 +155,70 @@ public static class AddonManager
                     DebugLogger.Msg($"[AddonManager] Registered {addonInfo.RegisteredModules.Count} module(s) from '{addonInfo.FileName}'");
                 }
             }
-
-            DebugLogger.Msg($"[AddonManager] Finished loading addon modules. Total new modules registered: {totalNewModules}");
         }
         catch (Exception ex)
         {
             DebugLogger.Error($"[AddonManager] Critical error during InitModules: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// Discovers and registers all HudElement subclasses from the loaded addon assemblies.
+    /// </summary>
+    public static void InitHUDElements()
+    {
+        try
+        {
+            if (DiscoveredAssemblies.Count == 0)
+            {
+                DebugLogger.Msg("[AddonManager] No assemblies found to load HUD elements from.");
+                return;
+            }
+
+            int totalNewElements = 0;
+
+            foreach (var addonInfo in LoadedAddons)
+            {
+                if (!DiscoveredAssemblies.TryGetValue(addonInfo.FilePath, out var cachedData))
+                    continue;
+
+                var hudTypes = cachedData.Types
+                    .Where(t => t.IsClass
+                                && !t.IsAbstract
+                                && t.IsSubclassOf(typeof(HudElement)))
+                    .OrderBy(t => t.Name, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                foreach (var hudType in hudTypes)
+                {
+                    try
+                    {
+                        int beforeCount = HUDRenderer.Elements.Count;
+                        HUDRenderer.RegisterElement(hudType);
+
+                        if (HUDRenderer.Elements.Count > beforeCount)
+                        {
+                            var instance = HUDRenderer.Elements[HUDRenderer.Elements.Count - 1];
+                            addonInfo.RegisteredHudElements.Add(instance);
+                            totalNewElements++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        DebugLogger.Error($"[AddonManager] Failed to register addon HUD element '{hudType.FullName}' from '{addonInfo.FileName}': {ex}");
+                    }
+                }
+
+                if (addonInfo.RegisteredHudElements.Count > 0)
+                {
+                    DebugLogger.Msg($"[AddonManager] Registered {addonInfo.RegisteredHudElements.Count} HUD element(s) from '{addonInfo.FileName}'");
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+            DebugLogger.Error($"[AddonManager] Critical error during InitHUDElements: {ex}");
         }
     }
 }

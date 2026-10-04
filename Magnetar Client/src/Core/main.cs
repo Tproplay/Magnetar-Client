@@ -5,6 +5,7 @@ using UnityEngine;
 using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using System.Reflection;
+using Magnetar_Client.UI;
 
 namespace Magnetar_Client.Core;
 
@@ -72,16 +73,19 @@ public class Main
     {
         Api.Actions.Core.OnEarlyInitializeCore?.Invoke();
 
-        SaveLoad.InitializePreferences();
+        Preferences.InitializePreferences();
 
         ModuleManager.Init();
         AddonManager.InitModules();
+
         HUDRenderer.Init();
+        AddonManager.InitHUDElements();
+
         NEFManager.Init();
         TopBar.Init();
         ProfileManager.Init();
 
-        Utils.Translator.LoadTranslations();
+        Translator.LoadTranslations();
         SaveLoad.Load();
         GUIManager.Init();
 
@@ -103,6 +107,7 @@ public class Main
         {
             BlockSKeysPatch.BlockEscKey = true;
             Config.showgui = !Config.showgui;
+            LockUI.LockGameCanvas(Config.showgui);
             SaveLoad.Save();
         }
 

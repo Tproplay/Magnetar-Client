@@ -3,6 +3,7 @@ using Magnetar_Client.Utils;
 using System;
 using UnityEngine;
 using Il2CppSystem.IO;
+using static Magnetar_Client.Api.MagnetarApi;
 
 #if MELONLOADER || RELEASE_MELON
 
@@ -47,7 +48,7 @@ public static class MobileMenuUI
         // --- 1. Load from the dedicated magnetar_ui AssetBundle ---
         try
         {
-            string bundlePath = System.IO.Path.Combine(SaveLoad.ModsDir, "Magnetar Data", "magnetar_ui");
+            string bundlePath = System.IO.Path.Combine(ModsDir, "Magnetar Data", "magnetar_ui");
             if (System.IO.File.Exists(bundlePath))
             {
                 // Check if already in memory before attempting to load from disk
@@ -136,7 +137,7 @@ public static class MobileMenuUI
         }
 
         // --- 2. Loose disk fallback (Magnetar Data/Magnetar_logo.png) ---
-        string path = System.IO.Path.Combine(SaveLoad.ModsDir, "Magnetar Data", "Magnetar_logo.png");
+        string path = System.IO.Path.Combine(DataDir, "Magnetar_logo.png");
 
         if (System.IO.File.Exists(path))
         {

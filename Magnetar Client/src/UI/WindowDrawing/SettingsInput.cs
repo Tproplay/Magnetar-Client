@@ -448,6 +448,11 @@ public static class DrawSetting
             filteredItems.Add((intVal, displayName));
         }
 
+        if (activeMultiSelect.DisplayAlphabetically)
+        {
+            filteredItems.Sort((a, b) => string.Compare(a.DisplayName, b.DisplayName, StringComparison.CurrentCultureIgnoreCase));
+        }
+
         totalContentHeight = filteredItems.Count * rowStep;
 
         int selectedCount = activeMultiSelect.SelectedValues.Count;

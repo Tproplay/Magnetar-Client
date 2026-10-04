@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using static Magnetar_Client.Api.PathsManager;
 
 namespace Magnetar_Client.UI.Themes;
 
@@ -537,7 +538,7 @@ public static class ThemeManager
     {
         LoadedThemes[InternalDefaultTheme.Name] = InternalDefaultTheme;
 
-        string dataDir = Path.Combine(SaveLoad.ModsDir, "Magnetar Data");
+        string dataDir = Path.Combine(ModsDir, "Magnetar Data");
         string themePath = Path.Combine(dataDir, "themes.json");
 
         try

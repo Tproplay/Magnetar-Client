@@ -9,6 +9,7 @@ using System.Text;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using static Magnetar_Client.Api.PathsManager;
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -35,7 +36,7 @@ public class QuickSetup : Module
 
     private Dictionary<string, string> _savedSetups = new(StringComparer.OrdinalIgnoreCase);
 
-    private static string SetupsFilePath => Path.Combine(ProfileManager.ConfigDir, "Custom_Setups.json");
+    private static string SetupsFilePath => Path.Combine(ConfigDir, "Custom_Setups.json");
 
     public QuickSetup()
     {

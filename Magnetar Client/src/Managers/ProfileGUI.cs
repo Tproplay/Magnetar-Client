@@ -133,7 +133,7 @@ public static class ProfileGUI
         {
             string profileName = profilesList[i];
             bool isActive = string.Equals(Config.CurrentProfile, profileName, StringComparison.OrdinalIgnoreCase);
-            bool isDefault = string.Equals(ProfileManager.DefaultProfile, profileName, StringComparison.OrdinalIgnoreCase);
+            bool isDefault = string.Equals(Config.DefaultProfile, profileName, StringComparison.OrdinalIgnoreCase);
 
             if (itemY + elementHeight >= 0 && itemY <= scrollAreaHeight)
             {

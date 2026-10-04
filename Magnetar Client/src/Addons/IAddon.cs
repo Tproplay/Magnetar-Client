@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Magnetar_Client.HUDElements;
+using System.Collections.Generic;
 using System.Reflection;
+using Magnetar_Client.Modules;
 
 namespace Magnetar_Client.Api;
 
@@ -10,8 +12,8 @@ public class AddonInfo
     public Assembly LoadedAssembly { get; set; }
     public IAddon AddonInstance { get; set; }
     public List<Modules.Module> RegisteredModules { get; } = new();
+    public List<HudElement> RegisteredHudElements { get; } = new();
 }
-
 public interface IAddon
 {
     string Name { get; }

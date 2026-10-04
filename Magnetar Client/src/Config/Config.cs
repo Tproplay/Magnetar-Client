@@ -20,6 +20,7 @@ public static class Magnetar_Info
 
 public static class Config
 {
+    public static string DefaultProfile = "Default";
     public static string CurrentProfile = "Default";
 
     private static string _theme = "Magnetar Default";
@@ -336,17 +337,4 @@ public static class Config
         rect.x = centerX - newWidth / 2f;
         rect.y = centerY - newHeight / 2f;
     }
-}
-
-public static class Preferences
-{
-#if MELONLOADER || RELEASE_MELON
-    public static MelonPreferences_Category MagnetarCategory;
-    public static MelonPreferences_Entry<bool> ShowFloatingIconEntry;
-    public static MelonPreferences_Entry<bool> ShowMobileButtonsEntry;
-#elif BEPINEX || RELEASE_BEPINEX || ANDROID
-    public static ConfigFile BepInExConfig;
-    public static BepInEx.Configuration.ConfigEntry<bool> ShowFloatingIconEntry;
-    public static BepInEx.Configuration.ConfigEntry<bool> ShowMobileButtonsEntry;
-#endif
 }

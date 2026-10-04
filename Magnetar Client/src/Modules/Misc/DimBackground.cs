@@ -14,7 +14,7 @@ public class DimBackground : Module
     public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
 
     public override bool Active { get; set; } = true;
-    public override bool defaultActive { get; set; } = true;
+    public override bool defaultActive { get; } = true;
     public override bool enableInVanillaMode { get; set; } = true;
 
     // Mod Data

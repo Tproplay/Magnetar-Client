@@ -57,7 +57,7 @@ public static class GUIHelper
     /// </summary>
     public static Color RainbowColor { get; private set; }
 
-    public static void _UpdateRainbowColor()
+    internal static void _UpdateRainbowColor()
     {
         float hue = (Time.time * Config.RainbowSpeed) % 1.0f;
 

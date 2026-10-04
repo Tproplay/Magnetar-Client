@@ -19,6 +19,11 @@ public static class MagnetarApi
         ModuleManager.RegisterModule(typeof(T));
     }
 
+    public static void RegisterModule(Type type)
+    {
+        ModuleManager.RegisterModule(type);
+    }
+
     public static Module FindModule(string name)
     {
         foreach (Module module in ModuleManager.Modules)
@@ -40,11 +45,6 @@ public static class MagnetarApi
         return null;
     }
 
-    public static void RegisterHUDElement(HudElement hudElement)
-    {
-        HUDRenderer.RegisterElement(hudElement);
-    }
-
     public static void LogMsg(string msg)
     {
         Magnetar_Logger.DebugLogger.Msg(msg);
@@ -62,6 +62,11 @@ public static class MagnetarApi
 
     public static string ModsDir => PathsManager.ModsDir;
     public static string AddonsDir => PathsManager.AddonsDir;
+    public static string ConfigDir => PathsManager.ConfigDir;
+    public static string TranslationRootDir => PathsManager.TranslationRootDir;
+    public static string GetProfilePath(string profileName) => PathsManager.GetProfilePath(profileName);
 
+    public static void RegisterElement<T>() where T : HudElement => Magnetar_Client.Core.HUDRenderer.RegisterElement(typeof(T));
+    public static string DataDir => PathsManager.DataDir;
 
 }

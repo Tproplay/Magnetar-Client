@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using Magnetar_Client.UI.Setting;
+using static Magnetar_Client.Api.MagnetarApi;
 
 namespace Magnetar_Client.Core;
 
@@ -65,7 +66,7 @@ public static class GUIManager
             CustomNames = new Dictionary<int, string>()
         };
 
-        string translationRoot = Path.Combine(SaveLoad.ModsDir, "Magnetar Translation");
+        string translationRoot = Path.Combine(ModsDir, "Magnetar Translation");
         try { if (!Directory.Exists(translationRoot)) Directory.CreateDirectory(translationRoot); } catch { }
 
         LanguageSetting.AddOption(0, "English");

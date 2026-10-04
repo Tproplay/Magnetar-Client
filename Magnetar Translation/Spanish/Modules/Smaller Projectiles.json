@@ -1,6 +1,6 @@
 {
   "Name": "Proyectiles diminutos",
-  "Description": "Reduce los visuales de bala(s) para reducir el desorden en pantalla.",
+  "Description": "Reduce los visuales de las balas para reducir el desorden en pantalla.",
   "Search Hints": "smallerprojectiles smallprojectiles projectile size visual reduce screen clutter tiny peas bullet bulletsize smallpea lessclutter screenclutter projectile size visualreduce projectileclutter shrinking projectilesize projectil smallbullet clear screen projectilevisual smallammo ammoclutter pea size hitclutter tinyprojectiles lagclutter projectils",
   "settings": {
     "General": "General",

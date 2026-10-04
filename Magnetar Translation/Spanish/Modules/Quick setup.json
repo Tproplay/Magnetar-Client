@@ -1,6 +1,6 @@
 {
   "Name": "Selección rápida",
-  "Description": "Salva y accede a selecciones personalizadas.",
+  "Description": "Salva y accede a grupos de plantas pre-plantadas personalizadas.",
   "Search Hints": "quicksetup loadout setupmanager savebuild loadbuild setup presetmanager quickload quicksave plantsetup configuration buildmanager setuploader loadouts quick-setup customsetup setupsaver presetload",
   "settings": {
     "Save": "Salvar",

@@ -1,6 +1,6 @@
 {
   "Name": "Fortalecer zombis",
-  "Description": "Fortalece los zombis cuando el módulo está activado.",
+  "Description": "Fortalece a los zombis cuando el módulo está activado.",
   "Search Hints": "buffzombies buffzombie bufzombie buffingzombies hpbuff healthboost strongzombies zombiehp morehealth tankyzombies zombiefy buffzombs biffzombies buffzombes hpup extrahealth buffedzombs healthup zombieboost buffmod buffactive buff-zombies hpplus zombiefying zombiebiff buffzom biffzom hpp boost buffzombiez",
   "settings": {
     "General": "General",

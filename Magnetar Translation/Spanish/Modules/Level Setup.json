@@ -1,6 +1,6 @@
 {
   "Name": "Setup de Nivel",
-  "Description": "Permite activar manualmente las funciones de configuración de la placa..",
+  "Description": "Permite colocar ciertos cachivaches con las que se inician los niveles.",
   "Search Hints": "levelsetup boardsetup setupfunctions triggerboardsetup setupmanager levelinit boardinit initializetrigger levelinitializer manualsetup setupcustomizer boardconfigurator levelsync setupoverride boardhandler initializegame levelconfig startuplevel setupdebug boardreset levelreset levelbuilder initboard boardloader customsetup runsetup",
   "settings": {
     "General": "General",

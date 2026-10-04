@@ -1,6 +1,6 @@
 {
   "Name": "Martillo sin CD",
-  "Description": "Amartillarás a tus enemigos, ilimitadamente.",
+  "Description": "Amartillarás a tus enemigos ilimitadamente.",
   "Search Hints": "nohammercd hammercooldown customhammercd hammercd zerohammercd nohammercoolndown hammercooldownreset fasthammer instanthammer hammerbuff hammercdmod hammercdchanger hammercdremover hammercolldown hammercooldon hammercooldwn hamrcd hammercooldoun hammercdtimer hammercdreducion hammercooldownreduction hammerfast hammerready hammerunlimited hammerinfinite hammerinterval hammerperiod hammerspeed hammerspam hammerfrequency",
   "settings": {
     "General": "General",

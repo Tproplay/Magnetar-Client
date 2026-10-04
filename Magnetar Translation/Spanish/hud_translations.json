@@ -1,122 +1,122 @@
 {
   "FPS Counter": {
-    "Name": "FPS Counter"
+    "Name": "Contador de FPS"
   },
   "Real FPS Counter": {
-    "Name": "Real FPS Counter"
+    "Name": "Contador de FPS real"
   },
   "Frame Time": {
-    "Name": "Frame Time"
+    "Name": "Tiempo en frames"
   },
   "Game Name and Version": {
-    "Name": "Game Name and Version"
+    "Name": "Juego y versión"
   },
   "Magnetar Name and Version": {
-    "Name": "Magnetar Name and Version"
+    "Name": "Magnetar y versión"
   },
   "Using Vanilla Mode": {
-    "Name": "Using Vanilla Mode"
+    "Name": "Usando modo vanilla"
   },
   "Up Time": {
-    "Name": "Up Time"
+    "Name": "Tiempo transcurrido desde iniciado el juego"
   },
   "Number of Bullets Spawned": {
-    "Name": "Number of Bullets Spawned"
+    "Name": "Numero de balas en pantalla"
   },
   "Total Damage by Plants": {
-    "Name": "Total Damage by Plants"
+    "Name": "Daño total de plantas"
   },
   "Average Damage by Plants": {
-    "Name": "Average Damage by Plants"
+    "Name": "Daño estimado de plantas"
   },
   "Total Plants": {
-    "Name": "Total Plants"
+    "Name": "Plantas totales"
   },
   "Plants Placed": {
-    "Name": "Plants Placed"
+    "Name": "Plantas colocadas"
   },
   "Plant Deaths": {
-    "Name": "Plant Deaths"
+    "Name": "Plantas muertas"
   },
   "Total Sun Obtained": {
-    "Name": "Total Sun Obtained"
+    "Name": "Sol total obtenido"
   },
   "Total Sun Spent": {
-    "Name": "Total Sun Spent"
+    "Name": "Sol total gastado"
   },
   "Total Money Obtained": {
-    "Name": "Total Money Obtained"
+    "Name": "Monedas totales obtenidas"
   },
   "Total Money Spent": {
-    "Name": "Total Money Spent"
+    "Name": "Monedas totales gastadas"
   },
   "Auto drop/fall sun timer": {
-    "Name": "Auto drop/fall sun timer"
+    "Name": "Contador de caídas de sol espontáneo"
   },
   "Time In Current Level": {
-    "Name": "Time In Current Level"
+    "Name": "Tiempo transcurrido en el nivel"
   },
   "Next wave arrival time": {
-    "Name": "Next wave arrival time"
+    "Name": "Tiempo para próxima oleada"
   },
   "Active Star drop Cooldown": {
-    "Name": "Active Star drop Cooldown"
+    "Name": "CD de Caída de estrellas activas"
   },
   "Passive Star drop Cooldown": {
-    "Name": "Passive Star drop Cooldown"
+    "Name": "CD de Caída de estrellas pasivas"
   },
   "Game Speed": {
-    "Name": "Game Speed"
+    "Name": "Velocidad de juego"
   },
   "Zombies On Lawn": {
-    "Name": "Zombies On Lawn"
+    "Name": "Zombis en el césped"
   },
   "Hypnotized Zombies On Lawn": {
-    "Name": "Hypnotized Zombies On Lawn"
+    "Name": "Hipnozombis en el césped"
   },
   "Zombies Spawned": {
-    "Name": "Zombies Spawned"
+    "Name": "Zombis generados"
   },
   "Hypnotized Zombies Spawned": {
-    "Name": "Hypnotized Zombies Spawned"
+    "Name": "Hipnozombis generados"
   },
   "Zombies Killed": {
-    "Name": "Zombies Killed"
+    "Name": "Zombis asesinados"
   },
   "Hypnotized Zombies Killed": {
-    "Name": "Hypnotized Zombies Killed"
+    "Name": "hipnozombis asesinados"
   },
   "Current Zombie Wave Health": {
-    "Name": "Current Zombie Wave Health"
+    "Name": "Salud de orda estimada"
   },
   "Total Zombies Health": {
-    "Name": "Total Zombies Health"
+    "Name": "Salud total de zombis"
   },
   "Hypnotized Zombies Health": {
-    "Name": "Hypnotized Zombies Health"
+    "Name": "Salud de hipnozombis"
   },
   "Current Wave": {
-    "Name": "Current Wave"
+    "Name": "Orda actual"
   },
   "RAM Usage": {
-    "Name": "RAM Usage"
+    "Name": "Uso de RAM"
   },
   "System RAM Usage": {
-    "Name": "System RAM Usage"
+    "Name": "Uso de RAM del sistema"
   },
   "CPU Usage": {
-    "Name": "CPU Usage"
+    "Name": "Uso de CPU"
   },
   "VRAM Usage": {
-    "Name": "VRAM Usage"
+    "Name": "Uso de VRAM"
   },
   "GPU Name": {
-    "Name": "GPU Name"
+    "Name": "Nombre de GPU"
   },
   "CPU Name": {
-    "Name": "CPU Name"
+    "Name": "Nombre de CPU"
   },
   "Current Time": {
-    "Name": "Current Time"
+    "Name": "La Hora"
   }
 }

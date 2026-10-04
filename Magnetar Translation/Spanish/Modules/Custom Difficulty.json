@@ -1,6 +1,6 @@
 {
   "Name": "Dificultad personalizada",
-  "Description": "Permite modificar la dificultad.",
+  "Description": "Permite personalizar/modificar una dificultad.",
   "Search Hints": "customdifficulty difficultymodifier difficultysettings scaledifficulty difficultyeditor game difficultyconfig difficultychanger hardmod easymod difficultybalancer customdifficultycustomizer diffeditor difficultyoverride adjustmentmod challengedifficulty difficultyselector diffmanager customchallenge",
   "settings": {
     "General": "General",
@@ -14,7 +14,7 @@
     "Zombie Speed Multiplier": "Multiplicador de velocidad zombi",
     "Damage Reduction %": "Reducción de daño %",
     "Zombie Spawn Multiplier": "Multiplicador de zombis",
-    "Zombie Insta-kill Threshold %": "Posibilidad de zombi instakill %",
+    "Zombie Insta-kill Threshold %": "Posibilidad instakill de zombi %",
     "Insta-kill ignore armor": "Instakill ignora armadura",
     "First Wave Arrival Time": "Tiempo de primera orda",
     "Wave Interval": "Intervalo de orda",

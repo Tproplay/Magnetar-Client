@@ -1,6 +1,6 @@
 {
   "Name": "Cinta transportadora personalizada",
-  "Description": "fuerza la cinta transportadora en un nivel para traer plantas.\nSi ninguna es seleccionada, será todas al azar.",
+  "Description": "fuerza la cinta transportadora en un nivel para traer plantas que selecciones.\nSi ninguna es seleccionada, será todas al azar.",
   "Search Hints": "customconveyor conveyor belt customplants forceplants conveyorforce plantconveyor selectconveyor editconveyor conveyorinjector injectplants conveyoroverride customconveyer conveyerbelt plantinject injectevery plantspawn custombelt forceconveyer converyor conveyorcustom conveyerbelt forceplant allplants conveyoritem spawnplant conveyorpool custompool conveyorlist",
   "settings": {
     "General": "General",

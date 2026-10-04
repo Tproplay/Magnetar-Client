@@ -55,7 +55,7 @@
   "GUI Scale": "Escala GUI",
   "Element Scale": "Escala de elementos",
   "Floating Icon": "Ícono flotante",
-  "Mobile Close Buttons": "Botones para Móbil",
+  "Mobile Close Buttons": "Botones para Móviles",
   "Change": "Cambiar",
   "Theme": "Tema",
   "Language": "Idioma",
@@ -64,5 +64,7 @@
   "Active Meteorite": "Active Meteorite",
   "Ultimate Meteorite": "Ultimate Meteorite",
   "Ultimate Meteorite (skin)": "Ultimate Meteorite (skin)",
-  "+ Add Section": "+ Add Section"
+  "+ Add Section": "+ Añadir sección",
+  "Click": "Click",
+  "Add": "Añadir"
 }

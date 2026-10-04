@@ -1,5 +1,5 @@
 {
   "(\\d+) selected": "{1} Seleccionado",
   "Seed Slot (\\d+)":"Ranura de Semilla {1}",
-  "Section #(\\d+)": "Section #{1}"
+  "Section #(\\d+)": "Sección #{1}"
 }

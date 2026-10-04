@@ -1,6 +1,6 @@
 {
   "Name": "Mejor visualización de salud",
-  "Description": "Resume las largas exposiciones de vida a uno más corto.",
+  "Description": "Resume las largas exposiciones de vida a una versión más corta.",
   "Search Hints": "healthdisplay healthtext healthshow hpdisplay hptext betterhealth clearhealth shorthealth healthform shorthp clearhp healthconverter texthp hpconverter shorttext healthui hpui hpvisual healthvisual betterhp displayhealth healthshortener hp-display health-display texthp health-txt hptxt healthtxt",
   "settings": {
     "General": "General",

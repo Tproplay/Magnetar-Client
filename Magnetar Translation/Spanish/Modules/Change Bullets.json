@@ -1,6 +1,6 @@
 {
   "Name": "Cambiar balas",
-  "Description": "Cambia las balas que planta(s) dispara.",
+  "Description": "Cambia las balas que las plantas disparan.",
   "Search Hints": "changebullets bulletchanger projectilechanger bulletswap projectileswap changebullet switchbullets bulletskins bullettype projectiletype bulletmodifier changeammo ammoswitch bulleteditor bulletcustomizer projectilecustomizer changebulletts changebullits changebullits changebulits projectilemod ammomod bulletvariant projectileskin bulletoverride ammovariant shootchange bulletprojectile bullettransformation bulletreplace",
   "settings": {
     "General": "General",

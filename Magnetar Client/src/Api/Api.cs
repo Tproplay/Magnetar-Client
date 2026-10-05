@@ -9,9 +9,35 @@ namespace Magnetar_Client.Api;
 
 public static class MagnetarApi
 {
-    public static void RegisterTheme(ThemeData themeData)
+    /// <summary>
+    /// Registers a theme definition from an addon or internal module,
+    /// synchronizes the active theme options in GUIManager, and optionally applies it immediately.
+    /// </summary>
+    /// <param name="theme">The theme definition to register.</param>
+    /// <param name="applyImmediately">If true, immediately applies and rescales the theme across the client.</param>
+    public static void RegisterTheme(ThemeDefinition theme, bool applyImmediately = false)
     {
-        ThemeManager.LoadedThemes[themeData.Name] = themeData;
+        if (theme == null || string.IsNullOrWhiteSpace(theme.Name))
+        {
+            Magnetar_Logger.DebugLogger.Error("[ThemeManager] Cannot register a null or unnamed theme.");
+            return;
+        }
+
+        string themeKey = theme.Name.Trim();
+        ThemeData.LoadedThemes[themeKey] = theme;
+
+        // Refresh dropdown options in GUIManager if it has been initialized
+        if (GUIManager.ThemeSetting != null)
+        {
+            GUIManager.RefreshThemeOptions();
+        }
+
+        if (applyImmediately)
+        {
+            Magnetar_Client.UI.Themes.ThemeManager.ApplyTheme(themeKey);
+        }
+
+        Magnetar_Logger.DebugLogger.Msg($"[ThemeManager] Registered theme: '{themeKey}'");
     }
 
     public static void RegisterModule<T>() where T : Module, new()

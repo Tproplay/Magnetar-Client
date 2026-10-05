@@ -44,6 +44,9 @@ public static class Config
 
     public static bool ShowMainMenuCredits = true;
 
+    public static float FloatingIconOpacity = 0.85f;
+    public static float FloatingIconIdleTimeout = 4.0f;
+
     // Native canvas size used by the outer letterbox matrix (main.cs).
     // NOT scaled by GUIScale - it's the fixed reference resolution
     // everything else is authored against.

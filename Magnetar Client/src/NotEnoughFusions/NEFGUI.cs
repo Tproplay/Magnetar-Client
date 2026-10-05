@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.Utils;
 using Magnetar_Client.Core;
+using Magnetar_Client.UI;
 using static Magnetar_Client.UI.WindowDrawing.MiscDrawing;
 using static Magnetar_Client.NEF.Data.NEFRecipes;
 #if MELONLOADER || RELEASE_MELON
@@ -51,355 +52,378 @@ public static class NEFGUI
 
     public static void DrawNEFWindow(int windowID)
     {
-        if (firstLoad)
-        {
-            firstLoad = false;
-            NEFData.PerformSearch();
-        }
+        // ------------------------------------------------------------------------
+        // Apply synchronized GUI.color and GUI.contentColor inside window callback scope
+        // ------------------------------------------------------------------------
+        Color prevColor = GUI.color;
+        Color prevContentColor = GUI.contentColor;
+        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.SubWindowAlpha;
 
-        // Keep node layout distance in sync if GUI Scale changes dynamically
-        if (NEFData.currentPyramidRoots.Count > 0 && Mathf.Abs(NEFData.lastCalculatedScale - Config.GUIScale) > 0.001f)
-        {
-            NEFData.RelayoutCurrentTrees();
-        }
+        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
+        GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
 
-        Event e = Event.current;
+        try
+        {
+            if (firstLoad)
+            {
+                firstLoad = false;
+                NEFData.PerformSearch();
+            }
+
+            // Keep node layout distance in sync if GUI Scale changes dynamically
+            if (NEFData.currentPyramidRoots.Count > 0 && Mathf.Abs(NEFData.lastCalculatedScale - Config.GUIScale) > 0.001f)
+            {
+                NEFData.RelayoutCurrentTrees();
+            }
+
+            Event e = Event.current;
 
 #if ANDROID
-        // 1. Long-press hold timer update
-        if (_heldEntity.HasValue && !_hasTriggeredHold)
-        {
-            Vector2 currentScreenPos = GUIUtility.GUIToScreenPoint(e.mousePosition);
-            float moveDist = Vector2.Distance(currentScreenPos, _holdStartScreenPos);
+            // 1. Long-press hold timer update
+            if (_heldEntity.HasValue && !_hasTriggeredHold)
+            {
+                Vector2 currentScreenPos = GUIUtility.GUIToScreenPoint(e.mousePosition);
+                float moveDist = Vector2.Distance(currentScreenPos, _holdStartScreenPos);
 
-            if (moveDist > Config.S(20f))
-            {
-                _heldEntity = null;
+                if (moveDist > Config.S(20f))
+                {
+                    _heldEntity = null;
+                }
+                else if (Time.realtimeSinceStartup - _holdStartTime >= LongPressThreshold)
+                {
+                    _hasTriggeredHold = true;
+                    showUsagesView = true;
+                    UIAnimationHelper.TriggerSubWindowTransition();
+                    NEFData.GenerateUsagesView(_heldEntity.Value);
+                    _heldEntity = null;
+                    e.Use();
+                }
             }
-            else if (Time.realtimeSinceStartup - _holdStartTime >= LongPressThreshold)
-            {
-                _hasTriggeredHold = true;
-                NEFData.GenerateUsagesView(_heldEntity.Value);
-                _heldEntity = null;
-                e.Use();
-            }
-        }
 #endif
 
-        float rightPanelWidth = NEFManager.windowRect.width * 0.3f;
+            float rightPanelWidth = NEFManager.windowRect.width * 0.3f;
 
-        // Dynamic top indent scaled with GUI font size to prevent overlapping the title bar
-        float titleFontSize = ThemeManager.CategoryWindowStyle != null ? ThemeManager.CategoryWindowStyle.fontSize : Config.S(18f);
-        float topIndent = Mathf.Max(Config.S(48f), titleFontSize + Config.S(18f));
+            // Dynamic top indent scaled with GUI font size to prevent overlapping the title bar
+            float titleFontSize = ThemeManager.CategoryWindowStyle != null ? ThemeManager.CategoryWindowStyle.fontSize : Config.S(18f);
+            float topIndent = Mathf.Max(Config.S(48f), titleFontSize + Config.S(18f));
 
-        float pad = Config.S(10f);
-        float leftPanelWidth = NEFManager.windowRect.width - rightPanelWidth - (pad * 3f);
-        float contentHeight = NEFManager.windowRect.height - topIndent - pad;
+            float pad = Config.S(10f);
+            float leftPanelWidth = NEFManager.windowRect.width - rightPanelWidth - (pad * 3f);
+            float contentHeight = NEFManager.windowRect.height - topIndent - pad;
 
-        Rect pyramidBoxRect = new(pad, topIndent, leftPanelWidth, contentHeight);
-        Rect rightPanelRect = new(pad + leftPanelWidth + pad, topIndent, rightPanelWidth, contentHeight);
+            Rect pyramidBoxRect = new(pad, topIndent, leftPanelWidth, contentHeight);
+            Rect rightPanelRect = new(pad + leftPanelWidth + pad, topIndent, rightPanelWidth, contentHeight);
 
-        // ==========================================
-        // 1. LEFT PANEL: VISUALIZER
-        // ==========================================
-        GUI.Box(pyramidBoxRect, "", ThemeManager.CategoryWindowStyle);
+            // ==========================================
+            // 1. LEFT PANEL: VISUALIZER
+            // ==========================================
+            GUI.Box(pyramidBoxRect, "", ThemeManager.CategoryWindowStyle);
 
-        if (showUsagesView)
-        {
-            DrawUsagesView(pyramidBoxRect, e);
-        }
-        else
-        {
-            if (NEFData.currentPyramidRoots.Count == 0)
+            if (showUsagesView)
             {
-                GUI.Label(new Rect(pyramidBoxRect.x + pad, pyramidBoxRect.y + pad, leftPanelWidth - (pad * 2f), NEFManager.elementHeight),
-                    Translator.Translate("Select an entity to view its recipes."));
+                DrawUsagesView(pyramidBoxRect, e);
             }
             else
             {
-                GUI.BeginGroup(pyramidBoxRect);
-
-                float minX = NEFData.currentPyramidRoots[0].RenderX;
-                float maxX = NEFData.currentPyramidRoots[NEFData.currentPyramidRoots.Count - 1].RenderX;
-                float centerOfAllTrees = (minX + maxX) / 2f;
-
-                for (int i = 0; i < NEFData.currentPyramidRoots.Count; i++)
+                if (NEFData.currentPyramidRoots.Count == 0)
                 {
-                    DrawTree(NEFData.currentPyramidRoots[i], pyramidBoxRect, centerOfAllTrees, e);
+                    GUI.Label(new Rect(pyramidBoxRect.x + pad, pyramidBoxRect.y + pad, leftPanelWidth - (pad * 2f), NEFManager.elementHeight),
+                        Translator.Translate("Select an entity to view its recipes."));
+                }
+                else
+                {
+                    GUI.BeginGroup(pyramidBoxRect);
+
+                    float minX = NEFData.currentPyramidRoots[0].RenderX;
+                    float maxX = NEFData.currentPyramidRoots[NEFData.currentPyramidRoots.Count - 1].RenderX;
+                    float centerOfAllTrees = (minX + maxX) / 2f;
+
+                    for (int i = 0; i < NEFData.currentPyramidRoots.Count; i++)
+                    {
+                        DrawTree(NEFData.currentPyramidRoots[i], pyramidBoxRect, centerOfAllTrees, e);
+                    }
+
+                    GUI.EndGroup();
                 }
 
-                GUI.EndGroup();
-            }
-
-            // --- PAN & ZOOM ---
-            if (pyramidBoxRect.Contains(e.mousePosition))
-            {
-                // 1. Mouse Scroll Wheel Zoom (Desktop)
-                if (e.type == EventType.ScrollWheel)
+                // --- PAN & ZOOM ---
+                if (pyramidBoxRect.Contains(e.mousePosition))
                 {
-                    float oldZoom = pyramidZoom;
-                    pyramidZoom -= e.delta.y * 0.05f;
-                    pyramidZoom = Mathf.Clamp(pyramidZoom, 0.2f, 3.0f);
+                    // 1. Mouse Scroll Wheel Zoom (Desktop)
+                    if (e.type == EventType.ScrollWheel)
+                    {
+                        float oldZoom = pyramidZoom;
+                        pyramidZoom -= e.delta.y * 0.05f;
+                        pyramidZoom = Mathf.Clamp(pyramidZoom, 0.2f, 3.0f);
 
-                    float originX = pyramidBoxRect.x + (pyramidBoxRect.width / 2f);
-                    float originY = pyramidBoxRect.y + Config.S(60f);
+                        float originX = pyramidBoxRect.x + (pyramidBoxRect.width / 2f);
+                        float originY = pyramidBoxRect.y + Config.S(60f);
 
-                    float focusX = (e.mousePosition.x - originX - pyramidPan.x) / oldZoom;
-                    float focusY = (e.mousePosition.y - originY - pyramidPan.y) / oldZoom;
+                        float focusX = (e.mousePosition.x - originX - pyramidPan.x) / oldZoom;
+                        float focusY = (e.mousePosition.y - originY - pyramidPan.y) / oldZoom;
 
-                    pyramidPan.x = e.mousePosition.x - originX - (focusX * pyramidZoom);
-                    pyramidPan.y = e.mousePosition.y - originY - (focusY * pyramidZoom);
+                        pyramidPan.x = e.mousePosition.x - originX - (focusX * pyramidZoom);
+                        pyramidPan.y = e.mousePosition.y - originY - (focusY * pyramidZoom);
 
-                    e.Use();
+                        e.Use();
+                    }
+
+                    // 2. Click / Touch Initiation
+                    if (e.type == EventType.MouseDown && (e.button == 0 || e.button == 2))
+                    {
+                        isDraggingPyramid = true;
+                        e.Use();
+                    }
                 }
-
-                // 2. Click / Touch Initiation
-                if (e.type == EventType.MouseDown && (e.button == 0 || e.button == 2))
-                {
-                    isDraggingPyramid = true;
-                    e.Use();
-                }
-            }
 #if ANDROID
-            // 3. Pinch-to-Zoom (Touch Screens / Mobile)
-            if (Input.touchCount >= 2)
-            {
-                UnityEngine.Touch t0 = Input.GetTouch(0);
-                UnityEngine.Touch t1 = Input.GetTouch(1);
-
-                // Convert bottom-left screen space to top-left IMGUI window coordinates
-                Vector2 p0 = new Vector2(t0.position.x, Screen.height - t0.position.y);
-                Vector2 p1 = new Vector2(t1.position.x, Screen.height - t1.position.y);
-
-                // Only zoom if touches are within the visualizer box
-                if (pyramidBoxRect.Contains(p0) || pyramidBoxRect.Contains(p1))
+                // 3. Pinch-to-Zoom (Touch Screens / Mobile)
+                if (Input.touchCount >= 2)
                 {
-                    float currentDist = Vector2.Distance(p0, p1);
+                    UnityEngine.Touch t0 = Input.GetTouch(0);
+                    UnityEngine.Touch t1 = Input.GetTouch(1);
 
-                    if (t0.phase == TouchPhase.Began || t1.phase == TouchPhase.Began || !_isPinching || _lastPinchDistance <= 0f)
-                    {
-                        _isPinching = true;
-                        _lastPinchDistance = currentDist;
+                    // Convert bottom-left screen space to top-left IMGUI window coordinates
+                    Vector2 p0 = new Vector2(t0.position.x, Screen.height - t0.position.y);
+                    Vector2 p1 = new Vector2(t1.position.x, Screen.height - t1.position.y);
 
-                        _heldEntity = null;
-        }
-                    else if (t0.phase == TouchPhase.Moved || t1.phase == TouchPhase.Moved)
+                    // Only zoom if touches are within the visualizer box
+                    if (pyramidBoxRect.Contains(p0) || pyramidBoxRect.Contains(p1))
                     {
-                        float deltaDist = currentDist - _lastPinchDistance;
-                        if (Mathf.Abs(deltaDist) > 1f)
+                        float currentDist = Vector2.Distance(p0, p1);
+
+                        if (t0.phase == TouchPhase.Began || t1.phase == TouchPhase.Began || !_isPinching || _lastPinchDistance <= 0f)
                         {
-                            float oldZoom = pyramidZoom;
-                            float zoomFactor = deltaDist * 0.005f;
-                            pyramidZoom = Mathf.Clamp(pyramidZoom + zoomFactor, 0.2f, 3.0f);
-
-                            Vector2 pinchCenter = (p0 + p1) * 0.5f;
-                            float originX = pyramidBoxRect.x + (pyramidBoxRect.width / 2f);
-                            float originY = pyramidBoxRect.y + Config.S(60f);
-
-                            float focusX = (pinchCenter.x - originX - pyramidPan.x) / oldZoom;
-                            float focusY = (pinchCenter.y - originY - pyramidPan.y) / oldZoom;
-
-                            pyramidPan.x = pinchCenter.x - originX - (focusX * pyramidZoom);
-                            pyramidPan.y = pinchCenter.y - originY - (focusY * pyramidZoom);
-
+                            _isPinching = true;
                             _lastPinchDistance = currentDist;
-                            _heldEntity = null;
 
-                            e.Use();
+                            _heldEntity = null;
+                        }
+                        else if (t0.phase == TouchPhase.Moved || t1.phase == TouchPhase.Moved)
+                        {
+                            float deltaDist = currentDist - _lastPinchDistance;
+                            if (Mathf.Abs(deltaDist) > 1f)
+                            {
+                                float oldZoom = pyramidZoom;
+                                float zoomFactor = deltaDist * 0.005f;
+                                pyramidZoom = Mathf.Clamp(pyramidZoom + zoomFactor, 0.2f, 3.0f);
+
+                                Vector2 pinchCenter = (p0 + p1) * 0.5f;
+                                float originX = pyramidBoxRect.x + (pyramidBoxRect.width / 2f);
+                                float originY = pyramidBoxRect.y + Config.S(60f);
+
+                                float focusX = (pinchCenter.x - originX - pyramidPan.x) / oldZoom;
+                                float focusY = (pinchCenter.y - originY - pyramidPan.y) / oldZoom;
+
+                                pyramidPan.x = pinchCenter.x - originX - (focusX * pyramidZoom);
+                                pyramidPan.y = pinchCenter.y - originY - (focusY * pyramidZoom);
+
+                                _lastPinchDistance = currentDist;
+                                _heldEntity = null;
+
+                                e.Use();
+                            }
                         }
                     }
                 }
-            }
-            else
-            {
-                _isPinching = false;
-                _lastPinchDistance = -1f;
-            }
-#endif
-            // 4. Drag Pan (Only pan when not pinching)
-            if (isDraggingPyramid && e.type == EventType.MouseDrag)
-            {
-#if ANDROID
-                if (!_isPinching)
+                else
                 {
-                    pyramidPan.x += e.delta.x;
-                    pyramidPan.y -= e.delta.y; // Inverted Y for Android touch
-                    _heldEntity = null;
+                    _isPinching = false;
+                    _lastPinchDistance = -1f;
                 }
-#else
-                pyramidPan += e.delta;
 #endif
+                // 4. Drag Pan (Only pan when not pinching)
+                if (isDraggingPyramid && e.type == EventType.MouseDrag)
+                {
+#if ANDROID
+                    if (!_isPinching)
+                    {
+                        pyramidPan.x += e.delta.x;
+                        pyramidPan.y -= e.delta.y; // Inverted Y for Android touch
+                        _heldEntity = null;
+                    }
+#else
+                    pyramidPan += e.delta;
+#endif
+                    e.Use();
+                }
+
+                if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
+                {
+                    isDraggingPyramid = false;
+                }
+            }
+
+            // ==========================================
+            // 2. RIGHT PANEL: SEARCH & GRID
+            // ==========================================
+            float rx = rightPanelRect.x;
+            float ry = rightPanelRect.y;
+
+            string searchLabelText = Translator.Translate("Search:");
+            GUIStyle labelStyle = ThemeManager.SettingLabelStyle ?? GUI.skin.label;
+            float searchLabelWidth = labelStyle.CalcSize(new GUIContent(searchLabelText)).x + Config.S(8f);
+
+            GUI.Label(new Rect(rx, ry, searchLabelWidth, NEFManager.elementHeight), searchLabelText, labelStyle);
+            string newQuery = UI.WindowDrawing.DrawSetting.DrawManualTextField(
+                new Rect(rx + searchLabelWidth, ry, rightPanelWidth - searchLabelWidth, NEFManager.elementHeight),
+                searchQuery, Translator.Translate("Search..."));
+
+            if (newQuery != searchQuery)
+            {
+                searchQuery = newQuery;
+                currentScrollY = 0f;
+                NEFData.PerformSearch();
+            }
+
+            ry += NEFManager.elementHeight + Config.S(6f);
+
+            Rect clearBtnRect = new(rx, ry, rightPanelWidth, NEFManager.elementHeight);
+            bool clearHover = clearBtnRect.Contains(e.mousePosition);
+
+            GUI.Box(clearBtnRect, Translator.Translate("Clear Search"), ThemeManager.CategoryModuleOffStyle);
+            GUI.backgroundColor = Color.white;
+
+            if (clearHover && e.type == EventType.MouseDown && e.button == 0)
+            {
+                searchQuery = "";
+                currentScrollY = 0f;
+                NEFData.PerformSearch();
                 e.Use();
             }
 
-            if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
-            {
-                isDraggingPyramid = false;
-            }
-
-        }
-
-        // ==========================================
-        // 2. RIGHT PANEL: SEARCH & GRID
-        // ==========================================
-        float rx = rightPanelRect.x;
-        float ry = rightPanelRect.y;
-
-        string searchLabelText = Translator.Translate("Search:");
-        GUIStyle labelStyle = ThemeManager.SettingLabelStyle ?? GUI.skin.label;
-        float searchLabelWidth = labelStyle.CalcSize(new GUIContent(searchLabelText)).x + Config.S(8f);
-
-        GUI.Label(new Rect(rx, ry, searchLabelWidth, NEFManager.elementHeight), searchLabelText, labelStyle);
-        string newQuery = UI.WindowDrawing.DrawSetting.DrawManualTextField(
-            new Rect(rx + searchLabelWidth, ry, rightPanelWidth - searchLabelWidth, NEFManager.elementHeight),
-            searchQuery, Translator.Translate("Search..."));
-
-        if (newQuery != searchQuery)
-        {
-            searchQuery = newQuery;
-            currentScrollY = 0f;
-            NEFData.PerformSearch();
-        }
-
-        ry += NEFManager.elementHeight + Config.S(6f);
-
-        Rect clearBtnRect = new(rx, ry, rightPanelWidth, NEFManager.elementHeight);
-        bool clearHover = clearBtnRect.Contains(e.mousePosition);
-
-        GUI.Box(clearBtnRect, Translator.Translate("Clear Search"), ThemeManager.CategoryModuleOffStyle);
-        GUI.backgroundColor = Color.white;
-
-        if (clearHover && e.type == EventType.MouseDown && e.button == 0)
-        {
-            searchQuery = "";
-            currentScrollY = 0f;
-            NEFData.PerformSearch();
-            e.Use();
-        }
-
-        ry += NEFManager.elementHeight + Config.S(10f);
+            ry += NEFManager.elementHeight + Config.S(10f);
 
 #if ANDROID
-        GUI.Label(new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight),
-            Translator.Translate($"Results") + " (" + NEFData.searchResults.Count + ") " +
-            Translator.Translate("| Tap: Recipe | Hold: Usages"), labelStyle);
+            GUI.Label(new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight),
+                Translator.Translate($"Results") + " (" + NEFData.searchResults.Count + ") " +
+                Translator.Translate("| Tap: Recipe | Hold: Usages"), labelStyle);
 #else
-        GUI.Label(new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight),
-            Translator.Translate($"Results") + " (" + NEFData.searchResults.Count + ") " +
-            Translator.Translate("| L-Click: Recipe | R-Click: Usages"), labelStyle);
+            GUI.Label(new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight),
+                Translator.Translate($"Results") + " (" + NEFData.searchResults.Count + ") " +
+                Translator.Translate("| L-Click: Recipe | R-Click: Usages"), labelStyle);
 #endif
-        ry += NEFManager.elementHeight + Config.S(4f);
+            ry += NEFManager.elementHeight + Config.S(4f);
 
-        float scrollHeight = rightPanelRect.height - (ry - rightPanelRect.y);
-        Rect scrollRect = new(rx, ry, rightPanelWidth, scrollHeight);
+            float scrollHeight = rightPanelRect.height - (ry - rightPanelRect.y);
+            Rect scrollRect = new(rx, ry, rightPanelWidth, scrollHeight);
 
-        int columns = Mathf.Max(3, Mathf.FloorToInt(rightPanelWidth / Config.S(100f)));
-        float cellPadding = Config.S(5f);
-        float itemSize = (rightPanelWidth - (cellPadding * (columns - 1))) / columns;
-        int rowCount = Mathf.CeilToInt((float)NEFData.searchResults.Count / columns);
-        float totalContentHeight = rowCount * (itemSize + cellPadding);
-        float maxScrollY = Mathf.Max(0f, totalContentHeight - scrollRect.height);
+            int columns = Mathf.Max(3, Mathf.FloorToInt(rightPanelWidth / Config.S(100f)));
+            float cellPadding = Config.S(5f);
+            float itemSize = (rightPanelWidth - (cellPadding * (columns - 1))) / columns;
+            int rowCount = Mathf.CeilToInt((float)NEFData.searchResults.Count / columns);
+            float totalContentHeight = rowCount * (itemSize + cellPadding);
+            float maxScrollY = Mathf.Max(0f, totalContentHeight - scrollRect.height);
 
-        // Scroll Wheel
-        if (scrollRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
-        {
-            currentScrollY += e.delta.y * Config.S(30f);
-            currentScrollY = Mathf.Clamp(currentScrollY, 0f, maxScrollY);
-            e.Use();
-        }
-
-        // Hold-and-Drag Scrolling for Results Grid
-        if (e.type == EventType.MouseDown && e.button == 0 && scrollRect.Contains(e.mousePosition))
-        {
-            _gridTouchStart = e.mousePosition;
-            _gridScrollStartVal = currentScrollY;
-            _isGridSwiping = false;
-        }
-
-        if (e.type == EventType.MouseDrag && !_isGridSwiping && scrollRect.Contains(_gridTouchStart))
-        {
-            if (Vector2.Distance(e.mousePosition, _gridTouchStart) > Config.S(8f))
+            // Scroll Wheel
+            if (scrollRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
             {
-                _isGridSwiping = true;
+                currentScrollY += e.delta.y * Config.S(30f);
+                currentScrollY = Mathf.Clamp(currentScrollY, 0f, maxScrollY);
+                e.Use();
+            }
+
+            // Hold-and-Drag Scrolling for Results Grid
+            if (e.type == EventType.MouseDown && e.button == 0 && scrollRect.Contains(e.mousePosition))
+            {
+                _gridTouchStart = e.mousePosition;
+                _gridScrollStartVal = currentScrollY;
+                _isGridSwiping = false;
+            }
+
+            if (e.type == EventType.MouseDrag && !_isGridSwiping && scrollRect.Contains(_gridTouchStart))
+            {
+                if (Vector2.Distance(e.mousePosition, _gridTouchStart) > Config.S(8f))
+                {
+                    _isGridSwiping = true;
+#if ANDROID
+                    _heldEntity = null;
+#endif
+                }
+            }
+
+            if (_isGridSwiping && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove))
+            {
+                float deltaY = _gridTouchStart.y - e.mousePosition.y;
+                currentScrollY = Mathf.Clamp(_gridScrollStartVal + deltaY, 0f, maxScrollY);
+                e.Use();
+            }
+
+            GUI.BeginGroup(scrollRect);
+            if (!PlantMixTreeManager.IsInitialized)
+            {
+                GUI.Label(new Rect(Config.S(5f), Config.S(5f), rightPanelWidth, Config.S(30f)), Translator.Translate("Loading data..."));
+            }
+            else
+            {
+                for (int i = 0; i < NEFData.searchResults.Count; i++)
+                {
+                    int col = i % columns;
+                    int row = i / columns;
+
+                    float btnX = col * (itemSize + cellPadding);
+                    float btnY = row * (itemSize + cellPadding) - currentScrollY;
+
+                    if (btnY + itemSize < 0 || btnY > scrollRect.height) continue;
+
+                    RecipeEntity entity = NEFData.searchResults[i];
+                    Rect plantBtnRect = new(btnX, btnY, itemSize, itemSize);
+
+#if ANDROID
+                    if (plantBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+                    {
+                        _heldEntity = entity;
+                        _holdStartTime = Time.realtimeSinceStartup;
+                        _holdStartScreenPos = GUIUtility.GUIToScreenPoint(e.mousePosition);
+                        _hasTriggeredHold = false;
+                    }
+#endif
+
+                    if (!_isGridSwiping && plantBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseUp)
+                    {
+#if ANDROID
+                        if (!_hasTriggeredHold && e.button == 0)
+                        {
+                            if (showUsagesView) UIAnimationHelper.TriggerSubWindowTransition();
+                            showUsagesView = false;
+                            NEFData.GeneratePyramid(entity);
+                            e.Use();
+                        }
+#else
+                        if (e.button == 0)
+                        {
+                            if (showUsagesView) UIAnimationHelper.TriggerSubWindowTransition();
+                            showUsagesView = false;
+                            NEFData.GeneratePyramid(entity);
+                        }
+                        else if (e.button == 1)
+                        {
+                            if (!showUsagesView) UIAnimationHelper.TriggerSubWindowTransition();
+                            showUsagesView = true;
+                            NEFData.GenerateUsagesView(entity);
+                        }
+                        e.Use();
+#endif
+                    }
+
+                    DrawSquareNodeBox(plantBtnRect, entity, 1.5f);
+                    GUI.backgroundColor = Color.white;
+                }
+            }
+            GUI.EndGroup();
+
+            if (e.type == EventType.MouseUp)
+            {
+                _isGridSwiping = false;
 #if ANDROID
                 _heldEntity = null;
+                _hasTriggeredHold = false;
 #endif
             }
         }
-
-        if (_isGridSwiping && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove))
+        finally
         {
-            float deltaY = _gridTouchStart.y - e.mousePosition.y;
-            currentScrollY = Mathf.Clamp(_gridScrollStartVal + deltaY, 0f, maxScrollY);
-            e.Use();
-        }
-
-        GUI.BeginGroup(scrollRect);
-        if (!PlantMixTreeManager.IsInitialized)
-        {
-            GUI.Label(new Rect(Config.S(5f), Config.S(5f), rightPanelWidth, Config.S(30f)), Translator.Translate("Loading data..."));
-        }
-        else
-        {
-            for (int i = 0; i < NEFData.searchResults.Count; i++)
-            {
-                int col = i % columns;
-                int row = i / columns;
-
-                float btnX = col * (itemSize + cellPadding);
-                float btnY = row * (itemSize + cellPadding) - currentScrollY;
-
-                if (btnY + itemSize < 0 || btnY > scrollRect.height) continue;
-
-                RecipeEntity entity = NEFData.searchResults[i];
-                Rect plantBtnRect = new(btnX, btnY, itemSize, itemSize);
-
-#if ANDROID
-                if (plantBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
-                {
-                    _heldEntity = entity;
-                    _holdStartTime = Time.realtimeSinceStartup;
-                    _holdStartScreenPos = GUIUtility.GUIToScreenPoint(e.mousePosition);
-                    _hasTriggeredHold = false;
-                }
-#endif
-
-                if (!_isGridSwiping && plantBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseUp)
-                {
-#if ANDROID
-                    if (!_hasTriggeredHold && e.button == 0)
-                    {
-                        showUsagesView = false;
-                        NEFData.GeneratePyramid(entity);
-                        e.Use();
-                    }
-#else
-                    if (e.button == 0)
-                    {
-                        showUsagesView = false;
-                        NEFData.GeneratePyramid(entity);
-                    }
-                    else if (e.button == 1)
-                    {
-                        NEFData.GenerateUsagesView(entity);
-                    }
-                    e.Use();
-#endif
-                }
-
-                DrawSquareNodeBox(plantBtnRect, entity, 1.5f);
-                GUI.backgroundColor = Color.white;
-            }
-        }
-        GUI.EndGroup();
-
-        if (e.type == EventType.MouseUp)
-        {
-            _isGridSwiping = false;
-#if ANDROID
-            _heldEntity = null;
-            _hasTriggeredHold = false;
-#endif
+            GUI.color = prevColor;
+            GUI.contentColor = prevContentColor;
         }
     }
 
@@ -420,6 +444,7 @@ public static class NEFGUI
         if (backBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
             showUsagesView = false;
+            UIAnimationHelper.TriggerSubWindowTransition();
             e.Use();
         }
 
@@ -506,6 +531,7 @@ public static class NEFGUI
                 if (!_hasTriggeredHold && e.button == 0)
                 {
                     showUsagesView = false;
+                    UIAnimationHelper.TriggerSubWindowTransition();
                     NEFData.GeneratePyramid(resultEntity);
                     e.Use();
                 }
@@ -513,10 +539,12 @@ public static class NEFGUI
                 if (e.button == 0)
                 {
                     showUsagesView = false;
+                    UIAnimationHelper.TriggerSubWindowTransition();
                     NEFData.GeneratePyramid(resultEntity);
                 }
                 else if (e.button == 1)
                 {
+                    UIAnimationHelper.TriggerSubWindowTransition();
                     NEFData.GenerateUsagesView(resultEntity);
                 }
                 e.Use();
@@ -585,7 +613,7 @@ public static class NEFGUI
         if (!string.IsNullOrEmpty(node.EdgeMessage))
         {
             Color oldColor = GUI.contentColor;
-            GUI.contentColor = node.EdgeMessageColor;
+            GUI.contentColor = new Color(node.EdgeMessageColor.r, node.EdgeMessageColor.g, node.EdgeMessageColor.b, node.EdgeMessageColor.a * GUI.contentColor.a);
             GUIStyle msgStyle = new() { alignment = TextAnchor.LowerCenter, fontSize = Mathf.Max(1, (int)(Config.S(16f) * pyramidZoom)) };
 
             Rect msgRect = new(pos.x - (Config.S(100f) * pyramidZoom), pos.y - (Config.S(30f) * pyramidZoom), Config.S(200f) * pyramidZoom, Config.S(30f) * pyramidZoom);
@@ -612,8 +640,16 @@ public static class NEFGUI
                 e.Use();
             }
 #else
-            if (e.button == 0) NEFData.GeneratePyramid(node.Entity);
-            else if (e.button == 1) NEFData.GenerateUsagesView(node.Entity);
+            if (e.button == 0)
+            {
+                NEFData.GeneratePyramid(node.Entity);
+            }
+            else if (e.button == 1)
+            {
+                showUsagesView = true;
+                UIAnimationHelper.TriggerSubWindowTransition();
+                NEFData.GenerateUsagesView(node.Entity);
+            }
             e.Use();
 #endif
         }

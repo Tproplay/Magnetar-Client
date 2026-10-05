@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static Magnetar_Client.Utils.Translator;
+using Magnetar_Client.Core.Lifecycle;
 
 namespace Magnetar_Client.Core;
 
@@ -126,6 +127,7 @@ public static class TopBar
     public static void Init()
     {
         RebuildOffsets();
+        ServiceRegistry.Register(new TopBarService());
     }
 
     /// <summary>
@@ -219,5 +221,30 @@ public static class TopBar
         }
 
         GUI.EndGroup();
+    }
+
+    private class TopBarService : IInitializable, IWarmUp, IMenuRenderable, ILanguageAware
+    {
+        public string Name => "TopBar";
+        public int Priority => ServicePriority.Highest;
+
+        public void Initialize() => TopBar.RebuildOffsets();
+        public void OnWarmUp() => TopBar.RebuildOffsets();
+
+        public void OnMenuGUI()
+        {
+            TopBar.Render();
+
+            // Invoke custom tab render delegates if registered
+            if (Config.CurrentTab != null && Config.CurrentTab.IsCustom)
+            {
+                Config.CurrentTab.OnGUI?.Invoke();
+            }
+        }
+
+        public void OnLanguageChanged()
+        {
+            TopBar.RebuildOffsets();
+        }
     }
 }

@@ -17,6 +17,13 @@ public static class Actions
 
         public static Action OnEarlyApplicationQuit;
         public static Action OnLateApplicationQuit;
+
+        public static Action OnUpdate;
+
+        public static Action OnGUI;
+        public static Action OnGUIShow;
+
+        public static Action OnWarmUp;
     }
 
     public static class SaveLoad
@@ -24,8 +31,4 @@ public static class Actions
         public static Action OnLateInitializePreferences;
     }
 
-    public static class ModuleManager
-    {
-
-    }
 }

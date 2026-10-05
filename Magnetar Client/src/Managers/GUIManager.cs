@@ -1,13 +1,17 @@
-﻿using Magnetar_Client.UI.Themes;
+﻿using Magnetar_Client.Api;
+using Magnetar_Client.Core.Lifecycle;
+using Magnetar_Client.UI;
+using Magnetar_Client.UI.Setting;
+using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.WindowDrawing;
+using Magnetar_Client.Utils;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
-using System.IO;
-using System.Collections.Generic;
-using Magnetar_Client.Utils;
-using static Magnetar_Client.Utils.Magnetar_Logger;
-using Magnetar_Client.UI.Setting;
 using static Magnetar_Client.Api.PathsManager;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Core;
 
@@ -15,10 +19,37 @@ public static class GUIManager
 {
     public static bool isSelectingSubWindow = false;
 
-    public static MultiSelectSetting LanguageSetting;
-    public static MultiSelectSetting ThemeSetting;
-    public static FloatSetting ScaleSetting;
-    public static FloatSetting ElementScaleSetting;
+    public static MultiSelectSetting LanguageSetting { get; } = new("Language")
+    {
+        MaxSelection = 1,
+        Options = new Dictionary<int, string>
+        {
+            {0,"English" }
+        },
+        CustomNames = new Dictionary<int, string>()
+    };
+    public static MultiSelectSetting ThemeSetting { get; } = new("Theme")
+    {
+        MaxSelection = 1,
+        Options = new Dictionary<int, string>(),
+        CustomNames = new Dictionary<int, string>()
+    };
+    public static FloatSetting ScaleSetting = new("GUI Scale", 0.5f, 2.0f, Config.GUIScale,
+        decimalPlaces: 2, trueMin: 0.25f, trueMax: 3.0f)
+    {
+        OnValueChanged = (val) => Config.GUIScale = val
+    };
+    public static FloatSetting ElementScaleSetting = new("Element Scale", 0.5f, 2.0f,
+        Config.ElementScale, decimalPlaces: 2, trueMin: 0.25f, trueMax: 3.0f)
+    {
+        OnValueChanged = (val) => Config.ElementScale = val
+    };
+
+    public static FloatSetting FloatingIconOpacitySetting = new("Icon Opacity", 0.1f, 1.0f, Config.FloatingIconOpacity,
+    decimalPlaces: 2, trueMin: 0.05f, trueMax: 1.0f)
+    {
+        OnValueChanged = (val) => Config.FloatingIconOpacity = val
+    };
 
     private const float BaseWidth = 500f;
     private const float BaseHeight = 340f;
@@ -58,76 +89,66 @@ public static class GUIManager
 
     public static void Init()
     {
-        // --- 1. Language Setting ---
-        LanguageSetting = new MultiSelectSetting("Language")
+        try
         {
-            MaxSelection = 1,
-            Options = new Dictionary<int, string>(),
-            CustomNames = new Dictionary<int, string>()
-        };
+            var languageDirs = Directory.GetDirectories(TranslationRootDir);
+            int idx = 1;
+            int activeIndex = 0;
 
-        string translationRoot = Path.Combine(ModsDir, "Magnetar Translation");
-        try { if (!Directory.Exists(translationRoot)) Directory.CreateDirectory(translationRoot); } catch { }
-
-        LanguageSetting.AddOption(0, "English");
-
-        if (Directory.Exists(translationRoot))
-        {
-            try
+            foreach (var dir in languageDirs)
             {
-                var languageDirs = Directory.GetDirectories(translationRoot);
-                int idx = 1;
-                int activeIndex = 0;
+                string langName = Path.GetFileName(dir);
+                if (string.Equals(langName, "English", StringComparison.OrdinalIgnoreCase)) continue;
 
-                foreach (var dir in languageDirs)
+                LanguageSetting.AddOption(idx, langName);
+                if (string.Equals(Config.Language, langName, StringComparison.OrdinalIgnoreCase))
                 {
-                    string langName = Path.GetFileName(dir);
-                    if (string.Equals(langName, "English", StringComparison.OrdinalIgnoreCase)) continue;
-
-                    LanguageSetting.AddOption(idx, langName);
-                    if (string.Equals(Config.Language, langName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        activeIndex = idx;
-                    }
-                    idx++;
-                    TranslatorLogger.Msg($"Found language: {langName}");
+                    activeIndex = idx;
                 }
-                LanguageSetting.SelectedValues.Add(activeIndex);
+                idx++;
+                TranslatorLogger.Msg($"Found language: {langName}");
             }
-            catch (Exception ex)
-            {
-                TranslatorLogger.Error($"[GUIManager] Error reading translation directories: {ex.Message}");
-                LanguageSetting.SelectedValues.Add(0);
-            }
+            LanguageSetting.SelectedValues.Add(activeIndex);
         }
-        else
+        catch (Exception ex)
         {
+            TranslatorLogger.Error($"[GUIManager] Error reading translation directories: {ex.Message}");
             LanguageSetting.SelectedValues.Add(0);
         }
 
-        // --- 2. Theme Setting Initialization ---
-        ThemeSetting = new MultiSelectSetting("Theme")
-        {
-            MaxSelection = 1,
-            Options = new Dictionary<int, string>(),
-            CustomNames = new Dictionary<int, string>()
-        };
-
         RefreshThemeOptions();
 
-        // --- 3. GUI Scale Setting ---
         if (Config.GUIScale <= 0.1f) Config.GUIScale = 1.0f;
-        ScaleSetting = new FloatSetting("GUI Scale", 0.5f, 2.0f, Config.GUIScale, decimalPlaces: 2, trueMin: 0.25f, trueMax: 3.0f)
-        {
-            OnValueChanged = (val) => Config.GUIScale = val
-        };
-
-        // --- 4. Element Scale Setting ---
         if (Config.ElementScale <= 0.1f) Config.ElementScale = 1.0f;
-        ElementScaleSetting = new FloatSetting("Element Scale", 0.5f, 2.0f, Config.ElementScale, decimalPlaces: 2, trueMin: 0.25f, trueMax: 3.0f)
+
+        // Register to centralized ServiceRegistry and SafeToCloseManager
+        ServiceRegistry.Register(new GUIManagerService());
+
+        SafeToCloseManager.RegisterGuard(() =>
         {
-            OnValueChanged = (val) => Config.ElementScale = val
-        };
+            if (Config.CurrentTab == TabType.GUI)
+            {
+                return !isSelectingSubWindow
+                       && DrawSetting.activeSliderId == -1
+                       && DrawSetting.activeDropdownId == -1
+                       && DrawSetting.activeTextFieldId == -1;
+            }
+            return true;
+        });
+
+        SafeToCloseManager.RegisterInterceptor(() =>
+        {
+            if (Config.CurrentTab == TabType.GUI && isSelectingSubWindow)
+            {
+                OnClose();
+                UIAnimationHelper.TriggerSubWindowTransition();
+                return true;
+            }
+            return false;
+        });
+
+        Api.Actions.Core.OnGUIShow += Render;
+        Api.Actions.Core.OnWarmUp += Render;
     }
 
     public static void RefreshThemeOptions()
@@ -173,6 +194,7 @@ public static class GUIManager
         if (isSelectingSubWindow && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
         {
             OnClose();
+            UIAnimationHelper.TriggerSubWindowTransition();
             e.Use();
             return;
         }
@@ -210,172 +232,213 @@ public static class GUIManager
 
     private static void DrawSelectorModal(int windowID)
     {
-        Event e = Event.current;
-        Rect multiSelectRect = new(0, 0, selectorRect.width, selectorRect.height);
-        UI.WindowDrawing.DrawSetting.DrawMultiSelectWindow(multiSelectRect, UI.WindowDrawing.DrawSetting.activeMultiSelect, _cachedOnClose);
+        Color prevColor = GUI.color;
+        Color prevContentColor = GUI.contentColor;
+        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.SubWindowAlpha;
+
+        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
+        GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
+
+        try
+        {
+            Event e = Event.current;
+            Rect multiSelectRect = new(0, 0, selectorRect.width, selectorRect.height);
+            UI.WindowDrawing.DrawSetting.DrawMultiSelectWindow(multiSelectRect, UI.WindowDrawing.DrawSetting.activeMultiSelect, _cachedOnClose);
 
 #if ANDROID
-        float titleHeight = Config.S(25f) * 1.30f;
+            float titleHeight = Config.S(25f) * 1.30f;
 #else
-        float titleHeight = Config.S(25f);
+            float titleHeight = Config.S(25f);
 #endif
-        float dragSafeMargin = Config.ShowMobileButtons ? Config.S(35f) : 0f;
-        GUI.DragWindow(new Rect(0, 0, selectorRect.width - dragSafeMargin, titleHeight));
+            float dragSafeMargin = Config.ShowMobileButtons ? Config.S(35f) : 0f;
+            GUI.DragWindow(new Rect(0, 0, selectorRect.width - dragSafeMargin, titleHeight));
 
-        if (multiSelectRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
+            if (multiSelectRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
+            {
+                Input.ResetInputAxes();
+                e.Use();
+            }
+        }
+        finally
         {
-            Input.ResetInputAxes();
-            e.Use();
+            GUI.color = prevColor;
+            GUI.contentColor = prevContentColor;
         }
     }
 
     private static void DrawGUIControls(int windowID)
     {
-        float w = windowRect.width;
-        float indent = Config.S(10f);
-        Event e = Event.current;
-        float y = Config.S(35f);
+        Color prevColor = GUI.color;
+        Color prevContentColor = GUI.contentColor;
+        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.SubWindowAlpha;
 
-        Rect headerBgRect = new(0, 0, w, y - indent);
-        GUI.Box(headerBgRect, Translator.Translate("GUI Configuration"), ThemeManager.SettingsWndowStyle);
+        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
+        GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
 
-        // --- 1. Language Row ---
-        string currentLangName = "English";
-        if (LanguageSetting?.SelectedValues != null && LanguageSetting.SelectedValues.Count > 0)
+        try
         {
-            int selectedId = LanguageSetting.SelectedValues.First();
-            if (LanguageSetting.Options.ContainsKey(selectedId))
-                currentLangName = LanguageSetting.Options[selectedId];
-        }
+            float w = windowRect.width;
+            float indent = Config.S(10f);
+            Event e = Event.current;
+            float y = Config.S(35f);
 
-        Config.Language = currentLangName;
+            Rect headerBgRect = new(0, 0, w, y - indent);
+            GUI.Box(headerBgRect, Translator.Translate("GUI Configuration"), ThemeManager.SettingsWndowStyle);
 
-        GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight),
-            $"Language: <color=yellow>{Config.Language}</color>",
-            ThemeManager.SettingLabelStyle);
-
-        Rect langBtnRect = new(w * 0.5f, y, w * 0.45f, elementHeight);
-
-        if (e.type == EventType.MouseDown && e.button == 0 && langBtnRect.Contains(e.mousePosition))
-        {
-            e.Use();
-            OpenSubSelector(LanguageSetting);
-        }
-        GUI.Box(langBtnRect, Translator.Translate("Change"), ThemeManager.SettingOff);
-        y += elementHeight + Config.S(10f);
-
-        // --- 2. Theme Row ---
-        string currentTheme = ThemeManager.CurrentThemeName;
-        if (ThemeSetting?.SelectedValues != null && ThemeSetting.SelectedValues.Count > 0)
-        {
-            int selThemeId = ThemeSetting.SelectedValues.First();
-            if (ThemeSetting.Options.ContainsKey(selThemeId))
+            // --- 1. Language Row ---
+            string currentLangName = "English";
+            if (LanguageSetting?.SelectedValues != null && LanguageSetting.SelectedValues.Count > 0)
             {
-                currentTheme = ThemeSetting.Options[selThemeId];
+                int selectedId = LanguageSetting.SelectedValues.First();
+                if (LanguageSetting.Options.ContainsKey(selectedId))
+                    currentLangName = LanguageSetting.Options[selectedId];
             }
-        }
 
-        Config.Theme = currentTheme;
+            Config.Language = currentLangName;
 
-        GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight),
-            $"Theme: <color=yellow>{Config.Theme}</color>",
-            ThemeManager.SettingLabelStyle);
+            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight),
+                $"Language: <color=yellow>{Config.Language}</color>",
+                ThemeManager.SettingLabelStyle);
 
-        Rect themeBtnRect = new(w * 0.5f, y, w * 0.45f, elementHeight);
+            Rect langBtnRect = new(w * 0.5f, y, w * 0.45f, elementHeight);
 
-        if (e.type == EventType.MouseDown && e.button == 0 && themeBtnRect.Contains(e.mousePosition))
-        {
-            e.Use();
-            RefreshThemeOptions();
-            OpenSubSelector(ThemeSetting);
-        }
-
-        GUI.Box(themeBtnRect, Translator.Translate("Change"), ThemeManager.SettingOff);
-        y += elementHeight + Config.S(10f);
-
-        // --- 3. GUI Scale Row ---
-        if (ScaleSetting != null)
-        {
-            if (UI.WindowDrawing.DrawSetting.activeSliderId != ScaleSetting.GetHashCode() &&
-                Mathf.Abs(ScaleSetting.Value - Config.GUIScale) > 0.001f)
+            if (e.type == EventType.MouseDown && e.button == 0 && langBtnRect.Contains(e.mousePosition))
             {
-                ScaleSetting.Value = Config.GUIScale;
+                e.Use();
+                OpenSubSelector(LanguageSetting);
             }
-            UI.WindowDrawing.DrawSetting.HandleNumericSetting(ScaleSetting, ref y, w, true);
+            GUI.Box(langBtnRect, Translator.Translate("Change"), ThemeManager.SettingOff);
             y += elementHeight + Config.S(10f);
-        }
 
-        // --- 4. Element Scale Row ---
-        if (ElementScaleSetting != null)
-        {
-            if (UI.WindowDrawing.DrawSetting.activeSliderId != ElementScaleSetting.GetHashCode() &&
-                Mathf.Abs(ElementScaleSetting.Value - Config.ElementScale) > 0.001f)
+            // --- 2. Theme Row ---
+            string currentTheme = ThemeManager.CurrentThemeName;
+            if (ThemeSetting?.SelectedValues != null && ThemeSetting.SelectedValues.Count > 0)
             {
-                ElementScaleSetting.Value = Config.ElementScale;
+                int selThemeId = ThemeSetting.SelectedValues.First();
+                if (ThemeSetting.Options.ContainsKey(selThemeId))
+                {
+                    currentTheme = ThemeSetting.Options[selThemeId];
+                }
             }
-            UI.WindowDrawing.DrawSetting.HandleNumericSetting(ElementScaleSetting, ref y, w, true);
+
+            Config.Theme = currentTheme;
+
+            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight),
+                $"Theme: <color=yellow>{Config.Theme}</color>",
+                ThemeManager.SettingLabelStyle);
+
+            Rect themeBtnRect = new(w * 0.5f, y, w * 0.45f, elementHeight);
+
+            if (e.type == EventType.MouseDown && e.button == 0 && themeBtnRect.Contains(e.mousePosition))
+            {
+                e.Use();
+                RefreshThemeOptions();
+                OpenSubSelector(ThemeSetting);
+            }
+
+            GUI.Box(themeBtnRect, Translator.Translate("Change"), ThemeManager.SettingOff);
             y += elementHeight + Config.S(10f);
+
+            // --- 3. GUI Scale Row ---
+            if (ScaleSetting != null)
+            {
+                if (UI.WindowDrawing.DrawSetting.activeSliderId != ScaleSetting.GetHashCode() &&
+                    Mathf.Abs(ScaleSetting.Value - Config.GUIScale) > 0.001f)
+                {
+                    ScaleSetting.Value = Config.GUIScale;
+                }
+                UI.WindowDrawing.DrawSetting.HandleNumericSetting(ScaleSetting, ref y, w, true);
+                y += elementHeight + Config.S(10f);
+            }
+
+            // --- 4. Element Scale Row ---
+            if (ElementScaleSetting != null)
+            {
+                if (UI.WindowDrawing.DrawSetting.activeSliderId != ElementScaleSetting.GetHashCode() &&
+                    Mathf.Abs(ElementScaleSetting.Value - Config.ElementScale) > 0.001f)
+                {
+                    ElementScaleSetting.Value = Config.ElementScale;
+                }
+                UI.WindowDrawing.DrawSetting.HandleNumericSetting(ElementScaleSetting, ref y, w, true);
+                y += elementHeight + Config.S(10f);
+            }
+
+            // --- 5. Floating Icon Toggle Row ---
+            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Floating Icon"), ThemeManager.SettingLabelStyle);
+            Rect floatIconRect = new(w * 0.5f, y, w * 0.45f, elementHeight);
+
+            GUI.Box(floatIconRect,
+                Config.ShowFloatingIcon ? Translator.Translate("ON") : Translator.Translate("OFF"),
+                Config.ShowFloatingIcon ? ThemeManager.SettingOn : ThemeManager.SettingOff);
+
+            if (floatIconRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+            {
+                Config.SetFloatingIcon(!Config.ShowFloatingIcon);
+                e.Use();
+            }
+            y += elementHeight + Config.S(10f);
+
+            // --- 6. Mobile Buttons Toggle Row ---
+            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Mobile Close Buttons"), ThemeManager.SettingLabelStyle);
+            Rect mobileBtnRect = new(w * 0.5f, y, w * 0.45f, elementHeight);
+
+            GUI.Box(mobileBtnRect,
+                Config.ShowMobileButtons ? Translator.Translate("ON") : Translator.Translate("OFF"),
+                Config.ShowMobileButtons ? ThemeManager.SettingOn : ThemeManager.SettingOff);
+
+            if (mobileBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+            {
+                Config.ShowMobileButtons = !Config.ShowMobileButtons;
+                e.Use();
+            }
+            y += elementHeight + Config.S(10f);
+
+            // --- 7. Show Main Menu Credits ---
+            GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Show Main Menu Credits"), ThemeManager.SettingLabelStyle);
+            Rect showMainMenuCredits = new(w * 0.5f, y, w * 0.45f, elementHeight);
+
+            GUI.Box(showMainMenuCredits,
+                Config.ShowMainMenuCredits ? Translator.Translate("ON") : Translator.Translate("OFF"),
+                Config.ShowMainMenuCredits ? ThemeManager.SettingOn : ThemeManager.SettingOff);
+
+            if (showMainMenuCredits.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+            {
+                Config.ShowMainMenuCredits = !Config.ShowMainMenuCredits;
+                e.Use();
+            }
+            y += elementHeight + Config.S(10f);
+
+            if (Config.ShowFloatingIcon && FloatingIconOpacitySetting != null)
+            {
+                if (UI.WindowDrawing.DrawSetting.activeSliderId != FloatingIconOpacitySetting.GetHashCode() &&
+                    Mathf.Abs(FloatingIconOpacitySetting.Value - Config.FloatingIconOpacity) > 0.001f)
+                {
+                    FloatingIconOpacitySetting.Value = Config.FloatingIconOpacity;
+                }
+                UI.WindowDrawing.DrawSetting.HandleNumericSetting(FloatingIconOpacitySetting, ref y, w, true);
+                y += elementHeight + Config.S(10f);
+            }
+
+            if (UI.WindowDrawing.DrawSetting.OnPostDraw != null)
+            {
+                UI.WindowDrawing.DrawSetting.OnPostDraw.Invoke();
+                UI.WindowDrawing.DrawSetting.OnPostDraw = null;
+            }
+
+            windowRect.height = y;
+            GUI.DragWindow(new Rect(0, 0, w, Config.S(25f)));
+
+            Rect _windowRect = new(0, 0, w, y);
+            if (_windowRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
+            {
+                Input.ResetInputAxes();
+                e.Use();
+            }
         }
-
-        // --- 5. Floating Icon Toggle Row ---
-        GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Floating Icon"), ThemeManager.SettingLabelStyle);
-        Rect floatIconRect = new(w * 0.5f, y, w * 0.45f, elementHeight);
-
-        GUI.Box(floatIconRect,
-            Config.ShowFloatingIcon ? Translator.Translate("ON") : Translator.Translate("OFF"),
-            Config.ShowFloatingIcon ? ThemeManager.SettingOn : ThemeManager.SettingOff);
-
-        if (floatIconRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+        finally
         {
-            Config.SetFloatingIcon(!Config.ShowFloatingIcon);
-            e.Use();
-        }
-        y += elementHeight + Config.S(10f);
-
-        // --- 6. Mobile Buttons Toggle Row ---
-        GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Mobile Close Buttons"), ThemeManager.SettingLabelStyle);
-        Rect mobileBtnRect = new(w * 0.5f, y, w * 0.45f, elementHeight);
-
-        GUI.Box(mobileBtnRect,
-            Config.ShowMobileButtons ? Translator.Translate("ON") : Translator.Translate("OFF"),
-            Config.ShowMobileButtons ? ThemeManager.SettingOn : ThemeManager.SettingOff);
-
-        if (mobileBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
-        {
-            Config.ShowMobileButtons = !Config.ShowMobileButtons;
-            e.Use();
-        }
-        y += elementHeight + Config.S(10f);
-
-        // --- 7. Show Main Menu Credits ---
-        GUI.Label(new Rect(indent, y, w * 0.45f, elementHeight), Translator.Translate("Show Main Menu Credits"), ThemeManager.SettingLabelStyle);
-        Rect showMainMenuCredits = new(w * 0.5f, y, w * 0.45f, elementHeight);
-
-        GUI.Box(showMainMenuCredits,
-            Config.ShowMainMenuCredits ? Translator.Translate("ON") : Translator.Translate("OFF"),
-            Config.ShowMainMenuCredits ? ThemeManager.SettingOn : ThemeManager.SettingOff);
-
-        if (showMainMenuCredits.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
-        {
-            Config.ShowMainMenuCredits = !Config.ShowMainMenuCredits;
-            e.Use();
-        }
-        y += elementHeight + Config.S(10f);
-
-        if (UI.WindowDrawing.DrawSetting.OnPostDraw != null)
-        {
-            UI.WindowDrawing.DrawSetting.OnPostDraw.Invoke();
-            UI.WindowDrawing.DrawSetting.OnPostDraw = null;
-        }
-
-        windowRect.height = y;
-        GUI.DragWindow(new Rect(0, 0, w, Config.S(25f)));
-
-        Rect _windowRect = new(0, 0, w, y);
-        if (_windowRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
-        {
-            Input.ResetInputAxes();
-            e.Use();
+            GUI.color = prevColor;
+            GUI.contentColor = prevContentColor;
         }
     }
 
@@ -390,5 +453,61 @@ public static class GUIManager
         selectorRect = new Rect((Config.NativeWidth - targetW) / 2f, (Config.NativeHeight - targetH) / 2f, targetW, targetH);
 
         isSelectingSubWindow = true;
+        UIAnimationHelper.TriggerSubWindowTransition();
+    }
+
+    private class GUIManagerService : IInitializable, IWarmUp, IMenuRenderable, ICloseHandler, ILanguageAware
+    {
+        public string Name => "GUIManager";
+        public int Priority => ServicePriority.UI;
+
+        public void Initialize() { }
+        public void OnWarmUp() => GUIManager.Render();
+
+        public void OnMenuGUI()
+        {
+            if (Config.CurrentTab == TabType.GUI)
+            {
+                GUIManager.Render();
+            }
+        }
+
+        public bool CanClose()
+        {
+            return !isSelectingSubWindow
+                   && DrawSetting.activeSliderId == -1
+                   && DrawSetting.activeDropdownId == -1
+                   && DrawSetting.activeTextFieldId == -1;
+        }
+
+        public bool OnEscapePressed()
+        {
+            if (Config.CurrentTab != TabType.GUI) return false;
+
+            // 1. If currently inside a sub-selector modal (Language or Theme selector), step back with animation
+            if (isSelectingSubWindow)
+            {
+                OnClose();
+                Main.ResetInputBind();
+                UIAnimationHelper.TriggerSubWindowTransition();
+                Input.ResetInputAxes();
+                return true;
+            }
+
+            // 2. If an active slider or text field is focused, cancel/unfocus it
+            if (DrawSetting.activeSliderId != -1 || DrawSetting.activeDropdownId != -1 || DrawSetting.activeTextFieldId != -1)
+            {
+                Main.ResetInputBind();
+                Input.ResetInputAxes();
+                return true;
+            }
+
+            return false;
+        }
+
+        public void OnLanguageChanged()
+        {
+            RefreshThemeOptions();
+        }
     }
 }

@@ -1,480 +1,74 @@
-﻿using Magnetar_Client.Utils;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
+using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
+using Magnetar_Client.Core;
+using Magnetar_Client.Core.Lifecycle;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Api.PathsManager;
 
 namespace Magnetar_Client.UI.Themes;
 
-#region Nested Theme Data Contracts
-[Serializable]
-public class ColorState
-{
-    [JsonProperty("normal")]
-    public string Normal { get; set; }
-
-    [JsonProperty("hover", NullValueHandling = NullValueHandling.Ignore)]
-    public string Hover { get; set; }
-
-    [JsonProperty("active", NullValueHandling = NullValueHandling.Ignore)]
-    public string Active { get; set; }
-
-    public ColorState() { }
-    public ColorState(string normal, string hover = null, string active = null)
-    {
-        Normal = normal;
-        Hover = hover ?? normal;
-        Active = active ?? normal;
-    }
-}
-
-[Serializable]
-public class ElementStyleTheme
-{
-    [JsonProperty("text")]
-    public ColorState Text { get; set; } = new ColorState();
-
-    [JsonProperty("background color")]
-    public ColorState BackgroundColor { get; set; } = new ColorState();
-
-    public ElementStyleTheme() { }
-    public ElementStyleTheme(ColorState text, ColorState bg)
-    {
-        Text = text;
-        BackgroundColor = bg;
-    }
-}
-
-[Serializable]
-public class WindowStyleTheme
-{
-    [JsonProperty("text")]
-    public string Text { get; set; }
-
-    [JsonProperty("background color")]
-    public string BackgroundColor { get; set; }
-
-    [JsonProperty("window background", NullValueHandling = NullValueHandling.Ignore)]
-    public string WindowBackground { get; set; }
-
-    public WindowStyleTheme() { }
-    public WindowStyleTheme(string text, string bg, string windowBg = null)
-    {
-        Text = text;
-        BackgroundColor = bg;
-        WindowBackground = windowBg ?? bg;
-    }
-}
-
-[Serializable]
-public class TypographyTheme
-{
-    /// <summary>
-    /// Color for the description of a module inside the module setting window
-    /// </summary>
-    [JsonProperty("description")]
-    public string Description { get; set; }
-
-    /// <summary>
-    /// Color for the text of a Label setting
-    /// </summary>
-    [JsonProperty("label")]
-    public string Label { get; set; }
-
-    /// <summary>
-    /// Color for the text of the author of the module
-    /// </summary>
-    [JsonProperty("author")]
-    public string Author { get; set; }
-
-    /// <summary>
-    /// Primary Color for the text of a setting's name and for the text inside the text field
-    /// </summary>
-    [JsonProperty("text")]
-    public string Text { get; set; }
-
-    /// <summary>
-    /// Color for the text which is highlighted by the cursor inside a text field
-    /// </summary>
-    [JsonProperty("highlight text")]
-    public string HighlightText { get; set; }
-
-    /// <summary>
-    /// Color for the background of a text which is highlighted by the cursor inside a text field
-    /// </summary>
-    [JsonProperty("highlight background")]
-    public string HighlightBackground { get; set; }
-
-    /// <summary>
-    /// Color for the text of the separator
-    /// </summary>
-    [JsonProperty("secondary", NullValueHandling = NullValueHandling.Ignore)]
-    public string Secondary { get; set; }
-
-    /// <summary>
-    /// Primary Color for the text of a setting's name and for the text inside the text field
-    /// </summary>
-    [JsonProperty("primary", NullValueHandling = NullValueHandling.Ignore)]
-    public string Primary { get => Text; set => Text = value; }
-}
-
-[Serializable]
-public class NefTheme
-{
-    [JsonProperty("line color")]
-    public string LineColor { get; set; }
-
-    [JsonProperty("node background")]
-    public string NodeBackground { get; set; }
-}
-
-[Serializable]
-public class HudTheme
-{
-    [JsonProperty("text color")]
-    public string TextColor { get; set; }
-}
-
-[Serializable]
-public class MiscTheme
-{
-    [JsonProperty("dim background")]
-    public string DimBackground { get; set; }
-
-    [JsonProperty("separator")]
-    public string Separator { get; set; }
-
-    [JsonProperty("separator text", NullValueHandling = NullValueHandling.Ignore)]
-    public string SeparatorText { get; set; }
-}
-
-[Serializable]
-public class SliderTheme
-{
-    [JsonProperty("track off", NullValueHandling = NullValueHandling.Ignore)]
-    public string TrackOff { get; set; }
-
-    [JsonProperty("track on", NullValueHandling = NullValueHandling.Ignore)]
-    public string TrackOn { get; set; }
-
-    [JsonProperty("thumb", NullValueHandling = NullValueHandling.Ignore)]
-    public string Thumb { get; set; }
-
-    [JsonProperty("thumb hover", NullValueHandling = NullValueHandling.Ignore)]
-    public string ThumbHover { get; set; }
-}
-
-[Serializable]
-public class SectionSettingTheme
-{
-    [JsonProperty("group header", NullValueHandling = NullValueHandling.Ignore)]
-    public ElementStyleTheme GroupHeader { get; set; }
-
-    [JsonProperty("section header", NullValueHandling = NullValueHandling.Ignore)]
-    public ElementStyleTheme SectionHeader { get; set; }
-
-    [JsonProperty("remove button", NullValueHandling = NullValueHandling.Ignore)]
-    public ElementStyleTheme RemoveButton { get; set; }
-
-    [JsonProperty("add button", NullValueHandling = NullValueHandling.Ignore)]
-    public ElementStyleTheme AddButton { get; set; }
-}
-
-
-[Serializable]
-public class ThemeData
-{
-    /// <summary>
-    /// Name for the custom theme
-    /// </summary>
-    [JsonProperty("name")]
-    public string Name { get; set; } = "Custom Theme";
-
-    /// <summary>
-    /// Style for the Top Bar buttons when the Button is not selected
-    /// </summary>
-    [JsonProperty("TopBarOff")]
-    public ElementStyleTheme TopBarOff { get; set; } = new ElementStyleTheme();
-
-    /// <summary>
-    /// Style for the Top Bar buttons when the Button is selected
-    /// </summary>
-    [JsonProperty("TopBarActive")]
-    public ElementStyleTheme TopBarActive { get; set; } = new ElementStyleTheme();
-
-    /// <summary>
-    /// Style for the name of header of a category window like "Level" or "Visual"
-    /// </summary>
-    [JsonProperty("CategoryHeader")]
-    public ElementStyleTheme CategoryHeader { get; set; } = new ElementStyleTheme();
-
-    /// <summary>
-    /// Style for the background of a category window
-    /// </summary>
-    [JsonProperty("CategoryWindow")]
-    public WindowStyleTheme CategoryWindow { get; set; } = new WindowStyleTheme();
-
-    /// <summary>
-    /// Style for a module on the category window when the module is not enabled
-    /// </summary>
-    [JsonProperty("CategoryModuleOff")]
-    public ElementStyleTheme CategoryModuleOff { get; set; } = new ElementStyleTheme();
-
-    /// <summary>
-    /// Style for a module on the category window when the module is enabled
-    /// </summary>
-    [JsonProperty("CategoryModuleOn")]
-    public ElementStyleTheme CategoryModuleOn { get; set; } = new ElementStyleTheme();
-
-    [JsonProperty("SettingsWindow")]
-    public WindowStyleTheme SettingsWindow { get; set; } = new WindowStyleTheme();
-
-    /// <summary>
-    /// Style for the close button present at top right corner of the Settings window or the Multiselect window
-    /// </summary>
-    [JsonProperty("CloseButton")]
-    public ElementStyleTheme CloseButton { get; set; } = new ElementStyleTheme();
-
-    /// <summary>
-    /// Style for the button, like Bool Setting, of a settings window not including the text of the setting
-    /// </summary>
-    [JsonProperty("SettingOff")]
-    public ElementStyleTheme SettingOff { get; set; } = new ElementStyleTheme();
-
-    /// <summary>
-    /// Style for the button, like Bool Setting, of a settings window not including the text of the setting
-    /// </summary>
-    [JsonProperty("SettingOn")]
-    public ElementStyleTheme SettingOn { get; set; } = new ElementStyleTheme();
-
-    /// <summary>
-    /// Style for the single click button
-    /// </summary>
-    [JsonProperty("ButtonSetting", NullValueHandling = NullValueHandling.Ignore)]
-    public ElementStyleTheme ButtonSetting { get; set; }
-
-    /// <summary>
-    /// Style for the Reset button present at the right side of every setting
-    /// </summary>
-    [JsonProperty("ResetButton", NullValueHandling = NullValueHandling.Ignore)]
-    public ElementStyleTheme ResetButton { get; set; }
-
-    /// <summary>
-    /// Style for the +Add button present at the botton of a List string setting
-    /// </summary>
-    [JsonProperty("ListAddButton", NullValueHandling = NullValueHandling.Ignore)]
-    public ElementStyleTheme ListAddButton { get; set; }
-
-    /// <summary>
-    /// Style for the - button present at the right side of each text field in place of the reset button
-    /// </summary>
-    [JsonProperty("ListRemoveButton", NullValueHandling = NullValueHandling.Ignore)]
-    public ElementStyleTheme ListRemoveButton { get; set; }
-
-    /// <summary>
-    /// Style colors for the text
-    /// </summary>
-    [JsonProperty("Typography")]
-    public TypographyTheme Typography { get; set; } = new TypographyTheme();
-
-    [JsonProperty("NEF")]
-    public NefTheme NEF { get; set; } = new NefTheme();
-
-    [JsonProperty("HUD")]
-    public HudTheme HUD { get; set; } = new HudTheme();
-
-    [JsonProperty("Misc")]
-    public MiscTheme Misc { get; set; } = new MiscTheme();
-
-    [JsonProperty("Slider", NullValueHandling = NullValueHandling.Ignore)]
-    public SliderTheme Slider { get; set; }
-
-    /// <summary>
-    /// Style for the Section Setting
-    /// </summary>
-    [JsonProperty("Section", NullValueHandling = NullValueHandling.Ignore)]
-    public SectionSettingTheme Section { get; set; }
-}
-
-
-#endregion
-
 public static class ThemeManager
 {
-    public static bool IsInitialized { get; private set; } = false;
+    public static string CurrentThemeName => Config.Theme ?? "Magnetar Default";
 
-    #region Styles
+    #region Direct Accessors
+    public static Color BackgroundColor => ThemeData.CategoryWindowBg;
+    public static Color AccentColor => ThemeData.CategoryModuleOnBg;
+    public static Color LightBackgroundColor => ThemeData.CategoryModuleOffBg;
+    public static Color TextWhite => ThemeData.TypographyText;
+    public static Color TextDim => ThemeData.CategoryModuleOffText;
+    public static Color DimColor => ThemeData.DimBg;
+    public static Color NefLineColor => ThemeData.NefLineColor;
+    public static Color NefNodeColor => ThemeData.NefNodeBg;
+    public static Color SettingOnColor => ThemeData.SettingOnBg;
+    public static Color SettingOffColor => ThemeData.SettingOffBg;
+    public static Color SeparatorColor => ThemeData.Separator;
 
-    public static GUIStyle TopBarStyle;
-    public static GUIStyle TopBarActiveStyle;
-    public static GUIStyle CategoryWindowStyle;
-    public static GUIStyle CategoryHeaderStyle;
-    public static GUIStyle CategoryModuleOffStyle;
-    public static GUIStyle CategoryModuleOnStyle;
-    public static GUIStyle CloseButtonStyle;
-    public static GUIStyle SettingsWndowBgStyle;
-    public static GUIStyle SettingsWndowStyle;
-    public static GUIStyle SettingsDescriptionStyle;
-    public static GUIStyle SettingTextStyle;
-    public static GUIStyle SettingAuthorStyle;
-    public static GUIStyle SettingOff;
-    public static GUIStyle SettingOn;
-    public static GUIStyle SettingLabelStyle;
-    public static GUIStyle ButtonSettingStyle;
-    public static GUIStyle ResetButtonStyle;
-    public static GUIStyle ListAddButtonStyle;
-    public static GUIStyle ListRemoveButtonStyle;
-    public static GUIStyle SeparatorStyle;
-    public static GUIStyle SeparatorTextStyle;
-    public static GUIStyle TextStyle;
-    public static GUIStyle TextHighlightedStyle;
-    public static GUIStyle DimBackgroundStyle;
-    public static GUIStyle HUDElementStyle;
-    public static GUIStyle NEFLineStyle;
-    public static GUIStyle NEFNodeStyle;
-    public static GUIStyle SliderTrackOffStyle;
-    public static GUIStyle SliderTrackOnStyle;
-    public static GUIStyle SliderThumbStyle;
-    public static GUIStyle SectionGroupHeaderStyle;
-    public static GUIStyle SectionHeaderStyle;
-    public static GUIStyle SectionRemoveButtonStyle;
-    public static GUIStyle SectionAddButtonStyle;
-
+    public static Dictionary<string, ThemeDefinition> LoadedThemes => ThemeData.LoadedThemes;
+    public static ThemeDefinition InternalDefaultTheme => ThemeData.InternalDefaultTheme;
     #endregion
 
-    #region Dynamic Theme Colors
-    public static Color BackgroundColor { get; private set; }
-    public static Color AccentColor { get; private set; }
-    public static Color AccentHoverColor { get; private set; }
-    public static Color LightBackgroundColor { get; private set; }
-    public static Color TextWhite { get; private set; }
-    public static Color TextDim { get; private set; }
-    public static Color HoverColor { get; private set; }
-    public static Color ActiveColor { get; private set; }
-    public static Color DimColor { get; private set; }
-    public static Color NefLineColor { get; private set; }
-    public static Color NefNodeColor { get; private set; }
+    #region GUIStyle Registries
+    public static GUIStyle TopBarStyle { get; private set; }
+    public static GUIStyle TopBarActiveStyle { get; private set; }
+    public static GUIStyle CategoryWindowStyle { get; private set; }
+    public static GUIStyle CategoryHeaderStyle { get; private set; }
+    public static GUIStyle CategoryModuleOffStyle { get; private set; }
+    public static GUIStyle CategoryModuleOnStyle { get; private set; }
+    public static GUIStyle CloseButtonStyle { get; private set; }
+    public static GUIStyle SettingsWndowBgStyle { get; private set; }
+    public static GUIStyle SettingsWndowStyle { get; private set; }
+    public static GUIStyle SettingsDescriptionStyle { get; private set; }
+    public static GUIStyle SettingTextStyle { get; private set; }
+    public static GUIStyle SettingAuthorStyle { get; private set; }
+    public static GUIStyle SettingOff { get; private set; }
+    public static GUIStyle SettingOn { get; private set; }
+    public static GUIStyle SettingLabelStyle { get; private set; }
+    public static GUIStyle ButtonSettingStyle { get; private set; }
+    public static GUIStyle ResetButtonStyle { get; private set; }
+    public static GUIStyle ListAddButtonStyle { get; private set; }
+    public static GUIStyle ListRemoveButtonStyle { get; private set; }
+    public static GUIStyle SeparatorStyle { get; private set; }
+    public static GUIStyle SeparatorTextStyle { get; private set; }
+    public static GUIStyle TextStyle { get; private set; }
+    public static GUIStyle TextHighlightedStyle { get; private set; }
+    public static GUIStyle DimBackgroundStyle { get; private set; }
+    public static GUIStyle HUDElementStyle { get; private set; }
+    public static GUIStyle NEFLineStyle { get; private set; }
+    public static GUIStyle NEFNodeStyle { get; private set; }
+    public static GUIStyle SliderTrackOffStyle { get; private set; }
+    public static GUIStyle SliderTrackOnStyle { get; private set; }
+    public static GUIStyle SliderThumbStyle { get; private set; }
+    public static GUIStyle SectionGroupHeaderStyle { get; private set; }
+    public static GUIStyle SectionHeaderStyle { get; private set; }
+    public static GUIStyle SectionRemoveButtonStyle { get; private set; }
+    public static GUIStyle SectionAddButtonStyle { get; private set; }
     #endregion
 
-    #region Hardcoded Default Theme (Safety Fallback)
-    public static readonly ThemeData InternalDefaultTheme = new()
-    {
-        Name = "Magnetar Default",
-        TopBarOff = new ElementStyleTheme(
-            new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
-            new ColorState("#1A1A1ADC", "#1C1C1CFF", "#333333FF")
-        ),
-        TopBarActive = new ElementStyleTheme(
-            new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
-            new ColorState("#FF3D3DFF", "#FF3D3DFF", "#FF3D3DFF")
-        ),
-        CategoryHeader = new ElementStyleTheme(
-            new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
-            new ColorState("#1A1A1ADC", "#1C1C1CFF", "#333333FF")
-        ),
-        CategoryWindow = new WindowStyleTheme("#FFFFFFFF", "#1A1A1ADC"),
-        CategoryModuleOff = new ElementStyleTheme(
-            new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
-            new ColorState("#1C1C1CD6", "#1C1C1CFF", "#1C1C1CFF")
-        ),
-        CategoryModuleOn = new ElementStyleTheme(
-            new ColorState("#000000FF", "#000000FF", "#000000FF"),
-            new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
-        ),
-        CloseButton = new ElementStyleTheme(
-            new ColorState("#000000FF", "#000000FF", "#000000FF"),
-            new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
-        ),
-        SettingsWindow = new WindowStyleTheme("#000000FF", "#FF3D3DFF", "#1A1A1AEE"),
-        SettingOff = new ElementStyleTheme(
-            new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
-            new ColorState("#242424DC", "#333333FF", "#1C1C1CFF")
-        ),
-        SettingOn = new ElementStyleTheme(
-            new ColorState("#000000FF", "#000000FF", "#000000FF"),
-            new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
-        ),
-        ButtonSetting = new ElementStyleTheme(
-            new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
-            new ColorState("#2A2A2ADD", "#3A3A3AFF", "#222222FF")
-        ),
-        ResetButton = new ElementStyleTheme(
-            new ColorState("#D0D0D0FF", "#FFFFFFFF", "#FF5555FF"),
-            new ColorState("#242424DC", "#333333FF", "#1C1C1CFF")
-        ),
-        ListAddButton = new ElementStyleTheme(
-            new ColorState("#000000FF", "#000000FF", "#000000FF"),
-            new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
-        ),
-        ListRemoveButton = new ElementStyleTheme(
-            new ColorState("#FF6B6BFF", "#FF8E8EFF", "#FF3D3DFF"),
-            new ColorState("#2B1818DC", "#3D1E1EFF", "#201212FF")
-        ),
-        Section = new SectionSettingTheme
-        {
-            GroupHeader = new ElementStyleTheme(
-                new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
-                new ColorState("#1A1A1ADC", "#242424FF", "#181818FF")
-            ),
-            SectionHeader = new ElementStyleTheme(
-                new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
-                new ColorState("#1C1C1CD6", "#2A2A2AFF", "#161616FF")
-            ),
-            RemoveButton = new ElementStyleTheme(
-                new ColorState("#FF6B6BFF", "#FF8E8EFF", "#FF3D3DFF"),
-                new ColorState("#2B1818DC", "#3D1E1EFF", "#201212FF")
-            ),
-            AddButton = new ElementStyleTheme(
-                new ColorState("#000000FF", "#000000FF", "#000000FF"),
-                new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
-            )
-        },
-        Typography = new TypographyTheme
-        {
-            Description = "#BFBFBFFF",
-            Label = "#E6E6E6FF",
-            Author = "#808080FF",
-            Text = "#FFFFFFFF",
-            Secondary = "#FFFFFFFF",
-            HighlightText = "#FFFFFFFF",
-            HighlightBackground = "#FF3D3DFF"
-        },
-        NEF = new NefTheme
-        {
-            LineColor = "#FFFFFFFF",
-            NodeBackground = "#FF3D3DFF"
-        },
-        HUD = new HudTheme
-        {
-            TextColor = "#FFFFFFFF"
-        },
-        Misc = new MiscTheme
-        {
-            DimBackground = "#1A1A1A66",
-            Separator = "#FFFFFFFF",
-            SeparatorText = "#FFFFFFFF"
-        },
-        Slider = new SliderTheme
-        {
-            TrackOff = "#22252FFF",
-            TrackOn = "#FF3D3DFF",
-            Thumb = "#FF3D3DFF",
-            ThumbHover = "#FF3D3DFF"
-        },
-    };
-    #endregion
-
-    public static readonly Dictionary<string, ThemeData> LoadedThemes = new(StringComparer.OrdinalIgnoreCase);
-    public static string CurrentThemeName { get; private set; } = "Magnetar Default";
-
-    private static readonly Dictionary<Color, Texture2D> _texCache = new();
-    private static float lastScale = -1f;
-    private static float lastElementScale = -1f;
-
-    #region Base Sizes
+    #region Base Sizing Constants
     private const int TopBarFontSize = 14;
     private const int TopBarPaddingLR = 10;
     private const int TopBarPaddingTB = 5;
@@ -501,8 +95,7 @@ public static class ThemeManager
     private const int AuthorFontSize = 15;
     private const int AuthorPaddingLeft = 10;
 
-    private const float SeparatorFixedHeight = 1;
-
+    private const float SeparatorFixedHeight = 1f;
     private const int HUDElementFontSize = 18;
 
     private const int NEFNodePaddingLR = 2;
@@ -515,412 +108,169 @@ public static class ThemeManager
     public static void Init()
     {
         LoadThemes();
-        BuildEmptyStyles();
-
-        IsInitialized = true;
-
-        string requestedTheme = Config.Theme;
-        if (string.IsNullOrEmpty(requestedTheme) || !LoadedThemes.ContainsKey(requestedTheme))
-        {
-            requestedTheme = InternalDefaultTheme.Name;
-        }
-
-        ApplyTheme(requestedTheme);
-
-        lastScale = -1f;
-        lastElementScale = -1f;
+        ApplyTheme(CurrentThemeName);
         Rescale();
 
-        GUILogger.Msg($"[Themes] Initialized with theme: '{CurrentThemeName}'");
+        ServiceRegistry.Register(new ThemeService());
+    }
+
+    private static void BuildTextures()
+    {
+        ThemeData.TopBarOffBgTex = ThemeData.Create1x1Tex(ThemeData.TopBarOffBg);
+        ThemeData.TopBarActiveBgTex = ThemeData.Create1x1Tex(ThemeData.TopBarActiveBg);
+        ThemeData.CategoryWindowBgTex = ThemeData.Create1x1Tex(ThemeData.CategoryWindowBg);
+        ThemeData.CategoryHeaderBgTex = ThemeData.Create1x1Tex(ThemeData.CategoryHeaderBg);
+        ThemeData.CategoryModuleOffBgTex = ThemeData.Create1x1Tex(ThemeData.CategoryModuleOffBg);
+        ThemeData.CategoryModuleOnBgTex = ThemeData.Create1x1Tex(ThemeData.CategoryModuleOnBg);
+
+        ThemeData.SettingsWindowBgTex = ThemeData.Create1x1Tex(ThemeData.SettingsWindowBg);
+        ThemeData.SettingsHeaderBgTex = ThemeData.Create1x1Tex(ThemeData.SettingsHeaderBg);
+        ThemeData.CloseBtnBgTex = ThemeData.Create1x1Tex(ThemeData.CloseBtnBg);
+
+        ThemeData.SettingOffBgTex = ThemeData.Create1x1Tex(ThemeData.SettingOffBg);
+        ThemeData.SettingOnBgTex = ThemeData.Create1x1Tex(ThemeData.SettingOnBg);
+
+        ThemeData.ButtonSettingBgTex = ThemeData.Create1x1Tex(ThemeData.ButtonSettingBg);
+        ThemeData.ResetBtnBgTex = ThemeData.Create1x1Tex(ThemeData.ResetBtnBg);
+        ThemeData.ListAddBtnBgTex = ThemeData.Create1x1Tex(ThemeData.ListAddBtnBg);
+        ThemeData.ListRemoveBtnBgTex = ThemeData.Create1x1Tex(ThemeData.ListRemoveBtnBg);
+
+        ThemeData.SectionGroupHeaderBgTex = ThemeData.Create1x1Tex(ThemeData.SectionGroupHeaderBg);
+        ThemeData.SectionHeaderBgTex = ThemeData.Create1x1Tex(ThemeData.SectionHeaderBg);
+        ThemeData.SectionRemoveBtnBgTex = ThemeData.Create1x1Tex(ThemeData.SectionRemoveBtnBg);
+        ThemeData.SectionAddBtnBgTex = ThemeData.Create1x1Tex(ThemeData.SectionAddBtnBg);
+
+        ThemeData.HighlightBgTex = ThemeData.Create1x1Tex(ThemeData.TypographyHighlightBg);
+        ThemeData.NefLineTex = ThemeData.Create1x1Tex(ThemeData.NefLineColor);
+        ThemeData.NefNodeTex = ThemeData.Create1x1Tex(ThemeData.NefNodeBg);
+        ThemeData.DimBgTex = ThemeData.Create1x1Tex(ThemeData.DimBg);
+        ThemeData.SeparatorTex = ThemeData.Create1x1Tex(ThemeData.Separator);
+
+        ThemeData.SliderTrackOffTex = ThemeData.Create1x1Tex(ThemeData.SliderTrackOff);
+        ThemeData.SliderTrackOnTex = ThemeData.Create1x1Tex(ThemeData.SliderTrackOn);
+        ThemeData.SliderThumbTex = ThemeData.GetCircleTex(ThemeData.SliderThumb);
     }
 
     public static void LoadThemes()
     {
-        LoadedThemes[InternalDefaultTheme.Name] = InternalDefaultTheme;
+        ThemeData.LoadedThemes.Clear();
+        ThemeData.LoadedThemes[ThemeData.InternalDefaultTheme.Name] = ThemeData.InternalDefaultTheme;
 
-        string dataDir = Path.Combine(ModsDir, "Magnetar Data");
-        string themePath = Path.Combine(dataDir, "themes.json");
-
+        string themeDir = Path.Combine(DataDir, "Themes");
         try
         {
-            if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
-
-            if (!File.Exists(themePath))
+            if (!Directory.Exists(themeDir))
             {
-                var templateList = new List<ThemeData>
-                {
-                    new() {
-                        Name = "Meteor Purple",
-                        TopBarOff = new ElementStyleTheme(
-                            new ColorState("#e8e8e8", "#e8e8e8", "#e8e8e8"),
-                            new ColorState("#11141b94", "#131721ca", "#131721ca")
-                        ),
-                        TopBarActive = new ElementStyleTheme(
-                            new ColorState("#e8e8e8", "#e8e8e8", "#e8e8e8"),
-                            new ColorState("#131721ca", "#131721ca", "#131721ca")
-                        ),
-                        CategoryHeader = new ElementStyleTheme(
-                            new ColorState("#E6EDF3FF", "#FFFFFFFF", "#FFFFFFFF"),
-                            new ColorState("#7d00f1", "#9a2eff", "#9a2eff")
-                        ),
-                        CategoryWindow = new WindowStyleTheme("#FFFFFFFF", "#100c14c0"),
-                        CategoryModuleOff = new ElementStyleTheme(
-                            new ColorState("#8B949EFF", "#e6e6e6ea", "#e6e6e6ea"),
-                            new ColorState("#00000000", "#22142594", "#22142594")
-                        ),
-                        CategoryModuleOn = new ElementStyleTheme(
-                            new ColorState("#8B949EFF", "#e6e6e6ea", "#e6e6e6ea"),
-                            new ColorState("#22142594", "#22142594", "#22142594")
-                        ),
-                        CloseButton = new ElementStyleTheme(
-                            new ColorState("#000000FF", "#000000FF", "#000000FF"),
-                            new ColorState("#7d00f1", "#A855F7FF", "#A855F7FF")
-                        ),
-                        SettingsWindow = new WindowStyleTheme("#FFFFFFFF", "#7d00f1", "#11141bb6"),
-                        SettingOff = new ElementStyleTheme(
-                            new ColorState("#8B949EFF", "#FFFFFFFF", "#FFFFFFFF"),
-                            new ColorState("#02010271", "#0000009d", "#0000009d")
-                        ),
-                        SettingOn = new ElementStyleTheme(
-                            new ColorState("#000000FF", "#000000FF", "#000000FF"),
-                            new ColorState("#8B0FFFFF", "#992cff", "#8B0FFFFF")
-                        ),
-                        ButtonSetting = new ElementStyleTheme(
-                            new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
-                            new ColorState("#2A123DCC", "#441D63FF", "#1F0A2FFF")
-                        ),
-                        ResetButton = new ElementStyleTheme(
-                            new ColorState("#D4C2F0FF", "#FFFFFFFF", "#A855F7FF"),
-                            new ColorState("#1D1226CC", "#2C173DFF", "#150B1EFF")
-                        ),
-                        ListAddButton = new ElementStyleTheme(
-                            new ColorState("#E6EDF3FF", "#FFFFFFFF", "#FFFFFFFF"),
-                            new ColorState("#1E1128CC", "#2F1940FF", "#140A1CFF")
-                        ),
-                        ListRemoveButton = new ElementStyleTheme(
-                            new ColorState("#FF77BCFF", "#FFA6D2FF", "#E11D48FF"),
-                            new ColorState("#2D1022CC", "#4A1835FF", "#1F0A17FF")
-                        ),
-                        Section = new SectionSettingTheme
-                        {
-                            GroupHeader = new ElementStyleTheme(
-                                new ColorState("#E6EDF3FF", "#FFFFFFFF", "#FFFFFFFF"),
-                                new ColorState("#7d00f1", "#9a2eff", "#9a2eff")
-                            ),
-                            SectionHeader = new ElementStyleTheme(
-                                new ColorState("#8B949EFF", "#e6e6e6ea", "#e6e6e6ea"),
-                                new ColorState("#1D1226CC", "#2C173DFF", "#22142594")
-                            ),
-                            RemoveButton = new ElementStyleTheme(
-                                new ColorState("#FF77BCFF", "#FFA6D2FF", "#E11D48FF"),
-                                new ColorState("#2D1022CC", "#4A1835FF", "#1F0A17FF")
-                            ),
-                            AddButton = new ElementStyleTheme(
-                                new ColorState("#000000FF", "#000000FF", "#000000FF"),
-                                new ColorState("#8B0FFFFF", "#992cff", "#8B0FFFFF")
-                            )
-                        },
-                        Typography = new TypographyTheme
-                        {
-                            Description = "#ec45ff",
-                            Label = "#E6E6E6FF",
-                            Author = "#808080FF",
-                            Text = "#E6EDF3FF",
-                            Secondary = "#8B949EFF",
-                            HighlightText = "#FFFFFFFF",
-                            HighlightBackground = "#203e6ec4"
-                        },
-                        NEF = new NefTheme
-                        {
-                            LineColor = "#FFFFFFFF",
-                            NodeBackground = "#8B0FFFFF"
-                        },
-                        HUD = new HudTheme
-                        {
-                            TextColor = "#FFFFFFFF"
-                        },
-                        Misc = new MiscTheme
-                        {
-                            DimBackground = "#1a1a1a5c",
-                            Separator = "#ffffff",
-                            SeparatorText = "#ffffff"
-                        },
-                        Slider = new SliderTheme
-                        {
-                            TrackOff = "#1D212BFF",
-                            TrackOn = "#00ff9d",
-                            Thumb = "#00ff9d",
-                            ThumbHover = "#00ff9d"
-                        }
-                    }
-                };
-
-                string jsonTemplate = JsonConvert.SerializeObject(templateList, Formatting.Indented);
-                File.WriteAllText(themePath, jsonTemplate);
+                Directory.CreateDirectory(themeDir);
+                string defaultJson = JsonConvert.SerializeObject(ThemeData.InternalDefaultTheme, Formatting.Indented);
+                File.WriteAllText(Path.Combine(themeDir, "Default.json"), defaultJson);
+                return;
             }
 
-            string rawJson = File.ReadAllText(themePath);
-            var parsedThemes = JsonConvert.DeserializeObject<List<ThemeData>>(rawJson);
-
-            if (parsedThemes != null)
+            string[] files = Directory.GetFiles(themeDir, "*.json");
+            foreach (var file in files)
             {
-                foreach (var th in parsedThemes)
+                try
                 {
-                    if (!string.IsNullOrEmpty(th.Name))
+                    string json = File.ReadAllText(file);
+                    var def = JsonConvert.DeserializeObject<ThemeDefinition>(json);
+                    if (def != null && !string.IsNullOrEmpty(def.Name))
                     {
-                        LoadedThemes[th.Name] = th;
-                        GUILogger.Msg($"[Themes] Loaded theme: {th.Name}");
+                        ThemeData.LoadedThemes[def.Name] = def;
                     }
+                }
+                catch (Exception ex)
+                {
+                    DebugLogger.Error($"[ThemeManager] Error loading theme file '{Path.GetFileName(file)}': {ex.Message}");
                 }
             }
         }
         catch (Exception ex)
         {
-            GUILogger.Error($"[Themes] Error loading themes.json, falling back to internal default: {ex.Message}");
+            DebugLogger.Error($"[ThemeManager] Error reading Themes directory: {ex.Message}");
         }
     }
 
     public static void ApplyTheme(string themeName)
     {
-        if (!IsInitialized)
+        if (!ThemeData.LoadedThemes.TryGetValue(themeName, out var def))
         {
-            CurrentThemeName = themeName;
-            return;
+            def = ThemeData.InternalDefaultTheme;
         }
 
-        if (!LoadedThemes.TryGetValue(themeName, out var theme))
-        {
-            GUILogger.Warning($"[Themes] Theme '{themeName}' not found. Falling back to default.");
-            theme = InternalDefaultTheme;
-            themeName = InternalDefaultTheme.Name;
-        }
+        // TopBar
+        if (ColorUtility.TryParseHtmlString(def.TopBarOffBgHex, out var tbOffBg)) ThemeData.TopBarOffBg = tbOffBg;
+        if (ColorUtility.TryParseHtmlString(def.TopBarOffTextHex, out var tbOffTxt)) ThemeData.TopBarOffText = tbOffTxt;
+        if (ColorUtility.TryParseHtmlString(def.TopBarActiveBgHex, out var tbActBg)) ThemeData.TopBarActiveBg = tbActBg;
+        if (ColorUtility.TryParseHtmlString(def.TopBarActiveTextHex, out var tbActTxt)) ThemeData.TopBarActiveText = tbActTxt;
 
-        CurrentThemeName = themeName;
-        var d = InternalDefaultTheme;
+        // Categories
+        if (ColorUtility.TryParseHtmlString(def.CategoryWindowBgHex, out var catWinBg)) ThemeData.CategoryWindowBg = catWinBg;
+        if (ColorUtility.TryParseHtmlString(def.CategoryWindowTextHex, out var catWinTxt)) ThemeData.CategoryWindowText = catWinTxt;
+        if (ColorUtility.TryParseHtmlString(def.CategoryHeaderBgHex, out var catHdrBg)) ThemeData.CategoryHeaderBg = catHdrBg;
+        if (ColorUtility.TryParseHtmlString(def.CategoryHeaderTextHex, out var catHdrTxt)) ThemeData.CategoryHeaderText = catHdrTxt;
+        if (ColorUtility.TryParseHtmlString(def.CategoryModuleOffBgHex, out var catModOffBg)) ThemeData.CategoryModuleOffBg = catModOffBg;
+        if (ColorUtility.TryParseHtmlString(def.CategoryModuleOffTextHex, out var catModOffTxt)) ThemeData.CategoryModuleOffText = catModOffTxt;
+        if (ColorUtility.TryParseHtmlString(def.CategoryModuleOnBgHex, out var catModOnBg)) ThemeData.CategoryModuleOnBg = catModOnBg;
+        if (ColorUtility.TryParseHtmlString(def.CategoryModuleOnTextHex, out var catModOnTxt)) ThemeData.CategoryModuleOnText = catModOnTxt;
 
-        void ApplyElement(GUIStyle style, ElementStyleTheme t, ElementStyleTheme fallback)
-        {
-            var text = ResolveState(t?.Text, fallback?.Text);
-            var bg = ResolveState(t?.BackgroundColor, fallback?.BackgroundColor);
-            style.normal.textColor = text.normal;
-            style.hover.textColor = text.hover;
-            style.active.textColor = text.active;
-            style.normal.background = GetTex(bg.normal);
-            style.hover.background = GetTex(bg.hover);
-            style.active.background = GetTex(bg.active);
-        }
+        // Settings Window
+        if (ColorUtility.TryParseHtmlString(def.SettingsWindowBgHex, out var setWinBg)) ThemeData.SettingsWindowBg = setWinBg;
+        if (ColorUtility.TryParseHtmlString(def.SettingsHeaderBgHex, out var setHdrBg)) ThemeData.SettingsHeaderBg = setHdrBg;
+        if (ColorUtility.TryParseHtmlString(def.SettingsHeaderTextHex, out var setHdrTxt)) ThemeData.SettingsHeaderText = setHdrTxt;
+        if (ColorUtility.TryParseHtmlString(def.CloseBtnBgHex, out var clsBg)) ThemeData.CloseBtnBg = clsBg;
+        if (ColorUtility.TryParseHtmlString(def.CloseBtnTextHex, out var clsTxt)) ThemeData.CloseBtnText = clsTxt;
 
-        // --- 1. Top Bar ---
-        ApplyElement(TopBarStyle, theme.TopBarOff, d.TopBarOff);
-        ApplyElement(TopBarActiveStyle, theme.TopBarActive, d.TopBarActive);
-
-        // --- 2. Category Header & Window ---
-        ApplyElement(CategoryHeaderStyle, theme.CategoryHeader, d.CategoryHeader);
-        CategoryWindowStyle.normal.textColor = ParseColor(theme.CategoryWindow?.Text, d.CategoryWindow.Text);
-        CategoryWindowStyle.normal.background = GetTex(ParseColor(theme.CategoryWindow?.BackgroundColor, d.CategoryWindow.BackgroundColor));
-
-        // --- 3. Category Modules ---
-        ApplyElement(CategoryModuleOffStyle, theme.CategoryModuleOff, d.CategoryModuleOff);
-        ApplyElement(CategoryModuleOnStyle, theme.CategoryModuleOn, d.CategoryModuleOn);
-
-        // --- 4. Close Button ---
-        ApplyElement(CloseButtonStyle, theme.CloseButton, d.CloseButton);
-
-        // --- 5. Settings Window ---
-        string rawWindowBg = theme.SettingsWindow?.WindowBackground
-                             ?? theme.CategoryWindow?.BackgroundColor
-                             ?? d.SettingsWindow.WindowBackground;
-        SettingsWndowBgStyle.normal.background = GetTex(ParseColor(rawWindowBg, d.SettingsWindow.WindowBackground));
-
-        SettingsWndowStyle.normal.textColor = ParseColor(theme.SettingsWindow?.Text, d.SettingsWindow.Text);
-        SettingsWndowStyle.normal.background = GetTex(ParseColor(theme.SettingsWindow?.BackgroundColor, d.SettingsWindow.BackgroundColor));
-
-        // --- 6. Setting Toggles ---
-        ApplyElement(SettingOff, theme.SettingOff, d.SettingOff);
-        ApplyElement(SettingOn, theme.SettingOn, d.SettingOn);
-
-        // --- 7. Button Settings, Reset, and List Operations ---
-        ApplyElement(ButtonSettingStyle, theme.ButtonSetting, d.ButtonSetting);
-        ApplyElement(ResetButtonStyle, theme.ResetButton, d.ResetButton);
-        ApplyElement(ListAddButtonStyle, theme.ListAddButton, d.ListAddButton);
-        ApplyElement(ListRemoveButtonStyle, theme.ListRemoveButton, d.ListRemoveButton);
-
-        // --- 8. Typography ---
-        SettingsDescriptionStyle.normal.textColor = ParseColor(theme.Typography?.Description, d.Typography.Description);
-        SettingLabelStyle.normal.textColor = ParseColor(theme.Typography?.Label, d.Typography.Label);
-        SettingAuthorStyle.normal.textColor = ParseColor(theme.Typography?.Author, d.Typography.Author);
-
-        Color baseText = ParseColor(theme.Typography?.Text, d.Typography.Text);
-        SettingTextStyle.normal.textColor = baseText;
-        TextStyle.normal.textColor = baseText;
-
-        TextHighlightedStyle.normal.textColor = ParseColor(theme.Typography?.HighlightText, d.Typography.HighlightText);
-        TextHighlightedStyle.normal.background = GetTex(ParseColor(theme.Typography?.HighlightBackground, d.Typography.HighlightBackground));
-
-        // --- 9. Separator & Dim ---
-        SeparatorStyle.normal.background = GetTex(ParseColor(theme.Misc?.Separator, d.Misc.Separator));
-
-        Color sepTextColor = ParseColor(theme.Misc?.SeparatorText ?? theme.Typography?.Secondary, d.Typography.Secondary);
-        SeparatorTextStyle.normal.textColor = sepTextColor;
-
-        DimBackgroundStyle.normal.background = GetTex(ParseColor(theme.Misc?.DimBackground, d.Misc.DimBackground));
-
-        // --- 10. NEF & HUD ---
-        NEFLineStyle.normal.background = GetTex(ParseColor(theme.NEF?.LineColor, d.NEF.LineColor));
-        NEFNodeStyle.normal.background = GetTex(ParseColor(theme.NEF?.NodeBackground, d.NEF.NodeBackground));
-        HUDElementStyle.normal.textColor = ParseColor(theme.HUD?.TextColor, d.HUD.TextColor);
-
-        // --- 11. Slider ---
-        Color trackOffColor = ParseColor(theme.Slider?.TrackOff ?? theme.SettingOff?.BackgroundColor?.Normal, d.Slider.TrackOff);
-        Color trackOnColor = ParseColor(theme.Slider?.TrackOn ?? theme.SettingOn?.BackgroundColor?.Normal, d.Slider.TrackOn);
-        Color thumbColor = ParseColor(theme.Slider?.Thumb ?? theme.SettingOn?.BackgroundColor?.Normal, d.Slider.Thumb);
-        Color thumbHoverColor = ParseColor(theme.Slider?.ThumbHover ?? theme.Slider?.Thumb ?? theme.SettingOn?.BackgroundColor?.Hover, d.Slider.ThumbHover);
-
-        SliderTrackOffStyle.normal.background = GetTex(trackOffColor);
-        SliderTrackOnStyle.normal.background = GetTex(trackOnColor);
-
-        SliderThumbStyle.normal.background = GetCircleTex(thumbColor);
-        SliderThumbStyle.hover.background = GetCircleTex(thumbHoverColor);
-        SliderThumbStyle.active.background = GetCircleTex(thumbHoverColor);
-
-        // --- 12 Section Setting Styles ---
-        ApplyElement(SectionGroupHeaderStyle, theme.Section?.GroupHeader, d.Section?.GroupHeader ?? d.CategoryHeader);
-        ApplyElement(SectionHeaderStyle, theme.Section?.SectionHeader, d.Section?.SectionHeader ?? d.CategoryModuleOff);
-        ApplyElement(SectionRemoveButtonStyle, theme.Section?.RemoveButton, d.Section?.RemoveButton ?? d.ListRemoveButton ?? d.SettingOff);
-        ApplyElement(SectionAddButtonStyle, theme.Section?.AddButton, d.Section?.AddButton ?? d.SettingOn);
-
-        // Exposed dynamic properties
-        var catModOffBg = ResolveState(theme.CategoryModuleOff?.BackgroundColor, d.CategoryModuleOff.BackgroundColor);
-        var catModOnBg = ResolveState(theme.CategoryModuleOn?.BackgroundColor, d.CategoryModuleOn.BackgroundColor);
-        var catModOffText = ResolveState(theme.CategoryModuleOff?.Text, d.CategoryModuleOff.Text);
-        var tbOffBg = ResolveState(theme.TopBarOff?.BackgroundColor, d.TopBarOff.BackgroundColor);
-
-        AccentColor = catModOnBg.normal;
-        AccentHoverColor = catModOnBg.hover;
-        BackgroundColor = ParseColor(theme.CategoryWindow?.BackgroundColor, d.CategoryWindow.BackgroundColor);
-        LightBackgroundColor = catModOffBg.normal;
-        TextWhite = baseText;
-        TextDim = catModOffText.normal;
-        HoverColor = catModOffBg.hover;
-        ActiveColor = tbOffBg.active;
-        DimColor = ParseColor(theme.Misc?.DimBackground, d.Misc.DimBackground);
-        NefLineColor = ParseColor(theme.NEF?.LineColor, d.NEF.LineColor);
-        NefNodeColor = ParseColor(theme.NEF?.NodeBackground, d.NEF.NodeBackground);
-    }
-
-    private static (Color normal, Color hover, Color active) ResolveState(ColorState state, ColorState fallback)
-    {
-        string normHex = !string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Normal;
-        string hovHex = !string.IsNullOrEmpty(state?.Hover) ? state.Hover : (!string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Hover);
-        string actHex = !string.IsNullOrEmpty(state?.Active) ? state.Active : (!string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Active);
-
-        Color normal = ParseColor(normHex, fallback?.Normal ?? "#FFFFFFFF");
-        Color hover = ParseColor(hovHex, fallback?.Hover ?? normHex);
-        Color active = ParseColor(actHex, fallback?.Active ?? normHex);
-
-        return (normal, hover, active);
-    }
-
-    private static Color ParseColor(string hex, string defaultHex)
-    {
-        if (!string.IsNullOrEmpty(hex) && ColorUtility.TryParseHtmlString(hex, out Color col))
-            return col;
-
-        ColorUtility.TryParseHtmlString(defaultHex, out Color defCol);
-        return defCol;
-    }
-
-    private static Texture2D GetTex(Color col)
-    {
-        if (_texCache.TryGetValue(col, out var tex) && tex != null)
-            return tex;
-
-        Texture2D newTex = new(1, 1, TextureFormat.RGBA32, false);
-        newTex.SetPixel(0, 0, col);
-        newTex.Apply();
-        _texCache[col] = newTex;
-        return newTex;
-    }
-
-    private static readonly Dictionary<string, Texture2D> _circleTextureCache = new();
-
-    public static Texture2D GetCircleTex(Color color, int size = 64)
-    {
-        string key = $"{color.r}_{color.g}_{color.b}_{color.a}_{size}";
-        if (_circleTextureCache.TryGetValue(key, out var cached) && cached != null)
-            return cached;
-
-        Texture2D tex = new(size, size, TextureFormat.RGBA32, false)
-        {
-            filterMode = FilterMode.Bilinear,
-            wrapMode = TextureWrapMode.Clamp
-        };
-
-        float center = (size - 1) / 2f;
-        float radius = size / 2f;
-        float edgeThickness = 1.25f;
-
-        for (int y = 0; y < size; y++)
-        {
-            for (int x = 0; x < size; x++)
-            {
-                float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
-                float alpha = Mathf.Clamp01((radius - dist) / edgeThickness);
-                Color pixelColor = new(color.r, color.g, color.b, color.a * alpha);
-                tex.SetPixel(x, y, pixelColor);
-            }
-        }
-
-        tex.Apply(false);
-        _circleTextureCache[key] = tex;
-        return tex;
-    }
-
-    private static void BuildEmptyStyles()
-    {
-        TopBarStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
-        TopBarActiveStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
-        CategoryModuleOnStyle = new GUIStyle { alignment = TextAnchor.MiddleLeft };
-        CloseButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
-        CategoryHeaderStyle = new GUIStyle { alignment = TextAnchor.UpperCenter, fontStyle = FontStyle.Bold };
-        CategoryModuleOffStyle = new GUIStyle { alignment = TextAnchor.MiddleLeft };
-        CategoryWindowStyle = new GUIStyle { alignment = TextAnchor.UpperCenter, fontStyle = FontStyle.Bold };
-        SettingsWndowBgStyle = new GUIStyle();
-        SettingsWndowStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
-        SettingOn = new GUIStyle { alignment = TextAnchor.MiddleLeft };
-        SettingOff = new GUIStyle { alignment = TextAnchor.MiddleLeft };
+        // Setting Elements
+        if (ColorUtility.TryParseHtmlString(def.SettingOffBgHex, out var setOffBg)) ThemeData.SettingOffBg = setOffBg;
+        if (ColorUtility.TryParseHtmlString(def.SettingOffTextHex, out var setOffTxt)) ThemeData.SettingOffText = setOffTxt;
+        if (ColorUtility.TryParseHtmlString(def.SettingOnBgHex, out var setOnBg)) ThemeData.SettingOnBg = setOnBg;
+        if (ColorUtility.TryParseHtmlString(def.SettingOnTextHex, out var setOnTxt)) ThemeData.SettingOnText = setOnTxt;
 
         // Action Buttons
-        ButtonSettingStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
-        ResetButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
-        ListAddButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
-        ListRemoveButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
+        if (ColorUtility.TryParseHtmlString(def.ButtonSettingBgHex, out var btnSetBg)) ThemeData.ButtonSettingBg = btnSetBg;
+        if (ColorUtility.TryParseHtmlString(def.ButtonSettingTextHex, out var btnSetTxt)) ThemeData.ButtonSettingText = btnSetTxt;
+        if (ColorUtility.TryParseHtmlString(def.ResetBtnBgHex, out var rstBg)) ThemeData.ResetBtnBg = rstBg;
+        if (ColorUtility.TryParseHtmlString(def.ResetBtnTextHex, out var rstTxt)) ThemeData.ResetBtnText = rstTxt;
+        if (ColorUtility.TryParseHtmlString(def.ListAddBtnBgHex, out var addBg)) ThemeData.ListAddBtnBg = addBg;
+        if (ColorUtility.TryParseHtmlString(def.ListAddBtnTextHex, out var addTxt)) ThemeData.ListAddBtnText = addTxt;
+        if (ColorUtility.TryParseHtmlString(def.ListRemoveBtnBgHex, out var remBg)) ThemeData.ListRemoveBtnBg = remBg;
+        if (ColorUtility.TryParseHtmlString(def.ListRemoveBtnTextHex, out var remTxt)) ThemeData.ListRemoveBtnText = remTxt;
 
-        SettingsDescriptionStyle = new GUIStyle { wordWrap = true, alignment = TextAnchor.UpperLeft, richText = true };
-        SettingLabelStyle = new GUIStyle { wordWrap = true, alignment = TextAnchor.UpperLeft, richText = true };
-        SettingAuthorStyle = new GUIStyle { fontStyle = FontStyle.Italic, alignment = TextAnchor.MiddleLeft, richText = true };
-        SettingTextStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = true, clipping = TextClipping.Clip };
-        SeparatorStyle = new GUIStyle();
-        SeparatorTextStyle = new GUIStyle
-        {
-            alignment = TextAnchor.MiddleCenter,
-            wordWrap = false,
-            richText = true,
-            clipping = TextClipping.Overflow
-        };
-        DimBackgroundStyle = new GUIStyle();
-        HUDElementStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, wordWrap = false, richText = true };
-        NEFLineStyle = new GUIStyle();
-        NEFNodeStyle = new GUIStyle { alignment = TextAnchor.LowerCenter };
-        TextStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = false, clipping = TextClipping.Clip };
-        TextHighlightedStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = false, clipping = TextClipping.Clip };
-        SliderTrackOffStyle = new GUIStyle();
-        SliderTrackOnStyle = new GUIStyle();
-        SliderThumbStyle = new GUIStyle();
-        SectionGroupHeaderStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
-        SectionHeaderStyle = new GUIStyle { alignment = TextAnchor.MiddleLeft };
-        SectionRemoveButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
-        SectionAddButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
+        // Section Settings
+        if (ColorUtility.TryParseHtmlString(def.SectionGroupHeaderBgHex, out var secGrpBg)) ThemeData.SectionGroupHeaderBg = secGrpBg;
+        if (ColorUtility.TryParseHtmlString(def.SectionGroupHeaderTextHex, out var secGrpTxt)) ThemeData.SectionGroupHeaderText = secGrpTxt;
+        if (ColorUtility.TryParseHtmlString(def.SectionHeaderBgHex, out var secHdrBg)) ThemeData.SectionHeaderBg = secHdrBg;
+        if (ColorUtility.TryParseHtmlString(def.SectionHeaderTextHex, out var secHdrTxt)) ThemeData.SectionHeaderText = secHdrTxt;
+        if (ColorUtility.TryParseHtmlString(def.SectionRemoveBtnBgHex, out var secRemBg)) ThemeData.SectionRemoveBtnBg = secRemBg;
+        if (ColorUtility.TryParseHtmlString(def.SectionRemoveBtnTextHex, out var secRemTxt)) ThemeData.SectionRemoveBtnText = secRemTxt;
+        if (ColorUtility.TryParseHtmlString(def.SectionAddBtnBgHex, out var secAddBg)) ThemeData.SectionAddBtnBg = secAddBg;
+        if (ColorUtility.TryParseHtmlString(def.SectionAddBtnTextHex, out var secAddTxt)) ThemeData.SectionAddBtnText = secAddTxt;
+
+        // Typography
+        if (ColorUtility.TryParseHtmlString(def.TypographyDescriptionHex, out var typoDesc)) ThemeData.TypographyDescription = typoDesc;
+        if (ColorUtility.TryParseHtmlString(def.TypographyLabelHex, out var typoLbl)) ThemeData.TypographyLabel = typoLbl;
+        if (ColorUtility.TryParseHtmlString(def.TypographyAuthorHex, out var typoAuth)) ThemeData.TypographyAuthor = typoAuth;
+        if (ColorUtility.TryParseHtmlString(def.TypographyTextHex, out var typoTxt)) ThemeData.TypographyText = typoTxt;
+        if (ColorUtility.TryParseHtmlString(def.TypographySecondaryHex, out var typoSec)) ThemeData.TypographySecondary = typoSec;
+        if (ColorUtility.TryParseHtmlString(def.TypographyHighlightTextHex, out var typoHighTxt)) ThemeData.TypographyHighlightText = typoHighTxt;
+        if (ColorUtility.TryParseHtmlString(def.TypographyHighlightBgHex, out var typoHighBg)) ThemeData.TypographyHighlightBg = typoHighBg;
+
+        // NEF & HUD
+        if (ColorUtility.TryParseHtmlString(def.NefLineColorHex, out var nefLine)) ThemeData.NefLineColor = nefLine;
+        if (ColorUtility.TryParseHtmlString(def.NefNodeBgHex, out var nefNode)) ThemeData.NefNodeBg = nefNode;
+        if (ColorUtility.TryParseHtmlString(def.HudTextColorHex, out var hudTxt)) ThemeData.HudTextColor = hudTxt;
+
+        // Misc & Sliders
+        if (ColorUtility.TryParseHtmlString(def.DimBgHex, out var dim)) ThemeData.DimBg = dim;
+        if (ColorUtility.TryParseHtmlString(def.SeparatorHex, out var sep)) ThemeData.Separator = sep;
+        if (ColorUtility.TryParseHtmlString(def.SeparatorTextHex, out var sepTxt)) ThemeData.SeparatorText = sepTxt;
+        if (ColorUtility.TryParseHtmlString(def.SliderTrackOffHex, out var sldOff)) ThemeData.SliderTrackOff = sldOff;
+        if (ColorUtility.TryParseHtmlString(def.SliderTrackOnHex, out var sldOn)) ThemeData.SliderTrackOn = sldOn;
+        if (ColorUtility.TryParseHtmlString(def.SliderThumbHex, out var sldThb)) ThemeData.SliderThumb = sldThb;
+
+        BuildTextures();
+        Rescale();
     }
 
     private static void SetOffset(RectOffset ro, int left, int right, int top, int bottom)
@@ -934,108 +284,444 @@ public static class ThemeManager
 
     public static void Rescale()
     {
-        if (!IsInitialized) return;
-
-        float scale = Config.GUIScale;
-        float elementScale = Config.ElementScale;
-
-        if (Mathf.Approximately(scale, lastScale) && Mathf.Approximately(elementScale, lastElementScale))
-            return;
-
-        lastScale = scale;
-        lastElementScale = elementScale;
-
         int S(int baseValue) => Mathf.Max(1, Mathf.RoundToInt(Config.S(baseValue)));
         float Sf(float baseValue) => Mathf.Max(0f, Config.S(baseValue));
 
-        // TopBar
-        TopBarStyle.fontSize = S(TopBarFontSize);
+        // 1. Top Bar
+        TopBarStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleCenter,
+            normal = { background = ThemeData.TopBarOffBgTex, textColor = ThemeData.TopBarOffText },
+            fontSize = S(TopBarFontSize),
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
         SetOffset(TopBarStyle.padding, S(TopBarPaddingLR), S(TopBarPaddingLR), S(TopBarPaddingTB), S(TopBarPaddingTB));
 
-        TopBarActiveStyle.fontSize = S(TopBarFontSize);
+        TopBarActiveStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleCenter,
+            normal = { background = ThemeData.TopBarActiveBgTex, textColor = ThemeData.TopBarActiveText },
+            fontStyle = FontStyle.Bold,
+            fontSize = S(TopBarFontSize),
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
         SetOffset(TopBarActiveStyle.padding, S(TopBarPaddingLR), S(TopBarPaddingLR), S(TopBarPaddingTB), S(TopBarPaddingTB));
 
-        // Category Modules
-        CategoryHeaderStyle.fontSize = S(ModuleWindowFontSize);
-        SetOffset(CategoryHeaderStyle.padding, 0, 0, S(ModuleWindowPaddingTop), 0);
-
-        CategoryModuleOnStyle.fontSize = S(ModuleFontSize);
-        SetOffset(CategoryModuleOnStyle.padding, S(ModulePaddingLeft), 0, 0, 0);
-
-        CloseButtonStyle.fontSize = S(ModuleFontSize);
-
-        CategoryModuleOffStyle.fontSize = S(ModuleFontSize);
-        SetOffset(CategoryModuleOffStyle.padding, S(ModulePaddingLeft), 0, 0, 0);
-
-        // Windows
-        SetOffset(SettingsWndowBgStyle.padding, 0, 0, 0, 0);
-
-        CategoryWindowStyle.fontSize = S(ModuleWindowFontSize);
+        // 2. Category Windows
+        CategoryWindowStyle = new GUIStyle
+        {
+            alignment = TextAnchor.UpperCenter,
+            fontStyle = FontStyle.Bold,
+            fontSize = S(ModuleWindowFontSize),
+            normal = { background = ThemeData.CategoryWindowBgTex, textColor = ThemeData.CategoryWindowText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
         SetOffset(CategoryWindowStyle.padding, 0, 0, S(ModuleWindowPaddingTop), 0);
 
-        SettingsWndowStyle.fontSize = S(SettingsWindowFontSize);
+        CategoryHeaderStyle = new GUIStyle
+        {
+            alignment = TextAnchor.UpperCenter,
+            fontStyle = FontStyle.Bold,
+            fontSize = S(ModuleWindowFontSize),
+            normal = { background = ThemeData.CategoryHeaderBgTex, textColor = ThemeData.CategoryHeaderText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(CategoryHeaderStyle.padding, 0, 0, S(ModuleWindowPaddingTop), 0);
+
+        CategoryModuleOffStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleLeft,
+            fontSize = S(ModuleFontSize),
+            normal = { background = ThemeData.CategoryModuleOffBgTex, textColor = ThemeData.CategoryModuleOffText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(CategoryModuleOffStyle.padding, S(ModulePaddingLeft), 0, 0, 0);
+
+        CategoryModuleOnStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleLeft,
+            fontSize = S(ModuleFontSize),
+            normal = { background = ThemeData.CategoryModuleOnBgTex, textColor = ThemeData.CategoryModuleOnText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(CategoryModuleOnStyle.padding, S(ModulePaddingLeft), 0, 0, 0);
+
+        // 3. Settings Window & Close Button
+        SettingsWndowStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontStyle = FontStyle.Bold,
+            fontSize = S(SettingsWindowFontSize),
+            normal = { background = ThemeData.SettingsHeaderBgTex, textColor = ThemeData.SettingsHeaderText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
         SetOffset(SettingsWndowStyle.padding, 0, 0, 0, 0);
 
-        // Controls
-        SettingOn.fontSize = S(SettingFontSize);
-        SetOffset(SettingOn.padding, S(SettingPaddingLeft), 0, 0, 0);
+        SettingsWndowBgStyle = new GUIStyle
+        {
+            normal = { background = ThemeData.SettingsWindowBgTex, textColor = ThemeData.SettingsHeaderText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(SettingsWndowBgStyle.padding, 0, 0, 0, 0);
 
-        SettingOff.fontSize = S(SettingFontSize);
+        CloseButtonStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontStyle = FontStyle.Bold,
+            fontSize = S(ModuleFontSize),
+            normal = { background = ThemeData.CloseBtnBgTex, textColor = ThemeData.CloseBtnText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+
+        // 4. Setting Toggles
+        SettingOff = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleLeft,
+            fontSize = S(SettingFontSize),
+            normal = { background = ThemeData.SettingOffBgTex, textColor = ThemeData.SettingOffText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
         SetOffset(SettingOff.padding, S(SettingPaddingLeft), 0, 0, 0);
 
-        // New Action Buttons font scaling
-        ButtonSettingStyle.fontSize = S(SettingFontSize);
+        SettingOn = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleLeft,
+            fontSize = S(SettingFontSize),
+            normal = { background = ThemeData.SettingOnBgTex, textColor = ThemeData.SettingOnText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(SettingOn.padding, S(SettingPaddingLeft), 0, 0, 0);
+
+        // 5. Action Buttons
+        ButtonSettingStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = S(SettingFontSize),
+            normal = { background = ThemeData.ButtonSettingBgTex, textColor = ThemeData.ButtonSettingText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
         SetOffset(ButtonSettingStyle.padding, 0, 0, 0, 0);
 
-        ResetButtonStyle.fontSize = S(SettingFontSize);
+        ResetButtonStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontStyle = FontStyle.Bold,
+            fontSize = S(SettingFontSize),
+            normal = { background = ThemeData.ResetBtnBgTex, textColor = ThemeData.ResetBtnText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
         SetOffset(ResetButtonStyle.padding, 0, 0, 0, 0);
 
-        ListAddButtonStyle.fontSize = S(SettingFontSize);
+        ListAddButtonStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = S(SettingFontSize),
+            normal = { background = ThemeData.ListAddBtnBgTex, textColor = ThemeData.ListAddBtnText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
         SetOffset(ListAddButtonStyle.padding, 0, 0, 0, 0);
 
-        ListRemoveButtonStyle.fontSize = S(SettingFontSize);
+        ListRemoveButtonStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontStyle = FontStyle.Bold,
+            fontSize = S(SettingFontSize),
+            normal = { background = ThemeData.ListRemoveBtnBgTex, textColor = ThemeData.ListRemoveBtnText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
         SetOffset(ListRemoveButtonStyle.padding, 0, 0, 0, 0);
 
-        // Typography
-        SettingsDescriptionStyle.fontSize = S(DescriptionFontSize);
-        SetOffset(SettingsDescriptionStyle.padding, S(DescriptionPaddingLR), S(DescriptionPaddingLR), S(DescriptionPaddingTB), S(DescriptionPaddingTB));
-
-        SettingLabelStyle.fontSize = S(SettingDescriptionFontSize);
-        SetOffset(SettingLabelStyle.padding, S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingTB), S(SettingDescriptionPaddingTB));
-
-        SettingAuthorStyle.fontSize = S(AuthorFontSize);
-        SetOffset(SettingAuthorStyle.padding, S(AuthorPaddingLeft), 0, 0, 0);
-
-        SettingTextStyle.fontSize = S(TextFontSize);
-
-        // Separators & HUD
-        SeparatorStyle.fixedHeight = Sf(SeparatorFixedHeight);
-        SeparatorTextStyle.fontSize = S(SettingFontSize);
-        SetOffset(SeparatorTextStyle.padding, 0, 0, 0, 0);
-        HUDElementStyle.fontSize = Mathf.Max(1, Mathf.RoundToInt(HUDElementFontSize * elementScale));
-        SetOffset(HUDElementStyle.padding, 0, 0, 0, 0);
-
-        // NEF & Text
-        SetOffset(NEFNodeStyle.padding, S(NEFNodePaddingLR), S(NEFNodePaddingLR), S(NEFNodePaddingTop), S(NEFNodePaddingBottom));
-        TextStyle.fontSize = S(TextFontSize);
-        TextHighlightedStyle.fontSize = TextStyle.fontSize;
-
-        // Slider
-        SetOffset(SliderTrackOffStyle.padding, 0, 0, 0, 0);
-        SetOffset(SliderTrackOnStyle.padding, 0, 0, 0, 0);
-        SetOffset(SliderThumbStyle.padding, 0, 0, 0, 0);
-
-        // Section Setting
-        SectionGroupHeaderStyle.fontSize = S(SettingDescriptionFontSize);
+        // 6. Section Settings
+        SectionGroupHeaderStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontStyle = FontStyle.Bold,
+            fontSize = S(SettingDescriptionFontSize),
+            normal = { background = ThemeData.SectionGroupHeaderBgTex, textColor = ThemeData.SectionGroupHeaderText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
         SetOffset(SectionGroupHeaderStyle.padding, S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingLR), 0, 0);
 
-        SectionHeaderStyle.fontSize = S(SettingFontSize);
+        SectionHeaderStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleLeft,
+            fontSize = S(SettingFontSize),
+            normal = { background = ThemeData.SectionHeaderBgTex, textColor = ThemeData.SectionHeaderText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
         SetOffset(SectionHeaderStyle.padding, S(SettingPaddingLeft), 0, 0, 0);
 
-        SectionRemoveButtonStyle.fontSize = S(SettingFontSize);
+        SectionRemoveButtonStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontStyle = FontStyle.Bold,
+            fontSize = S(SettingFontSize),
+            normal = { background = ThemeData.SectionRemoveBtnBgTex, textColor = ThemeData.SectionRemoveBtnText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
         SetOffset(SectionRemoveButtonStyle.padding, 0, 0, 0, 0);
 
-        SectionAddButtonStyle.fontSize = S(SettingFontSize);
+        SectionAddButtonStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = S(SettingFontSize),
+            normal = { background = ThemeData.SectionAddBtnBgTex, textColor = ThemeData.SectionAddBtnText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
         SetOffset(SectionAddButtonStyle.padding, 0, 0, 0, 0);
+
+        // 7. Typography
+        SettingsDescriptionStyle = new GUIStyle
+        {
+            wordWrap = true,
+            alignment = TextAnchor.UpperLeft,
+            richText = true,
+            fontSize = S(DescriptionFontSize),
+            normal = { textColor = ThemeData.TypographyDescription },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(SettingsDescriptionStyle.padding, S(DescriptionPaddingLR), S(DescriptionPaddingLR), S(DescriptionPaddingTB), S(DescriptionPaddingTB));
+
+        SettingLabelStyle = new GUIStyle
+        {
+            wordWrap = true,
+            alignment = TextAnchor.UpperLeft,
+            richText = true,
+            fontSize = S(SettingDescriptionFontSize),
+            normal = { textColor = ThemeData.TypographyLabel },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(SettingLabelStyle.padding, S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingTB), S(SettingDescriptionPaddingTB));
+
+        SettingAuthorStyle = new GUIStyle
+        {
+            fontStyle = FontStyle.Italic,
+            alignment = TextAnchor.MiddleLeft,
+            richText = true,
+            fontSize = S(AuthorFontSize),
+            normal = { textColor = ThemeData.TypographyAuthor },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(SettingAuthorStyle.padding, S(AuthorPaddingLeft), 0, 0, 0);
+
+        SettingTextStyle = new GUIStyle
+        {
+            wordWrap = false,
+            alignment = TextAnchor.MiddleLeft,
+            richText = true,
+            clipping = TextClipping.Clip,
+            fontSize = S(TextFontSize),
+            normal = { textColor = ThemeData.TypographyText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+
+        TextStyle = new GUIStyle
+        {
+            wordWrap = false,
+            alignment = TextAnchor.MiddleLeft,
+            richText = false,
+            clipping = TextClipping.Clip,
+            fontSize = S(TextFontSize),
+            normal = { textColor = ThemeData.TypographyText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+
+        TextHighlightedStyle = new GUIStyle
+        {
+            wordWrap = false,
+            alignment = TextAnchor.MiddleLeft,
+            richText = false,
+            clipping = TextClipping.Clip,
+            fontSize = S(TextFontSize),
+            normal = { background = ThemeData.HighlightBgTex, textColor = ThemeData.TypographyHighlightText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+
+        // 8. Separators & HUD
+        SeparatorStyle = new GUIStyle
+        {
+            fixedHeight = Sf(SeparatorFixedHeight),
+            normal = { background = ThemeData.SeparatorTex },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+
+        SeparatorTextStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleCenter,
+            wordWrap = false,
+            richText = true,
+            clipping = TextClipping.Overflow,
+            fontSize = S(SettingFontSize),
+            normal = { textColor = ThemeData.SeparatorText },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(SeparatorTextStyle.padding, 0, 0, 0, 0);
+
+        HUDElementStyle = new GUIStyle
+        {
+            alignment = TextAnchor.MiddleCenter,
+            wordWrap = false,
+            richText = true,
+            fontSize = Mathf.Max(1, Mathf.RoundToInt(HUDElementFontSize * Config.ElementScale)),
+            normal = { textColor = ThemeData.HudTextColor },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(HUDElementStyle.padding, 0, 0, 0, 0);
+
+        // 9. NEF & Overlays
+        NEFLineStyle = new GUIStyle
+        {
+            normal = { background = ThemeData.NefLineTex },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+
+        NEFNodeStyle = new GUIStyle
+        {
+            alignment = TextAnchor.LowerCenter,
+            normal = { background = ThemeData.NefNodeTex },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(NEFNodeStyle.padding, S(NEFNodePaddingLR), S(NEFNodePaddingLR), S(NEFNodePaddingTop), S(NEFNodePaddingBottom));
+
+        DimBackgroundStyle = new GUIStyle
+        {
+            normal = { background = ThemeData.DimBgTex },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+
+        // 10. Sliders
+        SliderTrackOffStyle = new GUIStyle
+        {
+            normal = { background = ThemeData.SliderTrackOffTex },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(SliderTrackOffStyle.padding, 0, 0, 0, 0);
+
+        SliderTrackOnStyle = new GUIStyle
+        {
+            normal = { background = ThemeData.SliderTrackOnTex },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(SliderTrackOnStyle.padding, 0, 0, 0, 0);
+
+        SliderThumbStyle = new GUIStyle
+        {
+            normal = { background = ThemeData.SliderThumbTex },
+            hover = { background = ThemeData.SliderThumbTex },
+            active = { background = ThemeData.SliderThumbTex },
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        SetOffset(SliderThumbStyle.padding, 0, 0, 0, 0);
+    }
+
+    private class ThemeService : IInitializable, IWarmUp
+    {
+        public string Name => "ThemeManager";
+        public int Priority => ServicePriority.Highest;
+
+        public void Initialize() => ThemeManager.Rescale();
+        public void OnWarmUp() => ThemeManager.Rescale();
     }
 }

@@ -6,6 +6,8 @@ using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using System.Reflection;
 using Magnetar_Client.UI;
+using Magnetar_Client.Api;
+using Magnetar_Client.Core.Lifecycle;
 
 namespace Magnetar_Client.Core;
 
@@ -14,6 +16,8 @@ public class Main
     public static Main Instance { get; private set; }
     public static HarmonyLib.Harmony HarmonyInstance { get; private set; }
     public bool HasWarmedUp { get; private set; } = false;
+
+    public static bool SafeToClose => SafeToCloseManager.CanClose();
 
     public static void Initialize()
     {
@@ -24,13 +28,13 @@ public class Main
         }
         Instance = new Main();
 
-        // Load the IAddons first so that they can register their actions
+        // Initialize the logger first so subsequent diagnostics are captured
+        Utils.Magnetar_Logger.Init();
+
+        // Load the IAddons first so that they can register their actions and sevices
         AddonManager.InitAddons();
 
         Api.Actions.Core.OnEarlyInitialize?.Invoke();
-
-        // Initialize the logger first so subsequent diagnostics are captured
-        Utils.Magnetar_Logger.Init();
 
         DebugLogger.Msg($"[Core] Initializing Magnetar Client with Harmony ID: '{Magnetar_Info.HarmonyId}'...");
 
@@ -57,7 +61,7 @@ public class Main
 
         DebugLogger.Msg($"[Harmony] Total classes checked: {patchInfo.TotalClassesEvaluated} | Succeeded: {patchInfo.SuccessCount} | Failed: {patchInfo.FailCount}");
 
-        // 3. Log detailed failure diagnostics and exceptions if any patch failed
+        // Log detailed failure diagnostics and exceptions if any patch failed
         if (patchInfo.HasFailures)
         {
             DebugLogger.Warning($"[Harmony] {patchInfo.FailCount} patch classes failed to apply:");
@@ -75,19 +79,27 @@ public class Main
 
         Preferences.InitializePreferences();
 
+        // 1. Initialize Built-in Managers (they self-register into ServiceRegistry)
         ModuleManager.Init();
-        AddonManager.InitModules();
-
+        HUDManager.Init();
         HUDRenderer.Init();
-        AddonManager.InitHUDElements();
-
         NEFManager.Init();
         TopBar.Init();
-        ProfileManager.Init();
+        ProfileGUI.Init();
+        MobileMenuUI.Init();
+        GUIManager.Init();
 
+        // 2. Discover and register Addon modules, HUD elements, and services
+        AddonManager.InitModules();
+        AddonManager.InitHUDElements();
+        AddonManager.InitServices();
+
+        // 3. Load state, themes, and translations
         Translator.LoadTranslations();
         SaveLoad.Load();
-        GUIManager.Init();
+
+        // 4. Run unified pipeline across all registered services
+        ServiceRegistry.InitializeAll();
 
         Api.Actions.Core.OnLateInitializeCore?.Invoke();
 
@@ -97,9 +109,9 @@ public class Main
     public void OnUpdate()
     {
         LockUI.BlockSKeysPatch.BlockKeys = false;
-        UI.GUIHelper._UpdateRainbowColor();
 
-        HUDRenderer.UpdateElements();
+        UI.GUIHelper._UpdateRainbowColor();
+        UIAnimationHelper.UpdateTransition();
 
         if (Input.GetKeyDown(KeyCode.RightShift) && !HUDManager.forceShow)
         {
@@ -107,51 +119,28 @@ public class Main
             if (!Config.showgui) SaveLoad.Save();
         }
 
-        ModuleManager.OnUpdate();
+        Api.Actions.Core.OnUpdate?.Invoke();
+        ServiceRegistry.UpdateAll();
 
-        if (!HasWarmedUp) return;
-
-        #region Handle Escape Key
-        if (Input.GetKeyDown(KeyCode.Escape) && Config.CurrentTab == TabType.MODULES)
+        #region Handle Escape
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            bool isInputBlocked = ModuleManager.bindingModuleId != -1
-                                  || UI.WindowDrawing.DrawSetting.focusedControlId != -1
-                                  || UI.WindowDrawing.DrawSetting.activeTextFieldId != -1;
+            if (SafeToCloseManager.TryInterceptEscape())
+            {
+                Input.ResetInputAxes();
+                return;
+            }
 
-            if (ModuleManager.showModules)
+            if (SafeToClose)
             {
                 Config.showgui = false;
                 SaveLoad.Save();
                 ResetInputBind();
                 Input.ResetInputAxes();
             }
-            else if (!isInputBlocked)
+            else
             {
-                if (ModuleManager.showSettings)
-                {
-                    ModuleManager.showModules = true;
-                    ModuleManager.showSettings = false;
-                    ModuleManager.showSelectionGui = false;
-
-                    if (ModuleManager.Modules != null)
-                    {
-                        foreach (var m in ModuleManager.Modules)
-                        {
-                            m.ShowSettings = false;
-                        }
-                    }
-
-                    ResetInputBind();
-                    Input.ResetInputAxes();
-                }
-                else if (ModuleManager.showSelectionGui)
-                {
-                    ModuleManager.showSettings = true;
-                    ModuleManager.showSelectionGui = false;
-
-                    ResetInputBind();
-                    Input.ResetInputAxes();
-                }
+                ResetInputBind();
             }
         }
         #endregion
@@ -162,7 +151,6 @@ public class Main
     public void OnGUI()
     {
         LockUI.BlockSKeysPatch.BlockKeys = false;
-        if (!ModuleManager.IsInitialized) return;
 
         Event e = Event.current;
         if (e == null) return;
@@ -192,23 +180,21 @@ public class Main
 
             UI.Themes.ThemeManager.Rescale();
 
-            MobileMenuUI.Render();
-            HUDManager.Render();
+            // Continuous overlays / HUD
+            ServiceRegistry.RenderAll();
 
-            foreach (var mod in ModuleManager.Modules)
+            // Render menus with smooth fade transition
+            if (UIAnimationHelper.ShouldRenderGUI)
             {
-                mod.OnGUI();
-            }
+                Color prevGuiColor = GUI.color;
+                GUI.color = new Color(1f, 1f, 1f, UIAnimationHelper.FadeProgress);
 
-
-            if (Config.showgui)
-            {
                 TopBar.Render();
+                Config.CurrentTab?.OnGUI?.Invoke();
 
-                if (Config.CurrentTab == TabType.MODULES) ModuleManager.Render();
-                if (Config.CurrentTab == TabType.NEF) NEFManager.Render();
-                if (Config.CurrentTab == TabType.GUI) GUIManager.Render();
-                if (Config.CurrentTab == TabType.PROFILE) ProfileGUI.Render();
+                ServiceRegistry.RenderMenuAll();
+
+                GUI.color = prevGuiColor;
             }
         }
         catch (Exception ex)
@@ -226,6 +212,7 @@ public class Main
     public void OnApplicationQuit()
     {
         Api.Actions.Core.OnEarlyApplicationQuit?.Invoke();
+        ServiceRegistry.QuitAll();
         SaveLoad.Save(true);
         Api.Actions.Core.OnLateApplicationQuit?.Invoke();
         DebugLogger.Msg("Magnetar Preferences Saved!");
@@ -244,16 +231,8 @@ public class Main
         LoadFont.Init();
         UI.Themes.ThemeManager.Init();
 
-        ModuleManager.Render();
+        ServiceRegistry.WarmUpAll();
 
-        Magnetar_Client.NEF.Data.NEFBanned.InitBan();
-        Magnetar_Client.NEF.Data.NEFBanned.InitHidden();
-        Magnetar_Client.NEF.Data.NEFRecipes.InitRecipes();
-
-        NEFManager.Render();
-        GUIManager.Render();
-
-
+        Api.Actions.Core.OnWarmUp?.Invoke();
     }
-
 }

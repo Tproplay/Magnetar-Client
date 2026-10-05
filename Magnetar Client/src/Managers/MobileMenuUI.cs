@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using Il2CppSystem.IO;
 using static Magnetar_Client.Api.PathsManager;
+using Magnetar_Client.Core.Lifecycle;
 
 #if MELONLOADER || RELEASE_MELON
 
@@ -28,6 +29,24 @@ public static class MobileMenuUI
     private static GUIStyle _circleBtnStyle;
     private static GUIStyle _closeBtnStyle;
     private static bool _attemptedLogoLoad = false;
+
+    // --- Dormant / Double-Click System ---
+    private static bool _isDormant = false;
+    private static float _lastInteractionTime = 0f;
+    private static float _lastClickTime = 0f;
+    private const float DoubleClickInterval = 0.35f;
+    private const float DormantDarkenFactor = 0.40f; // Multiplier applied to color when dormant
+
+    public static void Init()
+    {
+        ServiceRegistry.Register(new MobileMenuUIService());
+    }
+
+    public static void ResetIdleTimer()
+    {
+        _lastInteractionTime = Time.realtimeSinceStartup;
+        _isDormant = false;
+    }
 
     public static Rect GetVisibleScreenBounds()
     {
@@ -156,7 +175,7 @@ public static class MobileMenuUI
                 Magnetar_Logger.GUILogger.Error($"Failed reading disk logo: {ex.Message}");
             }
         }
-        
+
 
         return null;
     }
@@ -206,10 +225,8 @@ public static class MobileMenuUI
                     dstPixels[idx] = Color.clear;
                 }
                 else if (dist >= innerRadius)
-                {
                     // Border ring band
                     dstPixels[idx] = ringColor;
-                }
                 else
                 {
                     // Inside badge: star logo pixel
@@ -344,6 +361,7 @@ public static class MobileMenuUI
             _btnRect.x = Mathf.Clamp(_btnRect.x, visible.xMin, visible.xMax - _btnRect.width);
             _btnRect.y = Mathf.Clamp(_btnRect.y, visible.yMin, visible.yMax - _btnRect.height);
             _hasClampedInitialPos = true;
+            _lastInteractionTime = Time.realtimeSinceStartup;
         }
     }
 
@@ -370,17 +388,41 @@ public static class MobileMenuUI
     {
         Vector2 mousePos = e.mousePosition;
         Rect visible = GetVisibleScreenBounds();
+        float now = Time.realtimeSinceStartup;
 
-        if (e.type == EventType.MouseDown && e.button == 0)
+        // Check for idle transition to dormant state
+        if (!_isPointerDown && !_isDragging)
         {
-            if (_btnRect.Contains(mousePos))
+            if (now - _lastInteractionTime > Config.FloatingIconIdleTimeout)
             {
-                _isPointerDown = true;
-                _isDragging = false;
-                _dragStartMousePos = mousePos;
-                _dragStartBtnPos = new Vector2(_btnRect.x, _btnRect.y);
-                e.Use();
+                _isDormant = true;
             }
+        }
+
+        // --- Handle Mouse Interactions ---
+        if (e.type == EventType.MouseDown && e.button == 0 && _btnRect.Contains(mousePos))
+        {
+            if (_isDormant)
+            {
+                // Double-click check to unlock from dormant state
+                if (now - _lastClickTime <= DoubleClickInterval)
+                {
+                    ResetIdleTimer();
+                    e.Use();
+                    return;
+                }
+                _lastClickTime = now;
+                e.Use();
+                return; // Suppress single clicks and drags while dormant
+            }
+
+            // Normal active interaction
+            _isPointerDown = true;
+            _isDragging = false;
+            _dragStartMousePos = mousePos;
+            _dragStartBtnPos = new Vector2(_btnRect.x, _btnRect.y);
+            _lastInteractionTime = now;
+            e.Use();
         }
 
         if (_isPointerDown && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove))
@@ -396,6 +438,7 @@ public static class MobileMenuUI
                 Vector2 delta = mousePos - _dragStartMousePos;
                 _btnRect.x = Mathf.Clamp(_dragStartBtnPos.x + delta.x, visible.xMin, visible.xMax - _btnRect.width);
                 _btnRect.y = Mathf.Clamp(_dragStartBtnPos.y + delta.y, visible.yMin, visible.yMax - _btnRect.height);
+                _lastInteractionTime = now;
                 e.Use();
             }
         }
@@ -403,6 +446,8 @@ public static class MobileMenuUI
         if (_isPointerDown && (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp) && e.button == 0)
         {
             _isPointerDown = false;
+            _lastInteractionTime = now;
+
             if (!_isDragging)
             {
                 Config.showgui = true;
@@ -411,10 +456,22 @@ public static class MobileMenuUI
             e.Use();
         }
 
+        // --- Render with Opacity and Dormant Darkening ---
         if (e.type == EventType.Repaint)
         {
+            Color prevColor = GUI.color;
+
+            float baseOpacity = Mathf.Clamp01(Config.FloatingIconOpacity);
+            float renderAlpha = _isDormant ? baseOpacity * 0.70f : baseOpacity;
+            float shadeMultiplier = _isDormant ? DormantDarkenFactor : 1.0f;
+
+            // Apply darker tint and opacity
+            GUI.color = new Color(shadeMultiplier, shadeMultiplier, shadeMultiplier, renderAlpha);
+
             string badgeLabel = _logoTex != null ? "" : "M";
             GUI.Box(_btnRect, badgeLabel, _circleBtnStyle);
+
+            GUI.color = prevColor;
         }
     }
 
@@ -472,5 +529,16 @@ public static class MobileMenuUI
         tex.SetPixels(colors);
         tex.Apply();
         return tex;
+    }
+
+    private class MobileMenuUIService : IRenderable
+    {
+        public string Name => "MobileMenuUI";
+        public int Priority => ServicePriority.UI;
+
+        public void OnGUI()
+        {
+            MobileMenuUI.Render();
+        }
     }
 }

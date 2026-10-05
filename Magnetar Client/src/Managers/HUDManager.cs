@@ -10,15 +10,21 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 using Magnetar_Client.UI;
 using Magnetar_Client.Game;
 using Magnetar_Client.UI.Setting;
+using Magnetar_Client.Core.Lifecycle;
+using Magnetar_Client.Api;
 
 namespace Magnetar_Client.Core;
 
 public static class HUDManager
 {
+    public static bool IsInitialized { get; private set; } = false;
     public static bool Enabled = true;
     public static bool forceShow = false;
     public static bool isSelectingElements = false;
     public static bool showBackground = false;
+
+    // Flag to suppress sub-window fade transition when returning from Edit Layout mode
+    private static bool _suppressNextTransition = false;
 
     private const float BaseWidth = 500f;
     private const float BaseHeight = 300f;
@@ -33,6 +39,63 @@ public static class HUDManager
 
     private static bool _rectsInitialized = false;
     private static readonly Action _cachedOnClose = OnClose;
+
+    public static void Init()
+    {
+        if (IsInitialized) return;
+
+        EnsureRects();
+
+        // Register to centralized ServiceRegistry
+        ServiceRegistry.Register(new HUDManagerService());
+
+        // Register close guard: block GUI closure while editing layout or picking elements
+        SafeToCloseManager.RegisterGuard(() =>
+        {
+            if (forceShow || (Config.CurrentTab == TabType.HUD && isSelectingElements))
+                return false;
+
+            return true;
+        });
+
+        // Register Escape interceptor to back out of element picker or layout edit mode
+        SafeToCloseManager.RegisterInterceptor(() =>
+        {
+            if (forceShow)
+            {
+                ExitLayoutMode();
+                return true;
+            }
+
+            if (isSelectingElements)
+            {
+                OnClose();
+                Main.ResetInputBind();
+                UIAnimationHelper.TriggerSubWindowTransition();
+                Input.ResetInputAxes();
+                return true;
+            }
+
+            return false;
+        });
+
+        IsInitialized = true;
+        DebugLogger.Msg("[HUDManager] Initialized and registered HUD service.");
+    }
+
+    public static void ExitLayoutMode()
+    {
+        forceShow = false;
+        Config.showgui = true;
+        _suppressNextTransition = true;
+
+        // Force both main fade and sub-window alpha to 1 immediately
+        UIAnimationHelper.SnapToVisible();
+
+        SaveLoad.Save();
+        Main.ResetInputBind();
+        Input.ResetInputAxes();
+    }
 
     public static void OnClose()
     {
@@ -91,6 +154,72 @@ public static class HUDManager
         return _cachedControlsDelegate;
     }
 
+    public static void RenderDimBackground()
+    {
+        if (!Config.dimBg) return;
+
+        // When in forceShow OR when we just exited layout mode, force alpha to 1.0f solid
+        float currentAlpha;
+        if (forceShow || _suppressNextTransition)
+        {
+            currentAlpha = 1.0f;
+        }
+        else
+        {
+            currentAlpha = UIAnimationHelper.FadeProgress;
+        }
+
+        if (currentAlpha <= 0.001f) return;
+
+        Event e = Event.current;
+        if (e == null) return;
+
+        if (e.type == EventType.Repaint && ThemeManager.DimBackgroundStyle != null)
+        {
+            Matrix4x4 prevMatrix = GUI.matrix;
+            Color prevColor = GUI.color;
+
+            GUI.matrix = Matrix4x4.identity;
+            GUI.color = new Color(1f, 1f, 1f, currentAlpha);
+
+            GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "", ThemeManager.DimBackgroundStyle);
+
+            GUI.color = prevColor;
+            GUI.matrix = prevMatrix;
+        }
+
+        if (e.type == EventType.MouseDown && UI.WindowDrawing.DrawSetting.activeSliderId == -1 && UI.WindowDrawing.DrawSetting.activeDropdownId == -1)
+        {
+            Input.ResetInputAxes();
+        }
+    }
+
+    public static void RenderControlsWindow()
+    {
+        GUIStyle windowBgStyle = ThemeManager.SettingsWndowBgStyle ?? ThemeManager.SettingsWndowStyle;
+
+        if (isSelectingElements)
+        {
+            selectorRect = GUI.Window(
+                2001,
+                selectorRect,
+                GetSelectorDelegate(),
+                "",
+                windowBgStyle
+            );
+        }
+        else
+        {
+            windowRect = GUI.Window(
+                2000,
+                windowRect,
+                GetControlsDelegate(),
+                "",
+                windowBgStyle
+            );
+        }
+    }
+
     public static void Render()
     {
         EnsureRects();
@@ -99,72 +228,32 @@ public static class HUDManager
         {
             Event e = Event.current;
 
-            RenderModCredit();
-
-            if (Config.dimBg && (Config.showgui || forceShow))
-            {
-                if (e.type == EventType.Repaint && ThemeManager.DimBackgroundStyle != null)
-                {
-                    Matrix4x4 prevMatrix = GUI.matrix;
-                    GUI.matrix = Matrix4x4.identity;
-
-                    GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "", ThemeManager.DimBackgroundStyle);
-
-                    GUI.matrix = prevMatrix;
-                }
-
-                if (e.type == EventType.MouseDown && UI.WindowDrawing.DrawSetting.activeSliderId == -1 && UI.WindowDrawing.DrawSetting.activeDropdownId == -1)
-                {
-                    Input.ResetInputAxes();
-                }
-            }
-
-            #region Handle Escape
+            #region Handle Escape Key In-GUI (Do not bail out early!)
             if (forceShow && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
             {
-                forceShow = false;
-                Config.showgui = true;
-                SaveLoad.Save();
+                ExitLayoutMode();
                 e.Use();
-                return;
+                // Notice: DO NOT return here! Proceed directly to draw the background and window on this exact frame.
             }
             else if (isSelectingElements && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
             {
                 OnClose();
+                UIAnimationHelper.TriggerSubWindowTransition();
                 e.Use();
-                return;
             }
             #endregion
+
+            RenderModCredit();
+            RenderDimBackground();
 
             if (forceShow)
             {
                 DrawExitLayoutButton();
             }
 
-            GUIStyle windowBgStyle = ThemeManager.SettingsWndowBgStyle ?? ThemeManager.SettingsWndowStyle;
-
             if (Config.CurrentTab == TabType.HUD && !forceShow && Config.showgui)
             {
-                if (isSelectingElements)
-                {
-                    selectorRect = GUI.Window(
-                        2001,
-                        selectorRect,
-                        GetSelectorDelegate(),
-                        "",
-                        windowBgStyle
-                    );
-                }
-                else
-                {
-                    windowRect = GUI.Window(
-                        2000,
-                        windowRect,
-                        GetControlsDelegate(),
-                        "",
-                        windowBgStyle
-                    );
-                }
+                RenderControlsWindow();
             }
 
             HUDRenderer.RenderOverlay();
@@ -190,10 +279,7 @@ public static class HUDManager
 
             if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
             {
-                forceShow = false;
-                Config.showgui = true;
-                SaveLoad.Save();
-                Input.ResetInputAxes();
+                ExitLayoutMode();
                 e.Use();
             }
         }
@@ -201,120 +287,158 @@ public static class HUDManager
 
     private static void DrawElementSelector(int windowID)
     {
-        Event e = Event.current;
+        Color prevColor = GUI.color;
+        Color prevContentColor = GUI.contentColor;
+        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.SubWindowAlpha;
 
-        Rect multiSelectRect = new(0, 0, selectorRect.width, selectorRect.height);
-        UI.WindowDrawing.DrawSetting.DrawMultiSelectWindow(multiSelectRect, UI.WindowDrawing.DrawSetting.activeMultiSelect, _cachedOnClose);
+        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
+        GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
 
-        float titleHeight = Config.S(34f);
-        float dragSafeMargin = Config.ShowMobileButtons ? Config.S(35f) : 0f;
-        GUI.DragWindow(new Rect(0, 0, selectorRect.width - dragSafeMargin, titleHeight));
-
-        if (multiSelectRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
+        try
         {
-            Input.ResetInputAxes();
-            e.Use();
+            Event e = Event.current;
+
+            Rect multiSelectRect = new(0, 0, selectorRect.width, selectorRect.height);
+            UI.WindowDrawing.DrawSetting.DrawMultiSelectWindow(multiSelectRect, UI.WindowDrawing.DrawSetting.activeMultiSelect, _cachedOnClose);
+
+            float titleHeight = Config.S(34f);
+            float dragSafeMargin = Config.ShowMobileButtons ? Config.S(35f) : 0f;
+            GUI.DragWindow(new Rect(0, 0, selectorRect.width - dragSafeMargin, titleHeight));
+
+            if (multiSelectRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
+            {
+                Input.ResetInputAxes();
+                e.Use();
+            }
+        }
+        finally
+        {
+            GUI.color = prevColor;
+            GUI.contentColor = prevContentColor;
         }
     }
 
     private static void DrawHUDControls(int windowID)
     {
-        float width = windowRect.width;
-        float indent = Config.S(10f);
-        Event e = Event.current;
-        float y = Config.S(35f);
+        Color prevColor = GUI.color;
+        Color prevContentColor = GUI.contentColor;
 
-        Rect headerBgRect = new(0, 0, width, y - indent);
-        GUI.Box(headerBgRect, Translator.Translate("Customize HUD"), ThemeManager.SettingsWndowStyle);
-
-        int activeCount = HUDRenderer.HudToggles != null ? HUDRenderer.HudToggles.SelectedValues.Count : 0;
-        GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight),
-            Translator.Translate("Elements") + $" ({activeCount})",
-            ThemeManager.SettingLabelStyle);
-
-        Rect selectBtnRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
-
-        if (e.type == EventType.MouseDown && e.button == 0 && selectBtnRect.Contains(e.mousePosition))
+        float subAlpha = _suppressNextTransition ? 1.0f : UIAnimationHelper.SubWindowAlpha;
+        if (_suppressNextTransition && Event.current.type == EventType.Repaint)
         {
-            e.Use();
-            UI.WindowDrawing.DrawSetting.activeMultiSelect = HUDRenderer.HudToggles;
-            UI.WindowDrawing.DrawSetting.multiSelectSearchQuery = "";
-            UI.WindowDrawing.DrawSetting.manualScrollY = 0f;
-
-            float targetW = Config.S(BaseSelectorWidth);
-            float targetH = Mathf.Min(Config.S(BaseSelectorHeight), Config.NativeHeight * 0.8f);
-
-            selectorRect = new Rect(
-                (Config.NativeWidth - targetW) / 2f,
-                (Config.NativeHeight - targetH) / 2f,
-                targetW,
-                targetH
-            );
-
-            isSelectingElements = true;
+            _suppressNextTransition = false;
         }
 
-        GUI.Box(selectBtnRect, Translator.Translate("Select"), ThemeManager.SettingOff);
+        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * subAlpha;
 
-        y += elementHeight + Config.S(5f);
+        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
+        GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
 
-        GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Layout"),
-            ThemeManager.SettingLabelStyle);
-
-        Rect configBtnRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
-
-        if (e.type == EventType.MouseDown && e.button == 0 && configBtnRect.Contains(e.mousePosition))
+        try
         {
-            e.Use();
-            forceShow = true;
-            Config.showgui = false;
-            DebugLogger.Msg("Escape Triggered : Hud Window -> Edit Layout");
+            float width = windowRect.width;
+            float indent = Config.S(10f);
+            Event e = Event.current;
+            float y = Config.S(35f);
+
+            Rect headerBgRect = new(0, 0, width, y - indent);
+            GUI.Box(headerBgRect, Translator.Translate("Customize HUD"), ThemeManager.SettingsWndowStyle);
+
+            int activeCount = HUDRenderer.HudToggles != null ? HUDRenderer.HudToggles.SelectedValues.Count : 0;
+            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight),
+                Translator.Translate("Elements") + $" ({activeCount})",
+                ThemeManager.SettingLabelStyle);
+
+            Rect selectBtnRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
+
+            if (e.type == EventType.MouseDown && e.button == 0 && selectBtnRect.Contains(e.mousePosition))
+            {
+                e.Use();
+                UI.WindowDrawing.DrawSetting.activeMultiSelect = HUDRenderer.HudToggles;
+                UI.WindowDrawing.DrawSetting.multiSelectSearchQuery = "";
+                UI.WindowDrawing.DrawSetting.manualScrollY = 0f;
+
+                float targetW = Config.S(BaseSelectorWidth);
+                float targetH = Mathf.Min(Config.S(BaseSelectorHeight), Config.NativeHeight * 0.8f);
+
+                selectorRect = new Rect(
+                    (Config.NativeWidth - targetW) / 2f,
+                    (Config.NativeHeight - targetH) / 2f,
+                    targetW,
+                    targetH
+                );
+
+                isSelectingElements = true;
+                UIAnimationHelper.TriggerSubWindowTransition();
+            }
+
+            GUI.Box(selectBtnRect, Translator.Translate("Select"), ThemeManager.SettingOff);
+
+            y += elementHeight + Config.S(5f);
+
+            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Layout"),
+                ThemeManager.SettingLabelStyle);
+
+            Rect configBtnRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
+
+            if (e.type == EventType.MouseDown && e.button == 0 && configBtnRect.Contains(e.mousePosition))
+            {
+                e.Use();
+                forceShow = true;
+                Config.showgui = false;
+                DebugLogger.Msg("Escape Triggered : Hud Window -> Edit Layout");
+            }
+
+            GUI.Box(configBtnRect, Translator.Translate("Edit"), ThemeManager.SettingOff);
+
+            y += elementHeight + Config.S(5f);
+
+            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Background"),
+                ThemeManager.SettingLabelStyle);
+            Rect bgRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
+            bool bgHover = bgRect.Contains(e.mousePosition);
+
+            GUI.Box(bgRect, showBackground ? Translator.Translate("ON") : Translator.Translate("OFF"),
+                showBackground ? ThemeManager.SettingOn : ThemeManager.SettingOff);
+
+            if (bgHover && e.type == EventType.MouseDown && e.button == 0)
+            {
+                showBackground = !showBackground;
+                e.Use();
+            }
+
+            y += elementHeight + Config.S(5f);
+
+            GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Enabled"),
+                ThemeManager.SettingLabelStyle);
+            Rect enabledRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
+            bool enabledHover = enabledRect.Contains(e.mousePosition);
+
+            GUI.Box(enabledRect, Enabled ? Translator.Translate("ON") : Translator.Translate("OFF"),
+                Enabled ? ThemeManager.SettingOn : ThemeManager.SettingOff);
+
+            if (enabledHover && e.type == EventType.MouseDown && e.button == 0)
+            {
+                Enabled = !Enabled;
+                e.Use();
+            }
+
+            y += elementHeight + Config.S(10f);
+            windowRect.height = y;
+
+            GUI.DragWindow(new Rect(0, 0, width, Config.S(25f)));
+
+            Rect _windowRect = new(0, 0, width, y);
+            if (_windowRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
+            {
+                Input.ResetInputAxes();
+                e.Use();
+            }
         }
-
-        GUI.Box(configBtnRect, Translator.Translate("Edit"), ThemeManager.SettingOff);
-
-        y += elementHeight + Config.S(5f);
-
-        GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Background"),
-            ThemeManager.SettingLabelStyle);
-        Rect bgRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
-        bool bgHover = bgRect.Contains(e.mousePosition);
-
-        GUI.Box(bgRect, showBackground ? Translator.Translate("ON") : Translator.Translate("OFF"),
-            showBackground ? ThemeManager.SettingOn : ThemeManager.SettingOff);
-
-        if (bgHover && e.type == EventType.MouseDown && e.button == 0)
+        finally
         {
-            showBackground = !showBackground;
-            e.Use();
-        }
-
-        y += elementHeight + Config.S(5f);
-
-        GUI.Label(new Rect(indent, y, width * 0.45f, elementHeight), Translator.Translate("Enabled"),
-            ThemeManager.SettingLabelStyle);
-        Rect enabledRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
-        bool enabledHover = enabledRect.Contains(e.mousePosition);
-
-        GUI.Box(enabledRect, Enabled ? Translator.Translate("ON") : Translator.Translate("OFF"),
-            Enabled ? ThemeManager.SettingOn : ThemeManager.SettingOff);
-
-        if (enabledHover && e.type == EventType.MouseDown && e.button == 0)
-        {
-            Enabled = !Enabled;
-            e.Use();
-        }
-
-        y += elementHeight + Config.S(10f);
-        windowRect.height = y;
-
-        GUI.DragWindow(new Rect(0, 0, width, Config.S(25f)));
-
-        Rect _windowRect = new(0, 0, width, y);
-        if (_windowRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
-        {
-            Input.ResetInputAxes();
-            e.Use();
+            GUI.color = prevColor;
+            GUI.contentColor = prevContentColor;
         }
     }
 
@@ -357,6 +481,70 @@ public static class HUDManager
 
         GUIHelper.DrawBoxWithOutlinedText(rect, Text, style, GUIHelper.RainbowColor, Color.black);
     }
+
+    private class HUDManagerService : IInitializable, IWarmUp, IUpdatable, IRenderable, IMenuRenderable, ICloseHandler, ILanguageAware
+    {
+        public string Name => "HUDManager";
+        public int Priority => ServicePriority.HUD;
+
+        public void Initialize() => HUDManager.EnsureRects();
+        public void OnWarmUp() => HUDManager.EnsureRects();
+        public void OnUpdate() => HUDRenderer.UpdateElements();
+
+        public void OnGUI()
+        {
+            HUDManager.EnsureRects();
+            HUDManager.RenderModCredit();
+            HUDManager.RenderDimBackground();
+
+            if (HUDManager.forceShow)
+            {
+                HUDManager.DrawExitLayoutButton();
+            }
+
+            HUDRenderer.RenderOverlay();
+        }
+
+        public void OnMenuGUI()
+        {
+            if (Config.CurrentTab == TabType.HUD && !HUDManager.forceShow)
+            {
+                HUDManager.RenderControlsWindow();
+            }
+        }
+
+        public bool CanClose()
+        {
+            return !HUDManager.forceShow && !HUDManager.isSelectingElements;
+        }
+
+        public bool OnEscapePressed()
+        {
+            // 1. Exiting layout editing mode back to the main GUI menu (no sub-window fade)
+            if (HUDManager.forceShow)
+            {
+                ExitLayoutMode();
+                return true;
+            }
+
+            // 2. Stepping out of the MultiSelect element picker modal
+            if (HUDManager.isSelectingElements)
+            {
+                HUDManager.OnClose();
+                Main.ResetInputBind();
+                UIAnimationHelper.TriggerSubWindowTransition();
+                Input.ResetInputAxes();
+                return true;
+            }
+
+            return false;
+        }
+
+        public void OnLanguageChanged()
+        {
+            HUDManager.OnLanguageChange();
+        }
+    }
 }
 
 public static class HUDRenderer
@@ -367,12 +555,14 @@ public static class HUDRenderer
         CustomNames = new Dictionary<int, string>(),
         DisplayAlphabetically = true,
     };
-    private static bool isMasterVisible ;
+    private static bool isMasterVisible;
 
     public static int currentWindowId = 4000;
 
     public static void Init()
     {
+        HUDManager.Init();
+
         var types = Assembly.GetExecutingAssembly().GetTypes()
             .Where(t => t.IsSubclassOf(typeof(HudElement)) && !t.IsAbstract);
 
@@ -430,8 +620,11 @@ public static class HUDRenderer
     {
         if (!isMasterVisible) return;
 
-        foreach (var element in Elements)
+        for (int i = 0; i < Elements.Count; i++)
         {
+            var element = Elements[i];
+            if (element == null) continue;
+
             bool isElementEnabled = isMasterVisible && HudToggles.IsSelected(element.WindowId);
             element.HandleLifecycle(isElementEnabled);
         }

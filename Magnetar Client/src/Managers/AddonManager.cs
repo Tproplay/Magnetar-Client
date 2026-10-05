@@ -1,4 +1,5 @@
 ﻿using Magnetar_Client.Api;
+using Magnetar_Client.Core.Lifecycle;
 using Magnetar_Client.HUDElements;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,44 @@ public static class AddonManager
     public static readonly List<AddonInfo> LoadedAddons = new();
 
     private static readonly Dictionary<string, (Assembly Assembly, Type[] Types)> DiscoveredAssemblies = new();
+    private static bool _isResolverAttached = false;
+
+    private static void EnsureAssemblyResolver()
+    {
+        if (_isResolverAttached) return;
+
+        AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+        {
+            try
+            {
+                string assemblySimpleName = new AssemblyName(args.Name).Name;
+                string targetPath = Path.Combine(AddonsDir, assemblySimpleName + ".dll");
+
+                if (File.Exists(targetPath))
+                {
+                    return Assembly.LoadFrom(targetPath);
+                }
+
+                // Deep search in subfolders within AddonsDir
+                if (Directory.Exists(AddonsDir))
+                {
+                    string matchedFile = Directory.GetFiles(AddonsDir, assemblySimpleName + ".dll", SearchOption.AllDirectories).FirstOrDefault();
+                    if (!string.IsNullOrEmpty(matchedFile))
+                    {
+                        return Assembly.LoadFrom(matchedFile);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugLogger.Error($"[AddonManager] Error resolving assembly '{args.Name}': {ex.Message}");
+            }
+
+            return null;
+        };
+
+        _isResolverAttached = true;
+    }
 
     /// <summary>
     /// Scans the 'Mods/Magnetar Addon' directory, loads all assemblies into memory,
@@ -24,6 +63,8 @@ public static class AddonManager
     {
         try
         {
+            EnsureAssemblyResolver();
+
             LoadedAddons.Clear();
             DiscoveredAssemblies.Clear();
 
@@ -219,6 +260,55 @@ public static class AddonManager
         catch (Exception ex)
         {
             DebugLogger.Error($"[AddonManager] Critical error during InitHUDElements: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// Discovers and registers all IClientService implementations from addon assemblies into the ServiceRegistry.
+    /// </summary>
+    public static void InitServices()
+    {
+        try
+        {
+            if (DiscoveredAssemblies.Count == 0) return;
+
+            int totalServices = 0;
+
+            foreach (var addonInfo in LoadedAddons)
+            {
+                if (!DiscoveredAssemblies.TryGetValue(addonInfo.FilePath, out var cachedData))
+                    continue;
+
+                var serviceTypes = cachedData.Types
+                    .Where(t => t.IsClass
+                                && !t.IsAbstract
+                                && typeof(IClientService).IsAssignableFrom(t))
+                    .OrderBy(t => t.Name, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                foreach (var svcType in serviceTypes)
+                {
+                    try
+                    {
+                        var serviceInstance = (IClientService)Activator.CreateInstance(svcType);
+                        ServiceRegistry.Register(serviceInstance);
+                        totalServices++;
+                    }
+                    catch (Exception ex)
+                    {
+                        DebugLogger.Error($"[AddonManager] Failed to register addon service '{svcType.FullName}' from '{addonInfo.FileName}': {ex}");
+                    }
+                }
+            }
+
+            if (totalServices > 0)
+            {
+                DebugLogger.Msg($"[AddonManager] Registered {totalServices} client service(s) from addons.");
+            }
+        }
+        catch (Exception ex)
+        {
+            DebugLogger.Error($"[AddonManager] Critical error during InitServices: {ex}");
         }
     }
 }

@@ -163,7 +163,14 @@ public static class PathsManager
         return path;
     }
 
-    public static string TranslationRootDir => Path.Combine(ModsDir, "Magnetar Translation");
+    public static string TranslationRootDir => GetSafeTranslationRootDir();
+
+    static string GetSafeTranslationRootDir()
+    {
+        var path = Path.Combine(ModsDir, "Magnetar Translation");
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+        return path;
+    }
 
     public static string GetLanguageDir(string targetLanguage) => Path.Combine(TranslationRootDir, targetLanguage);
 
@@ -172,7 +179,7 @@ public static class PathsManager
     {
         var path = Path.Combine(ModsDir, "Magnetar Data");
         if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-        return Path.Combine(ModsDir, "Magnetar Data");
+        return path;
     }
 
     public static string TextureDataPath => GetSafeTexturePath();

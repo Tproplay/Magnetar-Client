@@ -1,204 +1,18 @@
 ﻿using Magnetar_Client.Modules;
+using Magnetar_Client.UI;
+using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
+using Magnetar_Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
-using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.UI.WindowDrawing.DrawSetting;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Utils.Translator;
-using Magnetar_Client.UI.Setting;
 
 namespace Magnetar_Client.Core;
-
-public static class ModuleManager
-{
-    public static bool IsInitialized = false;
-    public static List<Modules.Module> Modules = new();
-    public static bool showModules = true;
-    public static bool showSettings = false;
-    public static bool showSelectionGui = false;
-    public static Modules.Module activeSettingsModule = null;
-
-    public static bool resetWindowPos = false;
-    public static int bindingModuleId = -1;
-
-    public static Dictionary<ModuleCategory, Rect> windowPositions => CategoryWindowDrawer.WindowPositions;
-    public static string ModuleSearchQuery
-    {
-        get => SearchWindowDrawer.SearchQuery;
-        set => SearchWindowDrawer.SearchQuery = value;
-    }
-
-    public static void Init()
-    {
-        #region Register All Interal Modules
-        Type[] exportedTypes;
-        try
-        {
-            exportedTypes = Assembly.GetExecutingAssembly().GetTypes();
-        }
-        catch (ReflectionTypeLoadException ex)
-        {
-            exportedTypes = ex.Types.Where(t => t != null).ToArray();
-        }
-
-        var moduleTypes = exportedTypes
-            .Where(t => t.IsClass
-                        && !t.IsAbstract
-                        && typeof(Modules.Module).IsAssignableFrom(t)
-                        && t.Namespace != null
-                        && t.Namespace.StartsWith("Magnetar_Client.Modules", StringComparison.Ordinal))
-            .OrderBy(t => t.Name, StringComparer.OrdinalIgnoreCase);
-
-        foreach (var type in moduleTypes)
-        {
-            RegisterModule(type);
-        }
-
-        #endregion
-
-        CategoryWindowDrawer.InitializeLayout();
-        MultiSelectWindowDrawer.InitializeLayout();
-        SearchWindowDrawer.Initialize();
-
-        showModules = true;
-        showSettings = false;
-        showSelectionGui = false;
-
-        IsInitialized = true;
-        DebugLogger.Msg($"Loaded {Modules.Count} modules");
-    }
-
-    internal static void RegisterModule(Type type)
-    {
-        if (type == null)
-        {
-            DebugLogger.Error("[ModuleManager] Cannot register a null module type.");
-            return;
-        }
-
-        if (!typeof(Modules.Module).IsAssignableFrom(type) || type.IsAbstract || !type.IsClass)
-        {
-            DebugLogger.Error($"[ModuleManager] Type '{type.FullName}' must be a non-abstract class derived from '{nameof(Magnetar_Client.Modules.Module)}'.");
-            return;
-        }
-
-        if (Modules.Exists(m => m.GetType() == type))
-        {
-            DebugLogger.Warning($"[ModuleManager] Module '{type.Name}' is already registered. Skipping.");
-            return;
-        }
-
-        try
-        {
-            var instance = (Modules.Module)Activator.CreateInstance(type);
-            Modules.Add(instance);
-
-            // Automatically ensure the category window is mapped
-            if (instance.Category != null)
-            {
-                CategoryWindowDrawer.EnsureCategoryInitialized(instance.Category);
-            }
-        }
-        catch (Exception ex)
-        {
-            DebugLogger.Error($"[ModuleManager] Failed to instantiate and register '{type.FullName}': {ex}");
-        }
-    }
-
-    public static void OpenModuleSettings(Modules.Module mod)
-    {
-        MobileInputHandler.Reset();
-        showModules = false;
-        showSelectionGui = false;
-        showSettings = true;
-        activeSettingsModule = mod;
-
-        foreach (var m in Modules)
-            m.ShowSettings = false;
-
-        mod.ShowSettings = true;
-        resetWindowPos = true;
-    }
-
-    public static void Render()
-    {
-        Event currentEvent = Event.current;
-        MobileInputHandler.Update(currentEvent);
-
-        if (showModules)
-        {
-            resetWindowPos = true;
-            SearchWindowDrawer.Render(currentEvent);
-            CategoryWindowDrawer.Render();
-        }
-        else if (showSettings)
-        {
-            SettingsWindowDrawer.Render(currentEvent);
-        }
-        else if (showSelectionGui)
-        {
-            MultiSelectWindowDrawer.Render(currentEvent);
-        }
-    }
-
-    public static void OnUpdate()
-    {
-        if (!Config.showgui && !HUDManager.forceShow)
-        {
-            HandleHotkeys();
-        }
-
-        foreach (var mod in Modules)
-        {
-            mod?.OnUpdate();
-        }
-
-    }
-
-    static void HandleHotkeys()
-    {
-        if (focusedControlId != -1 || bindingModuleId != -1) return;
-
-        foreach (var mod in Modules)
-        {
-            if (mod.BindKeys == null || mod.BindKeys.Count == 0) continue;
-
-            bool allKeysHeld = true;
-            bool anyKeyJustPressed = false;
-            bool anyKeyJustReleased = false;
-
-            foreach (KeyCode key in mod.BindKeys)
-            {
-                if (!Input.GetKey(key)) allKeysHeld = false;
-                if (Input.GetKeyDown(key)) anyKeyJustPressed = true;
-                if (Input.GetKeyUp(key)) anyKeyJustReleased = true;
-            }
-
-            if (mod.HoldMode)
-            {
-                if (allKeysHeld && anyKeyJustPressed && !mod.Active)
-                {
-                    if (VanillaMode.instance.IsAllowed(mod)) mod.Toggle();
-                }
-                else if (mod.Active && anyKeyJustReleased)
-                {
-                    if (VanillaMode.instance.IsAllowed(mod)) mod.Toggle();
-                }
-            }
-            else
-            {
-                if (allKeysHeld && anyKeyJustPressed)
-                {
-                    if (VanillaMode.instance.IsAllowed(mod)) mod.Toggle();
-                }
-            }
-        }
-    }
-}
 
 internal static class CategoryWindowDrawer
 {
@@ -246,11 +60,13 @@ internal static class CategoryWindowDrawer
 
     public static void Render()
     {
+        Color prevColor = GUI.color;
+        // Apply smooth composite alpha
+        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.SubWindowAlpha);
+
         foreach (var cat in ModuleCategory.AllCategories.ToList())
         {
-
             int id = cat.Id;
-
             Rect syncedPos = WindowPositions[cat];
             if (!Mathf.Approximately(syncedPos.width, Config.ModuleWindowWidth))
             {
@@ -277,10 +93,19 @@ internal static class CategoryWindowDrawer
                 }
             }
         }
+
+        GUI.color = prevColor;
     }
 
     private static void DrawCategoryWindow(int id)
     {
+        Color prevColor = GUI.color;
+        Color prevContentColor = GUI.contentColor;
+        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.SubWindowAlpha;
+
+        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
+        GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
+
         try
         {
             ModuleCategory category = ModuleCategory.AllCategories.FirstOrDefault(c => c.Id == id);
@@ -389,6 +214,11 @@ internal static class CategoryWindowDrawer
         catch (Exception ex)
         {
             DebugLogger.Error($"[DrawCategoryWindow] Error rendering category ID {id}: {ex}");
+        }
+        finally
+        {
+            GUI.color = prevColor;
+            GUI.contentColor = prevContentColor;
         }
     }
 
@@ -521,7 +351,6 @@ internal static class CategoryWindowDrawer
         GUI.Box(new Rect(trackX, handleY, Config.S(5f), handleHeight), "", ThemeManager.CategoryModuleOffStyle);
     }
 }
-
 internal static class SettingsWindowDrawer
 {
     private static readonly Dictionary<Modules.Module, Rect> _settingsPositions = new();
@@ -530,11 +359,16 @@ internal static class SettingsWindowDrawer
     private static readonly Dictionary<Modules.Module, float> _targetContentHeights = new();
     private static readonly Dictionary<Modules.Module, GUI.WindowFunction> _cachedSettingsDelegates = new();
 
+    // Cache the active module while it fades out to prevent instant popping
+    private static Modules.Module _lastActiveModule = null;
+
     private static GUI.WindowFunction GetSettingsDelegate(Modules.Module mod)
     {
         if (!_cachedSettingsDelegates.TryGetValue(mod, out var del))
         {
-            del = Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)(id => DrawSettingsWindow(id, mod)));
+            del = Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>(
+                (Action<int>)(id => DrawSettingsWindow(id, mod))
+            );
             _cachedSettingsDelegates[mod] = del;
         }
         return del;
@@ -542,49 +376,185 @@ internal static class SettingsWindowDrawer
 
     public static void Render(Event currentEvent)
     {
-        foreach (var mod in ModuleManager.Modules)
+        Modules.Module targetMod = ModuleManager.activeSettingsModule;
+
+        // Keep targetMod alive during fade out
+        if (targetMod != null && targetMod.ShowSettings)
         {
-            if (!mod.ShowSettings) continue;
+            _lastActiveModule = targetMod;
+        }
+        else if (UIAnimationHelper.SubWindowAlpha > 0.01f && _lastActiveModule != null)
+        {
+            targetMod = _lastActiveModule;
+        }
+        else
+        {
+            _lastActiveModule = null;
+            return;
+        }
 
-            int settingsId = Mathf.Abs(mod.GetHashCode()) + 1000;
-            float targetWidth = CalculateTargetWidth(mod);
+        if (targetMod == null) return;
 
-            if (!_settingsPositions.ContainsKey(mod) || ModuleManager.resetWindowPos)
+        // Calculate blended alpha
+        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.SubWindowAlpha;
+        if (currentAlpha <= 0.001f) return;
+
+        Color prevColor = GUI.color;
+        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
+
+        int settingsId = Mathf.Abs(targetMod.GetHashCode()) + 1000;
+        float targetWidth = CalculateTargetWidth(targetMod);
+
+        if (!_settingsPositions.ContainsKey(targetMod) || ModuleManager.resetWindowPos)
+        {
+            ModuleManager.resetWindowPos = false;
+            float popupHeight = Config.S(25f);
+
+            _settingsPositions[targetMod] = new Rect(
+                (Config.NativeWidth / 2f) - (targetWidth / 2f),
+                (Config.NativeHeight / 2f) - (popupHeight / 2f),
+                targetWidth,
+                popupHeight
+            );
+
+            _moduleContentHeights[targetMod] = 0f;
+            _targetContentHeights[targetMod] = 0f;
+        }
+        else
+        {
+            Rect currentRect = _settingsPositions[targetMod];
+            if (Mathf.Abs(currentRect.width - targetWidth) > 0.5f)
             {
-                ModuleManager.resetWindowPos = false;
-                float popupHeight = Config.S(25f);
+                float newWidth = Mathf.Lerp(currentRect.width, targetWidth, Time.deltaTime * Config.ModuleManager.PopupSpeed);
+                float widthDiff = newWidth - currentRect.width;
 
-                _settingsPositions[mod] = new Rect(
-                    (Config.NativeWidth / 2f) - (targetWidth / 2f),
-                    (Config.NativeHeight / 2f) - (popupHeight / 2f),
-                    targetWidth,
-                    popupHeight
-                );
-
-                _moduleContentHeights[mod] = 0f;
-                _targetContentHeights[mod] = 0f;
+                currentRect.width = newWidth;
+                currentRect.x -= widthDiff / 2f;
+                _settingsPositions[targetMod] = currentRect;
             }
-            else
-            {
-                Rect currentRect = _settingsPositions[mod];
-                if (Mathf.Abs(currentRect.width - targetWidth) > 0.5f)
-                {
-                    float newWidth = Mathf.Lerp(currentRect.width, targetWidth, Time.deltaTime * Config.ModuleManager.PopupSpeed);
-                    float widthDiff = newWidth - currentRect.width;
+        }
 
-                    currentRect.width = newWidth;
-                    currentRect.x -= widthDiff / 2f;
-                    _settingsPositions[mod] = currentRect;
+        _settingsPositions[targetMod] = GUI.Window(
+            settingsId,
+            _settingsPositions[targetMod],
+            GetSettingsDelegate(targetMod),
+            "",
+            ThemeManager.SettingsWndowBgStyle
+        );
+
+        GUI.color = prevColor;
+    }
+
+    private static void DrawSettingsWindow(int id, Modules.Module mod)
+    {
+        // Re-apply both GUI.color and GUI.contentColor inside the window callback scope
+        Color prevColor = GUI.color;
+        Color prevContentColor = GUI.contentColor;
+        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.SubWindowAlpha;
+
+        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
+        GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
+        try
+        {
+            ModuleManager.activeSettingsModule = mod;
+            float windowWidth = _settingsPositions[mod].width;
+
+#if ANDROID
+            float headerHeight = Config.S(26f) * 1.30f;
+#else
+            float headerHeight = Config.S(26f);
+#endif
+            float maxWindowHeight = Config.NativeHeight * Config.ModuleManager.MaxSettingsWindowHeightPct;
+            float maxViewHeight = maxWindowHeight - headerHeight;
+
+            if (!_moduleContentHeights.ContainsKey(mod)) _moduleContentHeights[mod] = 0f;
+            if (!_targetContentHeights.ContainsKey(mod)) _targetContentHeights[mod] = 0f;
+            if (!_settingsScrollPositions.ContainsKey(mod)) _settingsScrollPositions[mod] = Vector2.zero;
+
+            // Header Banner using SettingsWndowStyle
+            Rect headerBgRect = new(0, 0, windowWidth, headerHeight);
+            GUI.Box(headerBgRect, Translator.Translate(mod.Name), ThemeManager.SettingsWndowStyle);
+
+            _moduleContentHeights[mod] = Mathf.Lerp(_moduleContentHeights[mod], _targetContentHeights[mod],
+                Time.unscaledDeltaTime * Config.ModuleManager.SettingsScrollLerpSpeed);
+
+            if (Mathf.Abs(_moduleContentHeights[mod] - _targetContentHeights[mod]) < 0.5f)
+                _moduleContentHeights[mod] = _targetContentHeights[mod];
+
+            float contentHeight = _moduleContentHeights[mod];
+            float windowHeight = Mathf.Min(contentHeight + headerHeight, maxWindowHeight);
+            float viewHeight = windowHeight - headerHeight;
+
+            Event e = Event.current;
+            float closeBtnSize = Config.S(20f);
+
+            if (Config.ShowMobileButtons)
+            {
+                float btnSize = Config.S(22f);
+                float btnY = (headerHeight - btnSize) / 2f;
+                Rect closeButtonRect = new(windowWidth - Config.S(26f), btnY, btnSize, btnSize);
+                GUI.Box(closeButtonRect, "X", ThemeManager.CloseButtonStyle);
+                if (e.type == EventType.MouseDown && closeButtonRect.Contains(e.mousePosition))
+                {
+                    ModuleManager.showSettings = false;
+                    ModuleManager.showModules = true;
+                    ModuleManager.showSelectionGui = false;
+                    UIAnimationHelper.TriggerSubWindowTransition();
+                    return;
                 }
             }
 
-            _settingsPositions[mod] = GUI.Window(
-                settingsId,
-                _settingsPositions[mod],
-                GetSettingsDelegate(mod),
-                "",
-                ThemeManager.SettingsWndowBgStyle
-            );
+            if (e.type == EventType.Layout)
+            {
+                Rect r = _settingsPositions[mod];
+                float prevHeight = r.height;
+                r.height = windowHeight;
+                if (prevHeight > 0 && Mathf.Abs(windowHeight - prevHeight) > 0.1f)
+                {
+                    r.y -= (windowHeight - prevHeight) / 2f;
+                }
+                _settingsPositions[mod] = r;
+            }
+
+            bool needsScrollbar = _targetContentHeights[mod] > maxViewHeight;
+            float maxScroll = needsScrollbar ? (_targetContentHeights[mod] - maxViewHeight) : 0f;
+            float contentWidth = needsScrollbar ? windowWidth - Config.S(16f) : windowWidth;
+            float currentScroll = _settingsScrollPositions[mod].y;
+
+            Rect outRect = new(0, headerHeight, windowWidth, viewHeight);
+            if (outRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
+            {
+                currentScroll = Mathf.Clamp(currentScroll + e.delta.y * Config.ModuleManager.ScrollSensitivity, 0, maxScroll);
+                _settingsScrollPositions[mod] = new Vector2(0, currentScroll);
+                e.Use();
+            }
+
+            GUI.BeginGroup(outRect);
+            // DrawSettingsBody draws SettingOn and SettingOff
+            float actualHeightDrawn = DrawSettingsBody(mod, -currentScroll, contentWidth);
+            if (e.type == EventType.Repaint)
+            {
+                _targetContentHeights[mod] = actualHeightDrawn;
+            }
+
+            if (DrawSetting.OnPostDraw != null)
+            {
+                DrawSetting.OnPostDraw.Invoke();
+                DrawSetting.OnPostDraw = null;
+            }
+            GUI.EndGroup();
+
+            if (needsScrollbar)
+            {
+                DrawSettingsScrollbar(windowWidth, headerHeight, viewHeight, _targetContentHeights[mod], maxViewHeight, currentScroll, maxScroll);
+            }
+
+            GUI.DragWindow(new Rect(0, 0, windowWidth - closeBtnSize - Config.S(10f), headerHeight));
+        }
+        finally
+        {
+            GUI.color = prevColor;
+            GUI.contentColor = prevContentColor;
         }
     }
 
@@ -610,102 +580,6 @@ internal static class SettingsWindowDrawer
 
         float calculatedWidth = Config.indent + maxNameWidth + Config.S(35f) + Config.SettingWidth + Config.indent;
         return Mathf.Max(Config.ModuleManager.SettingsWidth, Mathf.Max(mod.SettingsWidth, calculatedWidth));
-    }
-
-    private static void DrawSettingsWindow(int id, Modules.Module mod)
-    {
-        ModuleManager.activeSettingsModule = mod;
-        float windowWidth = _settingsPositions[mod].width;
-
-#if ANDROID
-        // 30% header size increase on Android
-        float headerHeight = Config.S(26f) * 1.30f;
-#else
-        float headerHeight = Config.S(26f);
-#endif
-        float maxWindowHeight = Config.NativeHeight * Config.ModuleManager.MaxSettingsWindowHeightPct;
-        float maxViewHeight = maxWindowHeight - headerHeight;
-
-        if (!_moduleContentHeights.ContainsKey(mod)) _moduleContentHeights[mod] = 0f;
-        if (!_targetContentHeights.ContainsKey(mod)) _targetContentHeights[mod] = 0f;
-        if (!_settingsScrollPositions.ContainsKey(mod)) _settingsScrollPositions[mod] = Vector2.zero;
-
-        Rect headerBgRect = new(0, 0, windowWidth, headerHeight);
-        GUI.Box(headerBgRect, Translate(mod.Name), ThemeManager.SettingsWndowStyle);
-
-        _moduleContentHeights[mod] = Mathf.Lerp(_moduleContentHeights[mod], _targetContentHeights[mod],
-            Time.unscaledDeltaTime * Config.ModuleManager.SettingsScrollLerpSpeed);
-
-        if (Mathf.Abs(_moduleContentHeights[mod] - _targetContentHeights[mod]) < 0.5f)
-            _moduleContentHeights[mod] = _targetContentHeights[mod];
-
-        float contentHeight = _moduleContentHeights[mod];
-        float windowHeight = Mathf.Min(contentHeight + headerHeight, maxWindowHeight);
-        float viewHeight = windowHeight - headerHeight;
-
-        Event e = Event.current;
-        float closeBtnSize = Config.S(20f);
-
-        if (Config.ShowMobileButtons)
-        {
-            float btnSize = Config.S(22f);
-            float btnY = (headerHeight - btnSize) / 2f;
-            Rect closeButtonRect = new(windowWidth - Config.S(26f), btnY, btnSize, btnSize);
-            GUI.Box(closeButtonRect, "X", ThemeManager.CloseButtonStyle);
-            if (e.type == EventType.MouseDown && closeButtonRect.Contains(e.mousePosition))
-            {
-                ModuleManager.showSettings = false;
-                ModuleManager.showModules = true;
-                ModuleManager.showSelectionGui = false;
-                return;
-            }
-        }
-
-        if (e.type == EventType.Layout)
-        {
-            Rect r = _settingsPositions[mod];
-            float prevHeight = r.height;
-            r.height = windowHeight;
-            if (prevHeight > 0 && Mathf.Abs(windowHeight - prevHeight) > 0.1f)
-            {
-                r.y -= (windowHeight - prevHeight) / 2f;
-            }
-            _settingsPositions[mod] = r;
-        }
-
-        bool needsScrollbar = _targetContentHeights[mod] > maxViewHeight;
-        float maxScroll = needsScrollbar ? (_targetContentHeights[mod] - maxViewHeight) : 0f;
-        float contentWidth = needsScrollbar ? windowWidth - Config.S(16f) : windowWidth;
-        float currentScroll = _settingsScrollPositions[mod].y;
-
-        Rect outRect = new(0, headerHeight, windowWidth, viewHeight);
-        if (outRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
-        {
-            currentScroll = Mathf.Clamp(currentScroll + e.delta.y * Config.ModuleManager.ScrollSensitivity, 0, maxScroll);
-            _settingsScrollPositions[mod] = new Vector2(0, currentScroll);
-            e.Use();
-        }
-
-        GUI.BeginGroup(outRect);
-        float actualHeightDrawn = DrawSettingsBody(mod, -currentScroll, contentWidth);
-        if (e.type == EventType.Repaint)
-        {
-            _targetContentHeights[mod] = actualHeightDrawn;
-        }
-
-        if (DrawSetting.OnPostDraw != null)
-        {
-            DrawSetting.OnPostDraw.Invoke();
-            DrawSetting.OnPostDraw = null;
-        }
-        GUI.EndGroup();
-
-        if (needsScrollbar)
-        {
-            DrawSettingsScrollbar(windowWidth, headerHeight, viewHeight, _targetContentHeights[mod], maxViewHeight, currentScroll, maxScroll);
-        }
-
-        GUI.DragWindow(new Rect(0, 0, windowWidth - closeBtnSize - Config.S(10f), headerHeight));
     }
 
     private static float DrawSettingsBody(Modules.Module mod, float y, float width)
@@ -1027,104 +901,5 @@ internal static class MultiSelectWindowDrawer
         GUI.Label(new Rect(btnRect.x + Config.selectButtonWidth + Config.S(5f), y, width * 0.4f, Config.elementHeight),
             '(' + Translate($"{set.SelectedValues.Count} selected") + ")", ThemeManager.SettingLabelStyle);
         GUI.contentColor = originalColor;
-    }
-}
-
-internal static class MobileInputHandler
-{
-    private static Modules.Module _pressedModule = null;
-#if ANDROID
-    private static float _pressStartTime = 0f;
-    private static Vector2 _pressStartScreenPos = Vector2.zero;
-    private static bool _hasTriggeredLongPress = false;
-    private const float LongPressThreshold = 0.40f; // 400ms hold opens settings
-#endif
-
-    public static void Reset()
-    {
-        _pressedModule = null;
-#if ANDROID
-        _hasTriggeredLongPress = false;
-#endif
-    }
-
-#if ANDROID
-    public static void OnTouchDown(Modules.Module mod, Rect windowPos, float headerHeight, Vector2 mousePos)
-    {
-        _pressedModule = mod;
-        _pressStartTime = Time.realtimeSinceStartup;
-        _pressStartScreenPos = new Vector2(windowPos.x + mousePos.x, windowPos.y + headerHeight + mousePos.y);
-        _hasTriggeredLongPress = false;
-    }
-
-    public static void OnTouchUp(Modules.Module mod)
-    {
-        if (_pressedModule == mod && !_hasTriggeredLongPress)
-        {
-            if (VanillaMode.instance.IsAllowed(mod)) mod.Toggle();
-            Reset();
-        }
-    }
-#endif
-
-    public static void Update(Event currentEvent)
-    {
-#if ANDROID
-        if (_pressedModule != null && !_hasTriggeredLongPress)
-        {
-            float moveDist = Vector2.Distance(currentEvent.mousePosition, _pressStartScreenPos);
-            if (moveDist > Config.S(22f))
-            {
-                _pressedModule = null;
-            }
-            else if (Time.realtimeSinceStartup - _pressStartTime >= LongPressThreshold)
-            {
-                _hasTriggeredLongPress = true;
-                ModuleManager.OpenModuleSettings(_pressedModule);
-                _pressedModule = null;
-                if (currentEvent.isMouse) currentEvent.Use();
-            }
-        }
-
-        if (currentEvent.type == EventType.MouseUp || currentEvent.rawType == EventType.MouseUp)
-        {
-            if (_pressedModule != null)
-            {
-                if (!_hasTriggeredLongPress)
-                {
-                    float moveDist = Vector2.Distance(currentEvent.mousePosition, _pressStartScreenPos);
-                    if (moveDist <= Config.S(22f) && VanillaMode.instance.IsAllowed(_pressedModule))
-                    {
-                        _pressedModule.Toggle();
-                    }
-                }
-                Reset();
-            }
-        }
-#endif
-    }
-}
-
-internal static class ScreenBoundaryHelper
-{
-    public static Rect Clamp(Rect rect)
-    {
-        float scaleX = (float)Screen.width / Config.NativeWidth;
-        float scaleY = (float)Screen.height / Config.NativeHeight;
-        float uniformScale = Mathf.Min(scaleX, scaleY);
-
-        // Calculate the virtual coordinate range visible inside the transformed GUI.matrix
-        float virtualWidth = Screen.width / uniformScale;
-        float virtualHeight = Screen.height / uniformScale;
-
-        float minX = -(virtualWidth - Config.NativeWidth) * 0.5f;
-        float maxX = Config.NativeWidth + ((virtualWidth - Config.NativeWidth) * 0.5f) - rect.width;
-
-        float minY = -(virtualHeight - Config.NativeHeight) * 0.5f;
-        float maxY = Config.NativeHeight + ((virtualHeight - Config.NativeHeight) * 0.5f) - rect.height;
-
-        rect.x = Mathf.Clamp(rect.x, minX, Mathf.Max(minX, maxX));
-        rect.y = Mathf.Clamp(rect.y, minY, Mathf.Max(minY, maxY));
-        return rect;
     }
 }

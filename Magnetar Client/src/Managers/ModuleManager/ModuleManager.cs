@@ -51,6 +51,8 @@ public static class ModuleManager
 
     public static void Init()
     {
+        ModuleCategory.Init();
+
         #region Register All Interal Modules
         Type[] exportedTypes;
         try

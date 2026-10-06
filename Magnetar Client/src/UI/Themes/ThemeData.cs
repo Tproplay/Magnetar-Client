@@ -1,193 +1,504 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
 
 namespace Magnetar_Client.UI.Themes;
+
+#region Nested Theme Data Contracts
+[Serializable]
+public class ColorState
+{
+    [JsonProperty("normal")]
+    public string Normal { get; set; }
+
+    [JsonProperty("hover", NullValueHandling = NullValueHandling.Ignore)]
+    public string Hover { get; set; }
+
+    [JsonProperty("active", NullValueHandling = NullValueHandling.Ignore)]
+    public string Active { get; set; }
+
+    public ColorState() { }
+    public ColorState(string normal, string hover = null, string active = null)
+    {
+        Normal = normal;
+        Hover = hover ?? normal;
+        Active = active ?? normal;
+    }
+}
+
+[Serializable]
+public class ElementStyleTheme
+{
+    [JsonProperty("text")]
+    public ColorState Text { get; set; } = new ColorState();
+
+    [JsonProperty("background color")]
+    public ColorState BackgroundColor { get; set; } = new ColorState();
+
+    public ElementStyleTheme() { }
+    public ElementStyleTheme(ColorState text, ColorState bg)
+    {
+        Text = text;
+        BackgroundColor = bg;
+    }
+}
+
+[Serializable]
+public class WindowStyleTheme
+{
+    [JsonProperty("text")]
+    public string Text { get; set; }
+
+    [JsonProperty("background color")]
+    public string BackgroundColor { get; set; }
+
+    [JsonProperty("window background", NullValueHandling = NullValueHandling.Ignore)]
+    public string WindowBackground { get; set; }
+
+    public WindowStyleTheme() { }
+    public WindowStyleTheme(string text, string bg, string windowBg = null)
+    {
+        Text = text;
+        BackgroundColor = bg;
+        WindowBackground = windowBg ?? bg;
+    }
+}
+
+[Serializable]
+public class TypographyTheme
+{
+    [JsonProperty("description")]
+    public string Description { get; set; }
+
+    [JsonProperty("label")]
+    public string Label { get; set; }
+
+    [JsonProperty("author")]
+    public string Author { get; set; }
+
+    [JsonProperty("text")]
+    public string Text { get; set; }
+
+    [JsonProperty("highlight text")]
+    public string HighlightText { get; set; }
+
+    [JsonProperty("highlight background")]
+    public string HighlightBackground { get; set; }
+
+    [JsonProperty("secondary", NullValueHandling = NullValueHandling.Ignore)]
+    public string Secondary { get; set; }
+
+    [JsonProperty("primary", NullValueHandling = NullValueHandling.Ignore)]
+    public string Primary { get => Text; set => Text = value; }
+}
+
+[Serializable]
+public class NefTheme
+{
+    [JsonProperty("line color")]
+    public string LineColor { get; set; }
+
+    [JsonProperty("node background")]
+    public string NodeBackground { get; set; }
+}
+
+[Serializable]
+public class HudTheme
+{
+    [JsonProperty("text color")]
+    public string TextColor { get; set; }
+}
+
+[Serializable]
+public class MiscTheme
+{
+    [JsonProperty("dim background")]
+    public string DimBackground { get; set; }
+
+    [JsonProperty("separator")]
+    public string Separator { get; set; }
+
+    [JsonProperty("separator text", NullValueHandling = NullValueHandling.Ignore)]
+    public string SeparatorText { get; set; }
+}
+
+[Serializable]
+public class SliderTheme
+{
+    [JsonProperty("track off", NullValueHandling = NullValueHandling.Ignore)]
+    public string TrackOff { get; set; }
+
+    [JsonProperty("track on", NullValueHandling = NullValueHandling.Ignore)]
+    public string TrackOn { get; set; }
+
+    [JsonProperty("thumb", NullValueHandling = NullValueHandling.Ignore)]
+    public string Thumb { get; set; }
+
+    [JsonProperty("thumb hover", NullValueHandling = NullValueHandling.Ignore)]
+    public string ThumbHover { get; set; }
+}
+
+[Serializable]
+public class SectionSettingTheme
+{
+    [JsonProperty("group header", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme GroupHeader { get; set; }
+
+    [JsonProperty("section header", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme SectionHeader { get; set; }
+
+    [JsonProperty("remove button", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme RemoveButton { get; set; }
+
+    [JsonProperty("add button", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme AddButton { get; set; }
+}
 
 [Serializable]
 public class ThemeDefinition
 {
+    [JsonProperty("name")]
     public string Name { get; set; } = "Magnetar Default";
 
-    // --- TopBar ---
-    public string TopBarOffBgHex { get; set; } = "#1A1A1AFF";
-    public string TopBarOffTextHex { get; set; } = "#AEAEAEFF";
-    public string TopBarActiveBgHex { get; set; } = "#FF3D3DFF";
-    public string TopBarActiveTextHex { get; set; } = "#FFFFFFFF";
+    [JsonProperty("TopBarOff")]
+    public ElementStyleTheme TopBarOff { get; set; } = new ElementStyleTheme();
 
-    // --- Category Windows ---
-    public string CategoryWindowBgHex { get; set; } = "#181818FF";
-    public string CategoryWindowTextHex { get; set; } = "#FFFFFFFF";
-    public string CategoryHeaderBgHex { get; set; } = "#222222FF";
-    public string CategoryHeaderTextHex { get; set; } = "#FFFFFFFF";
-    public string CategoryModuleOffBgHex { get; set; } = "#1E1E1EFF";
-    public string CategoryModuleOffTextHex { get; set; } = "#AEAEAEFF";
-    public string CategoryModuleOnBgHex { get; set; } = "#FF3D3DFF";
-    public string CategoryModuleOnTextHex { get; set; } = "#000000FF";
+    [JsonProperty("TopBarActive")]
+    public ElementStyleTheme TopBarActive { get; set; } = new ElementStyleTheme();
 
-    // --- Settings Window ---
-    public string SettingsWindowBgHex { get; set; } = "#181818FF";
-    public string SettingsHeaderBgHex { get; set; } = "#FF3D3DFF";
-    public string SettingsHeaderTextHex { get; set; } = "#000000FF";
-    public string CloseBtnBgHex { get; set; } = "#FF3D3DFF";
-    public string CloseBtnTextHex { get; set; } = "#000000FF";
+    [JsonProperty("CategoryHeader")]
+    public ElementStyleTheme CategoryHeader { get; set; } = new ElementStyleTheme();
 
-    // --- Setting Elements ---
-    public string SettingOffBgHex { get; set; } = "#222222FF";
-    public string SettingOffTextHex { get; set; } = "#AEAEAEFF";
-    public string SettingOnBgHex { get; set; } = "#FF3D3DFF";
-    public string SettingOnTextHex { get; set; } = "#000000FF";
+    [JsonProperty("CategoryWindow")]
+    public WindowStyleTheme CategoryWindow { get; set; } = new WindowStyleTheme();
 
-    // --- Action Buttons ---
-    public string ButtonSettingBgHex { get; set; } = "#262626FF";
-    public string ButtonSettingTextHex { get; set; } = "#FFFFFFFF";
-    public string ResetBtnBgHex { get; set; } = "#242424FF";
-    public string ResetBtnTextHex { get; set; } = "#D0D0D0FF";
-    public string ListAddBtnBgHex { get; set; } = "#FF3D3DFF";
-    public string ListAddBtnTextHex { get; set; } = "#000000FF";
-    public string ListRemoveBtnBgHex { get; set; } = "#2E1A1AFF";
-    public string ListRemoveBtnTextHex { get; set; } = "#FF6B6BFF";
+    [JsonProperty("CategoryModuleOff")]
+    public ElementStyleTheme CategoryModuleOff { get; set; } = new ElementStyleTheme();
 
-    // --- Section Settings ---
-    public string SectionGroupHeaderBgHex { get; set; } = "#1C1C1CFF";
-    public string SectionGroupHeaderTextHex { get; set; } = "#FFFFFFFF";
-    public string SectionHeaderBgHex { get; set; } = "#1E1E1EFF";
-    public string SectionHeaderTextHex { get; set; } = "#AEAEAEFF";
-    public string SectionRemoveBtnBgHex { get; set; } = "#2E1A1AFF";
-    public string SectionRemoveBtnTextHex { get; set; } = "#FF6B6BFF";
-    public string SectionAddBtnBgHex { get; set; } = "#FF3D3DFF";
-    public string SectionAddBtnTextHex { get; set; } = "#000000FF";
+    [JsonProperty("CategoryModuleOn")]
+    public ElementStyleTheme CategoryModuleOn { get; set; } = new ElementStyleTheme();
 
-    // --- Typography ---
-    public string TypographyDescriptionHex { get; set; } = "#BFBFBFFF";
-    public string TypographyLabelHex { get; set; } = "#E6E6E6FF";
-    public string TypographyAuthorHex { get; set; } = "#808080FF";
-    public string TypographyTextHex { get; set; } = "#FFFFFFFF";
-    public string TypographySecondaryHex { get; set; } = "#AEAEAEFF";
-    public string TypographyHighlightTextHex { get; set; } = "#FFFFFFFF";
-    public string TypographyHighlightBgHex { get; set; } = "#FF3D3DFF";
+    [JsonProperty("SettingsWindow")]
+    public WindowStyleTheme SettingsWindow { get; set; } = new WindowStyleTheme();
 
-    // --- NEF & HUD ---
-    public string NefLineColorHex { get; set; } = "#FFFFFFFF";
-    public string NefNodeBgHex { get; set; } = "#FF3D3DFF";
-    public string HudTextColorHex { get; set; } = "#FFFFFFFF";
+    [JsonProperty("CloseButton")]
+    public ElementStyleTheme CloseButton { get; set; } = new ElementStyleTheme();
 
-    // --- Misc & Sliders ---
-    public string DimBgHex { get; set; } = "#14141A99"; // Consistent dark veil
-    public string SeparatorHex { get; set; } = "#383838FF";
-    public string SeparatorTextHex { get; set; } = "#AEAEAEFF";
-    public string SliderTrackOffHex { get; set; } = "#22252FFF";
-    public string SliderTrackOnHex { get; set; } = "#FF3D3DFF";
-    public string SliderThumbHex { get; set; } = "#FF3D3DFF";
+    [JsonProperty("SettingOff")]
+    public ElementStyleTheme SettingOff { get; set; } = new ElementStyleTheme();
+
+    [JsonProperty("SettingOn")]
+    public ElementStyleTheme SettingOn { get; set; } = new ElementStyleTheme();
+
+    [JsonProperty("ButtonSetting", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme ButtonSetting { get; set; }
+
+    [JsonProperty("ResetButton", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme ResetButton { get; set; }
+
+    [JsonProperty("ListAddButton", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme ListAddButton { get; set; }
+
+    [JsonProperty("ListRemoveButton", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme ListRemoveButton { get; set; }
+
+    [JsonProperty("Typography")]
+    public TypographyTheme Typography { get; set; } = new TypographyTheme();
+
+    [JsonProperty("NEF")]
+    public NefTheme NEF { get; set; } = new NefTheme();
+
+    [JsonProperty("HUD")]
+    public HudTheme HUD { get; set; } = new HudTheme();
+
+    [JsonProperty("Misc")]
+    public MiscTheme Misc { get; set; } = new MiscTheme();
+
+    [JsonProperty("Slider", NullValueHandling = NullValueHandling.Ignore)]
+    public SliderTheme Slider { get; set; }
+
+    [JsonProperty("Section", NullValueHandling = NullValueHandling.Ignore)]
+    public SectionSettingTheme Section { get; set; }
 }
+#endregion
 
 public static class ThemeData
 {
-    // Resolved Runtime Colors per Style (Fully opaque panels to allow clean alpha transitions)
-    public static Color TopBarOffBg = new(0.10f, 0.10f, 0.10f, 1.0f);
-    public static Color TopBarOffText = new(0.68f, 0.68f, 0.68f, 1.0f);
-    public static Color TopBarActiveBg = new(1.0f, 0.24f, 0.24f, 1.0f);
-    public static Color TopBarActiveText = Color.white;
+    // Resolved Runtime Colors per Style
+    public static Color BackgroundColor { get; set; }
+    public static Color AccentColor { get; set; }
+    public static Color AccentHoverColor { get; set; }
+    public static Color LightBackgroundColor { get; set; }
+    public static Color TextWhite { get; set; }
+    public static Color TextDim { get; set; }
+    public static Color HoverColor { get; set; }
+    public static Color ActiveColor { get; set; }
+    public static Color DimColor { get; set; }
+    public static Color NefLineColor { get; set; }
+    public static Color NefNodeColor { get; set; }
+    public static Color SettingOnColor { get; set; }
+    public static Color SettingOffColor { get; set; }
+    public static Color SeparatorColor { get; set; }
 
-    public static Color CategoryWindowBg = new(0.09f, 0.09f, 0.09f, 1.0f);
-    public static Color CategoryWindowText = Color.white;
-    public static Color CategoryHeaderBg = new(0.13f, 0.13f, 0.13f, 1.0f);
-    public static Color CategoryHeaderText = Color.white;
-    public static Color CategoryModuleOffBg = new(0.12f, 0.12f, 0.12f, 1.0f);
-    public static Color CategoryModuleOffText = new(0.68f, 0.68f, 0.68f, 1.0f);
-    public static Color CategoryModuleOnBg = new(1.0f, 0.24f, 0.24f, 1.0f);
-    public static Color CategoryModuleOnText = Color.black;
+    // --- Hardcoded Default Theme (Safety Fallback) ---
+    public static readonly ThemeDefinition InternalDefaultTheme = new()
+    {
+        Name = "Magnetar Default",
+        TopBarOff = new ElementStyleTheme(
+            new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#1A1A1ADC", "#1C1C1CFF", "#333333FF")
+        ),
+        TopBarActive = new ElementStyleTheme(
+            new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#FF3D3DFF", "#FF3D3DFF", "#FF3D3DFF")
+        ),
+        CategoryHeader = new ElementStyleTheme(
+            new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#1A1A1ADC", "#1C1C1CFF", "#333333FF")
+        ),
+        CategoryWindow = new WindowStyleTheme("#FFFFFFFF", "#1A1A1ADC"),
+        CategoryModuleOff = new ElementStyleTheme(
+            new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#1C1C1CD6", "#1C1C1CFF", "#1C1C1CFF")
+        ),
+        CategoryModuleOn = new ElementStyleTheme(
+            new ColorState("#000000FF", "#000000FF", "#000000FF"),
+            new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+        ),
+        CloseButton = new ElementStyleTheme(
+            new ColorState("#000000FF", "#000000FF", "#000000FF"),
+            new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+        ),
+        SettingsWindow = new WindowStyleTheme("#000000FF", "#FF3D3DFF", "#1A1A1AEE"),
+        SettingOff = new ElementStyleTheme(
+            new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#242424DC", "#333333FF", "#1C1C1CFF")
+        ),
+        SettingOn = new ElementStyleTheme(
+            new ColorState("#000000FF", "#000000FF", "#000000FF"),
+            new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+        ),
+        ButtonSetting = new ElementStyleTheme(
+            new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#2A2A2ADD", "#3A3A3AFF", "#222222FF")
+        ),
+        ResetButton = new ElementStyleTheme(
+            new ColorState("#D0D0D0FF", "#FFFFFFFF", "#FF5555FF"),
+            new ColorState("#242424DC", "#333333FF", "#1C1C1CFF")
+        ),
+        ListAddButton = new ElementStyleTheme(
+            new ColorState("#000000FF", "#000000FF", "#000000FF"),
+            new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+        ),
+        ListRemoveButton = new ElementStyleTheme(
+            new ColorState("#FF6B6BFF", "#FF8E8EFF", "#FF3D3DFF"),
+            new ColorState("#2B1818DC", "#3D1E1EFF", "#201212FF")
+        ),
+        Section = new SectionSettingTheme
+        {
+            GroupHeader = new ElementStyleTheme(
+                new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+                new ColorState("#1A1A1ADC", "#242424FF", "#181818FF")
+            ),
+            SectionHeader = new ElementStyleTheme(
+                new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
+                new ColorState("#1C1C1CD6", "#2A2A2AFF", "#161616FF")
+            ),
+            RemoveButton = new ElementStyleTheme(
+                new ColorState("#FF6B6BFF", "#FF8E8EFF", "#FF3D3DFF"),
+                new ColorState("#2B1818DC", "#3D1E1EFF", "#201212FF")
+            ),
+            AddButton = new ElementStyleTheme(
+                new ColorState("#000000FF", "#000000FF", "#000000FF"),
+                new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+            )
+        },
+        Typography = new TypographyTheme
+        {
+            Description = "#BFBFBFFF",
+            Label = "#E6E6E6FF",
+            Author = "#808080FF",
+            Text = "#FFFFFFFF",
+            Secondary = "#FFFFFFFF",
+            HighlightText = "#FFFFFFFF",
+            HighlightBackground = "#FF3D3DFF"
+        },
+        NEF = new NefTheme
+        {
+            LineColor = "#FFFFFFFF",
+            NodeBackground = "#FF3D3DFF"
+        },
+        HUD = new HudTheme
+        {
+            TextColor = "#FFFFFFFF"
+        },
+        Misc = new MiscTheme
+        {
+            DimBackground = "#1A1A1A66",
+            Separator = "#FFFFFFFF",
+            SeparatorText = "#FFFFFFFF"
+        },
+        Slider = new SliderTheme
+        {
+            TrackOff = "#22252FFF",
+            TrackOn = "#FF3D3DFF",
+            Thumb = "#FF3D3DFF",
+            ThumbHover = "#FF3D3DFF"
+        }
+    };
 
-    public static Color SettingsWindowBg = new(0.09f, 0.09f, 0.09f, 1.0f);
-    public static Color SettingsHeaderBg = new(1.0f, 0.24f, 0.24f, 1.0f);
-    public static Color SettingsHeaderText = Color.black;
-    public static Color CloseBtnBg = new(1.0f, 0.24f, 0.24f, 1.0f);
-    public static Color CloseBtnText = Color.black;
+    // --- Hardcoded Template for Meteor Purple (Dumped to Disk) ---
+    public static readonly ThemeDefinition MeteorPurpleTemplate = new()
+    {
+        Name = "Meteor Purple",
+        TopBarOff = new ElementStyleTheme(
+            new ColorState("#e8e8e8", "#e8e8e8", "#e8e8e8"),
+            new ColorState("#11141b94", "#131721ca", "#131721ca")
+        ),
+        TopBarActive = new ElementStyleTheme(
+            new ColorState("#e8e8e8", "#e8e8e8", "#e8e8e8"),
+            new ColorState("#131721ca", "#131721ca", "#131721ca")
+        ),
+        CategoryHeader = new ElementStyleTheme(
+            new ColorState("#E6EDF3FF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#7d00f1", "#9a2eff", "#9a2eff")
+        ),
+        CategoryWindow = new WindowStyleTheme("#FFFFFFFF", "#100c14c0"),
+        CategoryModuleOff = new ElementStyleTheme(
+            new ColorState("#8B949EFF", "#e6e6e6ea", "#e6e6e6ea"),
+            new ColorState("#00000000", "#22142594", "#22142594")
+        ),
+        CategoryModuleOn = new ElementStyleTheme(
+            new ColorState("#8B949EFF", "#e6e6e6ea", "#e6e6e6ea"),
+            new ColorState("#22142594", "#22142594", "#22142594")
+        ),
+        CloseButton = new ElementStyleTheme(
+            new ColorState("#000000FF", "#000000FF", "#000000FF"),
+            new ColorState("#7d00f1", "#A855F7FF", "#A855F7FF")
+        ),
+        SettingsWindow = new WindowStyleTheme("#FFFFFFFF", "#7d00f1", "#11141bb6"),
+        SettingOff = new ElementStyleTheme(
+            new ColorState("#8B949EFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#02010271", "#0000009d", "#0000009d")
+        ),
+        SettingOn = new ElementStyleTheme(
+            new ColorState("#000000FF", "#000000FF", "#000000FF"),
+            new ColorState("#8B0FFFFF", "#992cff", "#8B0FFFFF")
+        ),
+        ButtonSetting = new ElementStyleTheme(
+            new ColorState("#FFFFFFFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#2A123DCC", "#441D63FF", "#1F0A2FFF")
+        ),
+        ResetButton = new ElementStyleTheme(
+            new ColorState("#D4C2F0FF", "#FFFFFFFF", "#A855F7FF"),
+            new ColorState("#1D1226CC", "#2C173DFF", "#150B1EFF")
+        ),
+        ListAddButton = new ElementStyleTheme(
+            new ColorState("#E6EDF3FF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#1E1128CC", "#2F1940FF", "#140A1CFF")
+        ),
+        ListRemoveButton = new ElementStyleTheme(
+            new ColorState("#FF77BCFF", "#FFA6D2FF", "#E11D48FF"),
+            new ColorState("#2D1022CC", "#4A1835FF", "#1F0A17FF")
+        ),
+        Section = new SectionSettingTheme
+        {
+            GroupHeader = new ElementStyleTheme(
+                new ColorState("#E6EDF3FF", "#FFFFFFFF", "#FFFFFFFF"),
+                new ColorState("#7d00f1", "#9a2eff", "#9a2eff")
+            ),
+            SectionHeader = new ElementStyleTheme(
+                new ColorState("#8B949EFF", "#e6e6e6ea", "#e6e6e6ea"),
+                new ColorState("#1D1226CC", "#2C173DFF", "#22142594")
+            ),
+            RemoveButton = new ElementStyleTheme(
+                new ColorState("#FF77BCFF", "#FFA6D2FF", "#E11D48FF"),
+                new ColorState("#2D1022CC", "#4A1835FF", "#1F0A17FF")
+            ),
+            AddButton = new ElementStyleTheme(
+                new ColorState("#000000FF", "#000000FF", "#000000FF"),
+                new ColorState("#8B0FFFFF", "#992cff", "#8B0FFFFF")
+            )
+        },
+        Typography = new TypographyTheme
+        {
+            Description = "#ec45ff",
+            Label = "#E6E6E6FF",
+            Author = "#808080FF",
+            Text = "#E6EDF3FF",
+            Secondary = "#8B949EFF",
+            HighlightText = "#FFFFFFFF",
+            HighlightBackground = "#203e6ec4"
+        },
+        NEF = new NefTheme
+        {
+            LineColor = "#FFFFFFFF",
+            NodeBackground = "#8B0FFFFF"
+        },
+        HUD = new HudTheme
+        {
+            TextColor = "#FFFFFFFF"
+        },
+        Misc = new MiscTheme
+        {
+            DimBackground = "#1a1a1a5c",
+            Separator = "#ffffff",
+            SeparatorText = "#ffffff"
+        },
+        Slider = new SliderTheme
+        {
+            TrackOff = "#1D212BFF",
+            TrackOn = "#00ff9d",
+            Thumb = "#00ff9d",
+            ThumbHover = "#00ff9d"
+        }
+    };
 
-    public static Color SettingOffBg = new(0.13f, 0.13f, 0.13f, 1.0f);
-    public static Color SettingOffText = new(0.68f, 0.68f, 0.68f, 1.0f);
-    public static Color SettingOnBg = new(1.0f, 0.24f, 0.24f, 1.0f);
-    public static Color SettingOnText = Color.black;
-
-    public static Color ButtonSettingBg = new(0.15f, 0.15f, 0.15f, 1.0f);
-    public static Color ButtonSettingText = Color.white;
-    public static Color ResetBtnBg = new(0.14f, 0.14f, 0.14f, 1.0f);
-    public static Color ResetBtnText = new(0.82f, 0.82f, 0.82f, 1.0f);
-    public static Color ListAddBtnBg = new(1.0f, 0.24f, 0.24f, 1.0f);
-    public static Color ListAddBtnText = Color.black;
-    public static Color ListRemoveBtnBg = new(0.18f, 0.10f, 0.10f, 1.0f);
-    public static Color ListRemoveBtnText = new(1.0f, 0.42f, 0.42f, 1.0f);
-
-    public static Color SectionGroupHeaderBg = new(0.11f, 0.11f, 0.11f, 1.0f);
-    public static Color SectionGroupHeaderText = Color.white;
-    public static Color SectionHeaderBg = new(0.12f, 0.12f, 0.12f, 1.0f);
-    public static Color SectionHeaderText = new(0.68f, 0.68f, 0.68f, 1.0f);
-    public static Color SectionRemoveBtnBg = new(0.18f, 0.10f, 0.10f, 1.0f);
-    public static Color SectionRemoveBtnText = new(1.0f, 0.42f, 0.42f, 1.0f);
-    public static Color SectionAddBtnBg = new(1.0f, 0.24f, 0.24f, 1.0f);
-    public static Color SectionAddBtnText = Color.black;
-
-    public static Color TypographyDescription = new(0.75f, 0.75f, 0.75f, 1.0f);
-    public static Color TypographyLabel = new(0.90f, 0.90f, 0.90f, 1.0f);
-    public static Color TypographyAuthor = new(0.50f, 0.50f, 0.50f, 1.0f);
-    public static Color TypographyText = Color.white;
-    public static Color TypographySecondary = new(0.68f, 0.68f, 0.68f, 1.0f);
-    public static Color TypographyHighlightText = Color.white;
-    public static Color TypographyHighlightBg = new(1.0f, 0.24f, 0.24f, 1.0f);
-
-    public static Color NefLineColor = Color.white;
-    public static Color NefNodeBg = new(1.0f, 0.24f, 0.24f, 1.0f);
-    public static Color HudTextColor = Color.white;
-
-    // Overlay remains the sole translucent texture
-    public static Color DimBg = new(0.08f, 0.08f, 0.10f, 0.60f);
-    public static Color Separator = new(0.22f, 0.22f, 0.22f, 1.0f);
-    public static Color SeparatorText = new(0.68f, 0.68f, 0.68f, 1.0f);
-    public static Color SliderTrackOff = new(0.13f, 0.15f, 0.18f, 1.0f);
-    public static Color SliderTrackOn = new(1.0f, 0.24f, 0.24f, 1.0f);
-    public static Color SliderThumb = new(1.0f, 0.24f, 0.24f, 1.0f);
-
-    // Default Fallback Template
-    public static readonly ThemeDefinition InternalDefaultTheme = new();
-
-    // Procedural Solid Textures per Style
-    public static Texture2D TopBarOffBgTex;
-    public static Texture2D TopBarActiveBgTex;
-    public static Texture2D CategoryWindowBgTex;
-    public static Texture2D CategoryHeaderBgTex;
-    public static Texture2D CategoryModuleOffBgTex;
-    public static Texture2D CategoryModuleOnBgTex;
-    public static Texture2D SettingsWindowBgTex;
-    public static Texture2D SettingsHeaderBgTex;
-    public static Texture2D CloseBtnBgTex;
-    public static Texture2D SettingOffBgTex;
-    public static Texture2D SettingOnBgTex;
-    public static Texture2D ButtonSettingBgTex;
-    public static Texture2D ResetBtnBgTex;
-    public static Texture2D ListAddBtnBgTex;
-    public static Texture2D ListRemoveBtnBgTex;
-    public static Texture2D SectionGroupHeaderBgTex;
-    public static Texture2D SectionHeaderBgTex;
-    public static Texture2D SectionRemoveBtnBgTex;
-    public static Texture2D SectionAddBtnBgTex;
-    public static Texture2D HighlightBgTex;
-    public static Texture2D NefLineTex;
-    public static Texture2D NefNodeTex;
-    public static Texture2D DimBgTex;
-    public static Texture2D SeparatorTex;
-    public static Texture2D SliderTrackOffTex;
-    public static Texture2D SliderTrackOnTex;
-    public static Texture2D SliderThumbTex;
-
-    // Registry of loaded themes
     public static readonly Dictionary<string, ThemeDefinition> LoadedThemes = new(StringComparer.OrdinalIgnoreCase);
 
-    public static Texture2D Create1x1Tex(Color color)
+    #region Color Parsing & Texture Cache Helpers
+    public static (Color normal, Color hover, Color active) ResolveState(ColorState state, ColorState fallback)
     {
-        Texture2D tex = new(1, 1, TextureFormat.RGBA32, false);
-        tex.SetPixel(0, 0, color);
-        tex.Apply();
-        return tex;
+        string normHex = !string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Normal;
+        string hovHex = !string.IsNullOrEmpty(state?.Hover) ? state.Hover : (!string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Hover);
+        string actHex = !string.IsNullOrEmpty(state?.Active) ? state.Active : (!string.IsNullOrEmpty(state?.Normal) ? state.Normal : fallback?.Active);
+
+        Color normal = ParseColor(normHex, fallback?.Normal ?? "#FFFFFFFF");
+        Color hover = ParseColor(hovHex, fallback?.Hover ?? normHex);
+        Color active = ParseColor(actHex, fallback?.Active ?? normHex);
+
+        return (normal, hover, active);
+    }
+
+    public static Color ParseColor(string hex, string defaultHex)
+    {
+        if (!string.IsNullOrEmpty(hex) && ColorUtility.TryParseHtmlString(hex, out Color col))
+            return col;
+
+        ColorUtility.TryParseHtmlString(defaultHex, out Color defCol);
+        return defCol;
+    }
+
+    private static readonly Dictionary<Color, Texture2D> _texCache = new();
+
+    public static Texture2D GetTex(Color col)
+    {
+        if (_texCache.TryGetValue(col, out var tex) && tex != null)
+            return tex;
+
+        Texture2D newTex = new(2, 2, TextureFormat.RGBA32, false)
+        {
+            filterMode = FilterMode.Point,
+            wrapMode = TextureWrapMode.Repeat,
+            hideFlags = HideFlags.DontSave
+        };
+        Color[] pixels = new Color[4] { col, col, col, col };
+        newTex.SetPixels(pixels);
+        newTex.Apply(false, false);
+
+        _texCache[col] = newTex;
+        return newTex;
     }
 
     private static readonly Dictionary<string, Texture2D> _circleTextureCache = new();
@@ -201,7 +512,8 @@ public static class ThemeData
         Texture2D tex = new(size, size, TextureFormat.RGBA32, false)
         {
             filterMode = FilterMode.Bilinear,
-            wrapMode = TextureWrapMode.Clamp
+            wrapMode = TextureWrapMode.Clamp,
+            hideFlags = HideFlags.DontSave
         };
 
         float center = (size - 1) / 2f;
@@ -214,12 +526,14 @@ public static class ThemeData
             {
                 float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
                 float alpha = Mathf.Clamp01((radius - dist) / edgeThickness);
-                tex.SetPixel(x, y, new Color(color.r, color.g, color.b, color.a * alpha));
+                Color pixelColor = new(color.r, color.g, color.b, color.a * alpha);
+                tex.SetPixel(x, y, pixelColor);
             }
         }
 
-        tex.Apply(false);
+        tex.Apply(false, false);
         _circleTextureCache[key] = tex;
         return tex;
     }
+    #endregion
 }

@@ -119,23 +119,23 @@ public class NoGridItem : Module
 
         CreateCategory("General");
 
-        selectedGridItems = new MultiSelectSetting("Grid Items")
+        selectedGridItems = new MultiSelectSetting("Grid Items", typeof(GridItemType))
         {
             CustomNames = TranslatedNames(typeof(GridItemType))
         };
-        Settings.Add(selectedGridItems);
+        AddSettings(selectedGridItems);
 
         EndCategory();
         CreateCategory("Extra");
 
         AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
-        Settings.Add(AutoTurnOff);
+        AddSettings(AutoTurnOff);
 
-        EndCategory();
 #if MELONLOADER || BEPINEX
         DebugMode = new BoolSetting("Debug Mode", false);
-        Settings.Add(DebugMode);
+        AddSettings(DebugMode);
 #endif
+        EndCategory();
     }
 
     public override void OnLanguageChanged()

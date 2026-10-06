@@ -17,6 +17,19 @@ public abstract class Setting
 
     public static bool DrawResetButton(Rect rect)
     {
-        return GUI.Button(rect, ResetSymbol, ThemeManager.ResetButtonStyle);
+        Event e = Event.current;
+        bool isHovered = rect.Contains(e.mousePosition);
+
+        // Draw visuals without standard GUI.Button state capture
+        GUI.Box(rect, ResetSymbol, ThemeManager.ResetButtonStyle);
+
+        // Manual click detection
+        if (isHovered && e.type == EventType.MouseDown && e.button == 0)
+        {
+            e.Use();
+            return true;
+        }
+
+        return false;
     }
 }

@@ -5,6 +5,8 @@ using UnityEngine;
 using Magnetar_Client.Core;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.Utils;
+using Harmony;
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -20,40 +22,58 @@ public class ModuleCategory : IEquatable<ModuleCategory>
 
     public static IReadOnlyList<ModuleCategory> AllCategories => _allCategories;
 
-
-    // built-in categories
-    public static readonly ModuleCategory Level = RegisterInternal("Level");
-    public static readonly ModuleCategory Tools = RegisterInternal("Tools");
-    public static readonly ModuleCategory Plant = RegisterInternal("Plant");
-    public static readonly ModuleCategory Zombie = RegisterInternal("Zombie");
-    public static readonly ModuleCategory Misc = RegisterInternal("Misc");
-    public static readonly ModuleCategory Visual = RegisterInternal("Visual");
+    // --- Built-in Categories registered upfront in your designated order ---
+    public static readonly ModuleCategory Level = RegisterInternal("Level", 10);
+    public static readonly ModuleCategory Tools = RegisterInternal("Tools", 20);
+    public static readonly ModuleCategory Plant = RegisterInternal("Plant", 30);
+    public static readonly ModuleCategory Zombie = RegisterInternal("Zombie", 40);
+    public static readonly ModuleCategory Misc = RegisterInternal("Misc", 50);
+    public static readonly ModuleCategory Visual = RegisterInternal("Visual", 60);
 
     // Instance variables
     public int Id { get; }
     public string Name { get; }
     public bool IsCustom { get; }
+    public int DisplayOrder { get; set; }
 
-    private ModuleCategory(string name, int id, bool isCustom)
+    private ModuleCategory(string name, int id, bool isCustom, int displayOrder = 100)
     {
         Name = name;
         Id = id;
         IsCustom = isCustom;
+        DisplayOrder = displayOrder;
     }
 
-    private static ModuleCategory RegisterInternal(string name)
+    private static ModuleCategory RegisterInternal(string name, int displayOrder)
     {
-        if (_registeredCategories.TryGetValue(name, out var existing)) return existing;
-        var cat = new ModuleCategory(name, _nextId++, false);
+        if (_registeredCategories.TryGetValue(name, out var existing))
+            return existing;
+
+        var cat = new ModuleCategory(name, _nextId++, false, displayOrder);
         _registeredCategories[name] = cat;
         _allCategories.Add(cat);
         return cat;
     }
 
     /// <summary>
+    /// Explicitly initializes and registers the built-in categories so they exist
+    /// and occupy layout slots before any module accesses or assigns them.
+    /// </summary>
+    public static void Init()
+    {
+        // Forces static constructor execution to ensure built-ins are populated
+        _ = Level;
+        _ = Tools;
+        _ = Plant;
+        _ = Zombie;
+        _ = Misc;
+        _ = Visual;
+    }
+
+    /// <summary>
     /// Registers a new category or returns an existing one if already registered.
     /// </summary>
-    public static ModuleCategory Register(string name)
+    public static ModuleCategory Register(string name, int displayOrder = 100)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Category name cannot be null or empty.", nameof(name));
@@ -62,7 +82,7 @@ public class ModuleCategory : IEquatable<ModuleCategory>
         if (_registeredCategories.TryGetValue(cleanName, out var existing))
             return existing;
 
-        var cat = new ModuleCategory(cleanName, _nextId++, true);
+        var cat = new ModuleCategory(cleanName, _nextId++, true, displayOrder);
         _registeredCategories[cleanName] = cat;
         _allCategories.Add(cat);
 
@@ -90,40 +110,27 @@ public class ModuleCategory : IEquatable<ModuleCategory>
     }
 
     // --- Query Methods ---
-
-    /// <summary>
-    /// Returns all registered modules belonging to this category.
-    /// </summary>
-    public List<Module> GetAllModules()
+    public List<Modules.Module> GetAllModules()
     {
         return ModuleManager.Modules.Where(m => m.Category == this).ToList();
     }
 
-    /// <summary>
-    /// Finds the first module in this category matching the given module name.
-    /// </summary>
-    public Module Find(string moduleName)
+    public Modules.Module Find(string moduleName)
     {
         if (string.IsNullOrEmpty(moduleName)) return null;
         return ModuleManager.Modules.FirstOrDefault(m =>
             m.Category == this && string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
     }
 
-    /// <summary>
-    /// Finds the first module in this category matching a predicate.
-    /// </summary>
-    public Module Find(Predicate<Module> match)
+    public Modules.Module Find(Predicate<Modules.Module> match)
     {
         if (match == null) return null;
         return ModuleManager.Modules.FirstOrDefault(m => m.Category == this && match(m));
     }
 
-    /// <summary>
-    /// Finds all modules in this category matching a predicate.
-    /// </summary>
-    public List<Module> FindAll(Predicate<Module> match)
+    public List<Modules.Module> FindAll(Predicate<Modules.Module> match)
     {
-        if (match == null) return new List<Module>();
+        if (match == null) return new List<Modules.Module>();
         return ModuleManager.Modules.Where(m => m.Category == this && match(m)).ToList();
     }
 

@@ -149,7 +149,7 @@ public static class TopBar
         foreach (TabType tab in TabType.AllTabs)
         {
             string translated = Translate(tab.Name);
-            float btnWidth = Mathf.Max(translated.Length * 12f, 50f);
+            float btnWidth = Mathf.Max(translated.Length * 13f, 50f);
 
             Order.Add(tab);
             BaseWidth[tab] = btnWidth;

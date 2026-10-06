@@ -156,19 +156,8 @@ public static class HUDManager
 
     public static void RenderDimBackground()
     {
-        if (!Config.dimBg) return;
-
-        // When in forceShow OR when we just exited layout mode, force alpha to 1.0f solid
-        float currentAlpha;
-        if (forceShow || _suppressNextTransition)
-        {
-            currentAlpha = 1.0f;
-        }
-        else
-        {
-            currentAlpha = UIAnimationHelper.FadeProgress;
-        }
-
+        // Render as long as the alpha is above threshold so it smoothly fades out
+        float currentAlpha = forceShow ? 1.0f : UIAnimationHelper.CurrentEasedDimAlpha;
         if (currentAlpha <= 0.001f) return;
 
         Event e = Event.current;

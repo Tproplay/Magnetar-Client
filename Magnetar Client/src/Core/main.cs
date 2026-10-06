@@ -123,26 +123,30 @@ public class Main
         ServiceRegistry.UpdateAll();
 
         #region Handle Escape
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Config.showgui)
         {
-            if (SafeToCloseManager.TryInterceptEscape())
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
-                Input.ResetInputAxes();
-                return;
-            }
+                if (SafeToCloseManager.TryInterceptEscape())
+                {
+                    Input.ResetInputAxes();
+                    return;
+                }
 
-            if (SafeToClose)
-            {
-                Config.showgui = false;
-                SaveLoad.Save();
-                ResetInputBind();
-                Input.ResetInputAxes();
-            }
-            else
-            {
-                ResetInputBind();
+                if (SafeToClose)
+                {
+                    Config.showgui = false;
+                    SaveLoad.Save();
+                    ResetInputBind();
+                    Input.ResetInputAxes();
+                }
+                else
+                {
+                    ResetInputBind();
+                }
             }
         }
+        
         #endregion
 
         if (Config.showgui) LockUI.BlockSKeysPatch.BlockKeys = true;

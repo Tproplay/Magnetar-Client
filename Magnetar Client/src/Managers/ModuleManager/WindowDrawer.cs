@@ -36,10 +36,21 @@ internal static class CategoryWindowDrawer
 
     public static void InitializeLayout()
     {
-        int index = 0;
-        foreach (var cat in ModuleCategory.AllCategories)
+        // Clear any previous positions before laying out afresh
+        WindowPositions.Clear();
+        CategoryFolded.Clear();
+        CategoryScrollPositions.Clear();
+
+        // 1. Sort all registered categories by DisplayOrder, then by Name
+        var sortedCategories = ModuleCategory.AllCategories
+            .OrderBy(c => c.DisplayOrder)
+            .ThenBy(c => c.Name)
+            .ToList();
+
+        // 2. Initialize each category at its explicit deterministic column index
+        for (int index = 0; index < sortedCategories.Count; index++)
         {
-            EnsureCategoryInitialized(cat, index++);
+            EnsureCategoryInitialized(sortedCategories[index], index);
         }
     }
 
@@ -47,8 +58,28 @@ internal static class CategoryWindowDrawer
     {
         if (cat == null || WindowPositions.ContainsKey(cat)) return;
 
-        int index = indexHint ?? WindowPositions.Count;
-        float initX = Config.S(20f) + (index * (Config.ModuleWindowWidth + Config.S(10f)));
+        int index;
+        if (indexHint.HasValue)
+        {
+            index = indexHint.Value;
+        }
+        else
+        {
+            // Sort against the master list to guarantee distinct horizontal placement
+            var sortedCategories = ModuleCategory.AllCategories
+                .OrderBy(c => c.DisplayOrder)
+                .ThenBy(c => c.Name)
+                .ToList();
+
+            index = sortedCategories.IndexOf(cat);
+            if (index < 0) index = WindowPositions.Count;
+        }
+
+        // Horizontal spacing: start at margin + index * (windowWidth + gap)
+        float startX = Config.S(20f);
+        float columnStep = Config.ModuleWindowWidth + Config.S(10f);
+        float initX = startX + (index * columnStep);
+
         float initY = Config.S(50f);
         float w = Config.ModuleWindowWidth;
         float h = Config.S(50f);

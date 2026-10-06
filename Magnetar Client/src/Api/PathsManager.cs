@@ -188,4 +188,12 @@ public static class PathsManager
         if (!Directory.Exists(DataDir)) Directory.CreateDirectory(DataDir);
         return Path.Combine(DataDir, "TextureData.json");
     }
+
+    public static string ThemesDir => GetSafeThemesDir();
+    static string GetSafeThemesDir()
+    {
+        var path = Path.Combine(ModsDir, "Magnetar Data", "Themes");
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+        return path;
+    }
 }

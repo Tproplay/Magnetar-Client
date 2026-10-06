@@ -5,16 +5,15 @@ namespace Magnetar_Client.UI;
 public static class UIAnimationHelper
 {
     public static float FadeProgress { get; private set; } = 0f;
-    public static float FadeSpeed { get; set; } = 5.0f; // Adjusted for a smoother, natural cadence (~200ms)
+    public static float FadeSpeed { get; set; } = 5.0f;
 
-    // Sub-window transition progress (0.0: Fully Switched/Settled)
     public static float SubWindowAlpha { get; private set; } = 1f;
     private static float _targetSubAlpha = 1f;
 
-    /// <summary>
-    /// Cubic ease-out calculation: 1 - (1 - t)^3
-    /// Starts fast and glides smoothly into final opacity without a sudden snap.
-    /// </summary>
+    // Dedicated smooth alpha for background dimming
+    public static float DimAlpha { get; private set; } = 0f;
+    public static float DimFadeSpeed { get; set; } = 6.0f;
+
     public static float EaseOutCubic(float t)
     {
         t = Mathf.Clamp01(t);
@@ -22,10 +21,8 @@ public static class UIAnimationHelper
         return 1f - (inv * inv * inv);
     }
 
-    /// <summary>
-    /// Evaluated alpha for menu windows and backgrounds using non-linear easing.
-    /// </summary>
     public static float CurrentEasedAlpha => EaseOutCubic(FadeProgress);
+    public static float CurrentEasedDimAlpha => EaseOutCubic(DimAlpha);
 
     public static void UpdateTransition()
     {
@@ -34,24 +31,25 @@ public static class UIAnimationHelper
 
         // Sub-modal fade transition
         SubWindowAlpha = Mathf.MoveTowards(SubWindowAlpha, _targetSubAlpha, Time.unscaledDeltaTime * 7.5f);
+
+        // Target for dimmed background: full opacity if dimBg is on and menu/layout is active
+        float dimTarget = (Config.dimBg && (Config.showgui || Core.HUDManager.forceShow)) ? 1f : 0f;
+        DimAlpha = Mathf.MoveTowards(DimAlpha, dimTarget, Time.unscaledDeltaTime * DimFadeSpeed);
     }
 
     public static void TriggerSubWindowTransition()
     {
-        SubWindowAlpha = 0.25f; // Soft dip instead of an empty black flash
+        SubWindowAlpha = 0.25f;
         _targetSubAlpha = 1f;
     }
 
-    public static bool ShouldRenderGUI => Config.showgui || FadeProgress > 0.001f;
-
-    /// <summary>
-    /// Instantly forces full visibility to prevent single-frame blackouts 
-    /// during internal state handoffs (such as exiting HUD edit layout mode).
-    /// </summary>
     public static void SnapToVisible()
     {
         FadeProgress = 1f;
         SubWindowAlpha = 1f;
         _targetSubAlpha = 1f;
+        if (Config.dimBg) DimAlpha = 1f;
     }
+
+    public static bool ShouldRenderGUI => Config.showgui || FadeProgress > 0.001f;
 }

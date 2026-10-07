@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-namespace Magnetar_Client.Core;
+namespace Magnetar_Client.Core.ModuleManager_;
 
-internal static class MobileInputHandler
+public static class MobileInputHandler
 {
     private static Modules.Module _pressedModule = null;
 #if ANDROID
@@ -77,7 +77,7 @@ internal static class MobileInputHandler
     }
 }
 
-internal static class ScreenBoundaryHelper
+public static class ScreenBoundaryHelper
 {
     public static Rect Clamp(Rect rect)
     {

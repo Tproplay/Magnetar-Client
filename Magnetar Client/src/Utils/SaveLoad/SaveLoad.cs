@@ -1,4 +1,5 @@
-﻿using Magnetar_Client.Core;
+﻿using Magnetar_Client.Api;
+using Magnetar_Client.Core;
 using Magnetar_Client.Modules;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
@@ -7,10 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using static Magnetar_Client.Api.MagnetarApi;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Utils.SaveLoadData;
-using static Magnetar_Client.Api.MagnetarApi;
-using Magnetar_Client.Api;
+using Magnetar_Client.Core.HUDManager_;
 
 namespace Magnetar_Client.Utils;
 

@@ -1,9 +1,9 @@
-﻿using System;
-using Magnetar_Client.Core;
+﻿using Magnetar_Client.Core;
 using Magnetar_Client.HUDElements;
 using Magnetar_Client.Modules;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.Utils;
+using System;
 
 namespace Magnetar_Client.Api;
 
@@ -86,6 +86,6 @@ public static class MagnetarApi
         Magnetar_Logger.DebugLogger.Error(msg);
     }
 
-    public static void RegisterElement<T>() where T : HudElement => Magnetar_Client.Core.HUDRenderer.RegisterElement(typeof(T));
+    public static void RegisterElement<T>() where T : HudElement => Magnetar_Client.Core.HUDManager_.HUDRenderer.RegisterElement(typeof(T));
 
 }

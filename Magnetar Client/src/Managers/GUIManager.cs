@@ -17,15 +17,16 @@ namespace Magnetar_Client.Core;
 
 public static class GUIManager
 {
-    public static bool isSelectingSubWindow = false;
+    public const string Group = "GUI";
+    public const string ViewMain = "Controls";
+    public const string ViewSelector = "Selector";
+
+    public static bool isSelectingSubWindow => UIAnimationHelper.GetViewAlpha(Group, ViewSelector) > 0.001f;
 
     public static MultiSelectSetting LanguageSetting { get; } = new("Language")
     {
         MaxSelection = 1,
-        Options = new Dictionary<int, string>
-        {
-            { 0, "English" }
-        },
+        Options = new Dictionary<int, string> { { 0, "English" } },
         CustomNames = new Dictionary<int, string>()
     };
 
@@ -86,12 +87,15 @@ public static class GUIManager
 
     public static void OnClose()
     {
-        isSelectingSubWindow = false;
+        UIAnimationHelper.SwitchView(Group, ViewMain);
         DrawSetting.activeMultiSelect = null;
     }
 
     public static void Init()
     {
+        UIAnimationHelper.SetViewImmediate(Group, ViewMain, 1.0f);
+        UIAnimationHelper.SetViewImmediate(Group, ViewSelector, 0.0f);
+
         try
         {
             var languageDirs = Directory.GetDirectories(TranslationRootDir);
@@ -124,14 +128,11 @@ public static class GUIManager
         if (Config.GUIScale <= 0.1f) Config.GUIScale = 1.0f;
         if (Config.ElementScale <= 0.1f) Config.ElementScale = 1.0f;
 
-        // Register to centralized ServiceRegistry and SafeToCloseManager
         ServiceRegistry.Register(new GUIManagerService());
 
-        // SAFE-TO-CLOSE GUARD: Block GUI closure if in sub-window or manipulating inputs
         SafeToCloseManager.RegisterGuard(() =>
         {
-            if (isSelectingSubWindow)
-                return false;
+            if (isSelectingSubWindow) return false;
 
             if (Config.CurrentTab == TabType.GUI)
             {
@@ -142,33 +143,8 @@ public static class GUIManager
             return true;
         });
 
-        // ESCAPE INTERCEPTOR: Back out of language/theme selection without closing the mod menu
-        SafeToCloseManager.RegisterInterceptor(() =>
-        {
-            if (isSelectingSubWindow)
-            {
-                OnClose();
-                Main.ResetInputBind();
-                UIAnimationHelper.TriggerSubWindowTransition();
-                Input.ResetInputAxes();
-                return true;
-            }
-
-            if (Config.CurrentTab == TabType.GUI)
-            {
-                if (DrawSetting.activeSliderId != -1 || DrawSetting.activeDropdownId != -1 || DrawSetting.activeTextFieldId != -1)
-                {
-                    Main.ResetInputBind();
-                    Input.ResetInputAxes();
-                    return true;
-                }
-            }
-
-            return false;
-        });
-
-        Api.Actions.Core.OnGUIShow += Render;
-        Api.Actions.Core.OnWarmUp += Render;
+        Api.Actions.OnGUIShow += Render;
+        Api.Actions.OnWarmUp += Render;
     }
 
     public static void RefreshThemeOptions()
@@ -211,12 +187,10 @@ public static class GUIManager
 
         Event e = Event.current;
 
-        // Immediate Escape consumption inside IMGUI pass as well
         if (isSelectingSubWindow && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
         {
             OnClose();
             Main.ResetInputBind();
-            UIAnimationHelper.TriggerSubWindowTransition();
             Input.ResetInputAxes();
             e.Use();
             return;
@@ -231,25 +205,15 @@ public static class GUIManager
 
         GUIStyle windowBgStyle = ThemeManager.SettingsWndowBgStyle ?? ThemeManager.SettingsWndowStyle;
 
-        if (isSelectingSubWindow)
+        // Render both views if their alpha is active
+        if (UIAnimationHelper.GetViewAlpha(Group, ViewSelector) > 0.001f)
         {
-            selectorRect = GUI.Window(
-                4001,
-                selectorRect,
-                SelectorDelegate,
-                "",
-                windowBgStyle
-            );
+            selectorRect = GUI.Window(4001, selectorRect, SelectorDelegate, "", windowBgStyle);
         }
-        else
+
+        if (UIAnimationHelper.GetViewAlpha(Group, ViewMain) > 0.001f)
         {
-            windowRect = GUI.Window(
-                4000,
-                windowRect,
-                GuiControlsDelegate,
-                "",
-                windowBgStyle
-            );
+            windowRect = GUI.Window(4000, windowRect, GuiControlsDelegate, "", windowBgStyle);
         }
     }
 
@@ -257,10 +221,10 @@ public static class GUIManager
     {
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
-        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.SubWindowAlpha;
 
-        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
-        GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
+        float alpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.GetViewAlpha(Group, ViewSelector);
+        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * alpha);
+        GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * alpha);
 
         try
         {
@@ -293,10 +257,10 @@ public static class GUIManager
     {
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
-        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.SubWindowAlpha;
 
-        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
-        GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
+        float alpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.GetViewAlpha(Group, ViewMain);
+        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * alpha);
+        GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * alpha);
 
         try
         {
@@ -307,33 +271,34 @@ public static class GUIManager
             float rowSpacing = Config.S(8f);
 
 #if ANDROID
-        float headerHeight = Config.S(26f) * 1.30f;
+            float headerHeight = Config.S(26f) * 1.30f;
 #else
             float headerHeight = Config.S(26f);
 #endif
             float y = headerHeight + Config.S(12f);
 
-            // 1. Header Banner
             Rect headerBgRect = new(0, 0, w, headerHeight);
             GUI.Box(headerBgRect, Translator.Translate("GUI Configuration"), ThemeManager.SettingsWndowStyle);
 
-            // Standardized Right-Aligned Control Slot
             float controlWidth = Mathf.Min(Config.SettingWidth, w * 0.45f);
             float controlX = w - rightMargin - controlWidth;
             float labelWidth = controlX - indent - Config.S(10f);
 
-            // -------------------------------------------------------------
-            // Row 1: Label + Button / Toggle Helper
-            // -------------------------------------------------------------
             void DrawButtonRow(string labelText, string btnText, Action onClick, GUIStyle btnStyle = null)
             {
                 Rect lblRect = new(indent, y, labelWidth, elementHeight);
                 GUI.Label(lblRect, labelText, ThemeManager.SettingLabelStyle);
 
                 Rect btnRect = new(controlX, y, controlWidth, elementHeight);
-                GUI.Box(btnRect, btnText, btnStyle ?? ThemeManager.SettingOff);
+                bool isHovered = btnRect.Contains(e.mousePosition);
 
-                if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+                Color prevBg = GUI.backgroundColor;
+                if (isHovered) GUI.backgroundColor = new Color(1.25f, 1.25f, 1.25f, 1.0f);
+
+                GUI.Box(btnRect, btnText, btnStyle ?? ThemeManager.SettingOff);
+                GUI.backgroundColor = prevBg;
+
+                if (isHovered && e.type == EventType.MouseDown && e.button == 0)
                 {
                     onClick?.Invoke();
                     e.Use();
@@ -342,10 +307,7 @@ public static class GUIManager
                 y += elementHeight + rowSpacing;
             }
 
-            // -------------------------------------------------------------
-            // Row 2: Unified Numeric Slider Helper (Aligned to controlX & controlWidth)
-            // -------------------------------------------------------------
-            void DrawSliderRow(FloatSetting setting, float stepDecPlaces = 2)
+            void DrawSliderRow(FloatSetting setting)
             {
                 string labelText = Translator.Translate(setting.Name);
                 Rect lblRect = new(indent, y, labelWidth, elementHeight);
@@ -366,7 +328,6 @@ public static class GUIManager
                 float thumbY = sliderRect.y + (trackH / 2f) - (thumbSize / 2f);
                 Rect thumbRect = new(thumbX, thumbY, thumbSize, thumbSize);
 
-                // Draw Track & Thumb
                 GUI.Box(sliderRect, "", ThemeManager.SliderTrackOffStyle);
                 if (fillWidth > 0f)
                 {
@@ -374,7 +335,6 @@ public static class GUIManager
                 }
                 GUI.Box(thumbRect, "", ThemeManager.SliderThumbStyle);
 
-                // Drag handling
                 int sliderControlId = GUIUtility.GetControlID(setting.Name.GetHashCode(), FocusType.Passive);
                 Rect grabHitBox = new(sliderRect.x - 6f, y, sliderW + 12f, elementHeight);
 
@@ -416,7 +376,6 @@ public static class GUIManager
                     }
                 }
 
-                // Numeric Input Box
                 int controlId = inputRect.GetHashCode();
                 bool isFocused = (DrawSetting.activeTextFieldId == controlId);
                 string formatString = "0." + new string('0', setting.DecimalPlaces);
@@ -447,7 +406,6 @@ public static class GUIManager
                 y += elementHeight + rowSpacing;
             }
 
-            // --- 1. Language Row ---
             string currentLangName = "English";
             if (LanguageSetting?.SelectedValues != null && LanguageSetting.SelectedValues.Count > 0)
             {
@@ -463,7 +421,6 @@ public static class GUIManager
                 () => OpenSubSelector(LanguageSetting)
             );
 
-            // --- 2. Theme Row ---
             string currentTheme = ThemeManager.CurrentThemeName;
             if (ThemeSetting?.SelectedValues != null && ThemeSetting.SelectedValues.Count > 0)
             {
@@ -483,7 +440,6 @@ public static class GUIManager
                 }
             );
 
-            // --- 3. GUI Scale Slider ---
             if (ScaleSetting != null)
             {
                 if (DrawSetting.activeSliderId != ScaleSetting.GetHashCode() && Mathf.Abs(ScaleSetting.Value - Config.GUIScale) > 0.001f)
@@ -493,7 +449,6 @@ public static class GUIManager
                 DrawSliderRow(ScaleSetting);
             }
 
-            // --- 4. Element Scale Slider ---
             if (ElementScaleSetting != null)
             {
                 if (DrawSetting.activeSliderId != ElementScaleSetting.GetHashCode() && Mathf.Abs(ElementScaleSetting.Value - Config.ElementScale) > 0.001f)
@@ -503,7 +458,6 @@ public static class GUIManager
                 DrawSliderRow(ElementScaleSetting);
             }
 
-            // --- 5. Floating Icon Toggle ---
             DrawButtonRow(
                 Translator.Translate("Floating Icon"),
                 Config.ShowFloatingIcon ? Translator.Translate("ON") : Translator.Translate("OFF"),
@@ -511,7 +465,6 @@ public static class GUIManager
                 Config.ShowFloatingIcon ? ThemeManager.SettingOn : ThemeManager.SettingOff
             );
 
-            // --- 6. Mobile Close Buttons Toggle ---
             DrawButtonRow(
                 Translator.Translate("Mobile Close Buttons"),
                 Config.ShowMobileButtons ? Translator.Translate("ON") : Translator.Translate("OFF"),
@@ -519,7 +472,6 @@ public static class GUIManager
                 Config.ShowMobileButtons ? ThemeManager.SettingOn : ThemeManager.SettingOff
             );
 
-            // --- 7. Show Main Menu Credits Toggle ---
             DrawButtonRow(
                 Translator.Translate("Show Main Menu Credits"),
                 Config.ShowMainMenuCredits ? Translator.Translate("ON") : Translator.Translate("OFF"),
@@ -527,7 +479,6 @@ public static class GUIManager
                 Config.ShowMainMenuCredits ? ThemeManager.SettingOn : ThemeManager.SettingOff
             );
 
-            // --- 8. Floating Icon Opacity Slider ---
             if (Config.ShowFloatingIcon && FloatingIconOpacitySetting != null)
             {
                 if (DrawSetting.activeSliderId != FloatingIconOpacitySetting.GetHashCode() && Mathf.Abs(FloatingIconOpacitySetting.Value - Config.FloatingIconOpacity) > 0.001f)
@@ -571,8 +522,7 @@ public static class GUIManager
         float targetH = Mathf.Min(Config.S(BaseSelectorHeight), Config.NativeHeight * 0.8f);
         selectorRect = new Rect((Config.NativeWidth - targetW) / 2f, (Config.NativeHeight - targetH) / 2f, targetW, targetH);
 
-        isSelectingSubWindow = true;
-        UIAnimationHelper.TriggerSubWindowTransition();
+        UIAnimationHelper.SwitchView(Group, ViewSelector);
     }
 
     private class GUIManagerService : IInitializable, IWarmUp, IMenuRenderable, ICloseHandler, ILanguageAware
@@ -601,19 +551,16 @@ public static class GUIManager
 
         public bool OnEscapePressed()
         {
-            // 1. If currently inside a sub-selector modal (Language or Theme selector), step back with animation
             if (isSelectingSubWindow)
             {
                 OnClose();
                 Main.ResetInputBind();
-                UIAnimationHelper.TriggerSubWindowTransition();
                 Input.ResetInputAxes();
                 return true;
             }
 
             if (Config.CurrentTab == TabType.GUI)
             {
-                // 2. If an active slider or text field is focused, cancel/unfocus it
                 if (DrawSetting.activeSliderId != -1 || DrawSetting.activeDropdownId != -1 || DrawSetting.activeTextFieldId != -1)
                 {
                     Main.ResetInputBind();

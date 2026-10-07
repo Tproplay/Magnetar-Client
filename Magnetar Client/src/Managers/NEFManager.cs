@@ -11,8 +11,10 @@ namespace Magnetar_Client.Core;
 
 public static class NEFManager
 {
-    // Base (unscaled, GUIScale == 1) margin around the window - actual
-    // margin is derived via Config.S() so it scales with the rest of the UI.
+    public const string Group = "NEF";
+    public const string ViewTree = "Tree";
+    public const string ViewUsages = "Usages";
+
     private const float BaseMargin = 60f;
 
     public static bool ShowMenu = false;
@@ -21,19 +23,17 @@ public static class NEFManager
 
     public static void Init()
     {
-        NEFData.Init();
+        UIAnimationHelper.SetViewImmediate(Group, ViewTree, 1.0f);
+        UIAnimationHelper.SetViewImmediate(Group, ViewUsages, 0.0f);
 
-        // Register to centralized ServiceRegistry and SafeToCloseManager
+        NEFData.Init();
         ServiceRegistry.Register(new NEFManagerService());
 
         SafeToCloseManager.RegisterGuard(() =>
         {
             if (Config.CurrentTab == TabType.NEF)
             {
-                return UI.WindowDrawing.DrawSetting.focusedControlId == -1
-                       && UI.WindowDrawing.DrawSetting.activeTextFieldId == -1
-                       && UI.WindowDrawing.DrawSetting.activeDropdownId == -1
-                       && UI.WindowDrawing.DrawSetting.activeSliderId == -1;
+                return !DrawSetting.IsFocused;
             }
             return true;
         });
@@ -83,18 +83,13 @@ public static class NEFManager
 
         public bool CanClose()
         {
-            return UI.WindowDrawing.DrawSetting.focusedControlId == -1
-                   && UI.WindowDrawing.DrawSetting.activeTextFieldId == -1
-                   && UI.WindowDrawing.DrawSetting.activeDropdownId == -1
-                   && UI.WindowDrawing.DrawSetting.activeSliderId == -1
-                   && !NEFGUI.showUsagesView;
+            return !DrawSetting.IsFocused && !NEFGUI.showUsagesView;
         }
 
         public bool OnEscapePressed()
         {
             if (Config.CurrentTab != TabType.NEF) return false;
 
-            // 1. If searching, typing, or interacting with a NEF filter control, unfocus it first
             if (DrawSetting.activeTextFieldId != -1 || DrawSetting.focusedControlId != -1 || DrawSetting.activeDropdownId != -1)
             {
                 Main.ResetInputBind();
@@ -102,20 +97,17 @@ public static class NEFManager
                 return true;
             }
 
-            // 2. If in Usages View, return to Tree view with a smooth transition
             if (NEFGUI.showUsagesView)
             {
                 NEFGUI.showUsagesView = false;
-                UIAnimationHelper.TriggerSubWindowTransition();
+                UIAnimationHelper.SwitchView(Group, ViewTree);
                 Input.ResetInputAxes();
                 return true;
             }
 
-            // 3. If NEF has an open sub-menu/recipe overlay, dismiss it
             if (NEFManager.ShowMenu)
             {
                 NEFManager.ShowMenu = false;
-                UIAnimationHelper.TriggerSubWindowTransition();
                 Input.ResetInputAxes();
                 return true;
             }

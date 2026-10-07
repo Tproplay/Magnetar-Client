@@ -1,12 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using Magnetar_Client.UI.Setting;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using static Magnetar_Client.Utils.Magnetar_Logger;
-using Magnetar_Client.UI.Setting;
 using static Magnetar_Client.Api.PathsManager;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Utils;
 
@@ -123,10 +123,10 @@ public static class TranslatorData
         }
 
         // 2. Live HUD elements in memory
-        bool hudReady = Core.HUDRenderer.Elements != null && Core.HUDRenderer.Elements.Count > 0;
+        bool hudReady = Core.HUDManager_.HUDRenderer.Elements != null && Core.HUDManager_.HUDRenderer.Elements.Count > 0;
         if (hudReady)
         {
-            foreach (var element in Core.HUDRenderer.Elements)
+            foreach (var element in Core.HUDManager_.HUDRenderer.Elements)
             {
                 if (!string.IsNullOrEmpty(element.Name))
                     CachedBlacklist.Add(element.Name);
@@ -225,10 +225,10 @@ public static class TranslatorData
             }
 
             // HUD Dump
-            if (Core.HUDRenderer.Elements != null && Core.HUDRenderer.Elements.Count > 0)
+            if (Core.HUDManager_.HUDRenderer.Elements != null && Core.HUDManager_.HUDRenderer.Elements.Count > 0)
             {
                 var engHud = new Dictionary<string, HudTranslationNode>();
-                foreach (var el in Core.HUDRenderer.Elements)
+                foreach (var el in Core.HUDManager_.HUDRenderer.Elements)
                 {
                     engHud[el.Name] = new HudTranslationNode { Name = el.Name };
                 }
@@ -575,9 +575,9 @@ public static class TranslatorData
             var hudDict = JsonConvert.DeserializeObject<Dictionary<string, HudTranslationNode>>(File.ReadAllText(hudPath));
             if (hudDict == null) return;
 
-            if (Core.HUDRenderer.Elements != null)
+            if (Core.HUDManager_.HUDRenderer.Elements != null)
             {
-                foreach (var element in Core.HUDRenderer.Elements)
+                foreach (var element in Core.HUDManager_.HUDRenderer.Elements)
                 {
                     if (hudDict.TryGetValue(element.Name, out var node))
                     {

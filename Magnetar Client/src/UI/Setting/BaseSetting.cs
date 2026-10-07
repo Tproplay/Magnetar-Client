@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using Magnetar_Client.UI.Themes;
+﻿using Magnetar_Client.UI.Themes;
+using UnityEngine;
 
 namespace Magnetar_Client.UI.Setting;
 

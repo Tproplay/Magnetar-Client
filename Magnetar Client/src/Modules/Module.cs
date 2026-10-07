@@ -5,7 +5,7 @@ using UnityEngine;
 using Magnetar_Client.Core;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.Utils;
-using Harmony;
+using Magnetar_Client.Core.ModuleManager_;
 
 
 #if MELONLOADER || RELEASE_MELON

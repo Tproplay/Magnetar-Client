@@ -1,9 +1,9 @@
 ﻿using Magnetar_Client.Utils;
 using MelonLoader.Utils;
-using System.IO;
 using System;
-using static Magnetar_Client.Utils.Magnetar_Logger;
+using System.IO;
 using UnityEngine;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Api;
 
@@ -69,7 +69,14 @@ public static class PathsManager
         }
     }
 
-    public static string AddonsDir => Path.Combine(ModsDir, "Magnetar Addon");
+    public static string AddonsDir => GetAddonsDir();
+
+    static string GetAddonsDir()
+    {
+        var path = Path.Combine(ConfigDir, "Magnetar Profiles");
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+        return path;
+    }
 
     private static string _cachedConfigDir;
 

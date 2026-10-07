@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using static Magnetar_Client.UI.Themes.ThemeManager;
 using UnityEngine;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 
 namespace Magnetar_Client.HUDElements;
 

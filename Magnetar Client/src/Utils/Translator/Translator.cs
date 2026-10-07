@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Api.PathsManager;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Utils;
 
@@ -95,7 +95,7 @@ public static class Translator
                 }
             }
 
-            if (Core.HUDRenderer.Elements != null && Core.HUDRenderer.Elements.Count > 0)
+            if (Core.HUDManager_.HUDRenderer.Elements != null && Core.HUDManager_.HUDRenderer.Elements.Count > 0)
             {
                 TranslatorData.LinkHudTranslations();
                 TranslatorData.HudLinked = true;
@@ -126,7 +126,7 @@ public static class Translator
             TranslatorData.ModulesLinked = true;
         }
 
-        if (!TranslatorData.HudLinked && Core.HUDRenderer.Elements != null && Core.HUDRenderer.Elements.Count > 0)
+        if (!TranslatorData.HudLinked && Core.HUDManager_.HUDRenderer.Elements != null && Core.HUDManager_.HUDRenderer.Elements.Count > 0)
         {
             TranslatorData.LinkHudTranslations();
             TranslatorData.HudLinked = true;

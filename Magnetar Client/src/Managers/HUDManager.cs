@@ -1,30 +1,27 @@
-﻿using Magnetar_Client.HUDElements;
-using Magnetar_Client.UI.Themes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using UnityEngine;
-using Magnetar_Client.Utils;
-using static Magnetar_Client.Utils.Magnetar_Logger;
-using Magnetar_Client.UI;
-using Magnetar_Client.Game;
-using Magnetar_Client.UI.Setting;
+﻿using Magnetar_Client.Api;
 using Magnetar_Client.Core.Lifecycle;
-using Magnetar_Client.Api;
+using Magnetar_Client.Game;
+using Magnetar_Client.UI;
+using Magnetar_Client.UI.Themes;
+using Magnetar_Client.Utils;
+using System;
+using UnityEngine;
+using static Magnetar_Client.Utils.Magnetar_Logger;
+using Magnetar_Client.Core.HUDManager_;
 
 namespace Magnetar_Client.Core;
 
 public static class HUDManager
 {
+    public const string Group = "HUD";
+    public const string ViewMain = "Controls";
+    public const string ViewSelector = "Selector";
+
     public static bool IsInitialized { get; private set; } = false;
     public static bool Enabled = true;
     public static bool forceShow = false;
-    public static bool isSelectingElements = false;
+    public static bool isSelectingElements => UIAnimationHelper.GetViewAlpha(Group, ViewSelector) > 0.001f;
     public static bool showBackground = false;
-
-    // Flag to suppress sub-window fade transition when returning from Edit Layout mode
-    private static bool _suppressNextTransition = false;
 
     private const float BaseWidth = 500f;
     private const float BaseHeight = 300f;
@@ -44,12 +41,12 @@ public static class HUDManager
     {
         if (IsInitialized) return;
 
-        EnsureRects();
+        UIAnimationHelper.SetViewImmediate(Group, ViewMain, 1.0f);
+        UIAnimationHelper.SetViewImmediate(Group, ViewSelector, 0.0f);
 
-        // Register to centralized ServiceRegistry
+        EnsureRects();
         ServiceRegistry.Register(new HUDManagerService());
 
-        // Register close guard: block GUI closure while editing layout or picking elements
         SafeToCloseManager.RegisterGuard(() =>
         {
             if (forceShow || (Config.CurrentTab == TabType.HUD && isSelectingElements))
@@ -58,27 +55,7 @@ public static class HUDManager
             return true;
         });
 
-        // Register Escape interceptor to back out of element picker or layout edit mode
-        SafeToCloseManager.RegisterInterceptor(() =>
-        {
-            if (forceShow)
-            {
-                ExitLayoutMode();
-                return true;
-            }
-
-            if (isSelectingElements)
-            {
-                OnClose();
-                Main.ResetInputBind();
-                UIAnimationHelper.TriggerSubWindowTransition();
-                Input.ResetInputAxes();
-                return true;
-            }
-
-            return false;
-        });
-
+        HUDRenderer.Init();
         IsInitialized = true;
         DebugLogger.Msg("[HUDManager] Initialized and registered HUD service.");
     }
@@ -87,10 +64,8 @@ public static class HUDManager
     {
         forceShow = false;
         Config.showgui = true;
-        _suppressNextTransition = true;
-
-        // Force both main fade and sub-window alpha to 1 immediately
         UIAnimationHelper.SnapToVisible();
+        UIAnimationHelper.SwitchView(Group, ViewMain);
 
         SaveLoad.Save();
         Main.ResetInputBind();
@@ -99,7 +74,7 @@ public static class HUDManager
 
     public static void OnClose()
     {
-        isSelectingElements = false;
+        UIAnimationHelper.SwitchView(Group, ViewMain);
         UI.WindowDrawing.DrawSetting.activeMultiSelect = null;
     }
 
@@ -136,27 +111,14 @@ public static class HUDManager
     private static GUI.WindowFunction _cachedSelectorDelegate;
     private static GUI.WindowFunction _cachedControlsDelegate;
 
-    private static GUI.WindowFunction GetSelectorDelegate()
-    {
-        if (_cachedSelectorDelegate == null)
-        {
-            _cachedSelectorDelegate = Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawElementSelector);
-        }
-        return _cachedSelectorDelegate;
-    }
+    private static GUI.WindowFunction GetSelectorDelegate() =>
+        _cachedSelectorDelegate ??= Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawElementSelector);
 
-    private static GUI.WindowFunction GetControlsDelegate()
-    {
-        if (_cachedControlsDelegate == null)
-        {
-            _cachedControlsDelegate = Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawHUDControls);
-        }
-        return _cachedControlsDelegate;
-    }
+    private static GUI.WindowFunction GetControlsDelegate() =>
+        _cachedControlsDelegate ??= Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawHUDControls);
 
     public static void RenderDimBackground()
     {
-        // Render as long as the alpha is above threshold so it smoothly fades out
         float currentAlpha = forceShow ? 1.0f : UIAnimationHelper.CurrentEasedDimAlpha;
         if (currentAlpha <= 0.001f) return;
 
@@ -187,25 +149,14 @@ public static class HUDManager
     {
         GUIStyle windowBgStyle = ThemeManager.SettingsWndowBgStyle ?? ThemeManager.SettingsWndowStyle;
 
-        if (isSelectingElements)
+        if (UIAnimationHelper.GetViewAlpha(Group, ViewSelector) > 0.001f)
         {
-            selectorRect = GUI.Window(
-                2001,
-                selectorRect,
-                GetSelectorDelegate(),
-                "",
-                windowBgStyle
-            );
+            selectorRect = GUI.Window(2001, selectorRect, GetSelectorDelegate(), "", windowBgStyle);
         }
-        else
+
+        if (UIAnimationHelper.GetViewAlpha(Group, ViewMain) > 0.001f)
         {
-            windowRect = GUI.Window(
-                2000,
-                windowRect,
-                GetControlsDelegate(),
-                "",
-                windowBgStyle
-            );
+            windowRect = GUI.Window(2000, windowRect, GetControlsDelegate(), "", windowBgStyle);
         }
     }
 
@@ -217,20 +168,16 @@ public static class HUDManager
         {
             Event e = Event.current;
 
-            #region Handle Escape Key In-GUI (Do not bail out early!)
             if (forceShow && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
             {
                 ExitLayoutMode();
                 e.Use();
-                // Notice: DO NOT return here! Proceed directly to draw the background and window on this exact frame.
             }
             else if (isSelectingElements && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
             {
                 OnClose();
-                UIAnimationHelper.TriggerSubWindowTransition();
                 e.Use();
             }
-            #endregion
 
             RenderModCredit();
             RenderDimBackground();
@@ -278,7 +225,7 @@ public static class HUDManager
     {
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
-        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.SubWindowAlpha;
+        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.GetViewAlpha(Group, ViewSelector);
 
         GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
         GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
@@ -286,7 +233,6 @@ public static class HUDManager
         try
         {
             Event e = Event.current;
-
             Rect multiSelectRect = new(0, 0, selectorRect.width, selectorRect.height);
             UI.WindowDrawing.DrawSetting.DrawMultiSelectWindow(multiSelectRect, UI.WindowDrawing.DrawSetting.activeMultiSelect, _cachedOnClose);
 
@@ -311,14 +257,7 @@ public static class HUDManager
     {
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
-
-        float subAlpha = _suppressNextTransition ? 1.0f : UIAnimationHelper.SubWindowAlpha;
-        if (_suppressNextTransition && Event.current.type == EventType.Repaint)
-        {
-            _suppressNextTransition = false;
-        }
-
-        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * subAlpha;
+        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.GetViewAlpha(Group, ViewMain);
 
         GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
         GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
@@ -339,8 +278,14 @@ public static class HUDManager
                 ThemeManager.SettingLabelStyle);
 
             Rect selectBtnRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
+            bool isSelectHovered = selectBtnRect.Contains(e.mousePosition);
 
-            if (e.type == EventType.MouseDown && e.button == 0 && selectBtnRect.Contains(e.mousePosition))
+            Color prevBg = GUI.backgroundColor;
+            if (isSelectHovered) GUI.backgroundColor = new Color(1.25f, 1.25f, 1.25f, 1.0f);
+            GUI.Box(selectBtnRect, Translator.Translate("Select"), ThemeManager.SettingOff);
+            GUI.backgroundColor = prevBg;
+
+            if (e.type == EventType.MouseDown && e.button == 0 && isSelectHovered)
             {
                 e.Use();
                 UI.WindowDrawing.DrawSetting.activeMultiSelect = HUDRenderer.HudToggles;
@@ -357,11 +302,8 @@ public static class HUDManager
                     targetH
                 );
 
-                isSelectingElements = true;
-                UIAnimationHelper.TriggerSubWindowTransition();
+                UIAnimationHelper.SwitchView(Group, ViewSelector);
             }
-
-            GUI.Box(selectBtnRect, Translator.Translate("Select"), ThemeManager.SettingOff);
 
             y += elementHeight + Config.S(5f);
 
@@ -369,16 +311,20 @@ public static class HUDManager
                 ThemeManager.SettingLabelStyle);
 
             Rect configBtnRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
+            bool isConfigHovered = configBtnRect.Contains(e.mousePosition);
 
-            if (e.type == EventType.MouseDown && e.button == 0 && configBtnRect.Contains(e.mousePosition))
+            prevBg = GUI.backgroundColor;
+            if (isConfigHovered) GUI.backgroundColor = new Color(1.25f, 1.25f, 1.25f, 1.0f);
+            GUI.Box(configBtnRect, Translator.Translate("Edit"), ThemeManager.SettingOff);
+            GUI.backgroundColor = prevBg;
+
+            if (e.type == EventType.MouseDown && e.button == 0 && isConfigHovered)
             {
                 e.Use();
                 forceShow = true;
                 Config.showgui = false;
                 DebugLogger.Msg("Escape Triggered : Hud Window -> Edit Layout");
             }
-
-            GUI.Box(configBtnRect, Translator.Translate("Edit"), ThemeManager.SettingOff);
 
             y += elementHeight + Config.S(5f);
 
@@ -387,8 +333,11 @@ public static class HUDManager
             Rect bgRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
             bool bgHover = bgRect.Contains(e.mousePosition);
 
+            prevBg = GUI.backgroundColor;
+            if (bgHover) GUI.backgroundColor = new Color(1.25f, 1.25f, 1.25f, 1.0f);
             GUI.Box(bgRect, showBackground ? Translator.Translate("ON") : Translator.Translate("OFF"),
                 showBackground ? ThemeManager.SettingOn : ThemeManager.SettingOff);
+            GUI.backgroundColor = prevBg;
 
             if (bgHover && e.type == EventType.MouseDown && e.button == 0)
             {
@@ -403,8 +352,11 @@ public static class HUDManager
             Rect enabledRect = new(width * 0.5f, y, width * 0.45f, elementHeight);
             bool enabledHover = enabledRect.Contains(e.mousePosition);
 
+            prevBg = GUI.backgroundColor;
+            if (enabledHover) GUI.backgroundColor = new Color(1.25f, 1.25f, 1.25f, 1.0f);
             GUI.Box(enabledRect, Enabled ? Translator.Translate("ON") : Translator.Translate("OFF"),
                 Enabled ? ThemeManager.SettingOn : ThemeManager.SettingOff);
+            GUI.backgroundColor = prevBg;
 
             if (enabledHover && e.type == EventType.MouseDown && e.button == 0)
             {
@@ -444,29 +396,22 @@ public static class HUDManager
     {
         if (!Config.ShowMainMenuCredits) return;
         if (Config.showgui || HUDManager.forceShow) return;
-
         if (!AppData.InMainMenu) return;
 
         string Text = "Magnetar Client <color=white>by</color> <color=red>Tproplay</color>";
-
         GUIContent content = new(Text);
 
         GUIStyle style = new()
         {
             alignment = TextAnchor.UpperRight,
             richText = true,
+            normal = { textColor = Color.white },
+            fontStyle = FontStyle.Bold,
+            fontSize = (int)Config.NativeHeight / 36
         };
-        style.normal.textColor = Color.white;
-        style.fontStyle = FontStyle.Bold;
-        style.fontSize = (int)Config.NativeHeight / 36;
 
         float width = style.CalcSize(content).x;
-
-        Rect rect = new()
-        {
-            x = Config.NativeWidth * 0.995f - width,
-            width = width
-        };
+        Rect rect = new() { x = Config.NativeWidth * 0.995f - width, width = width };
 
         GUIHelper.DrawBoxWithOutlinedText(rect, Text, style, GUIHelper.RainbowColor, Color.black);
     }
@@ -509,19 +454,16 @@ public static class HUDManager
 
         public bool OnEscapePressed()
         {
-            // 1. Exiting layout editing mode back to the main GUI menu (no sub-window fade)
             if (HUDManager.forceShow)
             {
                 ExitLayoutMode();
                 return true;
             }
 
-            // 2. Stepping out of the MultiSelect element picker modal
             if (HUDManager.isSelectingElements)
             {
                 HUDManager.OnClose();
                 Main.ResetInputBind();
-                UIAnimationHelper.TriggerSubWindowTransition();
                 Input.ResetInputAxes();
                 return true;
             }
@@ -529,93 +471,6 @@ public static class HUDManager
             return false;
         }
 
-        public void OnLanguageChanged()
-        {
-            HUDManager.OnLanguageChange();
-        }
-    }
-}
-
-public static class HUDRenderer
-{
-    public static List<HudElement> Elements = new();
-    public static MultiSelectSetting HudToggles = new("Active Elements")
-    {
-        CustomNames = new Dictionary<int, string>(),
-        DisplayAlphabetically = true,
-    };
-    private static bool isMasterVisible;
-
-    public static int currentWindowId = 4000;
-
-    public static void Init()
-    {
-        HUDManager.Init();
-
-        var types = Assembly.GetExecutingAssembly().GetTypes()
-            .Where(t => t.IsSubclassOf(typeof(HudElement)) && !t.IsAbstract);
-
-        foreach (var type in types)
-        {
-            RegisterElement(type);
-        }
-
-        DebugLogger.Msg($"Registered {Elements.Count} HUD elements");
-    }
-
-    public static void RegisterElement(Type element)
-    {
-        HudElement instance = (HudElement)Activator.CreateInstance(element);
-        instance.WindowId = currentWindowId;
-        Elements.Add(instance);
-        HudToggles.AddOption(instance.WindowId, element.Name);
-        HudToggles.CustomNames[instance.WindowId] = element.Name;
-        currentWindowId++;
-    }
-
-    public static void RenderOverlay()
-    {
-        isMasterVisible = HUDManager.Enabled;
-
-        if (Config.showgui && Config.CurrentTab != TabType.HUD)
-        {
-            isMasterVisible = false;
-        }
-
-        if (!isMasterVisible) return;
-
-        for (int i = 0; i < Elements.Count; i++)
-        {
-            var element = Elements[i];
-            if (element == null) continue;
-
-            bool isElementEnabled = HudToggles != null && HudToggles.IsSelected(element.WindowId);
-
-            if (isElementEnabled)
-            {
-                try
-                {
-                    element.Render();
-                }
-                catch (Exception ex)
-                {
-                    DebugLogger.Error($"[HUDRenderer] CRASH in element '{element.Name}': {ex}");
-                }
-            }
-        }
-    }
-
-    public static void UpdateElements()
-    {
-        if (!isMasterVisible) return;
-
-        for (int i = 0; i < Elements.Count; i++)
-        {
-            var element = Elements[i];
-            if (element == null) continue;
-
-            bool isElementEnabled = isMasterVisible && HudToggles.IsSelected(element.WindowId);
-            element.HandleLifecycle(isElementEnabled);
-        }
+        public void OnLanguageChanged() => HUDManager.OnLanguageChange();
     }
 }

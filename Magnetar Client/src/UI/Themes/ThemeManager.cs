@@ -1,13 +1,13 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using UnityEngine;
-using Newtonsoft.Json;
+﻿using Magnetar_Client.Api;
 using Magnetar_Client.Core;
 using Magnetar_Client.Core.Lifecycle;
-using static Magnetar_Client.Utils.Magnetar_Logger;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
 using static Magnetar_Client.Api.PathsManager;
-using Magnetar_Client.Api;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.UI.Themes;
 
@@ -522,12 +522,11 @@ public static class ThemeManager
         SectionAddButtonStyle.fontSize = S(SettingFontSize);
     }
 
-    private class ThemeService : IInitializable, IWarmUp
+    private class ThemeService : IWarmUp
     {
         public string Name => "ThemeManager";
         public int Priority => ServicePriority.Highest;
 
-        public void Initialize() => ThemeManager.Rescale();
         public void OnWarmUp() => ThemeManager.Rescale();
     }
 }

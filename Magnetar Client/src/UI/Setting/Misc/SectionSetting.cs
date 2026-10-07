@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.Utils;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Magnetar_Client.UI.Themes;
-using Magnetar_Client.Utils;
 
 namespace Magnetar_Client.UI.Setting;
 

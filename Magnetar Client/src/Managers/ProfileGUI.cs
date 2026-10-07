@@ -1,11 +1,11 @@
-﻿using System;
-using UnityEngine;
-using Magnetar_Client.Utils;
+﻿using Magnetar_Client.Api;
+using Magnetar_Client.Core.Lifecycle;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
-using Magnetar_Client.Core.Lifecycle;
-using Magnetar_Client.Api;
+using Magnetar_Client.Utils;
+using System;
+using UnityEngine;
 
 namespace Magnetar_Client.Core;
 
@@ -38,19 +38,6 @@ public static class ProfileGUI
             }
             return true;
         });
-
-        SafeToCloseManager.RegisterInterceptor(() =>
-        {
-            if (Config.CurrentTab == TabType.PROFILE)
-            {
-                if (DrawSetting.activeTextFieldId != -1 || DrawSetting.focusedControlId != -1)
-                {
-                    Main.ResetInputBind();
-                    return true;
-                }
-            }
-            return false;
-        });
     }
 
     public static void Render()
@@ -72,7 +59,7 @@ public static class ProfileGUI
     {
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
-        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.SubWindowAlpha;
+        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha;
 
         GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
         GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
@@ -84,11 +71,9 @@ public static class ProfileGUI
             float indent = Config.S(12f);
             float y = Config.S(35f);
 
-            // Header Banner
             Rect headerBgRect = new(0, 0, w, y - indent);
             GUI.Box(headerBgRect, Translator.Translate("Profile Manager"), ThemeManager.SettingsWndowStyle);
 
-            // Current Profile (Vertically Centered with SettingTextStyle)
             GUI.Label(
                 new Rect(indent, y, w - (indent * 2), elementHeight),
                 $"{Translator.Translate("Current Active Profile")}: <color=yellow>{Config.CurrentProfile}</color>",
@@ -103,17 +88,19 @@ public static class ProfileGUI
             float gap = Config.S(8f);
             float inputW = w - (indent * 2f) - labelW - btnW - (gap * 2f);
 
-            // 1. "New Profile:" Label aligned to MiddleLeft
             Rect labelRect = new(indent, y, labelW, elementHeight);
             GUI.Label(labelRect, Translator.Translate("New Profile:"), ThemeManager.SettingTextStyle);
 
-            // 2. Input Box aligned to MiddleLeft
             Rect inputRect = new(indent + labelW + gap, y, inputW, elementHeight);
             newProfileInput = DrawSetting.DrawManualTextField(inputRect, newProfileInput, Translator.Translate("Enter profile name..."));
 
-            // 3. Create Button
             Rect createBtnRect = new(w - indent - btnW, y, btnW, elementHeight);
             bool isCreateHover = createBtnRect.Contains(e.mousePosition);
+
+            Color prevBg = GUI.backgroundColor;
+            if (isCreateHover) GUI.backgroundColor = new Color(1.25f, 1.25f, 1.25f, 1.0f);
+            GUI.Box(createBtnRect, Translator.Translate("Create"), ThemeManager.SettingOff);
+            GUI.backgroundColor = prevBg;
 
             if (e.type == EventType.MouseDown && e.button == 0 && isCreateHover)
             {
@@ -128,11 +115,8 @@ public static class ProfileGUI
                 e.Use();
             }
 
-            GUI.Box(createBtnRect, Translator.Translate("Create"), ThemeManager.SettingOff);
-
             y += elementHeight + Config.S(14f);
 
-            // Separator Rule
             float lineThickness = Mathf.Max(1f, Config.S(1f));
             GUI.Box(new Rect(indent, y, w - (indent * 2f), lineThickness), "", ThemeManager.SeparatorStyle);
             y += lineThickness + Config.S(10f);
@@ -175,14 +159,12 @@ public static class ProfileGUI
                     bool isItemHovered = itemRect.Contains(e.mousePosition);
                     bool isDeleteHovered = !isDefault && deleteBtnRect.Contains(e.mousePosition);
 
-                    // Row background
                     GUIStyle rowStyle = isActive
                         ? ThemeManager.SettingOn
                         : (isItemHovered && !isDeleteHovered ? ThemeManager.SettingOff : ThemeManager.CategoryModuleOffStyle);
 
                     GUI.Box(itemRect, "", rowStyle);
 
-                    // Row text: vertically centered via SettingTextStyle and full row elementHeight
                     string labelText = isActive
                         ? $"<b><color=yellow>{profileName}</color> ({Translator.Translate("Active")})</b>"
                         : profileName;
@@ -192,7 +174,6 @@ public static class ProfileGUI
 
                     GUI.Label(textRect, labelText, ThemeManager.SettingTextStyle);
 
-                    // Delete Button
                     if (!isDefault)
                     {
                         Color oldBg = GUI.backgroundColor;
@@ -201,7 +182,6 @@ public static class ProfileGUI
                         GUI.backgroundColor = oldBg;
                     }
 
-                    // Click Detection
                     if (e.type == EventType.MouseDown && e.button == 0 && isItemHovered)
                     {
                         if (isDeleteHovered)
@@ -263,7 +243,6 @@ public static class ProfileGUI
         {
             if (Config.CurrentTab != TabType.PROFILE) return false;
 
-            // 1. If the "New Profile" text field or any control is active, cancel input focus
             if (DrawSetting.activeTextFieldId != -1 || DrawSetting.focusedControlId != -1)
             {
                 Main.ResetInputBind();

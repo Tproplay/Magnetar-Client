@@ -1,7 +1,8 @@
 ﻿using Magnetar_Client.Core;
 using Magnetar_Client.UI.Themes;
-using UnityEngine;
 using System;
+using UnityEngine;
+using Magnetar_Client.Core.HUDManager_;
 
 namespace Magnetar_Client.HUDElements;
 

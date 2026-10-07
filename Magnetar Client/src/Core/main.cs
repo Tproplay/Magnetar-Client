@@ -1,13 +1,11 @@
-﻿using System;
-using System.Linq;
-using HarmonyLib;
-using UnityEngine;
-using Magnetar_Client.Utils;
-using static Magnetar_Client.Utils.Magnetar_Logger;
-using System.Reflection;
-using Magnetar_Client.UI;
-using Magnetar_Client.Api;
+﻿using Magnetar_Client.Api;
 using Magnetar_Client.Core.Lifecycle;
+using Magnetar_Client.UI;
+using Magnetar_Client.Utils;
+using System;
+using System.Reflection;
+using UnityEngine;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Core;
 
@@ -31,23 +29,22 @@ public class Main
         // Initialize the logger first so subsequent diagnostics are captured
         Utils.Magnetar_Logger.Init();
 
+        DebugLogger.Msg("[Core] Initializing Magnetar Client...");
+
         // Load the IAddons first so that they can register their actions and sevices
         AddonManager.InitAddons();
 
-        Api.Actions.Core.OnEarlyInitialize?.Invoke();
-
-        DebugLogger.Msg($"[Core] Initializing Magnetar Client with Harmony ID: '{Magnetar_Info.HarmonyId}'...");
+        Api.Actions.OnEarlyInitialize?.Invoke();
 
         // Apply the harmony patches
 
-        Api.Actions.Core.OnPreApplyHarmonyPatches?.Invoke();
+        Api.Actions.OnPreApplyHarmonyPatches?.Invoke();
 
         ApplyHarmonyPatches();
 
-        Api.Actions.Core.OnPostApplyHarmonyPatches?.Invoke();
+        Api.Actions.OnPostApplyHarmonyPatches?.Invoke();
 
         // Initialize core systems and modules
-        DebugLogger.Msg("[Core] Proceeding to InitializeCore...");
         Instance.InitializeCore();
     }
 
@@ -59,30 +56,29 @@ public class Main
 
         HarmonyPatchInfo patchInfo = HarmonyManager.HarmonyPatchAll(currentAssembly, HarmonyInstance);
 
-        DebugLogger.Msg($"[Harmony] Total classes checked: {patchInfo.TotalClassesEvaluated} | Succeeded: {patchInfo.SuccessCount} | Failed: {patchInfo.FailCount}");
+        DebugLogger.Msg($"[Core] Applied all Harmony patches - Succeeded: {patchInfo.SuccessCount} | Failed: {patchInfo.FailCount}");
 
         // Log detailed failure diagnostics and exceptions if any patch failed
         if (patchInfo.HasFailures)
         {
-            DebugLogger.Warning($"[Harmony] {patchInfo.FailCount} patch classes failed to apply:");
+            DebugLogger.Warning($"[Core] {patchInfo.FailCount} patch classes failed to apply:");
             for (int i = 0; i < patchInfo.Failures.Count; i++)
             {
                 var failure = patchInfo.Failures[i];
-                DebugLogger.Error($"[Harmony] -> Failure #{i + 1} on '{failure.ClassName}':\nException: {failure.Exception.GetType().Name} - {failure.Exception.Message}\nStack: {failure.Exception.StackTrace}");
+                DebugLogger.Error($"[Core] -> Failure #{i + 1} on '{failure.ClassName}':\nException: {failure.Exception.GetType().Name} - {failure.Exception.Message}\nStack: {failure.Exception.StackTrace}");
             }
         }
     }
 
     void InitializeCore()
     {
-        Api.Actions.Core.OnEarlyInitializeCore?.Invoke();
+        Api.Actions.OnEarlyInitializeCore?.Invoke();
 
         Preferences.InitializePreferences();
 
         // 1. Initialize Built-in Managers (they self-register into ServiceRegistry)
         ModuleManager.Init();
         HUDManager.Init();
-        HUDRenderer.Init();
         NEFManager.Init();
         TopBar.Init();
         ProfileGUI.Init();
@@ -101,7 +97,7 @@ public class Main
         // 4. Run unified pipeline across all registered services
         ServiceRegistry.InitializeAll();
 
-        Api.Actions.Core.OnLateInitializeCore?.Invoke();
+        Api.Actions.OnLateInitializeCore?.Invoke();
 
         DebugLogger.Msg("Magnetar Client Loaded!");
     }
@@ -119,7 +115,7 @@ public class Main
             if (!Config.showgui) SaveLoad.Save();
         }
 
-        Api.Actions.Core.OnUpdate?.Invoke();
+        Api.Actions.OnUpdate?.Invoke();
         ServiceRegistry.UpdateAll();
 
         #region Handle Escape
@@ -193,10 +189,12 @@ public class Main
                 Color prevGuiColor = GUI.color;
                 GUI.color = new Color(1f, 1f, 1f, UIAnimationHelper.FadeProgress);
 
-                TopBar.Render();
                 Config.CurrentTab?.OnGUI?.Invoke();
 
                 ServiceRegistry.RenderMenuAll();
+
+                TopBar.Render();
+                
 
                 GUI.color = prevGuiColor;
             }
@@ -215,19 +213,19 @@ public class Main
 
     public void OnApplicationQuit()
     {
-        Api.Actions.Core.OnEarlyApplicationQuit?.Invoke();
+        Api.Actions.OnEarlyApplicationQuit?.Invoke();
         ServiceRegistry.QuitAll();
         SaveLoad.Save(true);
-        Api.Actions.Core.OnLateApplicationQuit?.Invoke();
+        Api.Actions.OnLateApplicationQuit?.Invoke();
         DebugLogger.Msg("Magnetar Preferences Saved!");
     }
 
     public static void ResetInputBind()
     {
+        UI.WindowDrawing.DrawSetting.focusedControlId = -1;
         UI.WindowDrawing.DrawSetting.activeDropdownId = -1;
         UI.WindowDrawing.DrawSetting.activeSliderId = -1;
         UI.WindowDrawing.DrawSetting.activeTextFieldId = -1;
-        ModuleManager.bindingModuleId = -1;
     }
 
     public static void WarmUp()
@@ -237,6 +235,6 @@ public class Main
 
         ServiceRegistry.WarmUpAll();
 
-        Api.Actions.Core.OnWarmUp?.Invoke();
+        Api.Actions.OnWarmUp?.Invoke();
     }
 }

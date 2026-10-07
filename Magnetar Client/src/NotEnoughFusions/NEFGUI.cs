@@ -57,7 +57,7 @@ public static class NEFGUI
         // ------------------------------------------------------------------------
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
-        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * UIAnimationHelper.SubWindowAlpha;
+        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha;
 
         GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
         GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
@@ -391,13 +391,13 @@ public static class NEFGUI
 #else
                         if (e.button == 0)
                         {
-                            if (showUsagesView) UIAnimationHelper.TriggerSubWindowTransition();
+                            if (showUsagesView) UIAnimationHelper.SwitchView(NEFManager.Group, NEFManager.ViewTree);
                             showUsagesView = false;
                             NEFData.GeneratePyramid(entity);
                         }
                         else if (e.button == 1)
                         {
-                            if (!showUsagesView) UIAnimationHelper.TriggerSubWindowTransition();
+                            if (!showUsagesView) UIAnimationHelper.SwitchView(NEFManager.Group, NEFManager.ViewUsages);
                             showUsagesView = true;
                             NEFData.GenerateUsagesView(entity);
                         }
@@ -444,7 +444,7 @@ public static class NEFGUI
         if (backBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
             showUsagesView = false;
-            UIAnimationHelper.TriggerSubWindowTransition();
+            UIAnimationHelper.SwitchView(NEFManager.Group, NEFManager.ViewTree);
             e.Use();
         }
 
@@ -539,12 +539,12 @@ public static class NEFGUI
                 if (e.button == 0)
                 {
                     showUsagesView = false;
-                    UIAnimationHelper.TriggerSubWindowTransition();
+                    UIAnimationHelper.SwitchView(NEFManager.Group, NEFManager.ViewTree);
                     NEFData.GeneratePyramid(resultEntity);
                 }
                 else if (e.button == 1)
                 {
-                    UIAnimationHelper.TriggerSubWindowTransition();
+                    UIAnimationHelper.SwitchView(NEFManager.Group, NEFManager.ViewUsages);
                     NEFData.GenerateUsagesView(resultEntity);
                 }
                 e.Use();
@@ -647,7 +647,7 @@ public static class NEFGUI
             else if (e.button == 1)
             {
                 showUsagesView = true;
-                UIAnimationHelper.TriggerSubWindowTransition();
+                UIAnimationHelper.SwitchView(NEFManager.Group, NEFManager.ViewUsages);
                 NEFData.GenerateUsagesView(node.Entity);
             }
             e.Use();

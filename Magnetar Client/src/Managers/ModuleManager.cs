@@ -1,8 +1,7 @@
-﻿using Magnetar_Client.Api;
-using Magnetar_Client.Core.Lifecycle;
+﻿using Magnetar_Client.Core.Lifecycle;
+using Magnetar_Client.Core.ModuleManager_;
 using Magnetar_Client.Modules;
 using Magnetar_Client.UI;
-using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
 using System;
 using System.Collections.Generic;
@@ -16,37 +15,25 @@ namespace Magnetar_Client.Core;
 
 public static class ModuleManager
 {
+    public enum WindowType
+    {
+        Modules,
+        Settings,
+        SelectionGUI,
+    }
+    public const string Group = "ModuleManager";
     public static bool IsInitialized { get; private set; } = false;
     public static List<Modules.Module> Modules = new();
-    public static bool showModules = true;
-    public static bool showSettings = false;
-    public static bool showSelectionGui = false;
+    public static WindowType CurrentWindow = WindowType.Modules;
     public static Modules.Module activeSettingsModule = null;
-
     public static bool resetWindowPos = false;
-    public static int bindingModuleId = -1;
+    
 
     public static Dictionary<ModuleCategory, Rect> windowPositions => CategoryWindowDrawer.WindowPositions;
     public static string ModuleSearchQuery
     {
         get => SearchWindowDrawer.SearchQuery;
         set => SearchWindowDrawer.SearchQuery = value;
-    }
-
-    /// <summary>
-    /// Computes whether ModuleManager is in a clean root state where closing the GUI is safe.
-    /// </summary>
-    public static bool SafeToClose
-    {
-        get
-        {
-            return showModules
-                   && bindingModuleId == -1
-                   && focusedControlId == -1
-                   && activeTextFieldId == -1
-                   && activeDropdownId == -1
-                   && activeSliderId == -1;
-        }
     }
 
     public static void Init()
@@ -83,64 +70,10 @@ public static class ModuleManager
         MultiSelectWindowDrawer.InitializeLayout();
         SearchWindowDrawer.Initialize();
 
-        showModules = true;
-        showSettings = false;
-        showSelectionGui = false;
-
         // Register to centralized ServiceRegistry and SafeToCloseManager
         ServiceRegistry.Register(new ModuleManagerService());
 
-        SafeToCloseManager.RegisterGuard(() =>
-        {
-            if (Config.CurrentTab == TabType.MODULES)
-            {
-                return SafeToClose;
-            }
-            return true;
-        });
-
-        SafeToCloseManager.RegisterInterceptor(() =>
-        {
-            if (Config.CurrentTab != TabType.MODULES) return false;
-
-            // 1. Cancel active binding or text input
-            if (bindingModuleId != -1 || focusedControlId != -1 || activeTextFieldId != -1)
-            {
-                Main.ResetInputBind();
-                return true;
-            }
-
-            // 2. Step back from Selection GUI to Settings
-            if (showSelectionGui)
-            {
-                showSettings = true;
-                showSelectionGui = false;
-                Main.ResetInputBind();
-                return true;
-            }
-
-            // 3. Step back from Settings to Modules root
-            if (showSettings)
-            {
-                showModules = true;
-                showSettings = false;
-                showSelectionGui = false;
-
-                if (Modules != null)
-                {
-                    for (int i = 0; i < Modules.Count; i++)
-                    {
-                        if (Modules[i] != null)
-                            Modules[i].ShowSettings = false;
-                    }
-                }
-
-                Main.ResetInputBind();
-                return true;
-            }
-
-            return false;
-        });
+        UIAnimationHelper.SetViewImmediate(Group, WindowType.Modules.ToString(), 1f);
 
         IsInitialized = true;
         DebugLogger.Msg($"Loaded {Modules.Count} modules");
@@ -186,27 +119,15 @@ public static class ModuleManager
     public static void OpenModuleSettings(Modules.Module mod)
     {
         MobileInputHandler.Reset();
-        showModules = false;
-        showSelectionGui = false;
-        showSettings = true;
-        activeSettingsModule = mod;
 
-        foreach (var m in Modules)
-            m.ShowSettings = false;
+        CurrentWindow = WindowType.Settings;
+
+        activeSettingsModule = mod;
 
         mod.ShowSettings = true;
         resetWindowPos = true;
 
-        // Trigger smooth alpha dip and glide
-        UIAnimationHelper.TriggerSubWindowTransition();
-    }
-
-    public static void RenderCheck()
-    {
-        if (Config.CurrentTab == TabType.MODULES)
-        {
-            Render();
-        }
+        UIAnimationHelper.SwitchView(Group, CurrentWindow.ToString());
     }
 
     public static void Render()
@@ -214,17 +135,19 @@ public static class ModuleManager
         Event currentEvent = Event.current;
         MobileInputHandler.Update(currentEvent);
 
-        if (showModules)
+        // Render any view that is currently visible or cross-fading
+        if (UIAnimationHelper.GetViewAlpha(Group, WindowType.Modules.ToString()) > 0.001f)
         {
-            resetWindowPos = true;
             SearchWindowDrawer.Render(currentEvent);
             CategoryWindowDrawer.Render();
         }
-        else if (showSettings)
+
+        if (UIAnimationHelper.GetViewAlpha(Group, WindowType.Settings.ToString()) > 0.001f)
         {
             SettingsWindowDrawer.Render(currentEvent);
         }
-        else if (showSelectionGui)
+
+        if (UIAnimationHelper.GetViewAlpha(Group, WindowType.SelectionGUI.ToString()) > 0.001f)
         {
             MultiSelectWindowDrawer.Render(currentEvent);
         }
@@ -256,7 +179,7 @@ public static class ModuleManager
 
     static void HandleHotkeys()
     {
-        if (focusedControlId != -1 || bindingModuleId != -1) return;
+        if (IsFocused) return;
 
         foreach (var mod in Modules)
         {
@@ -294,12 +217,11 @@ public static class ModuleManager
         }
     }
 
-    private class ModuleManagerService : IInitializable, IWarmUp, IUpdatable, IRenderable, IMenuRenderable, ICloseHandler, ILanguageAware
+    private class ModuleManagerService : IWarmUp, IUpdatable, IRenderable, IMenuRenderable, ICloseHandler, ILanguageAware
     {
         public string Name => "ModuleManager";
         public int Priority => ServicePriority.Modules;
 
-        public void Initialize() { }
         public void OnWarmUp() => Render();
         public void OnUpdate() => ModuleManager.OnUpdate();
         public void OnGUI() => RenderModulesGUI();
@@ -312,30 +234,38 @@ public static class ModuleManager
             }
         }
 
-        public bool CanClose() => ModuleManager.SafeToClose;
-
         public bool OnEscapePressed()
         {
-            // Inside your Escape back-handler when closing Settings:
-            if (ModuleManager.showSettings)
+            if (Config.CurrentTab != TabType.MODULES) return false;
+
+            if (DrawSetting.IsFocused)
             {
-                ModuleManager.showModules = true;
-                ModuleManager.showSettings = false;
-                ModuleManager.showSelectionGui = false;
-
-                if (ModuleManager.Modules != null)
-                {
-                    for (int i = 0; i < ModuleManager.Modules.Count; i++)
-                    {
-                        if (ModuleManager.Modules[i] != null)
-                            ModuleManager.Modules[i].ShowSettings = false;
-                    }
-                }
-
                 Main.ResetInputBind();
-                UIAnimationHelper.TriggerSubWindowTransition(); // Smoothly blends back into Category Windows
                 return true;
             }
+
+            if (CurrentWindow != WindowType.Modules)
+            {
+                switch (CurrentWindow)
+                {
+                    case WindowType.Settings:
+                        if (activeSettingsModule != null)
+                        {
+                            activeSettingsModule.ShowSettings = false;
+                        }
+                        CurrentWindow = WindowType.Modules;
+                        break;
+                    case WindowType.SelectionGUI:
+                        CurrentWindow = WindowType.Settings;
+                        break;
+                }
+
+                // Cross-fade to the new window state
+                UIAnimationHelper.SwitchView(Group, CurrentWindow.ToString());
+                Main.ResetInputBind();
+                return true;
+            }
+
             return false;
         }
 
@@ -346,6 +276,15 @@ public static class ModuleManager
             {
                 Modules[i]?.OnLanguageChanged();
             }
+        }
+
+        public bool CanClose()
+        {
+            if (Config.CurrentTab == TabType.MODULES)
+            {
+                return CurrentWindow == WindowType.Modules && !DrawSetting.IsFocused;
+            }
+            return true;
         }
     }
 }

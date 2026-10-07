@@ -1,5 +1,5 @@
-﻿using static Magnetar_Client.UI.Themes.ThemeManager;
-using UnityEngine;
+﻿using UnityEngine;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 
 namespace Magnetar_Client.HUDElements;
 

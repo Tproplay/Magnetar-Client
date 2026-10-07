@@ -5,6 +5,17 @@ namespace Magnetar_Client.UI.WindowDrawing;
 
 public static partial class DrawSetting
 {
+    public static bool IsFocused
+    {
+        get
+        {
+            return focusedControlId != -1
+                || activeSliderId != -1
+                || activeTextFieldId != -1
+                || activeDropdownId != -1;
+        }
+    }
+
     public static int focusedControlId = -1;
     public static string currentInputBuffer = "";
     public static int activeSliderId = -1;

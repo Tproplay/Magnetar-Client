@@ -1,10 +1,10 @@
-﻿using Magnetar_Client.UI.Themes;
+﻿using Il2CppSystem.IO;
+using Magnetar_Client.Core.Lifecycle;
+using Magnetar_Client.UI.Themes;
 using Magnetar_Client.Utils;
 using System;
 using UnityEngine;
-using Il2CppSystem.IO;
 using static Magnetar_Client.Api.PathsManager;
-using Magnetar_Client.Core.Lifecycle;
 
 #if MELONLOADER || RELEASE_MELON
 

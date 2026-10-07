@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using static Magnetar_Client.Api.PathsManager;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using Magnetar_Client.Core.HUDManager_;
 
 namespace Magnetar_Client.Core;
 
@@ -57,7 +58,7 @@ public static class AddonManager
 
     /// <summary>
     /// Scans the 'Mods/Magnetar Addon' directory, loads all assemblies into memory,
-    /// and instantiates and initializes all IAddon implementations first.
+    /// and instantiates and initializes all IMagnetarAddon implementations first.
     /// </summary>
     public static void InitAddons()
     {
@@ -68,13 +69,6 @@ public static class AddonManager
             LoadedAddons.Clear();
             DiscoveredAssemblies.Clear();
 
-            if (!Directory.Exists(AddonsDir))
-            {
-                Directory.CreateDirectory(AddonsDir);
-                DebugLogger.Msg($"[AddonManager] Created addon directory at: {AddonsDir}");
-                return;
-            }
-
             string[] dllFiles = Directory.GetFiles(AddonsDir, "*.dll", SearchOption.AllDirectories);
             if (dllFiles.Length == 0)
             {
@@ -83,65 +77,82 @@ public static class AddonManager
 
             DebugLogger.Msg($"[AddonManager] Discovered {dllFiles.Length} candidate assembly file(s)");
 
-            // Pass 1: Load assemblies and execute IAddon lifecycle
+            // Load assemblies
             foreach (string filePath in dllFiles)
             {
-                string fileName = Path.GetFileName(filePath);
                 try
                 {
-                    Assembly assembly = Assembly.LoadFrom(filePath);
-
-                    Type[] exportedTypes;
-                    try
-                    {
-                        exportedTypes = assembly.GetTypes();
-                    }
-                    catch (ReflectionTypeLoadException ex)
-                    {
-                        exportedTypes = ex.Types.Where(t => t != null).ToArray();
-                        DebugLogger.Warning($"[AddonManager] Type resolution warning in '{fileName}': {ex.LoaderExceptions.FirstOrDefault()?.Message}");
-                    }
-
-                    DiscoveredAssemblies[filePath] = (assembly, exportedTypes);
-
-                    var addonInfo = new AddonInfo
-                    {
-                        FileName = fileName,
-                        FilePath = filePath,
-                        LoadedAssembly = assembly
-                    };
-
-                    // Discover concrete IAddon implementations
-                    Type addonEntryType = exportedTypes.FirstOrDefault(t =>
-                        typeof(IAddon).IsAssignableFrom(t) && !t.IsAbstract && t.IsClass);
-
-                    if (addonEntryType != null)
-                    {
-                        try
-                        {
-                            var addonInstance = (IAddon)Activator.CreateInstance(addonEntryType);
-                            addonInfo.AddonInstance = addonInstance;
-                            addonInstance.OnLoad();
-                        }
-                        catch (Exception ex)
-                        {
-                            DebugLogger.Error($"[AddonManager] Failed to instantiate IAddon in '{fileName}': {ex}");
-                        }
-                    }
-
-                    LoadedAddons.Add(addonInfo);
+                    var info = LoadAssembly(filePath);
+                    if (info!= null) LoadedAddons.Add(info);
                 }
                 catch (Exception ex)
                 {
-                    DebugLogger.Error($"[AddonManager] Failed to load assembly '{fileName}': {ex}");
+                    DebugLogger.Error($"[AddonManager] Failed to load assembly '{Path.GetFileName(filePath)}': {ex}");
                 }
             }
+
+            // Execute their OnLoad
+            LoadedAddons.ForEach(
+                addon => addon.AddonInstances.
+                    ForEach(
+                        instance => instance.OnLoad()
+                        )
+                );
+
         }
         catch (Exception ex)
         {
             DebugLogger.Error($"[AddonManager] Critical error during InitAddons: {ex}");
         }
     }
+
+    private static AddonInfo LoadAssembly(string filePath)
+    {
+        string fileName = Path.GetFileName(filePath);
+
+        Assembly assembly = Assembly.LoadFrom(filePath);
+
+        Type[] exportedTypes;
+        try
+        {
+            exportedTypes = assembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            exportedTypes = ex.Types.Where(t => t != null).ToArray();
+            DebugLogger.Warning($"[AddonManager] Type resolution warning in '{fileName}': {ex.LoaderExceptions.FirstOrDefault()?.Message}");
+        }
+
+        DiscoveredAssemblies[filePath] = (assembly, exportedTypes);
+
+        var addonInfo = new AddonInfo
+        {
+            FileName = fileName,
+            FilePath = filePath,
+            LoadedAssembly = assembly
+        };
+
+        // Discover concrete IMagnetarAddon implementations
+        var addonEntryTypes = exportedTypes.Where(t =>
+        typeof(IMagnetarAddon).IsAssignableFrom(t) && !t.IsAbstract && t.IsClass);
+
+        foreach (Type addonType in addonEntryTypes)
+        {
+            try
+            {
+                var addonInstance = (IMagnetarAddon)Activator.CreateInstance(addonType);
+                addonInfo.AddonInstances.Add(addonInstance);
+
+                DebugLogger.Msg($"[AddonManager] Discovered addon '{addonInstance.Name}' v{addonInstance.Version} by {addonInstance.Author} in '{fileName}'");
+            }
+            catch (Exception ex)
+            {
+                DebugLogger.Error($"[AddonManager] Failed to instantiate IMagnetarAddon type '{addonType.FullName}' in '{fileName}': {ex}");
+            }
+        }
+
+        return addonInfo;
+    } 
 
     /// <summary>
     /// Discovers and registers all Module subclasses from the previously loaded addon assemblies.

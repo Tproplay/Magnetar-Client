@@ -13,7 +13,7 @@ namespace Magnetar_Client;
 public static class Magnetar_Info
 {
     public const string ModName = "Magnetar Client";
-    public const string Version = "4.0.1";
+    public const string Version = "4.0.3";
     public const string Developer = "Tproplay";
     public const string HarmonyId = "com.tproplay.magnetar";
 }
@@ -191,7 +191,7 @@ public static class Config
             set => _baseSettingsWidth = value;
         }
 
-        public static float PopupSpeed = 10f;
+        public static float PopupSpeed = 13f;
 
         // Search Window
         public static float SearchAnimationSpeed = 15f;

@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Magnetar_Client.Core.Lifecycle;
+using System;
 using System.Collections.Generic;
-using Magnetar_Client.Core.Lifecycle;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Api;

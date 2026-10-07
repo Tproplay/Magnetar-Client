@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
-using Magnetar_Client.Core;
+﻿using Magnetar_Client.Core;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
 using Magnetar_Client.Utils;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Magnetar_Client.UI.Setting;
 
@@ -19,6 +19,7 @@ public class MultiSelectSetting : Setting
     public System.Type EnumType { get; private set; }
 
     public Action<int, bool> OnSelectionChanged { get; set; }
+    public Action OnWindowOpen { get; set; }
 
     public Dictionary<int, string> CustomNames;
     public bool DisplayAlphabetically = false;
@@ -124,11 +125,7 @@ public class MultiSelectSetting : Setting
 
         if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
-            ModuleManager.showModules = false;
-            ModuleManager.showSettings = false;
-            ModuleManager.showSelectionGui = true;
-
-            MultiSelectWindowDrawer.ActiveMultiSelect = this;
+            OnWindowOpen?.Invoke();
             DrawSetting.multiSelectSearchQuery = "";
             DrawSetting.manualScrollY = 0f;
             e.Use();

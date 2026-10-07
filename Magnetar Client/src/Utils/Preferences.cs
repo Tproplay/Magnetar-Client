@@ -1,9 +1,4 @@
 ﻿using MelonLoader;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Magnetar_Client;
 
@@ -25,6 +20,8 @@ public static class Preferences
 #endif
     public static void InitializePreferences()
     {
+        Api.Actions.OnEarlyInitializePreferences?.Invoke();
+
 #if MELONLOADER || RELEASE_MELON
         Preferences.MagnetarCategory = MelonPreferences.CreateCategory("Magnetar Client", "Magnetar Client");
 
@@ -102,7 +99,7 @@ public static class Preferences
             AutoSaveLogger.Error($"Failed to bind BepInEx preference: {ex.Message}");
         }
 #endif
-        Api.Actions.SaveLoad.OnLateInitializePreferences?.Invoke();
+        Api.Actions.OnLateInitializePreferences?.Invoke();
     }
 
 }

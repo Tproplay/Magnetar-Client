@@ -1,9 +1,9 @@
-﻿using Magnetar_Client.UI.Themes;
+﻿using Magnetar_Client.Core.Lifecycle;
+using Magnetar_Client.UI.Themes;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static Magnetar_Client.Utils.Translator;
-using Magnetar_Client.Core.Lifecycle;
 
 namespace Magnetar_Client.Core;
 

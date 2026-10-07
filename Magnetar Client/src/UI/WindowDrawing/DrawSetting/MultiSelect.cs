@@ -1,5 +1,5 @@
-﻿using Magnetar_Client.UI.Themes;
-using Magnetar_Client.UI.Setting;
+﻿using Magnetar_Client.UI.Setting;
+using Magnetar_Client.UI.Themes;
 using Magnetar_Client.Utils;
 using System;
 using System.Collections.Generic;
@@ -75,17 +75,7 @@ public static partial class DrawSetting
             if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
             {
                 e.Use();
-                if (onClose != null)
-                {
-                    onClose.Invoke();
-                }
-                else
-                {
-                    Core.ModuleManager.showSelectionGui = false;
-                    Core.ModuleManager.showModules = true;
-                    Core.GUIManager.isSelectingSubWindow = false;
-                    Core.HUDManager.isSelectingElements = false;
-                }
+                onClose?.Invoke();
                 return;
             }
 

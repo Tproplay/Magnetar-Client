@@ -90,12 +90,12 @@ public class Main
         AddonManager.InitHUDElements();
         AddonManager.InitServices();
 
-        // 3. Load state, themes, and translations
+        // 3. Run unified pipeline across all registered services
+        ServiceRegistry.InitializeAll();
+
+        // 4. Load state, themes, and translations
         Translator.LoadTranslations();
         SaveLoad.Load();
-
-        // 4. Run unified pipeline across all registered services
-        ServiceRegistry.InitializeAll();
 
         Api.Actions.OnLateInitializeCore?.Invoke();
 

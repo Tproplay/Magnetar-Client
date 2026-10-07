@@ -1,4 +1,5 @@
 ﻿using Magnetar_Client.Core.Lifecycle;
+using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ namespace Magnetar_Client.Core;
 
 public class TabType : IEquatable<TabType>
 {
+    public const string AnimationGroup = "Tabs";
     private static int _nextId = 0;
     private static readonly Dictionary<string, TabType> _registeredTabs = new(StringComparer.OrdinalIgnoreCase);
     private static readonly List<TabType> _allTabs = new();
@@ -19,6 +21,7 @@ public class TabType : IEquatable<TabType>
     public string Name { get; }
     public bool IsCustom { get; }
     public Action OnSelected { get; set; }
+    public Action OnDeselected { get; set; }
     public Action OnGUI { get; set; }
 
     // Predefined built-in tabs (mirrors original enum values)
@@ -28,12 +31,13 @@ public class TabType : IEquatable<TabType>
     public static readonly TabType NEF = RegisterInternal("NEF");
     public static readonly TabType PROFILE = RegisterInternal("PROFILE");
 
-    private TabType(string name, int id, bool isCustom, Action onSelected = null, Action onGUI = null)
+    private TabType(string name, int id, bool isCustom, Action onSelected = null, Action onDeselected = null, Action onGUI = null)
     {
         Name = name;
         Id = id;
         IsCustom = isCustom;
         OnSelected = onSelected;
+        OnDeselected = onDeselected;
         OnGUI = onGUI;
     }
 
@@ -49,7 +53,7 @@ public class TabType : IEquatable<TabType>
     /// <summary>
     /// Registers a new custom tab. Automatically updates TopBar geometry.
     /// </summary>
-    public static TabType Register(string name, Action onSelected = null, Action onGUI = null)
+    public static TabType Register(string name, Action onSelected = null, Action onDeselected = null, Action onGUI = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Tab name cannot be null or empty.", nameof(name));
@@ -58,11 +62,12 @@ public class TabType : IEquatable<TabType>
         if (_registeredTabs.TryGetValue(cleanName, out var existing))
         {
             if (onSelected != null) existing.OnSelected = onSelected;
+            if (onDeselected != null) existing.OnDeselected = onDeselected;
             if (onGUI != null) existing.OnGUI = onGUI;
             return existing;
         }
 
-        var tab = new TabType(cleanName, _nextId++, true, onSelected, onGUI);
+        var tab = new TabType(cleanName, _nextId++, true, onSelected, onDeselected, onGUI);
         _registeredTabs[cleanName] = tab;
         _allTabs.Add(tab);
 
@@ -126,6 +131,7 @@ public static class TopBar
 
     public static void Init()
     {
+        UIAnimationHelper.SetViewImmediate(TabType.AnimationGroup, Config.CurrentTab.Name, 1.0f);
         RebuildOffsets();
         ServiceRegistry.Register(new TopBarService());
     }
@@ -214,8 +220,19 @@ public static class TopBar
 
             if (e.type == EventType.MouseDown && e.button == 0 && btnRect.Contains(e.mousePosition))
             {
-                Config.CurrentTab = tab;
-                tab.OnSelected?.Invoke();
+                if (Config.CurrentTab != tab)
+                {
+                    TabType previousTab = Config.CurrentTab;
+
+                    previousTab?.OnDeselected?.Invoke();
+
+                    Config.CurrentTab = tab;
+
+                    UIAnimationHelper.SwitchView(TabType.AnimationGroup, tab.Name);
+
+                    tab.OnSelected?.Invoke();
+                }
+
                 e.Use();
             }
         }

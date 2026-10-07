@@ -110,8 +110,11 @@ public static class ThemeManager
     private static float _lastScale = -1f;
     private static float _lastElementScale = -1f;
 
+    private static bool _initialized = false;
+
     public static void Init()
     {
+        _initialized = true;
         BuildEmptyStyles();
         LoadThemes();
         ApplyTheme(CurrentThemeName);
@@ -216,6 +219,8 @@ public static class ThemeManager
 
     public static void ApplyTheme(string themeName)
     {
+        if (!_initialized) return;
+
         if (!ThemeData.LoadedThemes.TryGetValue(themeName, out var theme))
         {
             theme = ThemeData.InternalDefaultTheme;

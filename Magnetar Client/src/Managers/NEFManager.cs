@@ -75,10 +75,7 @@ public static class NEFManager
 
         public void OnMenuGUI()
         {
-            if (Config.CurrentTab == TabType.NEF)
-            {
-                NEFManager.Render();
-            }
+            UIAnimationHelper.RenderWithTabAlpha(TabType.NEF, NEFManager.Render);
         }
 
         public bool CanClose()

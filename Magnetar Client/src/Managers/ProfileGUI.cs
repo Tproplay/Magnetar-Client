@@ -227,10 +227,7 @@ public static class ProfileGUI
 
         public void OnMenuGUI()
         {
-            if (Config.CurrentTab == TabType.PROFILE)
-            {
-                ProfileGUI.Render();
-            }
+            UIAnimationHelper.RenderWithTabAlpha(TabType.PROFILE, ProfileGUI.Render);
         }
 
         public bool CanClose()

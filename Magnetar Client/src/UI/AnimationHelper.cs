@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Magnetar_Client.Core;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -138,4 +139,64 @@ public static class UIAnimationHelper
     }
 
     public static bool ShouldRenderGUI => Config.showgui || FadeProgress > 0.001f;
+
+    /// <summary>
+    /// Smoothly transitions a specific view inside a group toward a target alpha (0.0 to 1.0).
+    /// </summary>
+    public static void FadeView(string group, string viewKey, float targetAlpha, float? speed = null)
+    {
+        if (string.IsNullOrEmpty(group) || string.IsNullOrEmpty(viewKey)) return;
+
+        float animSpeed = speed ?? DefaultWindowSpeed;
+
+        if (!_scopedViews.TryGetValue(group, out var groupViews))
+        {
+            groupViews = new Dictionary<string, ViewState>(StringComparer.OrdinalIgnoreCase);
+            _scopedViews[group] = groupViews;
+        }
+
+        if (!groupViews.TryGetValue(viewKey, out var state))
+        {
+            state = new ViewState
+            {
+                CurrentAlpha = 0f,
+                TargetAlpha = Mathf.Clamp01(targetAlpha),
+                Speed = animSpeed
+            };
+            groupViews[viewKey] = state;
+        }
+        else
+        {
+            state.TargetAlpha = Mathf.Clamp01(targetAlpha);
+            if (speed.HasValue) state.Speed = speed.Value;
+        }
+    }
+
+    /// <summary>
+    /// Executes a render action with blended tab alpha if the tab view is active or transitioning.
+    /// Automatically handles GUI.color preservation and restoration.
+    /// </summary>
+    /// <param name="tab">The target tab to check.</param>
+    /// <param name="renderAction">The render delegate to execute.</param>
+    /// <param name="threshold">Minimum visible alpha threshold.</param>
+    public static void RenderWithTabAlpha(TabType tab, Action renderAction, float threshold = 0.001f)
+    {
+        if (tab == null || renderAction == null) return;
+
+        float tabAlpha = GetViewAlpha(TabType.AnimationGroup, tab.Name);
+        if (tabAlpha <= threshold) return;
+
+        Color prevColor = GUI.color;
+        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * tabAlpha);
+
+        try
+        {
+            renderAction();
+        }
+        finally
+        {
+            GUI.color = prevColor;
+        }
+    }
+
 }

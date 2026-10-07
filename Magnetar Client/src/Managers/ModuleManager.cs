@@ -75,6 +75,18 @@ public static class ModuleManager
 
         UIAnimationHelper.SetViewImmediate(Group, WindowType.Modules.ToString(), 1f);
 
+        TabType.MODULES.OnDeselected = () =>
+        {
+            MultiSelectTabStorage.SaveState(TabType.MODULES);
+            UIAnimationHelper.FadeView(Group, CurrentWindow.ToString(), 0f);
+        };
+
+        TabType.MODULES.OnSelected = () =>
+        {
+            MultiSelectTabStorage.RestoreState(TabType.MODULES);
+            UIAnimationHelper.SwitchView(Group, CurrentWindow.ToString());
+        };
+
         IsInitialized = true;
         DebugLogger.Msg($"Loaded {Modules.Count} modules");
     }
@@ -228,10 +240,7 @@ public static class ModuleManager
 
         public void OnMenuGUI()
         {
-            if (Config.CurrentTab == TabType.MODULES)
-            {
-                Render();
-            }
+            UIAnimationHelper.RenderWithTabAlpha(TabType.MODULES, ModuleManager.Render);
         }
 
         public bool OnEscapePressed()

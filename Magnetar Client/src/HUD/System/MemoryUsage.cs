@@ -19,7 +19,7 @@ public class RAMElement : HudElement
         UpdateInterval = 1;
     }
 
-    string displayText = "RAM: <color=yellow>{Na</color>";
+    string displayText = "RAM: <color=yellow>Na</color>";
     protected override void DrawContent(float width, float height)
     {
         GUI.Label(new Rect(5, 5, width - 5, height - 5), displayText, HUDElementStyle);
@@ -37,11 +37,11 @@ public class RAMElement : HudElement
 
         displayText = $"RAM: <color={color}>{displayValue} MB</color>";
 
-        AdjustWidthToText(displayText, HUDElementStyle, 10);
+        AdjustWidthToText(displayText, HUDElementStyle, 8);
     }
     public override void OnEnable()
     {
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        AdjustWidthToText(displayText, HUDElementStyle, 8);
     }
 }
 

@@ -42,7 +42,7 @@ public class CPUElement : HudElement
 
     public override void OnEnable()
     {
-        displayText = $"<color=cyan>{cpuName}</color>\n";
+        displayText = $"<color=cyan>{cpuName}</color>";
 
         AdjustWidthToText(displayText, HUDElementStyle, 10);
     }

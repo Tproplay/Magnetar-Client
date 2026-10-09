@@ -208,9 +208,9 @@ public class TotalZombieHealth : HudElement
         GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
     }
 
-    long GetZombieHealth()
+    double GetZombieHealth()
     {
-        long health = 0;
+        double health = 0;
         foreach (Zombie zombie in ZombieList)
         {
             if (zombie.isMindControlled) continue;
@@ -247,9 +247,9 @@ public class TotalHypnotizedZombieHealth : HudElement
     }
 
 
-    long GetZombieHealth()
+    double GetZombieHealth()
     {
-        long health = 0;
+        double health = 0;
         foreach (Zombie zombie in ZombieList)
         {
             if (!zombie.isMindControlled) continue;

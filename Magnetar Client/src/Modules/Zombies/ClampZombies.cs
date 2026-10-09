@@ -93,8 +93,8 @@ public class ClampZombies : Module
 
 
                 // Sum Healths
-                rightZombie.theMaxHealth += (int)(leftZombie.theHealth * HpAdditionPercentageSetting.Value/100);
-                rightZombie.theHealth += (int)(leftZombie.theHealth * HpAdditionPercentageSetting.Value / 100);
+                rightZombie.theMaxHealth += (long)(leftZombie.theHealth * HpAdditionPercentageSetting.Value/100);
+                rightZombie.theHealth += (long)(leftZombie.theHealth * HpAdditionPercentageSetting.Value / 100);
 
                 if (leftZombie.theFirstArmorHealth > 0)
                 {

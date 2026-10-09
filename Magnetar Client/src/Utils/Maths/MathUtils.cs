@@ -9,19 +9,30 @@ public static class Maths
     {
         long absoluteValue = Math.Abs(number);
 
-        if (absoluteValue >= 1_000_000_000_000) // Trillion
-            return (number / 1_000_000_000_000D).ToString("0.##") + "TranslateText";
+        // Quintillion
+        if (absoluteValue >= 1_000_000_000_000_000_000)
+            return (number / 1_000_000_000_000_000_000D).ToString("0.##") + "Qi";
 
-        if (absoluteValue >= 1_000_000_000) // Billion
+        // Quadrillion
+        if (absoluteValue >= 1_000_000_000_000_000)
+            return (number / 1_000_000_000_000_000D).ToString("0.##") + "Q";
+
+        // Trillion
+        if (absoluteValue >= 1_000_000_000_000)
+            return (number / 1_000_000_000_000D).ToString("0.##") + "T";
+
+        // Billion
+        if (absoluteValue >= 1_000_000_000)
             return (number / 1_000_000_000D).ToString("0.##") + "B";
 
-        if (absoluteValue >= 1_000_000) // Million
+        // Million
+        if (absoluteValue >= 1_000_000)
             return (number / 1_000_000D).ToString("0.##") + "M";
 
-        if (absoluteValue >= 1_000) // Thousand
+        // Thousand
+        if (absoluteValue >= 1_000)
             return (number / 1_000D).ToString("0.##") + "K";
 
-        // Return the original number as a string if under 1,000
         return number.ToString();
     }
 
@@ -32,23 +43,33 @@ public static class Maths
 
         double absoluteValue = Math.Abs(number);
 
+        // Note: Using 999,950... thresholds fixes floating-point rounding bugs 
+        // (e.g., preventing 999,999 from rendering as "1000K" instead of "1M")
+
+        // Quintillion
+        if (absoluteValue >= 999_950_000_000_000_000D)
+            return (number / 1_000_000_000_000_000_000D).ToString("0.##") + "Qi";
+
+        // Quadrillion
+        if (absoluteValue >= 999_950_000_000_000D)
+            return (number / 1_000_000_000_000_000D).ToString("0.##") + "Q";
+
         // Trillion
-        if (absoluteValue >= 1_000_000_000_000D)
-            return (number / 1_000_000_000_000D).ToString("0.##") + "TranslateText";
+        if (absoluteValue >= 999_950_000_000D)
+            return (number / 1_000_000_000_000D).ToString("0.##") + "T";
 
         // Billion
-        if (absoluteValue >= 1_000_000_000D)
+        if (absoluteValue >= 999_950_000D)
             return (number / 1_000_000_000D).ToString("0.##") + "B";
 
         // Million
-        if (absoluteValue >= 1_000_000D)
+        if (absoluteValue >= 999_950D)
             return (number / 1_000_000D).ToString("0.##") + "M";
 
         // Thousand
-        if (absoluteValue >= 1_000D)
+        if (absoluteValue >= 999.95D)
             return (number / 1_000D).ToString("0.##") + "K";
 
-        // Return the original number under 1,000 (maintains up to two decimals)
         return number.ToString("0.##");
     }
 

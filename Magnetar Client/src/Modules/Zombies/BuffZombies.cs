@@ -84,12 +84,12 @@ public class BuffZombies : Module
                     };
 
                 // 2. Multiply Max Healths
-                zombie.theMaxHealth = Mathf.RoundToInt(zombie.theMaxHealth * multiplier);
+                zombie.theMaxHealth = (long)System.Math.Round(zombie.theMaxHealth * multiplier);
                 zombie.theFirstArmorMaxHealth = Mathf.RoundToInt(zombie.theFirstArmorMaxHealth * multiplier);
                 zombie.theSecondArmorMaxHealth = Mathf.RoundToInt(zombie.theSecondArmorMaxHealth * multiplier);
 
                 // 3. Multiply Current Healths
-                zombie.theHealth = Mathf.RoundToInt(zombie.theHealth * multiplier);
+                zombie.theHealth = (long)System.Math.Round(zombie.theHealth * multiplier);
                 zombie.theFirstArmorHealth = Mathf.RoundToInt(zombie.theFirstArmorHealth * multiplier);
                 zombie.theSecondArmorHealth = Mathf.RoundToInt(zombie.theSecondArmorHealth * multiplier);
 

@@ -60,7 +60,7 @@ public class DebugMode : Module
     {
         instance = this;
 
-        ParticleNameTranslated = TranslatedNames(typeof(ParticleType));
+        ParticleNameTranslated = TranslateEnum(typeof(ParticleType));
 
         CreateCategory("General");
 

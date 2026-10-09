@@ -1,5 +1,4 @@
-﻿using Magnetar_Client.Utils;
-using MelonLoader.Utils;
+﻿using MelonLoader.Utils;
 using System;
 using System.IO;
 using UnityEngine;
@@ -9,7 +8,17 @@ namespace Magnetar_Client.Api;
 
 public static class PathsManager
 {
+
+    #region Mods / Plugin Directory 
     static string _cachedModsDir;
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / Mods
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / plugins
+    /// </remarks>
     public static string ModsDir
     {
         get
@@ -69,17 +78,35 @@ public static class PathsManager
         }
     }
 
-    public static string AddonsDir => GetAddonsDir();
-
-    static string GetAddonsDir()
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / Mods / Magnetar Data
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / plugins / Magnetar Data
+    /// </remarks>
+    public static string DataDir => GetSafeDataDir();
+    static string GetSafeDataDir()
     {
-        var path = Path.Combine(ConfigDir, "Magnetar Profiles");
+        var path = Path.Combine(ModsDir, "Magnetar Data");
         if (!Directory.Exists(path)) Directory.CreateDirectory(path);
         return path;
     }
 
+    #endregion
+
+    #region UserData / Config
     private static string _cachedConfigDir;
 
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / UserData
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / config
+    /// </remarks>
     public static string ConfigDir
     {
         get
@@ -128,8 +155,6 @@ public static class PathsManager
             targetDir = MelonEnvironment.UserDataDirectory;
 #elif BEPINEX || RELEASE_BEPINEX
             targetDir = Paths.ConfigPath;
-#else
-            targetDir = Path.Combine(Application.persistentDataPath, "Magnetar", "Config");
 #endif
 
             try
@@ -151,6 +176,14 @@ public static class PathsManager
         }
     }
 
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / UserData / Magnetar Profiles
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / config / Magnetar Profiles
+    /// </remarks>
     public static string ProfilesDir => GetProfilesDir();
     static string GetProfilesDir()
     {
@@ -159,36 +192,78 @@ public static class PathsManager
         return path;
     }
 
+    /// <summary>
+    /// Gets the path to the save file of the profile.
+    /// </summary>
     public static string GetProfilePath(string profileName)
     {
         string safeName = string.Join("_", profileName.Split(Path.GetInvalidFileNameChars()));
         return Path.Combine(ProfilesDir, $"Magnetar_{safeName}.json");
     }
-    public static string GetSafeProfilePath(string profileName)
+
+    #endregion
+
+    #region Magnetar Data
+
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / Mods / Magnetar Data / Addons
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / plugins / Magnetar Data / Addons
+    /// </remarks>
+    public static string AddonsDir => GetAddonsDir();
+    static string GetAddonsDir()
     {
-        string path = GetProfilePath(profileName);
+        var path = Path.Combine(DataDir, "Addons");
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
         return path;
     }
 
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / Mods / Magnetar Data / Magnetar Translation
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / plugins / Magnetar Data / Magnetar Translation
+    /// </remarks>
     public static string TranslationRootDir => GetSafeTranslationRootDir();
 
     static string GetSafeTranslationRootDir()
     {
-        var path = Path.Combine(ModsDir, "Magnetar Translation");
+        var path = Path.Combine(DataDir, "Magnetar Translation");
         if (!Directory.Exists(path)) Directory.CreateDirectory(path);
         return path;
     }
 
     public static string GetLanguageDir(string targetLanguage) => Path.Combine(TranslationRootDir, targetLanguage);
 
-    public static string DataDir => GetSafeDataDir();
-    static string GetSafeDataDir()
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / Mods / Magnetar Data / Resources
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / plugins / Magnetar Data / Resources
+    /// </remarks>
+    public static string ResouceDataDir => GetSafeResouceDataDir();
+    static string GetSafeResouceDataDir()
     {
-        var path = Path.Combine(ModsDir, "Magnetar Data");
+        var path = Path.Combine(DataDir, "Resources");
         if (!Directory.Exists(path)) Directory.CreateDirectory(path);
         return path;
     }
 
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / Mods / Magnetar Data / TextureData.json
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / plugins / Magnetar Data / TextureData.json
+    /// </remarks>
     public static string TextureDataPath => GetSafeTexturePath();
     static string GetSafeTexturePath()
     {
@@ -196,6 +271,14 @@ public static class PathsManager
         return Path.Combine(DataDir, "TextureData.json");
     }
 
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / Mods / Magnetar Data / Themes
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / plugins / Magnetar Data / Themes
+    /// </remarks>
     public static string ThemesDir => GetSafeThemesDir();
     static string GetSafeThemesDir()
     {
@@ -203,4 +286,17 @@ public static class PathsManager
         if (!Directory.Exists(path)) Directory.CreateDirectory(path);
         return path;
     }
+
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / Mods / Magnetar Data / Resources / magnetar_ui
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / plugins / Magnetar Data / Resources / magnetar_ui
+    /// </remarks>
+    public static string MagnetarUIABPath => Path.Combine(ResouceDataDir, "magnetar_ui");
+
+    #endregion
+
 }

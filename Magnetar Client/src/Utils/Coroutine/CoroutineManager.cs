@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using UnityEngine;
 
 #if MELONLOADER || RELEASE_MELON
 using MelonLoader;

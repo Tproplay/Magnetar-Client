@@ -32,7 +32,7 @@ public class ChangeMap : Module
         MapSetting = new MultiSelectSetting("Map", typeof(SceneType))
         {
             MaxSelection = 1,
-            CustomNames = TranslatedNames(typeof(SceneType)),
+            CustomNames = TranslateEnum(typeof(SceneType)),
         };
 
         ChangeMapButton = new ButtonSetting("Change Map Now", ChangeMapNow);
@@ -43,7 +43,7 @@ public class ChangeMap : Module
 
     public override void OnLanguageChanged()
     {
-        MapSetting.CustomNames = TranslatedNames(typeof(SceneType));
+        MapSetting.CustomNames = TranslateEnum(typeof(SceneType));
     }
 
     public void ChangeMapNow()

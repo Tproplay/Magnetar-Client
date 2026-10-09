@@ -2,7 +2,6 @@
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
-using Magnetar_Client.Utils;
 using System;
 using System.Linq;
 using UnityEngine;
@@ -23,11 +22,11 @@ public static class GUIControlsDrawer
 
     private static GUI.WindowFunction _cachedGuiControls;
     private static GUI.WindowFunction GuiControlsDelegate => _cachedGuiControls ??=
-        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawGUIControls);
+        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>(DrawGUIControls);
 
     public static void Render(GUIStyle windowBgStyle)
     {
-        float viewAlpha = UIAnimationHelper.GetViewAlpha(GUIManager.Group, GUIManager.ViewMain);
+        float viewAlpha = AnimationHandler.GetViewAlpha(GUIManager.Group, GUIManager.ViewMain);
         if (viewAlpha <= 0.001f) return;
 
         Config.RescaleAroundCenter(ref WindowRect, Config.S(BaseWidth), WindowRect.height);
@@ -67,7 +66,7 @@ public static class GUIControlsDrawer
         float y = headerHeight + Config.S(12f);
 
         Rect headerBgRect = new(0, 0, w, headerHeight);
-        GUI.Box(headerBgRect, Translate("GUI Configuration"), ThemeManager.SettingsWndowStyle);
+        GUI.Box(headerBgRect, GUIManager.Domain.Translate("GUI Configuration"), ThemeManager.SettingsWndowStyle);
 
         float controlWidth = Mathf.Min(Config.SettingWidth, w * 0.45f);
         float controlX = w - rightMargin - controlWidth;
@@ -98,7 +97,7 @@ public static class GUIControlsDrawer
 
         void DrawSliderRow(FloatSetting setting)
         {
-            string labelText = Translate(setting.Name);
+            string labelText = GUIManager.Domain.Translate(setting.Name);
             Rect lblRect = new(indent, y, labelWidth, elemH);
             GUI.Label(lblRect, labelText, ThemeManager.SettingLabelStyle);
 
@@ -206,8 +205,8 @@ public static class GUIControlsDrawer
         Config.Language = currentLangName;
 
         DrawButtonRow(
-            $"{Translate("Language")}: <color=yellow>{Config.Language}</color>",
-            Translate("Change"),
+            $"{GUIManager.Domain.Translate("Language")}: <color=yellow>{Config.Language}</color>",
+            GUIManager.Domain.Translate("Change"),
             () => GUISelectorDrawer.Open(GUIManager.LanguageSetting)
         );
 
@@ -222,8 +221,8 @@ public static class GUIControlsDrawer
         Config.Theme = currentTheme;
 
         DrawButtonRow(
-            $"{Translate("Theme")}: <color=yellow>{Config.Theme}</color>",
-            Translate("Change"),
+            $"{GUIManager.Domain.Translate("Theme")}: <color=yellow>{Config.Theme}</color>",
+            GUIManager.Domain.Translate("Change"),
             () =>
             {
                 GUIManager.RefreshThemeOptions();
@@ -253,24 +252,24 @@ public static class GUIControlsDrawer
 
         // 5. Floating Icon
         DrawButtonRow(
-            Translate("Floating Icon"),
-            Config.ShowFloatingIcon ? Translate("ON") : Translate("OFF"),
+            GUIManager.Domain.Translate("Floating Icon"),
+            GUIManager.Domain.Translate(Config.ShowFloatingIcon ? "ON" : "OFF"),
             () => Config.SetFloatingIcon(!Config.ShowFloatingIcon),
             Config.ShowFloatingIcon ? ThemeManager.SettingOn : ThemeManager.SettingOff
         );
 
         // 6. Mobile Close Buttons
         DrawButtonRow(
-            Translate("Mobile Close Buttons"),
-            Config.ShowMobileButtons ? Translate("ON") : Translate("OFF"),
+            GUIManager.Domain.Translate("Mobile Close Buttons"),
+            GUIManager.Domain.Translate(Config.ShowMobileButtons ? "ON" : "OFF"),
             () => Config.ShowMobileButtons = !Config.ShowMobileButtons,
             Config.ShowMobileButtons ? ThemeManager.SettingOn : ThemeManager.SettingOff
         );
 
         // 7. Show Credits
         DrawButtonRow(
-            Translate("Show Main Menu Credits"),
-            Config.ShowMainMenuCredits ? Translate("ON") : Translate("OFF"),
+            GUIManager.Domain.Translate("Show Main Menu Credits"),
+            GUIManager.Domain.Translate(Config.ShowMainMenuCredits ? "ON" : "OFF"),
             () => Config.ShowMainMenuCredits = !Config.ShowMainMenuCredits,
             Config.ShowMainMenuCredits ? ThemeManager.SettingOn : ThemeManager.SettingOff
         );

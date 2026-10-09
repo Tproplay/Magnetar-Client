@@ -5,7 +5,11 @@ using UnityEngine;
 using Magnetar_Client.Core;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.Utils;
-using Magnetar_Client.Core.ModuleManager_;
+using System.Text.RegularExpressions;
+
+using Newtonsoft.Json.Linq;
+
+
 
 
 #if MELONLOADER || RELEASE_MELON
@@ -14,174 +18,50 @@ using Il2Cpp;
 
 namespace Magnetar_Client.Modules;
 
-public class ModuleCategory : IEquatable<ModuleCategory>
-{
-    private static int _nextId = 0;
-    private static readonly Dictionary<string, ModuleCategory> _registeredCategories = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly List<ModuleCategory> _allCategories = new();
-
-    public static IReadOnlyList<ModuleCategory> AllCategories => _allCategories;
-
-    // --- Built-in Categories registered upfront in your designated order ---
-    public static readonly ModuleCategory Level = RegisterInternal("Level", 10);
-    public static readonly ModuleCategory Tools = RegisterInternal("Tools", 20);
-    public static readonly ModuleCategory Plant = RegisterInternal("Plant", 30);
-    public static readonly ModuleCategory Zombie = RegisterInternal("Zombie", 40);
-    public static readonly ModuleCategory Misc = RegisterInternal("Misc", 50);
-    public static readonly ModuleCategory Visual = RegisterInternal("Visual", 60);
-
-    // Instance variables
-    public int Id { get; }
-    public string Name { get; }
-    public bool IsCustom { get; }
-    public int DisplayOrder { get; set; }
-
-    private ModuleCategory(string name, int id, bool isCustom, int displayOrder = 100)
-    {
-        Name = name;
-        Id = id;
-        IsCustom = isCustom;
-        DisplayOrder = displayOrder;
-    }
-
-    private static ModuleCategory RegisterInternal(string name, int displayOrder)
-    {
-        if (_registeredCategories.TryGetValue(name, out var existing))
-            return existing;
-
-        var cat = new ModuleCategory(name, _nextId++, false, displayOrder);
-        _registeredCategories[name] = cat;
-        _allCategories.Add(cat);
-        return cat;
-    }
-
-    /// <summary>
-    /// Explicitly initializes and registers the built-in categories so they exist
-    /// and occupy layout slots before any module accesses or assigns them.
-    /// </summary>
-    public static void Init()
-    {
-        // Forces static constructor execution to ensure built-ins are populated
-        _ = Level;
-        _ = Tools;
-        _ = Plant;
-        _ = Zombie;
-        _ = Misc;
-        _ = Visual;
-    }
-
-    /// <summary>
-    /// Registers a new category or returns an existing one if already registered.
-    /// </summary>
-    public static ModuleCategory Register(string name, int displayOrder = 100)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Category name cannot be null or empty.", nameof(name));
-
-        string cleanName = name.Trim();
-        if (_registeredCategories.TryGetValue(cleanName, out var existing))
-            return existing;
-
-        var cat = new ModuleCategory(cleanName, _nextId++, true, displayOrder);
-        _registeredCategories[cleanName] = cat;
-        _allCategories.Add(cat);
-
-        CategoryWindowDrawer.EnsureCategoryInitialized(cat);
-        return cat;
-    }
-
-    public static ModuleCategory Get(string name)
-    {
-        if (string.IsNullOrEmpty(name)) return null;
-        _registeredCategories.TryGetValue(name.Trim(), out var cat);
-        return cat;
-    }
-
-    public static ModuleCategory GetOrCreate(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name)) return Misc;
-        return Get(name) ?? Register(name);
-    }
-
-    public static bool TryGet(string name, out ModuleCategory category)
-    {
-        category = Get(name);
-        return category != null;
-    }
-
-    // --- Query Methods ---
-    public List<Modules.Module> GetAllModules()
-    {
-        return ModuleManager.Modules.Where(m => m.Category == this).ToList();
-    }
-
-    public Modules.Module Find(string moduleName)
-    {
-        if (string.IsNullOrEmpty(moduleName)) return null;
-        return ModuleManager.Modules.FirstOrDefault(m =>
-            m.Category == this && string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
-    }
-
-    public Modules.Module Find(Predicate<Modules.Module> match)
-    {
-        if (match == null) return null;
-        return ModuleManager.Modules.FirstOrDefault(m => m.Category == this && match(m));
-    }
-
-    public List<Modules.Module> FindAll(Predicate<Modules.Module> match)
-    {
-        if (match == null) return new List<Modules.Module>();
-        return ModuleManager.Modules.Where(m => m.Category == this && match(m)).ToList();
-    }
-
-    // --- Conversion & Equality ---
-    public static implicit operator ModuleCategory(string name) => GetOrCreate(name);
-    public static implicit operator string(ModuleCategory cat) => cat?.Name;
-
-    public override string ToString() => Name;
-
-    public override bool Equals(object obj) => obj is ModuleCategory other && Equals(other);
-
-    public bool Equals(ModuleCategory other)
-    {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase);
-    }
-
-    public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Name);
-
-    public static bool operator ==(ModuleCategory left, ModuleCategory right)
-    {
-        if (ReferenceEquals(left, right)) return true;
-        if (ReferenceEquals(left, null) || ReferenceEquals(right, null)) return false;
-        return left.Equals(right);
-    }
-
-    public static bool operator !=(ModuleCategory left, ModuleCategory right) => !(left == right);
-}
-
 public abstract class Module
 {
-    public abstract string Name { get; set; }
-    public abstract string SearchHints { get; set; }
-    public virtual string Author { get; set; } = "";
-    public abstract string Description { get; set; }
-
     /// <summary>
-    /// Category object. Can be assigned via `ModuleCategory.Plant` or as a string `"MyCategory"`.
+    /// Name to be displayed
+    /// </summary>
+    public abstract string Name { get; set; }
+    /// <summary>
+    /// Search hints to be used when searching for the module
+    /// </summary>
+    public abstract string SearchHints { get; set; }
+    /// <summary>
+    /// Optional name for mod author. Supports rich text.
+    /// </summary>
+    public virtual string Author { get; set; } = "";
+    /// <summary>
+    /// Description for the module. Supports rich text.
+    /// </summary>
+    public abstract string Description { get; set; }
+    /// <summary>
+    /// The category to put the module in.
     /// </summary>
     public abstract ModuleCategory Category { get; set; }
 
     public virtual bool enableInVanillaMode { get; set; } = false;
 
+    // These will be in Every ModuleManager.
+    // Edit if you want a different default keybind or want it to be enabled by default.
+
     public BindSetting KeyBind = new("Keybind");
+
     public string GetBindString() => KeyBind.GetBindString();
+
     public List<KeyCode> BindKeys => KeyBind.BindKeys;
     public virtual bool HoldMode { get; set; } = false;
     public virtual bool Active { get; set; } = false;
+    /// <summary>
+    /// Used to determine whether the setting window of the module is opened.
+    /// </summary>
     public virtual bool ShowSettings { get; set; } = false;
 
+
+    /// <summary>
+    /// Used to store all the settings for the module.
+    /// </summary>
     public List<Setting> Settings = new();
 
     public void Toggle()
@@ -191,42 +71,85 @@ public abstract class Module
         else OnDisable();
     }
 
+    /// <summary>
+    /// Runs once when the module is enabled. Runs Before OnUpdateActive.
+    /// </summary>
     public virtual void OnEnable() { }
+    /// <summary>
+    /// Runs once when the module is disabled. Runs After OnUpdateActive.
+    /// </summary>
     public virtual void OnDisable() { }
+
+
+    /// <summary>
+    /// Runs every frame regardless of whether the module is active or not.
+    /// </summary>
     public virtual void OnUpdate() { if (Active) OnUpdateActive(); }
+
+    /// <summary>
+    /// Runs every frame only when the module is active. Will not run if OnUpdate is overridden without calling base.OnUpdate().
+    /// </summary>
     public virtual void OnUpdateActive() { }
+
+    /// <summary>
+    /// Runs every frame on UnityEngine.OnGUI
+    /// </summary>
     public virtual void OnGUI() { }
 
-    public void AddSettings(params Setting[] settings) => Settings.AddRange(settings);
-    public virtual bool Initialized { get; set; } = false;
+    /// <summary>
+    /// Static method to add settings to the module. Call this in the constructor of your module with all the settings you want to add.
+    /// </summary>
+    public void AddSettings(params Setting[] settings)
+    {
+        Settings.AddRange(settings);
+    }
+
+    /// <summary>
+    /// Runs When a the mod's language is changed
+    /// </summary>
     public virtual void OnLanguageChanged() { }
 
-    public static Dictionary<int, string> TranslatedNames(Type enumType)
+    /// <summary>
+    /// Translates a enum
+    /// </summary>
+    public static Dictionary<int, string> TranslateEnum(Type enumType, bool enumKey = true)
     {
         if (enumType == null || !enumType.IsEnum) return new Dictionary<int, string>();
 
-        Dictionary<int, string> names = new();
-#if ANDROID
-        foreach (var val in Enum.GetValues(enumType))
+        var names = ModuleManager.TranslateEnum(enumType);
+        if (enumKey)
         {
-            int key = Convert.ToInt32(val);
-            string name = Enum.GetName(enumType, val) ?? val.ToString();
-            names[key] = $"{name} ({key})";
+            foreach (var kvp in names.ToList())
+            {
+                names[kvp.Key] = $"{kvp.Value} ({kvp.Key})";
+            }
         }
-#else
-        names = Translator.TranslateEnum(enumType);
-        foreach (var kvp in names.ToList())
-        {
-            names[kvp.Key] = $"{kvp.Value} ({kvp.Key})";
-        }
-#endif
+        
         return names;
     }
+    /// <summary>
+    /// Translates a enum
+    /// </summary>
+    public static Dictionary<int, string> TranslateEnum<T>() => TranslateEnum(typeof(T));
+    /// <summary>
+    /// Translates a enum
+    /// </summary>
+    public static Dictionary<int, string> TranslateEnum<T>(bool enumKey = true) => TranslateEnum(typeof(T), enumKey);
 
     public virtual float SettingsWidth { get; set; } = Config.ModuleManager.SettingsWidth;
 
-    public void CreateCategory(string name, bool defaultExpanded = true) => Settings.Add(new CategorySetting(name, defaultExpanded));
-    public void EndCategory() => Settings.Add(new EndCategorySetting());
+    /// <summary>
+    /// Creates a new Category. Use EndCategory() to define the end.
+    /// </summary>
+    public void CreateCategory(string name, bool defaultExpanded = true)
+    {
+        Settings.Add(new CategorySetting(name, defaultExpanded));
+    }
+
+    public void EndCategory()
+    {
+        Settings.Add(new EndCategorySetting());
+    }
 
     public static bool GetKeyComboDown(List<KeyCode> keyCodes)
     {
@@ -237,35 +160,36 @@ public abstract class Module
 
         for (int i = 0; i < keyCodes.Count - 1; i++)
         {
-            if (!Input.GetKey(keyCodes[i])) return false;
+            if (!Input.GetKey(keyCodes[i]))
+            {
+                return false;
+            }
         }
         return true;
     }
-
-    public static bool GetKeyCombo(List<KeyCode> keyCodes)
-    {
-        if (keyCodes == null || keyCodes.Count == 0) return false;
-
-        foreach(KeyCode keyCode in keyCodes)
-        {
-            if (!Input.GetKey(keyCode)) return false;
-        }
-        return true;
-    }
-
+    
+    /// <summary>
+    /// Contains default Banned HashSets for Plants and Zombies
+    /// </summary>
     public struct Banned
     {
-        public static readonly HashSet<int> PlantTypeBanned = new()
+        public static HashSet<int> PlantTypeBanned = new()
         {
+            // Not a plant
             (int)PlantType.Nothing, (int)PlantType.MagnetInterface,
             (int)PlantType.MagnetBox, (int)PlantType.Pit,
             (int)PlantType.Refrash, (int)PlantType.Extract_single,
             (int)PlantType.Extract_ten,
-            261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275,
+
+            // EnumValueAsmResolver_002EDotNet_002ESerialized_002ESerializedConstant
+            261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,
+
+            // Unreleased
             3000,
         };
-        public static readonly HashSet<int> ZombieTypeBanned = new()
+        public static HashSet<int> ZombieTypeBanned = new()
         {
+            // Not a zombie
             (int)ZombieType.Nothing,
         };
     }
@@ -275,9 +199,153 @@ public abstract class Module
 
     public virtual void ResetBuiltIns()
     {
-        KeyBind?.Reset();
+        if (KeyBind != null)
+        {
+            KeyBind.Reset();
+        }
+
         HoldMode = defaultHoldMode;
-        if (Active != defaultActive) Toggle();
+
+        if (Active != defaultActive)
+        {
+            Toggle();
+        }
     }
     public virtual bool SaveData { get; } = true;
+    public virtual TranslationDomain Domain => ModuleManager.Domain;
+    public virtual string TranslationSource => $"Modules/{Name}.json";
+    #region Custom Saved Profile Data
+
+    /// <summary>
+    /// Arbitrary key-value store for module state (floats, ints, bools, strings, objects).
+    /// Serialized into the profile save file by ModuleManager and restored on profile load.
+    /// </summary>
+    public Dictionary<string, object> SavedData { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public void SetSaved<T>(string key, T value)
+    {
+        SavedData[key] = value;
+    }
+
+    public T GetSaved<T>(string key, T defaultValue = default)
+    {
+        if (SavedData != null && SavedData.TryGetValue(key, out var raw))
+        {
+            if (raw is T typed) return typed;
+            if (raw == null) return defaultValue;
+
+            try
+            {
+                if (raw is JToken token)
+                    return token.ToObject<T>();
+
+                Type targetType = typeof(T);
+                if (targetType.IsEnum)
+                    return (T)Enum.ToObject(targetType, raw);
+
+                return (T)Convert.ChangeType(raw, targetType);
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+        return defaultValue;
+    }
+
+    #endregion
+
+    #region Custom Module Translations & Regex
+
+    /// <summary>
+    /// Key-value pairs for module-specific phrases. Dumped into the module's 
+    /// translation JSON and overwritten with translated values when a language loads.
+    /// </summary>
+    public Dictionary<string, string> SavedTranslationData { get; set; } = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Custom regex replacement rules (RegexPattern -> ReplacementTemplate).
+    /// </summary>
+    public Dictionary<string, string> SavedRegexTranslations { get; set; } = new();
+
+    public void RegisterTranslation(string key, string defaultValue)
+    {
+        if (!SavedTranslationData.ContainsKey(key))
+            SavedTranslationData[key] = defaultValue;
+    }
+
+    public void RegisterTranslations(Dictionary<string, string> translations)
+    {
+        if (translations == null) return;
+        foreach (var kvp in translations)
+        {
+            if (!SavedTranslationData.ContainsKey(kvp.Key))
+                SavedTranslationData[kvp.Key] = kvp.Value;
+        }
+    }
+
+    public void RegisterRegexTranslation(string pattern, string replacement)
+    {
+        SavedRegexTranslations[pattern] = replacement;
+    }
+
+    /// <summary>
+    /// Translates an input string checking module-specific translations and regexes first,
+    /// then falling back to the module's translation domain file scope.
+    /// </summary>
+    public string Translate(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+
+        // 1. Exact match from SavedTranslationData
+        if (SavedTranslationData != null && SavedTranslationData.TryGetValue(input, out string exact) && !string.IsNullOrEmpty(exact))
+        {
+            return exact;
+        }
+
+        // 2. Module-specific regex rules
+        if (SavedRegexTranslations != null && SavedRegexTranslations.Count > 0)
+        {
+            foreach (var kvp in SavedRegexTranslations)
+            {
+                try
+                {
+                    Match match = Regex.Match(input, kvp.Key);
+                    if (match.Success)
+                    {
+                        string template = kvp.Value;
+                        for (int i = 1; i < match.Groups.Count; i++)
+                        {
+                            if (match.Groups[i].Success)
+                            {
+                                string val = match.Groups[i].Value;
+                                string sub = (SavedTranslationData != null && SavedTranslationData.TryGetValue(val, out var transSub))
+                                    ? transSub
+                                    : val;
+
+                                template = template.Replace($"{{{i}}}", sub);
+                            }
+                        }
+                        return template;
+                    }
+                }
+                catch { }
+            }
+        }
+
+        // 3. Fallback to ModuleManager.Domain scoped to this module's file
+        if (Domain != null)
+        {
+            return Domain.Translate(input, TranslationSource);
+        }
+
+        return input;
+    }
+
+    public virtual void OnDomainLanguageChanged()
+    {
+        ModuleManager.SetDomain(this);
+    }
+
+    #endregion
 }

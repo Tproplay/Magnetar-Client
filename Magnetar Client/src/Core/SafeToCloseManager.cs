@@ -1,5 +1,4 @@
-﻿using Magnetar_Client.Core.Lifecycle;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 

@@ -6,7 +6,6 @@ using System.Collections;
 using UnityEngine;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
-using MelonLoader;
 #elif BEPINEX || RELEASE_BEPINEX
 using BepInEx.Unity.IL2CPP.Utils;
 #endif

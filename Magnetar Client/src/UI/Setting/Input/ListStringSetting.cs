@@ -47,7 +47,7 @@ public class ListStringSetting : Setting
         // Label on the left
         float labelW = Mathf.Max(width * 0.35f, Config.S(120f));
         Rect labelRect = new(indent, y, labelW, elemH);
-        GUI.Label(labelRect, Translator.Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Input fields right column area
         float rightBoxW = width - (indent * 2f) - labelW - gap;
@@ -90,7 +90,7 @@ public class ListStringSetting : Setting
         bool canAdd = Values.Count < MaxCount;
         GUIStyle addStyle = canAdd ? ThemeManager.ListAddButtonStyle : ThemeManager.CategoryModuleOffStyle;
 
-        GUI.Box(addBtnRect, Translator.Translate(canAdd ? "Add" : "Max Reached"), addStyle);
+        GUI.Box(addBtnRect, Translate(canAdd ? "Add" : "Max Reached"), addStyle);
 
         if (canAdd && addBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {

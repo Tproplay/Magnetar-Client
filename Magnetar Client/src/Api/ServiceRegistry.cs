@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Magnetar_Client.Core.Lifecycle;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
-namespace Magnetar_Client.Core.Lifecycle;
+namespace Magnetar_Client.Api;
 
 public static class ServiceRegistry
 {

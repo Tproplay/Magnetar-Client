@@ -44,6 +44,14 @@ public class NoRender : Module
     {
         instance = this;
 
+        var strings = new string[]
+        {
+            "Ice shroom effect", "Doom shroom effect", "Jalapeno fire line", "Doom shroom smoke cloud", "Falling Sun",
+            "Falling Coin",
+        };
+
+        RegisterTranslations(Translator.CreateDictionary(strings));
+
         CreateCategory("General");
 
         #region Particle
@@ -90,19 +98,19 @@ public class NoRender : Module
 
         ParticleTypeSetting = new MultiSelectSetting("Particle Types", typeof(ParticleType))
         {
-            CustomNames = TranslatedNames(typeof(ParticleType))
+            CustomNames = TranslateEnum(typeof(ParticleType))
         };
         AddSettings(ParticleTypeSetting);
 
         GameObjectsSetting = new MultiSelectSetting("Game Objects", typeof(BucketType))
         {
-            CustomNames = TranslatedNames(typeof(BucketType))
+            CustomNames = TranslateEnum(typeof(BucketType))
         };
         AddSettings(GameObjectsSetting);
 
         BulletSetting = new MultiSelectSetting("Bullets", typeof(BulletType))
         {
-            CustomNames = TranslatedNames(typeof(BulletType))
+            CustomNames = TranslateEnum(typeof(BulletType))
         };
         AddSettings(BulletSetting);
 
@@ -141,11 +149,11 @@ public class NoRender : Module
 
     public override void OnLanguageChanged()
     {
-        GameObjectsSetting.CustomNames = TranslatedNames(typeof(BucketType));
-        BulletSetting.CustomNames = TranslatedNames(typeof(BulletType));
+        GameObjectsSetting.CustomNames = TranslateEnum(typeof(BucketType));
+        BulletSetting.CustomNames = TranslateEnum(typeof(BulletType));
 
         EffectSetting.CustomNames = EffectSetting.Options
-            .ToDictionary(kvp => kvp.Key, kvp => Translator.Translate(kvp.Value));
+            .ToDictionary(kvp => kvp.Key, kvp => Translate(kvp.Value));
     }
 
     public override void OnUpdateActive()

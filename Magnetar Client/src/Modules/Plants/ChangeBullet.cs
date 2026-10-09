@@ -36,7 +36,7 @@ public class ChangeBullet : Module
 
         selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
         {
-            CustomNames = TranslatedNames(typeof(BulletType)),
+            CustomNames = TranslateEnum(typeof(BulletType)),
         };
 
         selectBulletsSetting.SelectAll(setDefault: true);
@@ -50,7 +50,7 @@ public class ChangeBullet : Module
 
     public override void OnLanguageChanged()
     {
-        selectBulletsSetting.CustomNames = TranslatedNames(typeof(BulletType));
+        selectBulletsSetting.CustomNames = TranslateEnum(typeof(BulletType));
     }
 
     // Mod Logic

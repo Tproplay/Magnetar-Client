@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Magnetar_Client.UI;
 
-public static class UIAnimationHelper
+public static class AnimationHandler
 {
     public static float FadeProgress { get; private set; } = 0f;
     public static float FadeSpeed { get; set; } = 5.0f;
@@ -15,17 +15,15 @@ public static class UIAnimationHelper
 
     public static float DefaultWindowSpeed { get; set; } = 8.0f;
 
-    public static float EaseOutCubic(float t)
+    static float EaseOut(float t)
     {
         t = Mathf.Clamp01(t);
         float inv = 1f - t;
-        return 1f - (inv * inv * inv);
+        return 1f - Mathf.Pow(inv, 2f);
     }
 
-    public static float CurrentEasedAlpha => EaseOutCubic(FadeProgress);
-    public static float CurrentEasedDimAlpha => EaseOutCubic(DimAlpha);
-
-    #region Scoped View Registry System
+    public static float CurrentEasedAlpha => EaseOut(FadeProgress);
+    public static float CurrentEasedDimAlpha => EaseOut(DimAlpha);
 
     private class ViewState
     {
@@ -49,7 +47,7 @@ public static class UIAnimationHelper
         {
             if (groupViews.TryGetValue(viewKey, out var state))
             {
-                return eased ? EaseOutCubic(state.CurrentAlpha) : state.CurrentAlpha;
+                return eased ? EaseOut(state.CurrentAlpha) : state.CurrentAlpha;
             }
         }
 
@@ -85,7 +83,7 @@ public static class UIAnimationHelper
     }
 
     /// <summary>
-    /// Primes an initial view state directly without animation.
+    /// Set or register a new alpha animation key 
     /// </summary>
     public static void SetViewImmediate(string group, string viewKey, float alpha)
     {
@@ -108,17 +106,17 @@ public static class UIAnimationHelper
         }
     }
 
-    #endregion
 
-    public static void UpdateTransition()
+    internal static void UpdateTransition()
     {
+        float dt = Time.unscaledDeltaTime;
+
         float target = Config.showgui ? 1f : 0f;
-        FadeProgress = Mathf.MoveTowards(FadeProgress, target, Time.unscaledDeltaTime * FadeSpeed);
+        FadeProgress = Mathf.MoveTowards(FadeProgress, target, dt * FadeSpeed);
 
         float dimTarget = (Config.dimBg && (Config.showgui || Core.HUDManager.forceShow)) ? 1f : 0f;
-        DimAlpha = Mathf.MoveTowards(DimAlpha, dimTarget, Time.unscaledDeltaTime * DimFadeSpeed);
-
-        float dt = Time.unscaledDeltaTime;
+        DimAlpha = Mathf.MoveTowards(DimAlpha, dimTarget, dt * DimFadeSpeed);
+        
 
         foreach (var groupViews in _scopedViews.Values)
         {
@@ -132,7 +130,10 @@ public static class UIAnimationHelper
         }
     }
 
-    public static void SnapToVisible()
+    /// <summary>
+    /// Instantly complete the current fade transition
+    /// </summary>
+    public static void SnapToVisible()      
     {
         FadeProgress = 1f;
         if (Config.dimBg) DimAlpha = 1f;

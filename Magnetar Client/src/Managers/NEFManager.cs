@@ -23,8 +23,8 @@ public static class NEFManager
 
     public static void Init()
     {
-        UIAnimationHelper.SetViewImmediate(Group, ViewTree, 1.0f);
-        UIAnimationHelper.SetViewImmediate(Group, ViewUsages, 0.0f);
+        AnimationHandler.SetViewImmediate(Group, ViewTree, 1.0f);
+        AnimationHandler.SetViewImmediate(Group, ViewUsages, 0.0f);
 
         NEFData.Init();
         ServiceRegistry.Register(new NEFManagerService());
@@ -58,7 +58,7 @@ public static class NEFManager
         );
     }
 
-    private class NEFManagerService : IInitializable, IWarmUp, IMenuRenderable, ICloseHandler
+    private class NEFManagerService : IInitializable, IWarmUp, IMenuRenderable, ICloseHandler, ILanguageAware
     {
         public string Name => "NEFManager";
         public int Priority => ServicePriority.Standard;
@@ -75,7 +75,7 @@ public static class NEFManager
 
         public void OnMenuGUI()
         {
-            UIAnimationHelper.RenderWithTabAlpha(TabType.NEF, NEFManager.Render);
+            AnimationHandler.RenderWithTabAlpha(TabType.NEF, NEFManager.Render);
         }
 
         public bool CanClose()
@@ -97,7 +97,7 @@ public static class NEFManager
             if (NEFGUI.showUsagesView)
             {
                 NEFGUI.showUsagesView = false;
-                UIAnimationHelper.SwitchView(Group, ViewTree);
+                AnimationHandler.SwitchView(Group, ViewTree);
                 Input.ResetInputAxes();
                 return true;
             }
@@ -110,6 +110,11 @@ public static class NEFManager
             }
 
             return false;
+        }
+
+        public void OnLanguageChanged()
+        {
+            NEFData.OnLanguageChanged();
         }
     }
 }

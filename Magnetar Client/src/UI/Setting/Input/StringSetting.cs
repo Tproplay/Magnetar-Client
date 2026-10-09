@@ -63,7 +63,7 @@ public class StringSetting : Setting
         Rect inputRect = new(inputStartX, y, controlW, elemH);
         Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
 
-        GUI.Label(labelRect, Translator.Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
         Value = DrawSetting.DrawManualTextField(inputRect, Value, "", AutocompleteVars);
 
         if (DrawResetButton(resetRect))

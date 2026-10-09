@@ -25,7 +25,7 @@ public abstract class HudElement
     {
         if (_cachedWindowDelegate == null)
         {
-            _cachedWindowDelegate = Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawWindowContext);
+            _cachedWindowDelegate = Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>(DrawWindowContext);
         }
         return _cachedWindowDelegate;
     }

@@ -41,7 +41,7 @@ public class FasterZombies : Module
 
         ZombieSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
         };
         ZombieSelectedSetting.SelectAll(setDefault: true);
@@ -54,7 +54,7 @@ public class FasterZombies : Module
 
     public override void OnLanguageChanged()
     {
-        ZombieSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
+        ZombieSelectedSetting.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
     // Mod Logic

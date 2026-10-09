@@ -45,7 +45,7 @@ public class AntiLagSpawns : Module
 
         UnaffectedZombies = new MultiSelectSetting("Unaffected Entities", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             SelectedValues = new HashSet<int>
             {
                 (int)ZombieType.ImpKing,
@@ -64,7 +64,7 @@ public class AntiLagSpawns : Module
 
     public override void OnLanguageChanged()
     {
-        UnaffectedZombies.CustomNames = TranslatedNames(typeof(ZombieType));
+        UnaffectedZombies.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
     // Mod Logic

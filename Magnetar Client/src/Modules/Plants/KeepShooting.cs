@@ -35,7 +35,7 @@ public class KeepShooting : Module
         PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
         {
             Blacklist = Banned.PlantTypeBanned,
-            CustomNames = TranslatedNames(typeof(PlantType))
+            CustomNames = TranslateEnum(typeof(PlantType))
         };
 
         PlantsSelectedSetting.SelectAll(setDefault: true);
@@ -47,7 +47,7 @@ public class KeepShooting : Module
 
     public override void OnLanguageChanged()
     {
-        PlantsSelectedSetting.CustomNames = TranslatedNames(typeof(PlantType));
+        PlantsSelectedSetting.CustomNames = TranslateEnum(typeof(PlantType));
     }
 
     // Mod Logic

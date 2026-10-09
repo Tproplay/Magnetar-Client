@@ -47,7 +47,7 @@ public class Vector2Setting : Setting
 
         // Label: Left space
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), Translator.Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, labelW, elemH), Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Component layout: [X] [box] [Y] [box]
         float itemW = (totalControlW - (gap * 3f) - (subLabelW * 2f)) / 2f;
@@ -128,7 +128,7 @@ public class Vector2IntSetting : Setting
 
         // Label: Left space
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), Translator.Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, labelW, elemH), Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Component layout: [X] [box] [Y] [box]
         float itemW = (totalControlW - (gap * 3f) - (subLabelW * 2f)) / 2f;
@@ -209,7 +209,7 @@ public class Vector3Setting : Setting
 
         // Label: Left space
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), Translator.Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, labelW, elemH), Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Component layout: [X] [box] [Y] [box] [Z] [box]
         float itemW = (totalControlW - (gap * 5f) - (subLabelW * 3f)) / 3f;
@@ -297,7 +297,7 @@ public class Vector3IntSetting : Setting
 
         // Label: Left space
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), Translator.Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, labelW, elemH), Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Component layout: [X] [box] [Y] [box] [Z] [box]
         float itemW = (totalControlW - (gap * 5f) - (subLabelW * 3f)) / 3f;

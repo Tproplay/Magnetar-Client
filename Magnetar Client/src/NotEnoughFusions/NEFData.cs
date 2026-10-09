@@ -1,9 +1,16 @@
-﻿using Magnetar_Client.Utils;
+﻿using static Magnetar_Client.Utils.Magnetar_Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.NEF.Data.NEFRecipes;
+using Magnetar_Client.UI;
+using Magnetar_Client.Api;
+using Newtonsoft.Json;
+using System.IO;
+
+using System.Text.RegularExpressions;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -61,7 +68,7 @@ public static class NEFData
         {
             if (!CustomNames.ContainsKey((int)pt)) CustomNames[(int)pt] = pt.ToString();
         }
-        foreach (var Entry in Translator.TranslateEnum(typeof(PlantType)))
+        foreach (var Entry in TranslateNEFEnum(typeof(PlantType)))
         {
             CustomNames[Entry.Key] = Entry.Value;
         }
@@ -95,10 +102,23 @@ public static class NEFData
                 foreach (var pt in customPlantTypes)
                 {
                     int id = Convert.ToInt32(pt);
-                    if (!CustomNames.ContainsKey(id))
+                    if (CustomNames.ContainsKey(id)) continue;
+
+                    string defaultRawName = Enum.IsDefined(typeof(PlantType), id)
+                        ? ((PlantType)id).ToString()
+                        : $"Custom Plant #{id}";
+
+                    // 1. Check NEF's translation domain scoped to PlantType enum or general NEF strings
+                    string translated = NEFGUI.Domain.Translate(defaultRawName, new[] { "Enums/PlantType.json", "nef.json" });
+
+                    // 2. If untranslated and raw name was just a number or default, assign fallback label
+                    if (string.Equals(translated, defaultRawName, StringComparison.Ordinal))
                     {
-                        string translated = Utils.Translator.Translate(((PlantType)id).ToString());
-                        CustomNames[id] = (translated != ((PlantType)id).ToString()) ? translated : $"Custom Plant #{id}";
+                        CustomNames[id] = defaultRawName;
+                    }
+                    else
+                    {
+                        CustomNames[id] = translated;
                     }
                 }
             }
@@ -134,13 +154,147 @@ public static class NEFData
         }
     }
 
+    private static readonly Dictionary<Type, Dictionary<int, string>> _nefEnumCache = new();
+
     public static void OnLanguageChanged()
     {
-        foreach (var Entry in Translator.TranslateEnum(typeof(PlantType)))
+        _nefEnumCache.Clear();
+
+        CustomNames ??= new Dictionary<int, string>();
+
+        // 1. Translate PlantType enums scoped to the NEF domain
+        foreach (var entry in TranslateNEFEnum(typeof(PlantType)))
         {
-            CustomNames[Entry.Key] = Entry.Value;
+            CustomNames[entry.Key] = entry.Value;
+        }
+
+        // 2. Translate ZombieType enums scoped to the NEF domain (if used in recipes/usages)
+        foreach (var entry in TranslateNEFEnum(typeof(ZombieType)))
+        {
+            CustomNames[entry.Key] = entry.Value;
+        }
+
+        // 3. Refresh active tree layouts and search results with new localized strings
+        if (currentPyramidRoots != null && currentPyramidRoots.Count > 0)
+        {
+            RelayoutCurrentTrees();
+        }
+
+        PerformSearch();
+    }
+
+    #region NEF Enum Translation Helper
+
+    /// <summary>
+    /// Translates an enum type stored under Translations/{Language}/NEF/Enums/{EnumType}.json
+    /// </summary>
+    public static Dictionary<int, string> TranslateNEFEnum(Type enumType)
+    {
+        if (enumType == null) return new Dictionary<int, string>();
+
+        if (_nefEnumCache.TryGetValue(enumType, out var cached))
+            return new Dictionary<int, string>(cached);
+
+        string currentLang = Config.Language ?? "English";
+        string domainName = NEFGUI.Domain.DomainName;
+
+        string englishDir = Path.Combine(PathsManager.TranslationRootDir, "English", domainName, "Enums");
+        string targetDir = Path.Combine(PathsManager.TranslationRootDir, currentLang, domainName, "Enums");
+
+        if (!Directory.Exists(englishDir)) Directory.CreateDirectory(englishDir);
+        if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
+
+        string englishFile = Path.Combine(englishDir, $"{enumType.Name}.json");
+        string targetFile = Path.Combine(targetDir, $"{enumType.Name}.json");
+
+        // 1. Generate/verify English baseline template
+        Dictionary<int, string> englishDict = new();
+        if (File.Exists(englishFile))
+        {
+            try { englishDict = JsonConvert.DeserializeObject<Dictionary<int, string>>(File.ReadAllText(englishFile)) ?? new(); } catch { }
+        }
+
+        bool dirtyEnglish = false;
+        Array values = Enum.GetValues(enumType);
+        foreach (object val in values)
+        {
+            int intVal = (int)val;
+            if (!englishDict.ContainsKey(intVal))
+            {
+                englishDict[intVal] = Enum.GetName(enumType, intVal) ?? intVal.ToString();
+                dirtyEnglish = true;
+            }
+        }
+
+        if (dirtyEnglish || !File.Exists(englishFile))
+        {
+            var sorted = englishDict.OrderBy(k => k.Key).ToDictionary(k => k.Key, k => k.Value);
+            File.WriteAllText(englishFile, JsonConvert.SerializeObject(sorted, Formatting.Indented));
+        }
+
+        // 2. Sync target language JSON if running non-English
+        if (!string.Equals(currentLang, "English", StringComparison.OrdinalIgnoreCase))
+        {
+            SyncEnumJson(englishFile, targetFile);
+        }
+
+        // 3. Load active translations
+        Dictionary<int, string> result = new();
+        string activeFile = File.Exists(targetFile) ? targetFile : englishFile;
+
+        if (File.Exists(activeFile))
+        {
+            try
+            {
+                var raw = JsonConvert.DeserializeObject<Dictionary<int, string>>(File.ReadAllText(activeFile));
+                if (raw != null)
+                {
+                    foreach (var kvp in raw)
+                    {
+                        result[kvp.Key] = Regex.Replace(kvp.Value ?? "", "<.*?>", string.Empty);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TranslatorLogger.Error($"[NEFData] Failed loading enum '{enumType.Name}': {ex.Message}");
+            }
+        }
+
+        _nefEnumCache[enumType] = result;
+        return new Dictionary<int, string>(result);
+    }
+
+    private static void SyncEnumJson(string engPath, string targetPath)
+    {
+        if (!File.Exists(engPath)) return;
+
+        var engEnum = JsonConvert.DeserializeObject<Dictionary<int, string>>(File.ReadAllText(engPath)) ?? new();
+        var targetEnum = new Dictionary<int, string>();
+
+        if (File.Exists(targetPath))
+        {
+            try { targetEnum = JsonConvert.DeserializeObject<Dictionary<int, string>>(File.ReadAllText(targetPath)) ?? new(); } catch { }
+        }
+
+        bool dirty = false;
+        foreach (var kvp in engEnum)
+        {
+            if (!targetEnum.ContainsKey(kvp.Key) || string.IsNullOrEmpty(targetEnum[kvp.Key]))
+            {
+                targetEnum[kvp.Key] = kvp.Value;
+                dirty = true;
+            }
+        }
+
+        if (dirty || !File.Exists(targetPath))
+        {
+            var sorted = targetEnum.OrderBy(k => k.Key).ToDictionary(k => k.Key, k => k.Value);
+            File.WriteAllText(targetPath, JsonConvert.SerializeObject(sorted, Formatting.Indented));
         }
     }
+
+    #endregion
 
     public static RecipeEntity RegisterCustomEntity(string displayName, string texturePath, bool legacyLoad = false)
     {

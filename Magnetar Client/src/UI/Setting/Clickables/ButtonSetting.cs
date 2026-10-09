@@ -25,16 +25,19 @@ public class ButtonSetting : Setting
         float indent = Config.indent;
         float gap = Config.SettingsInput.Gap;
 
+        string localizedName = Translate(Name);
+        string localizedButtonText = Translate(ButtonText);
+
         // Label
         float labelW = width - indent * 2 - Config.SettingWidth;
         Rect labelRect = new(indent, y, labelW, Config.elementHeight);
-        GUI.Label(labelRect, Translator.Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(labelRect, localizedName, ThemeManager.SettingLabelStyle);
 
         // Button
         float btnW = Config.SettingWidth;
         float btnStartX = width - indent - btnW - gap - Config.SettingsInput.ResetButtonW;
         Rect btnRect = new(btnStartX, y, Config.SettingWidth, Config.elementHeight);
-        GUI.Box(btnRect, Translator.Translate(ButtonText), ThemeManager.ButtonSettingStyle);
+        GUI.Box(btnRect, localizedButtonText, ThemeManager.ButtonSettingStyle);
 
         if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {

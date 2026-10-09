@@ -222,7 +222,7 @@ public class CustomKeybind : Module
 
         if (targetCard != null && Mouse.Instance != null)
         {
-            if (AutoPlant.instance == null || !AutoPlant.instance.Active)
+            if (AutoPlant.Instance == null || !AutoPlant.Instance.Active)
             {
                 Mouse.Instance.ClickOnCard(targetCard);
             }

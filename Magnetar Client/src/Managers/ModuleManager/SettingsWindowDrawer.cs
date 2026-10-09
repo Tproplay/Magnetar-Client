@@ -7,7 +7,6 @@ using Magnetar_Client.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static Magnetar_Client.Utils.Translator;
 
 namespace Magnetar_Client.Core.ModuleManager_;
 
@@ -37,7 +36,7 @@ public static class SettingsWindowDrawer
     public static void Render(Event currentEvent)
     {
         Modules.Module targetMod = ModuleManager.activeSettingsModule;
-        float viewAlpha = UIAnimationHelper.GetViewAlpha(ModuleManager.Group, ModuleManager.WindowType.Settings.ToString());
+        float viewAlpha = AnimationHandler.GetViewAlpha(ModuleManager.Group, ModuleManager.WindowType.Settings.ToString());
 
         if (targetMod != null)
         {
@@ -55,7 +54,7 @@ public static class SettingsWindowDrawer
 
         if (targetMod == null) return;
 
-        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * viewAlpha;
+        float currentAlpha = AnimationHandler.CurrentEasedAlpha * viewAlpha;
         if (currentAlpha <= 0.001f) return;
 
         Color prevColor = GUI.color;
@@ -108,8 +107,8 @@ public static class SettingsWindowDrawer
     {
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
-        float viewAlpha = UIAnimationHelper.GetViewAlpha(ModuleManager.Group, ModuleManager.WindowType.Settings.ToString());
-        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * viewAlpha;
+        float viewAlpha = AnimationHandler.GetViewAlpha(ModuleManager.Group, ModuleManager.WindowType.Settings.ToString());
+        float currentAlpha = AnimationHandler.CurrentEasedAlpha * viewAlpha;
 
         GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
         GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
@@ -131,7 +130,7 @@ public static class SettingsWindowDrawer
 
         // Header Banner using SettingsWndowStyle
         Rect headerBgRect = new(0, 0, windowWidth, headerHeight);
-        GUI.Box(headerBgRect, Translator.Translate(mod.Name), ThemeManager.SettingsWndowStyle);
+        GUI.Box(headerBgRect, ModuleManager.Domain.Translate(mod.Name), ThemeManager.SettingsWndowStyle);
 
         _moduleContentHeights[mod] = Mathf.Lerp(_moduleContentHeights[mod], _targetContentHeights[mod],
             Time.unscaledDeltaTime * Config.ModuleManager.SettingsScrollLerpSpeed);
@@ -159,7 +158,7 @@ public static class SettingsWindowDrawer
             {
                 e.Use();
                 ModuleManager.CurrentWindow = ModuleManager.WindowType.Modules;
-                UIAnimationHelper.SwitchView(ModuleManager.Group, ModuleManager.CurrentWindow.ToString());
+                AnimationHandler.SwitchView(ModuleManager.Group, ModuleManager.CurrentWindow.ToString());
                 return;
             }
 
@@ -225,7 +224,7 @@ public static class SettingsWindowDrawer
             foreach (var setting in mod.Settings)
             {
                 if (setting == null || string.IsNullOrEmpty(setting.Name)) continue;
-                float w = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(Translate(setting.Name))).x;
+                float w = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(ModuleManager.Domain.Translate(setting.Name))).x;
                 if (w > maxNameWidth) maxNameWidth = w;
             }
         }
@@ -233,7 +232,7 @@ public static class SettingsWindowDrawer
         string[] builtIns = { "Hold Mode", "Enabled", "KeyBind" };
         foreach (var b in builtIns)
         {
-            float w = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(Translate(b))).x;
+            float w = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(ModuleManager.Domain.Translate(b))).x;
             if (w > maxNameWidth) maxNameWidth = w;
         }
 
@@ -247,7 +246,7 @@ public static class SettingsWindowDrawer
         y += 3 * Config.spacing;
 
         float descriptionWidth = width - (Config.indent * 2);
-        string translatedDescription = Translate(mod.Description);
+        string translatedDescription = ModuleManager.Domain.Translate(mod.Description);
 
         float calculatedHeight = ThemeManager.SettingsDescriptionStyle.CalcHeight(new GUIContent(translatedDescription), descriptionWidth);
         GUI.Label(new Rect(Config.indent, y, descriptionWidth, calculatedHeight), translatedDescription, ThemeManager.SettingsDescriptionStyle);
@@ -265,7 +264,7 @@ public static class SettingsWindowDrawer
         {
             if (setting is CategorySetting catSet)
             {
-                catSet.IsExpanded = MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Translate(catSet.Name), true, catSet.IsExpanded);
+                catSet.IsExpanded = MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, ModuleManager.Domain.Translate(catSet.Name), true, catSet.IsExpanded);
                 skipSettings = !catSet.IsExpanded;
                 if (skipSettings) y -= Config.spacing / 2;
                 continue;
@@ -285,7 +284,7 @@ public static class SettingsWindowDrawer
                 {
                     MultiSelectWindowDrawer.ActiveMultiSelect = multiSet;
                     ModuleManager.CurrentWindow = ModuleManager.WindowType.SelectionGUI;
-                    UIAnimationHelper.SwitchView(ModuleManager.Group, ModuleManager.CurrentWindow.ToString());
+                    AnimationHandler.SwitchView(ModuleManager.Group, ModuleManager.CurrentWindow.ToString());
                 };
             }
 
@@ -293,7 +292,7 @@ public static class SettingsWindowDrawer
             setting.Draw(ref y, width);
         }
 
-        MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Translate("KeyBind"));
+        MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, ModuleManager.Domain.Translate("KeyBind"));
 
         Event e = Event.current;
         bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
@@ -307,12 +306,12 @@ public static class SettingsWindowDrawer
         float labelWidth = Mathf.Max(width * 0.40f, width - Config.indent * 2 - Config.SettingWidth - resetBtnW - gap);
 
         // --- 2. Hold Mode Toggle Row ---
-        GUI.Label(new Rect(Config.indent, y, labelWidth, elemH), Translate("Hold Mode"), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(Config.indent, y, labelWidth, elemH), ModuleManager.Domain.Translate("Hold Mode"), ThemeManager.SettingLabelStyle);
 
         Rect holdRect = new(width - Config.indent - resetBtnW - gap - Config.SettingWidth, y, Config.SettingWidth, elemH);
         Rect holdResetRect = new(width - Config.indent - resetBtnW, y, resetBtnW, elemH);
 
-        GUI.Box(holdRect, mod.HoldMode ? Translate("ON") : Translate("OFF"), mod.HoldMode ? ThemeManager.SettingOn : ThemeManager.SettingOff);
+        GUI.Box(holdRect, mod.HoldMode ? ModuleManager.Domain.Translate("ON") : ModuleManager.Domain.Translate("OFF"), mod.HoldMode ? ThemeManager.SettingOn : ThemeManager.SettingOff);
         if (holdRect.Contains(e.mousePosition) && isLeftClick)
         {
             mod.HoldMode = !mod.HoldMode;
@@ -328,12 +327,12 @@ public static class SettingsWindowDrawer
         y += elemH + Config.spacing;
 
         // --- 3. Enabled Toggle Row ---
-        GUI.Label(new Rect(Config.indent, y, labelWidth, elemH), Translate("Enabled"), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(Config.indent, y, labelWidth, elemH), ModuleManager.Domain.Translate("Enabled"), ThemeManager.SettingLabelStyle);
 
         Rect enabledRect = new(width - Config.indent - resetBtnW - gap - Config.SettingWidth, y, Config.SettingWidth, elemH);
         Rect enabledResetRect = new(width - Config.indent - resetBtnW, y, resetBtnW, elemH);
 
-        GUI.Box(enabledRect, mod.Active ? Translate("ON") : Translate("OFF"), mod.Active ? ThemeManager.SettingOn : ThemeManager.SettingOff);
+        GUI.Box(enabledRect, mod.Active ? ModuleManager.Domain.Translate("ON") : ModuleManager.Domain.Translate("OFF"), mod.Active ? ThemeManager.SettingOn : ThemeManager.SettingOff);
         if (enabledRect.Contains(e.mousePosition) && isLeftClick)
         {
             if (VanillaMode.instance.IsAllowed(mod)) mod.Toggle();

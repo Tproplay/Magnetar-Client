@@ -32,7 +32,7 @@ public class SoundMuffler : Module
 
         blacklistedTypes = new MultiSelectSetting("Blacklisted", typeof(SoundType))
         {
-            CustomNames = TranslatedNames(typeof(SoundType))
+            CustomNames = TranslateEnum(typeof(SoundType))
         };
         AddSettings(blacklistedTypes);
 
@@ -41,7 +41,7 @@ public class SoundMuffler : Module
 
     public override void OnLanguageChanged()
     {
-        blacklistedTypes.CustomNames = TranslatedNames(typeof(SoundType));
+        blacklistedTypes.CustomNames = TranslateEnum(typeof(SoundType));
     }
 
     // Mod Logic

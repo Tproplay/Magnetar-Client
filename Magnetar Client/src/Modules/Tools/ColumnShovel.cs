@@ -32,6 +32,13 @@ public class ColumnShovel : Module
     {
         instance = this;
 
+        var strings = new string[]
+        {
+            "Column", "Row", "Rook", "3x3", "Full Lawn",
+        };
+
+        RegisterTranslations(Translator.CreateDictionary(strings));
+
         CreateCategory("General");
 
         Mode = new SelectSetting("Mode", 0)
@@ -56,7 +63,7 @@ public class ColumnShovel : Module
     public override void OnLanguageChanged()
     {
         Mode.CustomNames = Mode.Options
-            .ToDictionary(kvp => kvp.Key, kvp => Translator.Translate(kvp.Value));
+            .ToDictionary(kvp => kvp.Key, kvp => Translate(kvp.Value));
     }
 
     // Mod Logic

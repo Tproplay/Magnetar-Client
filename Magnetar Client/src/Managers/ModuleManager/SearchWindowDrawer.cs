@@ -17,7 +17,7 @@ public static class SearchWindowDrawer
 
     private static GUI.WindowFunction _cachedSearchDelegate;
     private static GUI.WindowFunction SearchDelegate => _cachedSearchDelegate ??=
-        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawSearchWindow);
+        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>(DrawSearchWindow);
 
     public static void Initialize()
     {
@@ -96,6 +96,6 @@ public static class SearchWindowDrawer
             }
         }
 
-        SearchQuery = DrawManualTextField(tfRect, SearchQuery, Translate("Search..."));
+        SearchQuery = DrawManualTextField(tfRect, SearchQuery, ModuleManager.Domain.Translate("Search..."));
     }
 }

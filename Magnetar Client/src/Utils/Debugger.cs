@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-#if MELONLOADER || RELEASE_MELON
+﻿#if MELONLOADER || RELEASE_MELON
 using MelonLoader;
 using MelonLoader.Logging;
 #elif BEPINEX || RELEASE_BEPINEX

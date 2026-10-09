@@ -35,7 +35,7 @@ public static partial class DrawSetting
     public static void HandleStringSetting(StringSetting strSet, ref float y, float width)
     {
         float elemH = Config.elementHeight;
-        string translatedName = Translator.Translate(strSet.Name);
+        string translatedName = strSet.Translate(strSet.Name);
 
         float controlW = Mathf.Min(Config.SettingWidth * 1.25f, width * 0.55f);
         float gap = Config.S(8f);
@@ -265,12 +265,12 @@ public static partial class DrawSetting
                 }
                 else if (ctrl && k == KeyCode.C)
                 {
-                    if (hasSelection) GUIUtility.systemCopyBuffer = text.Substring(selStart, selEnd - selStart);
+                    if (hasSelection) GUIUtility.systemCopyBuffer = text[selStart..selEnd];
                     e.Use();
                 }
                 else if (ctrl && k == KeyCode.X)
                 {
-                    if (hasSelection) { GUIUtility.systemCopyBuffer = text.Substring(selStart, selEnd - selStart); SaveState(); DeleteSelection(); }
+                    if (hasSelection) { GUIUtility.systemCopyBuffer = text[selStart..selEnd]; SaveState(); DeleteSelection(); }
                     e.Use();
                 }
                 else if (ctrl && k == KeyCode.V)

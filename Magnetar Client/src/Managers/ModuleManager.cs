@@ -1,8 +1,11 @@
-﻿using Magnetar_Client.Core.Lifecycle;
+﻿using Magnetar_Client.Api;
+using Magnetar_Client.Core.Lifecycle;
 using Magnetar_Client.Core.ModuleManager_;
 using Magnetar_Client.Modules;
 using Magnetar_Client.UI;
+using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.WindowDrawing;
+using Magnetar_Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,26 +24,24 @@ public static class ModuleManager
         Settings,
         SelectionGUI,
     }
+
     public const string Group = "ModuleManager";
+    public static TranslationDomain Domain => ModuleTranslationHandler.Domain;
+
     public static bool IsInitialized { get; private set; } = false;
     public static List<Modules.Module> Modules = new();
     public static WindowType CurrentWindow = WindowType.Modules;
     public static Modules.Module activeSettingsModule = null;
     public static bool resetWindowPos = false;
-    
 
     public static Dictionary<ModuleCategory, Rect> windowPositions => CategoryWindowDrawer.WindowPositions;
-    public static string ModuleSearchQuery
-    {
-        get => SearchWindowDrawer.SearchQuery;
-        set => SearchWindowDrawer.SearchQuery = value;
-    }
 
     public static void Init()
     {
         ModuleCategory.Init();
+        ModuleTranslationHandler.Init();
 
-        #region Register All Interal Modules
+        #region Register All Internal Modules
         Type[] exportedTypes;
         try
         {
@@ -63,35 +64,35 @@ public static class ModuleManager
         {
             RegisterModule(type);
         }
-
         #endregion
 
         CategoryWindowDrawer.InitializeLayout();
         MultiSelectWindowDrawer.InitializeLayout();
         SearchWindowDrawer.Initialize();
 
-        // Register to centralized ServiceRegistry and SafeToCloseManager
         ServiceRegistry.Register(new ModuleManagerService());
 
-        UIAnimationHelper.SetViewImmediate(Group, WindowType.Modules.ToString(), 1f);
+        AnimationHandler.SetViewImmediate(Group, WindowType.Modules.ToString(), 1f);
 
         TabType.MODULES.OnDeselected = () =>
         {
             MultiSelectTabStorage.SaveState(TabType.MODULES);
-            UIAnimationHelper.FadeView(Group, CurrentWindow.ToString(), 0f);
+            AnimationHandler.FadeView(Group, CurrentWindow.ToString(), 0f);
         };
 
         TabType.MODULES.OnSelected = () =>
         {
             MultiSelectTabStorage.RestoreState(TabType.MODULES);
-            UIAnimationHelper.SwitchView(Group, CurrentWindow.ToString());
+            AnimationHandler.SwitchView(Group, CurrentWindow.ToString());
         };
+
+        SaveLoad.RegisterHandler(new ModuleSaveHandler());
 
         IsInitialized = true;
         DebugLogger.Msg($"Loaded {Modules.Count} modules");
     }
 
-    internal static void RegisterModule(Type type)
+    public static void RegisterModule(Type type)
     {
         if (type == null)
         {
@@ -116,11 +117,8 @@ public static class ModuleManager
             var instance = (Modules.Module)Activator.CreateInstance(type);
             Modules.Add(instance);
 
-            // Automatically ensure the category window is mapped
-            if (instance.Category != null)
-            {
-                CategoryWindowDrawer.EnsureCategoryInitialized(instance.Category);
-            }
+            CategoryWindowDrawer.EnsureCategoryInitialized(instance.Category);
+            SetDomain(instance);
         }
         catch (Exception ex)
         {
@@ -128,18 +126,21 @@ public static class ModuleManager
         }
     }
 
+    public static void SetDomain(Modules.Module module) => ModuleTranslationHandler.SetDomain(module);
+    public static Dictionary<int, string> TranslateEnum(Type enumType) => ModuleTranslationHandler.TranslateEnum(enumType);
+    public static void InvalidateEnumCache() => ModuleTranslationHandler.InvalidateEnumCache();
+
     public static void OpenModuleSettings(Modules.Module mod)
     {
         MobileInputHandler.Reset();
 
         CurrentWindow = WindowType.Settings;
-
         activeSettingsModule = mod;
 
         mod.ShowSettings = true;
         resetWindowPos = true;
 
-        UIAnimationHelper.SwitchView(Group, CurrentWindow.ToString());
+        AnimationHandler.SwitchView(Group, CurrentWindow.ToString());
     }
 
     public static void Render()
@@ -147,19 +148,18 @@ public static class ModuleManager
         Event currentEvent = Event.current;
         MobileInputHandler.Update(currentEvent);
 
-        // Render any view that is currently visible or cross-fading
-        if (UIAnimationHelper.GetViewAlpha(Group, WindowType.Modules.ToString()) > 0.001f)
+        if (AnimationHandler.GetViewAlpha(Group, WindowType.Modules.ToString()) > 0.001f)
         {
             SearchWindowDrawer.Render(currentEvent);
             CategoryWindowDrawer.Render();
         }
 
-        if (UIAnimationHelper.GetViewAlpha(Group, WindowType.Settings.ToString()) > 0.001f)
+        if (AnimationHandler.GetViewAlpha(Group, WindowType.Settings.ToString()) > 0.001f)
         {
             SettingsWindowDrawer.Render(currentEvent);
         }
 
-        if (UIAnimationHelper.GetViewAlpha(Group, WindowType.SelectionGUI.ToString()) > 0.001f)
+        if (AnimationHandler.GetViewAlpha(Group, WindowType.SelectionGUI.ToString()) > 0.001f)
         {
             MultiSelectWindowDrawer.Render(currentEvent);
         }
@@ -167,12 +167,10 @@ public static class ModuleManager
 
     public static void RenderModulesGUI()
     {
-        if (Modules != null)
+        if (Modules == null) return;
+        for (int i = 0; i < Modules.Count; i++)
         {
-            for (int i = 0; i < Modules.Count; i++)
-            {
-                Modules[i]?.OnGUI();
-            }
+            Modules[i]?.OnGUI();
         }
     }
 
@@ -183,13 +181,14 @@ public static class ModuleManager
             HandleHotkeys();
         }
 
+        if (Modules == null) return;
         for (int i = 0; i < Modules.Count; i++)
         {
             Modules[i]?.OnUpdate();
         }
     }
 
-    static void HandleHotkeys()
+    private static void HandleHotkeys()
     {
         if (IsFocused) return;
 
@@ -229,71 +228,93 @@ public static class ModuleManager
         }
     }
 
+    public static void ResetToDefault()
+    {
+        if (Modules == null) return;
+
+        foreach (var mod in Modules)
+        {
+            if (mod == null) continue;
+
+            if (mod.Active)
+            {
+                mod.Active = false;
+                try { mod.OnDisable(); } catch { }
+               
+            }
+
+            mod.KeyBind?.Reset();
+            mod.HoldMode = mod.defaultHoldMode;
+            if (mod.Active != mod.defaultActive) mod.Toggle();
+
+            if (mod.Settings != null)
+            {
+                foreach (var setting in mod.Settings)
+                {
+                    try { setting?.Reset(); } catch { }
+                   
+                }
+            }
+        }
+    }
+
     private class ModuleManagerService : IWarmUp, IUpdatable, IRenderable, IMenuRenderable, ICloseHandler, ILanguageAware
     {
         public string Name => "ModuleManager";
-        public int Priority => ServicePriority.Modules;
+    public int Priority => ServicePriority.Modules;
 
-        public void OnWarmUp() => Render();
-        public void OnUpdate() => ModuleManager.OnUpdate();
-        public void OnGUI() => RenderModulesGUI();
+    public void OnWarmUp() => Render();
+    public void OnUpdate() => ModuleManager.OnUpdate();
+    public void OnGUI() => RenderModulesGUI();
 
-        public void OnMenuGUI()
-        {
-            UIAnimationHelper.RenderWithTabAlpha(TabType.MODULES, ModuleManager.Render);
+    public void OnMenuGUI()
+    {
+        AnimationHandler.RenderWithTabAlpha(TabType.MODULES, ModuleManager.Render);
         }
 
-        public bool OnEscapePressed()
-        {
-            if (Config.CurrentTab != TabType.MODULES) return false;
+    public bool OnEscapePressed()
+    {
+        if (Config.CurrentTab != TabType.MODULES) return false;
 
             if (DrawSetting.IsFocused)
             {
-                Main.ResetInputBind();
+            Main.ResetInputBind();
                 return true;
             }
 
-            if (CurrentWindow != WindowType.Modules)
+        if (CurrentWindow != WindowType.Modules)
             {
-                switch (CurrentWindow)
+            switch (CurrentWindow)
                 {
-                    case WindowType.Settings:
-                        if (activeSettingsModule != null)
+                case WindowType.Settings:
+                    if (activeSettingsModule != null)
                         {
-                            activeSettingsModule.ShowSettings = false;
+                        activeSettingsModule.ShowSettings = false;
                         }
-                        CurrentWindow = WindowType.Modules;
+                    CurrentWindow = WindowType.Modules;
                         break;
-                    case WindowType.SelectionGUI:
-                        CurrentWindow = WindowType.Settings;
+                case WindowType.SelectionGUI:
+                    CurrentWindow = WindowType.Settings;
                         break;
-                }
+            }
 
-                // Cross-fade to the new window state
-                UIAnimationHelper.SwitchView(Group, CurrentWindow.ToString());
+            AnimationHandler.SwitchView(Group, CurrentWindow.ToString());
                 Main.ResetInputBind();
                 return true;
             }
 
-            return false;
+        return false;
         }
 
-        public void OnLanguageChanged()
-        {
-            if (Modules == null) return;
-            for (int i = 0; i < Modules.Count; i++)
-            {
-                Modules[i]?.OnLanguageChanged();
-            }
-        }
+    public void OnLanguageChanged() => ModuleTranslationHandler.OnLanguageChanged();
 
-        public bool CanClose()
-        {
-            if (Config.CurrentTab == TabType.MODULES)
+    public bool CanClose()
+    {
+        if (Config.CurrentTab == TabType.MODULES)
             {
-                return CurrentWindow == WindowType.Modules && !DrawSetting.IsFocused;
+            return CurrentWindow == WindowType.Modules && !DrawSetting.IsFocused;
             }
-            return true;
+        return true;
         }
-    }
+}
 }

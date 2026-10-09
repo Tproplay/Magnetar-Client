@@ -1,5 +1,4 @@
-﻿using Magnetar_Client.Api;
-using Magnetar_Client.Core;
+﻿using Magnetar_Client.Core;
 using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 

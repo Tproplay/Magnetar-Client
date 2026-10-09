@@ -58,7 +58,7 @@ public class BetterOsu : Module
         PetTypeSetting = new MultiSelectSetting("Pet Type", typeof(PetType))
         {
             MaxSelection = 1,
-            CustomNames = TranslatedNames(typeof(PetType))
+            CustomNames = TranslateEnum(typeof(PetType))
         };
 
         PetTypeSetting.Select((int)PetType.PetSnowBoss);
@@ -67,7 +67,7 @@ public class BetterOsu : Module
 
         selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
         {
-            CustomNames = TranslatedNames(typeof(BulletType))
+            CustomNames = TranslateEnum(typeof(BulletType))
         };
 
         selectBulletsSetting.Options.Keys.ToList().ForEach(selectBulletsSetting.Select);
@@ -90,8 +90,8 @@ public class BetterOsu : Module
 
     public override void OnLanguageChanged()
     {
-        PetTypeSetting.CustomNames = TranslatedNames(typeof(PetType));
-        selectBulletsSetting.CustomNames = TranslatedNames(typeof(BulletType));
+        PetTypeSetting.CustomNames = TranslateEnum(typeof(PetType));
+        selectBulletsSetting.CustomNames = TranslateEnum(typeof(BulletType));
     }
 
     float DamageBuff = 1;

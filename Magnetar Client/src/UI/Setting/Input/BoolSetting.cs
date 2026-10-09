@@ -49,7 +49,7 @@ public class BoolSetting : Setting
         // Label: occupies remaining width on the left
         float labelW = width - (indent * 2f) - btnW - gap - resetBtnW;
         Rect labelRect = new(indent, y, labelW, Config.elementHeight);
-        GUI.Label(labelRect, Translator.Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Right-aligned elements: [Toggle Button] [gap] [Reset Button]
         float resetStartX = width - indent - resetBtnW;
@@ -58,7 +58,7 @@ public class BoolSetting : Setting
         Rect btnRect = new(btnStartX, y, btnW, Config.elementHeight);
         Rect resetRect = new(resetStartX, y, resetBtnW, Config.elementHeight);
 
-        GUI.Box(btnRect, Value ? Translator.Translate("ON") : Translator.Translate("OFF"),
+        GUI.Box(btnRect, Value ? Translate("ON") : Translate("OFF"),
             Value ? ThemeManager.SettingOn : ThemeManager.SettingOff);
 
         if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)

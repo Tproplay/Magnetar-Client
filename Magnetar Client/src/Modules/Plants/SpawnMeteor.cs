@@ -5,13 +5,6 @@ using UnityEngine;
 using System.Linq;
 using Magnetar_Client.Utils;
 
-#if MELONLOADER || RELEASE_MELON
-using Il2Cpp;
-using MelonLoader;
-#elif BEPINEX || RELEASE_BEPINEX
-using BepInEx.Unity.IL2CPP.Utils;
-#endif
-
 using Magnetar_Client.UI.Setting;
 
 namespace Magnetar_Client.Modules;
@@ -36,6 +29,13 @@ public class SpawnMeteor : Module
     public SpawnMeteor()
     {
         instance = this;
+
+        var strings = new string[]
+        {
+            "Passive Meteorite", "Active Meteorite", "Ultimate Meteorite", "Ultimate Meteorite (skin)",
+        };
+
+        RegisterTranslations(Translator.CreateDictionary(strings));
 
         CreateCategory("General");
 
@@ -67,7 +67,7 @@ public class SpawnMeteor : Module
         foreach (var instance in MeteorSectionSetting.Sections)
         {
             var select = (SelectSetting)instance.ChildSettings[0];
-            select.CustomNames = select.Options.ToDictionary(kvp =>  kvp.Key, kvp => Translator.Translate(kvp.Value));
+            select.CustomNames = select.Options.ToDictionary(kvp =>  kvp.Key, kvp => Translate(kvp.Value));
         }
     }
 

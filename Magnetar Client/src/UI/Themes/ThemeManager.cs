@@ -445,6 +445,8 @@ public static class ThemeManager
 
     public static void Rescale()
     {
+        if (!_initialized) return;
+
         float scale = Config.GUIScale;
         float elementScale = Config.ElementScale;
 

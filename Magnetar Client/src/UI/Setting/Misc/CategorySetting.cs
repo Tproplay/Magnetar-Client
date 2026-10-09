@@ -29,7 +29,7 @@ public class CategorySetting : Setting
             width,
             Config.indent,
             Config.spacing,
-            Translator.Translate(Name),
+            Translate(Name),
             true,
             IsExpanded
         );

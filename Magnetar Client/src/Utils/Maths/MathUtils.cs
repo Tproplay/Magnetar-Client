@@ -10,7 +10,7 @@ public static class Maths
         long absoluteValue = Math.Abs(number);
 
         if (absoluteValue >= 1_000_000_000_000) // Trillion
-            return (number / 1_000_000_000_000D).ToString("0.##") + "T";
+            return (number / 1_000_000_000_000D).ToString("0.##") + "TranslateText";
 
         if (absoluteValue >= 1_000_000_000) // Billion
             return (number / 1_000_000_000D).ToString("0.##") + "B";
@@ -34,7 +34,7 @@ public static class Maths
 
         // Trillion
         if (absoluteValue >= 1_000_000_000_000D)
-            return (number / 1_000_000_000_000D).ToString("0.##") + "T";
+            return (number / 1_000_000_000_000D).ToString("0.##") + "TranslateText";
 
         // Billion
         if (absoluteValue >= 1_000_000_000D)

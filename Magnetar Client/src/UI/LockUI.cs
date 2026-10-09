@@ -1,5 +1,4 @@
 ﻿#if MELONLOADER || RELEASE_MELON
-using Il2Cpp;
 #endif
 using HarmonyLib;
 using Magnetar_Client.Core;

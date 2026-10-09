@@ -120,7 +120,7 @@ public class SectionSetting : Setting
         float actionBtnW = Config.SettingsInput.ResetButtonW;
 
         // 1. Group Header
-        string title = $"{Translator.Translate(Name)} ({Sections.Count})";
+        string title = $"{Translate(Name)} ({Sections.Count})";
         Rect titleRect = new(indent, y, width - (indent * 2f), elemH);
         GUI.Box(titleRect, title, ThemeManager.SectionGroupHeaderStyle);
         y += elemH + gap;
@@ -142,7 +142,7 @@ public class SectionSetting : Setting
             Rect delRect = new(delStartX, y, actionBtnW, headerH);
 
             string foldArrow = section.IsExpanded ? "▼ " : "▶ ";
-            string secLabel = foldArrow + Translator.Translate(section.Title);
+            string secLabel = foldArrow + Translate(section.Title);
 
             // Sub-header bar
             if (GUI.Button(secHeaderRect, secLabel, ThemeManager.SectionHeaderStyle))
@@ -186,7 +186,7 @@ public class SectionSetting : Setting
         Rect resetRect = new(resetStartX, y, actionBtnW, elemH);
 
         GUIStyle addStyle = canAdd ? ThemeManager.SectionAddButtonStyle : ThemeManager.CategoryModuleOffStyle;
-        string buttonText = canAdd ? Translator.Translate("+ Add Section") : Translator.Translate("Max Sections Reached");
+        string buttonText = canAdd ? Translate("+ Add Section") : Translate("Max Sections Reached");
 
         GUI.Box(addBtnRect, buttonText, addStyle);
         if (canAdd && e.type == EventType.MouseDown && e.button == 0 && addBtnRect.Contains(e.mousePosition))

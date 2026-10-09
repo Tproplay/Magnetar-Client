@@ -1,37 +1,19 @@
-﻿using System;
+﻿using Magnetar_Client.Core;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEngine;
-using Magnetar_Client.Core;
-using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Api.PathsManager;
-using static Magnetar_Client.Preferences;
-
-#if MELONLOADER || RELEASE_MELON
-using MelonLoader;
-using MelonLoader.Utils;
-#elif BEPINEX || RELEASE_BEPINEX
-using BepInEx;
-using BepInEx.Configuration;
-#endif
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Utils;
 
 public static class ProfileManager
 {
-
-    /// <summary>
-    /// List of all detected profile names.
-    /// </summary>
-    public static List<string> Profiles { get; private set; } = new List<string> { Config.DefaultProfile };
-
-
+    public static List<string> Profiles { get; private set; } = new() { Config.DefaultProfile };
 
     public static void Init()
     {
-        _ = ConfigDir;
-
         RefreshProfiles();
 
         if (!Profiles.Contains(Config.DefaultProfile, StringComparer.OrdinalIgnoreCase))
@@ -41,9 +23,9 @@ public static class ProfileManager
 
         string savedProfile = Config.DefaultProfile;
 
-        if (prefCurrentProfile != null && !string.IsNullOrWhiteSpace(prefCurrentProfile.Value))
+        if (Preferences.CurrentProfileEntry != null && !string.IsNullOrWhiteSpace(Preferences.CurrentProfileEntry.Value))
         {
-            savedProfile = prefCurrentProfile.Value;
+            savedProfile = Preferences.CurrentProfileEntry.Value;
         }
 
         if (Profiles.Contains(savedProfile, StringComparer.OrdinalIgnoreCase))
@@ -63,19 +45,11 @@ public static class ProfileManager
     {
         try
         {
-#if MELONLOADER || RELEASE_MELON
-            if (prefCurrentProfile != null)
+            if (Preferences.CurrentProfileEntry != null)
             {
-                prefCurrentProfile.Value = profileName;
-                Preferences.MagnetarCategory.SaveToFile();
+                Preferences.CurrentProfileEntry.Value = profileName;
+                Preferences.CurrentProfileEntry.Save();
             }
-#elif BEPINEX || RELEASE_BEPINEX
-            if (prefCurrentProfile != null && Preferences.BepInExConfig != null)
-            {
-                prefCurrentProfile.Value = profileName;
-                Preferences.BepInExConfig.Save();
-            }
-#endif
         }
         catch (Exception ex)
         {
@@ -83,9 +57,6 @@ public static class ProfileManager
         }
     }
 
-    /// <summary>
-    /// Scans the config directory for all Magnetar_{profile}.json save files.
-    /// </summary>
     public static void RefreshProfiles()
     {
         Profiles.Clear();
@@ -142,9 +113,6 @@ public static class ProfileManager
         }
     }
 
-    /// <summary>
-    /// Disables all modules and resets every setting polymorphically to default values.
-    /// </summary>
     public static void ResetAllModulesToDefault()
     {
         DisableAllModules();
@@ -185,23 +153,16 @@ public static class ProfileManager
         }
     }
 
-    /// <summary>
-    /// Creates a new profile, saves current profile state, resets modules to default, and updates preferences.
-    /// </summary>
     public static bool CreateProfile(string profileName)
     {
         if (string.IsNullOrWhiteSpace(profileName)) return false;
-
         profileName = profileName.Trim();
 
         if (Profiles.Contains(profileName, StringComparer.OrdinalIgnoreCase))
-        {
-            AutoSaveLogger.Error($"Profile '{profileName}' already exists.");
             return false;
-        }
 
         SaveLoad.Save(force: true);
-        ResetAllModulesToDefault();
+        SaveLoad.ResetAll();
 
         Profiles.Add(profileName);
         Config.CurrentProfile = profileName;
@@ -214,15 +175,12 @@ public static class ProfileManager
         return true;
     }
 
-    /// <summary>
-    /// Saves current profile, resets modules to clean defaults, and loads the target profile.
-    /// </summary>
     public static void SwitchProfile(string targetProfile)
     {
         if (string.IsNullOrWhiteSpace(targetProfile) || string.Equals(Config.CurrentProfile, targetProfile, StringComparison.OrdinalIgnoreCase)) return;
 
         SaveLoad.Save(force: true);
-        ResetAllModulesToDefault();
+        SaveLoad.ResetAll();
 
         if (!Profiles.Contains(targetProfile, StringComparer.OrdinalIgnoreCase))
         {
@@ -238,9 +196,6 @@ public static class ProfileManager
         AutoSaveLogger.Msg($"Switched active profile to: '{Config.CurrentProfile}'");
     }
 
-    /// <summary>
-    /// Deletes a profile file and removes it from the list. Fallbacks to Default if active.
-    /// </summary>
     public static bool DeleteProfile(string profileName)
     {
         if (string.Equals(profileName, Config.DefaultProfile, StringComparison.OrdinalIgnoreCase))

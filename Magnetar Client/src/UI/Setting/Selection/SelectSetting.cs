@@ -70,7 +70,7 @@ public class SelectSetting : Setting
         // Label on the left: fills remaining horizontal space
         float labelW = width - (indent * 2f) - btnW - gap - resetBtnW;
         Rect labelRect = new(indent, y, labelW, elemH);
-        GUI.Label(labelRect, Translator.Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Right-to-left layout: [Dropdown Button] [gap] [Reset Button]
         float resetStartX = width - indent - resetBtnW;

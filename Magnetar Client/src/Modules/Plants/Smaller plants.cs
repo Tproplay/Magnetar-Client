@@ -41,7 +41,7 @@ public class SmallerPlants : Module
         PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
         {
             Blacklist = Banned.PlantTypeBanned,
-            CustomNames = TranslatedNames(typeof(PlantType))
+            CustomNames = TranslateEnum(typeof(PlantType))
         };
         PlantsSelectedSetting.SelectAll(setDefault: true);
 
@@ -59,7 +59,7 @@ public class SmallerPlants : Module
                 new MultiSelectSetting("Entities", typeof(PlantType))
                 {
                     Blacklist = Banned.PlantTypeBanned,
-                    CustomNames = TranslatedNames(typeof(PlantType))
+                    CustomNames = TranslateEnum(typeof(PlantType))
                 },
                 new FloatSetting("Scale multiplier", 0.5f, 2f, 1f, 3, 0f),
             }, 0);
@@ -70,12 +70,12 @@ public class SmallerPlants : Module
 
     public override void OnLanguageChanged()
     {
-        PlantsSelectedSetting.CustomNames = TranslatedNames(typeof(PlantType));
+        PlantsSelectedSetting.CustomNames = TranslateEnum(typeof(PlantType));
         foreach (var section in IndividualPlantsSectionSetting.Sections)
         {
             if (section.Find<MultiSelectSetting>("Entities", out var setting))
             {
-                setting.CustomNames = TranslatedNames(typeof(PlantType));
+                setting.CustomNames = TranslateEnum(typeof(PlantType));
             }
         }
     }

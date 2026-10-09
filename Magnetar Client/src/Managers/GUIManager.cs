@@ -9,7 +9,6 @@ using Magnetar_Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.Api.PathsManager;
 using static Magnetar_Client.Utils.Magnetar_Logger;
@@ -22,7 +21,9 @@ public static class GUIManager
     public const string ViewMain = "Controls";
     public const string ViewSelector = "Selector";
 
-    public static bool isSelectingSubWindow => UIAnimationHelper.GetViewAlpha(Group, ViewSelector) > 0.001f;
+    public static bool isSelectingSubWindow => AnimationHandler.GetViewAlpha(Group, ViewSelector) > 0.001f;
+
+    public static readonly TranslationDomain Domain = Translator.CreateDomain("GUI Manager");
 
     public static MultiSelectSetting LanguageSetting { get; } = new("Language")
     {
@@ -61,15 +62,15 @@ public static class GUIManager
 
     public static void OnClose()
     {
-        UIAnimationHelper.SwitchView(Group, ViewMain);
+        AnimationHandler.SwitchView(Group, ViewMain);
         GUISelectorDrawer.ActiveSetting = null;
         DrawSetting.activeMultiSelect = null;
     }
 
     public static void Init()
     {
-        UIAnimationHelper.SetViewImmediate(Group, ViewMain, 1.0f);
-        UIAnimationHelper.SetViewImmediate(Group, ViewSelector, 0.0f);
+        AnimationHandler.SetViewImmediate(Group, ViewMain, 1.0f);
+        AnimationHandler.SetViewImmediate(Group, ViewSelector, 0.0f);
 
         try
         {
@@ -127,6 +128,15 @@ public static class GUIManager
         {
             MultiSelectTabStorage.RestoreState(TabType.GUI);
         };
+
+        SaveLoad.RegisterEntry("Language", () => Config.Language, val => Config.Language = val, "English");
+        SaveLoad.RegisterEntry("Theme", () => Config.Theme, val => Config.Theme = val, "Default");
+        SaveLoad.RegisterEntry("GUIScale", () => Config.GUIScale, val => Config.GUIScale = val, 1.0f);
+        SaveLoad.RegisterEntry("ElementScale", () => Config.ElementScale, val => Config.ElementScale = val, 1.0f);
+        SaveLoad.RegisterEntry("ShowFloatingIcon", () => Config.ShowFloatingIcon, val => Config.ShowFloatingIcon = val, true);
+        SaveLoad.RegisterEntry("ShowMainMenuCredits", () => Config.ShowMainMenuCredits, val => Config.ShowMainMenuCredits = val, true);
+
+        Domain.OnDumpEnglishTemplate += DumpEnglishTemplates;
     }
 
     public static void RefreshThemeOptions()
@@ -193,7 +203,7 @@ public static class GUIManager
 
         public void OnMenuGUI()
         {
-            UIAnimationHelper.RenderWithTabAlpha(TabType.GUI, GUIManager.Render);
+            AnimationHandler.RenderWithTabAlpha(TabType.GUI, GUIManager.Render);
         }
 
         public bool CanClose()
@@ -228,5 +238,18 @@ public static class GUIManager
         }
 
         public void OnLanguageChanged() => RefreshThemeOptions();
+    }
+
+    private static void DumpEnglishTemplates(string domainDir)
+    {
+        var template = new string[]
+        {
+            "GUI Configuration", "Language", "Theme", "Change", "GUI Scale", "Element Scale",
+            "Floating Icon", "Mobile Close Buttons", "Show Main Menu Credits", "Icon Opacity",
+            "ON", "OFF",
+        };
+
+        string filePath = Path.Combine(domainDir, "translation_strings.json");
+        Translator.SaveJson(filePath, Translator.CreateDictionary(template));
     }
 }

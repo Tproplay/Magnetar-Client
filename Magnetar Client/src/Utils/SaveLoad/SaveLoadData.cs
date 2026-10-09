@@ -1,5 +1,6 @@
 ﻿using Magnetar_Client.UI.Setting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,22 +11,104 @@ namespace Magnetar_Client.Utils;
 
 public static class SaveLoadData
 {
+    #region Entry Data Interface & Registries
+
+    public interface ISaveEntry
+    {
+        string Key { get; }
+        object GetValue();
+        void SetValue(object rawValue);
+        void ResetToDefault();
+    }
+
+    public class SaveEntry<T> : ISaveEntry
+    {
+        public string Key { get; }
+        public Func<T> Getter { get; }
+        public Action<T> Setter { get; }
+        public T DefaultValue { get; }
+
+        public SaveEntry(string key, Func<T> getter, Action<T> setter, T defaultValue = default)
+        {
+            Key = key ?? throw new ArgumentNullException(nameof(key));
+            Getter = getter ?? throw new ArgumentNullException(nameof(getter));
+            Setter = setter ?? throw new ArgumentNullException(nameof(setter));
+            DefaultValue = defaultValue;
+        }
+
+        public object GetValue() => Getter();
+
+        public void SetValue(object rawValue)
+        {
+            if (rawValue == null)
+            {
+                Setter(DefaultValue);
+                return;
+            }
+
+            try
+            {
+                if (rawValue is T typedVal)
+                {
+                    Setter(typedVal);
+                    return;
+                }
+
+                if (rawValue is JToken token)
+                {
+                    T converted = token.ToObject<T>();
+                    Setter(converted);
+                    return;
+                }
+
+                T val = (T)Convert.ChangeType(rawValue, typeof(T));
+                Setter(val);
+            }
+            catch (Exception ex)
+            {
+                AutoSaveLogger.Error($"[SaveRegistry] Failed to deserialize entry '{Key}': {ex.Message}");
+                Setter(DefaultValue);
+            }
+        }
+
+        public void ResetToDefault() => Setter(DefaultValue);
+    }
+
+    public static class SaveRegistry
+    {
+        private static readonly Dictionary<string, ISaveEntry> _entries = new(StringComparer.OrdinalIgnoreCase);
+
+        public static IReadOnlyCollection<ISaveEntry> Entries => _entries.Values;
+
+        /// <summary>
+        /// Registers a new save entry. Can be called anywhere (e.g. extensions, plugins, managers).
+        /// </summary>
+        public static SaveEntry<T> Register<T>(string key, Func<T> getter, Action<T> setter, T defaultValue = default)
+        {
+            var entry = new SaveEntry<T>(key, getter, setter, defaultValue);
+            _entries[key] = entry;
+            return entry;
+        }
+
+        public static bool Unregister(string key) => _entries.Remove(key);
+
+        public static bool TryGetEntry(string key, out ISaveEntry entry) => _entries.TryGetValue(key, out entry);
+    }
+
+    #endregion
+
     #region Data Transfer Objects
+
     public class MagnetarSaveData
     {
-        public bool ShowGui = false;
-        public string Language;
-        public string Theme;
-        public float GUIScale = 1f;
-        public float ElementScale = 1f;
-        public bool HudEnabled = true;
-        public bool ShowBackground = false;
-        public bool ShowFloatingIcon = true;
-        public bool ShowMainMenuCredits = true;
+        // Core structural dictionaries
         public List<int> SelectedHudElements = new();
         public Dictionary<string, SimpleRect> HudPositions = new();
         public Dictionary<string, SimpleRect> CategoryPositions = new();
         public Dictionary<string, ModuleSaveData> Modules = new();
+
+        // Extensible storage for registered EntryData
+        public Dictionary<string, object> Entries = new(StringComparer.OrdinalIgnoreCase);
     }
 
     public class TextureSaveData
@@ -52,11 +135,13 @@ public static class SaveLoadData
     public class MultiSelectSaveData
     {
         public string Mode { get; set; } = "Selected";
-        public List<int> Values { get; set; } = new List<int>();
+        public List<int> Values { get; set; } = new();
     }
+
     #endregion
 
     #region Setting Serialization & Restoration
+
     public static object SerializeSettingValue(Setting setting)
     {
         if (setting == null) return null;
@@ -227,5 +312,6 @@ public static class SaveLoadData
             AutoSaveLogger.Error($"Error restoring setting '{setting.Name}': {ex.Message}");
         }
     }
+
     #endregion
 }

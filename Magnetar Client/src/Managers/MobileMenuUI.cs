@@ -1,16 +1,9 @@
-﻿using Il2CppSystem.IO;
+﻿using Magnetar_Client.Api;
 using Magnetar_Client.Core.Lifecycle;
+using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.Utils;
-using System;
 using UnityEngine;
-using static Magnetar_Client.Api.PathsManager;
-
-#if MELONLOADER || RELEASE_MELON
-
-#elif BEPINEX || RELEASE_BEPINEX
-using Il2CppInterop.Runtime;
-#endif
 
 namespace Magnetar_Client.Core;
 
@@ -35,7 +28,7 @@ public static class MobileMenuUI
     private static float _lastInteractionTime = 0f;
     private static float _lastClickTime = 0f;
     private const float DoubleClickInterval = 0.35f;
-    private const float DormantDarkenFactor = 0.40f; // Multiplier applied to color when dormant
+    private const float DormantDarkenFactor = 0.40f;
 
     public static void Init()
     {
@@ -62,131 +55,12 @@ public static class MobileMenuUI
         return new Rect(left, top, right - left, bottom - top);
     }
 
-    private static Texture2D LoadLogoTexture()
-    {
-        // --- 1. Load from the dedicated magnetar_ui AssetBundle ---
-        try
-        {
-            string bundlePath = System.IO.Path.Combine(ModsDir, "Magnetar Data", "magnetar_ui");
-            if (System.IO.File.Exists(bundlePath))
-            {
-                // Check if already in memory before attempting to load from disk
-                AssetBundle uiBundle = null;
-                foreach (var b in AssetBundle.GetAllLoadedAssetBundles().ToArray())
-                {
-                    if (b != null && b.name == "magnetar_ui")
-                    {
-                        uiBundle = b;
-                        break;
-                    }
-                }
-
-                bool loadedFromDisk = false;
-                if (uiBundle == null)
-                {
-                    uiBundle = AssetBundle.LoadFromFile(bundlePath);
-                    loadedFromDisk = true;
-                }
-
-                if (uiBundle != null)
-                {
-                    try
-                    {
-                        string[] targetNames = new string[]
-                        {
-                    "assets/assets/magnetar_logo.png",
-                    "magnetar_logo"
-                        };
-
-                        foreach (string name in targetNames)
-                        {
-#if MELONLOADER || RELEASE_MELON
-                            Texture2D tex = uiBundle.LoadAsset<Texture2D>(name);
-                            if (tex != null)
-                            {
-                                Magnetar_Logger.GUILogger.Msg($"Successfully loaded '{name}' as Texture2D from magnetar_ui!");
-                                return tex;
-                            }
-
-                            Sprite spr = uiBundle.LoadAsset<Sprite>(name);
-                            if (spr != null)
-                            {
-                                Magnetar_Logger.GUILogger.Msg($"Successfully loaded '{name}' as Sprite from magnetar_ui!");
-                                return ExtractSpriteTexture(spr);
-                            }
-#elif BEPINEX || RELEASE_BEPINEX || ANDROID
-                            var rawTex = uiBundle.LoadAsset(name, Il2CppType.Of<Texture2D>());
-                            if (rawTex != null)
-                            {
-                                Texture2D tex = rawTex.TryCast<Texture2D>();
-                                if (tex != null)
-                                {
-                                    Magnetar_Logger.GUILogger.Msg($"Successfully loaded '{name}' as Texture2D from magnetar_ui!");
-                                    return tex;
-                                }
-                            }
-
-                            var rawSpr = uiBundle.LoadAsset(name, Il2CppType.Of<Sprite>());
-                            if (rawSpr != null)
-                            {
-                                Sprite spr = rawSpr.TryCast<Sprite>();
-                                if (spr != null)
-                                {
-                                    Magnetar_Logger.GUILogger.Msg($"Successfully loaded '{name}' as Sprite from magnetar_ui!");
-                                    return ExtractSpriteTexture(spr);
-                                }
-                            }
-#endif
-                        }
-                    }
-                    finally
-                    {
-                        // Always unload the bundle wrapper so subsequent loaders can read from it
-                        if (loadedFromDisk)
-                        {
-                            uiBundle.Unload(false);
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Magnetar_Logger.GUILogger.Error($"Error loading from magnetar_ui bundle: {ex.Message}");
-        }
-
-        // --- 2. Loose disk fallback (Magnetar Data/Magnetar_logo.png) ---
-        string path = System.IO.Path.Combine(DataDir, "Magnetar_logo.png");
-
-        if (System.IO.File.Exists(path))
-        {
-            try
-            {
-                byte[] rawBytes = System.IO.File.ReadAllBytes(path);
-                Texture2D diskTex = new(2, 2, TextureFormat.RGBA32, false);
-                if (ImageConversion.LoadImage(diskTex, rawBytes))
-                {
-                    Magnetar_Logger.GUILogger.Msg($"Successfully loaded logo from disk: {path}");
-                    return diskTex;
-                }
-            }
-            catch (Exception ex)
-            {
-                Magnetar_Logger.GUILogger.Error($"Failed reading disk logo: {ex.Message}");
-            }
-        }
-
-
-        return null;
-    }
-
     private static Texture2D CreateCircularBadgeTexture(Texture2D source, Color ringColor, int ringThickness)
     {
         if (source == null) return null;
 
         int size = Mathf.Min(source.width, source.height);
 
-        // Ensure source texture is readable by blitting to an active RenderTexture
         RenderTexture tempRT = RenderTexture.GetTemporary(size, size, 0, RenderTextureFormat.ARGB32);
         RenderTexture prevRT = RenderTexture.active;
         RenderTexture.active = tempRT;
@@ -201,9 +75,12 @@ public static class MobileMenuUI
         RenderTexture.active = prevRT;
         RenderTexture.ReleaseTemporary(tempRT);
 
-        Texture2D circularTex = new(size, size, TextureFormat.RGBA32, false);
-        circularTex.wrapMode = TextureWrapMode.Clamp;
-        circularTex.filterMode = FilterMode.Bilinear;
+        Texture2D circularTex = new(size, size, TextureFormat.RGBA32, false)
+        {
+            wrapMode = TextureWrapMode.Clamp,
+            filterMode = FilterMode.Bilinear,
+            hideFlags = HideFlags.DontSave
+        };
 
         Color[] srcPixels = readable.GetPixels();
         Color[] dstPixels = new Color[size * size];
@@ -221,15 +98,14 @@ public static class MobileMenuUI
 
                 if (dist > outerRadius)
                 {
-                    // Outside circle: completely transparent
                     dstPixels[idx] = Color.clear;
                 }
                 else if (dist >= innerRadius)
-                    // Border ring band
+                {
                     dstPixels[idx] = ringColor;
+                }
                 else
                 {
-                    // Inside badge: star logo pixel
                     dstPixels[idx] = srcPixels[idx];
                 }
             }
@@ -242,42 +118,6 @@ public static class MobileMenuUI
         return circularTex;
     }
 
-    private static Texture2D ExtractSpriteTexture(Sprite sprite)
-    {
-        if (sprite == null || sprite.texture == null) return null;
-
-        Rect r = sprite.textureRect;
-        int width = Mathf.RoundToInt(r.width);
-        int height = Mathf.RoundToInt(r.height);
-
-        RenderTexture tempRT = RenderTexture.GetTemporary(
-            sprite.texture.width,
-            sprite.texture.height,
-            0,
-            RenderTextureFormat.ARGB32,
-            RenderTextureReadWrite.Default
-        );
-
-        RenderTexture prev = RenderTexture.active;
-        RenderTexture.active = tempRT;
-        GL.Clear(false, true, new Color(0, 0, 0, 0));
-        Graphics.Blit(sprite.texture, tempRT);
-
-        Texture2D copy = new(sprite.texture.width, sprite.texture.height, TextureFormat.RGBA32, false);
-        copy.ReadPixels(new Rect(0, 0, sprite.texture.width, sprite.texture.height), 0, 0);
-        copy.Apply();
-
-        RenderTexture.active = prev;
-        RenderTexture.ReleaseTemporary(tempRT);
-
-        Texture2D cropped = new(width, height, TextureFormat.RGBA32, false);
-        cropped.SetPixels(copy.GetPixels((int)r.x, (int)r.y, width, height));
-        cropped.Apply();
-
-        UnityEngine.Object.Destroy(copy);
-        return cropped;
-    }
-
     private static void EnsureResources()
     {
         float currentSize = Config.S(120f);
@@ -287,24 +127,20 @@ public static class MobileMenuUI
             _btnRect.height = currentSize;
         }
 
-        // Only attempt loading ONCE to eliminate all frame lag
+        // Direct load logo via ResourceManager with no AssetBundle wrapper
         if (!_attemptedLogoLoad)
         {
             _attemptedLogoLoad = true;
-            Texture2D rawLogo = LoadLogoTexture();
+            Texture2D rawLogo = ResourceManager.LoadTexture("Magnetar_logo.png"); ;
             if (rawLogo != null)
             {
-                // Calculate border thickness proportional to resolution (~4.5% of width)
                 int borderThickness = Mathf.Max(4, Mathf.RoundToInt(rawLogo.width * 0.045f));
-
-                // Circularize and add accent border
                 _logoTex = CreateCircularBadgeTexture(rawLogo, ThemeManager.AccentColor, borderThickness);
-
                 Magnetar_Logger.GUILogger.Msg("Successfully circularized logo with accent border!");
             }
             else
             {
-                Magnetar_Logger.GUILogger.Warning("Logo 'Magnetar_logo' not found. Falling back to default badge.");
+                Magnetar_Logger.GUILogger.Warning("Logo 'Magnetar_logo' not found. Falling back to procedural badge.");
             }
         }
 
@@ -317,15 +153,16 @@ public static class MobileMenuUI
 
         if (_circleBtnStyle == null)
         {
-            _circleBtnStyle = new GUIStyle();
-            _circleBtnStyle.alignment = TextAnchor.MiddleCenter;
-            _circleBtnStyle.fontStyle = FontStyle.Bold;
+            _circleBtnStyle = new GUIStyle
+            {
+                alignment = TextAnchor.MiddleCenter,
+                fontStyle = FontStyle.Bold,
+                border = new RectOffset(),
+                padding = new RectOffset(),
+                margin = new RectOffset(),
+                overflow = new RectOffset()
+            };
             _circleBtnStyle.normal.textColor = ThemeManager.AccentColor;
-
-            _circleBtnStyle.border = new RectOffset();
-            _circleBtnStyle.padding = new RectOffset();
-            _circleBtnStyle.margin = new RectOffset();
-            _circleBtnStyle.overflow = new RectOffset();
         }
         _circleBtnStyle.normal.background = activeBadgeTex;
         _circleBtnStyle.hover.background = activeBadgeTex;
@@ -334,14 +171,15 @@ public static class MobileMenuUI
 
         if (_closeBtnStyle == null)
         {
-            _closeBtnStyle = new GUIStyle();
-            _closeBtnStyle.alignment = TextAnchor.MiddleCenter;
-            _closeBtnStyle.fontStyle = FontStyle.Bold;
-
-            _closeBtnStyle.border = new RectOffset();
-            _closeBtnStyle.padding = new RectOffset();
-            _closeBtnStyle.margin = new RectOffset();
-            _closeBtnStyle.overflow = new RectOffset();
+            _closeBtnStyle = new GUIStyle
+            {
+                alignment = TextAnchor.MiddleCenter,
+                fontStyle = FontStyle.Bold,
+                border = new RectOffset(),
+                padding = new RectOffset(),
+                margin = new RectOffset(),
+                overflow = new RectOffset()
+            };
         }
 
         if (ThemeManager.CategoryModuleOnStyle != null)
@@ -390,7 +228,6 @@ public static class MobileMenuUI
         Rect visible = GetVisibleScreenBounds();
         float now = Time.realtimeSinceStartup;
 
-        // Check for idle transition to dormant state
         if (!_isPointerDown && !_isDragging)
         {
             if (now - _lastInteractionTime > Config.FloatingIconIdleTimeout)
@@ -399,12 +236,10 @@ public static class MobileMenuUI
             }
         }
 
-        // --- Handle Mouse Interactions ---
         if (e.type == EventType.MouseDown && e.button == 0 && _btnRect.Contains(mousePos))
         {
             if (_isDormant)
             {
-                // Double-click check to unlock from dormant state
                 if (now - _lastClickTime <= DoubleClickInterval)
                 {
                     ResetIdleTimer();
@@ -413,10 +248,9 @@ public static class MobileMenuUI
                 }
                 _lastClickTime = now;
                 e.Use();
-                return; // Suppress single clicks and drags while dormant
+                return;
             }
 
-            // Normal active interaction
             _isPointerDown = true;
             _isDragging = false;
             _dragStartMousePos = mousePos;
@@ -456,7 +290,6 @@ public static class MobileMenuUI
             e.Use();
         }
 
-        // --- Render with Opacity and Dormant Darkening ---
         if (e.type == EventType.Repaint)
         {
             Color prevColor = GUI.color;
@@ -465,7 +298,6 @@ public static class MobileMenuUI
             float renderAlpha = _isDormant ? baseOpacity * 0.70f : baseOpacity;
             float shadeMultiplier = _isDormant ? DormantDarkenFactor : 1.0f;
 
-            // Apply darker tint and opacity
             GUI.color = new Color(shadeMultiplier, shadeMultiplier, shadeMultiplier, renderAlpha);
 
             string badgeLabel = _logoTex != null ? "" : "M";
@@ -500,9 +332,12 @@ public static class MobileMenuUI
 
     private static Texture2D CreateCircleTexture(int size, Color bodyColor, Color ringColor, int ringThickness)
     {
-        Texture2D tex = new(size, size, TextureFormat.RGBA32, false);
-        tex.wrapMode = TextureWrapMode.Clamp;
-        tex.filterMode = FilterMode.Bilinear;
+        Texture2D tex = new(size, size, TextureFormat.RGBA32, false)
+        {
+            wrapMode = TextureWrapMode.Clamp,
+            filterMode = FilterMode.Bilinear,
+            hideFlags = HideFlags.DontSave
+        };
 
         float center = size / 2f;
         float radius = (size / 2f) - 2f;

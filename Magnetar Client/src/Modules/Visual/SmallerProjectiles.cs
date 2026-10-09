@@ -36,7 +36,7 @@ public class SmallerProjectiles : Module
 
         BulletTypeSetting = new MultiSelectSetting("Bullet Types", typeof(BulletType))
         {
-            CustomNames = TranslatedNames(typeof(BulletType)),
+            CustomNames = TranslateEnum(typeof(BulletType)),
         };
 
         BulletTypeSetting.SelectAll(setDefault: true);
@@ -51,7 +51,7 @@ public class SmallerProjectiles : Module
 
     public override void OnLanguageChanged()
     {
-        BulletTypeSetting.CustomNames = TranslatedNames(typeof(BulletType));
+        BulletTypeSetting.CustomNames = TranslateEnum(typeof(BulletType));
     }
 
 

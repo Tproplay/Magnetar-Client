@@ -11,6 +11,7 @@ public static partial class DrawSetting
     {
         float val, sliderMin, sliderMax, trueMin, trueMax;
         string name;
+        string translatedName;
         int decPlaces = 0;
 
         int intTrueMin = 0, intTrueMax = 0;
@@ -26,16 +27,18 @@ public static partial class DrawSetting
             trueMax = s.TrueMax;
             name = s.Name;
             decPlaces = s.DecimalPlaces;
+            translatedName = s.Translate(name);
         }
         else
         {
             var s = (IntSetting)setting;
-            val = (float)s.DisplayValue;
-            sliderMin = (float)s.Min;
-            sliderMax = (float)s.Max;
-            trueMin = (float)s.TrueMin;
-            trueMax = (float)s.TrueMax;
+            val = s.DisplayValue;
+            sliderMin = s.Min;
+            sliderMax = s.Max;
+            trueMin = s.TrueMin;
+            trueMax = s.TrueMax;
             name = s.Name;
+            translatedName = s.Translate(name);
 
             intSliderMin = s.Min;
             intSliderMax = s.Max;
@@ -44,7 +47,7 @@ public static partial class DrawSetting
         }
 
         string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
-        string translatedName = Translator.Translate(name);
+        
         GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
         float LogConvert(float v) => Mathf.Sign(v) * Mathf.Log10(Mathf.Abs(v) + 1.0f);

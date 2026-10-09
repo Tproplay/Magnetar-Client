@@ -68,7 +68,7 @@ public class BindSetting : Setting
         // Label: occupies remaining width on the left
         float labelW = width - (indent * 2f) - settingW - gap - resetBtnW;
         Rect labelRect = new(indent, y, labelW, Config.elementHeight);
-        GUI.Label(labelRect, Translator.Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Right-aligned elements: [Control Button] [gap] [Reset Button]
         float resetStartX = width - indent - resetBtnW;

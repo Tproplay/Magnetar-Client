@@ -1,12 +1,12 @@
 ﻿using System;
 #if MELONLOADER || RELEASE_MELON
-using MelonLoader;
 #elif BEPINEX || RELEASE_BEPINEX
 using BepInEx.Configuration;
 #endif
 using Magnetar_Client.Utils;
 using Magnetar_Client.Core;
 using UnityEngine;
+using Magnetar_Client.Api;
 
 namespace Magnetar_Client;
 
@@ -53,7 +53,13 @@ public static class Config
     public readonly static float NativeWidth = 1920;
     public readonly static float NativeHeight = 1080;
 
-    public static float GUIScale = 1f;
+    public static float GUIScale =
+#if ANDROID
+        1.5f;
+#else
+        1f;
+#endif
+
     public static float S(float value) => value * GUIScale;
 
     public static float ElementScale = 1f;
@@ -144,6 +150,8 @@ public static class Config
 
     private static string _language = "English";
 
+    internal static bool IsLanguageInitialized = false;
+
     public static string Language
     {
         get => _language;
@@ -154,20 +162,14 @@ public static class Config
 
             _language = value;
 
-            // Perform language reload & event propagation
-            Translator.LoadTranslations();
-            Translator.DumpMissingStrings();
+            if (!IsLanguageInitialized) return;
 
-            if (Core.ModuleManager.Modules != null)
+            Actions.OnPreLanguageChanged();
+
+            _ = Translator.LoadTranslationsAsync(() =>
             {
-                foreach (var mod in Core.ModuleManager.Modules)
-                {
-                    mod.OnLanguageChanged();
-                }
-            }
-
-            HUDManager.OnLanguageChange();
-            Magnetar_Client.NEF.NEFData.OnLanguageChanged();
+                Actions.OnPostLanguageChanged();
+            });
         }
     }
 

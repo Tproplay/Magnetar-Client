@@ -15,7 +15,7 @@ public static class MultiSelectWindowDrawer
 
     private static GUI.WindowFunction _cachedMultiSelectDelegate;
     private static GUI.WindowFunction MultiSelectDelegate => _cachedMultiSelectDelegate ??=
-        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawBridge);
+        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>(DrawBridge);
 
     public static void InitializeLayout()
     {
@@ -29,8 +29,8 @@ public static class MultiSelectWindowDrawer
 
     public static void Render(Event currentEvent)
     {
-        float viewAlpha = UIAnimationHelper.GetViewAlpha(ModuleManager.Group, ModuleManager.WindowType.SelectionGUI.ToString());
-        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * viewAlpha;
+        float viewAlpha = AnimationHandler.GetViewAlpha(ModuleManager.Group, ModuleManager.WindowType.SelectionGUI.ToString());
+        float currentAlpha = AnimationHandler.CurrentEasedAlpha * viewAlpha;
 
         if (currentAlpha <= 0.001f) return;
 
@@ -87,8 +87,8 @@ public static class MultiSelectWindowDrawer
     {
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
-        float viewAlpha = UIAnimationHelper.GetViewAlpha(ModuleManager.Group, ModuleManager.WindowType.SelectionGUI.ToString());
-        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * viewAlpha;
+        float viewAlpha = AnimationHandler.GetViewAlpha(ModuleManager.Group, ModuleManager.WindowType.SelectionGUI.ToString());
+        float currentAlpha = AnimationHandler.CurrentEasedAlpha * viewAlpha;
 
         GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
         GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
@@ -99,7 +99,7 @@ public static class MultiSelectWindowDrawer
             {
                 ActiveMultiSelect = null;
                 ModuleManager.CurrentWindow = ModuleManager.WindowType.Settings;
-                UIAnimationHelper.SwitchView(ModuleManager.Group, ModuleManager.CurrentWindow.ToString());
+                AnimationHandler.SwitchView(ModuleManager.Group, ModuleManager.CurrentWindow.ToString());
             });
 
             float titleHeight = Config.S(34f);
@@ -116,9 +116,9 @@ public static class MultiSelectWindowDrawer
     public static void HandleMultiSelectSetting(MultiSelectSetting set, ref float y, float width)
     {
         Event e = Event.current;
-        GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), Translate(set.Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), ModuleManager.Domain.Translate(set.Name), ThemeManager.SettingLabelStyle);
 
-        string countLabel = '(' + Translate($"{set.SelectedValues.Count} selected") + ')';
+        string countLabel = '(' + ModuleManager.Domain.Translate($"{set.SelectedValues.Count} selected") + ')';
         float countTextWidth = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(countLabel)).x;
 
         Rect btnRect = new(
@@ -141,7 +141,7 @@ public static class MultiSelectWindowDrawer
             {
                 ActiveMultiSelect = set;
                 ModuleManager.CurrentWindow = ModuleManager.WindowType.SelectionGUI;
-                UIAnimationHelper.SwitchView(ModuleManager.Group, ModuleManager.WindowType.SelectionGUI.ToString());
+                AnimationHandler.SwitchView(ModuleManager.Group, ModuleManager.WindowType.SelectionGUI.ToString());
             }
 
             multiSelectSearchQuery = "";
@@ -149,7 +149,7 @@ public static class MultiSelectWindowDrawer
             e.Use();
         }
 
-        GUI.Box(btnRect, Translate("Select"), ThemeManager.SettingOff);
+        GUI.Box(btnRect, ModuleManager.Domain.Translate("Select"), ThemeManager.SettingOff);
         GUI.backgroundColor = Color.white;
 
         Color originalColor = GUI.contentColor;

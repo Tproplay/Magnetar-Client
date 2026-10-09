@@ -38,7 +38,7 @@ public class BuffZombies : Module
 
         ZombieSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
 
         };
@@ -54,7 +54,7 @@ public class BuffZombies : Module
 
     public override void OnLanguageChanged()
     {
-        ZombieSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
+        ZombieSelectedSetting.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
     // Tracks the original max healths: [0] = Base, [1] = Armor1, [2] = Armor2

@@ -24,7 +24,7 @@ public static class HUDSelectorDrawer
 
     private static GUI.WindowFunction _cachedSelectorDelegate;
     private static GUI.WindowFunction SelectorDelegate => _cachedSelectorDelegate ??=
-        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawElementSelector);
+        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>(DrawElementSelector);
 
     public static void Open()
     {
@@ -36,12 +36,12 @@ public static class HUDSelectorDrawer
         float targetH = Mathf.Min(Config.S(BaseSelectorHeight), Config.NativeHeight * 0.8f);
         SelectorRect = new Rect((Config.NativeWidth - targetW) / 2f, (Config.NativeHeight - targetH) / 2f, targetW, targetH);
 
-        UIAnimationHelper.SwitchView(HUDManager.Group, HUDManager.ViewSelector);
+        AnimationHandler.SwitchView(HUDManager.Group, HUDManager.ViewSelector);
     }
 
     public static void Render(GUIStyle windowBgStyle)
     {
-        float viewAlpha = UIAnimationHelper.GetViewAlpha(HUDManager.Group, HUDManager.ViewSelector);
+        float viewAlpha = AnimationHandler.GetViewAlpha(HUDManager.Group, HUDManager.ViewSelector);
         if (viewAlpha <= 0.001f) return;
 
         float targetW = Config.S(BaseSelectorWidth);

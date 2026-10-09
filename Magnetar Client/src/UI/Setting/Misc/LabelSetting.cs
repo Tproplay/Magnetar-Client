@@ -17,7 +17,7 @@ public class LabelSetting : Setting
     {
         if (string.IsNullOrEmpty(Name)) return;
 
-        string displayText = Translator.Translate(Name);
+        string displayText = Translate(Name);
 
         float labelWidth = width - (Config.indent * 2f);
         float calculatedHeight = ThemeManager.SettingsDescriptionStyle.CalcHeight(

@@ -61,7 +61,7 @@ public static partial class DrawSetting
         float titleHeight = Config.S(25f);
 #endif
         Rect headerBgRect = new(0, 0, multiSelectWindowRect.width, titleHeight);
-        GUI.Box(headerBgRect, Translator.Translate("Select ") + Translator.Translate(activeMultiSelect.Name), ThemeManager.SettingsWndowStyle);
+        GUI.Box(headerBgRect, SettingsDrawerTranslation.T("Select ") + SettingsDrawerTranslation.T(activeMultiSelect.Name), ThemeManager.SettingsWndowStyle);
 
         if (Config.ShowMobileButtons)
         {
@@ -98,7 +98,7 @@ public static partial class DrawSetting
         multiSelectSearchQuery = DrawManualTextField(
             searchRect,
             multiSelectSearchQuery ?? "",
-            Translator.Translate("Search...")
+            SettingsDrawerTranslation.T("Search...")
         );
 
         if (oldQuery != multiSelectSearchQuery)
@@ -148,8 +148,8 @@ public static partial class DrawSetting
         }
 
         string toggleLabel = allSelected
-            ? Translator.Translate("Deselect All")
-            : Translator.Translate("Select All");
+            ? SettingsDrawerTranslation.T("Deselect All")
+            : SettingsDrawerTranslation.T("Select All");
 
         GUIStyle toggleStyle = !allSelected
             ? ThemeManager.SettingOn

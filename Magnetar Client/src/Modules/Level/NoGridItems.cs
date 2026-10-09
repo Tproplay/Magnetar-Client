@@ -121,7 +121,7 @@ public class NoGridItem : Module
 
         selectedGridItems = new MultiSelectSetting("Grid Items", typeof(GridItemType))
         {
-            CustomNames = TranslatedNames(typeof(GridItemType))
+            CustomNames = TranslateEnum(typeof(GridItemType))
         };
         AddSettings(selectedGridItems);
 
@@ -140,7 +140,7 @@ public class NoGridItem : Module
 
     public override void OnLanguageChanged()
     {
-        selectedGridItems.CustomNames = TranslatedNames(typeof(GridItemType));
+        selectedGridItems.CustomNames = TranslateEnum(typeof(GridItemType));
     }
 
     // Mod Logic

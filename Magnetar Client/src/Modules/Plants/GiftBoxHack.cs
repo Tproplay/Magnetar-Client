@@ -40,7 +40,7 @@ public class GiftBoxHack : Module
         ModifyNormalGiftbox = new BoolSetting("Modify Normal Giftbox",false);
         NormalGiftboxAllowedPlants = new MultiSelectSetting("Allowed Plants", typeof(PlantType))
         {
-            CustomNames = TranslatedNames(typeof(PlantType)),
+            CustomNames = TranslateEnum(typeof(PlantType)),
             Blacklist = Banned.PlantTypeBanned,
         };
 
@@ -52,7 +52,7 @@ public class GiftBoxHack : Module
         ModifySnowGiftbox = new BoolSetting("Modify Snow Giftbox", false);
         SnowGiftboxAllowedPlants = new MultiSelectSetting("Allowed Plants", typeof(PlantType))
         {
-            CustomNames = TranslatedNames(typeof(PlantType)),
+            CustomNames = TranslateEnum(typeof(PlantType)),
             Blacklist = Banned.PlantTypeBanned,
         };
 
@@ -70,9 +70,9 @@ public class GiftBoxHack : Module
 
     public override void OnLanguageChanged()
     {
-        NormalGiftboxAllowedPlants.CustomNames = TranslatedNames(typeof(PlantType));
-        SnowGiftboxAllowedPlants.CustomNames = TranslatedNames(typeof(PlantType));
-        //ZombieGiftboxAllowedZombies.CustomNames = TranslatedNames(typeof(ZombieType));
+        NormalGiftboxAllowedPlants.CustomNames = TranslateEnum(typeof(PlantType));
+        SnowGiftboxAllowedPlants.CustomNames = TranslateEnum(typeof(PlantType));
+        //ZombieGiftboxAllowedZombies.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
     // Mod Logic

@@ -41,14 +41,14 @@ public class KillZombies : Module
 
         ZombiesSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
         };
         ZombiesSelectedSetting.SelectAll(setDefault: true);
 
         HypnoZombiesSelectedSetting = new MultiSelectSetting("Hypnotized Entities", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
         };
         HypnoZombiesSelectedSetting.SelectAll(setDefault: true);
@@ -67,8 +67,8 @@ public class KillZombies : Module
 
     public override void OnLanguageChanged()
     {
-        HypnoZombiesSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
-        ZombiesSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
+        HypnoZombiesSelectedSetting.CustomNames = TranslateEnum(typeof(ZombieType));
+        ZombiesSelectedSetting.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
     // Mod Logic

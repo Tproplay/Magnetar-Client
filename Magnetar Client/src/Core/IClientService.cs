@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Magnetar_Client.Core.Lifecycle;
+﻿namespace Magnetar_Client.Core.Lifecycle;
 
 /// <summary>
 /// Common priorities for deterministic execution order. Lower numbers execute earlier.

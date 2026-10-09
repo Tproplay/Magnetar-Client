@@ -1,6 +1,6 @@
 ﻿using Magnetar_Client.Api;
-using Magnetar_Client.Core.Lifecycle;
 using Magnetar_Client.UI;
+using Magnetar_Client.UI.WindowDrawing;
 using Magnetar_Client.Utils;
 using System;
 using System.Reflection;
@@ -76,14 +76,17 @@ public class Main
 
         Preferences.InitializePreferences();
 
+        TopBar.Init();
+        MobileMenuUI.Init();
+        SettingsDrawerTranslation.Init();
+
         // 1. Initialize Built-in Managers (they self-register into ServiceRegistry)
         ModuleManager.Init();
         HUDManager.Init();
-        NEFManager.Init();
-        TopBar.Init();
-        ProfileGUI.Init();
-        MobileMenuUI.Init();
         GUIManager.Init();
+        NEFManager.Init();
+        ProfileGUI.Init();
+        
 
         // 2. Discover and register Addon modules, HUD elements, and services
         AddonManager.InitModules();
@@ -94,6 +97,7 @@ public class Main
         ServiceRegistry.InitializeAll();
 
         // 4. Load state, themes, and translations
+        Config.IsLanguageInitialized = true;
         Translator.LoadTranslations();
         SaveLoad.Load();
 
@@ -107,7 +111,7 @@ public class Main
         LockUI.BlockSKeysPatch.BlockKeys = false;
 
         UI.GUIHelper._UpdateRainbowColor();
-        UIAnimationHelper.UpdateTransition();
+        AnimationHandler.UpdateTransition();
 
         if (Input.GetKeyDown(KeyCode.RightShift) && !HUDManager.forceShow)
         {
@@ -159,8 +163,8 @@ public class Main
 
         try
         {
-            float scaleX = (float)Screen.width / Config.NativeWidth;
-            float scaleY = (float)Screen.height / Config.NativeHeight;
+            float scaleX = Screen.width / Config.NativeWidth;
+            float scaleY = Screen.height / Config.NativeHeight;
             float uniformScale = Mathf.Min(scaleX, scaleY);
 
             float offsetX = (Screen.width - (Config.NativeWidth * uniformScale)) * 0.5f;
@@ -184,10 +188,10 @@ public class Main
             ServiceRegistry.RenderAll();
 
             // Render menus with smooth fade transition
-            if (UIAnimationHelper.ShouldRenderGUI)
+            if (AnimationHandler.ShouldRenderGUI)
             {
                 Color prevGuiColor = GUI.color;
-                GUI.color = new Color(1f, 1f, 1f, UIAnimationHelper.FadeProgress);
+                GUI.color = new Color(1f, 1f, 1f, AnimationHandler.FadeProgress);
 
                 Config.CurrentTab?.OnGUI?.Invoke();
 
@@ -230,7 +234,7 @@ public class Main
 
     public static void WarmUp()
     {
-        LoadFont.Init();
+        FontLoader.Init();
         UI.Themes.ThemeManager.Init();
 
         ServiceRegistry.WarmUpAll();

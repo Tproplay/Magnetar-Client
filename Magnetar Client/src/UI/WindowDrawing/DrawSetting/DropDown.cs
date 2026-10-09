@@ -14,7 +14,7 @@ public static partial class DrawSetting
         Event e = Event.current;
         int controlId = selSet.GetHashCode();
 
-        string translatedName = Translator.Translate(selSet.Name);
+        string translatedName = selSet.Translate(selSet.Name);
         GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
         string currentValName = "Unknown";

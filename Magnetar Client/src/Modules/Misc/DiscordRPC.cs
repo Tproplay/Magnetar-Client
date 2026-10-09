@@ -11,6 +11,7 @@ using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
 using Magnetar_Client.Core;
+
 #if !ANDROID
 namespace Magnetar_Client.Modules;
 
@@ -45,6 +46,7 @@ public class DiscordRPC : Module
         InGame, Menu, Transition, Selecting, Big_Garden,
         Magnetar_GUI, InAlamanc
     }
+   
 
     public static Status status = Status.Menu;
 
@@ -59,9 +61,35 @@ public class DiscordRPC : Module
     private int index2 = 0;
     private float dataRefreshTimer = 0f;
 
+    public int TotalPresenceUpdates
+    {
+        get => GetSaved<int>("TotalUpdates", 0);
+        set => SetSaved("TotalUpdates", value);
+    }
+
     public DiscordRPC()
     {
         instance = this;
+
+        // 1. Register module-specific phrases to SavedTranslationData
+        RegisterTranslations(new Dictionary<string, string>
+        {
+            { "Browsing Magnetar's GUI", "Browsing Magnetar's GUI" },
+            { "Looking at the Main Menu", "Looking at the Main Menu" },
+            { "Checking out the almanac", "Checking out the almanac" },
+            { "Started a level", "Started a level" },
+            { "Picking Seeds", "Picking Seeds" },
+            { "Roaming in the Garden", "Roaming in the Garden" },
+            { "Growing Seeds", "Growing Seeds" },
+            { "Waterning plants", "Waterning plants" },
+            { "Sequential", "Sequential" },
+            { "Random", "Random" },
+            { "Made By Tproplay", "Made By Tproplay" }
+        });
+
+        // 2. Register module-specific regex translations
+        RegisterRegexTranslation(@"^Playing:\s*(.*)$", "Playing: {1}");
+        RegisterRegexTranslation(@"^Pvz Fusion v(.*)$", "Pvz Fusion v{1}");
 
         CreateCategory("General");
 
@@ -70,7 +98,7 @@ public class DiscordRPC : Module
 
         EndCategory();
 
-        CreateCategory("In Game",true);
+        CreateCategory("In Game", true);
 
         InGameLine1 = new ListStringSetting("Line 1",
             new List<string>
@@ -104,12 +132,18 @@ public class DiscordRPC : Module
 
         AddSettings(InGame_Randomizer_mode);
         EndCategory();
+
+        // Ensure settings inherit this module's domain and scope
+        ModuleManager.SetDomain(this);
     }
 
     public override void OnLanguageChanged()
     {
+        base.OnLanguageChanged();
+
+        // Translates options using this module's Translate() method
         InGame_Randomizer_mode.CustomNames = InGame_Randomizer_mode.Options
-            .ToDictionary(kvp => kvp.Key, kvp => Translator.Translate(kvp.Value));
+            .ToDictionary(kvp => kvp.Key, kvp => Translate(kvp.Value));
     }
 
     public override void OnEnable()
@@ -136,7 +170,6 @@ public class DiscordRPC : Module
         rotationTimer += Time.deltaTime;
         dataRefreshTimer += Time.deltaTime;
 
-        // Re-parse the live variables every 1 second
         if (dataRefreshTimer >= 1.0f)
         {
             UpdateText();
@@ -160,44 +193,39 @@ public class DiscordRPC : Module
 
         if (Gamestatus == GameStatus.InGame && !BoardInstanceIsNull) // In Game
         {
-            status = Status.InGame; 
+            status = Status.InGame;
         }
-
         else if (InMainMenu && (Config.showgui || HUDManager.forceShow)) // Menu & Magnetar GUI
         {
             status = Status.Magnetar_GUI;
-            Line1Cycle.Add(Translator.Translate("Browsing Magnetar's GUI"));
+            Line1Cycle.Add(Translate("Browsing Magnetar's GUI"));
         }
-
         else if (InMainMenu) // Menu
         {
             status = Status.Menu;
-            Line1Cycle.Add(Translator.Translate("Looking at the Main Menu"));
+            Line1Cycle.Add(Translate("Looking at the Main Menu"));
         }
         else if (InAlmanac)
         {
             status = Status.InAlamanc;
-            Line1Cycle.Add(Translator.Translate("Checking out the almanac"));
+            Line1Cycle.Add(Translate("Checking out the almanac"));
         }
-
         else if (Gamestatus == GameStatus.InInterlude) // In Transition
         {
             status = Status.Transition;
-            Line1Cycle.Add(Translator.Translate("Started a level"));
+            Line1Cycle.Add(Translate("Started a level"));
         }
-
         else if (Gamestatus == GameStatus.Selecting) // Picking seeds
         {
             status = Status.Selecting;
-            Line1Cycle.Add(Translator.Translate("Picking Seeds"));
+            Line1Cycle.Add(Translate("Picking Seeds"));
         }
-
         else if (Gamestatus == GameStatus.BigGarden)
         {
             status = Status.Big_Garden;
-            Line1Cycle.Add(Translator.Translate("Roaming in the Garden"));
-            Line2Cycle.Add(Translator.Translate("Growing Seeds"));
-            Line2Cycle.Add(Translator.Translate("Waterning plants"));
+            Line1Cycle.Add(Translate("Roaming in the Garden"));
+            Line2Cycle.Add(Translate("Growing Seeds"));
+            Line2Cycle.Add(Translate("Waterning plants"));
         }
 
         switch (status)
@@ -217,7 +245,6 @@ public class DiscordRPC : Module
                     break;
                 }
         }
-
     }
 
     public static List<string> In_Game_AutoCompleteArgs = new()
@@ -233,8 +260,7 @@ public class DiscordRPC : Module
         if (string.IsNullOrEmpty(input)) return input;
         string result = input;
 
-        result = result.Replace("{Magnetar_Version}",
-            Magnetar_Info.Version);
+        result = result.Replace("{Magnetar_Version}", Magnetar_Info.Version);
         result = result.Replace("{Game_Version}", Application.version);
         result = result.Replace("{Level_Name}", GetLevelName());
         result = result.Replace("{Sun}", FormatInternational(BoardInstance.theSun));
@@ -244,7 +270,9 @@ public class DiscordRPC : Module
         result = result.Replace("{number_of_plants}", PlantList.Count.ToString());
         result = result.Replace("{number_of_zombies}", ZombieList.Count.ToString());
         result = result.Replace("{movers_left}", BoardInstance.mowerArray.Count.ToString());
-        return result;
+
+        // Applies regex translation matching if needed (e.g., "Playing: {Level_Name}")
+        return Translate(result);
     }
 
     private static readonly System.Random _random = new();
@@ -253,24 +281,20 @@ public class DiscordRPC : Module
     {
         if (InGame_Randomizer_mode.Value == 0) // Sequential
         {
-            // Line 1
             if (Line1Cycle != null && Line1Cycle.Count > 0)
                 index1 = (index1 + 1) % Line1Cycle.Count;
             else index1 = 0;
 
-            // Line 2
             if (Line2Cycle != null && Line2Cycle.Count > 0)
                 index2 = (index2 + 1) % Line2Cycle.Count;
             else index2 = 0;
         }
         else if (InGame_Randomizer_mode.Value == 1) // Random
         {
-            //Line 1
             if (Line1Cycle != null && Line1Cycle.Count > 0)
                 index1 = _random.Next(Line1Cycle.Count);
             else index1 = 0;
 
-            // Line 2
             if (Line2Cycle != null && Line2Cycle.Count > 0)
                 index2 = _random.Next(Line2Cycle.Count);
             else index2 = 0;
@@ -284,10 +308,13 @@ public class DiscordRPC : Module
         if (Line1Cycle == null || Line1Cycle.Count == 0 || index1 >= Line1Cycle.Count)
             index1 = 0;
         if (Line2Cycle == null || Line2Cycle.Count == 0 || index2 >= Line2Cycle.Count)
-            index2 = 0; 
+            index2 = 0;
 
-        string currentLine1 = Line1Cycle.Count > 0 ? Line1Cycle[index1] : "Made By Tproplay";
-        string currentLine2 = Line2Cycle.Count > 0 ? Line2Cycle[index2] : $"Pvz Fusion v{Application.version}";
+        string defaultLine1 = Translate("Made By Tproplay");
+        string defaultLine2 = Translate($"Pvz Fusion v{Application.version}");
+
+        string currentLine1 = Line1Cycle.Count > 0 ? Line1Cycle[index1] : defaultLine1;
+        string currentLine2 = Line2Cycle.Count > 0 ? Line2Cycle[index2] : defaultLine2;
 
         client.SetPresence(new RichPresence()
         {
@@ -295,6 +322,8 @@ public class DiscordRPC : Module
             State = currentLine2,
             Timestamps = elapsedTimer
         });
+
+        TotalPresenceUpdates++;
     }
 }
 #endif

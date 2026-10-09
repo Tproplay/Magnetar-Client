@@ -368,7 +368,7 @@ public class CustomDifficulty : Module
             if (config == null) return true;
 
             int difficulty = config.difficulty;
-            float totalZombieHp = (float)(__instance.theFirstArmorHealth + __instance.theHealth);
+            float totalZombieHp = __instance.theFirstArmorHealth + __instance.theHealth;
 
             // 2. Difficulty thresholds for instant char/ash kill
             bool canBeCharred = false;

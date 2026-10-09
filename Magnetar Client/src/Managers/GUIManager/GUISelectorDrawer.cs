@@ -21,7 +21,7 @@ public static class GUISelectorDrawer
 
     private static GUI.WindowFunction _cachedSelector;
     private static GUI.WindowFunction SelectorDelegate => _cachedSelector ??=
-        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawSelectorModal);
+        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>(DrawSelectorModal);
 
     public static void Open(MultiSelectSetting setting)
     {
@@ -34,12 +34,12 @@ public static class GUISelectorDrawer
         float targetH = Mathf.Min(Config.S(BaseSelectorHeight), Config.NativeHeight * 0.8f);
         SelectorRect = new Rect((Config.NativeWidth - targetW) / 2f, (Config.NativeHeight - targetH) / 2f, targetW, targetH);
 
-        UIAnimationHelper.SwitchView(GUIManager.Group, GUIManager.ViewSelector);
+        AnimationHandler.SwitchView(GUIManager.Group, GUIManager.ViewSelector);
     }
 
     public static void Render(GUIStyle windowBgStyle)
     {
-        float viewAlpha = UIAnimationHelper.GetViewAlpha(GUIManager.Group, GUIManager.ViewSelector);
+        float viewAlpha = AnimationHandler.GetViewAlpha(GUIManager.Group, GUIManager.ViewSelector);
         if (viewAlpha <= 0.001f) return;
 
         float targetW = Config.S(BaseSelectorWidth);

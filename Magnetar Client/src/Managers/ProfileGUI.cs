@@ -15,6 +15,12 @@ public static class ProfileGUI
     private const float BaseWindowHeight = 420f;
     private const float BaseElementHeight = 30f;
 
+    // 1. Dedicated domain for Profile GUI
+    public static readonly TranslationDomain Domain = Translator.CreateDomain("ProfileGUI");
+
+    // Shorthand scoped translation helper
+    private static string TranslateText(string text) => Domain.Translate(text);
+
     public static Rect WindowRect = new(
         (Config.NativeWidth - Config.S(BaseWindowWidth)) / 2,
         (Config.NativeHeight - Config.S(BaseWindowHeight)) / 2,
@@ -27,6 +33,9 @@ public static class ProfileGUI
 
     public static void Init()
     {
+        // 2. Hook English template generation
+        Domain.OnDumpEnglishTemplate += DumpEnglishTemplates;
+
         ServiceRegistry.Register(new ProfileGUIService());
 
         SafeToCloseManager.RegisterGuard(() =>
@@ -38,6 +47,24 @@ public static class ProfileGUI
             }
             return true;
         });
+    }
+
+    private static void DumpEnglishTemplates(string englishDir)
+    {
+        string[] templateKeys = new[]
+        {
+            "Profile Manager",
+            "Current Active Profile",
+            "New Profile:",
+            "Enter profile name...",
+            "Create",
+            "Available Profiles:",
+            "Active",
+            "Delete"
+        };
+
+        var templateDict = Translator.CreateDictionary(templateKeys);
+        Translator.SaveJson(englishDir, "profile.json", templateDict);
     }
 
     public static void Render()
@@ -59,7 +86,7 @@ public static class ProfileGUI
     {
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
-        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha;
+        float currentAlpha = AnimationHandler.CurrentEasedAlpha;
 
         GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
         GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
@@ -72,11 +99,11 @@ public static class ProfileGUI
             float y = Config.S(35f);
 
             Rect headerBgRect = new(0, 0, w, y - indent);
-            GUI.Box(headerBgRect, Translator.Translate("Profile Manager"), ThemeManager.SettingsWndowStyle);
+            GUI.Box(headerBgRect, TranslateText("Profile Manager"), ThemeManager.SettingsWndowStyle);
 
             GUI.Label(
                 new Rect(indent, y, w - (indent * 2), elementHeight),
-                $"{Translator.Translate("Current Active Profile")}: <color=yellow>{Config.CurrentProfile}</color>",
+                $"{TranslateText("Current Active Profile")}: <color=yellow>{Config.CurrentProfile}</color>",
                 ThemeManager.SettingTextStyle
             );
 
@@ -89,17 +116,17 @@ public static class ProfileGUI
             float inputW = w - (indent * 2f) - labelW - btnW - (gap * 2f);
 
             Rect labelRect = new(indent, y, labelW, elementHeight);
-            GUI.Label(labelRect, Translator.Translate("New Profile:"), ThemeManager.SettingTextStyle);
+            GUI.Label(labelRect, TranslateText("New Profile:"), ThemeManager.SettingTextStyle);
 
             Rect inputRect = new(indent + labelW + gap, y, inputW, elementHeight);
-            newProfileInput = DrawSetting.DrawManualTextField(inputRect, newProfileInput, Translator.Translate("Enter profile name..."));
+            newProfileInput = DrawSetting.DrawManualTextField(inputRect, newProfileInput, TranslateText("Enter profile name..."));
 
             Rect createBtnRect = new(w - indent - btnW, y, btnW, elementHeight);
             bool isCreateHover = createBtnRect.Contains(e.mousePosition);
 
             Color prevBg = GUI.backgroundColor;
             if (isCreateHover) GUI.backgroundColor = new Color(1.25f, 1.25f, 1.25f, 1.0f);
-            GUI.Box(createBtnRect, Translator.Translate("Create"), ThemeManager.SettingOff);
+            GUI.Box(createBtnRect, TranslateText("Create"), ThemeManager.SettingOff);
             GUI.backgroundColor = prevBg;
 
             if (e.type == EventType.MouseDown && e.button == 0 && isCreateHover)
@@ -122,7 +149,7 @@ public static class ProfileGUI
             y += lineThickness + Config.S(10f);
 
             // --- AVAILABLE PROFILES LIST ---
-            GUI.Label(new Rect(indent, y, w - (indent * 2f), elementHeight), Translator.Translate("Available Profiles:"), ThemeManager.SettingTextStyle);
+            GUI.Label(new Rect(indent, y, w - (indent * 2f), elementHeight), TranslateText("Available Profiles:"), ThemeManager.SettingTextStyle);
             y += elementHeight + Config.S(5f);
 
             float scrollAreaHeight = WindowRect.height - y - Config.S(15f);
@@ -166,7 +193,7 @@ public static class ProfileGUI
                     GUI.Box(itemRect, "", rowStyle);
 
                     string labelText = isActive
-                        ? $"<b><color=yellow>{profileName}</color> ({Translator.Translate("Active")})</b>"
+                        ? $"<b><color=yellow>{profileName}</color> ({TranslateText("Active")})</b>"
                         : profileName;
 
                     float textWidth = !isDefault ? itemRect.width - delBtnW - Config.S(20f) : itemRect.width - Config.S(20f);
@@ -178,7 +205,7 @@ public static class ProfileGUI
                     {
                         Color oldBg = GUI.backgroundColor;
                         GUI.backgroundColor = isDeleteHovered ? new Color(1f, 0.35f, 0.35f, 1f) : new Color(0.85f, 0.25f, 0.25f, 1f);
-                        GUI.Box(deleteBtnRect, Translator.Translate("Delete"), ThemeManager.SettingOff);
+                        GUI.Box(deleteBtnRect, TranslateText("Delete"), ThemeManager.SettingOff);
                         GUI.backgroundColor = oldBg;
                     }
 
@@ -227,7 +254,7 @@ public static class ProfileGUI
 
         public void OnMenuGUI()
         {
-            UIAnimationHelper.RenderWithTabAlpha(TabType.PROFILE, ProfileGUI.Render);
+            AnimationHandler.RenderWithTabAlpha(TabType.PROFILE, ProfileGUI.Render);
         }
 
         public bool CanClose()

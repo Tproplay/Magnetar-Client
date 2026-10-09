@@ -1,5 +1,4 @@
 ﻿using Magnetar_Client.HUDElements;
-using Magnetar_Client.Modules;
 using System.Collections.Generic;
 using System.Reflection;
 

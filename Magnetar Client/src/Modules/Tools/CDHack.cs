@@ -306,7 +306,7 @@ public class CustomCDCards : Module
             "Cards", typeof(PlantType))
         {
             Blacklist = Banned.PlantTypeBanned,
-            CustomNames = TranslatedNames(typeof(PlantType))
+            CustomNames = TranslateEnum(typeof(PlantType))
         };
 
         selectedSeeds.Options.Keys.ToList().ForEach(selectedSeeds.Select);
@@ -315,7 +315,7 @@ public class CustomCDCards : Module
             "Duplicate Cards", typeof(PlantType))
         {
             Blacklist = Banned.PlantTypeBanned,
-            CustomNames = TranslatedNames(typeof(PlantType))
+            CustomNames = TranslateEnum(typeof(PlantType))
         };
 
         selectedSeeds_dup.Options.Keys.ToList().ForEach(selectedSeeds_dup.Select);

@@ -66,7 +66,7 @@ public class BetterHealthDisplay : Module
 
         SelectedPlants = new MultiSelectSetting("Whitelist Plants", typeof(PlantType))
         {
-            CustomNames = TranslatedNames(typeof(PlantType)),
+            CustomNames = TranslateEnum(typeof(PlantType)),
             Blacklist = Banned.PlantTypeBanned,
         };
         SelectedPlants.SelectAll(setDefault: true);
@@ -79,7 +79,7 @@ public class BetterHealthDisplay : Module
 
         SelectedZombies = new MultiSelectSetting("Whitelist Zombies", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
         };
         SelectedZombies.SelectAll(setDefault: true);

@@ -1,5 +1,4 @@
-﻿using Magnetar_Client.Utils;
-using Magnetar_Client.UI.Setting;
+﻿using Magnetar_Client.UI.Setting;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -192,7 +191,7 @@ public class QuickSetup : Module
             if (plant == null) continue;
 
             // Arithmetic encoding: (plantType * 10000) + (col * 100) + row
-            long code = ((long)(int)plant.thePlantType * 10000L) + (plant.thePlantColumn * 100) + plant.thePlantRow;
+            long code = ((int)plant.thePlantType * 10000L) + (plant.thePlantColumn * 100) + plant.thePlantRow;
 
             if (sb.Length > 0) sb.Append('-');
             sb.Append(ToBase62(code));

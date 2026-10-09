@@ -28,7 +28,7 @@ public static class CategoryWindowDrawer
 
     private static GUI.WindowFunction _cachedCategoryDelegate;
     private static GUI.WindowFunction CategoryDelegate => _cachedCategoryDelegate ??=
-        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawCategoryWindow);
+        Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>(DrawCategoryWindow);
 
     public static void InitializeLayout()
     {
@@ -88,8 +88,8 @@ public static class CategoryWindowDrawer
     public static void Render()
     {
         Color prevColor = GUI.color;
-        float viewAlpha = UIAnimationHelper.GetViewAlpha(ModuleManager.Group, ModuleManager.WindowType.Modules.ToString());
-        float compositeAlpha = UIAnimationHelper.CurrentEasedAlpha * viewAlpha;
+        float viewAlpha = AnimationHandler.GetViewAlpha(ModuleManager.Group, ModuleManager.WindowType.Modules.ToString());
+        float compositeAlpha = AnimationHandler.CurrentEasedAlpha * viewAlpha;
         if (compositeAlpha <= 0.001f) return;
 
         GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * compositeAlpha);
@@ -131,8 +131,8 @@ public static class CategoryWindowDrawer
     {
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
-        float viewAlpha = UIAnimationHelper.GetViewAlpha(ModuleManager.Group, ModuleManager.WindowType.Modules.ToString());
-        float currentAlpha = UIAnimationHelper.CurrentEasedAlpha * viewAlpha;
+        float viewAlpha = AnimationHandler.GetViewAlpha(ModuleManager.Group, ModuleManager.WindowType.Modules.ToString());
+        float currentAlpha = AnimationHandler.CurrentEasedAlpha * viewAlpha;
 
         GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
         GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
@@ -155,7 +155,7 @@ public static class CategoryWindowDrawer
             Rect titleBarRect = new(0, 0, windowWidth, headerHeight);
 
             // 1. Dedicated Header Background Box & Title
-            GUI.Box(titleBarRect, Translate(category.Name), ThemeManager.CategoryHeaderStyle);
+            GUI.Box(titleBarRect, ModuleManager.Domain.Translate(category.Name), ThemeManager.CategoryHeaderStyle);
 
             // 2. Invisible Background Triangle Fold Indicator
             Rect foldBtnRect = new(windowWidth - Config.S(24f), (headerHeight - Config.S(20f)) / 2f, Config.S(20f), Config.S(20f));
@@ -359,7 +359,7 @@ public static class CategoryWindowDrawer
 #endif
             }
 
-            GUI.Box(btnRect, Translate(mod.Name), currentStyle);
+            GUI.Box(btnRect, ModuleManager.Domain.Translate(mod.Name), currentStyle);
         }
     }
 

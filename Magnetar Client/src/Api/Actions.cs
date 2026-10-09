@@ -1,6 +1,4 @@
-﻿using Magnetar_Client;
-using Magnetar_Client.Core;
-using System;
+﻿using System;
 
 namespace Magnetar_Client.Api;
 
@@ -16,6 +14,8 @@ public static class Actions
     public static Action OnEarlyInitializePreferences;
     public static Action OnLateInitializePreferences;
 
+    public static Action OnModuleCategoyInitialized;
+
     public static Action OnLateInitializeCore;
 
     // Update
@@ -30,5 +30,8 @@ public static class Actions
     public static Action OnLateApplicationQuit;
 
     // Misc
+    public static Action OnPreLanguageChanged;
+    public static Action OnPostLanguageChanged;
+
 
 }

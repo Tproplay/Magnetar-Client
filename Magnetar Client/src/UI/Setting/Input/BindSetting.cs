@@ -99,7 +99,7 @@ public class BindSetting : Setting
             {
                 if (e.type == EventType.KeyDown)
                 {
-                    if (key == KeyCode.Escape || key == KeyCode.RightShift)
+                    if (key == KeyCode.Escape || key == Config.MenuOpenKey)
                     {
                         BindKeys.Clear();
                         IsBinding = false;

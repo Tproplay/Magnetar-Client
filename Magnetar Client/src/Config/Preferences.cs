@@ -4,6 +4,8 @@ using System.IO;
 using Magnetar_Client.Api;
 using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using UnityEngine;
+
 
 #if MELONLOADER || RELEASE_MELON
 using MelonLoader;
@@ -59,6 +61,8 @@ public static class Preferences
     public static IPreferenceEntry<bool> ShowFloatingIconEntry { get; private set; }
     public static IPreferenceEntry<bool> ShowMobileButtonsEntry { get; private set; }
     public static IPreferenceEntry<string> CurrentProfileEntry { get; private set; }
+    public static IPreferenceEntry<string> LanguageEntry { get; private set; }
+    public static IPreferenceEntry<KeyCode> ModMenuKeyEntry { get; private set; }
 
     /// <summary>
     /// API to create new preference entries at runtime without preprocessor directives in client code.
@@ -124,7 +128,16 @@ public static class Preferences
             if (ShowMobileButtonsEntry != null)
                 Config.ShowMobileButtons = ShowMobileButtonsEntry.Value;
 
-            CurrentProfileEntry = CreateEntry("ProfileManager", "CurrentProfile", Config.DefaultProfile, "Active Profile", "The active configuration profile name.");
+            CurrentProfileEntry = CreateEntry("ProfileManager", "CurrentProfile", Config.DefaultProfile,
+                "Active Profile", "The active configuration profile name.");
+            LanguageEntry = CreateEntry("Localization", "Language", "English", "Language", "Active client language.");
+            if (LanguageEntry != null && !string.IsNullOrEmpty(LanguageEntry.Value))
+            {
+                Config.Language = LanguageEntry.Value;
+            }
+
+            ModMenuKeyEntry = CreateEntry("UI", "MenuBind", KeyCode.RightShift, "MenuBind", "KeyCode to open the gui.");
+
         }
         catch (Exception ex)
         {

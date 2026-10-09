@@ -195,15 +195,6 @@ public static class GUIControlsDrawer
         }
 
         // 1. Language Row
-        string currentLangName = "English";
-        if (GUIManager.LanguageSetting?.SelectedValues != null && GUIManager.LanguageSetting.SelectedValues.Count > 0)
-        {
-            int selectedId = GUIManager.LanguageSetting.SelectedValues.First();
-            if (GUIManager.LanguageSetting.Options.ContainsKey(selectedId))
-                currentLangName = GUIManager.LanguageSetting.Options[selectedId];
-        }
-        Config.Language = currentLangName;
-
         DrawButtonRow(
             $"{GUIManager.Domain.Translate("Language")}: <color=yellow>{Config.Language}</color>",
             GUIManager.Domain.Translate("Change"),

@@ -97,7 +97,6 @@ public class Main
         ServiceRegistry.InitializeAll();
 
         // 4. Load state, themes, and translations
-        Config.IsLanguageInitialized = true;
         Translator.LoadTranslations();
         SaveLoad.Load();
 
@@ -113,7 +112,7 @@ public class Main
         UI.GUIHelper._UpdateRainbowColor();
         AnimationHandler.UpdateTransition();
 
-        if (Input.GetKeyDown(KeyCode.RightShift) && !HUDManager.forceShow)
+        if (Input.GetKeyDown(Config.MenuOpenKey) && !HUDManager.forceShow)
         {
             Config.showgui = !Config.showgui;
             if (!Config.showgui) SaveLoad.Save();

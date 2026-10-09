@@ -66,7 +66,7 @@ public static partial class DrawSetting
             {
                 if (e.type == EventType.KeyDown)
                 {
-                    if (key == KeyCode.Escape || key == KeyCode.RightShift)
+                    if (key == KeyCode.Escape || key == Config.MenuOpenKey)
                     {
                         bSet.BindKeys.Clear();
                         bSet.IsBinding = false;

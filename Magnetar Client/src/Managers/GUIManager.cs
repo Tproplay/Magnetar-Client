@@ -72,11 +72,19 @@ public static class GUIManager
         AnimationHandler.SetViewImmediate(Group, ViewMain, 1.0f);
         AnimationHandler.SetViewImmediate(Group, ViewSelector, 0.0f);
 
+        // Register English template hook early
+        Domain.OnDumpEnglishTemplate += DumpEnglishTemplates;
+
+        // Reset language options & selections before discovering available languages
+        LanguageSetting.Options.Clear();
+        LanguageSetting.SelectedValues.Clear();
+        LanguageSetting.AddOption(0, "English");
+
+        int activeIndex = 0;
         try
         {
             var languageDirs = Directory.GetDirectories(TranslationRootDir);
             int idx = 1;
-            int activeIndex = 0;
 
             foreach (var dir in languageDirs)
             {
@@ -91,13 +99,29 @@ public static class GUIManager
                 idx++;
                 TranslatorLogger.Msg($"Found language: {langName}");
             }
-            LanguageSetting.SelectedValues.Add(activeIndex);
         }
         catch (Exception ex)
         {
             TranslatorLogger.Error($"[GUIManager] Error reading translation directories: {ex.Message}");
-            LanguageSetting.SelectedValues.Add(0);
         }
+
+        LanguageSetting.SelectedValues.Add(activeIndex);
+
+        // Handle user selection changes and sync with Preferences + Config
+        LanguageSetting.OnSelectionChanged = (selectedId, isSelected) =>
+        {
+            if (!isSelected) return;
+
+            if (LanguageSetting.Options.TryGetValue(selectedId, out string chosenLang))
+            {
+                Config.Language = chosenLang;
+                if (Preferences.LanguageEntry != null)
+                {
+                    Preferences.LanguageEntry.Value = chosenLang;
+                    Preferences.LanguageEntry.Save();
+                }
+            }
+        };
 
         RefreshThemeOptions();
 
@@ -129,14 +153,30 @@ public static class GUIManager
             MultiSelectTabStorage.RestoreState(TabType.GUI);
         };
 
-        SaveLoad.RegisterEntry("Language", () => Config.Language, val => Config.Language = val, "English");
+        // SaveLoad entries
+        SaveLoad.RegisterEntry("Language", () => Config.Language, val =>
+        {
+            Config.Language = val;
+            // Keep the UI selector indicator in sync if loaded via save file
+            if (LanguageSetting?.Options != null)
+            {
+                foreach (var kvp in LanguageSetting.Options)
+                {
+                    if (string.Equals(kvp.Value, val, StringComparison.OrdinalIgnoreCase))
+                    {
+                        LanguageSetting.SelectedValues.Clear();
+                        LanguageSetting.SelectedValues.Add(kvp.Key);
+                        break;
+                    }
+                }
+            }
+        }, "English");
+
         SaveLoad.RegisterEntry("Theme", () => Config.Theme, val => Config.Theme = val, "Default");
         SaveLoad.RegisterEntry("GUIScale", () => Config.GUIScale, val => Config.GUIScale = val, 1.0f);
         SaveLoad.RegisterEntry("ElementScale", () => Config.ElementScale, val => Config.ElementScale = val, 1.0f);
         SaveLoad.RegisterEntry("ShowFloatingIcon", () => Config.ShowFloatingIcon, val => Config.ShowFloatingIcon = val, true);
         SaveLoad.RegisterEntry("ShowMainMenuCredits", () => Config.ShowMainMenuCredits, val => Config.ShowMainMenuCredits = val, true);
-
-        Domain.OnDumpEnglishTemplate += DumpEnglishTemplates;
     }
 
     public static void RefreshThemeOptions()

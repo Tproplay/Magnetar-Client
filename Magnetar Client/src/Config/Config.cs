@@ -23,6 +23,8 @@ public static class Config
     public static string DefaultProfile = "Default";
     public static string CurrentProfile = "Default";
 
+    public static KeyCode MenuOpenKey => Preferences.ModMenuKeyEntry!=null ? Preferences.ModMenuKeyEntry.Value : KeyCode.RightShift;
+
     private static string _theme = "Magnetar Default";
 
     public static string Theme
@@ -150,8 +152,6 @@ public static class Config
 
     private static string _language = "English";
 
-    internal static bool IsLanguageInitialized = false;
-
     public static string Language
     {
         get => _language;
@@ -161,8 +161,6 @@ public static class Config
                 return;
 
             _language = value;
-
-            if (!IsLanguageInitialized) return;
 
             Actions.OnPreLanguageChanged();
 

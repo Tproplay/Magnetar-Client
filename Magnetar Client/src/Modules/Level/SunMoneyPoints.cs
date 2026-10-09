@@ -32,8 +32,8 @@ public class SunHack : Module
     private FloatSetting sunMultiplierSetting;
 
     // State trackers for live toggling
-    private bool _lastUnlimitedState = false;
-    private bool _lastMultiplierState = false;
+    private bool _lastUnlimitedState;
+    private bool _lastMultiplierState;
     private float _originalSunEfficiency = 1f;
 
     // extra
@@ -232,11 +232,11 @@ public class MoneyHack : Module
     public FloatSetting moneyMultiplierSetting;
 
     // State trackers for live toggling
-    private bool _lastUnlimitedState = false;
-    private bool _lastMultiplierState = false;
+    private bool _lastUnlimitedState;
+    private bool _lastMultiplierState;
     private float _originalMoneyEfficiency = 1f;
 
-    public override bool Active { get; set; } = false;
+    public override bool Active { get; set; }
 
     public MoneyHack()
     {
@@ -355,10 +355,10 @@ public class PointsHack : Module
     private float _pointsAmount = -9476224.35443f;
 
     // State trackers for live toggling
-    private bool _lastUnlimitedState = false;
-    private bool _lastMultiplierState = false;
+    private bool _lastUnlimitedState;
+    private bool _lastMultiplierState;
 
-    public override bool Active { get; set; } = false;
+    public override bool Active { get; set; }
 
     public PointsHack()
     {

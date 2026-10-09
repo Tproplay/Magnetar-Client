@@ -119,7 +119,7 @@ public class CustomKeybind : Module
 
     
 
-    private static bool RanbyMod = false;
+    private static bool RanbyMod;
 
     public override void OnUpdateActive()
     {

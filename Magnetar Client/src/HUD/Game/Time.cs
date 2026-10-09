@@ -12,7 +12,7 @@ public class TimeInLevel : HudElement
     { UpdateInterval = 0.1f; }
 
     DateTime StartTime = DateTime.Now;
-    bool saved = false;
+    bool saved;
     public override void OnUpdate()
     {
         base.OnUpdate();

@@ -10,10 +10,10 @@ public static class SearchWindowDrawer
 {
     public static string SearchQuery = "";
     public static Rect SearchWindowRect;
-    public static bool IsSearchOpen = false;
-    public static float SearchAnimProgress = 0f;
-    public static bool SearchWasFocused = false;
-    public static bool RequestSearchFocus = false;
+    public static bool IsSearchOpen;
+    public static float SearchAnimProgress;
+    public static bool SearchWasFocused;
+    public static bool RequestSearchFocus;
 
     private static GUI.WindowFunction _cachedSearchDelegate;
     private static GUI.WindowFunction SearchDelegate => _cachedSearchDelegate ??=
@@ -41,7 +41,7 @@ public static class SearchWindowDrawer
             float searchWidth = Config.ModuleWindowWidth;
             float tfY = Config.S(10f);
             Rect anticipatedTfRect = new(Config.indent, tfY, searchWidth - (Config.indent * 2), Config.S(20f));
-            activeTextFieldId = anticipatedTfRect.GetHashCode();
+            ActiveTextFieldId = anticipatedTfRect.GetHashCode();
 
             GUI.FocusWindow(999);
             currentEvent.Use();
@@ -49,9 +49,9 @@ public static class SearchWindowDrawer
 
         if (IsSearchOpen)
         {
-            if (activeTextFieldId != -1) SearchWasFocused = true;
+            if (ActiveTextFieldId != -1) SearchWasFocused = true;
 
-            if (SearchWasFocused && activeTextFieldId == -1 && string.IsNullOrEmpty(SearchQuery))
+            if (SearchWasFocused && ActiveTextFieldId == -1 && string.IsNullOrEmpty(SearchQuery))
             {
                 IsSearchOpen = false;
                 RequestSearchFocus = true;
@@ -87,7 +87,7 @@ public static class SearchWindowDrawer
 
         if (RequestSearchFocus)
         {
-            activeTextFieldId = tfRect.GetHashCode();
+            ActiveTextFieldId = tfRect.GetHashCode();
             GUI.FocusWindow(999);
 
             if (Event.current.type == EventType.Repaint)

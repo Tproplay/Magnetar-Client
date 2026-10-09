@@ -36,8 +36,8 @@ public class AutoPlant : Module
         public int row;
         public GameObject ghostVisual;
 
-        public bool isProjectedSpread = false;
-        public GhostPlantRequest parentSpread = null;
+        public bool isProjectedSpread;
+        public GhostPlantRequest parentSpread;
     }
 
     public List<GhostPlantRequest> PendingPlants = new();

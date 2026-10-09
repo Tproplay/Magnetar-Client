@@ -44,7 +44,7 @@ public class AverageDamageStatsPlant : HudElement
 
     private List<long> damageHistory = new();
 
-    long Dps = 0;
+    long Dps;
     string displayText = "Plant DPS: 0";
     public override void OnUpdateActive()
     {

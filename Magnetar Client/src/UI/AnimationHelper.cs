@@ -7,10 +7,10 @@ namespace Magnetar_Client.UI;
 
 public static class AnimationHandler
 {
-    public static float FadeProgress { get; private set; } = 0f;
+    public static float FadeProgress { get; private set; }
     public static float FadeSpeed { get; set; } = 5.0f;
 
-    public static float DimAlpha { get; private set; } = 0f;
+    public static float DimAlpha { get; private set; }
     public static float DimFadeSpeed { get; set; } = 6.0f;
 
     public static float DefaultWindowSpeed { get; set; } = 8.0f;

@@ -21,7 +21,7 @@ public class MultiSelectSetting : Setting
     public Action OnWindowOpen { get; set; }
 
     public Dictionary<int, string> CustomNames;
-    public bool DisplayAlphabetically = false;
+    public bool DisplayAlphabetically;
 
     public MultiSelectSetting(string name)
     {

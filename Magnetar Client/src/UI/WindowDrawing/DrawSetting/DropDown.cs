@@ -7,7 +7,7 @@ namespace Magnetar_Client.UI.WindowDrawing;
 
 public static partial class DrawSetting
 {
-    public static float dropdownScrollY = 0f;
+    public static float dropdownScrollY;
 
     public static void HandleSelectSetting(SelectSetting selSet, ref float y, float width)
     {
@@ -32,23 +32,23 @@ public static partial class DrawSetting
 
         if (isHovered && e.type == EventType.MouseDown && e.button == 0)
         {
-            if (activeDropdownId == controlId)
+            if (ActiveDropdownId == controlId)
             {
-                activeDropdownId = -1;
+                ActiveDropdownId = -1;
             }
             else
             {
-                activeDropdownId = controlId;
+                ActiveDropdownId = controlId;
                 dropdownScrollY = 0f;
-                focusedControlId = -1;
+                FocusedControlId = -1;
             }
             e.Use();
         }
 
-        string arrow = (activeDropdownId == controlId) ? " ▲" : " ▼";
+        string arrow = (ActiveDropdownId == controlId) ? " ▲" : " ▼";
         GUI.Box(btnRect, currentValName + arrow, ThemeManager.SettingOff);
 
-        if (activeDropdownId == controlId)
+        if (ActiveDropdownId == controlId)
         {
             float rowHeight = Config.SettingsInput.DropdownRowHeight;
             int maxVisibleRows = Config.SettingsInput.DropdownMaxVisibleRows;
@@ -75,7 +75,7 @@ public static partial class DrawSetting
                     if (i == clickedIndex)
                     {
                         selSet.Value = kvp.Key;
-                        activeDropdownId = -1;
+                        ActiveDropdownId = -1;
                         e.Use();
                         break;
                     }
@@ -85,7 +85,7 @@ public static partial class DrawSetting
 
             if (e.type == EventType.MouseDown && !btnRect.Contains(e.mousePosition) && !dropRect.Contains(e.mousePosition))
             {
-                activeDropdownId = -1;
+                ActiveDropdownId = -1;
             }
 
             float _dropdownScrollY = dropdownScrollY;

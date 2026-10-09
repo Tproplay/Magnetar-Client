@@ -12,7 +12,7 @@ public class BindSetting : Setting
 {
     private List<KeyCode> _bindKeys = new();
     public List<KeyCode> DefaultKeys { get; private set; } = new();
-    public bool IsBinding = false;
+    public bool IsBinding;
 
     public Action<List<KeyCode>> OnValueChanging { get; set; }
     public Action<List<KeyCode>> OnValueChanged { get; set; }
@@ -23,7 +23,7 @@ public class BindSetting : Setting
         set
         {
             if (IsDisabled) return;
-            if (value == null) value = new List<KeyCode>();
+            value ??= new List<KeyCode>();
             if (!_bindKeys.SequenceEqual(value))
             {
                 OnValueChanging?.Invoke(value);
@@ -86,8 +86,8 @@ public class BindSetting : Setting
             if (IsBinding)
             {
                 BindKeys.Clear();
-                DrawSetting.activeTextFieldId = -1;
-                DrawSetting.focusedControlId = -1;
+                DrawSetting.ActiveTextFieldId = -1;
+                DrawSetting.FocusedControlId = -1;
             }
             e.Use();
         }

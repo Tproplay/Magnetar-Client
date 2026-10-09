@@ -28,7 +28,7 @@ public static class NEFData
     public static int NextCustomPlantId = 30000;
 
     // Internal Data State
-    public static bool hasSyncedCustomizeLib = false;
+    public static bool hasSyncedCustomizeLib;
 
     public static List<RecipeEntity> searchResults = new();
     public static List<RecipeNode> currentPyramidRoots = new();

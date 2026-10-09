@@ -96,7 +96,7 @@ public class DebugMode : Module
 
     // Mod Logic
 
-    private static float _time = 0;
+    private static float _time;
     public override void OnUpdateActive()
     {
         if (Time.realtimeSinceStartup < _time+speed.Value) return;
@@ -266,7 +266,7 @@ public class DebugMode : Module
     [HarmonyPatch(typeof(GameAPP))]
     public static class GameAPPPatch
     {
-        public static bool logged = false;
+        public static bool logged;
 
         [HarmonyPatch(nameof(GameAPP.PlaySound), new Type[] { typeof(int), typeof(float), typeof(float) })]
         [HarmonyPostfix]

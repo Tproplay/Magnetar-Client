@@ -1,5 +1,4 @@
 ﻿using Magnetar_Client.Api;
-using Magnetar_Client.Core.Lifecycle;
 using Magnetar_Client.NEF;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
@@ -17,7 +16,7 @@ public static class NEFManager
 
     private const float BaseMargin = 60f;
 
-    public static bool ShowMenu = false;
+    public static bool ShowMenu;
     public static float elementHeight => Config.S(25f);
     public static Rect windowRect = new(60, 60, 1000, 700);
 
@@ -87,9 +86,9 @@ public static class NEFManager
         {
             if (Config.CurrentTab != TabType.NEF) return false;
 
-            if (DrawSetting.activeTextFieldId != -1 || DrawSetting.focusedControlId != -1 || DrawSetting.activeDropdownId != -1)
+            if (DrawSetting.ActiveTextFieldId != -1 || DrawSetting.FocusedControlId != -1 || DrawSetting.ActiveDropdownId != -1)
             {
-                Main.ResetInputBind();
+                DrawSetting.ResetInputBind();
                 Input.ResetInputAxes();
                 return true;
             }

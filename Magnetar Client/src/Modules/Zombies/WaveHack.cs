@@ -97,7 +97,7 @@ public class WaveHack : Module
     [HarmonyPatch(typeof(BoardSpawner))]
     public static class BoardSpawnerPatch
     {
-        static bool spawnedByMod = false;
+        static bool spawnedByMod;
 
         [HarmonyPatch(nameof(BoardSpawner.SummonZombies))]
         [HarmonyPrefix]

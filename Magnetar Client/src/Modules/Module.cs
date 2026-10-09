@@ -41,7 +41,7 @@ public abstract class Module
     /// </summary>
     public abstract ModuleCategory Category { get; set; }
 
-    public virtual bool enableInVanillaMode { get; set; } = false;
+    public virtual bool enableInVanillaMode { get; set; }
 
     // These will be in Every ModuleManager.
     // Edit if you want a different default keybind or want it to be enabled by default.
@@ -51,12 +51,12 @@ public abstract class Module
     public string GetBindString() => KeyBind.GetBindString();
 
     public List<KeyCode> BindKeys => KeyBind.BindKeys;
-    public virtual bool HoldMode { get; set; } = false;
-    public virtual bool Active { get; set; } = false;
+    public virtual bool HoldMode { get; set; }
+    public virtual bool Active { get; set; }
     /// <summary>
     /// Used to determine whether the setting window of the module is opened.
     /// </summary>
-    public virtual bool ShowSettings { get; set; } = false;
+    public virtual bool ShowSettings { get; set; }
 
 
     /// <summary>
@@ -194,8 +194,8 @@ public abstract class Module
         };
     }
 
-    public virtual bool defaultHoldMode { get; } = false;
-    public virtual bool defaultActive { get; } = false;
+    public virtual bool defaultHoldMode { get; }
+    public virtual bool defaultActive { get; }
 
     public virtual void ResetBuiltIns()
     {

@@ -236,8 +236,8 @@ public class CustomDifficulty : Module
     [HarmonyPatch(typeof(DifficultyMgr))]
     public static class DifficultyMgrPatch
     {
-        private static bool _isSyncing = false;
-        private static DifficultyMgr _lastActiveMgr = null;
+        private static bool _isSyncing;
+        private static DifficultyMgr _lastActiveMgr;
 
         [HarmonyPatch(nameof(DifficultyMgr.Start))]
         [HarmonyPostfix]

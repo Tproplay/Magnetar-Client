@@ -68,7 +68,7 @@ public class ColumnShovel : Module
 
     // Mod Logic
 
-    private static bool DieByMod = false;
+    private static bool DieByMod;
 
     [HarmonyPatch(typeof(Plant))]
     public static class PlantPatch

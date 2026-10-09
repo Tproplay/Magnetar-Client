@@ -16,7 +16,7 @@ public static class CategoryWindowDrawer
     public static readonly Dictionary<ModuleCategory, bool> CategoryFolded = new();
     public static readonly Dictionary<ModuleCategory, float> CategoryScrollPositions = new();
 
-    private static ModuleCategory _clickCategory = null;
+    private static ModuleCategory _clickCategory;
     private static Vector2 _clickStartMousePos = Vector2.zero;
     private static Vector2 _clickStartWindowPos = Vector2.zero;
 

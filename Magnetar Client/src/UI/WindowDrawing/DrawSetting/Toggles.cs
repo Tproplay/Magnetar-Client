@@ -53,8 +53,8 @@ public static partial class DrawSetting
             if (bSet.IsBinding)
             {
                 bSet.BindKeys.Clear();
-                activeTextFieldId = -1;
-                focusedControlId = -1;
+                ActiveTextFieldId = -1;
+                FocusedControlId = -1;
             }
             e.Use();
         }

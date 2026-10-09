@@ -128,6 +128,5 @@ public static class Magnetar_Logger
         DebugModeLogger = new CustomLogger("Debug Mode", "\x1b[31m");
         GUILogger = new CustomLogger("Magnetar GUI", "\x1b[35m");
 #endif
-        DebugLogger.Msg("All Console loggers are successfully loaded!");
     }
 }

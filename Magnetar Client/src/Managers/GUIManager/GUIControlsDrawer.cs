@@ -138,10 +138,10 @@ public static class GUIControlsDrawer
             {
                 GUIUtility.hotControl = sliderControlId;
                 GUIUtility.keyboardControl = 0;
-                DrawSetting.activeSliderId = sliderControlId;
+                DrawSetting.ActiveSliderId = sliderControlId;
                 DrawSetting.activeNumericSetting = setting;
-                DrawSetting.focusedControlId = -1;
-                DrawSetting.activeTextFieldId = -1;
+                DrawSetting.FocusedControlId = -1;
+                DrawSetting.ActiveTextFieldId = -1;
 
                 ApplyMouseValue(e.mousePosition.x);
                 e.Use();
@@ -158,19 +158,19 @@ public static class GUIControlsDrawer
                 {
                     setting.Commit();
                     GUIUtility.hotControl = 0;
-                    DrawSetting.activeSliderId = -1;
+                    DrawSetting.ActiveSliderId = -1;
                     DrawSetting.activeNumericSetting = null;
                     e.Use();
                 }
             }
 
             int controlId = inputRect.GetHashCode();
-            bool isFocused = (DrawSetting.activeTextFieldId == controlId);
+            bool isFocused = (DrawSetting.ActiveTextFieldId == controlId);
             string formatString = "0." + new string('0', setting.DecimalPlaces);
 
             if (isFocused && DrawSetting.lastFocusedNumericControlId != controlId)
             {
-                DrawSetting.currentInputBuffer = setting.DisplayValue.ToString(formatString);
+                DrawSetting.CurrentInputBuffer = setting.DisplayValue.ToString(formatString);
                 DrawSetting.lastFocusedNumericControlId = controlId;
             }
             else if (!isFocused && DrawSetting.lastFocusedNumericControlId == controlId)
@@ -179,13 +179,13 @@ public static class GUIControlsDrawer
                 DrawSetting.lastFocusedNumericControlId = -1;
             }
 
-            string displayStr = isFocused ? DrawSetting.currentInputBuffer : setting.DisplayValue.ToString(formatString);
+            string displayStr = isFocused ? DrawSetting.CurrentInputBuffer : setting.DisplayValue.ToString(formatString);
             string newText = DrawSetting.DrawManualTextField(inputRect, displayStr, "0");
 
             if (isFocused)
             {
-                DrawSetting.currentInputBuffer = newText;
-                if (double.TryParse(DrawSetting.currentInputBuffer, out double parsed))
+                DrawSetting.CurrentInputBuffer = newText;
+                if (double.TryParse(DrawSetting.CurrentInputBuffer, out double parsed))
                 {
                     setting.SetPending((float)Math.Round(Mathf.Clamp((float)parsed, setting.TrueMin, setting.TrueMax), setting.DecimalPlaces));
                 }
@@ -224,7 +224,7 @@ public static class GUIControlsDrawer
         // 3. GUI Scale
         if (GUIManager.ScaleSetting != null)
         {
-            if (DrawSetting.activeSliderId != GUIManager.ScaleSetting.GetHashCode() && Mathf.Abs(GUIManager.ScaleSetting.Value - Config.GUIScale) > 0.001f)
+            if (DrawSetting.ActiveSliderId != GUIManager.ScaleSetting.GetHashCode() && Mathf.Abs(GUIManager.ScaleSetting.Value - Config.GUIScale) > 0.001f)
             {
                 GUIManager.ScaleSetting.Value = Config.GUIScale;
             }
@@ -234,7 +234,7 @@ public static class GUIControlsDrawer
         // 4. Element Scale
         if (GUIManager.ElementScaleSetting != null)
         {
-            if (DrawSetting.activeSliderId != GUIManager.ElementScaleSetting.GetHashCode() && Mathf.Abs(GUIManager.ElementScaleSetting.Value - Config.ElementScale) > 0.001f)
+            if (DrawSetting.ActiveSliderId != GUIManager.ElementScaleSetting.GetHashCode() && Mathf.Abs(GUIManager.ElementScaleSetting.Value - Config.ElementScale) > 0.001f)
             {
                 GUIManager.ElementScaleSetting.Value = Config.ElementScale;
             }
@@ -268,7 +268,7 @@ public static class GUIControlsDrawer
         // 8. Opacity Slider
         if (Config.ShowFloatingIcon && GUIManager.FloatingIconOpacitySetting != null)
         {
-            if (DrawSetting.activeSliderId != GUIManager.FloatingIconOpacitySetting.GetHashCode() && Mathf.Abs(GUIManager.FloatingIconOpacitySetting.Value - Config.FloatingIconOpacity) > 0.001f)
+            if (DrawSetting.ActiveSliderId != GUIManager.FloatingIconOpacitySetting.GetHashCode() && Mathf.Abs(GUIManager.FloatingIconOpacitySetting.Value - Config.FloatingIconOpacity) > 0.001f)
             {
                 GUIManager.FloatingIconOpacitySetting.Value = Config.FloatingIconOpacity;
             }

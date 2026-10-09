@@ -1,5 +1,4 @@
-﻿using Magnetar_Client.Core.Lifecycle;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Magnetar_Client.Utils.Magnetar_Logger;
@@ -25,7 +24,7 @@ public static class ServiceRegistry
     public static IReadOnlyList<ICloseHandler> CloseHandlers => _closeHandlers;
 
     /// <summary>
-    /// Registers a client service and rebuilds execution pipelines.
+    /// Registers a client service.
     /// </summary>
     public static void Register(IClientService service)
     {
@@ -51,7 +50,6 @@ public static class ServiceRegistry
     public static void Unregister(IClientService service)
     {
         if (service == null || !_services.Remove(service)) return;
-
         RebuildPipelines();
     }
 
@@ -68,7 +66,7 @@ public static class ServiceRegistry
         _quittables = _services.OfType<IQuittable>().OrderBy(s => s.Priority).ToArray();
     }
 
-    public static void InitializeAll()
+    internal static void InitializeAll()
     {
         for (int i = 0; i < _initializables.Length; i++)
         {
@@ -83,7 +81,7 @@ public static class ServiceRegistry
         }
     }
 
-    public static void WarmUpAll()
+    internal static void WarmUpAll()
     {
         for (int i = 0; i < _warmUps.Length; i++)
         {
@@ -98,7 +96,7 @@ public static class ServiceRegistry
         }
     }
 
-    public static void UpdateAll()
+    internal static void UpdateAll()
     {
         for (int i = 0; i < _updatables.Length; i++)
         {
@@ -113,7 +111,7 @@ public static class ServiceRegistry
         }
     }
 
-    public static void RenderAll()
+    internal static void RenderAll()
     {
         for (int i = 0; i < _renderables.Length; i++)
         {
@@ -128,7 +126,7 @@ public static class ServiceRegistry
         }
     }
 
-    public static void RenderMenuAll()
+    internal static void RenderMenuAll()
     {
         for (int i = 0; i < _menuRenderables.Length; i++)
         {
@@ -143,7 +141,7 @@ public static class ServiceRegistry
         }
     }
 
-    public static void NotifyLanguageChanged()
+    internal static void NotifyLanguageChanged()
     {
         for (int i = 0; i < _languageAwares.Length; i++)
         {
@@ -158,7 +156,7 @@ public static class ServiceRegistry
         }
     }
 
-    public static void SaveAll()
+    internal static void SaveAll()
     {
         for (int i = 0; i < _persistents.Length; i++)
         {
@@ -173,7 +171,7 @@ public static class ServiceRegistry
         }
     }
 
-    public static void LoadAll()
+    internal static void LoadAll()
     {
         for (int i = 0; i < _persistents.Length; i++)
         {
@@ -188,7 +186,7 @@ public static class ServiceRegistry
         }
     }
 
-    public static void QuitAll()
+    internal static void QuitAll()
     {
         for (int i = 0; i < _quittables.Length; i++)
         {

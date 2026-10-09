@@ -14,7 +14,7 @@ namespace Magnetar_Client.Modules;
 
 public class ModuleCategory : IEquatable<ModuleCategory>
 {
-    private static int _nextId = 0;
+    private static int _nextId;
     private static readonly Dictionary<string, ModuleCategory> _registeredCategories = new(StringComparer.OrdinalIgnoreCase);
     private static readonly List<ModuleCategory> _allCategories = new();
 

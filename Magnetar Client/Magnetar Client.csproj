@@ -178,4 +178,12 @@
 		<Exec Condition="$(Configuration) == 'Bepinex'" Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\UnityExploror 4.0.5\BepInEx\plugins\$(TargetFileName)&quot;&#xD;&#xA;start &quot;&quot; &quot;C:\Users\Tproplay\Games\Pvz\Fusion RH\UnityExploror 4.0.5\PlantsVsZombiesRH.exe&quot;" />
 	</Target>
 
+	<ItemGroup>
+	  <EditorConfigFiles Remove="C:\Users\Tproplay\Desktop\Visual studio\Magnetar Client\Magnetar Client\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="C:\Users\Tproplay\Desktop\Visual studio\Magnetar Client\Magnetar Client\.editorconfig" />
+	</ItemGroup>
+
 </Project>

@@ -30,8 +30,8 @@ public class KillPlants : Module
 
     public bool TurnOffAfterUse = true;
     public BoolSetting AutoTurnOff;
-    public override bool Active { get; set; } = false;
-    public static float deltaTime = 0;
+    public override bool Active { get; set; }
+    public static float deltaTime;
 
     public KillPlants()
     {

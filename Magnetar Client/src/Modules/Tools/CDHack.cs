@@ -33,7 +33,7 @@ public class CustomCDGlove : Module
 
     public BoolSetting resetCDonEnable;
 
-    public override bool Active { get; set; } = false;
+    public override bool Active { get; set; }
 
     public CustomCDGlove()
     {
@@ -109,7 +109,7 @@ public class CustomCDHammer : Module
 
     public BoolSetting resetCDonEnable;
 
-    public override bool Active { get; set; } = false;
+    public override bool Active { get; set; }
 
     public CustomCDHammer()
     {
@@ -204,7 +204,7 @@ public class CustomCDWheel : Module
 
     public BoolSetting resetCDonEnable;
 
-    public override bool Active { get; set; } = false;
+    public override bool Active { get; set; }
 
     public CustomCDWheel()
     {

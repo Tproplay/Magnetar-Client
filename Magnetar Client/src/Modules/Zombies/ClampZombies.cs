@@ -24,7 +24,7 @@ public class ClampZombies : Module
     public static ClampZombies instance;
 
     public IntSetting MaxZombiesSetting;
-    private float lastCheckTime = 0f;
+    private float lastCheckTime;
 
     public FloatSetting SpeedReductionSetting;
     public FloatSetting HpAdditionPercentageSetting;

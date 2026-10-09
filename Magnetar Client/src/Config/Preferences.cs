@@ -6,7 +6,6 @@ using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using UnityEngine;
 
-
 #if MELONLOADER || RELEASE_MELON
 using MelonLoader;
 #elif BEPINEX || RELEASE_BEPINEX || ANDROID
@@ -25,7 +24,7 @@ public static class Preferences
     }
 
 #if MELONLOADER || RELEASE_MELON
-    public static MelonPreferences_Category MagnetarCategory;
+    public static MelonPreferences_Category MagnetarCategory { get; private set; }
 
     private class MelonEntryWrapper<T> : IPreferenceEntry<T>
     {
@@ -70,8 +69,7 @@ public static class Preferences
     public static IPreferenceEntry<T> CreateEntry<T>(string category, string key, T defaultValue, string displayName = null, string description = null)
     {
 #if MELONLOADER || RELEASE_MELON
-        if (MagnetarCategory == null)
-            MagnetarCategory = MelonPreferences.CreateCategory("Magnetar Client", "Magnetar Client");
+        MagnetarCategory ??= MelonPreferences.CreateCategory("Magnetar Client", "Magnetar Client");
 
         var melonEntry = MagnetarCategory.CreateEntry(key, defaultValue, displayName ?? key, description);
         return new MelonEntryWrapper<T>(melonEntry);

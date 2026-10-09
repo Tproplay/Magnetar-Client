@@ -1,5 +1,4 @@
 ﻿using Magnetar_Client.Api;
-using Magnetar_Client.Core.Lifecycle;
 using Magnetar_Client.Core.ModuleManager_;
 using Magnetar_Client.Modules;
 using Magnetar_Client.UI;
@@ -28,13 +27,11 @@ public static class ModuleManager
     public const string Group = "ModuleManager";
     public static TranslationDomain Domain => ModuleTranslationHandler.Domain;
 
-    public static bool IsInitialized { get; private set; } = false;
-    public static List<Modules.Module> Modules = new();
-    public static WindowType CurrentWindow = WindowType.Modules;
-    public static Modules.Module activeSettingsModule = null;
-    public static bool resetWindowPos = false;
-
-    public static Dictionary<ModuleCategory, Rect> windowPositions => CategoryWindowDrawer.WindowPositions;
+    public static bool IsInitialized { get; private set; }
+    public static readonly List<Modules.Module> Modules = new();
+    public static WindowType CurrentWindow { get; set; } = WindowType.Modules;
+    public static Modules.Module ActiveSettingsModule { get; set; }
+    internal static bool resetWindowPos;
 
     public static void Init()
     {
@@ -135,7 +132,7 @@ public static class ModuleManager
         MobileInputHandler.Reset();
 
         CurrentWindow = WindowType.Settings;
-        activeSettingsModule = mod;
+        ActiveSettingsModule = mod;
 
         mod.ShowSettings = true;
         resetWindowPos = true;
@@ -278,7 +275,7 @@ public static class ModuleManager
 
             if (DrawSetting.IsFocused)
             {
-            Main.ResetInputBind();
+                DrawSetting.ResetInputBind();
                 return true;
             }
 
@@ -287,9 +284,9 @@ public static class ModuleManager
             switch (CurrentWindow)
                 {
                 case WindowType.Settings:
-                    if (activeSettingsModule != null)
+                    if (ActiveSettingsModule != null)
                         {
-                        activeSettingsModule.ShowSettings = false;
+                        ActiveSettingsModule.ShowSettings = false;
                         }
                     CurrentWindow = WindowType.Modules;
                         break;
@@ -299,7 +296,7 @@ public static class ModuleManager
             }
 
             AnimationHandler.SwitchView(Group, CurrentWindow.ToString());
-                Main.ResetInputBind();
+                DrawSetting.ResetInputBind();
                 return true;
             }
 

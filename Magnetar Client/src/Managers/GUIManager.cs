@@ -1,6 +1,5 @@
 ﻿using Magnetar_Client.Api;
 using Magnetar_Client.Core.GUIManager_;
-using Magnetar_Client.Core.Lifecycle;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
@@ -222,7 +221,7 @@ public static class GUIManager
         if (isSelectingSubWindow && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
         {
             OnClose();
-            Main.ResetInputBind();
+            DrawSetting.ResetInputBind();
             Input.ResetInputAxes();
             e.Use();
             return;
@@ -262,14 +261,14 @@ public static class GUIManager
             if (isSelectingSubWindow)
             {
                 OnClose();
-                Main.ResetInputBind();
+                DrawSetting.ResetInputBind();
                 Input.ResetInputAxes();
                 return true;
             }
 
             if (DrawSetting.IsFocused)
             {
-                Main.ResetInputBind();
+                DrawSetting.ResetInputBind();
                 Input.ResetInputAxes();
                 return true;
             }

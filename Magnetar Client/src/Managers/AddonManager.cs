@@ -1,5 +1,4 @@
 ﻿using Magnetar_Client.Api;
-using Magnetar_Client.Core.Lifecycle;
 using Magnetar_Client.HUDElements;
 using System;
 using System.Collections.Generic;
@@ -17,7 +16,7 @@ public static class AddonManager
     public static readonly List<AddonInfo> LoadedAddons = new();
 
     private static readonly Dictionary<string, (Assembly Assembly, Type[] Types)> DiscoveredAssemblies = new();
-    private static bool _isResolverAttached = false;
+    private static bool _isResolverAttached;
 
     private static void EnsureAssemblyResolver()
     {
@@ -47,7 +46,7 @@ public static class AddonManager
             }
             catch (Exception ex)
             {
-                DebugLogger.Error($"[AddonManager] Error resolving assembly '{args.Name}': {ex.Message}");
+                DebugLogger.Error($"Error resolving assembly '{args.Name}': {ex.Message}");
             }
 
             return null;
@@ -75,7 +74,7 @@ public static class AddonManager
                 return;
             }
 
-            DebugLogger.Msg($"[AddonManager] Discovered {dllFiles.Length} candidate assembly file(s)");
+            DebugLogger.Msg($"Discovered {dllFiles.Length} candidate assembly file(s)");
 
             // Load assemblies
             foreach (string filePath in dllFiles)
@@ -87,7 +86,7 @@ public static class AddonManager
                 }
                 catch (Exception ex)
                 {
-                    DebugLogger.Error($"[AddonManager] Failed to load assembly '{Path.GetFileName(filePath)}': {ex}");
+                    DebugLogger.Error($"Failed to load assembly '{Path.GetFileName(filePath)}': {ex}");
                 }
             }
 
@@ -102,7 +101,7 @@ public static class AddonManager
         }
         catch (Exception ex)
         {
-            DebugLogger.Error($"[AddonManager] Critical error during InitAddons: {ex}");
+            DebugLogger.Error($"Critical error during InitAddons: {ex}");
         }
     }
 
@@ -120,7 +119,7 @@ public static class AddonManager
         catch (ReflectionTypeLoadException ex)
         {
             exportedTypes = ex.Types.Where(t => t != null).ToArray();
-            DebugLogger.Warning($"[AddonManager] Type resolution warning in '{fileName}': {ex.LoaderExceptions.FirstOrDefault()?.Message}");
+            DebugLogger.Warning($"Type resolution warning in '{fileName}': {ex.LoaderExceptions.FirstOrDefault()?.Message}");
         }
 
         DiscoveredAssemblies[filePath] = (assembly, exportedTypes);
@@ -143,11 +142,11 @@ public static class AddonManager
                 var addonInstance = (IMagnetarAddon)Activator.CreateInstance(addonType);
                 addonInfo.AddonInstances.Add(addonInstance);
 
-                DebugLogger.Msg($"[AddonManager] Discovered addon '{addonInstance.Name}' v{addonInstance.Version} by {addonInstance.Author} in '{fileName}'");
+                DebugLogger.Msg($"Discovered addon '{addonInstance.Name}' v{addonInstance.Version} by {addonInstance.Author} in '{fileName}'");
             }
             catch (Exception ex)
             {
-                DebugLogger.Error($"[AddonManager] Failed to instantiate IMagnetarAddon type '{addonType.FullName}' in '{fileName}': {ex}");
+                DebugLogger.Error($"Failed to instantiate IMagnetarAddon type '{addonType.FullName}' in '{fileName}': {ex}");
             }
         }
 
@@ -163,11 +162,10 @@ public static class AddonManager
         {
             if (DiscoveredAssemblies.Count == 0)
             {
-                DebugLogger.Msg("[AddonManager] No assemblies found to load modules from.");
                 return;
             }
 
-            DebugLogger.Msg("[AddonManager] Scanning addon assemblies for Module subclasses...");
+            DebugLogger.Msg("Scanning addon assemblies for Module subclasses...");
             int totalNewModules = 0;
 
             // Pass 2: Discover and instantiate Module implementations
@@ -198,19 +196,19 @@ public static class AddonManager
                     }
                     catch (Exception ex)
                     {
-                        DebugLogger.Error($"[AddonManager] Failed to register addon module '{modType.FullName}' from '{addonInfo.FileName}': {ex}");
+                        DebugLogger.Error($"Failed to register addon module '{modType.FullName}' from '{addonInfo.FileName}': {ex}");
                     }
                 }
 
                 if (addonInfo.RegisteredModules.Count > 0)
                 {
-                    DebugLogger.Msg($"[AddonManager] Registered {addonInfo.RegisteredModules.Count} module(s) from '{addonInfo.FileName}'");
+                    DebugLogger.Msg($"Registered {addonInfo.RegisteredModules.Count} module(s) from '{addonInfo.FileName}'");
                 }
             }
         }
         catch (Exception ex)
         {
-            DebugLogger.Error($"[AddonManager] Critical error during InitModules: {ex}");
+            DebugLogger.Error($"Critical error during InitModules: {ex}");
         }
     }
 
@@ -223,7 +221,6 @@ public static class AddonManager
         {
             if (DiscoveredAssemblies.Count == 0)
             {
-                DebugLogger.Msg("[AddonManager] No assemblies found to load HUD elements from.");
                 return;
             }
 
@@ -257,20 +254,20 @@ public static class AddonManager
                     }
                     catch (Exception ex)
                     {
-                        DebugLogger.Error($"[AddonManager] Failed to register addon HUD element '{hudType.FullName}' from '{addonInfo.FileName}': {ex}");
+                        DebugLogger.Error($"Failed to register addon HUD element '{hudType.FullName}' from '{addonInfo.FileName}': {ex}");
                     }
                 }
 
                 if (addonInfo.RegisteredHudElements.Count > 0)
                 {
-                    DebugLogger.Msg($"[AddonManager] Registered {addonInfo.RegisteredHudElements.Count} HUD element(s) from '{addonInfo.FileName}'");
+                    DebugLogger.Msg($"Registered {addonInfo.RegisteredHudElements.Count} HUD element(s) from '{addonInfo.FileName}'");
                 }
             }
 
         }
         catch (Exception ex)
         {
-            DebugLogger.Error($"[AddonManager] Critical error during InitHUDElements: {ex}");
+            DebugLogger.Error($"Critical error during InitHUDElements: {ex}");
         }
     }
 
@@ -307,19 +304,19 @@ public static class AddonManager
                     }
                     catch (Exception ex)
                     {
-                        DebugLogger.Error($"[AddonManager] Failed to register addon service '{svcType.FullName}' from '{addonInfo.FileName}': {ex}");
+                        DebugLogger.Error($"Failed to register addon service '{svcType.FullName}' from '{addonInfo.FileName}': {ex}");
                     }
                 }
             }
 
             if (totalServices > 0)
             {
-                DebugLogger.Msg($"[AddonManager] Registered {totalServices} client service(s) from addons.");
+                DebugLogger.Msg($"Registered {totalServices} client service(s) from addons.");
             }
         }
         catch (Exception ex)
         {
-            DebugLogger.Error($"[AddonManager] Critical error during InitServices: {ex}");
+            DebugLogger.Error($"Critical error during InitServices: {ex}");
         }
     }
 }

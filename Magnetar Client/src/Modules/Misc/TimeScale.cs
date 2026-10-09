@@ -32,7 +32,7 @@ public class TimeScale : Module
     public BoolSetting ReEnableAfterPause;
 
     public float TargetSpeed { get; private set; } = 1f;
-    private bool wasPausedLastFrame = false;
+    private bool wasPausedLastFrame;
 
     public TimeScale()
     {

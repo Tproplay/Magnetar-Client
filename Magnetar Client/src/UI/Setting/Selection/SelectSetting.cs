@@ -87,16 +87,16 @@ public class SelectSetting : Setting
 
         if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
-            DrawSetting.activeDropdownId = (DrawSetting.activeDropdownId == controlId) ? -1 : controlId;
+            DrawSetting.ActiveDropdownId = (DrawSetting.ActiveDropdownId == controlId) ? -1 : controlId;
             DrawSetting.dropdownScrollY = 0f;
-            DrawSetting.focusedControlId = -1;
+            DrawSetting.FocusedControlId = -1;
             e.Use();
         }
 
-        string arrow = (DrawSetting.activeDropdownId == controlId) ? " ▲" : " ▼";
+        string arrow = (DrawSetting.ActiveDropdownId == controlId) ? " ▲" : " ▼";
         GUI.Box(btnRect, currentValName + arrow, ThemeManager.SettingOff);
 
-        if (DrawSetting.activeDropdownId == controlId)
+        if (DrawSetting.ActiveDropdownId == controlId)
         {
             float rowHeight = Config.SettingsInput.DropdownRowHeight;
             int maxVisibleRows = Config.SettingsInput.DropdownMaxVisibleRows;
@@ -122,7 +122,7 @@ public class SelectSetting : Setting
                     if (idx == clickedIndex)
                     {
                         Value = kvp.Key;
-                        DrawSetting.activeDropdownId = -1;
+                        DrawSetting.ActiveDropdownId = -1;
                         e.Use();
                         break;
                     }
@@ -132,7 +132,7 @@ public class SelectSetting : Setting
 
             if (e.type == EventType.MouseDown && !btnRect.Contains(e.mousePosition) && !dropRect.Contains(e.mousePosition))
             {
-                DrawSetting.activeDropdownId = -1;
+                DrawSetting.ActiveDropdownId = -1;
             }
 
             float scrollY = DrawSetting.dropdownScrollY;

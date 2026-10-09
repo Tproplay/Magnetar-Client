@@ -20,12 +20,7 @@ public interface IMagnetarAddon
     string Author { get; }
 
     /// <summary>
-    /// Invoked immediately after the assembly is loaded into memory.
+    /// Runs after all addon assemblies are loaded.
     /// </summary>
     void OnLoad();
-
-    /// <summary>
-    /// Invoked during mod unload or shutdown.
-    /// </summary>
-    void OnUnload();
 }

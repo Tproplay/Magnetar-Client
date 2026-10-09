@@ -10,11 +10,11 @@ namespace Magnetar_Client.NEF;
 public static partial class NEFGUI
 {
     public static string searchQuery = "";
-    public static float currentScrollY = 0f;
+    public static float currentScrollY;
 
     private static Vector2 _gridTouchStart = Vector2.zero;
-    private static float _gridScrollStartVal = 0f;
-    private static bool _isGridSwiping = false;
+    private static float _gridScrollStartVal;
+    private static bool _isGridSwiping;
 
     private static void DrawSearchAndGridPanel(Rect rightPanelRect, float rightPanelWidth, Event e)
     {

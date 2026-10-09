@@ -19,7 +19,7 @@ public static class SettingsWindowDrawer
     private static readonly Dictionary<Modules.Module, GUI.WindowFunction> _cachedSettingsDelegates = new();
 
     // Cache the active module while it fades out to prevent instant popping
-    private static Modules.Module _lastActiveModule = null;
+    private static Modules.Module _lastActiveModule;
 
     private static GUI.WindowFunction GetSettingsDelegate(Modules.Module mod)
     {
@@ -35,7 +35,7 @@ public static class SettingsWindowDrawer
 
     public static void Render(Event currentEvent)
     {
-        Modules.Module targetMod = ModuleManager.activeSettingsModule;
+        Modules.Module targetMod = ModuleManager.ActiveSettingsModule;
         float viewAlpha = AnimationHandler.GetViewAlpha(ModuleManager.Group, ModuleManager.WindowType.Settings.ToString());
 
         if (targetMod != null)
@@ -113,7 +113,7 @@ public static class SettingsWindowDrawer
         GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
         GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
 
-        ModuleManager.activeSettingsModule = mod;
+        ModuleManager.ActiveSettingsModule = mod;
         float windowWidth = _settingsPositions[mod].width;
 
 #if ANDROID

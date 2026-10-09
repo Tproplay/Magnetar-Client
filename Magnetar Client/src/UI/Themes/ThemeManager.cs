@@ -1,6 +1,5 @@
 ﻿using Magnetar_Client.Api;
 using Magnetar_Client.Core;
-using Magnetar_Client.Core.Lifecycle;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -110,7 +109,7 @@ public static class ThemeManager
     private static float _lastScale = -1f;
     private static float _lastElementScale = -1f;
 
-    private static bool _initialized = false;
+    private static bool _initialized;
 
     public static void Init()
     {

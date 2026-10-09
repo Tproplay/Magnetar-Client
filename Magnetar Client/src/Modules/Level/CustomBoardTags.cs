@@ -23,7 +23,7 @@ public class CustomBoardTags : Module
 
     // Mod Data
 
-    bool _active = false;
+    bool _active;
     public override bool Active 
     { 
         get => _active;

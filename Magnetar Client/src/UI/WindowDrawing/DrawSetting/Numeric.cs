@@ -105,10 +105,10 @@ public static partial class DrawSetting
         if (e.type == EventType.MouseDown && e.button == 0 && inHitbox)
         {
             GUIUtility.hotControl = sliderControlId;
-            activeSliderId = sliderControlId;
+            ActiveSliderId = sliderControlId;
             activeNumericSetting = setting;
-            focusedControlId = -1;
-            activeTextFieldId = -1;
+            FocusedControlId = -1;
+            ActiveTextFieldId = -1;
 
             ApplyFromMouseX(e.mousePosition.x);
             e.Use();
@@ -125,18 +125,18 @@ public static partial class DrawSetting
             {
                 CommitSettingValue();
                 GUIUtility.hotControl = 0;
-                activeSliderId = -1;
+                ActiveSliderId = -1;
                 activeNumericSetting = null;
                 e.Use();
             }
         }
 
         int controlId = inputRect.GetHashCode();
-        bool isFocused = (activeTextFieldId == controlId);
+        bool isFocused = (ActiveTextFieldId == controlId);
 
         if (isFocused && lastFocusedNumericControlId != controlId)
         {
-            currentInputBuffer = val.ToString(formatString);
+            CurrentInputBuffer = val.ToString(formatString);
             lastFocusedNumericControlId = controlId;
         }
         else if (!isFocused && lastFocusedNumericControlId == controlId)
@@ -145,13 +145,13 @@ public static partial class DrawSetting
             lastFocusedNumericControlId = -1;
         }
 
-        string displayValue = isFocused ? currentInputBuffer : val.ToString(formatString);
+        string displayValue = isFocused ? CurrentInputBuffer : val.ToString(formatString);
         string newText = DrawManualTextField(inputRect, displayValue, "0");
 
         if (isFocused)
         {
-            currentInputBuffer = newText;
-            if (double.TryParse(currentInputBuffer, out double parsed))
+            CurrentInputBuffer = newText;
+            if (double.TryParse(CurrentInputBuffer, out double parsed))
             {
                 if (isFloat)
                 {

@@ -17,7 +17,7 @@ public static class TextureLoader
 
     private static readonly Dictionary<string, Sprite> _spriteMemoryCache = new();
     private static readonly Dictionary<string, Texture2D> _rawTexMemoryCache = new();
-    private static bool _hasScannedMemory = false;
+    private static bool _hasScannedMemory;
 
     public static Dictionary<int, string> PlantTextureOverrides = new();
     public static Dictionary<int, string> ZombieTextureOverrides = new();

@@ -19,10 +19,7 @@ public static class GUIHelper
     {
         if (string.IsNullOrEmpty(text)) return;
 
-        if (_cachedOutlineStyle == null)
-        {
-            _cachedOutlineStyle = new GUIStyle();
-        }
+        _cachedOutlineStyle ??= new GUIStyle();
 
         // Copy relevant typography and layout properties without invoking stripped copy-constructors
         _cachedOutlineStyle.alignment = style.alignment;
@@ -57,7 +54,12 @@ public static class GUIHelper
     /// </summary>
     public static Color RainbowColor { get; private set; }
 
-    internal static void _UpdateRainbowColor()
+    internal static void OnUpdate()
+    {
+        UpdateRainbowColor();
+    }
+
+    private static void UpdateRainbowColor()
     {
         float hue = (Time.time * Config.RainbowSpeed) % 1.0f;
 

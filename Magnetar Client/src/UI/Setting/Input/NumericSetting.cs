@@ -10,8 +10,8 @@ public class IntSetting : Setting
 {
     private int _value;
     public int DefaultValue;
-    public bool InstantUpdate = false;
-    public int? PendingValue = null;
+    public bool InstantUpdate;
+    public int? PendingValue;
 
     public int Min;
     public int Max;
@@ -166,10 +166,10 @@ public class IntSetting : Setting
             {
                 GUIUtility.hotControl = sliderControlId;
                 GUIUtility.keyboardControl = 0;
-                DrawSetting.activeSliderId = sliderControlId;
+                DrawSetting.ActiveSliderId = sliderControlId;
                 DrawSetting.activeNumericSetting = setting;
-                DrawSetting.focusedControlId = -1;
-                DrawSetting.activeTextFieldId = -1;
+                DrawSetting.FocusedControlId = -1;
+                DrawSetting.ActiveTextFieldId = -1;
 
                 ApplyFromMouseX(e.mousePosition.x);
                 e.Use();
@@ -187,18 +187,18 @@ public class IntSetting : Setting
             {
                 CommitSettingValue();
                 GUIUtility.hotControl = 0;
-                DrawSetting.activeSliderId = -1;
+                DrawSetting.ActiveSliderId = -1;
                 DrawSetting.activeNumericSetting = null;
                 e.Use();
             }
         }
 
         int controlId = inputRect.GetHashCode();
-        bool isFocused = (DrawSetting.activeTextFieldId == controlId);
+        bool isFocused = (DrawSetting.ActiveTextFieldId == controlId);
 
         if (isFocused && DrawSetting.lastFocusedNumericControlId != controlId)
         {
-            DrawSetting.currentInputBuffer = val.ToString(formatString);
+            DrawSetting.CurrentInputBuffer = val.ToString(formatString);
             DrawSetting.lastFocusedNumericControlId = controlId;
         }
         else if (!isFocused && DrawSetting.lastFocusedNumericControlId == controlId)
@@ -207,13 +207,13 @@ public class IntSetting : Setting
             DrawSetting.lastFocusedNumericControlId = -1;
         }
 
-        string displayValue = isFocused ? DrawSetting.currentInputBuffer : val.ToString(formatString);
+        string displayValue = isFocused ? DrawSetting.CurrentInputBuffer : val.ToString(formatString);
         string newText = DrawSetting.DrawManualTextField(inputRect, displayValue, "0");
 
         if (isFocused)
         {
-            DrawSetting.currentInputBuffer = newText;
-            if (double.TryParse(DrawSetting.currentInputBuffer, out double parsed))
+            DrawSetting.CurrentInputBuffer = newText;
+            if (double.TryParse(DrawSetting.CurrentInputBuffer, out double parsed))
             {
                 if (isFloat) ((FloatSetting)setting).SetPending((float)Math.Round(Mathf.Clamp((float)parsed, trueMin, trueMax), decPlaces));
                 else ((IntSetting)setting).SetPending((int)Math.Max(intTrueMin, Math.Min((long)parsed, intTrueMax)));
@@ -234,8 +234,8 @@ public class FloatSetting : Setting
 {
     private float _value;
     public float DefaultValue;
-    public bool InstantUpdate = false;
-    public float? PendingValue = null;
+    public bool InstantUpdate;
+    public float? PendingValue;
 
     public float Min;
     public float Max;

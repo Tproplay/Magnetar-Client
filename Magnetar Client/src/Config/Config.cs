@@ -67,11 +67,10 @@ public static class Config
     public static float ElementScale = 1f;
     public static float ES(float value) => value * ElementScale;
 
-    private static bool _showMobileButtons =
+    private static bool _showMobileButtons
 #if ANDROID
-        true;
 #else
-        false;
+;
 #endif
 
     public static bool ShowMobileButtons
@@ -97,18 +96,17 @@ public static class Config
         }
     }
 
-    public static bool showgui = false;
-    public static bool dimBg = false;
+    public static bool showgui;
+    public static bool dimBg;
     public static TabType CurrentTab = TabType.MODULES;
 
     public static float MinTimeBetweenSaves = 120;
 
     // Floating Menu Icon toggle (Default: true on mobile, false on PC)
-    public static bool ShowFloatingIcon =
+    public static bool ShowFloatingIcon
 #if ANDROID
-        true;
 #else
-        false;
+;
 #endif
     public static void SetFloatingIcon(bool enabled)
     {
@@ -166,6 +164,7 @@ public static class Config
 
             _ = Translator.LoadTranslationsAsync(() =>
             {
+                ServiceRegistry.NotifyLanguageChanged();
                 Actions.OnPostLanguageChanged();
             });
         }

@@ -14,7 +14,7 @@ public static class Translator
 
     public static string CurrentLanguage => string.IsNullOrWhiteSpace(Config.Language) ? "English" : Config.Language;
 
-    public static bool IsLoading { get; private set; } = false;
+    public static bool IsLoading { get; private set; }
     public static event Action OnTranslationsLoaded;
 
     #region Domain Registration
@@ -51,7 +51,7 @@ public static class Translator
         IsLoading = true;
 
         string targetLang = CurrentLanguage;
-        TranslatorLogger.Msg($"[Translator] Starting load for '{targetLang}' across {_domains.Count} domains...");
+        TranslatorLogger.Msg($"Starting load for '{targetLang}' across {_domains.Count} domains...");
 
         var domainsSnapshot = _domains.Values.ToList();
 
@@ -65,7 +65,7 @@ public static class Translator
                 }
                 catch (Exception ex)
                 {
-                    TranslatorLogger.Error($"[Translator] Error dumping domain '{domain.DomainName}': {ex.Message}");
+                    TranslatorLogger.Error($"Error dumping domain '{domain.DomainName}': {ex.Message}");
                 }
             }
 
@@ -77,13 +77,13 @@ public static class Translator
                 }
                 catch (Exception ex)
                 {
-                    TranslatorLogger.Error($"[Translator] Error loading domain '{domain.DomainName}': {ex.Message}");
+                    TranslatorLogger.Error($"Error loading domain '{domain.DomainName}': {ex.Message}");
                 }
             }
         });
 
         IsLoading = false;
-        TranslatorLogger.Msg("[Translator] Translation loading complete.");
+        TranslatorLogger.Msg("Translation loading complete.");
 
         onComplete?.Invoke();
         OnTranslationsLoaded?.Invoke();
@@ -157,7 +157,7 @@ public static class Translator
         }
         catch (Exception ex)
         {
-            TranslatorLogger.Error($"[Translator] Failed to write JSON to '{filePath}': {ex.Message}");
+            TranslatorLogger.Error($"Failed to write JSON to '{filePath}': {ex.Message}");
             return false;
         }
     }

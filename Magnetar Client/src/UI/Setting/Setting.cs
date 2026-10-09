@@ -9,7 +9,7 @@ namespace Magnetar_Client.UI.Setting;
 public abstract class Setting
 {
     public string Name;
-    public bool IsDisabled { get; set; } = false;
+    public bool IsDisabled { get; set; }
     public virtual bool CanReset => true;
 
     public const string ResetSymbol = "R";

@@ -1,5 +1,4 @@
 ﻿using Magnetar_Client.Api;
-using Magnetar_Client.Core.Lifecycle;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.Utils;

@@ -27,10 +27,10 @@ public class AntiLagSpawns : Module
     public IntSetting FrameDelaySetting;
 
     public static Queue<Zombie> staggerQueue = new();
-    public static int framesSinceLastSpawn = 0;
+    public static int framesSinceLastSpawn;
 
-    public static int lastFrameCount = 0;
-    public static int spawnsThisFrame = 0;
+    public static int lastFrameCount;
+    public static int spawnsThisFrame;
 
     public MultiSelectSetting UnaffectedZombies;
 

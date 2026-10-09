@@ -37,7 +37,7 @@ public class NoRender : Module
 
     private Dictionary<int, string> fxDatabase = new();
     private readonly string filePath;
-    private int nextId = 0;
+    private int nextId;
 
     public enum ParticleTypes { Empty }
     public NoRender()

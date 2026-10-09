@@ -11,7 +11,7 @@ public static partial class NEFGUI
 {
     public static Vector2 pyramidPan = Vector2.zero;
     public static float pyramidZoom = 1f;
-    public static bool isDraggingPyramid = false;
+    public static bool isDraggingPyramid;
 
 #if ANDROID
     private static RecipeEntity? _heldEntity = null;

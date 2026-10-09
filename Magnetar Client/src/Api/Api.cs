@@ -9,12 +9,6 @@ namespace Magnetar_Client.Api;
 
 public static class MagnetarApi
 {
-    /// <summary>
-    /// Registers a theme definition from an addon or internal module,
-    /// synchronizes the active theme options in GUIManager, and optionally applies it immediately.
-    /// </summary>
-    /// <param name="theme">The theme definition to register.</param>
-    /// <param name="applyImmediately">If true, immediately applies and rescales the theme across the client.</param>
     public static void RegisterTheme(ThemeDefinition theme, bool applyImmediately = false)
     {
         if (theme == null || string.IsNullOrWhiteSpace(theme.Name))
@@ -88,4 +82,5 @@ public static class MagnetarApi
 
     public static void RegisterElement<T>() where T : HudElement => Magnetar_Client.Core.HUDManager_.HUDRenderer.RegisterElement(typeof(T));
 
+    public static void RegisterService(IClientService service) => ServiceRegistry.Register(service);
 }

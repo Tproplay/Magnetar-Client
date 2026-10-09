@@ -13,7 +13,7 @@ public class Main
 {
     public static Main Instance { get; private set; }
     public static HarmonyLib.Harmony HarmonyInstance { get; private set; }
-    public bool HasWarmedUp { get; private set; } = false;
+    public bool HasWarmedUp { get; private set; }
 
     public static bool SafeToClose => SafeToCloseManager.CanClose();
 
@@ -21,7 +21,7 @@ public class Main
     {
         if (Instance != null)
         {
-            DebugLogger.Error("[Core] Attempted to initialize Main multiple times! Aborting duplicate call.");
+            DebugLogger.Error("Attempted to initialize Main multiple times! Aborting duplicate call.");
             return;
         }
         Instance = new Main();
@@ -29,7 +29,7 @@ public class Main
         // Initialize the logger first so subsequent diagnostics are captured
         Utils.Magnetar_Logger.Init();
 
-        DebugLogger.Msg("[Core] Initializing Magnetar Client...");
+        DebugLogger.Msg("Initializing Magnetar Client...");
 
         // Load the IAddons first so that they can register their actions and sevices
         AddonManager.InitAddons();
@@ -56,16 +56,16 @@ public class Main
 
         HarmonyPatchInfo patchInfo = HarmonyManager.HarmonyPatchAll(currentAssembly, HarmonyInstance);
 
-        DebugLogger.Msg($"[Core] Applied all Harmony patches - Succeeded: {patchInfo.SuccessCount} | Failed: {patchInfo.FailCount}");
+        DebugLogger.Msg($"Applied all Harmony patches - Succeeded: {patchInfo.SuccessCount} | Failed: {patchInfo.FailCount}");
 
         // Log detailed failure diagnostics and exceptions if any patch failed
         if (patchInfo.HasFailures)
         {
-            DebugLogger.Warning($"[Core] {patchInfo.FailCount} patch classes failed to apply:");
+            DebugLogger.Warning($"{patchInfo.FailCount} patch classes failed to apply:");
             for (int i = 0; i < patchInfo.Failures.Count; i++)
             {
                 var failure = patchInfo.Failures[i];
-                DebugLogger.Error($"[Core] -> Failure #{i + 1} on '{failure.ClassName}':\nException: {failure.Exception.GetType().Name} - {failure.Exception.Message}\nStack: {failure.Exception.StackTrace}");
+                DebugLogger.Error($"-> Failure #{i + 1} on '{failure.ClassName}':\nException: {failure.Exception.GetType().Name} - {failure.Exception.Message}\nStack: {failure.Exception.StackTrace}");
             }
         }
     }
@@ -109,7 +109,7 @@ public class Main
     {
         LockUI.BlockSKeysPatch.BlockKeys = false;
 
-        UI.GUIHelper._UpdateRainbowColor();
+        UI.GUIHelper.OnUpdate();
         AnimationHandler.UpdateTransition();
 
         if (Input.GetKeyDown(Config.MenuOpenKey) && !HUDManager.forceShow)
@@ -136,13 +136,9 @@ public class Main
                 {
                     Config.showgui = false;
                     SaveLoad.Save();
-                    ResetInputBind();
                     Input.ResetInputAxes();
                 }
-                else
-                {
-                    ResetInputBind();
-                }
+                DrawSetting.ResetInputBind();
             }
         }
         
@@ -154,9 +150,6 @@ public class Main
     public void OnGUI()
     {
         LockUI.BlockSKeysPatch.BlockKeys = false;
-
-        Event e = Event.current;
-        if (e == null) return;
 
         Matrix4x4 originalMatrix = GUI.matrix;
 
@@ -175,6 +168,7 @@ public class Main
                 new Vector3(uniformScale, uniformScale, 1)
             );
 
+            // On first frame we call the WarmUp method
             if (!HasWarmedUp)
             {
                 WarmUp();
@@ -183,7 +177,6 @@ public class Main
 
             UI.Themes.ThemeManager.Rescale();
 
-            // Continuous overlays / HUD
             ServiceRegistry.RenderAll();
 
             // Render menus with smooth fade transition
@@ -192,10 +185,11 @@ public class Main
                 Color prevGuiColor = GUI.color;
                 GUI.color = new Color(1f, 1f, 1f, AnimationHandler.FadeProgress);
 
+                
                 Config.CurrentTab?.OnGUI?.Invoke();
-
                 ServiceRegistry.RenderMenuAll();
 
+                // Render TopBar on top
                 TopBar.Render();
                 
 
@@ -221,14 +215,6 @@ public class Main
         SaveLoad.Save(true);
         Api.Actions.OnLateApplicationQuit?.Invoke();
         DebugLogger.Msg("Magnetar Preferences Saved!");
-    }
-
-    public static void ResetInputBind()
-    {
-        UI.WindowDrawing.DrawSetting.focusedControlId = -1;
-        UI.WindowDrawing.DrawSetting.activeDropdownId = -1;
-        UI.WindowDrawing.DrawSetting.activeSliderId = -1;
-        UI.WindowDrawing.DrawSetting.activeTextFieldId = -1;
     }
 
     public static void WarmUp()

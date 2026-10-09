@@ -9,25 +9,25 @@ namespace Magnetar_Client.UI.WindowDrawing;
 
 public static partial class DrawSetting
 {
-    public static MultiSelectSetting activeMultiSelect = null;
+    public static MultiSelectSetting activeMultiSelect;
     public static string multiSelectSearchQuery = "";
 
-    public static float manualScrollY = 0f;
-    public static float targetScrollY = 0f;
-    private static float _scrollbarDragStartMouseY = 0f;
-    private static float _scrollbarDragStartScrollY = 0f;
+    public static float manualScrollY;
+    public static float targetScrollY;
+    private static float _scrollbarDragStartMouseY;
+    private static float _scrollbarDragStartScrollY;
 
-    public static float totalContentHeight = 0f;
-    public static float lastSliderUpdateTime = 0f;
+    public static float totalContentHeight;
+    public static float lastSliderUpdateTime;
 
     private static int lastHoveredIndex = -1;
-    private static bool isShiftDragging = false;
-    private static bool dragTargetState = false;
+    private static bool isShiftDragging;
+    private static bool dragTargetState;
     private static readonly HashSet<int> draggedItemsSession = new();
 
     private static Vector2 _listTouchStart = Vector2.zero;
-    private static float _scrollStartVal = 0f;
-    private static bool _isListSwiping = false;
+    private static float _scrollStartVal;
+    private static bool _isListSwiping;
 
 #if ANDROID
     private static float _mobileHoldStartTime = 0f;
@@ -192,7 +192,7 @@ public static partial class DrawSetting
         Rect handleRect = new(scrollX, handleY, scrollbarWidth, handleSize);
         Rect trackHitbox = new(scrollX - Config.S(4f), trackStartY, scrollbarWidth + Config.S(8f), trackHeight);
 
-        if (activeSliderId == sliderId)
+        if (ActiveSliderId == sliderId)
         {
             if (e.type == EventType.MouseDrag)
             {
@@ -205,14 +205,14 @@ public static partial class DrawSetting
             }
             else if (e.type == EventType.MouseUp || (e.type == EventType.Ignore && e.rawType == EventType.MouseUp))
             {
-                activeSliderId = -1;
+                ActiveSliderId = -1;
                 e.Use();
             }
         }
         else if (e.type == EventType.MouseDown && trackHitbox.Contains(e.mousePosition))
         {
-            activeSliderId = sliderId;
-            focusedControlId = -1;
+            ActiveSliderId = sliderId;
+            FocusedControlId = -1;
             _scrollbarDragStartMouseY = e.mousePosition.y;
 
             if (handleRect.Contains(e.mousePosition))
@@ -239,7 +239,7 @@ public static partial class DrawSetting
             e.Use();
         }
 
-        if (activeSliderId != sliderId && !_isListSwiping)
+        if (ActiveSliderId != sliderId && !_isListSwiping)
         {
             manualScrollY = Mathf.Lerp(manualScrollY, targetScrollY, 1f - Mathf.Exp(-20f * Time.unscaledDeltaTime));
             if (Mathf.Abs(manualScrollY - targetScrollY) < 0.01f)
@@ -524,7 +524,7 @@ public static partial class DrawSetting
         GUI.EndGroup();
 
         GUI.Box(new Rect(scrollX + (scrollbarWidth / 2f) - 1f, trackStartY, 2, trackHeight), "", ThemeManager.SeparatorStyle);
-        bool shouldHighlight = (activeSliderId == sliderId) || (Time.time - lastSliderUpdateTime < 1.0f);
+        bool shouldHighlight = (ActiveSliderId == sliderId) || (Time.time - lastSliderUpdateTime < 1.0f);
         GUI.Box(handleRect, "", shouldHighlight ? ThemeManager.SettingOn : ThemeManager.SettingOff);
     }
 

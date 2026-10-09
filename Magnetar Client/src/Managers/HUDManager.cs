@@ -1,7 +1,6 @@
 ﻿using Harmony;
 using Magnetar_Client.Api;
 using Magnetar_Client.Core.HUDManager_;
-using Magnetar_Client.Core.Lifecycle;
 using Magnetar_Client.Game;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
@@ -23,11 +22,11 @@ public static class HUDManager
     public const string ViewMain = "Controls";
     public const string ViewSelector = "Selector";
     public static readonly TranslationDomain Domain = Translator.CreateDomain("HUD Manager");
-    public static bool IsInitialized { get; private set; } = false;
+    public static bool IsInitialized { get; private set; }
     public static bool Enabled = true;
-    public static bool forceShow { get; set; } = false;
+    public static bool forceShow { get; set; }
     public static bool IsSelectingElements => AnimationHandler.GetViewAlpha(Group, ViewSelector) > 0.001f;
-    public static bool showBackground = false;
+    public static bool showBackground;
 
     private const float BaseElementHeight = 25f;
     public static float elementHeight => Config.S(BaseElementHeight);
@@ -59,7 +58,7 @@ public static class HUDManager
 
         IsInitialized = true;
 
-        DebugLogger.Msg("[HUDManager] Initialized and registered HUD service.");
+        DebugLogger.Msg("Initialized HUD Manager");
     }
 
     private static void DumpEnglishTemplate(string domainDir)
@@ -93,7 +92,7 @@ public static class HUDManager
         AnimationHandler.SwitchView(Group, ViewMain);
 
         SaveLoad.Save();
-        Main.ResetInputBind();
+        DrawSetting.ResetInputBind();
         Input.ResetInputAxes();
     }
 
@@ -125,7 +124,7 @@ public static class HUDManager
             GUI.matrix = prevMatrix;
         }
 
-        if (e.type == EventType.MouseDown && DrawSetting.activeSliderId == -1 && DrawSetting.activeDropdownId == -1)
+        if (e.type == EventType.MouseDown && DrawSetting.ActiveSliderId == -1 && DrawSetting.ActiveDropdownId == -1)
         {
             Input.ResetInputAxes();
         }
@@ -268,7 +267,7 @@ public static class HUDManager
             if (HUDManager.IsSelectingElements)
             {
                 HUDManager.OnClose();
-                Main.ResetInputBind();
+                DrawSetting.ResetInputBind();
                 Input.ResetInputAxes();
                 return true;
             }
@@ -353,7 +352,7 @@ public static class HUDManager
     public class HUDSaveData
     {
         public bool Enabled = true;
-        public bool ShowBackground = false;
+        public bool ShowBackground;
         public List<int> SelectedElements = new();
         public Dictionary<string, SaveLoadData.SimpleRect> Positions = new();
     }

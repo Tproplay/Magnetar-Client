@@ -1,4 +1,4 @@
-﻿namespace Magnetar_Client.Core.Lifecycle;
+﻿namespace Magnetar_Client.Api;
 
 /// <summary>
 /// Common priorities for deterministic execution order. Lower numbers execute earlier.
@@ -17,7 +17,7 @@ public static class ServicePriority
 }
 
 /// <summary>
-/// Base metadata interface for any client subsystem, manager, or addon service.
+/// Base metadata interface for any client service.
 /// </summary>
 public interface IClientService
 {
@@ -34,7 +34,7 @@ public interface IClientService
 }
 
 /// <summary>
-/// Services that require initialization during client startup (e.g. InitializeCore).
+/// Services that require initialization during startup.
 /// </summary>
 public interface IInitializable : IClientService
 {
@@ -42,7 +42,7 @@ public interface IInitializable : IClientService
 }
 
 /// <summary>
-/// Services that need to warm up fonts, textures, or styles before first frame rendering.
+/// Services that need to warm up fonts, textures, or styles at first frame rendering.
 /// </summary>
 public interface IWarmUp : IClientService
 {
@@ -58,7 +58,7 @@ public interface IUpdatable : IClientService
 }
 
 /// <summary>
-/// Services that render screen overlays or HUD components (runs every OnGUI regardless of menu state).
+/// Services that require rendering every OnGUI regardless of menu state.
 /// </summary>
 public interface IRenderable : IClientService
 {
@@ -82,13 +82,12 @@ public interface IMenuRenderable : IClientService
 public interface ICloseHandler : IClientService
 {
     /// <summary>
-    /// Returns true if this service is in a clean state and permits closing the whole GUI.
-    /// Returns false if sub-menus, search buffers, or binding states are active.
+    /// Return true to permits closing the whole GUI.
     /// </summary>
     bool CanClose();
 
     /// <summary>
-    /// Attempts to consume an Escape press (e.g., backing out of a sub-window or dismissing a modal).
+    /// Attempts to consume an Escape press.
     /// Return true if the event was consumed so the main GUI stays open.
     /// </summary>
     bool OnEscapePressed();

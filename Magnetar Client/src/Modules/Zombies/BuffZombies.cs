@@ -29,7 +29,7 @@ public class BuffZombies : Module
 
     public FloatSetting HpMultiplierSettig;
 
-    public override bool Active { get; set; } = false;
+    public override bool Active { get; set; }
     public BuffZombies()
     {
         instance = this;

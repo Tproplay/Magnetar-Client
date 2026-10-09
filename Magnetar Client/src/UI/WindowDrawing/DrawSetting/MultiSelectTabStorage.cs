@@ -10,8 +10,8 @@ public static class MultiSelectTabStorage
     {
         public MultiSelectSetting ActiveSetting;
         public string SearchQuery = "";
-        public float ScrollY = 0f;
-        public float TargetScrollY = 0f;
+        public float ScrollY;
+        public float TargetScrollY;
     }
 
     private static readonly Dictionary<TabType, TabSelectorState> _states = new();

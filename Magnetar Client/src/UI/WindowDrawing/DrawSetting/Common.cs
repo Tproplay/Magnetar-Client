@@ -9,37 +9,41 @@ public static partial class DrawSetting
     {
         get
         {
-            return focusedControlId != -1
-                || activeSliderId != -1
-                || activeTextFieldId != -1
-                || activeDropdownId != -1;
+            return FocusedControlId != -1
+                || ActiveSliderId != -1
+                || ActiveTextFieldId != -1
+                || ActiveDropdownId != -1;
         }
     }
 
-    public static int focusedControlId = -1;
-    public static string currentInputBuffer = "";
-    public static int activeSliderId = -1;
-    public static int activeTextFieldId = -1;
-    public static int activeDropdownId = -1;
+    public static void ResetInputBind()
+    {
+        FocusedControlId = -1;
+        ActiveDropdownId = -1;
+        ActiveSliderId = -1;
+        ActiveTextFieldId = -1;
+    }
+    public static int FocusedControlId { get; set; } = -1;
+    public static string CurrentInputBuffer { get; set; } = "";
+    public static int ActiveSliderId { get; set; } = -1;
+    public static int ActiveTextFieldId { get; set; } = -1;
+    public static int ActiveDropdownId { get; set; } = -1;
 
-    public static object activeNumericSetting = null;
-    public static int lastFocusedNumericControlId = -1;
-    public static System.Action OnPostDraw = null;
+    public static object activeNumericSetting { get; set; }
+    public static int lastFocusedNumericControlId { get; set; } = -1;
+    public static System.Action OnPostDraw;
 
     private static GUIStyle _placeholderStyle;
     private static GUIStyle PlaceholderStyle
     {
         get
         {
-            if (_placeholderStyle == null)
-            {
-                _placeholderStyle = new GUIStyle
+            _placeholderStyle ??= new GUIStyle
                 {
                     wordWrap = false,
                     clipping = TextClipping.Clip,
                     alignment = ThemeManager.TextStyle.alignment
                 };
-            }
             _placeholderStyle.fontSize = ThemeManager.TextStyle.fontSize;
             _placeholderStyle.normal.textColor = ThemeManager.TextDim;
             return _placeholderStyle;

@@ -31,13 +31,13 @@ public class BetterOsu : Module
 
     public static BetterOsu instance;
     
-    public int currentCombo = 0;
+    public int currentCombo;
     public BoolSetting HelperPetSetting;
     public MultiSelectSetting PetTypeSetting;
 
     public IntSetting BulletsDamageIncreaseSetting;
 
-    private bool RandomBullet = false;
+    private bool RandomBullet;
     public BoolSetting RandomBulletSetting;
 
     public MultiSelectSetting selectBulletsSetting;
@@ -95,7 +95,7 @@ public class BetterOsu : Module
     }
 
     float DamageBuff = 1;
-    public int SpawnedPets = 0;
+    public int SpawnedPets;
 
     // Mod Logic
 

@@ -8,11 +8,11 @@ namespace Magnetar_Client.UI.WindowDrawing;
 
 public static partial class DrawSetting
 {
-    private static int cursorIndex = 0;
-    private static int selectIndex = 0;
-    private static float scrollOffset = 0f;
-    public static float autocompleteScrollY = 0f;
-    public static int autocompleteSelectedIndex = 0;
+    private static int cursorIndex;
+    private static int selectIndex;
+    private static float scrollOffset;
+    public static float autocompleteScrollY;
+    public static int autocompleteSelectedIndex;
 
     public struct TextState
     {
@@ -52,7 +52,7 @@ public static partial class DrawSetting
     {
         Event e = Event.current;
         int controlId = rect.GetHashCode();
-        if (text == null) text = "";
+        text ??= "";
 
 #if ANDROID
         if (activeTextFieldId == controlId)
@@ -86,14 +86,14 @@ public static partial class DrawSetting
         }
 #endif
 
-        if (activeTextFieldId == controlId && lastHistoryFieldId != controlId)
+        if (ActiveTextFieldId == controlId && lastHistoryFieldId != controlId)
         {
             undoStack.Clear();
             redoStack.Clear();
             lastHistoryFieldId = controlId;
         }
 
-        if (activeTextFieldId == controlId)
+        if (ActiveTextFieldId == controlId)
         {
             cursorIndex = Mathf.Clamp(cursorIndex, 0, text.Length);
             selectIndex = Mathf.Clamp(selectIndex, 0, text.Length);
@@ -117,7 +117,7 @@ public static partial class DrawSetting
         int bracketStartIndex = -1;
         List<string> filteredVars = new();
 
-        if (activeTextFieldId == controlId && autocompleteVars != null)
+        if (ActiveTextFieldId == controlId && autocompleteVars != null)
         {
             for (int i = cursorIndex - 1; i >= 0; i--)
             {
@@ -146,9 +146,9 @@ public static partial class DrawSetting
 
             if (rect.Contains(e.mousePosition))
             {
-                if (activeTextFieldId != controlId)
+                if (ActiveTextFieldId != controlId)
                 {
-                    activeTextFieldId = controlId;
+                    ActiveTextFieldId = controlId;
 #if ANDROID
                     _mobileKeyboard = TouchScreenKeyboard.Open(text, TouchScreenKeyboardType.Default);
                     _activeMobileKeyboardId = controlId;
@@ -158,9 +158,9 @@ public static partial class DrawSetting
                 if (!e.shift) selectIndex = cursorIndex;
                 e.Use();
             }
-            else if (activeTextFieldId == controlId && !clickingDropdown)
+            else if (ActiveTextFieldId == controlId && !clickingDropdown)
             {
-                activeTextFieldId = -1;
+                ActiveTextFieldId = -1;
 #if ANDROID
                 if (_mobileKeyboard != null)
                 {
@@ -171,14 +171,14 @@ public static partial class DrawSetting
 #endif
             }
         }
-        else if (e.type == EventType.MouseDrag && e.button == 0 && activeTextFieldId == controlId)
+        else if (e.type == EventType.MouseDrag && e.button == 0 && ActiveTextFieldId == controlId)
         {
             cursorIndex = GetIndexFromMouse(e.mousePosition.x - rect.x);
             e.Use();
         }
 
 #if !ANDROID
-        if (activeTextFieldId == controlId && e.type == EventType.KeyDown)
+        if (ActiveTextFieldId == controlId && e.type == EventType.KeyDown)
         {
             char c = e.character;
             KeyCode k = e.keyCode;
@@ -343,7 +343,7 @@ public static partial class DrawSetting
                 }
                 else if (k == KeyCode.Return || k == KeyCode.Escape)
                 {
-                    activeTextFieldId = -1; e.Use();
+                    ActiveTextFieldId = -1; e.Use();
                 }
                 else if (c != '\0' && !char.IsControl(c))
                 {
@@ -357,7 +357,7 @@ public static partial class DrawSetting
         }
 #endif
 
-        if (activeTextFieldId == controlId)
+        if (ActiveTextFieldId == controlId)
         {
             float visibleWidth = rect.width - 10;
             float cursorPixelX = ThemeManager.TextStyle.CalcSize(new GUIContent(text.Substring(0, cursorIndex))).x;
@@ -374,13 +374,13 @@ public static partial class DrawSetting
         GUI.Box(rect, "", ThemeManager.SettingOff);
         GUI.BeginGroup(rect);
 
-        if (string.IsNullOrEmpty(text) && activeTextFieldId != controlId)
+        if (string.IsNullOrEmpty(text) && ActiveTextFieldId != controlId)
         {
             GUI.Label(new Rect(5, 0, rect.width, rect.height), defaultText, PlaceholderStyle);
         }
         else
         {
-            if (activeTextFieldId == controlId && cursorIndex != selectIndex)
+            if (ActiveTextFieldId == controlId && cursorIndex != selectIndex)
             {
                 int selStart = Mathf.Min(cursorIndex, selectIndex);
                 int selEnd = Mathf.Max(cursorIndex, selectIndex);
@@ -393,7 +393,7 @@ public static partial class DrawSetting
 
             GUI.Label(new Rect(5 - scrollOffset, 0, 2000, rect.height), text, ThemeManager.TextStyle);
 
-            if (activeTextFieldId == controlId && (int)(Time.realtimeSinceStartup * 2) % 2 == 0)
+            if (ActiveTextFieldId == controlId && (int)(Time.realtimeSinceStartup * 2) % 2 == 0)
             {
                 float cursorPixelX = ThemeManager.TextStyle.CalcSize(new GUIContent(text.Substring(0, cursorIndex))).x;
                 Rect cursorRect = new(5 + cursorPixelX - scrollOffset, 3, 1, rect.height - 6);
@@ -450,7 +450,7 @@ public static partial class DrawSetting
                     text = text.Remove(bracketStartIndex + 1, cursorIndex - bracketStartIndex - 1);
                     text = text.Insert(bracketStartIndex + 1, chosen + "}");
                     cursorIndex = selectIndex = bracketStartIndex + chosen.Length + 2;
-                    activeTextFieldId = controlId;
+                    ActiveTextFieldId = controlId;
 
 #if ANDROID
                     if (_mobileKeyboard != null)

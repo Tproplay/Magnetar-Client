@@ -8,10 +8,10 @@ namespace Magnetar_Client.NEF;
 
 public static partial class NEFGUI
 {
-    public static float usageScrollY = 0f;
+    public static float usageScrollY;
     private static Vector2 _usageTouchStart = Vector2.zero;
-    private static float _usageScrollStartVal = 0f;
-    private static bool _isUsageSwiping = false;
+    private static float _usageScrollStartVal;
+    private static bool _isUsageSwiping;
 
     private static void DrawUsagesView(Rect viewRect, Event e)
     {

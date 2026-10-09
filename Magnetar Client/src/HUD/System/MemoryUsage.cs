@@ -69,7 +69,7 @@ public class SystemRAMElement : HudElement
     private Process currentProc;
     private string totalInstalled;
     private string systemLoad;
-    private float nextActionTime = 0f;
+    private float nextActionTime;
 
     public SystemRAMElement() : base("System RAM Usage", HudElement.NewRect(200))
     {

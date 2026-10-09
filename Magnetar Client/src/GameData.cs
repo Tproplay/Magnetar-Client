@@ -241,8 +241,8 @@ public static class GameData
 
     #region Zombies
 
-    public static int Hypno_Zombies_Spawned = 0;
-    public static int Hypno_Zombies_Killed = 0;
+    public static int Hypno_Zombies_Spawned;
+    public static int Hypno_Zombies_Killed;
 
     [HarmonyPatch(typeof(Zombie))]
     private static class ZombieStatsPatch
@@ -268,7 +268,7 @@ public static class GameData
 
     #region Bullets
 
-    public static long TotalNumberOfBulletsSpawned = 0;
+    public static long TotalNumberOfBulletsSpawned;
     [HarmonyPatch(typeof(Bullet))]
     private class BulletPatch
     {

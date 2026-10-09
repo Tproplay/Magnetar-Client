@@ -32,8 +32,8 @@ public class RePickPlants : Module
     public BoolSetting DebugMode;
 #endif
 
-    public bool isDefaultEnabled = false;
-    public bool RepickenabledByMod = false;
+    public bool isDefaultEnabled;
+    public bool RepickenabledByMod;
 
     private bool allCardsEnabledbyMod;
     private bool ultimateCardsEnabledbyMod;

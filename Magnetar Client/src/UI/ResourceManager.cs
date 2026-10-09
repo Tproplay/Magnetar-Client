@@ -37,13 +37,13 @@ public static class ResourceManager
                 AssetBundle bundle = AssetBundle.LoadFromFile(MagnetarUIABPath);
                 if (bundle != null)
                 {
-                    GUILogger.Msg($"[ResourceManager] Successfully loaded AssetBundle from '{MagnetarUIABPath}'");
+                    GUILogger.Msg($"Successfully loaded AssetBundle from '{MagnetarUIABPath}'");
                     return bundle;
                 }
             }
             catch (Exception ex)
             {
-                GUILogger.Error($"[ResourceManager] Failed loading AssetBundle at '{MagnetarUIABPath}': {ex.Message}");
+                GUILogger.Error($"Failed loading AssetBundle at '{MagnetarUIABPath}': {ex.Message}");
             }
         }
 
@@ -82,14 +82,14 @@ public static class ResourceManager
                         font.hideFlags = HideFlags.DontSave;
                         _fontCache[assetName] = font;
                         _fontCache[cleanName] = font;
-                        GUILogger.Msg($"[ResourceManager] Loaded Font '{name}' from AssetBundle.");
+                        GUILogger.Msg($"Loaded Font '{name}' from AssetBundle.");
                         return font;
                     }
                 }
             }
             catch (Exception ex)
             {
-                GUILogger.Error($"[ResourceManager] Error loading Font '{assetName}' from AssetBundle: {ex.Message}");
+                GUILogger.Error($"Error loading Font '{assetName}' from AssetBundle: {ex.Message}");
             }
         }
 
@@ -176,7 +176,7 @@ public static class ResourceManager
             }
             catch (Exception ex)
             {
-                GUILogger.Error($"[ResourceManager] Error loading Texture '{assetName}' from AssetBundle: {ex.Message}");
+                GUILogger.Error($"Error loading Texture '{assetName}' from AssetBundle: {ex.Message}");
             }
         }
 
@@ -202,7 +202,7 @@ public static class ResourceManager
             }
             catch (Exception ex)
             {
-                GUILogger.Error($"[ResourceManager] Failed loading loose texture from '{diskPath}': {ex.Message}");
+                GUILogger.Error($"Failed loading loose texture from '{diskPath}': {ex.Message}");
             }
         }
 

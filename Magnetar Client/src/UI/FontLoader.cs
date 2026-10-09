@@ -31,12 +31,10 @@ public static class FontLoader
                 GUI.skin.toggle.font = DefaultFont;
                 GUI.skin.window.font = DefaultFont;
             }
-
-            GUILogger.Msg("[Texture Loader] Successfully loaded and applied custom font!");
         }
         else
         {
-            GUILogger.Warning("[Texture Loader] Custom font not found in Resources directory.");
+            GUILogger.Warning("Custom font not found in Resources directory.");
         }
     }
 }

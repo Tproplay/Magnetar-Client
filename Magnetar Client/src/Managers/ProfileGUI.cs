@@ -1,5 +1,4 @@
 ﻿using Magnetar_Client.Api;
-using Magnetar_Client.Core.Lifecycle;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
@@ -28,7 +27,7 @@ public static class ProfileGUI
         Config.S(BaseWindowHeight));
 
     private static string newProfileInput = "";
-    private static float scrollY = 0f;
+    private static float scrollY;
     private static float elementHeight => Config.S(BaseElementHeight);
 
     public static void Init()
@@ -42,8 +41,8 @@ public static class ProfileGUI
         {
             if (Config.CurrentTab == TabType.PROFILE)
             {
-                return DrawSetting.activeTextFieldId == -1
-                       && DrawSetting.focusedControlId == -1;
+                return DrawSetting.ActiveTextFieldId == -1
+                       && DrawSetting.FocusedControlId == -1;
             }
             return true;
         });
@@ -259,17 +258,17 @@ public static class ProfileGUI
 
         public bool CanClose()
         {
-            return DrawSetting.activeTextFieldId == -1
-                   && DrawSetting.focusedControlId == -1;
+            return DrawSetting.ActiveTextFieldId == -1
+                   && DrawSetting.FocusedControlId == -1;
         }
 
         public bool OnEscapePressed()
         {
             if (Config.CurrentTab != TabType.PROFILE) return false;
 
-            if (DrawSetting.activeTextFieldId != -1 || DrawSetting.focusedControlId != -1)
+            if (DrawSetting.ActiveTextFieldId != -1 || DrawSetting.FocusedControlId != -1)
             {
-                Main.ResetInputBind();
+                DrawSetting.ResetInputBind();
                 Input.ResetInputAxes();
                 return true;
             }

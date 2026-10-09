@@ -31,7 +31,7 @@ public class HypnotizeZombies : Module
     public readonly bool TurnOffAfterUse = true;
     public BoolSetting AutoTurnOff;
 
-    public static float deltaTime = 0;
+    public static float deltaTime;
 
     public HypnotizeZombies()
     {

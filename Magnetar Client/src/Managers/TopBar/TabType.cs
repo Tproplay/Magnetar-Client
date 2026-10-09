@@ -6,7 +6,7 @@ namespace Magnetar_Client.Core;
 public class TabType : IEquatable<TabType>
 {
     public const string AnimationGroup = "Tabs";
-    private static int _nextId = 0;
+    private static int _nextId;
     private static readonly Dictionary<string, TabType> _registeredTabs = new(StringComparer.OrdinalIgnoreCase);
     private static readonly List<TabType> _allTabs = new();
 

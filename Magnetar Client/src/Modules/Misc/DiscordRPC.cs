@@ -56,10 +56,10 @@ public class DiscordRPC : Module
     private DiscordRpcClient client;
     private Timestamps elapsedTimer;
 
-    private float rotationTimer = 0f;
-    private int index1 = 0;
-    private int index2 = 0;
-    private float dataRefreshTimer = 0f;
+    private float rotationTimer;
+    private int index1;
+    private int index2;
+    private float dataRefreshTimer;
 
     public int TotalPresenceUpdates
     {

@@ -8,7 +8,7 @@ namespace Magnetar_Client.HUDElements;
 
 public abstract class HudElement
 {
-    private bool _isCurrentlyEnabled = false;
+    private bool _isCurrentlyEnabled;
     public string Name { get; set; }
     public Rect Bounds;
     public int WindowId { get; set; }
@@ -16,8 +16,8 @@ public abstract class HudElement
     public static int ActiveDragId = -1;
     private Vector2 dragOffset;
 
-    public float UpdateInterval = 0;
-    private float _updateInterval = 0;
+    public float UpdateInterval;
+    private float _updateInterval;
 
     private GUI.WindowFunction _cachedWindowDelegate;
 

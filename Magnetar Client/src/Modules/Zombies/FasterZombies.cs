@@ -29,7 +29,7 @@ public class FasterZombies : Module
 
     public MultiSelectSetting ZombieSelectedSetting;
     public FloatSetting theSpeedSetting;
-    public override bool Active { get; set; } = false;
+    public override bool Active { get; set; }
 
     public static Dictionary<IntPtr, float> originalSpeedData = new();
 

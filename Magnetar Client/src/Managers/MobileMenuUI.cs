@@ -1,5 +1,4 @@
 ﻿using Magnetar_Client.Api;
-using Magnetar_Client.Core.Lifecycle;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.Utils;
@@ -12,21 +11,21 @@ public static class MobileMenuUI
     private static Rect _btnRect = new(40f, 200f, 120f, 120f);
     private static Vector2 _dragStartMousePos;
     private static Vector2 _dragStartBtnPos;
-    private static bool _isPointerDown = false;
-    private static bool _isDragging = false;
+    private static bool _isPointerDown;
+    private static bool _isDragging;
     private const float DragThreshold = 10f;
-    private static bool _hasClampedInitialPos = false;
+    private static bool _hasClampedInitialPos;
 
     private static Texture2D _logoTex;
     private static Texture2D _circleTex;
     private static GUIStyle _circleBtnStyle;
     private static GUIStyle _closeBtnStyle;
-    private static bool _attemptedLogoLoad = false;
+    private static bool _attemptedLogoLoad;
 
     // --- Dormant / Double-Click System ---
-    private static bool _isDormant = false;
-    private static float _lastInteractionTime = 0f;
-    private static float _lastClickTime = 0f;
+    private static bool _isDormant;
+    private static float _lastInteractionTime;
+    private static float _lastClickTime;
     private const float DoubleClickInterval = 0.35f;
     private const float DormantDarkenFactor = 0.40f;
 
@@ -136,7 +135,6 @@ public static class MobileMenuUI
             {
                 int borderThickness = Mathf.Max(4, Mathf.RoundToInt(rawLogo.width * 0.045f));
                 _logoTex = CreateCircularBadgeTexture(rawLogo, ThemeManager.AccentColor, borderThickness);
-                Magnetar_Logger.GUILogger.Msg("Successfully circularized logo with accent border!");
             }
             else
             {
@@ -169,9 +167,7 @@ public static class MobileMenuUI
         _circleBtnStyle.active.background = activeBadgeTex;
         _circleBtnStyle.fontSize = Mathf.RoundToInt(Config.S(24f));
 
-        if (_closeBtnStyle == null)
-        {
-            _closeBtnStyle = new GUIStyle
+        _closeBtnStyle ??= new GUIStyle
             {
                 alignment = TextAnchor.MiddleCenter,
                 fontStyle = FontStyle.Bold,
@@ -180,7 +176,6 @@ public static class MobileMenuUI
                 margin = new RectOffset(),
                 overflow = new RectOffset()
             };
-        }
 
         if (ThemeManager.CategoryModuleOnStyle != null)
         {

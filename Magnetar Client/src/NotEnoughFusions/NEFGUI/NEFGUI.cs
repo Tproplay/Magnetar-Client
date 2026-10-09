@@ -14,7 +14,7 @@ public static partial class NEFGUI
 
     public static string T(string text) => Domain.Translate(text, "nef.json");
 
-    public static bool showUsagesView = false;
+    public static bool showUsagesView;
     private static bool firstLoad = true;
 
     static NEFGUI()

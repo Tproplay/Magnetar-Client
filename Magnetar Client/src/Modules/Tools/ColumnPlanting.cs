@@ -70,7 +70,7 @@ public class MultiPlanting : Module
     [HarmonyPatch(typeof(CreatePlant))]
     public static class CreatePlantPatch
     {
-        static bool spawnByMod = false;
+        static bool spawnByMod;
 
         [HarmonyPatch(nameof(CreatePlant.SetPlant))]
         [HarmonyPostfix]

@@ -42,7 +42,7 @@ public class NoCraters : Module
 
     // Mod Logic
 
-    public static float deltaTime = 0;
+    public static float deltaTime;
     public override void OnUpdateActive()
     {
         // Handle auto turn off
@@ -145,7 +145,7 @@ public class NoGridItem : Module
 
     // Mod Logic
 
-    public static float deltaTime = 0;
+    public static float deltaTime;
     public override void OnUpdateActive()
     {
         // Handle auto turn off

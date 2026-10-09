@@ -58,7 +58,7 @@ public static class SaveLoad
             }
             catch (Exception ex)
             {
-                AutoSaveLogger.Error($"[SaveLoad] Error resetting section '{handler.SectionKey}': {ex.Message}");
+                AutoSaveLogger.Error($"Error resetting section '{handler.SectionKey}': {ex.Message}");
             }
         }
     }
@@ -83,6 +83,8 @@ public static class SaveLoad
 
         _lastSavedTime = Time.realtimeSinceStartup;
 
+        ServiceRegistry.SaveAll();
+
         // 1. Collect sections from all registered handlers
         var rootData = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
@@ -98,7 +100,7 @@ public static class SaveLoad
             }
             catch (Exception ex)
             {
-                AutoSaveLogger.Error($"[SaveLoad] Error exporting '{handler.SectionKey}': {ex.Message}");
+                AutoSaveLogger.Error($"Error exporting '{handler.SectionKey}': {ex.Message}");
             }
         }
 
@@ -116,7 +118,7 @@ public static class SaveLoad
             }
             catch (Exception ex)
             {
-                AutoSaveLogger.Error($"[SaveLoad] Failed writing save file '{savePath}': {ex.Message}");
+                AutoSaveLogger.Error($"Failed writing save file '{savePath}': {ex.Message}");
             }
         }
 
@@ -155,7 +157,7 @@ public static class SaveLoad
                     }
                     catch (Exception ex)
                     {
-                        AutoSaveLogger.Error($"[SaveLoad] Error loading section '{handler.SectionKey}': {ex.Message}");
+                        AutoSaveLogger.Error($"Error loading section '{handler.SectionKey}': {ex.Message}");
                     }
                 }
 
@@ -163,11 +165,13 @@ public static class SaveLoad
             }
             catch (Exception ex)
             {
-                AutoSaveLogger.Error($"[SaveLoad] Failed reading save file '{loadPath}': {ex.Message}");
+                AutoSaveLogger.Error($"Failed reading save file '{loadPath}': {ex.Message}");
             }
 
             TextureLoader.LoadTextureOverrides();
         }
+
+        ServiceRegistry.LoadAll();
     }
 
     #endregion

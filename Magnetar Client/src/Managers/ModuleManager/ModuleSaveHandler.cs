@@ -17,9 +17,9 @@ public class ModuleSaveHandler : ISaveHandler
         var export = new ModuleManagerSaveData();
 
         // 1. Export Category window positions
-        if (ModuleManager.windowPositions != null)
+        if (CategoryWindowDrawer.WindowPositions != null)
         {
-            foreach (var kvp in ModuleManager.windowPositions)
+            foreach (var kvp in CategoryWindowDrawer.WindowPositions)
                 export.CategoryPositions[kvp.Key.ToString()] = kvp.Value;
         }
 
@@ -62,7 +62,7 @@ public class ModuleSaveHandler : ISaveHandler
 
         // Restore category window layout
         JToken catPosToken = token["CategoryPositions"];
-        if (catPosToken != null && ModuleManager.windowPositions != null)
+        if (catPosToken != null && CategoryWindowDrawer.WindowPositions != null)
         {
             var catDict = catPosToken.ToObject<Dictionary<string, SaveLoadData.SimpleRect>>();
             if (catDict != null)
@@ -71,7 +71,7 @@ public class ModuleSaveHandler : ISaveHandler
                 {
                     if (ModuleCategory.TryGet(entry.Key, out ModuleCategory category))
                     {
-                        ModuleManager.windowPositions[category] = new Rect(entry.Value.x, entry.Value.y, entry.Value.w, entry.Value.h);
+                        CategoryWindowDrawer.WindowPositions[category] = new Rect(entry.Value.x, entry.Value.y, entry.Value.w, entry.Value.h);
                     }
                 }
             }

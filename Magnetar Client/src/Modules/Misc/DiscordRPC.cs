@@ -258,7 +258,7 @@ public class DiscordRPC : Module
         if (string.IsNullOrEmpty(input)) return input;
         string result = input;
 
-        result = result.Replace("{Magnetar_Version}", Magnetar_Info.Version);
+        result = result.Replace("{Magnetar_Version}", MagnetarInfo.Version);
         result = result.Replace("{Game_Version}", Application.version);
         result = result.Replace("{Level_Name}", GetLevelName());
         result = result.Replace("{Sun}", FormatInternational(BoardInstance.theSun));

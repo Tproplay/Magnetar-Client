@@ -24,7 +24,7 @@ public static partial class NEFGUI
 
         string searchLabelText = Translate("Search:");
         GUIStyle labelStyle = ThemeManager.SettingLabelStyle ?? GUI.skin.label;
-        float searchLabelWidth = labelStyle.CalcSize(new GUIContent(searchLabelText)).x + Config.S(8f);
+        float searchLabelWidth = labelStyle.CalcSize(new GUIContent(searchLabelText)).x + GUIManager.S(8f);
 
         GUI.Label(new Rect(rx, ry, searchLabelWidth, NEFManager.elementHeight), searchLabelText, labelStyle);
         string newQuery = UI.WindowDrawing.DrawSetting.DrawManualTextField(
@@ -38,7 +38,7 @@ public static partial class NEFGUI
             NEFData.PerformSearch();
         }
 
-        ry += NEFManager.elementHeight + Config.S(6f);
+        ry += NEFManager.elementHeight + GUIManager.S(6f);
 
         Rect clearBtnRect = new(rx, ry, rightPanelWidth, NEFManager.elementHeight);
         bool clearHover = clearBtnRect.Contains(e.mousePosition);
@@ -54,7 +54,7 @@ public static partial class NEFGUI
             e.Use();
         }
 
-        ry += NEFManager.elementHeight + Config.S(10f);
+        ry += NEFManager.elementHeight + GUIManager.S(10f);
 
 #if ANDROID
         GUI.Label(
@@ -69,13 +69,13 @@ public static partial class NEFGUI
             labelStyle
         );
 #endif
-        ry += NEFManager.elementHeight + Config.S(4f);
+        ry += NEFManager.elementHeight + GUIManager.S(4f);
 
         float scrollHeight = rightPanelRect.height - (ry - rightPanelRect.y);
         Rect scrollRect = new(rx, ry, rightPanelWidth, scrollHeight);
 
-        int columns = Mathf.Max(3, Mathf.FloorToInt(rightPanelWidth / Config.S(100f)));
-        float cellPadding = Config.S(5f);
+        int columns = Mathf.Max(3, Mathf.FloorToInt(rightPanelWidth / GUIManager.S(100f)));
+        float cellPadding = GUIManager.S(5f);
         float itemSize = (rightPanelWidth - (cellPadding * (columns - 1))) / columns;
         int rowCount = Mathf.CeilToInt((float)NEFData.searchResults.Count / columns);
         float totalContentHeight = rowCount * (itemSize + cellPadding);
@@ -83,7 +83,7 @@ public static partial class NEFGUI
 
         if (scrollRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
         {
-            currentScrollY += e.delta.y * Config.S(30f);
+            currentScrollY += e.delta.y * GUIManager.S(30f);
             currentScrollY = Mathf.Clamp(currentScrollY, 0f, maxScrollY);
             e.Use();
         }
@@ -97,7 +97,7 @@ public static partial class NEFGUI
 
         if (e.type == EventType.MouseDrag && !_isGridSwiping && scrollRect.Contains(_gridTouchStart))
         {
-            if (Vector2.Distance(e.mousePosition, _gridTouchStart) > Config.S(8f))
+            if (Vector2.Distance(e.mousePosition, _gridTouchStart) > GUIManager.S(8f))
             {
                 _isGridSwiping = true;
 #if ANDROID
@@ -116,7 +116,7 @@ public static partial class NEFGUI
         GUI.BeginGroup(scrollRect);
         if (!PlantMixTreeManager.IsInitialized)
         {
-            GUI.Label(new Rect(Config.S(5f), Config.S(5f), rightPanelWidth, Config.S(30f)), Translate("Loading data..."));
+            GUI.Label(new Rect(GUIManager.S(5f), GUIManager.S(5f), rightPanelWidth, GUIManager.S(30f)), Translate("Loading data..."));
         }
         else
         {

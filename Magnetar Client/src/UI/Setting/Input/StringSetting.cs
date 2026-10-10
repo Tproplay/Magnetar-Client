@@ -48,8 +48,8 @@ public class StringSetting : Setting
     {
         float elemH = Config.elementHeight;
         float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
         float controlW = Mathf.Min(Config.SettingWidth * 1.25f, width * 0.52f);
 
         // Label on the left occupies remaining width

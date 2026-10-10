@@ -1,4 +1,5 @@
-﻿using Magnetar_Client.Api;
+﻿using Il2CppSystem.Threading.Tasks;
+using Magnetar_Client.Api;
 using Magnetar_Client.Core.GUIManager_;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Setting;
@@ -36,26 +37,51 @@ public static class GUIManager
         CustomNames = new Dictionary<int, string>()
     };
 
-    public static FloatSetting ScaleSetting = new("GUI Scale", 0.5f, 2.0f, Config.GUIScale,
-        decimalPlaces: 2, trueMin: 0.25f, trueMax: 3.0f)
-    {
-        OnValueChanged = (val) => Config.GUIScale = val
-    };
+    public static FloatSetting ScaleSetting = new("GUI Scale", 0.5f, 2.0f,
+#if ANDROID
+        1.5f;
+#else
+        1,
+#endif
+        decimalPlaces: 2, trueMin: 0.25f, trueMax: 3.0f);
 
-    public static FloatSetting ElementScaleSetting = new("Element Scale", 0.5f, 2.0f,
-        Config.ElementScale, decimalPlaces: 2, trueMin: 0.25f, trueMax: 3.0f)
-    {
-        OnValueChanged = (val) => Config.ElementScale = val
-    };
+    public static FloatSetting ElementScaleSetting = new("Element Scale", 0.5f, 2.0f, 1,
+        decimalPlaces: 2, trueMin: 0.25f, trueMax: 3.0f);
 
-    public static FloatSetting FloatingIconOpacitySetting = new("Icon Opacity", 0.1f, 1.0f, Config.FloatingIconOpacity,
-        decimalPlaces: 2, trueMin: 0.05f, trueMax: 1.0f)
-    {
-        OnValueChanged = (val) => Config.FloatingIconOpacity = val
-    };
+    public static FloatSetting FloatingIconOpacitySetting = new("Icon Opacity", 0.1f, 1.0f, 0.85f,
+        decimalPlaces: 3, trueMin: 0.05f, trueMax: 1.0f);
 
     private const float BaseElementHeight = 25f;
-    public static float elementHeight => Config.S(BaseElementHeight);
+    public static float elementHeight => GUIManager.S(BaseElementHeight);
+
+    static bool _showMobileButtons;
+
+    public static bool ShowFloatingIcon;
+    public static float FloatingIconIdleTimeout = 4f;
+    public static bool ShowMobileButtons
+    {
+        get => _showMobileButtons;
+        set
+        {
+            if (_showMobileButtons == value) return;
+            _showMobileButtons = value;
+
+#if MELONLOADER || RELEASE_MELON
+            if (Preferences.ShowMobileButtonsEntry != null)
+            {
+                Preferences.ShowMobileButtonsEntry.Value = value;
+            }
+#elif BEPINEX || RELEASE_BEPINEX || ANDROID
+            if (Preferences.ShowMobileButtonsEntry != null)
+            {
+                Preferences .ShowMobileButtonsEntry.Value = value;
+                Preferences.BepInExConfig?.Save();
+            }
+#endif
+        }
+    }
+
+    public static bool ShowMainMenuCredits;
 
     public static void OnClose()
     {
@@ -119,8 +145,8 @@ public static class GUIManager
 
         RefreshThemeOptions();
 
-        if (Config.GUIScale <= 0.1f) Config.GUIScale = 1.0f;
-        if (Config.ElementScale <= 0.1f) Config.ElementScale = 1.0f;
+        if (ScaleSetting.Value <= 0.1f) ScaleSetting.Value = 1.0f;
+        if (ElementScaleSetting.Value <= 0.1f) ElementScaleSetting.Value = 1.0f;
 
         ServiceRegistry.Register(new GUIManagerService());
 
@@ -170,10 +196,10 @@ public static class GUIManager
         }, "English");
 
         SaveLoad.RegisterEntry("Theme", () => Config.Theme, val => Config.Theme = val, "Default");
-        SaveLoad.RegisterEntry("GUIScale", () => Config.GUIScale, val => Config.GUIScale = val, 1.0f);
-        SaveLoad.RegisterEntry("ElementScale", () => Config.ElementScale, val => Config.ElementScale = val, 1.0f);
-        SaveLoad.RegisterEntry("ShowFloatingIcon", () => Config.ShowFloatingIcon, val => Config.ShowFloatingIcon = val, true);
-        SaveLoad.RegisterEntry("ShowMainMenuCredits", () => Config.ShowMainMenuCredits, val => Config.ShowMainMenuCredits = val, true);
+        SaveLoad.RegisterEntry("GUIScale", () => ScaleSetting.Value, val => ScaleSetting.Value = val, 1.0f);
+        SaveLoad.RegisterEntry("ElementScale", () => ElementScaleSetting.Value, val => ElementScaleSetting.Value = val, 1.0f);
+        SaveLoad.RegisterEntry("ShowFloatingIcon", () => ShowFloatingIcon, val => ShowFloatingIcon = val, true);
+        SaveLoad.RegisterEntry("ShowMainMenuCredits", () => ShowMainMenuCredits, val => ShowMainMenuCredits = val, true);
     }
 
     public static void RefreshThemeOptions()
@@ -288,5 +314,25 @@ public static class GUIManager
 
         string filePath = Path.Combine(domainDir, "translation_strings.json");
         Translator.SaveJson(filePath, Translator.CreateDictionary(template));
+    }
+
+    public static float S(float value) => value * ScaleSetting.Value;
+    public static float ES(float value) => value * ElementScaleSetting.Value;
+    public static void SetFloatingIcon(bool enabled)
+    {
+        ShowFloatingIcon = enabled;
+#if MELONLOADER || RELEASE_MELON
+    if (Preferences.ShowFloatingIconEntry != null)
+    {
+        Preferences.ShowFloatingIconEntry.Value = enabled;
+    }
+#elif BEPINEX || RELEASE_BEPINEX || ANDROID
+        if (Preferences.ShowFloatingIconEntry != null)
+        {
+            Preferences.ShowFloatingIconEntry.Value = enabled;
+            Preferences.BepInExConfig?.Save();
+        }
+#endif
+        Utils.SaveLoad.Save();
     }
 }

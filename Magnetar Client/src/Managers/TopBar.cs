@@ -63,11 +63,11 @@ public static class TopBar
         float[] scaledOffsets = new float[count + 1];
         for (int i = 0; i <= count; i++)
         {
-            scaledOffsets[i] = Mathf.Round(Config.S(baseOffsets[i]));
+            scaledOffsets[i] = Mathf.Round(GUIManager.S(baseOffsets[i]));
         }
 
         float scaledTotalWidth = scaledOffsets[count];
-        float scaledHeight = Mathf.Round(Config.S(BaseHeight));
+        float scaledHeight = Mathf.Round(GUIManager.S(BaseHeight));
         float startX = Mathf.Round((Config.NativeWidth / 2f) - (scaledTotalWidth / 2f));
 
         Rect barArea = new(startX, 0, scaledTotalWidth, scaledHeight);

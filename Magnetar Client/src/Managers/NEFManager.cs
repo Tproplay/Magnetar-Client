@@ -17,7 +17,7 @@ public static class NEFManager
     private const float BaseMargin = 60f;
 
     public static bool ShowMenu;
-    public static float elementHeight => Config.S(25f);
+    public static float elementHeight => GUIManager.S(25f);
     public static Rect windowRect = new(60, 60, 1000, 700);
 
     public static void Init()
@@ -42,7 +42,7 @@ public static class NEFManager
 
     public static void Render()
     {
-        float margin = Config.S(BaseMargin);
+        float margin = GUIManager.S(BaseMargin);
         windowRect.x = margin;
         windowRect.y = margin;
         windowRect.width = Config.NativeWidth - margin * 2f;

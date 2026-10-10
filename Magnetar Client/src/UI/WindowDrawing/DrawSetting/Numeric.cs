@@ -2,6 +2,7 @@
 using Magnetar_Client.UI.Themes;
 using static Magnetar_Client.Utils.Translator;
 using UnityEngine;
+using Magnetar_Client.Core;
 
 namespace Magnetar_Client.UI.WindowDrawing;
 
@@ -58,10 +59,10 @@ public static partial class DrawSetting
         float logVal = LogConvert(visualVal);
         float percentage = Mathf.Clamp01((logVal - logMin) / (logMax - logMin));
 
-        float inputW = Config.SettingsInput.NumericInputWidth;
+        float inputW = SettingValues.NumericInputWidth;
         float sliderW = Config.SettingWidth - inputW - 10f;
-        float trackH = Config.SettingsInput.SliderHeight;
-        float thumbSize = Config.S(16f);
+        float trackH = SettingValues.SliderHeight;
+        float thumbSize = GUIManager.S(16f);
 
         Rect sliderRect = new(width - Config.indent - Config.SettingWidth, y + ((Config.elementHeight - trackH) / 2f), sliderW, trackH);
         Rect sliderHitBox = new(sliderRect.x, y, sliderRect.width, Config.elementHeight);

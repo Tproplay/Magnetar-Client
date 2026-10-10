@@ -50,8 +50,8 @@ public static partial class DrawSetting
 
         if (ActiveDropdownId == controlId)
         {
-            float rowHeight = Config.SettingsInput.DropdownRowHeight;
-            int maxVisibleRows = Config.SettingsInput.DropdownMaxVisibleRows;
+            float rowHeight = SettingValues.DropdownRowHeight;
+            int maxVisibleRows = SettingValues.DropdownMaxVisibleRows;
             int itemCount = selSet.Options.Count;
             float dropHeight = Mathf.Min(itemCount * rowHeight, maxVisibleRows * rowHeight);
 
@@ -59,7 +59,7 @@ public static partial class DrawSetting
 
             if (dropRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
             {
-                dropdownScrollY = Mathf.Clamp(dropdownScrollY + e.delta.y * Config.SettingsInput.DropdownScrollSensitivity,
+                dropdownScrollY = Mathf.Clamp(dropdownScrollY + e.delta.y * SettingValues.DropdownScrollSensitivity,
                     0, Mathf.Max(0, (itemCount * rowHeight) - dropHeight));
                 e.Use();
             }

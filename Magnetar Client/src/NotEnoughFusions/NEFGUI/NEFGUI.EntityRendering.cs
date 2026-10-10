@@ -4,6 +4,8 @@ using Magnetar_Client.UI.Themes;
 using Magnetar_Client.Utils;
 using static Magnetar_Client.NEF.Data.NEFRecipes;
 using Magnetar_Client.UI;
+using Magnetar_Client.Core;
+
 
 
 #if MELONLOADER || RELEASE_MELON
@@ -18,7 +20,7 @@ public static partial class NEFGUI
 
     private static void DrawSquareNodeBox(Rect rect, RecipeEntity entity, float scale)
     {
-        ThemeManager.NEFNodeStyle.fontSize = Mathf.Max(1, (int)(Config.S(8f) * scale));
+        ThemeManager.NEFNodeStyle.fontSize = Mathf.Max(1, (int)(GUIManager.S(8f) * scale));
         string displayName = NEFData.GetEntityName(entity);
         GUI.Box(rect, displayName, ThemeManager.NEFNodeStyle);
 
@@ -28,8 +30,8 @@ public static partial class NEFGUI
         {
             Texture2D tex = imgStyle.normal.background;
 
-            float pad = Config.S(10f) * scale;
-            float bottomTextSpace = Config.S(25f) * scale;
+            float pad = GUIManager.S(10f) * scale;
+            float bottomTextSpace = GUIManager.S(25f) * scale;
 
             float availWidth = rect.width - (pad * 2f);
             float availHeight = rect.height - pad - bottomTextSpace;

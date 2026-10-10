@@ -20,10 +20,11 @@ public static class MultiSelectWindowDrawer
     public static void InitializeLayout()
     {
         WindowRect = new Rect(
-            Config.NativeWidth / 2f - Config.ModuleManager.MultiSelectWindowWidth / 2f,
-            Config.NativeHeight / 2f - Config.ModuleManager.MultiSelectWindowHeight / 2f,
-            Config.ModuleManager.MultiSelectWindowWidth,
-            Config.ModuleManager.MultiSelectWindowHeight
+            Config.NativeWidth / 2f - ModuleManager.MultiSelectWindowWidth / 2f,
+            Config.NativeHeight / 2f - ModuleManager.MultiSelectWindowHeight / 2f,
+ModuleManager.MultiSelectWindowWidth,
+ModuleManager
+.MultiSelectWindowHeight
         );
     }
 
@@ -34,8 +35,8 @@ public static class MultiSelectWindowDrawer
 
         if (currentAlpha <= 0.001f) return;
 
-        float targetW = Mathf.Min(Config.ModuleManager.MultiSelectWindowWidth, Config.NativeWidth * 0.95f);
-        float targetH = Mathf.Min(Config.ModuleManager.MultiSelectWindowHeight, Config.NativeHeight * 0.8f);
+        float targetW = Mathf.Min(ModuleManager.MultiSelectWindowWidth, Config.NativeWidth * 0.95f);
+        float targetH = Mathf.Min(ModuleManager.MultiSelectWindowHeight, Config.NativeHeight * 0.8f);
 
         if (ModuleManager.resetWindowPos)
         {
@@ -102,8 +103,8 @@ public static class MultiSelectWindowDrawer
                 AnimationHandler.SwitchView(ModuleManager.Group, ModuleManager.CurrentWindow.ToString());
             });
 
-            float titleHeight = Config.S(34f);
-            float closeBtnWidth = Config.S(40f);
+            float titleHeight = GUIManager.S(34f);
+            float closeBtnWidth = GUIManager.S(40f);
             GUI.DragWindow(new Rect(0, 0, WindowRect.width - closeBtnWidth, titleHeight));
         }
         finally
@@ -154,7 +155,7 @@ public static class MultiSelectWindowDrawer
 
         Color originalColor = GUI.contentColor;
         GUI.contentColor = ThemeManager.TextDim;
-        GUI.Label(new Rect(btnRect.x + Config.selectButtonWidth + Config.S(5f), y, width * 0.4f, Config.elementHeight),
+        GUI.Label(new Rect(btnRect.x + Config.selectButtonWidth + GUIManager.S(5f), y, width * 0.4f, Config.elementHeight),
             countLabel, ThemeManager.SettingLabelStyle);
         GUI.contentColor = originalColor;
 

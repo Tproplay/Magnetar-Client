@@ -87,7 +87,7 @@ public static partial class NEFGUI
                 pyramidZoom = Mathf.Clamp(pyramidZoom, 0.2f, 3.0f);
 
                 float originX = pyramidBoxRect.x + (pyramidBoxRect.width / 2f);
-                float originY = pyramidBoxRect.y + Config.S(60f);
+                float originY = pyramidBoxRect.y + GUIManager.S(60f);
 
                 float focusX = (e.mousePosition.x - originX - pyramidPan.x) / oldZoom;
                 float focusY = (e.mousePosition.y - originY - pyramidPan.y) / oldZoom;
@@ -182,7 +182,7 @@ public static partial class NEFGUI
     {
         float centeredX = logicX - centerOfAllTrees;
         float screenX = (canvasRect.width / 2f) + (centeredX * pyramidZoom) + pyramidPan.x;
-        float screenY = Config.S(60f) + (logicY * pyramidZoom) + pyramidPan.y;
+        float screenY = GUIManager.S(60f) + (logicY * pyramidZoom) + pyramidPan.y;
         return new Vector2(screenX, screenY);
     }
 
@@ -190,7 +190,7 @@ public static partial class NEFGUI
     {
         if (node == null) return;
 
-        float baseSize = Config.S(100f);
+        float baseSize = GUIManager.S(100f);
         float scaledSize = baseSize * pyramidZoom;
 
         Vector2 pos = GetProjectedPosition(node.RenderX, node.RenderY, canvasRect, centerOfAllTrees);
@@ -225,9 +225,9 @@ public static partial class NEFGUI
         {
             Color oldColor = GUI.contentColor;
             GUI.contentColor = new Color(node.EdgeMessageColor.r, node.EdgeMessageColor.g, node.EdgeMessageColor.b, node.EdgeMessageColor.a * GUI.contentColor.a);
-            GUIStyle msgStyle = new() { alignment = TextAnchor.LowerCenter, fontSize = Mathf.Max(1, (int)(Config.S(16f) * pyramidZoom)) };
+            GUIStyle msgStyle = new() { alignment = TextAnchor.LowerCenter, fontSize = Mathf.Max(1, (int)(GUIManager.S(16f) * pyramidZoom)) };
 
-            Rect msgRect = new(pos.x - (Config.S(100f) * pyramidZoom), pos.y - (Config.S(30f) * pyramidZoom), Config.S(200f) * pyramidZoom, Config.S(30f) * pyramidZoom);
+            Rect msgRect = new(pos.x - (GUIManager.S(100f) * pyramidZoom), pos.y - (GUIManager.S(30f) * pyramidZoom), GUIManager.S(200f) * pyramidZoom, GUIManager.S(30f) * pyramidZoom);
             GUI.Label(msgRect, node.EdgeMessage, msgStyle);
             GUI.contentColor = oldColor;
         }

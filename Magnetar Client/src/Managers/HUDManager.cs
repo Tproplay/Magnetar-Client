@@ -28,7 +28,7 @@ public static class HUDManager
     public static bool showBackground;
 
     private const float BaseElementHeight = 25f;
-    public static float elementHeight => Config.S(BaseElementHeight);
+    public static float elementHeight => GUIManager.S(BaseElementHeight);
 
     public static void Init()
     {
@@ -148,12 +148,12 @@ public static class HUDManager
 
     private static void DrawExitLayoutButton()
     {
-        if (Config.ShowMobileButtons)
+        if (GUIManager.ShowMobileButtons)
         {
             Event e = Event.current;
-            float btnWidth = Config.S(180f);
-            float btnHeight = Config.S(36f);
-            Rect exitRect = new((Config.NativeWidth - btnWidth) / 2f, Config.S(16f), btnWidth, btnHeight);
+            float btnWidth = GUIManager.S(180f);
+            float btnHeight = GUIManager.S(36f);
+            Rect exitRect = new((Config.NativeWidth - btnWidth) / 2f, GUIManager.S(16f), btnWidth, btnHeight);
 
             bool isHovered = exitRect.Contains(e.mousePosition);
 
@@ -206,6 +206,11 @@ public static class HUDManager
         Rect rect = new() { x = Config.NativeWidth * 0.995f - width, width = width };
 
         GUIHelper.DrawBoxWithOutlinedText(rect, Text, style, GUIHelper.RainbowColor, Color.black);
+    }
+
+    public static void RegisterElement(Type element)
+    {
+        HUDRenderer.RegisterElement(element);
     }
 
     private class HUDManagerService : IUpdatable, IRenderable, IMenuRenderable, ICloseHandler, ILanguageAware

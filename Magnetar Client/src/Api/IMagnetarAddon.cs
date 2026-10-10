@@ -1,10 +1,17 @@
-﻿using Magnetar_Client.HUDElements;
+﻿//
+// IMagnetarAddon is used to create Addons for Magnetar Client.
+//
+// Simply place your file in Magnetar Data / Addons to get it loaded
+// automatically into the client.
+//
+
+using Magnetar_Client.HUDElements;
 using System.Collections.Generic;
 using System.Reflection;
 
 namespace Magnetar_Client.Api;
 
-public class AddonInfo
+internal class AddonInfo
 {
     public string FileName { get; set; }
     public string FilePath { get; set; }
@@ -13,6 +20,7 @@ public class AddonInfo
     public List<Modules.Module> RegisteredModules { get; } = new();
     public List<HudElement> RegisteredHudElements { get; } = new();
 }
+
 public interface IMagnetarAddon
 {
     string Name { get; }

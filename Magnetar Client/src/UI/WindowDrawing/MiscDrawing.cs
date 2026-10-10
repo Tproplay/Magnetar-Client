@@ -1,4 +1,5 @@
-﻿using Magnetar_Client.UI.Themes;
+﻿using Magnetar_Client.Core;
+using Magnetar_Client.UI.Themes;
 using UnityEngine;
 
 namespace Magnetar_Client.UI.WindowDrawing;
@@ -11,7 +12,7 @@ public static class MiscDrawing
     /// </summary>
     public static void SeperatorFull(ref float y, float width, float spacing)
     {
-        float lineThickness = Mathf.Max(1f, Config.S(1f));
+        float lineThickness = Mathf.Max(1f, GUIManager.S(1f));
 
         GUI.Box(new Rect(0, y, width, lineThickness), "", ThemeManager.SeparatorStyle);
 
@@ -24,7 +25,7 @@ public static class MiscDrawing
     public static bool Seperator(ref float y, float width, float indent, float spacing, string name = "", bool isCollapsible = false, bool isExpanded = true, Color? customTextColor = null)
     {
         y += spacing;
-        float lineThickness = Mathf.Max(1f, Config.S(1f));
+        float lineThickness = Mathf.Max(1f, GUIManager.S(1f));
 
         if (string.IsNullOrEmpty(name))
         {
@@ -40,7 +41,7 @@ public static class MiscDrawing
 
         string displayName = isCollapsible ? (isExpanded ? $"▼ {name}" : $"▶ {name}") : name;
 
-        float textPadding = Config.S(12f);
+        float textPadding = GUIManager.S(12f);
         float textWidth = ThemeManager.SeparatorTextStyle.CalcSize(new GUIContent(displayName)).x + textPadding;
         float lineW = Mathf.Max(0f, (width - (indent * 2f) - textWidth) / 2f);
 
@@ -90,7 +91,7 @@ public static class MiscDrawing
         Color oldColor = GUI.color;
         GUI.color = Color.white;
 
-        float thickness = Mathf.Max(1f, Config.S(3f) * Zoom);
+        float thickness = Mathf.Max(1f, GUIManager.S(3f) * Zoom);
         float halfThick = thickness / 2f;
         float midY = (pointA.y + pointB.y) / 2f;
 

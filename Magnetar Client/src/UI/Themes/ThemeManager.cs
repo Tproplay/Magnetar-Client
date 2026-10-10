@@ -455,8 +455,8 @@ public static class ThemeManager
         _lastScale = scale;
         _lastElementScale = elementScale;
 
-        int S(int baseValue) => Mathf.Max(1, Mathf.RoundToInt(Config.S(baseValue)));
-        float Sf(float baseValue) => Mathf.Max(0f, Config.S(baseValue));
+        int S(int baseValue) => Mathf.Max(1, Mathf.RoundToInt(GUIManager.S(baseValue)));
+        float Sf(float baseValue) => Mathf.Max(0f, GUIManager.S(baseValue));
 
         // TopBar
         TopBarStyle.fontSize = S(TopBarFontSize);

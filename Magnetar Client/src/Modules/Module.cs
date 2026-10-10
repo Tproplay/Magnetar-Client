@@ -125,7 +125,7 @@ public abstract class Module
     public static Dictionary<int, string> TranslateEnum<T>() => TranslateEnum(typeof(T));
     public static Dictionary<int, string> TranslateEnum<T>(bool enumKey = true) => TranslateEnum(typeof(T), enumKey);
 
-    public virtual float SettingsWidth { get; set; } = Config.ModuleManager.SettingsWidth;
+    public virtual float SettingsWidth { get; set; } = ModuleManager.SettingsWidth;
 
     /// <summary>
     /// Creates a new Category. Use EndCategory() to define the end.

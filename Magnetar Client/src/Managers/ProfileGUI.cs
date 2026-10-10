@@ -16,14 +16,14 @@ public static class ProfileGUI
     private const float BaseElementHeight = 30f;
 
     public static Rect WindowRect = new(
-        (Config.NativeWidth - Config.S(BaseWindowWidth)) / 2,
-        (Config.NativeHeight - Config.S(BaseWindowHeight)) / 2,
-        Config.S(BaseWindowWidth),
-        Config.S(BaseWindowHeight));
+        (Config.NativeWidth - GUIManager.S(BaseWindowWidth)) / 2,
+        (Config.NativeHeight - GUIManager.S(BaseWindowHeight)) / 2,
+GUIManager.S(BaseWindowWidth),
+GUIManager.S(BaseWindowHeight));
 
     private static string newProfileInput = "";
     private static float scrollY;
-    private static float elementHeight => Config.S(BaseElementHeight);
+    private static float elementHeight => GUIManager.S(BaseElementHeight);
 
     public static void Init()
     {
@@ -42,7 +42,7 @@ public static class ProfileGUI
 
     public static void Render()
     {
-        Config.RescaleAroundCenter(ref WindowRect, Config.S(BaseWindowWidth), Config.S(BaseWindowHeight));
+        Config.RescaleAroundCenter(ref WindowRect, GUIManager.S(BaseWindowWidth), GUIManager.S(BaseWindowHeight));
 
         GUIStyle windowBgStyle = ThemeManager.SettingsWndowBgStyle ?? ThemeManager.CategoryWindowStyle;
 
@@ -68,8 +68,8 @@ public static class ProfileGUI
         {
             Event e = Event.current;
             float w = WindowRect.width;
-            float indent = Config.S(12f);
-            float y = Config.S(35f);
+            float indent = GUIManager.S(12f);
+            float y = GUIManager.S(35f);
 
             Rect headerBgRect = new(0, 0, w, y - indent);
             GUI.Box(headerBgRect, Translate("Profile Manager"), ThemeManager.SettingsWndowStyle);
@@ -80,12 +80,12 @@ public static class ProfileGUI
                 ThemeManager.SettingTextStyle
             );
 
-            y += elementHeight + Config.S(10f);
+            y += elementHeight + GUIManager.S(10f);
 
             // --- CREATE NEW PROFILE ROW ---
-            float labelW = Config.S(100f);
-            float btnW = Config.S(90f);
-            float gap = Config.S(8f);
+            float labelW = GUIManager.S(100f);
+            float btnW = GUIManager.S(90f);
+            float gap = GUIManager.S(8f);
             float inputW = w - (indent * 2f) - labelW - btnW - (gap * 2f);
 
             Rect labelRect = new(indent, y, labelW, elementHeight);
@@ -115,27 +115,27 @@ public static class ProfileGUI
                 e.Use();
             }
 
-            y += elementHeight + Config.S(14f);
+            y += elementHeight + GUIManager.S(14f);
 
-            float lineThickness = Mathf.Max(1f, Config.S(1f));
+            float lineThickness = Mathf.Max(1f, GUIManager.S(1f));
             GUI.Box(new Rect(indent, y, w - (indent * 2f), lineThickness), "", ThemeManager.SeparatorStyle);
-            y += lineThickness + Config.S(10f);
+            y += lineThickness + GUIManager.S(10f);
 
             // --- AVAILABLE PROFILES LIST ---
             GUI.Label(new Rect(indent, y, w - (indent * 2f), elementHeight), Translate("Available Profiles:"), ThemeManager.SettingTextStyle);
-            y += elementHeight + Config.S(5f);
+            y += elementHeight + GUIManager.S(5f);
 
-            float scrollAreaHeight = WindowRect.height - y - Config.S(15f);
+            float scrollAreaHeight = WindowRect.height - y - GUIManager.S(15f);
             Rect scrollOuterRect = new(indent, y, w - (indent * 2f), scrollAreaHeight);
 
             var profilesList = ProfileManager.Profiles;
-            float rowSpacing = Config.S(6f);
+            float rowSpacing = GUIManager.S(6f);
             float contentHeight = profilesList.Count * (elementHeight + rowSpacing);
             float maxScroll = Mathf.Max(0f, contentHeight - scrollAreaHeight);
 
             if (scrollOuterRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
             {
-                scrollY += e.delta.y * Config.S(20f);
+                scrollY += e.delta.y * GUIManager.S(20f);
                 scrollY = Mathf.Clamp(scrollY, 0f, maxScroll);
                 e.Use();
             }
@@ -152,9 +152,9 @@ public static class ProfileGUI
                 if (itemY + elementHeight >= 0 && itemY <= scrollAreaHeight)
                 {
                     Rect itemRect = new(0, itemY, scrollOuterRect.width, elementHeight);
-                    float delBtnW = Config.S(65f);
-                    float delBtnH = elementHeight - Config.S(6f);
-                    Rect deleteBtnRect = new(itemRect.width - delBtnW - Config.S(4f), itemY + Config.S(3f), delBtnW, delBtnH);
+                    float delBtnW = GUIManager.S(65f);
+                    float delBtnH = elementHeight - GUIManager.S(6f);
+                    Rect deleteBtnRect = new(itemRect.width - delBtnW - GUIManager.S(4f), itemY + GUIManager.S(3f), delBtnW, delBtnH);
 
                     bool isItemHovered = itemRect.Contains(e.mousePosition);
                     bool isDeleteHovered = !isDefault && deleteBtnRect.Contains(e.mousePosition);
@@ -169,8 +169,8 @@ public static class ProfileGUI
                         ? $"<b><color=yellow>{profileName}</color> ({Translate("Active")})</b>"
                         : profileName;
 
-                    float textWidth = !isDefault ? itemRect.width - delBtnW - Config.S(20f) : itemRect.width - Config.S(20f);
-                    Rect textRect = new(Config.S(10f), itemY, textWidth, elementHeight);
+                    float textWidth = !isDefault ? itemRect.width - delBtnW - GUIManager.S(20f) : itemRect.width - GUIManager.S(20f);
+                    Rect textRect = new(GUIManager.S(10f), itemY, textWidth, elementHeight);
 
                     GUI.Label(textRect, labelText, ThemeManager.SettingTextStyle);
 
@@ -202,7 +202,7 @@ public static class ProfileGUI
 
             GUI.EndGroup();
 
-            GUI.DragWindow(new Rect(0, 0, w, Config.S(25f)));
+            GUI.DragWindow(new Rect(0, 0, w, GUIManager.S(25f)));
 
             if (WindowRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {

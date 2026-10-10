@@ -4,6 +4,7 @@ using static Magnetar_Client.Utils.Translator;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Magnetar_Client.Core;
 
 namespace Magnetar_Client.UI.Setting;
 
@@ -39,13 +40,13 @@ public class ListStringSetting : Setting
         Event e = Event.current;
         float elemH = Config.elementHeight;
         float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
-        float actionBtnW = Config.SettingsInput.ResetButtonW;
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
+        float actionBtnW = SettingValues.ResetButtonW;
         float addBtnW = Config.SettingWidth;
 
         // Label on the left
-        float labelW = Mathf.Max(width * 0.35f, Config.S(120f));
+        float labelW = Mathf.Max(width * 0.35f, GUIManager.S(120f));
         Rect labelRect = new(indent, y, labelW, elemH);
         GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
 

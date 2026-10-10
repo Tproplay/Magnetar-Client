@@ -42,8 +42,8 @@ public class BoolSetting : Setting
         Event e = Event.current;
 
         float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
         float btnW = Config.SettingWidth;
 
         // Label: occupies remaining width on the left

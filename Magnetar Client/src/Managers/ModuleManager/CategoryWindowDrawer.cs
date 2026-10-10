@@ -72,13 +72,13 @@ public static class CategoryWindowDrawer
         }
 
         // Horizontal spacing: start at margin + index * (windowWidth + gap)
-        float startX = Config.S(20f);
-        float columnStep = Config.ModuleWindowWidth + Config.S(10f);
+        float startX = GUIManager.S(20f);
+        float columnStep = Config.ModuleWindowWidth + GUIManager.S(10f);
         float initX = startX + (index * columnStep);
 
-        float initY = Config.S(50f);
+        float initY = GUIManager.S(50f);
         float w = Config.ModuleWindowWidth;
-        float h = Config.S(50f);
+        float h = GUIManager.S(50f);
 
         WindowPositions[cat] = ScreenBoundaryHelper.Clamp(new Rect(initX, initY, w, h));
         CategoryFolded[cat] = false;
@@ -145,8 +145,8 @@ public static class CategoryWindowDrawer
             var categoryModules = FilterModulesByCategory(category);
 
             float windowWidth = WindowPositions[category].width;
-            float headerHeight = Config.S(28f);
-            float buttonHeight = Config.S(28f);
+            float headerHeight = GUIManager.S(28f);
+            float buttonHeight = GUIManager.S(28f);
             Event e = Event.current;
 
             if (!CategoryFolded.ContainsKey(category)) CategoryFolded[category] = false;
@@ -158,13 +158,13 @@ public static class CategoryWindowDrawer
             GUI.Box(titleBarRect, Translate(category.Name), ThemeManager.CategoryHeaderStyle);
 
             // 2. Invisible Background Triangle Fold Indicator
-            Rect foldBtnRect = new(windowWidth - Config.S(24f), (headerHeight - Config.S(20f)) / 2f, Config.S(20f), Config.S(20f));
+            Rect foldBtnRect = new(windowWidth - GUIManager.S(24f), (headerHeight - GUIManager.S(20f)) / 2f, GUIManager.S(20f), GUIManager.S(20f));
             string foldIndicator = isFolded ? "▶" : "▼";
 
             GUIStyle arrowStyle = new()
             {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = Mathf.RoundToInt(Config.S(11f)),
+                fontSize = Mathf.RoundToInt(GUIManager.S(11f)),
                 normal = { textColor = ThemeManager.TextWhite }
             };
             GUI.Label(foldBtnRect, foldIndicator, arrowStyle);
@@ -184,7 +184,7 @@ public static class CategoryWindowDrawer
                     float mouseDelta = Vector2.Distance(e.mousePosition, _clickStartMousePos);
                     float windowDelta = Vector2.Distance(WindowPositions[category].position, _clickStartWindowPos);
 
-                    if (mouseDelta < Config.S(6f) && windowDelta < Config.S(4f))
+                    if (mouseDelta < GUIManager.S(6f) && windowDelta < GUIManager.S(4f))
                     {
                         CategoryFolded[category] = !isFolded;
                         isFolded = CategoryFolded[category];
@@ -228,7 +228,7 @@ public static class CategoryWindowDrawer
             CategoryScrollPositions[category] = currentScroll;
 
             // 6. Render Scrollable Group
-            float contentWidth = needsScroll ? windowWidth - Config.S(8f) : windowWidth;
+            float contentWidth = needsScroll ? windowWidth - GUIManager.S(8f) : windowWidth;
             GUI.BeginGroup(viewRect);
             DrawCategoryItems(category, categoryModules, buttonHeight, currentScroll, viewHeight, contentWidth, headerHeight, e);
             GUI.EndGroup();
@@ -273,7 +273,7 @@ public static class CategoryWindowDrawer
 
         if (viewRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
         {
-            currentScroll = Mathf.Clamp(currentScroll + e.delta.y * Config.ModuleManager.ScrollSensitivity, 0f, maxScroll);
+            currentScroll = Mathf.Clamp(currentScroll + e.delta.y * ModuleManager.ScrollSensitivity, 0f, maxScroll);
             e.Use();
         }
 
@@ -365,15 +365,15 @@ public static class CategoryWindowDrawer
 
     private static void DrawScrollbar(float windowWidth, float headerHeight, float viewHeight, float totalContentHeight, float currentScroll, float maxScroll)
     {
-        float trackX = windowWidth - Config.S(6f);
-        float trackY = headerHeight + Config.S(2f);
-        float trackHeight = viewHeight - Config.S(4f);
+        float trackX = windowWidth - GUIManager.S(6f);
+        float trackY = headerHeight + GUIManager.S(2f);
+        float trackHeight = viewHeight - GUIManager.S(4f);
 
-        float handleHeight = Mathf.Max(Config.S(16f), (viewHeight / totalContentHeight) * trackHeight);
+        float handleHeight = Mathf.Max(GUIManager.S(16f), (viewHeight / totalContentHeight) * trackHeight);
         float scrollPct = maxScroll > 0 ? currentScroll / maxScroll : 0f;
         float handleY = trackY + (scrollPct * (trackHeight - handleHeight));
 
-        GUI.Box(new Rect(trackX + Config.S(1f), trackY, Config.S(2f), trackHeight), "", ThemeManager.SeparatorStyle);
-        GUI.Box(new Rect(trackX, handleY, Config.S(5f), handleHeight), "", ThemeManager.CategoryModuleOffStyle);
+        GUI.Box(new Rect(trackX + GUIManager.S(1f), trackY, GUIManager.S(2f), trackHeight), "", ThemeManager.SeparatorStyle);
+        GUI.Box(new Rect(trackX, handleY, GUIManager.S(5f), handleHeight), "", ThemeManager.CategoryModuleOffStyle);
     }
 }

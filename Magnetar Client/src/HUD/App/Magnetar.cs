@@ -1,11 +1,12 @@
-﻿using UnityEngine;
+﻿using Magnetar_Client.Core;
+using UnityEngine;
 using static Magnetar_Client.UI.Themes.ThemeManager;
 
 namespace Magnetar_Client.HUDElements;
 
 public class MagnetarVersion : HudElement
 {
-    private static readonly string displayText = $"Magnetar Client v{Magnetar_Info.Version}";
+    private static readonly string displayText = $"Magnetar Client v{MagnetarInfo.Version}";
 
     public MagnetarVersion() : base("Magnetar Name and Version", HudElement.NewRect(90))
     { }

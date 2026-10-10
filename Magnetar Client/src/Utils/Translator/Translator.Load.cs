@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,8 +18,24 @@ public static partial class Translator
     private static Task _runningWorker = null;
     private static bool _needsAnotherPass = false;
     private static readonly List<Action> _callbacks = new();
+    private static readonly ConcurrentQueue<Action> _mainThreadQueue = new();
 
     public static bool IsLoading { get; private set; }
+
+    public static void Update()
+    {
+        while (_mainThreadQueue.TryDequeue(out var action))
+        {
+            try
+            {
+                action?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                TranslatorLogger.Error($"Error in main thread callback: {ex}");
+            }
+        }
+    }
 
     public static Task LoadTranslationsAsync(Action onComplete = null)
     {
@@ -43,44 +60,84 @@ public static partial class Translator
 
     private static void RunTranslationWorker()
     {
-        while (true)
+        IntPtr threadPtr = IntPtr.Zero;
+
+#if MELONLOADER || RELEASE_MELON || BEPINEX || RELEASE_BEPINEX
+        try
         {
-            lock (_queueLock)
+            IntPtr domain = Il2CppInterop.Runtime.IL2CPP.il2cpp_domain_get();
+            if (domain != IntPtr.Zero)
             {
-                _needsAnotherPass = false;
+                threadPtr = Il2CppInterop.Runtime.IL2CPP.il2cpp_thread_attach(domain);
             }
+        }
+        catch { }
+#endif
 
-            lock (_loadLock)
+        try
+        {
+            while (true)
             {
-                LoadTranslationsInternal();
-            }
-
-            lock (_queueLock)
-            {
-                if (_needsAnotherPass)
+                lock (_queueLock)
                 {
-                    continue;
+                    _needsAnotherPass = false;
                 }
 
-                IsLoading = false;
-                _runningWorker = null;
-                break;
+                lock (_loadLock)
+                {
+                    LoadTranslationsInternal();
+                }
+
+                lock (_queueLock)
+                {
+                    if (_needsAnotherPass)
+                    {
+                        continue;
+                    }
+
+                    IsLoading = false;
+                    _runningWorker = null;
+                    break;
+                }
             }
-        }
 
-        List<Action> callbacksToFire;
-        lock (_queueLock)
+            List<Action> callbacksToFire;
+            lock (_queueLock)
+            {
+                callbacksToFire = new List<Action>(_callbacks);
+                _callbacks.Clear();
+            }
+
+            _mainThreadQueue.Enqueue(() =>
+            {
+                foreach (var cb in callbacksToFire)
+                {
+                    try
+                    {
+                        cb?.Invoke();
+                    }
+                    catch (Exception ex)
+                    {
+                        TranslatorLogger.Error($"Callback error: {ex}");
+                    }
+                }
+
+                OnTranslationsLoaded?.Invoke();
+            });
+        }
+        finally
         {
-            callbacksToFire = new List<Action>(_callbacks);
-            _callbacks.Clear();
+#if MELONLOADER || RELEASE_MELON || BEPINEX || RELEASE_BEPINEX
+            if (threadPtr != IntPtr.Zero)
+            {
+                try
+                {
+                    Il2CppInterop.Runtime.IL2CPP.il2cpp_thread_detach(threadPtr);
+                }
+                catch { }
+            }
+#endif
         }
-
-        foreach (var cb in callbacksToFire)
-        {
-            try { cb?.Invoke(); } catch (Exception ex) { TranslatorLogger.Error($"[Translator] Callback error: {ex}"); }
-        }
-
-        OnTranslationsLoaded?.Invoke();
     }
 
     public static void LoadTranslations()

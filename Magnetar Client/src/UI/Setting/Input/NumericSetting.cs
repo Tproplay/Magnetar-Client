@@ -3,6 +3,7 @@ using Magnetar_Client.UI.WindowDrawing;
 using static Magnetar_Client.Utils.Translator;
 using System;
 using UnityEngine;
+using Magnetar_Client.Core;
 
 namespace Magnetar_Client.UI.Setting;
 
@@ -95,12 +96,12 @@ public class IntSetting : Setting
 
         float elemH = Config.elementHeight;
         float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
-        float inputW = Config.SettingsInput.NumericInputWidth;
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
+        float inputW = SettingValues.NumericInputWidth;
         float sliderW = Config.SettingWidth - inputW - gap;
-        float trackH = Config.SettingsInput.SliderHeight;
-        float thumbSize = Config.S(16f);
+        float trackH = SettingValues.SliderHeight;
+        float thumbSize = GUIManager.S(16f);
 
         // Right-to-left layout: [Reset] <- [Input] <- [Slider]
         float resetStartX = width - indent - resetBtnW;

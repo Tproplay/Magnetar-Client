@@ -1,4 +1,12 @@
-﻿using System;
+﻿// 
+// This file contains Actions that will be invoked at specific
+// moments during client initialization
+//
+// Note: Although these look like they are preserved for external
+// mods/addons, but some of these are used by internal classes
+//
+
+using System;
 
 namespace Magnetar_Client.Api;
 
@@ -30,8 +38,9 @@ public static class Actions
     public static Action OnLateApplicationQuit;
 
     // Misc
-    public static Action OnPreLanguageChanged;
-    public static Action OnPostLanguageChanged;
+    public static Action OnLanguageChanged;
+    public static Action OnProfileChanged;
+    
 
 
 }

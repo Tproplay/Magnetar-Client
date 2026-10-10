@@ -41,10 +41,10 @@ public static partial class NEFGUI
 #endif
 
             float rightPanelWidth = NEFManager.windowRect.width * 0.3f;
-            float titleFontSize = ThemeManager.CategoryWindowStyle != null ? ThemeManager.CategoryWindowStyle.fontSize : Config.S(18f);
-            float topIndent = Mathf.Max(Config.S(48f), titleFontSize + Config.S(18f));
+            float titleFontSize = ThemeManager.CategoryWindowStyle != null ? ThemeManager.CategoryWindowStyle.fontSize : GUIManager.S(18f);
+            float topIndent = Mathf.Max(GUIManager.S(48f), titleFontSize + GUIManager.S(18f));
 
-            float pad = Config.S(10f);
+            float pad = GUIManager.S(10f);
             float leftPanelWidth = NEFManager.windowRect.width - rightPanelWidth - (pad * 3f);
             float contentHeight = NEFManager.windowRect.height - topIndent - pad;
 

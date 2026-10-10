@@ -23,7 +23,7 @@ public class ButtonSetting : Setting
         Event e = Event.current;
 
         float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
+        float gap = SettingValues.Gap;
 
         string localizedName = Translate(Name);
         string localizedButtonText = Translate(ButtonText);
@@ -35,7 +35,7 @@ public class ButtonSetting : Setting
 
         // Button
         float btnW = Config.SettingWidth;
-        float btnStartX = width - indent - btnW - gap - Config.SettingsInput.ResetButtonW;
+        float btnStartX = width - indent - btnW - gap - SettingValues.ResetButtonW;
         Rect btnRect = new(btnStartX, y, Config.SettingWidth, Config.elementHeight);
         GUI.Box(btnRect, localizedButtonText, ThemeManager.ButtonSettingStyle);
 

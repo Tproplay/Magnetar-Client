@@ -12,10 +12,10 @@ public static class GUISelectorDrawer
     private const float BaseSelectorHeight = 800f;
 
     public static Rect SelectorRect = new(
-        (Config.NativeWidth - Config.S(BaseSelectorWidth)) / 2f,
-        (Config.NativeHeight - Config.S(BaseSelectorHeight)) / 2f,
-        Config.S(BaseSelectorWidth),
-        Config.S(BaseSelectorHeight));
+        (Config.NativeWidth - GUIManager.S(BaseSelectorWidth)) / 2f,
+        (Config.NativeHeight - GUIManager.S(BaseSelectorHeight)) / 2f,
+GUIManager.S(BaseSelectorWidth),
+GUIManager.S(BaseSelectorHeight));
 
     public static MultiSelectSetting ActiveSetting { get; set; }
 
@@ -30,8 +30,8 @@ public static class GUISelectorDrawer
         DrawSetting.multiSelectSearchQuery = "";
         DrawSetting.manualScrollY = 0f;
 
-        float targetW = Config.S(BaseSelectorWidth);
-        float targetH = Mathf.Min(Config.S(BaseSelectorHeight), Config.NativeHeight * 0.8f);
+        float targetW = GUIManager.S(BaseSelectorWidth);
+        float targetH = Mathf.Min(GUIManager.S(BaseSelectorHeight), Config.NativeHeight * 0.8f);
         SelectorRect = new Rect((Config.NativeWidth - targetW) / 2f, (Config.NativeHeight - targetH) / 2f, targetW, targetH);
 
         AnimationHandler.SwitchView(GUIManager.Group, GUIManager.ViewSelector);
@@ -42,8 +42,8 @@ public static class GUISelectorDrawer
         float viewAlpha = AnimationHandler.GetViewAlpha(GUIManager.Group, GUIManager.ViewSelector);
         if (viewAlpha <= 0.001f) return;
 
-        float targetW = Config.S(BaseSelectorWidth);
-        float targetH = Mathf.Min(Config.S(BaseSelectorHeight), Config.NativeHeight * 0.8f);
+        float targetW = GUIManager.S(BaseSelectorWidth);
+        float targetH = Mathf.Min(GUIManager.S(BaseSelectorHeight), Config.NativeHeight * 0.8f);
         Config.RescaleAroundCenter(ref SelectorRect, targetW, targetH);
 
         Color prevColor = GUI.color;
@@ -74,9 +74,9 @@ public static class GUISelectorDrawer
 #if ANDROID
         float titleHeight = Config.S(25f) * 1.30f;
 #else
-        float titleHeight = Config.S(25f);
+        float titleHeight = GUIManager.S(25f);
 #endif
-        float dragSafeMargin = Config.ShowMobileButtons ? Config.S(35f) : 0f;
+        float dragSafeMargin = GUIManager.ShowMobileButtons ? GUIManager.S(35f) : 0f;
         GUI.DragWindow(new Rect(0, 0, SelectorRect.width - dragSafeMargin, titleHeight));
 
         if (multiSelectRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)

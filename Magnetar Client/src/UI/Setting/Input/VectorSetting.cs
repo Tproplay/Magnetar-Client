@@ -3,6 +3,7 @@ using Magnetar_Client.UI.WindowDrawing;
 using static Magnetar_Client.Utils.Translator;
 using System;
 using UnityEngine;
+using Magnetar_Client.Core;
 
 namespace Magnetar_Client.UI.Setting;
 
@@ -40,9 +41,9 @@ public class Vector2Setting : Setting
     {
         float elemH = Config.elementHeight;
         float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
-        float subLabelW = Config.S(16f);
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
+        float subLabelW = GUIManager.S(16f);
         float totalControlW = Config.SettingWidth;
 
         // Label: Left space
@@ -121,9 +122,9 @@ public class Vector2IntSetting : Setting
     {
         float elemH = Config.elementHeight;
         float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
-        float subLabelW = Config.S(16f);
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
+        float subLabelW = GUIManager.S(16f);
         float totalControlW = Config.SettingWidth;
 
         // Label: Left space
@@ -202,9 +203,9 @@ public class Vector3Setting : Setting
     {
         float elemH = Config.elementHeight;
         float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
-        float subLabelW = Config.S(14f);
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
+        float subLabelW = GUIManager.S(14f);
         float totalControlW = Config.SettingWidth * 1.15f;
 
         // Label: Left space
@@ -290,9 +291,9 @@ public class Vector3IntSetting : Setting
     {
         float elemH = Config.elementHeight;
         float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
-        float subLabelW = Config.S(14f);
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
+        float subLabelW = GUIManager.S(14f);
         float totalControlW = Config.SettingWidth * 1.15f;
 
         // Label: Left space

@@ -25,12 +25,47 @@ public static class ModuleManager
     }
 
     public const string Group = "ModuleManager";
+        private const float _baseSettingsWidth = 630f;
 
     public static bool IsInitialized { get; private set; }
     public static readonly List<Modules.Module> Modules = new();
     public static WindowType CurrentWindow { get; set; } = WindowType.Modules;
     public static Modules.Module ActiveSettingsModule { get; set; }
+        private const float _baseSettingsWidth = 760f; // Wide enough for mobile displays
+        public static float SettingsWidth => GUIManager.S(_baseSettingsWidth);
+        public static float ScrollSensitivity
+        {
+            get => GUIManager.S(_baseScrollSensitivity);
+            set => _baseScrollSensitivity = value;
+        }
+        public static float MultiSelectWindowWidth
+        {
+            get => GUIManager.S(_baseMultiSelectWindowWidth);
+            set => _baseMultiSelectWindowWidth = value;
+        }
+        public static float MultiSelectWindowHeight
+        {
+            get => Mathf.Min(GUIManager.S(_baseMultiSelectWindowHeight), NativeHeight * 0.8f);
+            set => _baseMultiSelectWindowHeight = value;
+        }
     internal static bool resetWindowPos;
+
+        public static float PopupSpeed = 13f;
+
+        // Search Window
+        public static float SearchAnimationSpeed = 15f;
+        public static float SearchWidthMultiplier = 1.5f;
+
+        // Settings Window
+        public static float MaxSettingsWindowHeightPct = 0.8f;
+        public static float SettingsScrollLerpSpeed = 15f;
+
+        private static float _baseScrollSensitivity = 25f;
+
+        // Multi-Select Window (Capped at 80% of screen height)
+        private static float _baseMultiSelectWindowWidth = 500f;
+
+        private static float _baseMultiSelectWindowHeight = 800f;
 
     public static void Init()
     {

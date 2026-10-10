@@ -67,7 +67,7 @@ public static class SettingsWindowDrawer
         if (!_settingsPositions.ContainsKey(targetMod) || ModuleManager.resetWindowPos)
         {
             ModuleManager.resetWindowPos = false;
-            float popupHeight = Config.S(25f);
+            float popupHeight = GUIManager.S(25f);
 
             _settingsPositions[targetMod] = new Rect(
                 (Config.NativeWidth / 2f) - (targetWidth / 2f),
@@ -84,7 +84,7 @@ public static class SettingsWindowDrawer
             Rect currentRect = _settingsPositions[targetMod];
             if (Mathf.Abs(currentRect.width - targetWidth) > 0.5f)
             {
-                float newWidth = Mathf.Lerp(currentRect.width, targetWidth, Time.deltaTime * Config.ModuleManager.PopupSpeed);
+                float newWidth = Mathf.Lerp(currentRect.width, targetWidth, Time.deltaTime * ModuleManager.PopupSpeed);
                 float widthDiff = newWidth - currentRect.width;
 
                 currentRect.width = newWidth;
@@ -120,9 +120,9 @@ public static class SettingsWindowDrawer
 #if ANDROID
         float headerHeight = Config.S(26f) * 1.30f;
 #else
-        float headerHeight = Config.S(26f);
+        float headerHeight = GUIManager.S(26f);
 #endif
-        float maxWindowHeight = Config.NativeHeight * Config.ModuleManager.MaxSettingsWindowHeightPct;
+        float maxWindowHeight = Config.NativeHeight * ModuleManager.MaxSettingsWindowHeightPct;
         float maxViewHeight = maxWindowHeight - headerHeight;
 
         if (!_moduleContentHeights.ContainsKey(mod)) _moduleContentHeights[mod] = 0f;
@@ -134,7 +134,7 @@ public static class SettingsWindowDrawer
         GUI.Box(headerBgRect, Translate(mod.Name), ThemeManager.SettingsWndowStyle);
 
         _moduleContentHeights[mod] = Mathf.Lerp(_moduleContentHeights[mod], _targetContentHeights[mod],
-            Time.unscaledDeltaTime * Config.ModuleManager.SettingsScrollLerpSpeed);
+            Time.unscaledDeltaTime * ModuleManager.SettingsScrollLerpSpeed);
 
         if (Mathf.Abs(_moduleContentHeights[mod] - _targetContentHeights[mod]) < 0.5f)
             _moduleContentHeights[mod] = _targetContentHeights[mod];
@@ -144,13 +144,13 @@ public static class SettingsWindowDrawer
         float viewHeight = windowHeight - headerHeight;
 
         Event e = Event.current;
-        float closeBtnSize = Config.S(20f);
+        float closeBtnSize = GUIManager.S(20f);
 
-        if (Config.ShowMobileButtons)
+        if (GUIManager.ShowMobileButtons)
         {
-            float btnSize = Config.S(22f);
+            float btnSize = GUIManager.S(22f);
             float btnY = (headerHeight - btnSize) / 2f;
-            float btnX = windowWidth - Config.S(26f);
+            float btnX = windowWidth - GUIManager.S(26f);
             Rect closeButtonRect = new(btnX, btnY, btnSize, btnSize);
 
             bool isHovered = closeButtonRect.Contains(e.mousePosition);
@@ -180,13 +180,13 @@ public static class SettingsWindowDrawer
 
         bool needsScrollbar = _targetContentHeights[mod] > maxViewHeight;
         float maxScroll = needsScrollbar ? (_targetContentHeights[mod] - maxViewHeight) : 0f;
-        float contentWidth = needsScrollbar ? windowWidth - Config.S(16f) : windowWidth;
+        float contentWidth = needsScrollbar ? windowWidth - GUIManager.S(16f) : windowWidth;
         float currentScroll = _settingsScrollPositions[mod].y;
 
         Rect outRect = new(0, headerHeight, windowWidth, viewHeight);
         if (outRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
         {
-            currentScroll = Mathf.Clamp(currentScroll + e.delta.y * Config.ModuleManager.ScrollSensitivity, 0, maxScroll);
+            currentScroll = Mathf.Clamp(currentScroll + e.delta.y * ModuleManager.ScrollSensitivity, 0, maxScroll);
             _settingsScrollPositions[mod] = new Vector2(0, currentScroll);
             e.Use();
         }
@@ -211,7 +211,7 @@ public static class SettingsWindowDrawer
             DrawSettingsScrollbar(windowWidth, headerHeight, viewHeight, _targetContentHeights[mod], maxViewHeight, currentScroll, maxScroll);
         }
 
-        GUI.DragWindow(new Rect(0, 0, windowWidth - closeBtnSize - Config.S(10f), headerHeight));
+        GUI.DragWindow(new Rect(0, 0, windowWidth - closeBtnSize - GUIManager.S(10f), headerHeight));
 
         GUI.color = prevColor;
         GUI.contentColor = prevContentColor;
@@ -237,8 +237,8 @@ public static class SettingsWindowDrawer
             if (w > maxNameWidth) maxNameWidth = w;
         }
 
-        float calculatedWidth = Config.indent + maxNameWidth + Config.S(35f) + Config.SettingWidth + Config.indent;
-        return Mathf.Max(Config.ModuleManager.SettingsWidth, Mathf.Max(mod.SettingsWidth, calculatedWidth));
+        float calculatedWidth = Config.indent + maxNameWidth + GUIManager.S(35f) + Config.SettingWidth + Config.indent;
+        return Mathf.Max(ModuleManager.SettingsWidth, Mathf.Max(mod.SettingsWidth, calculatedWidth));
     }
 
     private static float DrawSettingsBody(Modules.Module mod, float y, float width)
@@ -255,7 +255,7 @@ public static class SettingsWindowDrawer
 
         if (!string.IsNullOrEmpty(mod.Author))
         {
-            float authorLineHeight = Config.S(18f);
+            float authorLineHeight = GUIManager.S(18f);
             GUI.Label(new Rect(Config.indent, y, width - (Config.indent * 2), authorLineHeight), "by " + mod.Author, ThemeManager.SettingAuthorStyle);
             y += authorLineHeight + Config.spacing;
         }
@@ -301,8 +301,8 @@ public static class SettingsWindowDrawer
         // 1. Draw Keybind
         mod.KeyBind.Draw(ref y, width);
 
-        float resetBtnW = Config.S(22f);
-        float gap = Config.S(6f);
+        float resetBtnW = GUIManager.S(22f);
+        float gap = GUIManager.S(6f);
         float elemH = Config.elementHeight;
         float labelWidth = Mathf.Max(width * 0.40f, width - Config.indent * 2 - Config.SettingWidth - resetBtnW - gap);
 
@@ -356,15 +356,15 @@ public static class SettingsWindowDrawer
 
     private static void DrawSettingsScrollbar(float windowWidth, float headerHeight, float viewHeight, float targetContentHeight, float maxViewHeight, float currentScroll, float maxScroll)
     {
-        float trackX = windowWidth - Config.S(14f);
-        float trackY = headerHeight + Config.S(5f);
-        float trackHeight = viewHeight - Config.S(10f);
+        float trackX = windowWidth - GUIManager.S(14f);
+        float trackY = headerHeight + GUIManager.S(5f);
+        float trackHeight = viewHeight - GUIManager.S(10f);
 
-        float handleHeight = Mathf.Max(Config.S(20f), (maxViewHeight / targetContentHeight) * trackHeight);
+        float handleHeight = Mathf.Max(GUIManager.S(20f), (maxViewHeight / targetContentHeight) * trackHeight);
         float scrollPct = maxScroll > 0 ? currentScroll / maxScroll : 0f;
         float handleY = trackY + (scrollPct * (trackHeight - handleHeight));
 
-        GUI.Box(new Rect(trackX + Config.S(5f), trackY, Config.S(2f), trackHeight), "", ThemeManager.SeparatorStyle);
-        GUI.Box(new Rect(trackX, handleY, Config.S(12f), handleHeight), "", ThemeManager.CategoryModuleOffStyle);
+        GUI.Box(new Rect(trackX + GUIManager.S(5f), trackY, GUIManager.S(2f), trackHeight), "", ThemeManager.SeparatorStyle);
+        GUI.Box(new Rect(trackX, handleY, GUIManager.S(12f), handleHeight), "", ThemeManager.CategoryModuleOffStyle);
     }
 }

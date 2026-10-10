@@ -15,10 +15,10 @@ public static class GUIControlsDrawer
     private const float BaseHeight = 360f;
 
     public static Rect WindowRect = new(
-        (Config.NativeWidth - Config.S(BaseWidth)) / 2f,
-        (Config.NativeHeight - Config.S(BaseHeight)) / 2f,
-        Config.S(BaseWidth),
-        Config.S(BaseHeight));
+        (Config.NativeWidth - GUIManager.S(BaseWidth)) / 2f,
+        (Config.NativeHeight - GUIManager.S(BaseHeight)) / 2f,
+GUIManager.S(BaseWidth),
+GUIManager.S(BaseHeight));
 
     private static GUI.WindowFunction _cachedGuiControls;
     private static GUI.WindowFunction GuiControlsDelegate => _cachedGuiControls ??=
@@ -29,7 +29,7 @@ public static class GUIControlsDrawer
         float viewAlpha = AnimationHandler.GetViewAlpha(GUIManager.Group, GUIManager.ViewMain);
         if (viewAlpha <= 0.001f) return;
 
-        Config.RescaleAroundCenter(ref WindowRect, Config.S(BaseWidth), WindowRect.height);
+        Config.RescaleAroundCenter(ref WindowRect, GUIManager.S(BaseWidth), WindowRect.height);
 
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
@@ -53,24 +53,24 @@ public static class GUIControlsDrawer
     {
         float w = WindowRect.width;
         float indent = Config.indent;
-        float rightMargin = Config.S(16f);
+        float rightMargin = GUIManager.S(16f);
         Event e = Event.current;
-        float rowSpacing = Config.S(8f);
+        float rowSpacing = GUIManager.S(8f);
         float elemH = GUIManager.elementHeight;
 
 #if ANDROID
         float headerHeight = Config.S(26f) * 1.30f;
 #else
-        float headerHeight = Config.S(26f);
+        float headerHeight = GUIManager.S(26f);
 #endif
-        float y = headerHeight + Config.S(12f);
+        float y = headerHeight + GUIManager.S(12f);
 
         Rect headerBgRect = new(0, 0, w, headerHeight);
         GUI.Box(headerBgRect, Translate("GUI Configuration"), ThemeManager.SettingsWndowStyle);
 
         float controlWidth = Mathf.Min(Config.SettingWidth, w * 0.45f);
         float controlX = w - rightMargin - controlWidth;
-        float labelWidth = controlX - indent - Config.S(10f);
+        float labelWidth = controlX - indent - GUIManager.S(10f);
 
         void DrawButtonRow(string labelText, string btnText, Action onClick, GUIStyle btnStyle = null)
         {
@@ -101,11 +101,11 @@ public static class GUIControlsDrawer
             Rect lblRect = new(indent, y, labelWidth, elemH);
             GUI.Label(lblRect, labelText, ThemeManager.SettingLabelStyle);
 
-            float inputW = Config.SettingsInput.NumericInputWidth;
-            float gap = Config.SettingsInput.Gap;
+            float inputW = SettingValues.NumericInputWidth;
+            float gap = SettingValues.Gap;
             float sliderW = controlWidth - inputW - gap;
-            float trackH = Config.SettingsInput.SliderHeight;
-            float thumbSize = Config.S(16f);
+            float trackH = SettingValues.SliderHeight;
+            float thumbSize = GUIManager.S(16f);
 
             Rect sliderRect = new(controlX, y + ((elemH - trackH) / 2f), sliderW, trackH);
             Rect inputRect = new(controlX + sliderW + gap, y, inputW, elemH);
@@ -244,17 +244,17 @@ public static class GUIControlsDrawer
         // 5. Floating Icon
         DrawButtonRow(
             Translate("Floating Icon"),
-            Translate(Config.ShowFloatingIcon ? "ON" : "OFF"),
-            () => Config.SetFloatingIcon(!Config.ShowFloatingIcon),
-            Config.ShowFloatingIcon ? ThemeManager.SettingOn : ThemeManager.SettingOff
+            Translate(GUIManager.ShowFloatingIcon ? "ON" : "OFF"),
+            () => GUIManager.SetFloatingIcon(!GUIManager.ShowFloatingIcon),
+GUIManager.ShowFloatingIcon ? ThemeManager.SettingOn : ThemeManager.SettingOff
         );
 
         // 6. Mobile Close Buttons
         DrawButtonRow(
             Translate("Mobile Close Buttons"),
-            Translate(Config.ShowMobileButtons ? "ON" : "OFF"),
-            () => Config.ShowMobileButtons = !Config.ShowMobileButtons,
-            Config.ShowMobileButtons ? ThemeManager.SettingOn : ThemeManager.SettingOff
+            Translate(GUIManager.ShowMobileButtons ? "ON" : "OFF"),
+            () => GUIManager.ShowMobileButtons = !GUIManager.ShowMobileButtons,
+GUIManager.ShowMobileButtons ? ThemeManager.SettingOn : ThemeManager.SettingOff
         );
 
         // 7. Show Credits
@@ -266,7 +266,7 @@ public static class GUIControlsDrawer
         );
 
         // 8. Opacity Slider
-        if (Config.ShowFloatingIcon && GUIManager.FloatingIconOpacitySetting != null)
+        if (GUIManager.ShowFloatingIcon && GUIManager.FloatingIconOpacitySetting != null)
         {
             if (DrawSetting.ActiveSliderId != GUIManager.FloatingIconOpacitySetting.GetHashCode() && Mathf.Abs(GUIManager.FloatingIconOpacitySetting.Value - Config.FloatingIconOpacity) > 0.001f)
             {
@@ -281,7 +281,7 @@ public static class GUIControlsDrawer
             DrawSetting.OnPostDraw = null;
         }
 
-        WindowRect.height = y + Config.S(12f);
+        WindowRect.height = y + GUIManager.S(12f);
 
         GUI.DragWindow(new Rect(0, 0, w, headerHeight));
 

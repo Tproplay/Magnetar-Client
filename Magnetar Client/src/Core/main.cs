@@ -50,7 +50,7 @@ public class Main
 
     static void ApplyHarmonyPatches()
     {
-        HarmonyInstance = new HarmonyLib.Harmony(Magnetar_Info.HarmonyId);
+        HarmonyInstance = new HarmonyLib.Harmony(MagnetarInfo.HarmonyId);
 
         Assembly currentAssembly = typeof(Main).Assembly;
 
@@ -109,6 +109,7 @@ public class Main
 
         UI.GUIHelper.OnUpdate();
         AnimationHandler.UpdateTransition();
+        Translator.Update();
 
         if (Input.GetKeyDown(Config.MenuOpenKey) && !HUDManager.forceShow)
         {
@@ -175,6 +176,7 @@ public class Main
 
             UI.Themes.ThemeManager.Rescale();
 
+            Actions.OnGUI?.Invoke();
             ServiceRegistry.RenderAll();
 
             // Render menus with smooth fade transition

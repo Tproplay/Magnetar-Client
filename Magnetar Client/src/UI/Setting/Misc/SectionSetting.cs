@@ -3,6 +3,7 @@ using static Magnetar_Client.Utils.Translator;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Magnetar_Client.Core;
 
 namespace Magnetar_Client.UI.Setting;
 
@@ -116,8 +117,8 @@ public class SectionSetting : Setting
         Event e = Event.current;
         float elemH = Config.elementHeight;
         float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float actionBtnW = Config.SettingsInput.ResetButtonW;
+        float gap = SettingValues.Gap;
+        float actionBtnW = SettingValues.ResetButtonW;
 
         // 1. Group Header
         string title = $"{Translate(Name)} ({Sections.Count})";
@@ -132,7 +133,7 @@ public class SectionSetting : Setting
         {
             var section = Sections[i];
             float sectionTotalW = width - (indent * 2f);
-            float headerH = Config.S(24f);
+            float headerH = GUIManager.S(24f);
 
             // Right-aligned action button
             float delStartX = indent + sectionTotalW - actionBtnW;

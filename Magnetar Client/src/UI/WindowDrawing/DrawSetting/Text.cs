@@ -3,6 +3,7 @@ using Magnetar_Client.UI.Themes;
 using static Magnetar_Client.Utils.Translator;
 using System.Collections.Generic;
 using UnityEngine;
+using Magnetar_Client.Core;
 
 namespace Magnetar_Client.UI.WindowDrawing;
 
@@ -22,7 +23,7 @@ public static partial class DrawSetting
         public TextState(string t, int c, int s) { Text = t; Cursor = c; Select = s; }
     }
 
-    private static int undoStackCount = Config.SettingsInput.TextFieldUndoLimit;
+    private static int undoStackCount = SettingValues.TextFieldUndoLimit;
     private static readonly List<TextState> undoStack = new();
     private static readonly List<TextState> redoStack = new();
     private static int lastHistoryFieldId = -1;
@@ -38,7 +39,7 @@ public static partial class DrawSetting
         string translatedName = Translate(strSet.Name);
 
         float controlW = Mathf.Min(Config.SettingWidth * 1.25f, width * 0.55f);
-        float gap = Config.S(8f);
+        float gap = GUIManager.S(8f);
         float labelW = Mathf.Max(width * 0.38f, width - (Config.indent * 2f) - controlW - gap);
 
         Rect labelRect = new(Config.indent, y, labelW, elemH);
@@ -404,8 +405,8 @@ public static partial class DrawSetting
 
         if (showAutocomplete && filteredVars.Count > 0)
         {
-            float rowHeight = Config.SettingsInput.AutocompleteRowHeight;
-            float maxDropdownHeight = Config.SettingsInput.AutocompleteMaxHeight;
+            float rowHeight = SettingValues.AutocompleteRowHeight;
+            float maxDropdownHeight = SettingValues.AutocompleteMaxHeight;
             float totalHeight = filteredVars.Count * rowHeight;
             float dropHeight = Mathf.Min(totalHeight, maxDropdownHeight);
 
@@ -437,7 +438,7 @@ public static partial class DrawSetting
 
                 if (e.type == EventType.ScrollWheel)
                 {
-                    autocompleteScrollY = Mathf.Clamp(autocompleteScrollY + e.delta.y * Config.SettingsInput.AutocompleteScrollSensitivity,
+                    autocompleteScrollY = Mathf.Clamp(autocompleteScrollY + e.delta.y * SettingValues.AutocompleteScrollSensitivity,
                         0, Mathf.Max(0, totalHeight - dropHeight));
                     e.Use();
                 }

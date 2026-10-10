@@ -61,8 +61,8 @@ public class BindSetting : Setting
         bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
 
         float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
         float settingW = Config.SettingWidth;
 
         // Label: occupies remaining width on the left

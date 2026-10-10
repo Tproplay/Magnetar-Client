@@ -11,6 +11,8 @@ using System.IO;
 using static Magnetar_Client.Utils.Translator;
 
 using System.Text.RegularExpressions;
+using Magnetar_Client.Core;
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -324,9 +326,9 @@ public static class NEFData
         if (currentPyramidRoots == null || currentPyramidRoots.Count == 0) return;
 
         // Spacing scales dynamically with GUI Scale to prevent overlap
-        float spacingX = Config.S(160f);
-        float spacingY = Config.S(160f);
-        float treeGap = Config.S(220f);
+        float spacingX = GUIManager.S(160f);
+        float spacingY = GUIManager.S(160f);
+        float treeGap = GUIManager.S(220f);
 
         float currentStartX = 0f;
         foreach (var root in currentPyramidRoots)

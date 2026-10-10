@@ -4,6 +4,7 @@ using static Magnetar_Client.Utils.Translator;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Magnetar_Client.Core;
 
 namespace Magnetar_Client.UI.WindowDrawing;
 
@@ -50,23 +51,23 @@ public static partial class DrawSetting
 
         Event e = Event.current;
         int sliderId = 1002;
-        float ROW_HEIGHT = Config.SettingsInput.MultiSelectRowHeight;
-        float rowStep = ROW_HEIGHT + Config.S(2f);
+        float ROW_HEIGHT = SettingValues.MultiSelectRowHeight;
+        float rowStep = ROW_HEIGHT + GUIManager.S(2f);
 
         var options = activeMultiSelect.Options;
 
 #if ANDROID
         float titleHeight = Config.S(25f) * 1.30f;
 #else
-        float titleHeight = Config.S(25f);
+        float titleHeight = GUIManager.S(25f);
 #endif
         Rect headerBgRect = new(0, 0, multiSelectWindowRect.width, titleHeight);
         GUI.Box(headerBgRect, Translate("Select ") + Translate(activeMultiSelect.Name), ThemeManager.SettingsWndowStyle);
 
-        if (Config.ShowMobileButtons)
+        if (GUIManager.ShowMobileButtons)
         {
-            float closeBtnSize = Config.S(20f);
-            float btnX = multiSelectWindowRect.width - Config.S(26f);
+            float closeBtnSize = GUIManager.S(20f);
+            float btnX = multiSelectWindowRect.width - GUIManager.S(26f);
             float btnY = (titleHeight - closeBtnSize) / 2f;
             Rect closeButtonRect = new(btnX, btnY, closeBtnSize, closeBtnSize);
 
@@ -82,13 +83,13 @@ public static partial class DrawSetting
             GUI.Box(closeButtonRect, "✕", ThemeManager.CloseButtonStyle);
         }
 
-        float spacing = Config.S(6f);
+        float spacing = GUIManager.S(6f);
         float searchY = titleHeight + spacing;
-        float searchHeight = Config.S(24f);
+        float searchHeight = GUIManager.S(24f);
 
-        float padX = Config.S(10f);
+        float padX = GUIManager.S(10f);
         float availWidth = multiSelectWindowRect.width - (padX * 2f);
-        float toggleWidth = Mathf.Min(Config.S(115f), availWidth * 0.32f);
+        float toggleWidth = Mathf.Min(GUIManager.S(115f), availWidth * 0.32f);
         float searchWidth = availWidth - toggleWidth - spacing;
 
         Rect searchRect = new(padX, searchY, searchWidth, searchHeight);
@@ -177,20 +178,20 @@ public static partial class DrawSetting
         }
 
         float contentStartY = searchY + searchHeight + spacing;
-        float viewHeight = multiSelectWindowRect.height - contentStartY - Config.S(8f);
+        float viewHeight = multiSelectWindowRect.height - contentStartY - GUIManager.S(8f);
         float maxScrollDist = Mathf.Max(0f, totalContentHeight - viewHeight);
 
-        float scrollbarWidth = Config.S(12f);
+        float scrollbarWidth = GUIManager.S(12f);
         float scrollX = multiSelectWindowRect.width - padX - scrollbarWidth;
         float trackStartY = contentStartY;
         float trackHeight = viewHeight;
-        float handleSize = Mathf.Max(Config.S(25f), (viewHeight / Mathf.Max(1f, totalContentHeight)) * trackHeight);
+        float handleSize = Mathf.Max(GUIManager.S(25f), (viewHeight / Mathf.Max(1f, totalContentHeight)) * trackHeight);
         float usableTrackRange = Mathf.Max(1f, trackHeight - handleSize);
 
         float scrollPctCurrent = (maxScrollDist > 0) ? manualScrollY / maxScrollDist : 0f;
         float handleY = trackStartY + (scrollPctCurrent * usableTrackRange);
         Rect handleRect = new(scrollX, handleY, scrollbarWidth, handleSize);
-        Rect trackHitbox = new(scrollX - Config.S(4f), trackStartY, scrollbarWidth + Config.S(8f), trackHeight);
+        Rect trackHitbox = new(scrollX - GUIManager.S(4f), trackStartY, scrollbarWidth + GUIManager.S(8f), trackHeight);
 
         if (ActiveSliderId == sliderId)
         {
@@ -234,7 +235,7 @@ public static partial class DrawSetting
 
         if (e.type == EventType.ScrollWheel && new Rect(0, 0, multiSelectWindowRect.width, multiSelectWindowRect.height).Contains(e.mousePosition))
         {
-            targetScrollY = Mathf.Clamp(targetScrollY + (e.delta.y * Config.S(40f)), 0f, maxScrollDist);
+            targetScrollY = Mathf.Clamp(targetScrollY + (e.delta.y * GUIManager.S(40f)), 0f, maxScrollDist);
             lastSliderUpdateTime = Time.time;
             e.Use();
         }
@@ -263,7 +264,7 @@ public static partial class DrawSetting
 #endif
         }
 
-        float listWidth = availWidth - scrollbarWidth - Config.S(6f);
+        float listWidth = availWidth - scrollbarWidth - GUIManager.S(6f);
         Rect listGroupRect = new(padX, contentStartY, listWidth, viewHeight);
         GUI.BeginGroup(listGroupRect);
         {

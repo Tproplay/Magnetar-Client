@@ -6,6 +6,9 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Api;
 
+/// <summary>
+/// Contains consistent paths for all mod loaders
+/// </summary>
 public static class PathsManager
 {
 

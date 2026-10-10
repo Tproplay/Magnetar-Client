@@ -12,10 +12,10 @@ public static class HUDControlsDrawer
     private const float BaseHeight = 300f;
 
     public static Rect WindowRect = new(
-        (Config.NativeWidth - Config.S(BaseWidth)) / 2f,
-        (Config.NativeHeight - Config.S(BaseHeight)) / 2f,
-        Config.S(BaseWidth),
-        Config.S(BaseHeight));
+        (Config.NativeWidth - GUIManager.S(BaseWidth)) / 2f,
+        (Config.NativeHeight - GUIManager.S(BaseHeight)) / 2f,
+GUIManager.S(BaseWidth),
+GUIManager.S(BaseHeight));
 
     private static GUI.WindowFunction _cachedControlsDelegate;
     private static GUI.WindowFunction ControlsDelegate => _cachedControlsDelegate ??=
@@ -26,7 +26,7 @@ public static class HUDControlsDrawer
         float viewAlpha = AnimationHandler.GetViewAlpha(HUDManager.Group, HUDManager.ViewMain);
         if (viewAlpha <= 0.001f) return;
 
-        Config.RescaleAroundCenter(ref WindowRect, Config.S(BaseWidth), WindowRect.height);
+        Config.RescaleAroundCenter(ref WindowRect, GUIManager.S(BaseWidth), WindowRect.height);
 
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
@@ -48,9 +48,9 @@ public static class HUDControlsDrawer
     private static void DrawHUDControls(int windowID)
     {
         float width = WindowRect.width;
-        float indent = Config.S(10f);
+        float indent = GUIManager.S(10f);
         Event e = Event.current;
-        float y = Config.S(35f);
+        float y = GUIManager.S(35f);
         float elemH = HUDManager.elementHeight;
 
         Rect headerBgRect = new(0, 0, width, y - indent);
@@ -75,7 +75,7 @@ public static class HUDControlsDrawer
             HUDSelectorDrawer.Open();
         }
 
-        y += elemH + Config.S(5f);
+        y += elemH + GUIManager.S(5f);
 
         GUI.Label(new Rect(indent, y, width * 0.45f, elemH), Translate("Layout"), ThemeManager.SettingLabelStyle);
 
@@ -94,7 +94,7 @@ public static class HUDControlsDrawer
             Config.showgui = false;
         }
 
-        y += elemH + Config.S(5f);
+        y += elemH + GUIManager.S(5f);
 
         GUI.Label(new Rect(indent, y, width * 0.45f, elemH), Translate("Background"), ThemeManager.SettingLabelStyle);
         Rect bgRect = new(width * 0.5f, y, width * 0.45f, elemH);
@@ -112,7 +112,7 @@ public static class HUDControlsDrawer
             e.Use();
         }
 
-        y += elemH + Config.S(5f);
+        y += elemH + GUIManager.S(5f);
 
         GUI.Label(new Rect(indent, y, width * 0.45f, elemH), Translate("Enabled"), ThemeManager.SettingLabelStyle);
         Rect enabledRect = new(width * 0.5f, y, width * 0.45f, elemH);
@@ -130,10 +130,10 @@ public static class HUDControlsDrawer
             e.Use();
         }
 
-        y += elemH + Config.S(10f);
+        y += elemH + GUIManager.S(10f);
         WindowRect.height = y;
 
-        GUI.DragWindow(new Rect(0, 0, width, Config.S(25f)));
+        GUI.DragWindow(new Rect(0, 0, width, GUIManager.S(25f)));
 
         Rect clientArea = new(0, 0, width, y);
         if (clientArea.Contains(e.mousePosition) && e.type == EventType.MouseDown)

@@ -10,23 +10,13 @@ using Magnetar_Client.Api;
 
 namespace Magnetar_Client;
 
-public static class Magnetar_Info
-{
-    public const string ModName = "Magnetar Client";
-    public const string Version = "4.0.3";
-    public const string Developer = "Tproplay";
-    public const string HarmonyId = "com.tproplay.magnetar";
-}
-
 public static class Config
 {
-    public static string DefaultProfile = "Default";
-    public static string CurrentProfile = "Default";
-
+    // Preferences
     public static KeyCode MenuOpenKey => Preferences.ModMenuKeyEntry!=null ? Preferences.ModMenuKeyEntry.Value : KeyCode.RightShift;
-
+    public const string DefaultProfile = "Default";
+    public static string CurrentProfile { get; set; } = "Default";
     private static string _theme = "Magnetar Default";
-
     public static string Theme
     {
         get => _theme;
@@ -36,120 +26,10 @@ public static class Config
                 return;
 
             _theme = value;
-
-            // Apply theme colors, rebuild textures, and bind styles
             Magnetar_Client.UI.Themes.ThemeManager.ApplyTheme(_theme);
         }
     }
-
-    public static float RainbowSpeed = 0.07f;
-
-    public static bool ShowMainMenuCredits = true;
-
-    public static float FloatingIconOpacity = 0.85f;
-    public static float FloatingIconIdleTimeout = 4.0f;
-
-    // Native canvas size used by the outer letterbox matrix (main.cs).
-    // NOT scaled by GUIScale - it's the fixed reference resolution
-    // everything else is authored against.
-    public readonly static float NativeWidth = 1920;
-    public readonly static float NativeHeight = 1080;
-
-    public static float GUIScale =
-#if ANDROID
-        1.5f;
-#else
-        1f;
-#endif
-
-    public static float S(float value) => value * GUIScale;
-
-    public static float ElementScale = 1f;
-    public static float ES(float value) => value * ElementScale;
-
-    private static bool _showMobileButtons
-#if ANDROID
-#else
-;
-#endif
-
-    public static bool ShowMobileButtons
-    {
-        get => _showMobileButtons;
-        set
-        {
-            if (_showMobileButtons == value) return;
-            _showMobileButtons = value;
-
-#if MELONLOADER || RELEASE_MELON
-            if (Preferences.ShowMobileButtonsEntry != null)
-            {
-                Preferences.ShowMobileButtonsEntry.Value = value;
-            }
-#elif BEPINEX || RELEASE_BEPINEX || ANDROID
-            if (Preferences.ShowMobileButtonsEntry != null)
-            {
-                Preferences .ShowMobileButtonsEntry.Value = value;
-                Preferences.BepInExConfig?.Save();
-            }
-#endif
-        }
-    }
-
-    public static bool showgui;
-    public static bool dimBg;
-    public static TabType CurrentTab = TabType.MODULES;
-
-    public static float MinTimeBetweenSaves = 120;
-
-    // Floating Menu Icon toggle (Default: true on mobile, false on PC)
-    public static bool ShowFloatingIcon
-#if ANDROID
-#else
-;
-#endif
-    public static void SetFloatingIcon(bool enabled)
-    {
-        ShowFloatingIcon = enabled;
-#if MELONLOADER || RELEASE_MELON
-    if (Preferences.ShowFloatingIconEntry != null)
-    {
-        Preferences.ShowFloatingIconEntry.Value = enabled;
-    }
-#elif BEPINEX || RELEASE_BEPINEX || ANDROID
-        if (Preferences.ShowFloatingIconEntry != null)
-        {
-            Preferences.ShowFloatingIconEntry.Value = enabled;
-            Preferences.BepInExConfig?.Save();
-        }
-#endif
-        Utils.SaveLoad.Save();
-    }
-
-    // --- Scaled UI sizes ---------------------------------------------
-    // These are exposed as their original (unscaled) "base"/1x sizes via
-    // the Base* fields, and every public property below returns that
-    // base size run through S(), so every consumer (ModuleManager,
-    // DrawSetting, etc.) automatically scales with Config.GUIScale
-    // without needing to call S() itself.
-
-    private const float BaseModuleWindowWidth = 200f;
-    public static float ModuleWindowWidth => S(BaseModuleWindowWidth);
-
-    private const float BaseElementHeight = 22f;
-    public static float elementHeight => S(BaseElementHeight);
-
-    private const float BaseIndent = 8f;
-    public static float indent => S(BaseIndent);
-
-    private const float BaseSpacing = 6f;
-    public static float spacing => S(BaseSpacing);
-
-    private const float BaseSelectButtonWidth = 70f;
-    public static float selectButtonWidth => S(BaseSelectButtonWidth);
-
     private static string _language = "English";
-
     public static string Language
     {
         get => _language;
@@ -160,168 +40,44 @@ public static class Config
 
             _language = value;
 
-            Actions.OnPreLanguageChanged?.Invoke();
-
             _ = Translator.LoadTranslationsAsync(() =>
             {
                 ServiceRegistry.NotifyLanguageChanged();
-                Actions.OnPostLanguageChanged?.Invoke();
+                Actions.OnLanguageChanged?.Invoke();
             });
         }
     }
 
-    private static float _baseSettingWidth = 200f;
-    public static float SettingWidth
-    {
-        get => S(_baseSettingWidth);
-        set => _baseSettingWidth = value;
-    }
+    // GUI
+    public static bool showgui;
+    public static bool dimBg;
+    public static TabType CurrentTab = TabType.MODULES;
 
-    public static class ModuleManager
-    {
-#if !ANDROID
-        private static float _baseSettingsWidth = 630f;
-#elif ANDROID
-        private static float _baseSettingsWidth = 830f; // Wide enough for mobile displays
-#endif
-        public static float SettingsWidth
-        {
-            get => S(_baseSettingsWidth);
-            set => _baseSettingsWidth = value;
-        }
 
-        public static float PopupSpeed = 13f;
+    // GUI Settings
+    public static float RainbowSpeed = 0.07f;
+    public const float NativeWidth = 1920;
+    public const float NativeHeight = 1080;
 
-        // Search Window
-        public static float SearchAnimationSpeed = 15f;
-        public static float SearchWidthMultiplier = 1.5f;
+    // GUI Width
+    private const float BaseModuleWindowWidth = 200f;
+    public static float ModuleWindowWidth => GUIManager.S(BaseModuleWindowWidth);
 
-        // Settings Window
-        public static float MaxSettingsWindowHeightPct = 0.8f;
-        public static float SettingsScrollLerpSpeed = 15f;
+    private const float BaseElementHeight = 22f;
+    public static float elementHeight => GUIManager.S(BaseElementHeight);
 
-        private static float _baseScrollSensitivity = 25f;
-        public static float ScrollSensitivity
-        {
-            get => S(_baseScrollSensitivity);
-            set => _baseScrollSensitivity = value;
-        }
+    private const float BaseIndent = 8f;
+    public static float indent => GUIManager.S(BaseIndent);
 
-        // Multi-Select Window (Capped at 80% of screen height)
-        private static float _baseMultiSelectWindowWidth = 500f;
-        public static float MultiSelectWindowWidth
-        {
-            get => S(_baseMultiSelectWindowWidth);
-            set => _baseMultiSelectWindowWidth = value;
-        }
+    private const float BaseSpacing = 6f;
+    public static float spacing => GUIManager.S(BaseSpacing);
 
-        private static float _baseMultiSelectWindowHeight = 800f;
-        public static float MultiSelectWindowHeight
-        {
-            get => Mathf.Min(S(_baseMultiSelectWindowHeight), NativeHeight * 0.8f);
-            set => _baseMultiSelectWindowHeight = value;
-        }
-    }
+    private const float BaseSelectButtonWidth = 70f;
+    public static float selectButtonWidth => GUIManager.S(BaseSelectButtonWidth);
 
-    public static class SettingsInput
-    {
-        private static float _baseResetButtonW = 22;
-        public static float ResetButtonW
-        {
-            get => S(_baseResetButtonW);
-            set => _baseResetButtonW = value;
-        }
-        private static float _baseGap = 6;
-        public static float Gap
-        {
-            get => S(_baseGap);
-            set => _baseGap = value;
-        }
 
-        // Numeric Sliders
-        private static float _baseNumericInputWidth = 75f;
-        public static float NumericInputWidth
-        {
-            get => S(_baseNumericInputWidth);
-            set => _baseNumericInputWidth = value;
-        }
-
-        // Fraction of the slider's own value range moved per scroll tick -
-        // not a pixel size, so it does not scale with GUIScale.
-        public static float SliderScrollStep = 0.04f;
-
-        private static float _baseSliderHeight = 7f;
-        public static float SliderHeight
-        {
-            get => S(_baseSliderHeight);
-            set => _baseSliderHeight = value;
-        }
-
-        private static int _baseSliderThumbFontSize = 40;
-        public static int SliderThumbFontSize
-        {
-            get => Mathf.Max(1, Mathf.RoundToInt(S(_baseSliderThumbFontSize)));
-            set => _baseSliderThumbFontSize = value;
-        }
-
-        // Multi-Select Window
-        private static float _baseMultiSelectRowHeight = 22f;
-        public static float MultiSelectRowHeight
-        {
-            get => S(_baseMultiSelectRowHeight);
-            set => _baseMultiSelectRowHeight = value;
-        }
-
-        private static float _baseMultiSelectHeaderHeight = 65f;
-        public static float MultiSelectHeaderHeight
-        {
-            get => S(_baseMultiSelectHeaderHeight);
-            set => _baseMultiSelectHeaderHeight = value;
-        }
-
-        // Dropdowns (Select Setting)
-        private static float _baseDropdownRowHeight = 22f;
-        public static float DropdownRowHeight
-        {
-            get => S(_baseDropdownRowHeight);
-            set => _baseDropdownRowHeight = value;
-        }
-
-        // Row count, not a size - does not scale.
-        public static int DropdownMaxVisibleRows = 6;
-
-        private static float _baseDropdownScrollSensitivity = 15f;
-        public static float DropdownScrollSensitivity
-        {
-            get => S(_baseDropdownScrollSensitivity);
-            set => _baseDropdownScrollSensitivity = value;
-        }
-
-        // Text Fields & Autocomplete
-        // History depth, not a size - does not scale.
-        public static int TextFieldUndoLimit = 200;
-
-        private static float _baseAutocompleteRowHeight = 22f;
-        public static float AutocompleteRowHeight
-        {
-            get => S(_baseAutocompleteRowHeight);
-            set => _baseAutocompleteRowHeight = value;
-        }
-
-        private static float _baseAutocompleteMaxHeight = 150f;
-        public static float AutocompleteMaxHeight
-        {
-            get => S(_baseAutocompleteMaxHeight);
-            set => _baseAutocompleteMaxHeight = value;
-        }
-
-        private static float _baseAutocompleteScrollSensitivity = 15f;
-        public static float AutocompleteScrollSensitivity
-        {
-            get => S(_baseAutocompleteScrollSensitivity);
-            set => _baseAutocompleteScrollSensitivity = value;
-        }
-    }
+    private const float _baseSettingWidth = 200f;
+    public static float SettingWidth => GUIManager.S(_baseSettingWidth);
 
     /// <summary>
     /// Resizes a Rect to the given width/height while keeping its current

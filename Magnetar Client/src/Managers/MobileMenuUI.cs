@@ -119,7 +119,7 @@ public static class MobileMenuUI
 
     private static void EnsureResources()
     {
-        float currentSize = Config.S(120f);
+        float currentSize = GUIManager.S(120f);
         if (Mathf.Abs(_btnRect.width - currentSize) > 0.5f)
         {
             _btnRect.width = currentSize;
@@ -165,7 +165,7 @@ public static class MobileMenuUI
         _circleBtnStyle.normal.background = activeBadgeTex;
         _circleBtnStyle.hover.background = activeBadgeTex;
         _circleBtnStyle.active.background = activeBadgeTex;
-        _circleBtnStyle.fontSize = Mathf.RoundToInt(Config.S(24f));
+        _circleBtnStyle.fontSize = Mathf.RoundToInt(GUIManager.S(24f));
 
         _closeBtnStyle ??= new GUIStyle
             {
@@ -186,7 +186,7 @@ public static class MobileMenuUI
             _closeBtnStyle.active.background = ThemeManager.CategoryModuleOnStyle.active.background;
             _closeBtnStyle.active.textColor = ThemeManager.CategoryModuleOnStyle.active.textColor;
         }
-        _closeBtnStyle.fontSize = Mathf.RoundToInt(Config.S(20f));
+        _closeBtnStyle.fontSize = Mathf.RoundToInt(GUIManager.S(20f));
 
         if (!_hasClampedInitialPos)
         {
@@ -206,12 +206,12 @@ public static class MobileMenuUI
 
         if (!Config.showgui && !HUDManager.forceShow)
         {
-            if (Config.ShowFloatingIcon)
+            if (GUIManager.ShowFloatingIcon)
             {
                 DrawFloatingCircle(e);
             }
         }
-        else if (Config.showgui && !HUDManager.forceShow && Config.ShowMobileButtons)
+        else if (Config.showgui && !HUDManager.forceShow && GUIManager.ShowMobileButtons)
         {
             DrawCloseButton(e);
         }
@@ -225,7 +225,7 @@ public static class MobileMenuUI
 
         if (!_isPointerDown && !_isDragging)
         {
-            if (now - _lastInteractionTime > Config.FloatingIconIdleTimeout)
+            if (now - _lastInteractionTime > GUIManager.FloatingIconIdleTimeout)
             {
                 _isDormant = true;
             }
@@ -289,7 +289,7 @@ public static class MobileMenuUI
         {
             Color prevColor = GUI.color;
 
-            float baseOpacity = Mathf.Clamp01(Config.FloatingIconOpacity);
+            float baseOpacity = Mathf.Clamp01(GUIManager.FloatingIconOpacitySetting.Value);
             float renderAlpha = _isDormant ? baseOpacity * 0.70f : baseOpacity;
             float shadeMultiplier = _isDormant ? DormantDarkenFactor : 1.0f;
 
@@ -305,9 +305,9 @@ public static class MobileMenuUI
     private static void DrawCloseButton(Event e)
     {
         Rect visibleScreen = GetVisibleScreenBounds();
-        float btnW = Config.S(44f);
-        float btnH = Config.S(34f);
-        Rect closeRect = new(visibleScreen.xMax - btnW - Config.S(16f), visibleScreen.yMin + Config.S(12f), btnW, btnH);
+        float btnW = GUIManager.S(44f);
+        float btnH = GUIManager.S(34f);
+        Rect closeRect = new(visibleScreen.xMax - btnW - GUIManager.S(16f), visibleScreen.yMin + GUIManager.S(12f), btnW, btnH);
 
         bool isHover = closeRect.Contains(e.mousePosition);
         if (isHover)

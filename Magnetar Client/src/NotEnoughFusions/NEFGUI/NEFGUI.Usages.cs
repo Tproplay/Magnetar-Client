@@ -16,9 +16,9 @@ public static partial class NEFGUI
 
     private static void DrawUsagesView(Rect viewRect, Event e)
     {
-        float pad = Config.S(10f);
-        float btnW = Config.S(110f);
-        float btnH = Config.S(30f);
+        float pad = GUIManager.S(10f);
+        float btnW = GUIManager.S(110f);
+        float btnH = GUIManager.S(30f);
 
         GUI.Label(
             new Rect(viewRect.x + pad, viewRect.y + pad, viewRect.width - btnW - (pad * 2f), btnH),
@@ -39,17 +39,17 @@ public static partial class NEFGUI
         if (NEFData.currentUsages.Count == 0)
         {
             GUI.Label(
-                new Rect(viewRect.x + pad, viewRect.y + Config.S(50f), viewRect.width - (pad * 2f), btnH),
+                new Rect(viewRect.x + pad, viewRect.y + GUIManager.S(50f), viewRect.width - (pad * 2f), btnH),
                 Translate("This entity is not used as an ingredient in any fusion.")
             );
             return;
         }
 
-        float scrollStartY = viewRect.y + Config.S(50f);
-        Rect scrollAreaRect = new(viewRect.x + pad, scrollStartY, viewRect.width - (pad * 2f), viewRect.height - Config.S(60f));
+        float scrollStartY = viewRect.y + GUIManager.S(50f);
+        Rect scrollAreaRect = new(viewRect.x + pad, scrollStartY, viewRect.width - (pad * 2f), viewRect.height - GUIManager.S(60f));
 
-        int columns = Mathf.Max(3, Mathf.FloorToInt(scrollAreaRect.width / Config.S(115f)));
-        float padding = Config.S(10f);
+        int columns = Mathf.Max(3, Mathf.FloorToInt(scrollAreaRect.width / GUIManager.S(115f)));
+        float padding = GUIManager.S(10f);
         float itemSize = (scrollAreaRect.width - (padding * (columns - 1))) / columns;
         int rowCount = Mathf.CeilToInt((float)NEFData.currentUsages.Count / columns);
         float totalContentHeight = rowCount * (itemSize + padding);
@@ -57,7 +57,7 @@ public static partial class NEFGUI
 
         if (scrollAreaRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
         {
-            usageScrollY += e.delta.y * Config.S(30f);
+            usageScrollY += e.delta.y * GUIManager.S(30f);
             usageScrollY = Mathf.Clamp(usageScrollY, 0f, maxScroll);
             e.Use();
         }
@@ -71,7 +71,7 @@ public static partial class NEFGUI
 
         if (e.type == EventType.MouseDrag && !_isUsageSwiping && scrollAreaRect.Contains(_usageTouchStart))
         {
-            if (Vector2.Distance(e.mousePosition, _usageTouchStart) > Config.S(8f))
+            if (Vector2.Distance(e.mousePosition, _usageTouchStart) > GUIManager.S(8f))
             {
                 _isUsageSwiping = true;
 #if ANDROID

@@ -63,8 +63,8 @@ public class SelectSetting : Setting
 
         float elemH = Config.elementHeight;
         float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
         float btnW = Config.SettingWidth;
 
         // Label on the left: fills remaining horizontal space
@@ -98,8 +98,8 @@ public class SelectSetting : Setting
 
         if (DrawSetting.ActiveDropdownId == controlId)
         {
-            float rowHeight = Config.SettingsInput.DropdownRowHeight;
-            int maxVisibleRows = Config.SettingsInput.DropdownMaxVisibleRows;
+            float rowHeight = SettingValues.DropdownRowHeight;
+            int maxVisibleRows = SettingValues.DropdownMaxVisibleRows;
             int itemCount = Options.Count;
             float dropHeight = Mathf.Min(itemCount * rowHeight, maxVisibleRows * rowHeight);
 
@@ -107,7 +107,7 @@ public class SelectSetting : Setting
 
             if (dropRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
             {
-                DrawSetting.dropdownScrollY = Mathf.Clamp(DrawSetting.dropdownScrollY + e.delta.y * Config.SettingsInput.DropdownScrollSensitivity,
+                DrawSetting.dropdownScrollY = Mathf.Clamp(DrawSetting.dropdownScrollY + e.delta.y * SettingValues.DropdownScrollSensitivity,
                     0, Mathf.Max(0, (itemCount * rowHeight) - dropHeight));
                 e.Use();
             }

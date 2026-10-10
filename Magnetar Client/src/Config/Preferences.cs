@@ -5,6 +5,8 @@ using Magnetar_Client.Api;
 using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using UnityEngine;
+using Magnetar_Client.Core;
+
 
 #if MELONLOADER || RELEASE_MELON
 using MelonLoader;
@@ -113,7 +115,7 @@ public static class Preferences
                 "Show Floating Icon", "Display floating draggable menu button.");
 
             if (ShowFloatingIconEntry != null)
-                Config.ShowFloatingIcon = ShowFloatingIconEntry.Value;
+                GUIManager.ShowFloatingIcon = ShowFloatingIconEntry.Value;
 
             ShowMobileButtonsEntry = CreateEntry("UI", "ShowMobileButtons",
 #if ANDROID
@@ -124,7 +126,7 @@ public static class Preferences
                 "Show Mobile Buttons", "Display top-right close buttons on popup windows.");
 
             if (ShowMobileButtonsEntry != null)
-                Config.ShowMobileButtons = ShowMobileButtonsEntry.Value;
+                GUIManager.ShowMobileButtons = ShowMobileButtonsEntry.Value;
 
             CurrentProfileEntry = CreateEntry("ProfileManager", "CurrentProfile", Config.DefaultProfile,
                 "Active Profile", "The active configuration profile name.");

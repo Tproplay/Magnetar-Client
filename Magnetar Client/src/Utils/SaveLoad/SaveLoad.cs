@@ -17,6 +17,8 @@ public static class SaveLoad
     private static float _lastSavedTime;
     private static readonly object _fileLock = new();
 
+    public static float MinTimeBetweenSaves { get; set; } = 120f;
+
     #region Handler Registration API
 
     /// <summary>
@@ -75,7 +77,7 @@ public static class SaveLoad
             {
                 _lastSavedTime = Time.realtimeSinceStartup;
             }
-            else if (_lastSavedTime + Config.MinTimeBetweenSaves >= Time.realtimeSinceStartup)
+            else if (_lastSavedTime + MinTimeBetweenSaves >= Time.realtimeSinceStartup)
             {
                 return;
             }

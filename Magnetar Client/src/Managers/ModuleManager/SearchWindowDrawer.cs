@@ -39,8 +39,8 @@ public static class SearchWindowDrawer
             RequestSearchFocus = true;
 
             float searchWidth = Config.ModuleWindowWidth;
-            float tfY = Config.S(10f);
-            Rect anticipatedTfRect = new(Config.indent, tfY, searchWidth - (Config.indent * 2), Config.S(20f));
+            float tfY = GUIManager.S(10f);
+            Rect anticipatedTfRect = new(Config.indent, tfY, searchWidth - (Config.indent * 2), GUIManager.S(20f));
             ActiveTextFieldId = anticipatedTfRect.GetHashCode();
 
             GUI.FocusWindow(999);
@@ -62,17 +62,17 @@ public static class SearchWindowDrawer
         if (currentEvent.type == EventType.Repaint)
         {
             float targetProgress = IsSearchOpen ? 1f : 0f;
-            SearchAnimProgress = Mathf.Lerp(SearchAnimProgress, targetProgress, Time.unscaledDeltaTime * Config.ModuleManager.SearchAnimationSpeed);
+            SearchAnimProgress = Mathf.Lerp(SearchAnimProgress, targetProgress, Time.unscaledDeltaTime * ModuleManager.SearchAnimationSpeed);
         }
 #endif
 
         if (SearchAnimProgress > 0.01f)
         {
-            float searchWidth = Config.ModuleWindowWidth * Config.ModuleManager.SearchWidthMultiplier;
-            float searchHeight = Config.S(30f);
+            float searchWidth = Config.ModuleWindowWidth * ModuleManager.SearchWidthMultiplier;
+            float searchHeight = GUIManager.S(30f);
 
-            float targetY = Config.NativeHeight - searchHeight - Config.S(20f);
-            float hiddenY = Config.NativeHeight + Config.S(10f);
+            float targetY = Config.NativeHeight - searchHeight - GUIManager.S(20f);
+            float hiddenY = Config.NativeHeight + GUIManager.S(10f);
             float currentY = Mathf.Lerp(hiddenY, targetY, SearchAnimProgress);
             float currentX = (Config.NativeWidth / 2f) - (searchWidth / 2f);
 
@@ -83,7 +83,7 @@ public static class SearchWindowDrawer
 
     private static void DrawSearchWindow(int id)
     {
-        Rect tfRect = new(Config.S(5f), Config.S(5f), SearchWindowRect.width - Config.S(10f), Config.S(20f));
+        Rect tfRect = new(GUIManager.S(5f), GUIManager.S(5f), SearchWindowRect.width - GUIManager.S(10f), GUIManager.S(20f));
 
         if (RequestSearchFocus)
         {

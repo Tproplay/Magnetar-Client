@@ -3,6 +3,7 @@ using Magnetar_Client.Core;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using UnityEngine;
+using static Magnetar_Client.Utils.Translator;
 using static Magnetar_Client.NEF.Data.NEFRecipes;
 
 namespace Magnetar_Client.NEF;
@@ -21,14 +22,14 @@ public static partial class NEFGUI
         float rx = rightPanelRect.x;
         float ry = rightPanelRect.y;
 
-        string searchLabelText = T("Search:");
+        string searchLabelText = Translate("Search:");
         GUIStyle labelStyle = ThemeManager.SettingLabelStyle ?? GUI.skin.label;
         float searchLabelWidth = labelStyle.CalcSize(new GUIContent(searchLabelText)).x + Config.S(8f);
 
         GUI.Label(new Rect(rx, ry, searchLabelWidth, NEFManager.elementHeight), searchLabelText, labelStyle);
         string newQuery = UI.WindowDrawing.DrawSetting.DrawManualTextField(
             new Rect(rx + searchLabelWidth, ry, rightPanelWidth - searchLabelWidth, NEFManager.elementHeight),
-            searchQuery, T("Search..."));
+            searchQuery, Translate("Search..."));
 
         if (newQuery != searchQuery)
         {
@@ -42,7 +43,7 @@ public static partial class NEFGUI
         Rect clearBtnRect = new(rx, ry, rightPanelWidth, NEFManager.elementHeight);
         bool clearHover = clearBtnRect.Contains(e.mousePosition);
 
-        GUI.Box(clearBtnRect, T("Clear Search"), ThemeManager.CategoryModuleOffStyle);
+        GUI.Box(clearBtnRect, Translate("Clear Search"), ThemeManager.CategoryModuleOffStyle);
         GUI.backgroundColor = Color.white;
 
         if (clearHover && e.type == EventType.MouseDown && e.button == 0)
@@ -58,13 +59,13 @@ public static partial class NEFGUI
 #if ANDROID
         GUI.Label(
             new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight),
-            $"{T("Results")} ({NEFData.searchResults.Count}) {T("| Tap: Recipe | Hold: Usages")}",
+            $"{Translate("Results")} ({NEFData.searchResults.Count}) {Translate("| Tap: Recipe | Hold: Usages")}",
             labelStyle
         );
 #else
         GUI.Label(
             new Rect(rx, ry, rightPanelWidth, NEFManager.elementHeight),
-            $"{T("Results")} ({NEFData.searchResults.Count}) {T("| L-Click: Recipe | R-Click: Usages")}",
+            $"{Translate("Results")} ({NEFData.searchResults.Count}) {Translate("| L-Click: Recipe | R-Click: Usages")}",
             labelStyle
         );
 #endif
@@ -115,7 +116,7 @@ public static partial class NEFGUI
         GUI.BeginGroup(scrollRect);
         if (!PlantMixTreeManager.IsInitialized)
         {
-            GUI.Label(new Rect(Config.S(5f), Config.S(5f), rightPanelWidth, Config.S(30f)), T("Loading data..."));
+            GUI.Label(new Rect(Config.S(5f), Config.S(5f), rightPanelWidth, Config.S(30f)), Translate("Loading data..."));
         }
         else
         {

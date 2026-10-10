@@ -19,7 +19,7 @@ public static class Maths
 
         // Trillion
         if (absoluteValue >= 1_000_000_000_000)
-            return (number / 1_000_000_000_000D).ToString("0.##") + "T";
+            return (number / 1_000_000_000_000D).ToString("0.##") + "Translate";
 
         // Billion
         if (absoluteValue >= 1_000_000_000)
@@ -56,7 +56,7 @@ public static class Maths
 
         // Trillion
         if (absoluteValue >= 999_950_000_000D)
-            return (number / 1_000_000_000_000D).ToString("0.##") + "T";
+            return (number / 1_000_000_000_000D).ToString("0.##") + "Translate";
 
         // Billion
         if (absoluteValue >= 999_950_000D)

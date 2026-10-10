@@ -38,8 +38,8 @@ public static class HUDRenderer
         HudElement instance = (HudElement)Activator.CreateInstance(element);
         instance.WindowId = currentWindowId;
         Elements.Add(instance);
-        HudToggles.AddOption(instance.WindowId, element.Name);
-        HudToggles.CustomNames[instance.WindowId] = element.Name;
+        HudToggles.AddOption(instance.WindowId, instance.Name);
+        HudToggles.CustomNames[instance.WindowId] = instance.Name;
         currentWindowId++;
     }
 

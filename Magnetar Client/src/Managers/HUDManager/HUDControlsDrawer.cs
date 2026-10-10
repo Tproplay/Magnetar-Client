@@ -54,11 +54,11 @@ public static class HUDControlsDrawer
         float elemH = HUDManager.elementHeight;
 
         Rect headerBgRect = new(0, 0, width, y - indent);
-        GUI.Box(headerBgRect, HUDManager.Domain.Translate("Customize HUD"), ThemeManager.SettingsWndowStyle);
+        GUI.Box(headerBgRect, Translate("Customize HUD"), ThemeManager.SettingsWndowStyle);
 
         int activeCount = HUDRenderer.HudToggles != null ? HUDRenderer.HudToggles.SelectedValues.Count : 0;
         GUI.Label(new Rect(indent, y, width * 0.45f, elemH),
-            HUDManager.Domain.Translate("Elements") + $" ({activeCount})",
+            Translate("Elements") + $" ({activeCount})",
             ThemeManager.SettingLabelStyle);
 
         Rect selectBtnRect = new(width * 0.5f, y, width * 0.45f, elemH);
@@ -66,7 +66,7 @@ public static class HUDControlsDrawer
 
         Color prevBg = GUI.backgroundColor;
         if (isSelectHovered) GUI.backgroundColor = new Color(1.25f, 1.25f, 1.25f, 1.0f);
-        GUI.Box(selectBtnRect, HUDManager.Domain.Translate("Select"), ThemeManager.SettingOff);
+        GUI.Box(selectBtnRect, Translate("Select"), ThemeManager.SettingOff);
         GUI.backgroundColor = prevBg;
 
         if (e.type == EventType.MouseDown && e.button == 0 && isSelectHovered)
@@ -77,14 +77,14 @@ public static class HUDControlsDrawer
 
         y += elemH + Config.S(5f);
 
-        GUI.Label(new Rect(indent, y, width * 0.45f, elemH), HUDManager.Domain.Translate("Layout"), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, width * 0.45f, elemH), Translate("Layout"), ThemeManager.SettingLabelStyle);
 
         Rect configBtnRect = new(width * 0.5f, y, width * 0.45f, elemH);
         bool isConfigHovered = configBtnRect.Contains(e.mousePosition);
 
         prevBg = GUI.backgroundColor;
         if (isConfigHovered) GUI.backgroundColor = new Color(1.25f, 1.25f, 1.25f, 1.0f);
-        GUI.Box(configBtnRect, HUDManager.Domain.Translate("Edit"), ThemeManager.SettingOff);
+        GUI.Box(configBtnRect, Translate("Edit"), ThemeManager.SettingOff);
         GUI.backgroundColor = prevBg;
 
         if (e.type == EventType.MouseDown && e.button == 0 && isConfigHovered)
@@ -96,13 +96,13 @@ public static class HUDControlsDrawer
 
         y += elemH + Config.S(5f);
 
-        GUI.Label(new Rect(indent, y, width * 0.45f, elemH), HUDManager.Domain.Translate("Background"), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, width * 0.45f, elemH), Translate("Background"), ThemeManager.SettingLabelStyle);
         Rect bgRect = new(width * 0.5f, y, width * 0.45f, elemH);
         bool bgHover = bgRect.Contains(e.mousePosition);
 
         prevBg = GUI.backgroundColor;
         if (bgHover) GUI.backgroundColor = new Color(1.25f, 1.25f, 1.25f, 1.0f);
-        GUI.Box(bgRect, HUDManager.Domain.Translate(HUDManager.showBackground ? "ON" : "OFF"),
+        GUI.Box(bgRect, Translate(HUDManager.showBackground ? "ON" : "OFF"),
             HUDManager.showBackground ? ThemeManager.SettingOn : ThemeManager.SettingOff);
         GUI.backgroundColor = prevBg;
 
@@ -114,13 +114,13 @@ public static class HUDControlsDrawer
 
         y += elemH + Config.S(5f);
 
-        GUI.Label(new Rect(indent, y, width * 0.45f, elemH), HUDManager.Domain.Translate("Enabled"), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, width * 0.45f, elemH), Translate("Enabled"), ThemeManager.SettingLabelStyle);
         Rect enabledRect = new(width * 0.5f, y, width * 0.45f, elemH);
         bool enabledHover = enabledRect.Contains(e.mousePosition);
 
         prevBg = GUI.backgroundColor;
         if (enabledHover) GUI.backgroundColor = new Color(1.25f, 1.25f, 1.25f, 1.0f);
-        GUI.Box(enabledRect, HUDManager.Domain.Translate(HUDManager.Enabled ? "ON" : "OFF"),
+        GUI.Box(enabledRect, Translate(HUDManager.Enabled ? "ON" : "OFF"),
             HUDManager.Enabled ? ThemeManager.SettingOn : ThemeManager.SettingOff);
         GUI.backgroundColor = prevBg;
 

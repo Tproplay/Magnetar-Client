@@ -116,9 +116,9 @@ public static class MultiSelectWindowDrawer
     public static void HandleMultiSelectSetting(MultiSelectSetting set, ref float y, float width)
     {
         Event e = Event.current;
-        GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), ModuleManager.Domain.Translate(set.Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), Translate(set.Name), ThemeManager.SettingLabelStyle);
 
-        string countLabel = '(' + ModuleManager.Domain.Translate($"{set.SelectedValues.Count} selected") + ')';
+        string countLabel = '(' + Translate($"{set.SelectedValues.Count} selected") + ')';
         float countTextWidth = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(countLabel)).x;
 
         Rect btnRect = new(
@@ -149,7 +149,7 @@ public static class MultiSelectWindowDrawer
             e.Use();
         }
 
-        GUI.Box(btnRect, ModuleManager.Domain.Translate("Select"), ThemeManager.SettingOff);
+        GUI.Box(btnRect, Translate("Select"), ThemeManager.SettingOff);
         GUI.backgroundColor = Color.white;
 
         Color originalColor = GUI.contentColor;

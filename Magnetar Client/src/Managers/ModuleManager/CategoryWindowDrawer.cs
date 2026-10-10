@@ -155,7 +155,7 @@ public static class CategoryWindowDrawer
             Rect titleBarRect = new(0, 0, windowWidth, headerHeight);
 
             // 1. Dedicated Header Background Box & Title
-            GUI.Box(titleBarRect, ModuleManager.Domain.Translate(category.Name), ThemeManager.CategoryHeaderStyle);
+            GUI.Box(titleBarRect, Translate(category.Name), ThemeManager.CategoryHeaderStyle);
 
             // 2. Invisible Background Triangle Fold Indicator
             Rect foldBtnRect = new(windowWidth - Config.S(24f), (headerHeight - Config.S(20f)) / 2f, Config.S(20f), Config.S(20f));
@@ -359,7 +359,7 @@ public static class CategoryWindowDrawer
 #endif
             }
 
-            GUI.Box(btnRect, ModuleManager.Domain.Translate(mod.Name), currentStyle);
+            GUI.Box(btnRect, Translate(mod.Name), currentStyle);
         }
     }
 

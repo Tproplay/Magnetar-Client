@@ -154,6 +154,10 @@ public static class ServiceRegistry
                 DebugLogger.Error($"[ServiceRegistry] Error in OnLanguageChanged for '{_languageAwares[i].Name}': {ex}");
             }
         }
+
+#if MELONLOADER
+        DebugLogger.Msg($"[ServiceRegistry] Invoked OnLanguageChanged across {_languageAwares.Length} Services");
+#endif
     }
 
     internal static void SaveAll()

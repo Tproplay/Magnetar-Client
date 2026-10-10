@@ -78,7 +78,6 @@ public class Main
 
         TopBar.Init();
         MobileMenuUI.Init();
-        SettingsDrawerTranslation.Init();
 
         // 1. Initialize Built-in Managers (they self-register into ServiceRegistry)
         ModuleManager.Init();
@@ -97,7 +96,6 @@ public class Main
         ServiceRegistry.InitializeAll();
 
         // 4. Load state, themes, and translations
-        Translator.LoadTranslations();
         SaveLoad.Load();
 
         Api.Actions.OnLateInitializeCore?.Invoke();

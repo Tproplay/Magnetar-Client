@@ -3,6 +3,7 @@ using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using UnityEngine;
 using static Magnetar_Client.NEF.Data.NEFRecipes;
+using static Magnetar_Client.Utils.Translator;
 
 namespace Magnetar_Client.NEF;
 
@@ -21,7 +22,7 @@ public static partial class NEFGUI
 
         GUI.Label(
             new Rect(viewRect.x + pad, viewRect.y + pad, viewRect.width - btnW - (pad * 2f), btnH),
-            $"{T("Fusions requiring")}: {NEFData.GetEntityName(NEFData.usageViewTarget)} ({NEFData.currentUsages.Count} {T("found")})"
+            $"{Translate("Fusions requiring")}: {NEFData.GetEntityName(NEFData.usageViewTarget)} ({NEFData.currentUsages.Count} {Translate("found")})"
         );
 
         Rect backBtnRect = new(viewRect.x + viewRect.width - btnW - pad, viewRect.y + pad, btnW, btnH);
@@ -32,14 +33,14 @@ public static partial class NEFGUI
             e.Use();
         }
 
-        GUI.Box(backBtnRect, T("Back to Tree"), ThemeManager.CategoryModuleOffStyle);
+        GUI.Box(backBtnRect, Translate("Back to Tree"), ThemeManager.CategoryModuleOffStyle);
         GUI.backgroundColor = Color.white;
 
         if (NEFData.currentUsages.Count == 0)
         {
             GUI.Label(
                 new Rect(viewRect.x + pad, viewRect.y + Config.S(50f), viewRect.width - (pad * 2f), btnH),
-                T("This entity is not used as an ingredient in any fusion.")
+                Translate("This entity is not used as an ingredient in any fusion.")
             );
             return;
         }

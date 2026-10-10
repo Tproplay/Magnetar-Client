@@ -4,6 +4,7 @@ using Magnetar_Client.Utils;
 using UnityEngine;
 using static Magnetar_Client.NEF.Data.NEFRecipes;
 using static Magnetar_Client.UI.WindowDrawing.MiscDrawing;
+using static Magnetar_Client.Utils.Translator;
 
 namespace Magnetar_Client.NEF;
 
@@ -53,7 +54,7 @@ public static partial class NEFGUI
         {
             GUI.Label(
                 new Rect(pyramidBoxRect.x + pad, pyramidBoxRect.y + pad, leftPanelWidth - (pad * 2f), NEFManager.elementHeight),
-                T("Select an entity to view its recipes.")
+                Translate("Select an entity to view its recipes.")
             );
         }
         else

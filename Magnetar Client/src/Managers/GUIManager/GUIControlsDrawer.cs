@@ -66,7 +66,7 @@ public static class GUIControlsDrawer
         float y = headerHeight + Config.S(12f);
 
         Rect headerBgRect = new(0, 0, w, headerHeight);
-        GUI.Box(headerBgRect, GUIManager.Domain.Translate("GUI Configuration"), ThemeManager.SettingsWndowStyle);
+        GUI.Box(headerBgRect, Translate("GUI Configuration"), ThemeManager.SettingsWndowStyle);
 
         float controlWidth = Mathf.Min(Config.SettingWidth, w * 0.45f);
         float controlX = w - rightMargin - controlWidth;
@@ -97,7 +97,7 @@ public static class GUIControlsDrawer
 
         void DrawSliderRow(FloatSetting setting)
         {
-            string labelText = GUIManager.Domain.Translate(setting.Name);
+            string labelText = Translate(setting.Name);
             Rect lblRect = new(indent, y, labelWidth, elemH);
             GUI.Label(lblRect, labelText, ThemeManager.SettingLabelStyle);
 
@@ -196,8 +196,8 @@ public static class GUIControlsDrawer
 
         // 1. Language Row
         DrawButtonRow(
-            $"{GUIManager.Domain.Translate("Language")}: <color=yellow>{Config.Language}</color>",
-            GUIManager.Domain.Translate("Change"),
+            $"{Translate("Language")}: <color=yellow>{Config.Language}</color>",
+            Translate("Change"),
             () => GUISelectorDrawer.Open(GUIManager.LanguageSetting)
         );
 
@@ -212,8 +212,8 @@ public static class GUIControlsDrawer
         Config.Theme = currentTheme;
 
         DrawButtonRow(
-            $"{GUIManager.Domain.Translate("Theme")}: <color=yellow>{Config.Theme}</color>",
-            GUIManager.Domain.Translate("Change"),
+            $"{Translate("Theme")}: <color=yellow>{Config.Theme}</color>",
+            Translate("Change"),
             () =>
             {
                 GUIManager.RefreshThemeOptions();
@@ -243,24 +243,24 @@ public static class GUIControlsDrawer
 
         // 5. Floating Icon
         DrawButtonRow(
-            GUIManager.Domain.Translate("Floating Icon"),
-            GUIManager.Domain.Translate(Config.ShowFloatingIcon ? "ON" : "OFF"),
+            Translate("Floating Icon"),
+            Translate(Config.ShowFloatingIcon ? "ON" : "OFF"),
             () => Config.SetFloatingIcon(!Config.ShowFloatingIcon),
             Config.ShowFloatingIcon ? ThemeManager.SettingOn : ThemeManager.SettingOff
         );
 
         // 6. Mobile Close Buttons
         DrawButtonRow(
-            GUIManager.Domain.Translate("Mobile Close Buttons"),
-            GUIManager.Domain.Translate(Config.ShowMobileButtons ? "ON" : "OFF"),
+            Translate("Mobile Close Buttons"),
+            Translate(Config.ShowMobileButtons ? "ON" : "OFF"),
             () => Config.ShowMobileButtons = !Config.ShowMobileButtons,
             Config.ShowMobileButtons ? ThemeManager.SettingOn : ThemeManager.SettingOff
         );
 
         // 7. Show Credits
         DrawButtonRow(
-            GUIManager.Domain.Translate("Show Main Menu Credits"),
-            GUIManager.Domain.Translate(Config.ShowMainMenuCredits ? "ON" : "OFF"),
+            Translate("Show Main Menu Credits"),
+            Translate(Config.ShowMainMenuCredits ? "ON" : "OFF"),
             () => Config.ShowMainMenuCredits = !Config.ShowMainMenuCredits,
             Config.ShowMainMenuCredits ? ThemeManager.SettingOn : ThemeManager.SettingOff
         );

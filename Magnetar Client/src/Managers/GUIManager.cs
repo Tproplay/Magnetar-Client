@@ -22,8 +22,6 @@ public static class GUIManager
 
     public static bool isSelectingSubWindow => AnimationHandler.GetViewAlpha(Group, ViewSelector) > 0.001f;
 
-    public static readonly TranslationDomain Domain = Translator.CreateDomain("GUI Manager");
-
     public static MultiSelectSetting LanguageSetting { get; } = new("Language")
     {
         MaxSelection = 1,
@@ -70,9 +68,6 @@ public static class GUIManager
     {
         AnimationHandler.SetViewImmediate(Group, ViewMain, 1.0f);
         AnimationHandler.SetViewImmediate(Group, ViewSelector, 0.0f);
-
-        // Register English template hook early
-        Domain.OnDumpEnglishTemplate += DumpEnglishTemplates;
 
         // Reset language options & selections before discovering available languages
         LanguageSetting.Options.Clear();
@@ -155,8 +150,11 @@ public static class GUIManager
         // SaveLoad entries
         SaveLoad.RegisterEntry("Language", () => Config.Language, val =>
         {
-            Config.Language = val;
-            // Keep the UI selector indicator in sync if loaded via save file
+            if (!string.Equals(Config.Language, val, StringComparison.OrdinalIgnoreCase))
+            {
+                Config.Language = val;
+            }
+
             if (LanguageSetting?.Options != null)
             {
                 foreach (var kvp in LanguageSetting.Options)

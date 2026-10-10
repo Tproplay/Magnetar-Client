@@ -9,40 +9,8 @@ namespace Magnetar_Client.NEF;
 
 public static partial class NEFGUI
 {
-    // Dedicated Translation Domain for NEF
-    public static readonly TranslationDomain Domain = Translator.CreateDomain("NEF");
-
-    public static string T(string text) => Domain.Translate(text, "nef.json");
-
     public static bool showUsagesView;
     private static bool firstLoad = true;
-
-    static NEFGUI()
-    {
-        Domain.OnDumpEnglishTemplate += DumpEnglishTemplates;
-    }
-
-    private static void DumpEnglishTemplates(string englishDir)
-    {
-        string[] templateStrings = new[]
-        {
-            "Select an entity to view its recipes.",
-            "Search:",
-            "Search...",
-            "Clear Search",
-            "Results",
-            "| Tap: Recipe | Hold: Usages",
-            "| L-Click: Recipe | R-Click: Usages",
-            "Loading data...",
-            "Fusions requiring",
-            "found",
-            "Back to Tree",
-            "This entity is not used as an ingredient in any fusion."
-        };
-
-        var dict = Translator.CreateDictionary(templateStrings);
-        Translator.SaveJson(englishDir, "nef.json", dict);
-    }
 
     public static void DrawNEFWindow(int windowID)
     {

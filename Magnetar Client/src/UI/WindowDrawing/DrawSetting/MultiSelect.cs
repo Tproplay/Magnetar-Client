@@ -1,6 +1,6 @@
 ﻿using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
-using Magnetar_Client.Utils;
+using static Magnetar_Client.Utils.Translator;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -61,7 +61,7 @@ public static partial class DrawSetting
         float titleHeight = Config.S(25f);
 #endif
         Rect headerBgRect = new(0, 0, multiSelectWindowRect.width, titleHeight);
-        GUI.Box(headerBgRect, SettingsDrawerTranslation.T("Select ") + SettingsDrawerTranslation.T(activeMultiSelect.Name), ThemeManager.SettingsWndowStyle);
+        GUI.Box(headerBgRect, Translate("Select ") + Translate(activeMultiSelect.Name), ThemeManager.SettingsWndowStyle);
 
         if (Config.ShowMobileButtons)
         {
@@ -98,7 +98,7 @@ public static partial class DrawSetting
         multiSelectSearchQuery = DrawManualTextField(
             searchRect,
             multiSelectSearchQuery ?? "",
-            SettingsDrawerTranslation.T("Search...")
+            Translate("Search...")
         );
 
         if (oldQuery != multiSelectSearchQuery)
@@ -148,8 +148,8 @@ public static partial class DrawSetting
         }
 
         string toggleLabel = allSelected
-            ? SettingsDrawerTranslation.T("Deselect All")
-            : SettingsDrawerTranslation.T("Select All");
+            ? Translate("Deselect All")
+            : Translate("Select All");
 
         GUIStyle toggleStyle = !allSelected
             ? ThemeManager.SettingOn

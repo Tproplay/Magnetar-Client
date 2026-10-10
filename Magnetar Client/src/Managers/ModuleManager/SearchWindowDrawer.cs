@@ -96,6 +96,6 @@ public static class SearchWindowDrawer
             }
         }
 
-        SearchQuery = DrawManualTextField(tfRect, SearchQuery, ModuleManager.Domain.Translate("Search..."));
+        SearchQuery = DrawManualTextField(tfRect, SearchQuery, Translate("Search..."));
     }
 }

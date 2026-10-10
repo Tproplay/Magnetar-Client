@@ -10,6 +10,7 @@ using UnityEngine;
 using static Magnetar_Client.Game.AppData;
 using static Magnetar_Client.Game.GameData;
 using static Magnetar_Client.Utils.Maths;
+using static Magnetar_Client.Utils.Translator;
 using Magnetar_Client.Core;
 
 #if !ANDROID
@@ -132,9 +133,6 @@ public class DiscordRPC : Module
 
         AddSettings(InGame_Randomizer_mode);
         EndCategory();
-
-        // Ensure settings inherit this module's domain and scope
-        ModuleManager.SetDomain(this);
     }
 
     public override void OnLanguageChanged()

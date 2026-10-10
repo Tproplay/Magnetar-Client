@@ -1,6 +1,6 @@
 ﻿using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
-using Magnetar_Client.Utils;
+using static Magnetar_Client.Utils.Translator;
 using UnityEngine;
 
 namespace Magnetar_Client.UI.WindowDrawing;
@@ -10,7 +10,7 @@ public static partial class DrawSetting
     public static void HandleBoolSetting(BoolSetting boolSet, ref float y, float width)
     {
         Event e = Event.current;
-        string translatedName = boolSet.Translate(boolSet.Name);
+        string translatedName = Translate(boolSet.Name);
         float labelWidth = Mathf.Max(width * 0.45f, width - Config.indent * 2 - Config.SettingWidth);
 
         GUI.Label(new Rect(Config.indent, y, labelWidth, Config.elementHeight),
@@ -19,7 +19,7 @@ public static partial class DrawSetting
         Rect btnRect = new(width - Config.indent - Config.SettingWidth, y,
             Config.SettingWidth, Config.elementHeight);
 
-        GUI.Box(btnRect, boolSet.Value ? boolSet.Translate("ON") : boolSet.Translate("OFF"),
+        GUI.Box(btnRect, boolSet.Value ? Translate("ON") : Translate("OFF"),
             boolSet.Value ? ThemeManager.SettingOn : ThemeManager.SettingOff);
 
         if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
@@ -34,7 +34,7 @@ public static partial class DrawSetting
         Event e = Event.current;
         bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
 
-        string translatedName = bSet.Translate(bSet.Name);
+        string translatedName = Translate(bSet.Name);
         float labelWidth = Mathf.Max(width * 0.45f, width - Config.indent * 2 - Config.SettingWidth);
 
         GUI.Label(new Rect(Config.indent, y, labelWidth, Config.elementHeight),
@@ -92,13 +92,13 @@ public static partial class DrawSetting
     public static void HandleButtonSetting(ButtonSetting btnSet, ref float y, float width)
     {
         Event e = Event.current;
-        string translatedName = btnSet.Translate(btnSet.Name);
+        string translatedName = Translate(btnSet.Name);
         GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
         Rect btnRect = new(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
         bool isHovered = btnRect.Contains(e.mousePosition);
 
-        GUI.Box(btnRect, btnSet.Translate(btnSet.ButtonText), ThemeManager.SettingOff);
+        GUI.Box(btnRect, Translate(btnSet.ButtonText), ThemeManager.SettingOff);
 
         if (isHovered && e.type == EventType.MouseDown && e.button == 0)
         {
@@ -114,7 +114,7 @@ public static partial class DrawSetting
     {
         if (lblSet == null || string.IsNullOrEmpty(lblSet.Name)) return;
 
-        string displayText = lblSet.Translate(lblSet.Name);
+        string displayText = Translate(lblSet.Name);
         float labelWidth = width - (Config.indent * 2f);
         float calculatedHeight = ThemeManager.SettingsDescriptionStyle.CalcHeight(
             new GUIContent(displayText),

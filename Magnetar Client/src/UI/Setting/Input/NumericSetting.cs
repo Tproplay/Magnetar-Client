@@ -1,6 +1,6 @@
 ﻿using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
-using Magnetar_Client.Utils;
+using static Magnetar_Client.Utils.Translator;
 using System;
 using UnityEngine;
 
@@ -73,7 +73,6 @@ public class IntSetting : Setting
     {
         float val, sliderMin, sliderMax, trueMin, trueMax;
         string name;
-        string translatedName;
 
         int decPlaces = 0, intTrueMin = 0, intTrueMax = 0, intSliderMin = 0, intSliderMax = 0;
 
@@ -82,7 +81,6 @@ public class IntSetting : Setting
             var s = (FloatSetting)setting;
             val = s.DisplayValue; sliderMin = s.Min; sliderMax = s.Max;
             trueMin = s.TrueMin; trueMax = s.TrueMax; name = s.Name; decPlaces = s.DecimalPlaces;
-            translatedName = s.Translate(name);
         }
         else
         {
@@ -90,9 +88,8 @@ public class IntSetting : Setting
             val = s.DisplayValue; sliderMin = s.Min; sliderMax = s.Max;
             trueMin = s.TrueMin; trueMax = s.TrueMax; name = s.Name;
             intSliderMin = s.Min; intSliderMax = s.Max; intTrueMin = s.TrueMin; intTrueMax = s.TrueMax;
-            translatedName = s.Translate(name);
         }
-
+        string translatedName = Translate(name);
         string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
         
 

@@ -1,5 +1,5 @@
 ﻿using Magnetar_Client.UI.WindowDrawing;
-using Magnetar_Client.Utils;
+using static Magnetar_Client.Utils.Translator;
 
 namespace Magnetar_Client.UI.Setting;
 

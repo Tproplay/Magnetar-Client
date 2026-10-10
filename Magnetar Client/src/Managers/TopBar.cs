@@ -1,7 +1,8 @@
 ﻿using Magnetar_Client.Api;
+using Magnetar_Client.Core.ModuleManager_;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
-using Magnetar_Client.Utils;
+using static Magnetar_Client.Utils.Translator;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,11 +11,6 @@ namespace Magnetar_Client.Core;
 
 public static class TopBar
 {
-    public static readonly TranslationDomain Domain = Translator.CreateDomain("TopBar");
-
-    // Scoped translation helper
-    private static string Translate(string tabName) => Domain.Translate(tabName, "tabs.json");
-
     private static readonly List<TabType> Order = new();
     private static readonly Dictionary<TabType, float> BaseWidth = new();
     private static float[] baseOffsets = Array.Empty<float>();
@@ -23,37 +19,18 @@ public static class TopBar
 
     public static void Init()
     {
-        Domain.OnDumpEnglishTemplate += DumpEnglishTemplates;
-
         AnimationHandler.SetViewImmediate(TabType.AnimationGroup, Config.CurrentTab.Name, 1.0f);
         RebuildOffsets();
         ServiceRegistry.Register(new TopBarService());
     }
 
-    private static void DumpEnglishTemplates(string englishDir)
-    {
-        var tabNames = new List<string>();
-        foreach (TabType tab in TabType.AllTabs)
-        {
-            if (!string.IsNullOrEmpty(tab.Name))
-                tabNames.Add(tab.Name);
-        }
-
-        var templateDict = Translator.CreateDictionary(tabNames.ToArray());
-        Translator.SaveJson(englishDir, "tabs.json", templateDict);
-    }
-
-    /// <summary>
-    /// Registers a custom tab directly from TopBar.
-    /// </summary>
     public static TabType RegisterTab(string name, Action onSelected = null, Action onGUI = null)
     {
-        return TabType.Register(name, onSelected, onGUI);
+        var tab = TabType.Register(name, onSelected, onGUI);
+        RebuildOffsets();
+        return tab;
     }
 
-    /// <summary>
-    /// Recalculates base tab widths and cumulative offsets whenever tabs are registered or language changes.
-    /// </summary>
     public static void RebuildOffsets()
     {
         Order.Clear();
@@ -122,7 +99,6 @@ public static class TopBar
                 ? ThemeManager.TopBarActiveStyle
                 : ThemeManager.TopBarStyle;
 
-            // Render button visuals
             GUI.Box(btnRect, displayName, btnStyle);
 
             if (e.type == EventType.MouseDown && e.button == 0 && btnRect.Contains(e.mousePosition))
@@ -130,13 +106,10 @@ public static class TopBar
                 if (Config.CurrentTab != tab)
                 {
                     TabType previousTab = Config.CurrentTab;
-
                     previousTab?.OnDeselected?.Invoke();
 
                     Config.CurrentTab = tab;
-
                     AnimationHandler.SwitchView(TabType.AnimationGroup, tab.Name);
-
                     tab.OnSelected?.Invoke();
                 }
 
@@ -159,7 +132,6 @@ public static class TopBar
         {
             TopBar.Render();
 
-            // Invoke custom tab render delegates if registered
             if (Config.CurrentTab != null && Config.CurrentTab.IsCustom)
             {
                 Config.CurrentTab.OnGUI?.Invoke();

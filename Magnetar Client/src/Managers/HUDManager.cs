@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using static Magnetar_Client.Utils.Translator;
 using Magnetar_Client.Api;
 using Magnetar_Client.Core.HUDManager_;
 using Magnetar_Client.Game;
@@ -21,7 +21,6 @@ public static class HUDManager
     public const string Group = "HUD";
     public const string ViewMain = "Controls";
     public const string ViewSelector = "Selector";
-    public static readonly TranslationDomain Domain = Translator.CreateDomain("HUD Manager");
     public static bool IsInitialized { get; private set; }
     public static bool Enabled = true;
     public static bool forceShow { get; set; }
@@ -54,34 +53,9 @@ public static class HUDManager
 
         SaveLoad.RegisterHandler(new HUDSaveHandler());
 
-        Domain.OnDumpEnglishTemplate += DumpEnglishTemplate;
-
         IsInitialized = true;
 
         DebugLogger.Msg("Initialized HUD Manager");
-    }
-
-    private static void DumpEnglishTemplate(string domainDir)
-    {
-        var template = new string[]
-        {
-            "Customize HUD", "Elements", "Select", "Layout", "Edit", "Background", "ON", "OFF",
-            "Enabled", "Exit Layout",
-        };
-        string filePath = Path.Combine(domainDir, "translation_strings.json");
-        Translator.SaveJson(filePath, Translator.CreateDictionary(template));
-
-        if (HUDRenderer.Elements == null || HUDRenderer.Elements.Count == 0) return;
-
-        var hudElements = new Dictionary<string, string>();
-        foreach (var el in HUDRenderer.Elements)
-        {
-            if (el != null && !string.IsNullOrEmpty(el.Name))
-                hudElements[el.Name] = el.Name;
-        }
-
-        string elementsPath = Path.Combine(domainDir, "elements.json");
-        Translator.SaveJson(elementsPath, hudElements);
     }
 
     public static void ExitLayoutMode()
@@ -183,7 +157,7 @@ public static class HUDManager
 
             bool isHovered = exitRect.Contains(e.mousePosition);
 
-            GUI.Box(exitRect, Domain.Translate("Exit Layout"), ThemeManager.SettingOn);
+            GUI.Box(exitRect, Translate("Exit Layout"), ThemeManager.SettingOn);
 
             if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
             {
@@ -199,9 +173,14 @@ public static class HUDManager
 
         HUDRenderer.HudToggles.CustomNames ??= new Dictionary<int, string>();
 
-        foreach (var keypair in HUDRenderer.HudToggles.Options)
+        foreach (var element in HUDRenderer.Elements)
         {
-            HUDRenderer.HudToggles.CustomNames[keypair.Key] = Domain.Translate(keypair.Value, "elements.json");
+            if (element == null) continue;
+
+            string translated = Translate(element.Name);
+
+            HUDRenderer.HudToggles.Options[element.WindowId] = translated;
+            HUDRenderer.HudToggles.CustomNames[element.WindowId] = translated;
         }
     }
 

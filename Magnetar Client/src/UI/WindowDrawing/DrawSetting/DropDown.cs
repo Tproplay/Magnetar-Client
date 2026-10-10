@@ -1,6 +1,6 @@
 ﻿using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
-using Magnetar_Client.Utils;
+using static Magnetar_Client.Utils.Translator;
 using UnityEngine;
 
 namespace Magnetar_Client.UI.WindowDrawing;
@@ -14,7 +14,7 @@ public static partial class DrawSetting
         Event e = Event.current;
         int controlId = selSet.GetHashCode();
 
-        string translatedName = selSet.Translate(selSet.Name);
+        string translatedName = Translate(selSet.Name);
         GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
         string currentValName = "Unknown";

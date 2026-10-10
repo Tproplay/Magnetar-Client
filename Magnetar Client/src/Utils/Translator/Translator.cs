@@ -1,23 +1,18 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Utils;
 
-public static class Translator
+public static partial class Translator
 {
-    private static readonly Dictionary<string, TranslationDomain> _domains = new(StringComparer.OrdinalIgnoreCase);
-
-    public static string CurrentLanguage => string.IsNullOrWhiteSpace(Config.Language) ? "English" : Config.Language;
-
-    public static bool IsLoading { get; private set; }
     public static event Action OnTranslationsLoaded;
 
-    #region Domain Registration
+    public static string TranslationRootDir => TranslationData.TranslationRootDir;
+    public static string CurrentLanguage => TranslationData.CurrentLanguage;
+
+    private static readonly Dictionary<string, TranslationDomain> _domains = new(StringComparer.OrdinalIgnoreCase);
 
     public static TranslationDomain RegisterDomain(TranslationDomain domain)
     {
@@ -26,150 +21,113 @@ public static class Translator
         return domain;
     }
 
-    public static TranslationDomain CreateDomain(string domainName)
-    {
-        return RegisterDomain(new TranslationDomain(domainName));
-    }
+    public static TranslationDomain CreateDomain(string domainName, params string[] sources) =>
+        RegisterDomain(new TranslationDomain(domainName, sources));
 
-    public static TranslationDomain GetDomain(string domainName)
-    {
-        return _domains.TryGetValue(domainName, out var domain) ? domain : null;
-    }
+    public static TranslationDomain GetDomain(string domainName) =>
+        _domains.TryGetValue(domainName, out var domain) ? domain : null;
 
     public static IReadOnlyCollection<TranslationDomain> AllDomains => _domains.Values;
 
-    #endregion
-
-    #region Asynchronous Loading & Operations
-
-    /// <summary>
-    /// Loads translations for all domains asynchronously in a background thread to prevent GUI hitches.
-    /// </summary>
-    public static async Task LoadTranslationsAsync(Action onComplete = null)
+    public static string Translate(string input)
     {
-        if (IsLoading) return;
-        IsLoading = true;
+        if (string.IsNullOrEmpty(input)) return input;
 
-        string targetLang = CurrentLanguage;
-        TranslatorLogger.Msg($"Starting load for '{targetLang}' across {_domains.Count} domains...");
+        if (!TranslationData.IsLoaded) LoadTranslations();
 
-        var domainsSnapshot = _domains.Values.ToList();
-
-        await Task.Run(() =>
+        if (!TranslationData.ModulesLinked && Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
         {
-            foreach (var domain in domainsSnapshot)
-            {
-                try
-                {
-                    domain.DumpEnglishTemplate();
-                }
-                catch (Exception ex)
-                {
-                    TranslatorLogger.Error($"Error dumping domain '{domain.DomainName}': {ex.Message}");
-                }
-            }
-
-            foreach (var domain in domainsSnapshot)
-            {
-                try
-                {
-                    domain.Load(targetLang);
-                }
-                catch (Exception ex)
-                {
-                    TranslatorLogger.Error($"Error loading domain '{domain.DomainName}': {ex.Message}");
-                }
-            }
-        });
-
-        IsLoading = false;
-        TranslatorLogger.Msg("Translation loading complete.");
-
-        onComplete?.Invoke();
-        OnTranslationsLoaded?.Invoke();
-    }
-
-    /// <summary>
-    /// Fire-and-forget non-blocking load.
-    /// </summary>
-    public static void LoadTranslations()
-    {
-        _ = LoadTranslationsAsync();
-    }
-
-    public static void DumpMissingStrings()
-    {
-        string targetLang = CurrentLanguage;
-        foreach (var domain in _domains.Values)
-        {
-            domain.DumpMissingStrings(targetLang);
+            LinkModuleTranslations();
+            TranslationData.ModulesLinked = true;
         }
+
+        if (!TranslationData.HudLinked && Core.HUDManager_.HUDRenderer.Elements != null && Core.HUDManager_.HUDRenderer.Elements.Count > 0)
+        {
+            LinkHudTranslations();
+            TranslationData.HudLinked = true;
+        }
+
+        string trimmedInput = input.Trim();
+        if (string.IsNullOrWhiteSpace(trimmedInput)) return input;
+
+        if (TranslationData.ExactTranslations.TryGetValue(input, out string exactMatch))
+            return exactMatch;
+
+        if (TranslationData.ExactTranslations.TryGetValue(trimmedInput, out string trimmedMatch))
+            return input.StartsWith(" ") || input.EndsWith(" ") ? input.Replace(trimmedInput, trimmedMatch) : trimmedMatch;
+
+        foreach (var rule in TranslationData.RegexTranslations)
+        {
+            Match match = rule.Key.Match(input);
+            if (match.Success)
+            {
+                string template = rule.Value;
+
+                for (int i = 1; i < match.Groups.Count; i++)
+                {
+                    if (match.Groups[i].Success)
+                    {
+                        string val = match.Groups[i].Value;
+                        if (string.IsNullOrWhiteSpace(val) || val == "：" || val == ":") continue;
+
+                        string finalWord = val;
+                        if (!long.TryParse(val, out _) && TranslationData.ExactTranslations.TryGetValue(val, out string translatedCapture))
+                        {
+                            finalWord = translatedCapture;
+                        }
+
+                        template = template.Replace($"{{{i}}}", finalWord);
+                    }
+                }
+
+                TranslationData.RegexMatchedInputs.Add(input);
+                TranslationData.ExactTranslations[input] = template;
+                return template;
+            }
+        }
+
+        TranslationData.ExactTranslations[input] = input;
+
+        if (string.Equals(CurrentLanguage, "English", StringComparison.OrdinalIgnoreCase))
+            return input;
+
+        HashSet<string> blacklist = GetCachedBlacklist();
+        if (!blacklist.Contains(input) && !blacklist.Contains(trimmedInput))
+        {
+            TranslationData.KnownEnglishStrings.Add(trimmedInput);
+            TranslationData.MissingStringsDirty = true;
+            AppendUntranslatedStringToDisk(trimmedInput);
+        }
+
+        return input;
     }
 
-    #endregion
-
-    #region Helper functions
-    /// <summary>
-    /// Serializes an object to JSON and safely writes it to a file, 
-    /// recursively creating any missing parent and nested subdirectories.
-    /// </summary>
-    /// <param name="directory">The base or nested directory path.</param>
-    /// <param name="relativePath">The file name or nested relative path (e.g., "Modules/Combat/file.json").</param>
-    /// <param name="data">The object to serialize.</param>
-    /// <param name="formatting">JSON formatting style (defaults to Indented).</param>
-    /// <returns>True if successfully written, false otherwise.</returns>
-    public static bool SaveJson(string directory, string relativePath, object data, Formatting formatting = Formatting.Indented)
+    public static Dictionary<int, string> TranslateEnum(Type enumType)
     {
-        if (string.IsNullOrWhiteSpace(directory) || string.IsNullOrWhiteSpace(relativePath) || data == null)
-            return false;
+        if (enumType == null)
+        {
+            TranslatorLogger.Error("TranslateEnum called with null enumType!");
+            return new Dictionary<int, string>();
+        }
 
-        string combinedPath = Path.Combine(directory, relativePath);
-        return SaveJson(combinedPath, data, formatting);
-    }
+        if (TranslationData.NameCache.TryGetValue(enumType, out var cachedDict))
+            return new Dictionary<int, string>(cachedDict);
 
-    /// <summary>
-    /// Serializes an object to JSON and safely writes it to a target path, 
-    /// automatically ensuring all nested directories leading to the file are created.
-    /// </summary>
-    /// <param name="filePath">The full or relative file path.</param>
-    /// <param name="data">The object to serialize.</param>
-    /// <param name="formatting">JSON formatting style (defaults to Indented).</param>
-    /// <returns>True if successfully written, false otherwise.</returns>
-    public static bool SaveJson(string filePath, object data, Formatting formatting = Formatting.Indented)
-    {
-        if (string.IsNullOrWhiteSpace(filePath) || data == null)
-            return false;
-
+        var sw = System.Diagnostics.Stopwatch.StartNew();
         try
         {
-            // Resolve the actual target folder (including any nested folders in the path)
-            string targetDir = Path.GetDirectoryName(filePath);
+            Dictionary<int, string> parsedNames = LoadEnumTranslations(enumType);
+            TranslationData.NameCache[enumType] = parsedNames;
+            sw.Stop();
 
-            if (!string.IsNullOrEmpty(targetDir) && !Directory.Exists(targetDir))
-            {
-                // Recursively creates all nested parent directories
-                Directory.CreateDirectory(targetDir);
-            }
-
-            string json = JsonConvert.SerializeObject(data, formatting);
-            File.WriteAllText(filePath, json);
-            return true;
+            TranslatorLogger.Msg($"Loaded and cached enum '{enumType.Name}' with {parsedNames.Count} entries ({sw.ElapsedMilliseconds} ms).");
+            return new Dictionary<int, string>(parsedNames);
         }
         catch (Exception ex)
         {
-            TranslatorLogger.Error($"Failed to write JSON to '{filePath}': {ex.Message}");
-            return false;
+            sw.Stop();
+            TranslatorLogger.Error($"Exception occurred while translating enum '{enumType.Name}': {ex}");
+            throw;
         }
     }
-
-    public static Dictionary<string, string> CreateDictionary(string[] stringList)
-    {
-        var dictionary = new Dictionary<string, string>();
-        foreach (string entry in stringList)
-        {
-            dictionary[entry] = entry;
-        }
-        return dictionary;
-    }
-    #endregion
 }

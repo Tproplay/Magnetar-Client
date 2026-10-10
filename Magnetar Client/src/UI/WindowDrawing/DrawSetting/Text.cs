@@ -1,6 +1,6 @@
 ﻿using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
-using Magnetar_Client.Utils;
+using static Magnetar_Client.Utils.Translator;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -35,7 +35,7 @@ public static partial class DrawSetting
     public static void HandleStringSetting(StringSetting strSet, ref float y, float width)
     {
         float elemH = Config.elementHeight;
-        string translatedName = strSet.Translate(strSet.Name);
+        string translatedName = Translate(strSet.Name);
 
         float controlW = Mathf.Min(Config.SettingWidth * 1.25f, width * 0.55f);
         float gap = Config.S(8f);

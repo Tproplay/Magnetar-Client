@@ -160,12 +160,12 @@ public static class Config
 
             _language = value;
 
-            Actions.OnPreLanguageChanged();
+            Actions.OnPreLanguageChanged?.Invoke();
 
             _ = Translator.LoadTranslationsAsync(() =>
             {
                 ServiceRegistry.NotifyLanguageChanged();
-                Actions.OnPostLanguageChanged();
+                Actions.OnPostLanguageChanged?.Invoke();
             });
         }
     }

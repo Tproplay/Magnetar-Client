@@ -6,11 +6,7 @@ using Magnetar_Client.Core;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.Utils;
 using System.Text.RegularExpressions;
-
 using Newtonsoft.Json.Linq;
-
-
-
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -58,7 +54,6 @@ public abstract class Module
     /// </summary>
     public virtual bool ShowSettings { get; set; }
 
-
     /// <summary>
     /// Used to store all the settings for the module.
     /// </summary>
@@ -79,7 +74,6 @@ public abstract class Module
     /// Runs once when the module is disabled. Runs After OnUpdateActive.
     /// </summary>
     public virtual void OnDisable() { }
-
 
     /// <summary>
     /// Runs every frame regardless of whether the module is active or not.
@@ -105,18 +99,18 @@ public abstract class Module
     }
 
     /// <summary>
-    /// Runs When a the mod's language is changed
+    /// Runs when the mod's language is changed.
     /// </summary>
     public virtual void OnLanguageChanged() { }
 
     /// <summary>
-    /// Translates a enum
+    /// Translates an enum using the central Translator.
     /// </summary>
     public static Dictionary<int, string> TranslateEnum(Type enumType, bool enumKey = true)
     {
         if (enumType == null || !enumType.IsEnum) return new Dictionary<int, string>();
 
-        var names = ModuleManager.TranslateEnum(enumType);
+        var names = Translator.TranslateEnum(enumType);
         if (enumKey)
         {
             foreach (var kvp in names.ToList())
@@ -124,16 +118,11 @@ public abstract class Module
                 names[kvp.Key] = $"{kvp.Value} ({kvp.Key})";
             }
         }
-        
+
         return names;
     }
-    /// <summary>
-    /// Translates a enum
-    /// </summary>
+
     public static Dictionary<int, string> TranslateEnum<T>() => TranslateEnum(typeof(T));
-    /// <summary>
-    /// Translates a enum
-    /// </summary>
     public static Dictionary<int, string> TranslateEnum<T>(bool enumKey = true) => TranslateEnum(typeof(T), enumKey);
 
     public virtual float SettingsWidth { get; set; } = Config.ModuleManager.SettingsWidth;
@@ -167,7 +156,7 @@ public abstract class Module
         }
         return true;
     }
-    
+
     /// <summary>
     /// Contains default Banned HashSets for Plants and Zombies
     /// </summary>
@@ -211,9 +200,9 @@ public abstract class Module
             Toggle();
         }
     }
+
     public virtual bool SaveData { get; } = true;
-    public virtual TranslationDomain Domain => ModuleManager.Domain;
-    public virtual string TranslationSource => $"Modules/{Name}.json";
+
     #region Custom Saved Profile Data
 
     /// <summary>
@@ -258,7 +247,7 @@ public abstract class Module
     #region Custom Module Translations & Regex
 
     /// <summary>
-    /// Key-value pairs for module-specific phrases. Dumped into the module's 
+    /// Key-value pairs for module-specific phrases. Loaded from the module's 
     /// translation JSON and overwritten with translated values when a language loads.
     /// </summary>
     public Dictionary<string, string> SavedTranslationData { get; set; } = new(StringComparer.Ordinal);
@@ -291,7 +280,7 @@ public abstract class Module
 
     /// <summary>
     /// Translates an input string checking module-specific translations and regexes first,
-    /// then falling back to the module's translation domain file scope.
+    /// then falling back to the global Translator.
     /// </summary>
     public string Translate(string input)
     {
@@ -319,9 +308,13 @@ public abstract class Module
                             if (match.Groups[i].Success)
                             {
                                 string val = match.Groups[i].Value;
-                                string sub = (SavedTranslationData != null && SavedTranslationData.TryGetValue(val, out var transSub))
-                                    ? transSub
-                                    : val;
+                                string sub = val;
+
+                                // Guard: Do not translate captured groups if they are numeric
+                                if (!long.TryParse(val, out _) && SavedTranslationData != null && SavedTranslationData.TryGetValue(val, out var transSub))
+                                {
+                                    sub = transSub;
+                                }
 
                                 template = template.Replace($"{{{i}}}", sub);
                             }
@@ -333,18 +326,8 @@ public abstract class Module
             }
         }
 
-        // 3. Fallback to ModuleManager.Domain scoped to this module's file
-        if (Domain != null)
-        {
-            return Domain.Translate(input, TranslationSource);
-        }
-
-        return input;
-    }
-
-    public virtual void OnDomainLanguageChanged()
-    {
-        ModuleManager.SetDomain(this);
+        // 3. Fallback to global Translator
+        return Translator.Translate(input);
     }
 
     #endregion

@@ -1,6 +1,6 @@
 ﻿using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
-using Magnetar_Client.Utils;
+using static Magnetar_Client.Utils.Translator;
 using UnityEngine;
 
 namespace Magnetar_Client.UI.WindowDrawing;
@@ -11,7 +11,6 @@ public static partial class DrawSetting
     {
         float val, sliderMin, sliderMax, trueMin, trueMax;
         string name;
-        string translatedName;
         int decPlaces = 0;
 
         int intTrueMin = 0, intTrueMax = 0;
@@ -27,7 +26,6 @@ public static partial class DrawSetting
             trueMax = s.TrueMax;
             name = s.Name;
             decPlaces = s.DecimalPlaces;
-            translatedName = s.Translate(name);
         }
         else
         {
@@ -38,7 +36,7 @@ public static partial class DrawSetting
             trueMin = s.TrueMin;
             trueMax = s.TrueMax;
             name = s.Name;
-            translatedName = s.Translate(name);
+            
 
             intSliderMin = s.Min;
             intSliderMax = s.Max;
@@ -46,6 +44,7 @@ public static partial class DrawSetting
             intTrueMax = s.TrueMax;
         }
 
+        string translatedName = Translate(name);
         string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
         
         GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, ThemeManager.SettingLabelStyle);

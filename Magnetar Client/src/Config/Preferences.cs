@@ -129,10 +129,6 @@ public static class Preferences
             CurrentProfileEntry = CreateEntry("ProfileManager", "CurrentProfile", Config.DefaultProfile,
                 "Active Profile", "The active configuration profile name.");
             LanguageEntry = CreateEntry("Localization", "Language", "English", "Language", "Active client language.");
-            if (LanguageEntry != null && !string.IsNullOrEmpty(LanguageEntry.Value))
-            {
-                Config.Language = LanguageEntry.Value;
-            }
 
             ModMenuKeyEntry = CreateEntry("UI", "MenuBind", KeyCode.RightShift, "MenuBind", "KeyCode to open the gui.");
 

@@ -125,7 +125,7 @@ public static class SaveLoad
         }
 
         // 3. Optional hook for disk asset overrides (e.g. textures)
-        TextureLoader.SaveTextureOverrides();
+        ResourceManager.SaveTextureOverrides();
 
         if (!force) AutoSaveLogger.Msg("Saved profile data.");
     }
@@ -170,7 +170,7 @@ public static class SaveLoad
                 AutoSaveLogger.Error($"Failed reading save file '{loadPath}': {ex.Message}");
             }
 
-            TextureLoader.LoadTextureOverrides();
+            ResourceManager.LoadTextureOverrides();
         }
 
         ServiceRegistry.LoadAll();

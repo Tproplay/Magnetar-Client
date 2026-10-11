@@ -241,7 +241,7 @@ public static class ThemeData
     public static Color SettingOffColor { get; set; }
     public static Color SeparatorColor { get; set; }
 
-    // --- Hardcoded Default Theme (Safety Fallback) ---
+    // --- Hardcoded Default Theme ---
     public static readonly ThemeDefinition InternalDefaultTheme = new()
     {
         Name = "Magnetar Default",
@@ -348,7 +348,7 @@ public static class ThemeData
         }
     };
 
-    // --- Hardcoded Template for Meteor Purple (Dumped to Disk) ---
+    // --- Hardcoded Template for Meteor Purple ---
     public static readonly ThemeDefinition MeteorPurpleTemplate = new()
     {
         Name = "Meteor Purple",

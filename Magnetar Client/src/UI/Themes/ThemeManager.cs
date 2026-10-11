@@ -131,9 +131,9 @@ public static class ThemeManager
         BuildEmptyStyles();
         LoadThemes();
         ApplyTheme(Theme);
+
         _lastScale = -1f;
         _lastElementScale = -1f;
-        Rescale();
 
         ServiceRegistry.Register(new ThemeService());
     }
@@ -142,23 +142,22 @@ public static class ThemeManager
     {
         ThemeData.LoadedThemes.Clear();
 
-        // 1. Magnetar Default is permanently hardcoded and immutable
+        // Internal Theme
         ThemeData.LoadedThemes[ThemeData.InternalDefaultTheme.Name] = ThemeData.InternalDefaultTheme;
 
         try
         {
-
-            // 2. Dump Meteor Purple as template if file does not exist
+            // Dump Meteor Purple as template if file does not exist
             string templatePath = Path.Combine(ThemesDir, "Meteor Purple.json");
             if (!File.Exists(templatePath))
             {
                 string json = JsonConvert.SerializeObject(ThemeData.MeteorPurpleTemplate, Formatting.Indented);
                 File.WriteAllText(templatePath, json);
                 ThemeData.LoadedThemes[ThemeData.MeteorPurpleTemplate.Name] = ThemeData.MeteorPurpleTemplate;
-                DebugLogger.Msg("[ThemeManager] Dumped 'Meteor Purple.json' template to disk.");
+                GUILogger.Msg($"Dumped 'Meteor Purple.json' template to {ThemesDir}");
             }
 
-            // 3. Load all themes from the Themes directory
+            // Load all themes from the Themes directory
             string[] files = Directory.GetFiles(ThemesDir, "*.json");
             foreach (var file in files)
             {
@@ -169,11 +168,9 @@ public static class ThemeManager
                     if (def != null && !string.IsNullOrWhiteSpace(def.Name))
                     {
                         string themeKey = def.Name.Trim();
-
-                        // Guard: Default theme is strictly immutable
                         if (string.Equals(themeKey, ThemeData.InternalDefaultTheme.Name, StringComparison.OrdinalIgnoreCase))
                         {
-                            DebugLogger.Warning($"[ThemeManager] Ignoring '{Path.GetFileName(file)}': 'Magnetar Default' is hardcoded and cannot be modified.");
+                            GUILogger.Warning($"Ignoring '{Path.GetFileName(file)}': 'Magnetar Default' is hardcoded and cannot be modified.");
                             continue;
                         }
 
@@ -182,7 +179,7 @@ public static class ThemeManager
                 }
                 catch (Exception ex)
                 {
-                    DebugLogger.Error($"[ThemeManager] Error loading theme file '{Path.GetFileName(file)}': {ex.Message}");
+                    GUILogger.Error($"Error loading theme file '{Path.GetFileName(file)}': {ex.Message}");
                 }
             }
 
@@ -194,7 +191,7 @@ public static class ThemeManager
         }
         catch (Exception ex)
         {
-            DebugLogger.Error($"[ThemeManager] Error handling Themes directory: {ex.Message}");
+            GUILogger.Error($"Error handling Themes directory: {ex.Message}");
             ThemeData.LoadedThemes[ThemeData.MeteorPurpleTemplate.Name] = ThemeData.MeteorPurpleTemplate;
         }
     }

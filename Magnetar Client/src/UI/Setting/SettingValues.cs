@@ -5,16 +5,11 @@ namespace Magnetar_Client.UI.Setting;
 
 public static class SettingValues
 {
-
-    // Fraction of the slider's own value range moved per scroll tick -
-    // not a pixel size, so it does not scale with GUIScale.
     public static float SliderScrollStep = 0.04f;
 
-    // Row count, not a size - does not scale.
     public static int DropdownMaxVisibleRows = 6;
 
     // Text Fields & Autocomplete
-    // History depth, not a size - does not scale.
     public static int TextFieldUndoLimit = 200;
     private static float _baseResetButtonW = 22;
     private static float _baseGap = 6;

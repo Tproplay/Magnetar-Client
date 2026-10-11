@@ -65,8 +65,8 @@ public static partial class NEFGUI
         if (NEFData.LegacyLoadEntities.Contains(entity.Id) || entity.Id >= 3000)
         {
             finalTex = entity.IsZombie
-                ? TextureLoader.GetZombieTexture(entity.Id)
-                : TextureLoader.GetPlantTexture(entity.Id);
+                ? ResourceManager.GetZombieTexture(entity.Id)
+                : ResourceManager.GetPlantTexture(entity.Id);
         }
 
         if (finalTex == null)

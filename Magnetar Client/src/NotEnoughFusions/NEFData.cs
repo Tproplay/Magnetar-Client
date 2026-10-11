@@ -190,7 +190,7 @@ public static class NEFData
     {
         int id = NextCustomPlantId++;
         CustomNames[id] = displayName;
-        TextureLoader.PlantTextureOverrides[id] = texturePath;
+        ResourceManager.PlantTextureOverrides[id] = texturePath;
 
         if (legacyLoad)
         {

@@ -138,7 +138,7 @@ public class Main
         
         #endregion
 
-        if (ClientConfig.showgui) LockUI.BlockSKeysPatch.BlockKeys = true;
+        if (ClientConfig.InGUI) LockUI.BlockSKeysPatch.BlockKeys = true;
     }
 
     public void OnGUI()
@@ -179,7 +179,6 @@ public class Main
             {
                 Color prevGuiColor = GUI.color;
                 GUI.color = new Color(1f, 1f, 1f, AnimationHandler.FadeProgress);
-
                 
                 ClientConfig.CurrentTab?.OnGUI?.Invoke();
                 ServiceRegistry.RenderMenuAll();
@@ -187,7 +186,6 @@ public class Main
                 // Render TopBar on top
                 TopBar.Render();
                 
-
                 GUI.color = prevGuiColor;
             }
         }
@@ -205,16 +203,15 @@ public class Main
 
     public void OnApplicationQuit()
     {
-        Api.Actions.OnEarlyApplicationQuit?.Invoke();
+        Api.Actions.OnApplicationQuit?.Invoke();
         ServiceRegistry.QuitAll();
         SaveLoad.Save(true);
-        Api.Actions.OnLateApplicationQuit?.Invoke();
-        DebugLogger.Msg("Magnetar PreferenceManager Saved!");
+        DebugLogger.Msg("Preferences Saved!");
     }
 
     public static void WarmUp()
     {
-        FontLoader.Init();
+        ResourceManager.Init();
         UI.Themes.ThemeManager.Init();
 
         ServiceRegistry.WarmUpAll();

@@ -31,8 +31,7 @@ public static class Actions
     public static Action OnGUIShow;
 
     // Quit
-    public static Action OnEarlyApplicationQuit;
-    public static Action OnLateApplicationQuit;
+    public static Action OnApplicationQuit;
 
     // Misc
     public static Action OnLanguageChanged;

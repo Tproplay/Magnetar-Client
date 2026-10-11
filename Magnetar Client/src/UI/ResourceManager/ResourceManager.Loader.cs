@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
+using Magnetar_Client.Api;
 using Magnetar_Client.Utils;
-
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -11,10 +13,8 @@ using BepInEx;
 
 namespace Magnetar_Client.UI;
 
-public static class TextureLoader
+public static partial class ResourceManager
 {
-    private static readonly Dictionary<string, Texture2D> _textureCache = new();
-
     private static readonly Dictionary<string, Sprite> _spriteMemoryCache = new();
     private static readonly Dictionary<string, Texture2D> _rawTexMemoryCache = new();
     private static bool _hasScannedMemory;
@@ -58,10 +58,7 @@ public static class TextureLoader
         if (_textureCache.TryGetValue(textureName, out Texture2D cachedTex))
             return cachedTex;
 
-        // ====================================================================
-        // STAGE 1: DIRECT DISK LOADING VIA RESOURCE MANAGER (NO ASSETBUNDLES)
-        // ====================================================================
-        Texture2D directDiskTex = ResourceManager.LoadTexture(textureName);
+        Texture2D directDiskTex = LoadTexture(textureName);
         if (directDiskTex != null)
         {
             _textureCache[textureName] = directDiskTex;
@@ -70,9 +67,6 @@ public static class TextureLoader
 
         bool isExplicitPath = textureName.Contains("/");
 
-        // ====================================================================
-        // STAGE 2: EXPLICIT SUB-PATH & SUB-ASSET PARSING
-        // ====================================================================
         if (isExplicitPath)
         {
             string cleanPath = textureName.ToLower();
@@ -94,15 +88,13 @@ public static class TextureLoader
                 }
             }
 
-            // Check if clean stripped path exists on disk in Resources or its subfolders
-            Texture2D diskCleanTex = ResourceManager.LoadTexture(cleanPath);
+            Texture2D diskCleanTex = LoadTexture(cleanPath);
             if (diskCleanTex != null)
             {
                 _textureCache[textureName] = diskCleanTex;
                 return diskCleanTex;
             }
 
-            // Fallback check against Unity's built-in game Resources
             string resPath = cleanPath.Replace(".png", "").Replace(".jpg", "");
 
             if (useSubAsset)
@@ -137,9 +129,6 @@ public static class TextureLoader
             return null;
         }
 
-        // ====================================================================
-        // STAGE 3: IN-MEMORY GAME OBJECT FALLBACK
-        // ====================================================================
         if (!_hasScannedMemory) RefreshMemoryCache();
 
         if (_spriteMemoryCache.TryGetValue(textureName, out Sprite sprite))
@@ -287,7 +276,7 @@ public static class TextureLoader
             if (!ZombieTextureOverrides.ContainsKey(zombieId))
             {
                 ZombieTextureOverrides[zombieId] = preferredPath;
-                Utils.SaveLoad.Save();
+                SaveLoad.Save();
             }
         }
         else
@@ -295,24 +284,16 @@ public static class TextureLoader
             if (!ZombieTextureOverrides.ContainsKey(zombieId))
             {
                 ZombieTextureOverrides[zombieId] = successfulPath;
-                Utils.SaveLoad.Save();
+                SaveLoad.Save();
             }
         }
 #endif
         return tex;
     }
 
-    public static void ClearCache()
-    {
-        _textureCache.Clear();
-        _spriteMemoryCache.Clear();
-        _rawTexMemoryCache.Clear();
-        _hasScannedMemory = false;
-    }
-
     public static void SaveTextureOverrides()
     {
-        string texturePath = Api.PathsManager.TextureDataPath;
+        string texturePath = PathsManager.TextureDataPath;
         try
         {
             var texData = new SaveLoadData.TextureSaveData
@@ -320,11 +301,11 @@ public static class TextureLoader
                 PlantTextureOverrides = PlantTextureOverrides ?? new(),
                 ZombieTextureOverrides = ZombieTextureOverrides ?? new()
             };
-            string dir = System.IO.Path.GetDirectoryName(texturePath);
-            if (!System.IO.Directory.Exists(dir)) System.IO.Directory.CreateDirectory(dir);
-            System.IO.File.WriteAllText(texturePath, Newtonsoft.Json.JsonConvert.SerializeObject(texData, Newtonsoft.Json.Formatting.Indented));
+            string dir = Path.GetDirectoryName(texturePath);
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            File.WriteAllText(texturePath, Newtonsoft.Json.JsonConvert.SerializeObject(texData, Newtonsoft.Json.Formatting.Indented));
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             Magnetar_Logger.AutoSaveLogger.Error($"Failed to save TextureData: {ex.Message}");
         }
@@ -332,12 +313,12 @@ public static class TextureLoader
 
     public static void LoadTextureOverrides()
     {
-        string texturePath = Api.PathsManager.TextureDataPath;
-        if (System.IO.File.Exists(texturePath))
+        string texturePath = PathsManager.TextureDataPath;
+        if (File.Exists(texturePath))
         {
             try
             {
-                string json = System.IO.File.ReadAllText(texturePath);
+                string json = File.ReadAllText(texturePath);
                 var data = Newtonsoft.Json.JsonConvert.DeserializeObject<SaveLoadData.TextureSaveData>(json);
                 if (data != null)
                 {
@@ -345,7 +326,7 @@ public static class TextureLoader
                     ZombieTextureOverrides = data.ZombieTextureOverrides ?? new();
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 Magnetar_Logger.AutoSaveLogger.Error($"Failed to load TextureData: {ex.Message}");
             }

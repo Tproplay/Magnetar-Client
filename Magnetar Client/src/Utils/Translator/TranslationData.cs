@@ -47,7 +47,7 @@ public static class TranslationData
     public static bool MissingStringsDirty { get; set; } = false;
 
     public static string TranslationRootDir => PathsManager.TranslationRootDir;
-    public static string CurrentLanguage => string.IsNullOrWhiteSpace(Config.Language) ? "English" : Config.Language;
+    public static string CurrentLanguage => string.IsNullOrWhiteSpace(Translator.Language) ? "English" : Translator.Language;
 
     public static void ResetForReload()
     {

@@ -171,7 +171,7 @@ public abstract class HudElement
 
     private Rect CalculateFlushDocking(Rect rect)
     {
-        float snapThreshold = 14f * Mathf.Max(1f, Config.ElementScale);
+        float snapThreshold = 14f * Mathf.Max(1f, GUIManager.ElementScaleSetting.Value);
         float canvasWidth = 1920f;
         float canvasHeight = 1080f;
 
@@ -284,8 +284,8 @@ public abstract class HudElement
         if (style == null || string.IsNullOrEmpty(text)) return;
 
         Vector2 textSize = style.CalcSize(new GUIContent(text));
-        float targetWidth = textSize.x + (padding * Config.ElementScale);
-        float targetHeight = textSize.y + (4f * Config.ElementScale);
+        float targetWidth = textSize.x + (padding * GUIManager.ElementScaleSetting.Value);
+        float targetHeight = textSize.y + (4f * GUIManager.ElementScaleSetting.Value);
 
         if (Mathf.Abs(Bounds.width - targetWidth) > 0.5f)
         {
@@ -300,8 +300,8 @@ public abstract class HudElement
     private static Vector2 windowPos = new(10, 10);
     public static Rect NewRect(float width = 250, float height = 24)
     {
-        float actualHeight = height * Config.ElementScale;
-        Rect rect = new(windowPos.x, windowPos.y, width * Config.ElementScale, actualHeight);
+        float actualHeight = height * GUIManager.ElementScaleSetting.Value;
+        Rect rect = new(windowPos.x, windowPos.y, width * GUIManager.ElementScaleSetting.Value, actualHeight);
 
         if (windowPos.y > 800)
         {

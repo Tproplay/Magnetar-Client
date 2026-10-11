@@ -10,45 +10,47 @@ namespace Magnetar_Client.Utils;
 
 public static class ProfileManager
 {
-    public static List<string> Profiles { get; private set; } = new() { Config.DefaultProfile };
+    public const string DefaultProfile = "Default";
+    public static List<string> Profiles { get; private set; } = new() { ProfileManager.DefaultProfile };
+    public static string CurrentProfile { get; set; } = "Default";
 
     public static void Init()
     {
         RefreshProfiles();
 
-        if (!Profiles.Contains(Config.DefaultProfile, StringComparer.OrdinalIgnoreCase))
+        if (!Profiles.Contains(ProfileManager.DefaultProfile, StringComparer.OrdinalIgnoreCase))
         {
-            Profiles.Insert(0, Config.DefaultProfile);
+            Profiles.Insert(0, ProfileManager.DefaultProfile);
         }
 
-        string savedProfile = Config.DefaultProfile;
+        string savedProfile = ProfileManager.DefaultProfile;
 
-        if (Preferences.CurrentProfileEntry != null && !string.IsNullOrWhiteSpace(Preferences.CurrentProfileEntry.Value))
+        if (PreferenceManager.CurrentProfileEntry != null && !string.IsNullOrWhiteSpace(PreferenceManager.CurrentProfileEntry.Value))
         {
-            savedProfile = Preferences.CurrentProfileEntry.Value;
+            savedProfile = PreferenceManager.CurrentProfileEntry.Value;
         }
 
         if (Profiles.Contains(savedProfile, StringComparer.OrdinalIgnoreCase))
         {
-            Config.CurrentProfile = savedProfile;
+            ProfileManager.CurrentProfile = savedProfile;
         }
         else
         {
-            Config.CurrentProfile = Config.DefaultProfile;
-            SaveCurrentProfileToPreferences(Config.DefaultProfile);
+            ProfileManager.CurrentProfile = ProfileManager.DefaultProfile;
+            SaveCurrentProfileToPreferences(ProfileManager.DefaultProfile);
         }
 
-        AutoSaveLogger.Msg($"Profile Manager initialized. Directory: '{ConfigDir}', Active profile: '{Config.CurrentProfile}'");
+        AutoSaveLogger.Msg($"Profile Manager initialized. Directory: '{ConfigDir}', Active profile: '{ProfileManager.CurrentProfile}'");
     }
 
     private static void SaveCurrentProfileToPreferences(string profileName)
     {
         try
         {
-            if (Preferences.CurrentProfileEntry != null)
+            if (PreferenceManager.CurrentProfileEntry != null)
             {
-                Preferences.CurrentProfileEntry.Value = profileName;
-                Preferences.CurrentProfileEntry.Save();
+                PreferenceManager.CurrentProfileEntry.Value = profileName;
+                PreferenceManager.CurrentProfileEntry.Save();
             }
         }
         catch (Exception ex)
@@ -60,7 +62,7 @@ public static class ProfileManager
     public static void RefreshProfiles()
     {
         Profiles.Clear();
-        Profiles.Add(Config.DefaultProfile);
+        Profiles.Add(ProfileManager.DefaultProfile);
 
         try
         {
@@ -75,7 +77,7 @@ public static class ProfileManager
                         string profileName = fileName.Substring("Magnetar_".Length);
 
                         if (!string.IsNullOrWhiteSpace(profileName) &&
-                            !string.Equals(profileName, "Config", StringComparison.OrdinalIgnoreCase) &&
+                            !string.Equals(profileName, "ClientConfig", StringComparison.OrdinalIgnoreCase) &&
                             !Profiles.Contains(profileName, StringComparer.OrdinalIgnoreCase))
                         {
                             Profiles.Add(profileName);
@@ -165,11 +167,11 @@ public static class ProfileManager
         SaveLoad.ResetAll();
 
         Profiles.Add(profileName);
-        Config.CurrentProfile = profileName;
+        ProfileManager.CurrentProfile = profileName;
 
         SaveCurrentProfileToPreferences(profileName);
         SaveLoad.Save(force: true);
-        Config.showgui = true;
+        ClientConfig.showgui = true;
 
         AutoSaveLogger.Msg($"Created and loaded new profile: '{profileName}'");
         return true;
@@ -177,7 +179,7 @@ public static class ProfileManager
 
     public static void SwitchProfile(string targetProfile)
     {
-        if (string.IsNullOrWhiteSpace(targetProfile) || string.Equals(Config.CurrentProfile, targetProfile, StringComparison.OrdinalIgnoreCase)) return;
+        if (string.IsNullOrWhiteSpace(targetProfile) || string.Equals(ProfileManager.CurrentProfile, targetProfile, StringComparison.OrdinalIgnoreCase)) return;
 
         SaveLoad.Save(force: true);
         SaveLoad.ResetAll();
@@ -186,19 +188,18 @@ public static class ProfileManager
         {
             Profiles.Add(targetProfile);
         }
-
-        Config.CurrentProfile = targetProfile;
+        ProfileManager.CurrentProfile = targetProfile;
         SaveCurrentProfileToPreferences(targetProfile);
 
         SaveLoad.Load();
-        Config.showgui = true;
+        ClientConfig.showgui = true;
 
-        AutoSaveLogger.Msg($"Switched active profile to: '{Config.CurrentProfile}'");
+        AutoSaveLogger.Msg($"Switched active profile to: '{ProfileManager.CurrentProfile}'");
     }
 
     public static bool DeleteProfile(string profileName)
     {
-        if (string.Equals(profileName, Config.DefaultProfile, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(profileName, ProfileManager.DefaultProfile, StringComparison.OrdinalIgnoreCase))
         {
             AutoSaveLogger.Error("Cannot delete the Default profile.");
             return false;
@@ -221,11 +222,11 @@ public static class ProfileManager
 
         Profiles.RemoveAll(p => string.Equals(p, profileName, StringComparison.OrdinalIgnoreCase));
 
-        if (string.Equals(Config.CurrentProfile, profileName, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(ProfileManager.CurrentProfile, profileName, StringComparison.OrdinalIgnoreCase))
         {
             ResetAllModulesToDefault();
-            Config.CurrentProfile = Config.DefaultProfile;
-            SaveCurrentProfileToPreferences(Config.DefaultProfile);
+            ProfileManager.CurrentProfile = ProfileManager.DefaultProfile;
+            SaveCurrentProfileToPreferences(ProfileManager.DefaultProfile);
             SaveLoad.Load();
         }
 

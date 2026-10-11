@@ -46,11 +46,11 @@ public class StringSetting : Setting
 
     public override void Draw(ref float y, float width)
     {
-        float elemH = Config.elementHeight;
-        float indent = Config.indent;
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
         float resetBtnW = SettingValues.ResetButtonW;
-        float controlW = Mathf.Min(Config.SettingWidth * 1.25f, width * 0.52f);
+        float controlW = Mathf.Min(ClientConfig.SettingWidth * 1.25f, width * 0.52f);
 
         // Label on the left occupies remaining width
         float labelW = width - (indent * 2f) - controlW - gap - resetBtnW;
@@ -71,6 +71,6 @@ public class StringSetting : Setting
             Reset();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
     }
 }

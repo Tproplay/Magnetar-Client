@@ -39,12 +39,12 @@ public class Vector2Setting : Setting
 
     public override void Draw(ref float y, float width)
     {
-        float elemH = Config.elementHeight;
-        float indent = Config.indent;
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
         float resetBtnW = SettingValues.ResetButtonW;
         float subLabelW = GUIManager.S(16f);
-        float totalControlW = Config.SettingWidth;
+        float totalControlW = ClientConfig.SettingWidth;
 
         // Label: Left space
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
@@ -84,7 +84,7 @@ public class Vector2Setting : Setting
             Reset();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
     }
 }
 
@@ -120,12 +120,12 @@ public class Vector2IntSetting : Setting
 
     public override void Draw(ref float y, float width)
     {
-        float elemH = Config.elementHeight;
-        float indent = Config.indent;
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
         float resetBtnW = SettingValues.ResetButtonW;
         float subLabelW = GUIManager.S(16f);
-        float totalControlW = Config.SettingWidth;
+        float totalControlW = ClientConfig.SettingWidth;
 
         // Label: Left space
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
@@ -165,7 +165,7 @@ public class Vector2IntSetting : Setting
             Reset();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
     }
 }
 
@@ -201,12 +201,12 @@ public class Vector3Setting : Setting
 
     public override void Draw(ref float y, float width)
     {
-        float elemH = Config.elementHeight;
-        float indent = Config.indent;
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
         float resetBtnW = SettingValues.ResetButtonW;
         float subLabelW = GUIManager.S(14f);
-        float totalControlW = Config.SettingWidth * 1.15f;
+        float totalControlW = ClientConfig.SettingWidth * 1.15f;
 
         // Label: Left space
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
@@ -253,7 +253,7 @@ public class Vector3Setting : Setting
             Reset();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
     }
 }
 
@@ -289,12 +289,12 @@ public class Vector3IntSetting : Setting
 
     public override void Draw(ref float y, float width)
     {
-        float elemH = Config.elementHeight;
-        float indent = Config.indent;
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
         float resetBtnW = SettingValues.ResetButtonW;
         float subLabelW = GUIManager.S(14f);
-        float totalControlW = Config.SettingWidth * 1.15f;
+        float totalControlW = ClientConfig.SettingWidth * 1.15f;
 
         // Label: Left space
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
@@ -341,6 +341,6 @@ public class Vector3IntSetting : Setting
             Reset();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
     }
 }

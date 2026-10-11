@@ -107,7 +107,7 @@ public static class SaveLoad
         }
 
         // 2. Write Profile JSON to disk
-        string savePath = PathsManager.GetProfilePath(Config.CurrentProfile);
+        string savePath = PathsManager.GetProfilePath(ProfileManager.CurrentProfile);
         string directory = Path.GetDirectoryName(savePath);
 
         lock (_fileLock)
@@ -132,7 +132,7 @@ public static class SaveLoad
 
     public static void Load()
     {
-        string loadPath = PathsManager.GetProfilePath(Config.CurrentProfile);
+        string loadPath = PathsManager.GetProfilePath(ProfileManager.CurrentProfile);
 
         lock (_fileLock)
         {
@@ -163,7 +163,7 @@ public static class SaveLoad
                     }
                 }
 
-                AutoSaveLogger.Msg($"Loaded Profile '{Config.CurrentProfile}'");
+                AutoSaveLogger.Msg($"Loaded Profile '{ProfileManager.CurrentProfile}'");
             }
             catch (Exception ex)
             {

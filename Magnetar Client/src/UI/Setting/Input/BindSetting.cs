@@ -60,22 +60,22 @@ public class BindSetting : Setting
         Event e = Event.current;
         bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
 
-        float indent = Config.indent;
+        float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
         float resetBtnW = SettingValues.ResetButtonW;
-        float settingW = Config.SettingWidth;
+        float settingW = ClientConfig.SettingWidth;
 
         // Label: occupies remaining width on the left
         float labelW = width - (indent * 2f) - settingW - gap - resetBtnW;
-        Rect labelRect = new(indent, y, labelW, Config.elementHeight);
+        Rect labelRect = new(indent, y, labelW, ClientConfig.elementHeight);
         GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Right-aligned elements: [Control Button] [gap] [Reset Button]
         float resetStartX = width - indent - resetBtnW;
         float bindStartX = resetStartX - gap - settingW;
 
-        Rect bindRect = new(bindStartX, y, settingW, Config.elementHeight);
-        Rect resetRect = new(resetStartX, y, resetBtnW, Config.elementHeight);
+        Rect bindRect = new(bindStartX, y, settingW, ClientConfig.elementHeight);
+        Rect resetRect = new(resetStartX, y, resetBtnW, ClientConfig.elementHeight);
 
         string bindText = IsBinding ? "[...]" : GetBindString();
         GUI.Box(bindRect, bindText, IsBinding ? ThemeManager.SettingOn : ThemeManager.SettingOff);
@@ -99,7 +99,7 @@ public class BindSetting : Setting
             {
                 if (e.type == EventType.KeyDown)
                 {
-                    if (key == KeyCode.Escape || key == Config.MenuOpenKey)
+                    if (key == KeyCode.Escape || key == ClientConfig.MenuOpenKey)
                     {
                         BindKeys.Clear();
                         IsBinding = false;
@@ -123,6 +123,6 @@ public class BindSetting : Setting
             Reset();
         }
 
-        y += Config.elementHeight + Config.spacing;
+        y += ClientConfig.elementHeight + ClientConfig.spacing;
     }
 }

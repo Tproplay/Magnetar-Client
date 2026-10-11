@@ -12,8 +12,8 @@ public static class HUDControlsDrawer
     private const float BaseHeight = 300f;
 
     public static Rect WindowRect = new(
-        (Config.NativeWidth - GUIManager.S(BaseWidth)) / 2f,
-        (Config.NativeHeight - GUIManager.S(BaseHeight)) / 2f,
+        (ClientConfig.NativeWidth - GUIManager.S(BaseWidth)) / 2f,
+        (ClientConfig.NativeHeight - GUIManager.S(BaseHeight)) / 2f,
 GUIManager.S(BaseWidth),
 GUIManager.S(BaseHeight));
 
@@ -26,7 +26,7 @@ GUIManager.S(BaseHeight));
         float viewAlpha = AnimationHandler.GetViewAlpha(HUDManager.Group, HUDManager.ViewMain);
         if (viewAlpha <= 0.001f) return;
 
-        Config.RescaleAroundCenter(ref WindowRect, GUIManager.S(BaseWidth), WindowRect.height);
+        ClientConfig.RescaleAroundCenter(ref WindowRect, GUIManager.S(BaseWidth), WindowRect.height);
 
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
@@ -91,7 +91,7 @@ GUIManager.S(BaseHeight));
         {
             e.Use();
             HUDManager.forceShow = true;
-            Config.showgui = false;
+            ClientConfig.showgui = false;
         }
 
         y += elemH + GUIManager.S(5f);

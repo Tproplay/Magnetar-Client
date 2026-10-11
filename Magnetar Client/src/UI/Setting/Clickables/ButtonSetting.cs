@@ -22,21 +22,21 @@ public class ButtonSetting : Setting
     {
         Event e = Event.current;
 
-        float indent = Config.indent;
+        float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
 
         string localizedName = Translate(Name);
         string localizedButtonText = Translate(ButtonText);
 
         // Label
-        float labelW = width - indent * 2 - Config.SettingWidth;
-        Rect labelRect = new(indent, y, labelW, Config.elementHeight);
+        float labelW = width - indent * 2 - ClientConfig.SettingWidth;
+        Rect labelRect = new(indent, y, labelW, ClientConfig.elementHeight);
         GUI.Label(labelRect, localizedName, ThemeManager.SettingLabelStyle);
 
         // Button
-        float btnW = Config.SettingWidth;
+        float btnW = ClientConfig.SettingWidth;
         float btnStartX = width - indent - btnW - gap - SettingValues.ResetButtonW;
-        Rect btnRect = new(btnStartX, y, Config.SettingWidth, Config.elementHeight);
+        Rect btnRect = new(btnStartX, y, ClientConfig.SettingWidth, ClientConfig.elementHeight);
         GUI.Box(btnRect, localizedButtonText, ThemeManager.ButtonSettingStyle);
 
         if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
@@ -45,6 +45,6 @@ public class ButtonSetting : Setting
             e.Use();
         }
 
-        y += Config.elementHeight + Config.spacing;
+        y += ClientConfig.elementHeight + ClientConfig.spacing;
     }
 }

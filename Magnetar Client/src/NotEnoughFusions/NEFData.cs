@@ -335,7 +335,7 @@ public static class NEFData
         {
             currentStartX = CalculateTreeLayout(root, currentStartX, 0f, spacingX, spacingY) + treeGap;
         }
-        lastCalculatedScale = Config.GUIScale;
+        lastCalculatedScale = GUIManager.ScaleSetting.Value;
     }
 
     public static void GeneratePyramid(RecipeEntity target)

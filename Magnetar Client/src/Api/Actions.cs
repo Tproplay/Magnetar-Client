@@ -14,13 +14,10 @@ public static class Actions
 {
     // Initialization
     public static Action OnEarlyInitialize;
-    public static Action OnPreApplyHarmonyPatches;
-    public static Action OnPostApplyHarmonyPatches;
 
     public static Action OnEarlyInitializeCore;
 
-    public static Action OnEarlyInitializePreferences;
-    public static Action OnLateInitializePreferences;
+    public static Action OnInitializePreferences;
 
     public static Action OnModuleCategoyInitialized;
 

@@ -37,12 +37,7 @@ public class Main
         Api.Actions.OnEarlyInitialize?.Invoke();
 
         // Apply the harmony patches
-
-        Api.Actions.OnPreApplyHarmonyPatches?.Invoke();
-
         ApplyHarmonyPatches();
-
-        Api.Actions.OnPostApplyHarmonyPatches?.Invoke();
 
         // Initialize core systems and modules
         Instance.InitializeCore();
@@ -74,7 +69,7 @@ public class Main
     {
         Api.Actions.OnEarlyInitializeCore?.Invoke();
 
-        Preferences.InitializePreferences();
+        PreferenceManager.InitializePreferences();
 
         TopBar.Init();
         MobileMenuUI.Init();
@@ -111,17 +106,17 @@ public class Main
         AnimationHandler.UpdateTransition();
         Translator.Update();
 
-        if (Input.GetKeyDown(Config.MenuOpenKey) && !HUDManager.forceShow)
+        if (Input.GetKeyDown(ClientConfig.MenuOpenKey) && !HUDManager.forceShow)
         {
-            Config.showgui = !Config.showgui;
-            if (!Config.showgui) SaveLoad.Save();
+            ClientConfig.showgui = !ClientConfig.showgui;
+            if (!ClientConfig.showgui) SaveLoad.Save();
         }
 
         Api.Actions.OnUpdate?.Invoke();
         ServiceRegistry.UpdateAll();
 
         #region Handle Escape
-        if (Config.showgui)
+        if (ClientConfig.showgui)
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
@@ -133,7 +128,7 @@ public class Main
 
                 if (SafeToClose)
                 {
-                    Config.showgui = false;
+                    ClientConfig.showgui = false;
                     SaveLoad.Save();
                     Input.ResetInputAxes();
                 }
@@ -143,7 +138,7 @@ public class Main
         
         #endregion
 
-        if (Config.showgui) LockUI.BlockSKeysPatch.BlockKeys = true;
+        if (ClientConfig.showgui) LockUI.BlockSKeysPatch.BlockKeys = true;
     }
 
     public void OnGUI()
@@ -154,12 +149,12 @@ public class Main
 
         try
         {
-            float scaleX = Screen.width / Config.NativeWidth;
-            float scaleY = Screen.height / Config.NativeHeight;
+            float scaleX = Screen.width / ClientConfig.NativeWidth;
+            float scaleY = Screen.height / ClientConfig.NativeHeight;
             float uniformScale = Mathf.Min(scaleX, scaleY);
 
-            float offsetX = (Screen.width - (Config.NativeWidth * uniformScale)) * 0.5f;
-            float offsetY = (Screen.height - (Config.NativeHeight * uniformScale)) * 0.5f;
+            float offsetX = (Screen.width - (ClientConfig.NativeWidth * uniformScale)) * 0.5f;
+            float offsetY = (Screen.height - (ClientConfig.NativeHeight * uniformScale)) * 0.5f;
 
             GUI.matrix = Matrix4x4.TRS(
                 new Vector3(offsetX, offsetY, 0),
@@ -186,7 +181,7 @@ public class Main
                 GUI.color = new Color(1f, 1f, 1f, AnimationHandler.FadeProgress);
 
                 
-                Config.CurrentTab?.OnGUI?.Invoke();
+                ClientConfig.CurrentTab?.OnGUI?.Invoke();
                 ServiceRegistry.RenderMenuAll();
 
                 // Render TopBar on top
@@ -205,7 +200,7 @@ public class Main
             GUI.matrix = originalMatrix;
         }
 
-        if (Config.showgui) LockUI.BlockSKeysPatch.BlockKeys = true;
+        if (ClientConfig.showgui) LockUI.BlockSKeysPatch.BlockKeys = true;
     }
 
     public void OnApplicationQuit()
@@ -214,7 +209,7 @@ public class Main
         ServiceRegistry.QuitAll();
         SaveLoad.Save(true);
         Api.Actions.OnLateApplicationQuit?.Invoke();
-        DebugLogger.Msg("Magnetar Preferences Saved!");
+        DebugLogger.Msg("Magnetar PreferenceManager Saved!");
     }
 
     public static void WarmUp()

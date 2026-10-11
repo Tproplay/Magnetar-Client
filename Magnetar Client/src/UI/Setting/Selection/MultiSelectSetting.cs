@@ -99,11 +99,11 @@ public class MultiSelectSetting : Setting
     public override void Draw(ref float y, float width)
     {
         Event e = Event.current;
-        float elemH = Config.elementHeight;
-        float indent = Config.indent;
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
         float resetBtnW = SettingValues.ResetButtonW;
-        float selectBtnW = Config.selectButtonWidth;
+        float selectBtnW = ClientConfig.selectButtonWidth;
 
         string countText = '(' + Translate($"{SelectedValues.Count} selected") + ')';
         float countTextW = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(countText)).x;
@@ -142,7 +142,7 @@ public class MultiSelectSetting : Setting
             Reset();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
     }
 
     /// <summary>

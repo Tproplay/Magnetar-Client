@@ -16,8 +16,8 @@ public static class ProfileGUI
     private const float BaseElementHeight = 30f;
 
     public static Rect WindowRect = new(
-        (Config.NativeWidth - GUIManager.S(BaseWindowWidth)) / 2,
-        (Config.NativeHeight - GUIManager.S(BaseWindowHeight)) / 2,
+        (ClientConfig.NativeWidth - GUIManager.S(BaseWindowWidth)) / 2,
+        (ClientConfig.NativeHeight - GUIManager.S(BaseWindowHeight)) / 2,
 GUIManager.S(BaseWindowWidth),
 GUIManager.S(BaseWindowHeight));
 
@@ -31,7 +31,7 @@ GUIManager.S(BaseWindowHeight));
 
         SafeToCloseManager.RegisterGuard(() =>
         {
-            if (Config.CurrentTab == TabType.PROFILE)
+            if (ClientConfig.CurrentTab == TabType.PROFILE)
             {
                 return DrawSetting.ActiveTextFieldId == -1
                        && DrawSetting.FocusedControlId == -1;
@@ -42,7 +42,7 @@ GUIManager.S(BaseWindowHeight));
 
     public static void Render()
     {
-        Config.RescaleAroundCenter(ref WindowRect, GUIManager.S(BaseWindowWidth), GUIManager.S(BaseWindowHeight));
+        ClientConfig.RescaleAroundCenter(ref WindowRect, GUIManager.S(BaseWindowWidth), GUIManager.S(BaseWindowHeight));
 
         GUIStyle windowBgStyle = ThemeManager.SettingsWndowBgStyle ?? ThemeManager.CategoryWindowStyle;
 
@@ -76,7 +76,7 @@ GUIManager.S(BaseWindowHeight));
 
             GUI.Label(
                 new Rect(indent, y, w - (indent * 2), elementHeight),
-                $"{Translate("Current Active Profile")}: <color=yellow>{Config.CurrentProfile}</color>",
+                $"{Translate("Current Active Profile")}: <color=yellow>{ProfileManager.CurrentProfile}</color>",
                 ThemeManager.SettingTextStyle
             );
 
@@ -146,8 +146,8 @@ GUIManager.S(BaseWindowHeight));
             for (int i = 0; i < profilesList.Count; i++)
             {
                 string profileName = profilesList[i];
-                bool isActive = string.Equals(Config.CurrentProfile, profileName, StringComparison.OrdinalIgnoreCase);
-                bool isDefault = string.Equals(Config.DefaultProfile, profileName, StringComparison.OrdinalIgnoreCase);
+                bool isActive = string.Equals(ProfileManager.CurrentProfile, profileName, StringComparison.OrdinalIgnoreCase);
+                bool isDefault = string.Equals(ProfileManager.DefaultProfile, profileName, StringComparison.OrdinalIgnoreCase);
 
                 if (itemY + elementHeight >= 0 && itemY <= scrollAreaHeight)
                 {
@@ -238,7 +238,7 @@ GUIManager.S(BaseWindowHeight));
 
         public bool OnEscapePressed()
         {
-            if (Config.CurrentTab != TabType.PROFILE) return false;
+            if (ClientConfig.CurrentTab != TabType.PROFILE) return false;
 
             if (DrawSetting.ActiveTextFieldId != -1 || DrawSetting.FocusedControlId != -1)
             {

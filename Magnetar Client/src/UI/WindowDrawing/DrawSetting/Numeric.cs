@@ -48,7 +48,7 @@ public static partial class DrawSetting
         string translatedName = Translate(name);
         string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
         
-        GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(ClientConfig.indent, y, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth, ClientConfig.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
         float LogConvert(float v) => Mathf.Sign(v) * Mathf.Log10(Mathf.Abs(v) + 1.0f);
         float ExpConvert(float l) => Mathf.Sign(l) * (Mathf.Pow(10.0f, Mathf.Abs(l)) - 1.0f);
@@ -60,13 +60,13 @@ public static partial class DrawSetting
         float percentage = Mathf.Clamp01((logVal - logMin) / (logMax - logMin));
 
         float inputW = SettingValues.NumericInputWidth;
-        float sliderW = Config.SettingWidth - inputW - 10f;
+        float sliderW = ClientConfig.SettingWidth - inputW - 10f;
         float trackH = SettingValues.SliderHeight;
         float thumbSize = GUIManager.S(16f);
 
-        Rect sliderRect = new(width - Config.indent - Config.SettingWidth, y + ((Config.elementHeight - trackH) / 2f), sliderW, trackH);
-        Rect sliderHitBox = new(sliderRect.x, y, sliderRect.width, Config.elementHeight);
-        Rect inputRect = new(width - Config.indent - inputW, y, inputW, Config.elementHeight);
+        Rect sliderRect = new(width - ClientConfig.indent - ClientConfig.SettingWidth, y + ((ClientConfig.elementHeight - trackH) / 2f), sliderW, trackH);
+        Rect sliderHitBox = new(sliderRect.x, y, sliderRect.width, ClientConfig.elementHeight);
+        Rect inputRect = new(width - ClientConfig.indent - inputW, y, inputW, ClientConfig.elementHeight);
         float fillWidth = sliderRect.width * percentage;
 
         float thumbX = sliderRect.x + fillWidth - (thumbSize / 2f);

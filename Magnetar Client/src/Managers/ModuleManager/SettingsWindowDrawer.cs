@@ -70,8 +70,8 @@ public static class SettingsWindowDrawer
             float popupHeight = GUIManager.S(25f);
 
             _settingsPositions[targetMod] = new Rect(
-                (Config.NativeWidth / 2f) - (targetWidth / 2f),
-                (Config.NativeHeight / 2f) - (popupHeight / 2f),
+                (ClientConfig.NativeWidth / 2f) - (targetWidth / 2f),
+                (ClientConfig.NativeHeight / 2f) - (popupHeight / 2f),
                 targetWidth,
                 popupHeight
             );
@@ -122,7 +122,7 @@ public static class SettingsWindowDrawer
 #else
         float headerHeight = GUIManager.S(26f);
 #endif
-        float maxWindowHeight = Config.NativeHeight * ModuleManager.MaxSettingsWindowHeightPct;
+        float maxWindowHeight = ClientConfig.NativeHeight * ModuleManager.MaxSettingsWindowHeightPct;
         float maxViewHeight = maxWindowHeight - headerHeight;
 
         if (!_moduleContentHeights.ContainsKey(mod)) _moduleContentHeights[mod] = 0f;
@@ -237,27 +237,27 @@ public static class SettingsWindowDrawer
             if (w > maxNameWidth) maxNameWidth = w;
         }
 
-        float calculatedWidth = Config.indent + maxNameWidth + GUIManager.S(35f) + Config.SettingWidth + Config.indent;
+        float calculatedWidth = ClientConfig.indent + maxNameWidth + GUIManager.S(35f) + ClientConfig.SettingWidth + ClientConfig.indent;
         return Mathf.Max(ModuleManager.SettingsWidth, Mathf.Max(mod.SettingsWidth, calculatedWidth));
     }
 
     private static float DrawSettingsBody(Modules.Module mod, float y, float width)
     {
         float startY = y;
-        y += 3 * Config.spacing;
+        y += 3 * ClientConfig.spacing;
 
-        float descriptionWidth = width - (Config.indent * 2);
+        float descriptionWidth = width - (ClientConfig.indent * 2);
         string translatedDescription = Translate(mod.Description);
 
         float calculatedHeight = ThemeManager.SettingsDescriptionStyle.CalcHeight(new GUIContent(translatedDescription), descriptionWidth);
-        GUI.Label(new Rect(Config.indent, y, descriptionWidth, calculatedHeight), translatedDescription, ThemeManager.SettingsDescriptionStyle);
-        y += calculatedHeight + Config.spacing;
+        GUI.Label(new Rect(ClientConfig.indent, y, descriptionWidth, calculatedHeight), translatedDescription, ThemeManager.SettingsDescriptionStyle);
+        y += calculatedHeight + ClientConfig.spacing;
 
         if (!string.IsNullOrEmpty(mod.Author))
         {
             float authorLineHeight = GUIManager.S(18f);
-            GUI.Label(new Rect(Config.indent, y, width - (Config.indent * 2), authorLineHeight), "by " + mod.Author, ThemeManager.SettingAuthorStyle);
-            y += authorLineHeight + Config.spacing;
+            GUI.Label(new Rect(ClientConfig.indent, y, width - (ClientConfig.indent * 2), authorLineHeight), "by " + mod.Author, ThemeManager.SettingAuthorStyle);
+            y += authorLineHeight + ClientConfig.spacing;
         }
 
         bool skipSettings = false;
@@ -265,9 +265,9 @@ public static class SettingsWindowDrawer
         {
             if (setting is CategorySetting catSet)
             {
-                catSet.IsExpanded = MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Translate(catSet.Name), true, catSet.IsExpanded);
+                catSet.IsExpanded = MiscDrawing.Seperator(ref y, width, ClientConfig.indent, ClientConfig.spacing, Translate(catSet.Name), true, catSet.IsExpanded);
                 skipSettings = !catSet.IsExpanded;
-                if (skipSettings) y -= Config.spacing / 2;
+                if (skipSettings) y -= ClientConfig.spacing / 2;
                 continue;
             }
             else if (setting is EndCategorySetting)
@@ -293,7 +293,7 @@ public static class SettingsWindowDrawer
             setting.Draw(ref y, width);
         }
 
-        MiscDrawing.Seperator(ref y, width, Config.indent, Config.spacing, Translate("KeyBind"));
+        MiscDrawing.Seperator(ref y, width, ClientConfig.indent, ClientConfig.spacing, Translate("KeyBind"));
 
         Event e = Event.current;
         bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
@@ -303,14 +303,14 @@ public static class SettingsWindowDrawer
 
         float resetBtnW = GUIManager.S(22f);
         float gap = GUIManager.S(6f);
-        float elemH = Config.elementHeight;
-        float labelWidth = Mathf.Max(width * 0.40f, width - Config.indent * 2 - Config.SettingWidth - resetBtnW - gap);
+        float elemH = ClientConfig.elementHeight;
+        float labelWidth = Mathf.Max(width * 0.40f, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth - resetBtnW - gap);
 
         // --- 2. Hold Mode Toggle Row ---
-        GUI.Label(new Rect(Config.indent, y, labelWidth, elemH), Translate("Hold Mode"), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(ClientConfig.indent, y, labelWidth, elemH), Translate("Hold Mode"), ThemeManager.SettingLabelStyle);
 
-        Rect holdRect = new(width - Config.indent - resetBtnW - gap - Config.SettingWidth, y, Config.SettingWidth, elemH);
-        Rect holdResetRect = new(width - Config.indent - resetBtnW, y, resetBtnW, elemH);
+        Rect holdRect = new(width - ClientConfig.indent - resetBtnW - gap - ClientConfig.SettingWidth, y, ClientConfig.SettingWidth, elemH);
+        Rect holdResetRect = new(width - ClientConfig.indent - resetBtnW, y, resetBtnW, elemH);
 
         GUI.Box(holdRect, mod.HoldMode ? Translate("ON") : Translate("OFF"), mod.HoldMode ? ThemeManager.SettingOn : ThemeManager.SettingOff);
         if (holdRect.Contains(e.mousePosition) && isLeftClick)
@@ -325,13 +325,13 @@ public static class SettingsWindowDrawer
             e.Use();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
 
         // --- 3. Enabled Toggle Row ---
-        GUI.Label(new Rect(Config.indent, y, labelWidth, elemH), Translate("Enabled"), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(ClientConfig.indent, y, labelWidth, elemH), Translate("Enabled"), ThemeManager.SettingLabelStyle);
 
-        Rect enabledRect = new(width - Config.indent - resetBtnW - gap - Config.SettingWidth, y, Config.SettingWidth, elemH);
-        Rect enabledResetRect = new(width - Config.indent - resetBtnW, y, resetBtnW, elemH);
+        Rect enabledRect = new(width - ClientConfig.indent - resetBtnW - gap - ClientConfig.SettingWidth, y, ClientConfig.SettingWidth, elemH);
+        Rect enabledResetRect = new(width - ClientConfig.indent - resetBtnW, y, resetBtnW, elemH);
 
         GUI.Box(enabledRect, mod.Active ? Translate("ON") : Translate("OFF"), mod.Active ? ThemeManager.SettingOn : ThemeManager.SettingOff);
         if (enabledRect.Contains(e.mousePosition) && isLeftClick)
@@ -349,7 +349,7 @@ public static class SettingsWindowDrawer
             e.Use();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
 
         return y - startY;
     }

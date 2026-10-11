@@ -2,6 +2,7 @@
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
+using Magnetar_Client.Utils;
 using System;
 using System.Linq;
 using UnityEngine;
@@ -15,8 +16,8 @@ public static class GUIControlsDrawer
     private const float BaseHeight = 360f;
 
     public static Rect WindowRect = new(
-        (Config.NativeWidth - GUIManager.S(BaseWidth)) / 2f,
-        (Config.NativeHeight - GUIManager.S(BaseHeight)) / 2f,
+        (ClientConfig.NativeWidth - GUIManager.S(BaseWidth)) / 2f,
+        (ClientConfig.NativeHeight - GUIManager.S(BaseHeight)) / 2f,
 GUIManager.S(BaseWidth),
 GUIManager.S(BaseHeight));
 
@@ -29,7 +30,7 @@ GUIManager.S(BaseHeight));
         float viewAlpha = AnimationHandler.GetViewAlpha(GUIManager.Group, GUIManager.ViewMain);
         if (viewAlpha <= 0.001f) return;
 
-        Config.RescaleAroundCenter(ref WindowRect, GUIManager.S(BaseWidth), WindowRect.height);
+        ClientConfig.RescaleAroundCenter(ref WindowRect, GUIManager.S(BaseWidth), WindowRect.height);
 
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;
@@ -52,7 +53,7 @@ GUIManager.S(BaseHeight));
     private static void DrawGUIControls(int windowID)
     {
         float w = WindowRect.width;
-        float indent = Config.indent;
+        float indent = ClientConfig.indent;
         float rightMargin = GUIManager.S(16f);
         Event e = Event.current;
         float rowSpacing = GUIManager.S(8f);
@@ -68,7 +69,7 @@ GUIManager.S(BaseHeight));
         Rect headerBgRect = new(0, 0, w, headerHeight);
         GUI.Box(headerBgRect, Translate("GUI Configuration"), ThemeManager.SettingsWndowStyle);
 
-        float controlWidth = Mathf.Min(Config.SettingWidth, w * 0.45f);
+        float controlWidth = Mathf.Min(ClientConfig.SettingWidth, w * 0.45f);
         float controlX = w - rightMargin - controlWidth;
         float labelWidth = controlX - indent - GUIManager.S(10f);
 
@@ -196,23 +197,23 @@ GUIManager.S(BaseHeight));
 
         // 1. Language Row
         DrawButtonRow(
-            $"{Translate("Language")}: <color=yellow>{Config.Language}</color>",
+            $"{Translate("Language")}: <color=yellow>{Translator.Language}</color>",
             Translate("Change"),
             () => GUISelectorDrawer.Open(GUIManager.LanguageSetting)
         );
 
         // 2. Theme Row
-        string currentTheme = ThemeManager.CurrentThemeName;
+        string currentTheme = ThemeManager.Theme;
         if (GUIManager.ThemeSetting?.SelectedValues != null && GUIManager.ThemeSetting.SelectedValues.Count > 0)
         {
             int selThemeId = GUIManager.ThemeSetting.SelectedValues.First();
             if (GUIManager.ThemeSetting.Options.ContainsKey(selThemeId))
                 currentTheme = GUIManager.ThemeSetting.Options[selThemeId];
         }
-        Config.Theme = currentTheme;
+        ThemeManager.Theme = currentTheme;
 
         DrawButtonRow(
-            $"{Translate("Theme")}: <color=yellow>{Config.Theme}</color>",
+            $"{Translate("Theme")}: <color=yellow>{ThemeManager.Theme}</color>",
             Translate("Change"),
             () =>
             {
@@ -224,20 +225,12 @@ GUIManager.S(BaseHeight));
         // 3. GUI Scale
         if (GUIManager.ScaleSetting != null)
         {
-            if (DrawSetting.ActiveSliderId != GUIManager.ScaleSetting.GetHashCode() && Mathf.Abs(GUIManager.ScaleSetting.Value - Config.GUIScale) > 0.001f)
-            {
-                GUIManager.ScaleSetting.Value = Config.GUIScale;
-            }
             DrawSliderRow(GUIManager.ScaleSetting);
         }
 
         // 4. Element Scale
         if (GUIManager.ElementScaleSetting != null)
         {
-            if (DrawSetting.ActiveSliderId != GUIManager.ElementScaleSetting.GetHashCode() && Mathf.Abs(GUIManager.ElementScaleSetting.Value - Config.ElementScale) > 0.001f)
-            {
-                GUIManager.ElementScaleSetting.Value = Config.ElementScale;
-            }
             DrawSliderRow(GUIManager.ElementScaleSetting);
         }
 
@@ -260,18 +253,14 @@ GUIManager.ShowMobileButtons ? ThemeManager.SettingOn : ThemeManager.SettingOff
         // 7. Show Credits
         DrawButtonRow(
             Translate("Show Main Menu Credits"),
-            Translate(Config.ShowMainMenuCredits ? "ON" : "OFF"),
-            () => Config.ShowMainMenuCredits = !Config.ShowMainMenuCredits,
-            Config.ShowMainMenuCredits ? ThemeManager.SettingOn : ThemeManager.SettingOff
+            Translate(GUIManager.ShowMainMenuCredits ? "ON" : "OFF"),
+            () => GUIManager.ShowMainMenuCredits = !GUIManager.ShowMainMenuCredits,
+            GUIManager.ShowMainMenuCredits ? ThemeManager.SettingOn : ThemeManager.SettingOff
         );
 
         // 8. Opacity Slider
         if (GUIManager.ShowFloatingIcon && GUIManager.FloatingIconOpacitySetting != null)
         {
-            if (DrawSetting.ActiveSliderId != GUIManager.FloatingIconOpacitySetting.GetHashCode() && Mathf.Abs(GUIManager.FloatingIconOpacitySetting.Value - Config.FloatingIconOpacity) > 0.001f)
-            {
-                GUIManager.FloatingIconOpacitySetting.Value = Config.FloatingIconOpacity;
-            }
             DrawSliderRow(GUIManager.FloatingIconOpacitySetting);
         }
 

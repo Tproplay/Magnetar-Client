@@ -12,19 +12,19 @@ public class TabType : IEquatable<TabType>
 
     public static IReadOnlyList<TabType> AllTabs => _allTabs;
 
+    // Predefined built-in tabs
+    public static readonly TabType MODULES = RegisterInternal("MODULES");
+    public static readonly TabType HUD = RegisterInternal("HUD");
+    public static readonly TabType GUI = RegisterInternal("GUI");
+    public static readonly TabType NEF = RegisterInternal("NEF");
+    public static readonly TabType PROFILE = RegisterInternal("PROFILE");
+
     public int Id { get; }
     public string Name { get; }
     public bool IsCustom { get; }
     public Action OnSelected { get; set; }
     public Action OnDeselected { get; set; }
     public Action OnGUI { get; set; }
-
-    // Predefined built-in tabs (mirrors original enum values)
-    public static readonly TabType MODULES = RegisterInternal("MODULES");
-    public static readonly TabType HUD = RegisterInternal("HUD");
-    public static readonly TabType GUI = RegisterInternal("GUI");
-    public static readonly TabType NEF = RegisterInternal("NEF");
-    public static readonly TabType PROFILE = RegisterInternal("PROFILE");
 
     private TabType(string name, int id, bool isCustom, Action onSelected = null, Action onDeselected = null, Action onGUI = null)
     {
@@ -46,7 +46,7 @@ public class TabType : IEquatable<TabType>
     }
 
     /// <summary>
-    /// Registers a new custom tab. Automatically updates TopBar geometry.
+    /// Registers a new custom tab.
     /// </summary>
     public static TabType Register(string name, Action onSelected = null, Action onDeselected = null, Action onGUI = null)
     {
@@ -66,8 +66,8 @@ public class TabType : IEquatable<TabType>
         _registeredTabs[cleanName] = tab;
         _allTabs.Add(tab);
 
-        // Dynamically recalculate TopBar widths
         TopBar.RebuildOffsets();
+
         return tab;
     }
 
@@ -77,25 +77,18 @@ public class TabType : IEquatable<TabType>
         _registeredTabs.TryGetValue(name.Trim(), out var tab);
         return tab;
     }
-
     public static TabType GetOrCreate(string name)
     {
         if (string.IsNullOrWhiteSpace(name)) return null;
         return Get(name) ?? Register(name);
     }
-
-    public static bool TryParse(string name, out TabType tab)
-    {
-        tab = Get(name);
-        return tab != null;
-    }
-
     public static implicit operator TabType(string name) => GetOrCreate(name);
+
+
     public static implicit operator string(TabType tab) => tab?.Name;
-
     public override string ToString() => Name;
+    public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Name);
 
-    public override bool Equals(object obj) => obj is TabType other && Equals(other);
 
     public bool Equals(TabType other)
     {
@@ -103,9 +96,7 @@ public class TabType : IEquatable<TabType>
         if (ReferenceEquals(this, other)) return true;
         return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase);
     }
-
-    public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Name);
-
+    public override bool Equals(object obj) => obj is TabType other && Equals(other);
     public static bool operator ==(TabType left, TabType right)
     {
         if (ReferenceEquals(left, right)) return true;

@@ -66,7 +66,7 @@ public interface IRenderable : IClientService
 }
 
 /// <summary>
-/// Services that render within the transformed matrix GUI window when Config.showgui is true.
+/// Services that render within the transformed matrix GUI window when ClientConfig.showgui is true.
 /// </summary>
 public interface IMenuRenderable : IClientService
 {
@@ -94,7 +94,7 @@ public interface ICloseHandler : IClientService
 }
 
 /// <summary>
-/// Services that respond to language changes to reload display string caches and format buffers.
+/// Services that respond to language changes.
 /// </summary>
 public interface ILanguageAware : IClientService
 {
@@ -116,4 +116,17 @@ public interface IPersistent : IClientService
 public interface IQuittable : IClientService
 {
     void OnApplicationQuit();
+}
+/// <summary>
+/// Services that respond to theme changes.
+/// </summary>
+public interface IThemeAware : IClientService
+{
+    void OnThemeChanged();
+}
+/// Services that respond to GUI Scale changes.
+/// </summary>
+public interface IScaleAware : IClientService
+{
+    void OnGUIScaleChanged();
 }

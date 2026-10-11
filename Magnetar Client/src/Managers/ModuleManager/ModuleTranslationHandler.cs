@@ -17,7 +17,7 @@ public static class ModuleTranslationHandler
 
     public static void OnLanguageChanged()
     {
-        string currentLang = Config.Language ?? "English";
+        string currentLang = Translator.Language ?? "English";
 
         if (ModuleManager.Modules != null)
         {

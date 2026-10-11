@@ -12,7 +12,19 @@ namespace Magnetar_Client.UI.Themes;
 
 public static class ThemeManager
 {
-    public static string CurrentThemeName => Config.Theme ?? "Magnetar Default";
+    private static string _theme = "Magnetar Default";
+    public static string Theme
+    {
+        get => _theme;
+        set
+        {
+            if (string.Equals(_theme, value, System.StringComparison.OrdinalIgnoreCase))
+                return;
+
+            _theme = value;
+            ApplyTheme(_theme);
+        }
+    }
 
     #region Direct Accessors
     public static Color BackgroundColor => ThemeData.BackgroundColor;
@@ -67,6 +79,7 @@ public static class ThemeManager
     public static GUIStyle SectionHeaderStyle { get; private set; }
     public static GUIStyle SectionRemoveButtonStyle { get; private set; }
     public static GUIStyle SectionAddButtonStyle { get; private set; }
+    
     #endregion
 
     #region Base Sizing Constants
@@ -110,13 +123,14 @@ public static class ThemeManager
     private static float _lastElementScale = -1f;
 
     private static bool _initialized;
+    
 
     public static void Init()
     {
         _initialized = true;
         BuildEmptyStyles();
         LoadThemes();
-        ApplyTheme(CurrentThemeName);
+        ApplyTheme(Theme);
         _lastScale = -1f;
         _lastElementScale = -1f;
         Rescale();
@@ -387,6 +401,8 @@ public static class ThemeManager
         _lastScale = -1f;
         _lastElementScale = -1f;
         Rescale();
+
+        ServiceRegistry.NotifyThemeChanged();
     }
 
     private static void SetOffset(RectOffset ro, int left, int right, int top, int bottom)
@@ -446,8 +462,8 @@ public static class ThemeManager
     {
         if (!_initialized) return;
 
-        float scale = Config.GUIScale;
-        float elementScale = Config.ElementScale;
+        float scale = GUIManager.ScaleSetting.Value;
+        float elementScale = GUIManager.ElementScaleSetting.Value;
 
         if (Mathf.Approximately(scale, _lastScale) && Mathf.Approximately(elementScale, _lastElementScale))
             return;

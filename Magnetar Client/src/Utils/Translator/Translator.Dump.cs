@@ -6,11 +6,31 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Magnetar_Client.UI.Setting;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using Magnetar_Client.Api;
 
 namespace Magnetar_Client.Utils;
 
 public static partial class Translator
 {
+
+    private static string _language = "English";
+    public static string Language
+    {
+        get => _language;
+        set
+        {
+            if (string.Equals(_language, value, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            _language = value;
+
+            _ = Translator.LoadTranslationsAsync(() =>
+            {
+                ServiceRegistry.NotifyLanguageChanged();
+                Actions.OnLanguageChanged?.Invoke();
+            });
+        }
+    }
     public static void InvalidateBlacklist()
     {
         TranslationData.BlacklistDirty = true;

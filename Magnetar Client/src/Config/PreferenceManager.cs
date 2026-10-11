@@ -16,7 +16,7 @@ using BepInEx.Configuration;
 
 namespace Magnetar_Client;
 
-public static class Preferences
+public static class PreferenceManager
 {
     public interface IPreferenceEntry<T>
     {
@@ -66,7 +66,7 @@ public static class Preferences
     public static IPreferenceEntry<KeyCode> ModMenuKeyEntry { get; private set; }
 
     /// <summary>
-    /// API to create new preference entries at runtime without preprocessor directives in client code.
+    /// API to create new preference entries at runtime.
     /// </summary>
     public static IPreferenceEntry<T> CreateEntry<T>(string category, string key, T defaultValue, string displayName = null, string description = null)
     {
@@ -93,10 +93,10 @@ public static class Preferences
 
     public static void InitializePreferences()
     {
-        Actions.OnEarlyInitializePreferences?.Invoke();
-
         try
         {
+            // Creating Category
+
 #if MELONLOADER || RELEASE_MELON
             MagnetarCategory = MelonPreferences.CreateCategory("Magnetar Client", "Magnetar Client");
 #elif BEPINEX || RELEASE_BEPINEX || ANDROID
@@ -106,6 +106,8 @@ public static class Preferences
             BepInExConfig = new ConfigFile(configFilePath, true);
 #endif
 
+            // --- Entries ---
+
             ShowFloatingIconEntry = CreateEntry("UI", "ShowFloatingIcon",
 #if ANDROID
                 true,
@@ -113,9 +115,6 @@ public static class Preferences
                 false,
 #endif
                 "Show Floating Icon", "Display floating draggable menu button.");
-
-            if (ShowFloatingIconEntry != null)
-                GUIManager.ShowFloatingIcon = ShowFloatingIconEntry.Value;
 
             ShowMobileButtonsEntry = CreateEntry("UI", "ShowMobileButtons",
 #if ANDROID
@@ -125,10 +124,7 @@ public static class Preferences
 #endif
                 "Show Mobile Buttons", "Display top-right close buttons on popup windows.");
 
-            if (ShowMobileButtonsEntry != null)
-                GUIManager.ShowMobileButtons = ShowMobileButtonsEntry.Value;
-
-            CurrentProfileEntry = CreateEntry("ProfileManager", "CurrentProfile", Config.DefaultProfile,
+            CurrentProfileEntry = CreateEntry("ProfileManager", "CurrentProfile", ProfileManager.DefaultProfile,
                 "Active Profile", "The active configuration profile name.");
             LanguageEntry = CreateEntry("Localization", "Language", "English", "Language", "Active client language.");
 
@@ -140,6 +136,6 @@ public static class Preferences
             AutoSaveLogger.Error($"Failed initializing preferences: {ex.Message}");
         }
 
-        Actions.OnLateInitializePreferences?.Invoke();
+        Actions.OnInitializePreferences?.Invoke();
     }
 }

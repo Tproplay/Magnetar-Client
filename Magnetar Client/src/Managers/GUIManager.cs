@@ -54,29 +54,32 @@ public static class GUIManager
     private const float BaseElementHeight = 25f;
     public static float elementHeight => GUIManager.S(BaseElementHeight);
 
-    static bool _showMobileButtons;
-
-    public static bool ShowFloatingIcon;
     public static float FloatingIconIdleTimeout = 4f;
-    public static bool ShowMobileButtons
+
+    public static bool ShowFloatingIcon
     {
-        get => _showMobileButtons;
+        get => PreferenceManager.ShowFloatingIconEntry.Value;
         set
         {
-            if (_showMobileButtons == value) return;
-            _showMobileButtons = value;
+            if (PreferenceManager.ShowFloatingIconEntry.Value == value) return;
+            PreferenceManager.ShowFloatingIconEntry.Value = value;
 
-#if MELONLOADER || RELEASE_MELON
-            if (Preferences.ShowMobileButtonsEntry != null)
-            {
-                Preferences.ShowMobileButtonsEntry.Value = value;
-            }
-#elif BEPINEX || RELEASE_BEPINEX || ANDROID
-            if (Preferences.ShowMobileButtonsEntry != null)
-            {
-                Preferences .ShowMobileButtonsEntry.Value = value;
-                Preferences.BepInExConfig?.Save();
-            }
+#if BEPINEX || RELEASE_BEPINEX || ANDROID
+            Preferences.BepInExConfig.Save();
+#endif
+        }
+    }
+    public static bool ShowMobileButtons
+    {
+        get => PreferenceManager.ShowMobileButtonsEntry.Value;
+        set
+        {
+            if (PreferenceManager.ShowMobileButtonsEntry.Value == value) return;
+
+            PreferenceManager.ShowMobileButtonsEntry.Value = value;
+
+#if BEPINEX || RELEASE_BEPINEX || ANDROID
+            Preferences.BepInExConfig?.Save();
 #endif
         }
     }
@@ -112,7 +115,7 @@ public static class GUIManager
                 if (string.Equals(langName, "English", StringComparison.OrdinalIgnoreCase)) continue;
 
                 LanguageSetting.AddOption(idx, langName);
-                if (string.Equals(Config.Language, langName, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(Translator.Language, langName, StringComparison.OrdinalIgnoreCase))
                 {
                     activeIndex = idx;
                 }
@@ -127,18 +130,18 @@ public static class GUIManager
 
         LanguageSetting.SelectedValues.Add(activeIndex);
 
-        // Handle user selection changes and sync with Preferences + Config
+        // Handle user selection changes and sync with PreferenceManager + ClientConfig
         LanguageSetting.OnSelectionChanged = (selectedId, isSelected) =>
         {
             if (!isSelected) return;
 
             if (LanguageSetting.Options.TryGetValue(selectedId, out string chosenLang))
             {
-                Config.Language = chosenLang;
-                if (Preferences.LanguageEntry != null)
+                Translator.Language = chosenLang;
+                if (PreferenceManager.LanguageEntry != null)
                 {
-                    Preferences.LanguageEntry.Value = chosenLang;
-                    Preferences.LanguageEntry.Save();
+                    PreferenceManager.LanguageEntry.Value = chosenLang;
+                    PreferenceManager.LanguageEntry.Save();
                 }
             }
         };
@@ -152,7 +155,7 @@ public static class GUIManager
 
         SafeToCloseManager.RegisterGuard(() =>
         {
-            if (Config.CurrentTab == TabType.GUI)
+            if (ClientConfig.CurrentTab == TabType.GUI)
             {
                 if (isSelectingSubWindow) return false;
                 if (DrawSetting.IsFocused) return false;
@@ -174,11 +177,11 @@ public static class GUIManager
         };
 
         // SaveLoad entries
-        SaveLoad.RegisterEntry("Language", () => Config.Language, val =>
+        SaveLoad.RegisterEntry("Language", () => Translator.Language, val =>
         {
-            if (!string.Equals(Config.Language, val, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(Translator.Language, val, StringComparison.OrdinalIgnoreCase))
             {
-                Config.Language = val;
+                Translator.Language = val;
             }
 
             if (LanguageSetting?.Options != null)
@@ -195,10 +198,9 @@ public static class GUIManager
             }
         }, "English");
 
-        SaveLoad.RegisterEntry("Theme", () => Config.Theme, val => Config.Theme = val, "Default");
+        SaveLoad.RegisterEntry("Theme", () => ThemeManager.Theme, val => ThemeManager.Theme = val, "Default");
         SaveLoad.RegisterEntry("GUIScale", () => ScaleSetting.Value, val => ScaleSetting.Value = val, 1.0f);
         SaveLoad.RegisterEntry("ElementScale", () => ElementScaleSetting.Value, val => ElementScaleSetting.Value = val, 1.0f);
-        SaveLoad.RegisterEntry("ShowFloatingIcon", () => ShowFloatingIcon, val => ShowFloatingIcon = val, true);
         SaveLoad.RegisterEntry("ShowMainMenuCredits", () => ShowMainMenuCredits, val => ShowMainMenuCredits = val, true);
     }
 
@@ -220,7 +222,7 @@ public static class GUIManager
         foreach (var kvp in ThemeManager.LoadedThemes)
         {
             ThemeSetting.AddOption(tIdx, kvp.Key);
-            if (string.Equals(Config.Theme, kvp.Key, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(ThemeManager.Theme, kvp.Key, StringComparison.OrdinalIgnoreCase))
             {
                 activeThemeIdx = tIdx;
             }
@@ -271,7 +273,7 @@ public static class GUIManager
 
         public bool CanClose()
         {
-            if (Config.CurrentTab == TabType.GUI)
+            if (ClientConfig.CurrentTab == TabType.GUI)
             {
                 return !isSelectingSubWindow && !DrawSetting.IsFocused;
             }
@@ -280,7 +282,7 @@ public static class GUIManager
 
         public bool OnEscapePressed()
         {
-            if (Config.CurrentTab != TabType.GUI) return false;
+            if (ClientConfig.CurrentTab != TabType.GUI) return false;
 
             if (isSelectingSubWindow)
             {
@@ -303,28 +305,15 @@ public static class GUIManager
         public void OnLanguageChanged() => RefreshThemeOptions();
     }
 
-    private static void DumpEnglishTemplates(string domainDir)
-    {
-        var template = new string[]
-        {
-            "GUI Configuration", "Language", "Theme", "Change", "GUI Scale", "Element Scale",
-            "Floating Icon", "Mobile Close Buttons", "Show Main Menu Credits", "Icon Opacity",
-            "ON", "OFF",
-        };
-
-        string filePath = Path.Combine(domainDir, "translation_strings.json");
-        Translator.SaveJson(filePath, Translator.CreateDictionary(template));
-    }
-
     public static float S(float value) => value * ScaleSetting.Value;
     public static float ES(float value) => value * ElementScaleSetting.Value;
     public static void SetFloatingIcon(bool enabled)
     {
         ShowFloatingIcon = enabled;
 #if MELONLOADER || RELEASE_MELON
-    if (Preferences.ShowFloatingIconEntry != null)
+    if (PreferenceManager.ShowFloatingIconEntry != null)
     {
-        Preferences.ShowFloatingIconEntry.Value = enabled;
+        PreferenceManager.ShowFloatingIconEntry.Value = enabled;
     }
 #elif BEPINEX || RELEASE_BEPINEX || ANDROID
         if (Preferences.ShowFloatingIconEntry != null)

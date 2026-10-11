@@ -115,8 +115,8 @@ public class SectionSetting : Setting
     public override void Draw(ref float y, float width)
     {
         Event e = Event.current;
-        float elemH = Config.elementHeight;
-        float indent = Config.indent;
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
         float actionBtnW = SettingValues.ResetButtonW;
 
@@ -201,6 +201,6 @@ public class SectionSetting : Setting
             Reset();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
     }
 }

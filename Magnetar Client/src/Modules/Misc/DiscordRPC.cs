@@ -193,7 +193,7 @@ public class DiscordRPC : Module
         {
             status = Status.InGame;
         }
-        else if (InMainMenu && (Config.showgui || HUDManager.forceShow)) // Menu & Magnetar GUI
+        else if (InMainMenu && (ClientConfig.showgui || HUDManager.forceShow)) // Menu & Magnetar GUI
         {
             status = Status.Magnetar_GUI;
             Line1Cycle.Add(Translate("Browsing Magnetar's GUI"));

@@ -111,10 +111,10 @@ public static class AnimationHandler
     {
         float dt = Time.unscaledDeltaTime;
 
-        float target = Config.showgui ? 1f : 0f;
+        float target = ClientConfig.showgui ? 1f : 0f;
         FadeProgress = Mathf.MoveTowards(FadeProgress, target, dt * FadeSpeed);
 
-        float dimTarget = (Config.dimBg && (Config.showgui || Core.HUDManager.forceShow)) ? 1f : 0f;
+        float dimTarget = (ClientConfig.dimBg && (ClientConfig.showgui || Core.HUDManager.forceShow)) ? 1f : 0f;
         DimAlpha = Mathf.MoveTowards(DimAlpha, dimTarget, dt * DimFadeSpeed);
         
 
@@ -136,10 +136,10 @@ public static class AnimationHandler
     public static void SnapToVisible()      
     {
         FadeProgress = 1f;
-        if (Config.dimBg) DimAlpha = 1f;
+        if (ClientConfig.dimBg) DimAlpha = 1f;
     }
 
-    public static bool ShouldRenderGUI => Config.showgui || FadeProgress > 0.001f;
+    public static bool ShouldRenderGUI => ClientConfig.showgui || FadeProgress > 0.001f;
 
     /// <summary>
     /// Smoothly transitions a specific view inside a group toward a target alpha (0.0 to 1.0).

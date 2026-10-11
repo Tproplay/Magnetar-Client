@@ -12,8 +12,8 @@ public static class HUDSelectorDrawer
     private const float BaseSelectorHeight = 800f;
 
     public static Rect SelectorRect = new(
-        (Config.NativeWidth - GUIManager.S(BaseSelectorWidth)) / 2f,
-        (Config.NativeHeight - GUIManager.S(BaseSelectorHeight)) / 2f,
+        (ClientConfig.NativeWidth - GUIManager.S(BaseSelectorWidth)) / 2f,
+        (ClientConfig.NativeHeight - GUIManager.S(BaseSelectorHeight)) / 2f,
 GUIManager.S(BaseSelectorWidth),
 GUIManager.S(BaseSelectorHeight));
 
@@ -33,8 +33,8 @@ GUIManager.S(BaseSelectorHeight));
         DrawSetting.manualScrollY = 0f;
 
         float targetW = GUIManager.S(BaseSelectorWidth);
-        float targetH = Mathf.Min(GUIManager.S(BaseSelectorHeight), Config.NativeHeight * 0.8f);
-        SelectorRect = new Rect((Config.NativeWidth - targetW) / 2f, (Config.NativeHeight - targetH) / 2f, targetW, targetH);
+        float targetH = Mathf.Min(GUIManager.S(BaseSelectorHeight), ClientConfig.NativeHeight * 0.8f);
+        SelectorRect = new Rect((ClientConfig.NativeWidth - targetW) / 2f, (ClientConfig.NativeHeight - targetH) / 2f, targetW, targetH);
 
         AnimationHandler.SwitchView(HUDManager.Group, HUDManager.ViewSelector);
     }
@@ -45,11 +45,11 @@ GUIManager.S(BaseSelectorHeight));
         if (viewAlpha <= 0.001f) return;
 
         float targetW = GUIManager.S(BaseSelectorWidth);
-        float targetH = Mathf.Min(GUIManager.S(BaseSelectorHeight), Config.NativeHeight * 0.8f);
-        Config.RescaleAroundCenter(ref SelectorRect, targetW, targetH);
+        float targetH = Mathf.Min(GUIManager.S(BaseSelectorHeight), ClientConfig.NativeHeight * 0.8f);
+        ClientConfig.RescaleAroundCenter(ref SelectorRect, targetW, targetH);
 
-        SelectorRect.x = Mathf.Clamp(SelectorRect.x, 0f, Mathf.Max(0f, Config.NativeWidth - SelectorRect.width));
-        SelectorRect.y = Mathf.Clamp(SelectorRect.y, 0f, Mathf.Max(0f, Config.NativeHeight - SelectorRect.height));
+        SelectorRect.x = Mathf.Clamp(SelectorRect.x, 0f, Mathf.Max(0f, ClientConfig.NativeWidth - SelectorRect.width));
+        SelectorRect.y = Mathf.Clamp(SelectorRect.y, 0f, Mathf.Max(0f, ClientConfig.NativeHeight - SelectorRect.height));
 
         Color prevColor = GUI.color;
         Color prevContentColor = GUI.contentColor;

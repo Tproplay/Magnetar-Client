@@ -47,7 +47,7 @@ public static class HUDRenderer
     {
         isMasterVisible = HUDManager.Enabled;
 
-        if (Config.showgui && Config.CurrentTab != TabType.HUD)
+        if (ClientConfig.showgui && ClientConfig.CurrentTab != TabType.HUD)
         {
             isMasterVisible = false;
         }

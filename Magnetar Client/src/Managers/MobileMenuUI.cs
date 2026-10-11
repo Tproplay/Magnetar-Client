@@ -8,21 +8,18 @@ namespace Magnetar_Client.Core;
 
 public static class MobileMenuUI
 {
-    private static Rect _btnRect = new(40f, 200f, 120f, 120f);
+    private static Rect _btnRect = new(40f, 200f, 250f, 250f);
     private static Vector2 _dragStartMousePos;
     private static Vector2 _dragStartBtnPos;
     private static bool _isPointerDown;
     private static bool _isDragging;
     private const float DragThreshold = 10f;
-    private static bool _hasClampedInitialPos;
 
     private static Texture2D _logoTex;
     private static Texture2D _circleTex;
     private static GUIStyle _circleBtnStyle;
     private static GUIStyle _closeBtnStyle;
     private static bool _attemptedLogoLoad;
-
-    // --- Dormant / Double-Click System ---
     private static bool _isDormant;
     private static float _lastInteractionTime;
     private static float _lastClickTime;
@@ -117,65 +114,51 @@ public static class MobileMenuUI
         return circularTex;
     }
 
-    private static void EnsureResources()
+    private static void CreateFloatingIcon()
     {
-        float currentSize = GUIManager.S(120f);
-        if (Mathf.Abs(_btnRect.width - currentSize) > 0.5f)
+        // Load the texture
+        Texture2D rawLogo = ResourceManager.LoadTexture("Magnetar_logo.png"); ;
+        if (rawLogo != null)
         {
-            _btnRect.width = currentSize;
-            _btnRect.height = currentSize;
+            int borderThickness = Mathf.Max(4, Mathf.RoundToInt(rawLogo.width * 0.045f));
+            _logoTex = CreateCircularBadgeTexture(rawLogo, ThemeManager.AccentColor, borderThickness);
+        }
+        else
+        {
+            Magnetar_Logger.GUILogger.Warning("Logo 'Magnetar_logo' not found.");
         }
 
-        // Direct load logo via ResourceManager with no AssetBundle wrapper
-        if (!_attemptedLogoLoad)
-        {
-            _attemptedLogoLoad = true;
-            Texture2D rawLogo = ResourceManager.LoadTexture("Magnetar_logo.png"); ;
-            if (rawLogo != null)
-            {
-                int borderThickness = Mathf.Max(4, Mathf.RoundToInt(rawLogo.width * 0.045f));
-                _logoTex = CreateCircularBadgeTexture(rawLogo, ThemeManager.AccentColor, borderThickness);
-            }
-            else
-            {
-                Magnetar_Logger.GUILogger.Warning("Logo 'Magnetar_logo' not found. Falling back to procedural badge.");
-            }
-        }
-
-        if (_circleTex == null)
-        {
-            _circleTex = CreateCircleTexture(128, ThemeManager.BackgroundColor, ThemeManager.AccentColor, 6);
-        }
+        // fallback circle texture
+        _circleTex = CreateCircleTexture(128, ThemeManager.BackgroundColor, ThemeManager.AccentColor, 6);
 
         Texture2D activeBadgeTex = _logoTex != null ? _logoTex : _circleTex;
 
-        if (_circleBtnStyle == null)
+        _circleBtnStyle = new GUIStyle
         {
-            _circleBtnStyle = new GUIStyle
-            {
-                alignment = TextAnchor.MiddleCenter,
-                fontStyle = FontStyle.Bold,
-                border = new RectOffset(),
-                padding = new RectOffset(),
-                margin = new RectOffset(),
-                overflow = new RectOffset()
-            };
-            _circleBtnStyle.normal.textColor = ThemeManager.AccentColor;
-        }
+            alignment = TextAnchor.MiddleCenter,
+            fontStyle = FontStyle.Bold,
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
+        _circleBtnStyle.normal.textColor = ThemeManager.AccentColor;
         _circleBtnStyle.normal.background = activeBadgeTex;
         _circleBtnStyle.hover.background = activeBadgeTex;
         _circleBtnStyle.active.background = activeBadgeTex;
         _circleBtnStyle.fontSize = Mathf.RoundToInt(GUIManager.S(24f));
-
+    }
+    private static void RebuildCloseButton()
+    {
         _closeBtnStyle ??= new GUIStyle
-            {
-                alignment = TextAnchor.MiddleCenter,
-                fontStyle = FontStyle.Bold,
-                border = new RectOffset(),
-                padding = new RectOffset(),
-                margin = new RectOffset(),
-                overflow = new RectOffset()
-            };
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontStyle = FontStyle.Bold,
+            border = new RectOffset(),
+            padding = new RectOffset(),
+            margin = new RectOffset(),
+            overflow = new RectOffset()
+        };
 
         if (ThemeManager.CategoryModuleOnStyle != null)
         {
@@ -187,31 +170,29 @@ public static class MobileMenuUI
             _closeBtnStyle.active.textColor = ThemeManager.CategoryModuleOnStyle.active.textColor;
         }
         _closeBtnStyle.fontSize = Mathf.RoundToInt(GUIManager.S(20f));
+    }
+    private static void LoadResources()
+    {
+        CreateFloatingIcon();
 
-        if (!_hasClampedInitialPos)
-        {
-            Rect visible = GetVisibleScreenBounds();
-            _btnRect.x = Mathf.Clamp(_btnRect.x, visible.xMin, visible.xMax - _btnRect.width);
-            _btnRect.y = Mathf.Clamp(_btnRect.y, visible.yMin, visible.yMax - _btnRect.height);
-            _hasClampedInitialPos = true;
-            _lastInteractionTime = Time.realtimeSinceStartup;
-        }
+        RebuildCloseButton();
+
+        Rect visible = GetVisibleScreenBounds();
+        _btnRect.x = Mathf.Clamp(_btnRect.x, visible.xMin, visible.xMax - _btnRect.width);
+        _btnRect.y = Mathf.Clamp(_btnRect.y, visible.yMin, visible.yMax - _btnRect.height);
+        _lastInteractionTime = Time.realtimeSinceStartup;
     }
 
     public static void Render()
     {
-        EnsureResources();
         Event e = Event.current;
         if (e == null) return;
 
-        if (!Config.showgui && !HUDManager.forceShow)
+        if (!ClientConfig.InGUI && GUIManager.ShowFloatingIcon)
         {
-            if (GUIManager.ShowFloatingIcon)
-            {
-                DrawFloatingCircle(e);
-            }
+            DrawFloatingCircle(e);
         }
-        else if (Config.showgui && !HUDManager.forceShow && GUIManager.ShowMobileButtons)
+        else if (ClientConfig.showgui && !HUDManager.forceShow && GUIManager.ShowMobileButtons)
         {
             DrawCloseButton(e);
         }
@@ -279,7 +260,7 @@ public static class MobileMenuUI
 
             if (!_isDragging)
             {
-                Config.showgui = true;
+                ClientConfig.showgui = true;
             }
             _isDragging = false;
             e.Use();
@@ -305,9 +286,9 @@ public static class MobileMenuUI
     private static void DrawCloseButton(Event e)
     {
         Rect visibleScreen = GetVisibleScreenBounds();
-        float btnW = GUIManager.S(44f);
-        float btnH = GUIManager.S(34f);
-        Rect closeRect = new(visibleScreen.xMax - btnW - GUIManager.S(16f), visibleScreen.yMin + GUIManager.S(12f), btnW, btnH);
+        float btnW = GUIManager.S(80f);
+        float btnH = GUIManager.S(65f);
+        Rect closeRect = new(visibleScreen.xMax - btnW - GUIManager.S(12), visibleScreen.yMin + GUIManager.S(12f), btnW, btnH);
 
         bool isHover = closeRect.Contains(e.mousePosition);
         if (isHover)
@@ -320,7 +301,7 @@ public static class MobileMenuUI
 
         if (e.type == EventType.MouseDown && e.button == 0 && isHover)
         {
-            Config.showgui = false;
+            ClientConfig.showgui = false;
             e.Use();
         }
     }
@@ -361,14 +342,24 @@ public static class MobileMenuUI
         return tex;
     }
 
-    private class MobileMenuUIService : IRenderable
+    private class MobileMenuUIService : IRenderable, IWarmUp, IThemeAware
     {
         public string Name => "MobileMenuUI";
         public int Priority => ServicePriority.UI;
 
         public void OnGUI()
         {
-            MobileMenuUI.Render();
+            Render();
+        }
+
+        public void OnThemeChanged()
+        {
+            RebuildCloseButton();
+        }
+
+        public void OnWarmUp()
+        {
+            LoadResources();
         }
     }
 }

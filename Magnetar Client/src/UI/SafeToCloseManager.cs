@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Magnetar_Client.Api;
+using System;
 using System.Collections.Generic;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
-namespace Magnetar_Client.Api;
+namespace Magnetar_Client.UI;
 
 public static class SafeToCloseManager
 {

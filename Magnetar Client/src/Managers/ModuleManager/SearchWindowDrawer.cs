@@ -38,9 +38,9 @@ public static class SearchWindowDrawer
             IsSearchOpen = true;
             RequestSearchFocus = true;
 
-            float searchWidth = Config.ModuleWindowWidth;
+            float searchWidth = ClientConfig.ModuleWindowWidth;
             float tfY = GUIManager.S(10f);
-            Rect anticipatedTfRect = new(Config.indent, tfY, searchWidth - (Config.indent * 2), GUIManager.S(20f));
+            Rect anticipatedTfRect = new(ClientConfig.indent, tfY, searchWidth - (ClientConfig.indent * 2), GUIManager.S(20f));
             ActiveTextFieldId = anticipatedTfRect.GetHashCode();
 
             GUI.FocusWindow(999);
@@ -68,13 +68,13 @@ public static class SearchWindowDrawer
 
         if (SearchAnimProgress > 0.01f)
         {
-            float searchWidth = Config.ModuleWindowWidth * ModuleManager.SearchWidthMultiplier;
+            float searchWidth = ClientConfig.ModuleWindowWidth * ModuleManager.SearchWidthMultiplier;
             float searchHeight = GUIManager.S(30f);
 
-            float targetY = Config.NativeHeight - searchHeight - GUIManager.S(20f);
-            float hiddenY = Config.NativeHeight + GUIManager.S(10f);
+            float targetY = ClientConfig.NativeHeight - searchHeight - GUIManager.S(20f);
+            float hiddenY = ClientConfig.NativeHeight + GUIManager.S(10f);
             float currentY = Mathf.Lerp(hiddenY, targetY, SearchAnimProgress);
-            float currentX = (Config.NativeWidth / 2f) - (searchWidth / 2f);
+            float currentX = (ClientConfig.NativeWidth / 2f) - (searchWidth / 2f);
 
             SearchWindowRect = new Rect(currentX, currentY, searchWidth, searchHeight);
             SearchWindowRect = GUI.Window(999, SearchWindowRect, SearchDelegate, "", ThemeManager.CategoryWindowStyle);

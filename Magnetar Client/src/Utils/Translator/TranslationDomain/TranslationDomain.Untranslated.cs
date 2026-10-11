@@ -30,7 +30,7 @@ public partial class TranslationDomain
     {
         if (!DumpUntranslated || !IsLoaded || string.IsNullOrEmpty(input)) return;
 
-        string currentLang = Config.Language ?? "English";
+        string currentLang = Translator.Language ?? "English";
 
         lock (_dumpLock)
         {

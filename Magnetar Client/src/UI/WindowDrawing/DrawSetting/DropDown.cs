@@ -15,7 +15,7 @@ public static partial class DrawSetting
         int controlId = selSet.GetHashCode();
 
         string translatedName = Translate(selSet.Name);
-        GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(ClientConfig.indent, y, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth, ClientConfig.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
         string currentValName = "Unknown";
         if (selSet.Options.ContainsKey(selSet.Value))
@@ -27,7 +27,7 @@ public static partial class DrawSetting
             }
         }
 
-        Rect btnRect = new(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
+        Rect btnRect = new(width - ClientConfig.indent - ClientConfig.SettingWidth, y, ClientConfig.SettingWidth, ClientConfig.elementHeight);
         bool isHovered = btnRect.Contains(e.mousePosition);
 
         if (isHovered && e.type == EventType.MouseDown && e.button == 0)

@@ -81,19 +81,19 @@ public static class ScreenBoundaryHelper
 {
     public static Rect Clamp(Rect rect)
     {
-        float scaleX = Screen.width / Config.NativeWidth;
-        float scaleY = Screen.height / Config.NativeHeight;
+        float scaleX = Screen.width / ClientConfig.NativeWidth;
+        float scaleY = Screen.height / ClientConfig.NativeHeight;
         float uniformScale = Mathf.Min(scaleX, scaleY);
 
         // Calculate the virtual coordinate range visible inside the transformed GUI.matrix
         float virtualWidth = Screen.width / uniformScale;
         float virtualHeight = Screen.height / uniformScale;
 
-        float minX = -(virtualWidth - Config.NativeWidth) * 0.5f;
-        float maxX = Config.NativeWidth + ((virtualWidth - Config.NativeWidth) * 0.5f) - rect.width;
+        float minX = -(virtualWidth - ClientConfig.NativeWidth) * 0.5f;
+        float maxX = ClientConfig.NativeWidth + ((virtualWidth - ClientConfig.NativeWidth) * 0.5f) - rect.width;
 
-        float minY = -(virtualHeight - Config.NativeHeight) * 0.5f;
-        float maxY = Config.NativeHeight + ((virtualHeight - Config.NativeHeight) * 0.5f) - rect.height;
+        float minY = -(virtualHeight - ClientConfig.NativeHeight) * 0.5f;
+        float maxY = ClientConfig.NativeHeight + ((virtualHeight - ClientConfig.NativeHeight) * 0.5f) - rect.height;
 
         rect.x = Mathf.Clamp(rect.x, minX, Mathf.Max(minX, maxX));
         rect.y = Mathf.Clamp(rect.y, minY, Mathf.Max(minY, maxY));

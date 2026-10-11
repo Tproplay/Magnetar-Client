@@ -14,7 +14,7 @@ public static class LockUI
         public static bool BlockKeys;
         public static bool Prefix(KeyCode key, ref bool __result)
         {
-            if ((Config.showgui || HUDManager.forceShow) && BlockKeys)
+            if ((ClientConfig.showgui || HUDManager.forceShow) && BlockKeys)
             {
                 __result = false;
                 return false;

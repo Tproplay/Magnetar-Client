@@ -29,7 +29,7 @@ public static partial class NEFGUI
                 NEFData.PerformSearch();
             }
 
-            if (NEFData.currentPyramidRoots.Count > 0 && Mathf.Abs(NEFData.lastCalculatedScale - Config.GUIScale) > 0.001f)
+            if (NEFData.currentPyramidRoots.Count > 0 && Mathf.Abs(NEFData.lastCalculatedScale - GUIManager.ScaleSetting.Value) > 0.001f)
             {
                 NEFData.RelayoutCurrentTrees();
             }

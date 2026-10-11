@@ -36,7 +36,7 @@ public static class MiscDrawing
         }
 
         // --- Labeled & Collapsible Category Separator ---
-        float elementH = Config.elementHeight;
+        float elementH = ClientConfig.elementHeight;
         float lineY = Mathf.Round(y + (elementH / 2f) - (lineThickness / 2f));
 
         string displayName = isCollapsible ? (isExpanded ? $"▼ {name}" : $"▶ {name}") : name;

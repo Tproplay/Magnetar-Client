@@ -27,8 +27,8 @@ public class CategorySetting : Setting
         IsExpanded = MiscDrawing.Seperator(
             ref y,
             width,
-            Config.indent,
-            Config.spacing,
+            ClientConfig.indent,
+            ClientConfig.spacing,
             Translate(Name),
             true,
             IsExpanded

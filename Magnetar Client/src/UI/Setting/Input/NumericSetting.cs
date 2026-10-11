@@ -94,12 +94,12 @@ public class IntSetting : Setting
         string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
         
 
-        float elemH = Config.elementHeight;
-        float indent = Config.indent;
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
         float resetBtnW = SettingValues.ResetButtonW;
         float inputW = SettingValues.NumericInputWidth;
-        float sliderW = Config.SettingWidth - inputW - gap;
+        float sliderW = ClientConfig.SettingWidth - inputW - gap;
         float trackH = SettingValues.SliderHeight;
         float thumbSize = GUIManager.S(16f);
 
@@ -224,7 +224,7 @@ public class IntSetting : Setting
             else ((IntSetting)setting).Reset();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
     }
 }
 

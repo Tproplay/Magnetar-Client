@@ -35,15 +35,15 @@ public static partial class DrawSetting
 
     public static void HandleStringSetting(StringSetting strSet, ref float y, float width)
     {
-        float elemH = Config.elementHeight;
+        float elemH = ClientConfig.elementHeight;
         string translatedName = Translate(strSet.Name);
 
-        float controlW = Mathf.Min(Config.SettingWidth * 1.25f, width * 0.55f);
+        float controlW = Mathf.Min(ClientConfig.SettingWidth * 1.25f, width * 0.55f);
         float gap = GUIManager.S(8f);
-        float labelW = Mathf.Max(width * 0.38f, width - (Config.indent * 2f) - controlW - gap);
+        float labelW = Mathf.Max(width * 0.38f, width - (ClientConfig.indent * 2f) - controlW - gap);
 
-        Rect labelRect = new(Config.indent, y, labelW, elemH);
-        Rect inputRect = new(width - Config.indent - controlW, y, controlW, elemH);
+        Rect labelRect = new(ClientConfig.indent, y, labelW, elemH);
+        Rect inputRect = new(width - ClientConfig.indent - controlW, y, controlW, elemH);
 
         GUI.Label(labelRect, translatedName, ThemeManager.SettingLabelStyle);
         strSet.Value = DrawManualTextField(inputRect, strSet.Value, "", strSet.AutocompleteVars);

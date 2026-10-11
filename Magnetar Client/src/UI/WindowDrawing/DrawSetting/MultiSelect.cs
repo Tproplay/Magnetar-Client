@@ -43,7 +43,7 @@ public static partial class DrawSetting
     {
         if (activeMultiSelect == null) return;
 
-        float maxAllowedHeight = Config.NativeHeight * 0.8f;
+        float maxAllowedHeight = ClientConfig.NativeHeight * 0.8f;
         if (multiSelectWindowRect.height > maxAllowedHeight)
         {
             multiSelectWindowRect.height = maxAllowedHeight;

@@ -17,6 +17,8 @@ public static class ServiceRegistry
     private static IMenuRenderable[] _menuRenderables = Array.Empty<IMenuRenderable>();
     private static ICloseHandler[] _closeHandlers = Array.Empty<ICloseHandler>();
     private static ILanguageAware[] _languageAwares = Array.Empty<ILanguageAware>();
+    private static IThemeAware[] _themeAwares = Array.Empty<IThemeAware>();
+    private static IScaleAware[] _scaleAwares = Array.Empty<IScaleAware>();
     private static IPersistent[] _persistents = Array.Empty<IPersistent>();
     private static IQuittable[] _quittables = Array.Empty<IQuittable>();
 
@@ -157,6 +159,44 @@ public static class ServiceRegistry
 
 #if MELONLOADER
         DebugLogger.Msg($"[ServiceRegistry] Invoked OnLanguageChanged across {_languageAwares.Length} Services");
+#endif
+    }
+
+    internal static void NotifyThemeChanged()
+    {
+        for (int i = 0; i < _themeAwares.Length; i++)
+        {
+            try
+            {
+                _themeAwares[i].OnThemeChanged();
+            }
+            catch (Exception ex)
+            {
+                DebugLogger.Error($"[ServiceRegistry] Error in OnThemeChanged for '{_themeAwares[i].Name}': {ex}");
+            }
+        }
+
+#if MELONLOADER
+        DebugLogger.Msg($"[ServiceRegistry] Invoked OnThemeChanged across {_themeAwares.Length} Services");
+#endif
+    } 
+
+    internal static void NotifyScaleChanged()
+    {
+        for (int i = 0; i < _scaleAwares.Length; i++)
+        {
+            try
+            {
+                _scaleAwares[i].OnGUIScaleChanged();
+            }
+            catch (Exception ex)
+            {
+                DebugLogger.Error($"[ServiceRegistry] Error in OnGUIScaleChanged for '{_scaleAwares[i].Name}': {ex}");
+            }
+        }
+
+#if MELONLOADER
+        DebugLogger.Msg($"[ServiceRegistry] Invoked OnGUIScaleChanged across {_scaleAwares.Length} Services");
 #endif
     }
 

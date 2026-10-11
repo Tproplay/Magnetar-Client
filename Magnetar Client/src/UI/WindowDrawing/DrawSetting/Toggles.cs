@@ -11,13 +11,13 @@ public static partial class DrawSetting
     {
         Event e = Event.current;
         string translatedName = Translate(boolSet.Name);
-        float labelWidth = Mathf.Max(width * 0.45f, width - Config.indent * 2 - Config.SettingWidth);
+        float labelWidth = Mathf.Max(width * 0.45f, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth);
 
-        GUI.Label(new Rect(Config.indent, y, labelWidth, Config.elementHeight),
+        GUI.Label(new Rect(ClientConfig.indent, y, labelWidth, ClientConfig.elementHeight),
             translatedName, ThemeManager.SettingLabelStyle);
 
-        Rect btnRect = new(width - Config.indent - Config.SettingWidth, y,
-            Config.SettingWidth, Config.elementHeight);
+        Rect btnRect = new(width - ClientConfig.indent - ClientConfig.SettingWidth, y,
+            ClientConfig.SettingWidth, ClientConfig.elementHeight);
 
         GUI.Box(btnRect, boolSet.Value ? Translate("ON") : Translate("OFF"),
             boolSet.Value ? ThemeManager.SettingOn : ThemeManager.SettingOff);
@@ -35,14 +35,14 @@ public static partial class DrawSetting
         bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
 
         string translatedName = Translate(bSet.Name);
-        float labelWidth = Mathf.Max(width * 0.45f, width - Config.indent * 2 - Config.SettingWidth);
+        float labelWidth = Mathf.Max(width * 0.45f, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth);
 
-        GUI.Label(new Rect(Config.indent, y, labelWidth, Config.elementHeight),
+        GUI.Label(new Rect(ClientConfig.indent, y, labelWidth, ClientConfig.elementHeight),
             translatedName, ThemeManager.SettingLabelStyle);
 
         string bindText = bSet.IsBinding ? "[...]" : bSet.GetBindString();
-        Rect bindRect = new(width - Config.indent - Config.SettingWidth, y,
-            Config.SettingWidth, Config.elementHeight);
+        Rect bindRect = new(width - ClientConfig.indent - ClientConfig.SettingWidth, y,
+            ClientConfig.SettingWidth, ClientConfig.elementHeight);
         bool bindHover = bindRect.Contains(e.mousePosition);
 
         GUI.Box(bindRect, bindText, bSet.IsBinding ? ThemeManager.SettingOn : ThemeManager.SettingOff);
@@ -66,7 +66,7 @@ public static partial class DrawSetting
             {
                 if (e.type == EventType.KeyDown)
                 {
-                    if (key == KeyCode.Escape || key == Config.MenuOpenKey)
+                    if (key == KeyCode.Escape || key == ClientConfig.MenuOpenKey)
                     {
                         bSet.BindKeys.Clear();
                         bSet.IsBinding = false;
@@ -93,9 +93,9 @@ public static partial class DrawSetting
     {
         Event e = Event.current;
         string translatedName = Translate(btnSet.Name);
-        GUI.Label(new Rect(Config.indent, y, width - Config.indent * 2 - Config.SettingWidth, Config.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(ClientConfig.indent, y, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth, ClientConfig.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
-        Rect btnRect = new(width - Config.indent - Config.SettingWidth, y, Config.SettingWidth, Config.elementHeight);
+        Rect btnRect = new(width - ClientConfig.indent - ClientConfig.SettingWidth, y, ClientConfig.SettingWidth, ClientConfig.elementHeight);
         bool isHovered = btnRect.Contains(e.mousePosition);
 
         GUI.Box(btnRect, Translate(btnSet.ButtonText), ThemeManager.SettingOff);
@@ -115,15 +115,15 @@ public static partial class DrawSetting
         if (lblSet == null || string.IsNullOrEmpty(lblSet.Name)) return;
 
         string displayText = Translate(lblSet.Name);
-        float labelWidth = width - (Config.indent * 2f);
+        float labelWidth = width - (ClientConfig.indent * 2f);
         float calculatedHeight = ThemeManager.SettingsDescriptionStyle.CalcHeight(
             new GUIContent(displayText),
             labelWidth
         );
 
-        Rect labelRect = new(Config.indent, y, labelWidth, calculatedHeight);
+        Rect labelRect = new(ClientConfig.indent, y, labelWidth, calculatedHeight);
         GUI.Label(labelRect, displayText, ThemeManager.SettingsDescriptionStyle);
 
-        y += calculatedHeight + Config.spacing;
+        y += calculatedHeight + ClientConfig.spacing;
     }
 }

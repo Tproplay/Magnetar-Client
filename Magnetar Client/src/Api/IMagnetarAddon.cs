@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Magnetar_Client.Api;
 
-internal class AddonInfo
+public class AddonInfo
 {
     public string FileName { get; set; }
     public string FilePath { get; set; }

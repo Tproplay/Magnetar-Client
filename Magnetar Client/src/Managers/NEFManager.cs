@@ -30,7 +30,7 @@ public static class NEFManager
 
         SafeToCloseManager.RegisterGuard(() =>
         {
-            if (Config.CurrentTab == TabType.NEF)
+            if (ClientConfig.CurrentTab == TabType.NEF)
             {
                 return !DrawSetting.IsFocused;
             }
@@ -45,8 +45,8 @@ public static class NEFManager
         float margin = GUIManager.S(BaseMargin);
         windowRect.x = margin;
         windowRect.y = margin;
-        windowRect.width = Config.NativeWidth - margin * 2f;
-        windowRect.height = Config.NativeHeight - margin * 2f;
+        windowRect.width = ClientConfig.NativeWidth - margin * 2f;
+        windowRect.height = ClientConfig.NativeHeight - margin * 2f;
 
         windowRect = GUI.Window(
             2002,
@@ -84,7 +84,7 @@ public static class NEFManager
 
         public bool OnEscapePressed()
         {
-            if (Config.CurrentTab != TabType.NEF) return false;
+            if (ClientConfig.CurrentTab != TabType.NEF) return false;
 
             if (DrawSetting.ActiveTextFieldId != -1 || DrawSetting.FocusedControlId != -1 || DrawSetting.ActiveDropdownId != -1)
             {

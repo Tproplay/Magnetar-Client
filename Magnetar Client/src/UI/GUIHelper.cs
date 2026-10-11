@@ -61,7 +61,7 @@ public static class GUIHelper
 
     private static void UpdateRainbowColor()
     {
-        float hue = (Time.time * Config.RainbowSpeed) % 1.0f;
+        float hue = (Time.time * ClientConfig.RainbowSpeed) % 1.0f;
 
         RainbowColor = Color.HSVToRGB(hue, 1.0f, 1.0f);
     }

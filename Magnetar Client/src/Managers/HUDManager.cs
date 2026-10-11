@@ -61,7 +61,7 @@ public static class HUDManager
     public static void ExitLayoutMode()
     {
         forceShow = false;
-        Config.showgui = true;
+        ClientConfig.showgui = true;
         AnimationHandler.SnapToVisible();
         AnimationHandler.SwitchView(Group, ViewMain);
 
@@ -124,7 +124,7 @@ public static class HUDManager
                 ExitLayoutMode();
                 e.Use();
             }
-            else if (Config.CurrentTab == TabType.HUD && IsSelectingElements && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
+            else if (ClientConfig.CurrentTab == TabType.HUD && IsSelectingElements && e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
             {
                 OnClose();
                 e.Use();
@@ -153,7 +153,7 @@ public static class HUDManager
             Event e = Event.current;
             float btnWidth = GUIManager.S(180f);
             float btnHeight = GUIManager.S(36f);
-            Rect exitRect = new((Config.NativeWidth - btnWidth) / 2f, GUIManager.S(16f), btnWidth, btnHeight);
+            Rect exitRect = new((ClientConfig.NativeWidth - btnWidth) / 2f, GUIManager.S(16f), btnWidth, btnHeight);
 
             bool isHovered = exitRect.Contains(e.mousePosition);
 
@@ -186,8 +186,8 @@ public static class HUDManager
 
     public static void RenderModCredit()
     {
-        if (!Config.ShowMainMenuCredits) return;
-        if (Config.showgui || HUDManager.forceShow) return;
+        if (!GUIManager.ShowMainMenuCredits) return;
+        if (ClientConfig.showgui || HUDManager.forceShow) return;
         if (!AppData.InMainMenu) return;
 
         string Text = "Magnetar Client <color=white>by</color> <color=red>Tproplay</color>";
@@ -199,11 +199,11 @@ public static class HUDManager
             richText = true,
             normal = { textColor = Color.white },
             fontStyle = FontStyle.Bold,
-            fontSize = (int)Config.NativeHeight / 36
+            fontSize = (int)ClientConfig.NativeHeight / 36
         };
 
         float width = style.CalcSize(content).x;
-        Rect rect = new() { x = Config.NativeWidth * 0.995f - width, width = width };
+        Rect rect = new() { x = ClientConfig.NativeWidth * 0.995f - width, width = width };
 
         GUIHelper.DrawBoxWithOutlinedText(rect, Text, style, GUIHelper.RainbowColor, Color.black);
     }
@@ -230,7 +230,7 @@ public static class HUDManager
 
         public bool CanClose()
         {
-            if (Config.CurrentTab == TabType.HUD)
+            if (ClientConfig.CurrentTab == TabType.HUD)
             {
                 return !HUDManager.forceShow && !HUDManager.IsSelectingElements;
             }
@@ -240,7 +240,7 @@ public static class HUDManager
         public bool OnEscapePressed()
         {
             // Escape guard: do not consume event if user is on another tab
-            if (Config.CurrentTab != TabType.HUD) return false;
+            if (ClientConfig.CurrentTab != TabType.HUD) return false;
 
             if (HUDManager.forceShow)
             {

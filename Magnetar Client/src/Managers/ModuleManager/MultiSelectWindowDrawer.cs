@@ -20,8 +20,8 @@ public static class MultiSelectWindowDrawer
     public static void InitializeLayout()
     {
         WindowRect = new Rect(
-            Config.NativeWidth / 2f - ModuleManager.MultiSelectWindowWidth / 2f,
-            Config.NativeHeight / 2f - ModuleManager.MultiSelectWindowHeight / 2f,
+            ClientConfig.NativeWidth / 2f - ModuleManager.MultiSelectWindowWidth / 2f,
+            ClientConfig.NativeHeight / 2f - ModuleManager.MultiSelectWindowHeight / 2f,
 ModuleManager.MultiSelectWindowWidth,
 ModuleManager
 .MultiSelectWindowHeight
@@ -35,14 +35,14 @@ ModuleManager
 
         if (currentAlpha <= 0.001f) return;
 
-        float targetW = Mathf.Min(ModuleManager.MultiSelectWindowWidth, Config.NativeWidth * 0.95f);
-        float targetH = Mathf.Min(ModuleManager.MultiSelectWindowHeight, Config.NativeHeight * 0.8f);
+        float targetW = Mathf.Min(ModuleManager.MultiSelectWindowWidth, ClientConfig.NativeWidth * 0.95f);
+        float targetH = Mathf.Min(ModuleManager.MultiSelectWindowHeight, ClientConfig.NativeHeight * 0.8f);
 
         if (ModuleManager.resetWindowPos)
         {
             WindowRect = new Rect(
-                (Config.NativeWidth - targetW) / 2f,
-                (Config.NativeHeight - targetH) / 2f,
+                (ClientConfig.NativeWidth - targetW) / 2f,
+                (ClientConfig.NativeHeight - targetH) / 2f,
                 targetW,
                 targetH
             );
@@ -50,7 +50,7 @@ ModuleManager
         }
         else
         {
-            Config.RescaleAroundCenter(ref WindowRect, targetW, targetH);
+            ClientConfig.RescaleAroundCenter(ref WindowRect, targetW, targetH);
         }
 
         WindowRect = ScreenBoundaryHelper.Clamp(WindowRect);
@@ -117,16 +117,16 @@ ModuleManager
     public static void HandleMultiSelectSetting(MultiSelectSetting set, ref float y, float width)
     {
         Event e = Event.current;
-        GUI.Label(new Rect(Config.indent, y, width * 0.4f, Config.elementHeight), Translate(set.Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(ClientConfig.indent, y, width * 0.4f, ClientConfig.elementHeight), Translate(set.Name), ThemeManager.SettingLabelStyle);
 
         string countLabel = '(' + Translate($"{set.SelectedValues.Count} selected") + ')';
         float countTextWidth = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(countLabel)).x;
 
         Rect btnRect = new(
-            width - Config.SettingWidth / 2f - Config.selectButtonWidth - countTextWidth / 2f,
+            width - ClientConfig.SettingWidth / 2f - ClientConfig.selectButtonWidth - countTextWidth / 2f,
             y,
-            Config.selectButtonWidth,
-            Config.elementHeight
+            ClientConfig.selectButtonWidth,
+            ClientConfig.elementHeight
         );
 
         if (btnRect.Contains(e.mousePosition))
@@ -155,10 +155,10 @@ ModuleManager
 
         Color originalColor = GUI.contentColor;
         GUI.contentColor = ThemeManager.TextDim;
-        GUI.Label(new Rect(btnRect.x + Config.selectButtonWidth + GUIManager.S(5f), y, width * 0.4f, Config.elementHeight),
+        GUI.Label(new Rect(btnRect.x + ClientConfig.selectButtonWidth + GUIManager.S(5f), y, width * 0.4f, ClientConfig.elementHeight),
             countLabel, ThemeManager.SettingLabelStyle);
         GUI.contentColor = originalColor;
 
-        y += Config.elementHeight + Config.spacing;
+        y += ClientConfig.elementHeight + ClientConfig.spacing;
     }
 }

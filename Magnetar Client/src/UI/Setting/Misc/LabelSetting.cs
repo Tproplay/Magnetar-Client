@@ -19,15 +19,15 @@ public class LabelSetting : Setting
 
         string displayText = Translate(Name);
 
-        float labelWidth = width - (Config.indent * 2f);
+        float labelWidth = width - (ClientConfig.indent * 2f);
         float calculatedHeight = ThemeManager.SettingsDescriptionStyle.CalcHeight(
             new GUIContent(displayText),
             labelWidth
         );
 
-        Rect labelRect = new(Config.indent, y, labelWidth, calculatedHeight);
+        Rect labelRect = new(ClientConfig.indent, y, labelWidth, calculatedHeight);
         GUI.Label(labelRect, displayText, ThemeManager.SettingsDescriptionStyle);
 
-        y += calculatedHeight + Config.spacing;
+        y += calculatedHeight + ClientConfig.spacing;
     }
 }

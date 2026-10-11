@@ -61,11 +61,11 @@ public class SelectSetting : Setting
         Event e = Event.current;
         int controlId = GetHashCode();
 
-        float elemH = Config.elementHeight;
-        float indent = Config.indent;
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
         float resetBtnW = SettingValues.ResetButtonW;
-        float btnW = Config.SettingWidth;
+        float btnW = ClientConfig.SettingWidth;
 
         // Label on the left: fills remaining horizontal space
         float labelW = width - (indent * 2f) - btnW - gap - resetBtnW;
@@ -161,6 +161,6 @@ public class SelectSetting : Setting
             Reset();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
     }
 }

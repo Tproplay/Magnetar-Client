@@ -38,12 +38,12 @@ public class ListStringSetting : Setting
     public override void Draw(ref float y, float width)
     {
         Event e = Event.current;
-        float elemH = Config.elementHeight;
-        float indent = Config.indent;
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
         float resetBtnW = SettingValues.ResetButtonW;
         float actionBtnW = SettingValues.ResetButtonW;
-        float addBtnW = Config.SettingWidth;
+        float addBtnW = ClientConfig.SettingWidth;
 
         // Label on the left
         float labelW = Mathf.Max(width * 0.35f, GUIManager.S(120f));
@@ -105,6 +105,6 @@ public class ListStringSetting : Setting
             Reset();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
     }
 }

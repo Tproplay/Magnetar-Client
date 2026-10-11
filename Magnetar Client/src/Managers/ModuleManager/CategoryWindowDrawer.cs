@@ -73,11 +73,11 @@ public static class CategoryWindowDrawer
 
         // Horizontal spacing: start at margin + index * (windowWidth + gap)
         float startX = GUIManager.S(20f);
-        float columnStep = Config.ModuleWindowWidth + GUIManager.S(10f);
+        float columnStep = ClientConfig.ModuleWindowWidth + GUIManager.S(10f);
         float initX = startX + (index * columnStep);
 
         float initY = GUIManager.S(50f);
-        float w = Config.ModuleWindowWidth;
+        float w = ClientConfig.ModuleWindowWidth;
         float h = GUIManager.S(50f);
 
         WindowPositions[cat] = ScreenBoundaryHelper.Clamp(new Rect(initX, initY, w, h));
@@ -98,9 +98,9 @@ public static class CategoryWindowDrawer
         {
             int id = cat.Id;
             Rect syncedPos = WindowPositions[cat];
-            if (!Mathf.Approximately(syncedPos.width, Config.ModuleWindowWidth))
+            if (!Mathf.Approximately(syncedPos.width, ClientConfig.ModuleWindowWidth))
             {
-                syncedPos.width = Config.ModuleWindowWidth;
+                syncedPos.width = ClientConfig.ModuleWindowWidth;
             }
 
             WindowPositions[cat] = ScreenBoundaryHelper.Clamp(syncedPos);
@@ -209,7 +209,7 @@ public static class CategoryWindowDrawer
 
             // 4. 70% Max Screen Height Calculation
             float totalContentHeight = categoryModules.Count * buttonHeight;
-            float maxCategoryHeight = Config.NativeHeight * 0.70f;
+            float maxCategoryHeight = ClientConfig.NativeHeight * 0.70f;
             float maxViewHeight = maxCategoryHeight - headerHeight;
 
             bool needsScroll = (headerHeight + totalContentHeight) > maxCategoryHeight;

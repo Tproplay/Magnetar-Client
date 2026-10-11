@@ -24,17 +24,17 @@ public class DimBackground : Module
     public  DimBackground()
     {
         instance = this;
-        Config.dimBg = Active;
+        ClientConfig.dimBg = Active;
     }
 
     // Mod Logic
     public override void OnEnable()
     {
-        Config.dimBg = true;
+        ClientConfig.dimBg = true;
     }
 
     public override void OnDisable()
     {
-        Config.dimBg = false;
+        ClientConfig.dimBg = false;
     }
 }

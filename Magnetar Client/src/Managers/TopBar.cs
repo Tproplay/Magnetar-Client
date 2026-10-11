@@ -19,16 +19,14 @@ public static class TopBar
 
     public static void Init()
     {
-        AnimationHandler.SetViewImmediate(TabType.AnimationGroup, Config.CurrentTab.Name, 1.0f);
+        AnimationHandler.SetViewImmediate(TabType.AnimationGroup, ClientConfig.CurrentTab.Name, 1.0f);
         RebuildOffsets();
         ServiceRegistry.Register(new TopBarService());
     }
 
-    public static TabType RegisterTab(string name, Action onSelected = null, Action onGUI = null)
+    public static TabType RegisterTab(string name, Action onSelected = null, Action onDeselected = null, Action onGUI = null)
     {
-        var tab = TabType.Register(name, onSelected, onGUI);
-        RebuildOffsets();
-        return tab;
+        return TabType.Register(name, onSelected, onDeselected, onGUI);
     }
 
     public static void RebuildOffsets()
@@ -68,7 +66,7 @@ public static class TopBar
 
         float scaledTotalWidth = scaledOffsets[count];
         float scaledHeight = Mathf.Round(GUIManager.S(BaseHeight));
-        float startX = Mathf.Round((Config.NativeWidth / 2f) - (scaledTotalWidth / 2f));
+        float startX = Mathf.Round((ClientConfig.NativeWidth / 2f) - (scaledTotalWidth / 2f));
 
         Rect barArea = new(startX, 0, scaledTotalWidth, scaledHeight);
 
@@ -94,7 +92,7 @@ public static class TopBar
             Rect btnRect = new(btnX, 0, btnW, scaledHeight);
             string displayName = Translate(tab.Name);
 
-            bool isSelected = (Config.CurrentTab == tab);
+            bool isSelected = (ClientConfig.CurrentTab == tab);
             GUIStyle btnStyle = isSelected
                 ? ThemeManager.TopBarActiveStyle
                 : ThemeManager.TopBarStyle;
@@ -103,12 +101,12 @@ public static class TopBar
 
             if (e.type == EventType.MouseDown && e.button == 0 && btnRect.Contains(e.mousePosition))
             {
-                if (Config.CurrentTab != tab)
+                if (ClientConfig.CurrentTab != tab)
                 {
-                    TabType previousTab = Config.CurrentTab;
+                    TabType previousTab = ClientConfig.CurrentTab;
                     previousTab?.OnDeselected?.Invoke();
 
-                    Config.CurrentTab = tab;
+                    ClientConfig.CurrentTab = tab;
                     AnimationHandler.SwitchView(TabType.AnimationGroup, tab.Name);
                     tab.OnSelected?.Invoke();
                 }
@@ -120,21 +118,18 @@ public static class TopBar
         GUI.EndGroup();
     }
 
-    private class TopBarService : IInitializable, IWarmUp, IMenuRenderable, ILanguageAware
+    private class TopBarService : IMenuRenderable, ILanguageAware
     {
         public string Name => "TopBar";
         public int Priority => ServicePriority.Highest;
-
-        public void Initialize() => TopBar.RebuildOffsets();
-        public void OnWarmUp() => TopBar.RebuildOffsets();
 
         public void OnMenuGUI()
         {
             TopBar.Render();
 
-            if (Config.CurrentTab != null && Config.CurrentTab.IsCustom)
+            if (ClientConfig.CurrentTab != null && ClientConfig.CurrentTab.IsCustom)
             {
-                Config.CurrentTab.OnGUI?.Invoke();
+                ClientConfig.CurrentTab.OnGUI?.Invoke();
             }
         }
 

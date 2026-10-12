@@ -29,6 +29,13 @@ public static partial class DrawSetting
     private static Vector2 _listTouchStart = Vector2.zero;
     private static float _scrollStartVal;
     private static bool _isListSwiping;
+    private static int _clickedItemIdx = -1;
+
+    // Momentum / Inertial Scrolling
+    private static float _scrollVelocity = 0f;
+    private static float _lastTouchSampleY = 0f;
+    private static float _lastTouchSampleTime = 0f;
+    private const float FrictionDecay = 4.5f;
 
 #if ANDROID
     private static float _mobileHoldStartTime = 0f;
@@ -106,6 +113,7 @@ public static partial class DrawSetting
         {
             manualScrollY = 0f;
             targetScrollY = 0f;
+            _scrollVelocity = 0f;
         }
 
         var filteredItems = new List<(int Key, string DisplayName)>();
@@ -181,6 +189,20 @@ public static partial class DrawSetting
         float viewHeight = multiSelectWindowRect.height - contentStartY - GUIManager.S(8f);
         float maxScrollDist = Mathf.Max(0f, totalContentHeight - viewHeight);
 
+        // Apply Inertia & Momentum Cooldown
+        if (!_isListSwiping && ActiveSliderId != sliderId && Mathf.Abs(_scrollVelocity) > 0.5f)
+        {
+            float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
+            targetScrollY = Mathf.Clamp(targetScrollY + (_scrollVelocity * dt), 0f, maxScrollDist);
+
+            _scrollVelocity = Mathf.Lerp(_scrollVelocity, 0f, 1f - Mathf.Exp(-FrictionDecay * dt));
+
+            if (targetScrollY <= 0f || targetScrollY >= maxScrollDist || Mathf.Abs(_scrollVelocity) < 1f)
+            {
+                _scrollVelocity = 0f;
+            }
+        }
+
         float scrollbarWidth = GUIManager.S(12f);
         float scrollX = multiSelectWindowRect.width - padX - scrollbarWidth;
         float trackStartY = contentStartY;
@@ -201,6 +223,7 @@ public static partial class DrawSetting
                 float scrollDelta = (mouseDeltaY / usableTrackRange) * maxScrollDist;
                 targetScrollY = Mathf.Clamp(_scrollbarDragStartScrollY + scrollDelta, 0f, maxScrollDist);
                 manualScrollY = targetScrollY;
+                _scrollVelocity = 0f;
                 lastSliderUpdateTime = Time.time;
                 e.Use();
             }
@@ -214,6 +237,7 @@ public static partial class DrawSetting
         {
             ActiveSliderId = sliderId;
             FocusedControlId = -1;
+            _scrollVelocity = 0f;
             _scrollbarDragStartMouseY = e.mousePosition.y;
 
             if (handleRect.Contains(e.mousePosition))
@@ -235,6 +259,7 @@ public static partial class DrawSetting
 
         if (e.type == EventType.ScrollWheel && new Rect(0, 0, multiSelectWindowRect.width, multiSelectWindowRect.height).Contains(e.mousePosition))
         {
+            _scrollVelocity = 0f;
             targetScrollY = Mathf.Clamp(targetScrollY + (e.delta.y * GUIManager.S(40f)), 0f, maxScrollDist);
             lastSliderUpdateTime = Time.time;
             e.Use();
@@ -283,6 +308,7 @@ public static partial class DrawSetting
                 {
                     _mobileShiftDragActive = true;
                     _isMobileHolding = false;
+                    _scrollVelocity = 0f;
 
                     if (_mobileHoldItemIdx >= 0 && _mobileHoldItemIdx < filteredItems.Count)
                     {
@@ -308,6 +334,7 @@ public static partial class DrawSetting
                 _scrollStartVal = manualScrollY;
                 targetScrollY = manualScrollY;
                 _isListSwiping = false;
+                _scrollVelocity = 0f;
 
                 float contentY = mousePos.y + manualScrollY;
                 int clickedIdx = Mathf.FloorToInt(contentY / rowStep);
@@ -317,6 +344,9 @@ public static partial class DrawSetting
                 _mobileHoldStartPos = mousePos;
                 _isMobileHolding = (clickedIdx >= 0 && clickedIdx < filteredItems.Count);
                 _mobileShiftDragActive = false;
+
+                _lastTouchSampleY = mousePos.y;
+                _lastTouchSampleTime = Time.realtimeSinceStartup;
             }
 
             if (_mobileShiftDragActive)
@@ -357,7 +387,7 @@ public static partial class DrawSetting
             {
                 if (e.type == EventType.MouseDrag && isMouseInsideList && !_isListSwiping)
                 {
-                    if (Vector2.Distance(mousePos, _listTouchStart) > Config.S(12f))
+                    if (Vector2.Distance(mousePos, _listTouchStart) > Config.S(10f))
                     {
                         _isListSwiping = true;
                         _isMobileHolding = false;
@@ -369,6 +399,16 @@ public static partial class DrawSetting
                     float deltaY = _listTouchStart.y - mousePos.y;
                     targetScrollY = Mathf.Clamp(_scrollStartVal + deltaY, 0f, maxScrollDist);
                     manualScrollY = targetScrollY;
+
+                    float dt = Time.realtimeSinceStartup - _lastTouchSampleTime;
+                    if (dt > 0.001f)
+                    {
+                        float rawVel = (_lastTouchSampleY - mousePos.y) / dt;
+                        _scrollVelocity = Mathf.Lerp(_scrollVelocity, rawVel, 0.4f);
+                        _lastTouchSampleY = mousePos.y;
+                        _lastTouchSampleTime = Time.realtimeSinceStartup;
+                    }
+
                     e.Use();
                 }
             }
@@ -381,6 +421,7 @@ public static partial class DrawSetting
                     isShiftDragging = false;
                     draggedItemsSession.Clear();
                     lastHoveredIndex = -1;
+                    _scrollVelocity = 0f;
                     e.Use();
                 }
                 else if (_isMobileHolding && !_isListSwiping)
@@ -406,6 +447,15 @@ public static partial class DrawSetting
                     }
                 }
 
+                if (_isListSwiping)
+                {
+                    float timeSinceSample = Time.realtimeSinceStartup - _lastTouchSampleTime;
+                    if (timeSinceSample > 0.08f)
+                    {
+                        _scrollVelocity = 0f;
+                    }
+                }
+
                 _isMobileHolding = false;
                 _isListSwiping = false;
             }
@@ -416,51 +466,38 @@ public static partial class DrawSetting
                 _scrollStartVal = manualScrollY;
                 targetScrollY = manualScrollY;
                 _isListSwiping = false;
+                _scrollVelocity = 0f;
+
+                _lastTouchSampleY = mousePos.y;
+                _lastTouchSampleTime = Time.realtimeSinceStartup;
 
                 float contentY = mousePos.y + manualScrollY;
-                int clickedIdx = Mathf.FloorToInt(contentY / rowStep);
+                _clickedItemIdx = Mathf.FloorToInt(contentY / rowStep);
 
-                if (clickedIdx >= 0 && clickedIdx < filteredItems.Count)
+                if (isShiftHeld && activeMultiSelect.MaxSelection != 1 && _clickedItemIdx >= 0 && _clickedItemIdx < filteredItems.Count)
                 {
-                    int itemKey = filteredItems[clickedIdx].Key;
+                    int itemKey = filteredItems[_clickedItemIdx].Key;
                     bool isCurrentlySelected = activeMultiSelect.IsSelected(itemKey);
 
-                    if (isShiftHeld && activeMultiSelect.MaxSelection != 1)
-                    {
-                        isShiftDragging = true;
-                        dragTargetState = !isCurrentlySelected;
-                        draggedItemsSession.Clear();
-                        lastHoveredIndex = clickedIdx;
+                    isShiftDragging = true;
+                    dragTargetState = !isCurrentlySelected;
+                    draggedItemsSession.Clear();
+                    lastHoveredIndex = _clickedItemIdx;
 
-                        if (dragTargetState) ToggleWithLimit(activeMultiSelect, itemKey);
-                        else activeMultiSelect.Deselect(itemKey);
+                    if (dragTargetState) ToggleWithLimit(activeMultiSelect, itemKey);
+                    else activeMultiSelect.Deselect(itemKey);
 
-                        draggedItemsSession.Add(itemKey);
-                    }
-                    else
-                    {
-                        isShiftDragging = false;
-                        if (activeMultiSelect.MaxSelection == 1)
-                        {
-                            activeMultiSelect.SelectedValues.Clear();
-                            activeMultiSelect.Select(itemKey);
-                        }
-                        else
-                        {
-                            if (isCurrentlySelected) activeMultiSelect.Deselect(itemKey);
-                            else ToggleWithLimit(activeMultiSelect, itemKey);
-                        }
-                    }
-
+                    draggedItemsSession.Add(itemKey);
                     e.Use();
                 }
             }
 
             if (e.type == EventType.MouseDrag && isMouseInsideList && !_isListSwiping && !isShiftDragging)
             {
-                if (Vector2.Distance(mousePos, _listTouchStart) > 12f)
+                if (Vector2.Distance(mousePos, _listTouchStart) > 10f)
                 {
                     _isListSwiping = true;
+                    _clickedItemIdx = -1;
                 }
             }
 
@@ -469,6 +506,16 @@ public static partial class DrawSetting
                 float deltaY = _listTouchStart.y - mousePos.y;
                 targetScrollY = Mathf.Clamp(_scrollStartVal + deltaY, 0f, maxScrollDist);
                 manualScrollY = targetScrollY;
+
+                float dt = Time.realtimeSinceStartup - _lastTouchSampleTime;
+                if (dt > 0.001f)
+                {
+                    float rawVel = (_lastTouchSampleY - mousePos.y) / dt;
+                    _scrollVelocity = Mathf.Lerp(_scrollVelocity, rawVel, 0.4f);
+                    _lastTouchSampleY = mousePos.y;
+                    _lastTouchSampleTime = Time.realtimeSinceStartup;
+                }
+
                 e.Use();
             }
 
@@ -506,6 +553,40 @@ public static partial class DrawSetting
                 isShiftDragging = false;
                 draggedItemsSession.Clear();
                 lastHoveredIndex = -1;
+            }
+
+            if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
+            {
+                if (!isShiftDragging && !_isListSwiping && _clickedItemIdx >= 0 && _clickedItemIdx < filteredItems.Count)
+                {
+                    int itemKey = filteredItems[_clickedItemIdx].Key;
+                    bool isCurrentlySelected = activeMultiSelect.IsSelected(itemKey);
+
+                    if (activeMultiSelect.MaxSelection == 1)
+                    {
+                        activeMultiSelect.SelectedValues.Clear();
+                        activeMultiSelect.Select(itemKey);
+                    }
+                    else
+                    {
+                        if (isCurrentlySelected) activeMultiSelect.Deselect(itemKey);
+                        else ToggleWithLimit(activeMultiSelect, itemKey);
+                    }
+
+                    e.Use();
+                }
+
+                if (_isListSwiping)
+                {
+                    float timeSinceSample = Time.realtimeSinceStartup - _lastTouchSampleTime;
+                    if (timeSinceSample > 0.08f)
+                    {
+                        _scrollVelocity = 0f;
+                    }
+                }
+
+                _clickedItemIdx = -1;
+                _isListSwiping = false;
             }
 #endif
 

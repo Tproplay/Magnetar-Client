@@ -302,23 +302,21 @@ public class CustomCDCards : Module
 
         CreateCategory("General");
 
-        selectedSeeds = new MultiSelectSetting(
-            "Cards", typeof(PlantType))
+        selectedSeeds = new MultiSelectSetting("Cards", typeof(PlantType))
         {
             Blacklist = Banned.PlantTypeBanned,
             CustomNames = TranslateEnum(typeof(PlantType))
         };
 
-        selectedSeeds.Options.Keys.ToList().ForEach(selectedSeeds.Select);
+        selectedSeeds.SelectAll();
 
-        selectedSeeds_dup = new MultiSelectSetting(
-            "Duplicate Cards", typeof(PlantType))
+        selectedSeeds_dup = new MultiSelectSetting("Duplicate Cards", typeof(PlantType))
         {
             Blacklist = Banned.PlantTypeBanned,
-            CustomNames = TranslateEnum(typeof(PlantType))
+            CustomNames = TranslateEnum(typeof(PlantType)),
         };
 
-        selectedSeeds_dup.Options.Keys.ToList().ForEach(selectedSeeds_dup.Select);
+        selectedSeeds_dup.SelectAll();
 
         CustomCDSetting = new FloatSetting("Custom CD Multiplier", 0.001f, 10, 1_000_000,3, 0.001f);
 

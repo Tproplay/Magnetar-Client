@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Magnetar_Client.Core.ModuleManager_;
 
-public static class SettingsWindowDrawer
+internal static class SettingsWindowDrawer
 {
     private static readonly Dictionary<Modules.Module, Rect> _settingsPositions = new();
     private static readonly Dictionary<Modules.Module, Vector2> _settingsScrollPositions = new();
@@ -19,7 +19,10 @@ public static class SettingsWindowDrawer
     private static readonly Dictionary<Modules.Module, float> _targetContentHeights = new();
     private static readonly Dictionary<Modules.Module, GUI.WindowFunction> _cachedSettingsDelegates = new();
 
-    // Cache the active module while it fades out to prevent instant popping
+    private static readonly Dictionary<Modules.Module, float> _touchStartY = new();
+    private static readonly Dictionary<Modules.Module, float> _touchStartScroll = new();
+    private static readonly Dictionary<Modules.Module, bool> _isDragging = new();
+    private static bool _isDraggingScrollbar;
     private static Modules.Module _lastActiveModule;
 
     private static GUI.WindowFunction GetSettingsDelegate(Modules.Module mod)
@@ -181,22 +184,28 @@ public static class SettingsWindowDrawer
         bool needsScrollbar = _targetContentHeights[mod] > maxViewHeight;
         float maxScroll = needsScrollbar ? (_targetContentHeights[mod] - maxViewHeight) : 0f;
         float contentWidth = needsScrollbar ? windowWidth - GUIManager.S(16f) : windowWidth;
-        float currentScroll = _settingsScrollPositions[mod].y;
+        float currentScroll = Mathf.Clamp(_settingsScrollPositions[mod].y, 0f, maxScroll);
+        _settingsScrollPositions[mod] = new Vector2(0, currentScroll);
 
         Rect outRect = new(0, headerHeight, windowWidth, viewHeight);
-        if (outRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
-        {
-            currentScroll = Mathf.Clamp(currentScroll + e.delta.y * ModuleManager.ScrollSensitivity, 0, maxScroll);
-            _settingsScrollPositions[mod] = new Vector2(0, currentScroll);
-            e.Use();
-        }
+
+        // Unified Scroll Handling (Mouse Wheel + Mobile Touch Drag + Scrollbar Drag)
+        currentScroll = HandleScrollInput(mod, outRect, currentScroll, maxScroll, needsScrollbar, windowWidth, headerHeight, viewHeight, _targetContentHeights[mod], maxViewHeight, e);
+
+        // Ensure clamped after input
+        currentScroll = Mathf.Clamp(currentScroll, 0f, maxScroll);
+        _settingsScrollPositions[mod] = new Vector2(0, currentScroll);
 
         GUI.BeginGroup(outRect);
-        // DrawSettingsBody draws SettingOn and SettingOff
         float actualHeightDrawn = DrawSettingsBody(mod, -currentScroll, contentWidth);
-        if (e.type == EventType.Repaint)
+
+        // 2. Update target content height and immediately clamp if content shrunk this frame
+        _targetContentHeights[mod] = actualHeightDrawn;
+        float dynamicMaxScroll = Mathf.Max(0f, actualHeightDrawn - maxViewHeight);
+        if (currentScroll > dynamicMaxScroll)
         {
-            _targetContentHeights[mod] = actualHeightDrawn;
+            currentScroll = dynamicMaxScroll;
+            _settingsScrollPositions[mod] = new Vector2(0, currentScroll);
         }
 
         if (DrawSetting.OnPostDraw != null)
@@ -208,14 +217,110 @@ public static class SettingsWindowDrawer
 
         if (needsScrollbar)
         {
-            DrawSettingsScrollbar(windowWidth, headerHeight, viewHeight, _targetContentHeights[mod], maxViewHeight, currentScroll, maxScroll);
+            DrawSettingsScrollbar(windowWidth, headerHeight, viewHeight, _targetContentHeights[mod], maxViewHeight, currentScroll, dynamicMaxScroll);
         }
 
         GUI.DragWindow(new Rect(0, 0, windowWidth - closeBtnSize - GUIManager.S(10f), headerHeight));
 
         GUI.color = prevColor;
         GUI.contentColor = prevContentColor;
-}
+    }
+
+    private static float HandleScrollInput(
+        Modules.Module mod,
+        Rect outRect,
+        float currentScroll,
+        float maxScroll,
+        bool needsScrollbar,
+        float windowWidth,
+        float headerHeight,
+        float viewHeight,
+        float targetContentHeight,
+        float maxViewHeight,
+        Event e)
+    {
+        if (!needsScrollbar) return 0f;
+
+        // 1. Mouse ScrollWheel
+        if (outRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
+        {
+            currentScroll = Mathf.Clamp(currentScroll + e.delta.y * ModuleManager.ScrollSensitivity, 0f, maxScroll);
+            e.Use();
+            return currentScroll;
+        }
+
+        // 2. Direct Scrollbar Dragging
+        float trackX = windowWidth - GUIManager.S(14f);
+        float trackY = headerHeight + GUIManager.S(5f);
+        float trackHeight = viewHeight - GUIManager.S(10f);
+        float handleHeight = Mathf.Max(GUIManager.S(20f), (maxViewHeight / targetContentHeight) * trackHeight);
+        Rect scrollbarHitBox = new(trackX - GUIManager.S(10f), trackY, GUIManager.S(25f), trackHeight);
+
+        if (e.type == EventType.MouseDown && e.button == 0 && scrollbarHitBox.Contains(e.mousePosition))
+        {
+            _isDraggingScrollbar = true;
+            float clickPct = Mathf.Clamp01((e.mousePosition.y - trackY - (handleHeight / 2f)) / Mathf.Max(1f, trackHeight - handleHeight));
+            currentScroll = clickPct * maxScroll;
+            e.Use();
+            return currentScroll;
+        }
+
+        if (_isDraggingScrollbar)
+        {
+            if (Input.GetMouseButton(0))
+            {
+                float dragPct = Mathf.Clamp01((e.mousePosition.y - trackY - (handleHeight / 2f)) / Mathf.Max(1f, trackHeight - handleHeight));
+                currentScroll = dragPct * maxScroll;
+                if (e.isMouse && e.type != EventType.Repaint && e.type != EventType.Layout)
+                {
+                    e.Use();
+                }
+                return currentScroll;
+            }
+
+            _isDraggingScrollbar = false;
+        }
+
+
+#if ANDROID
+        bool canTouchScroll = !DrawSetting.IsFocused && !_isDraggingScrollbar;
+#else
+        bool canTouchScroll = !DrawSetting.IsFocused && !_isDraggingScrollbar && Input.touchSupported && Input.touchCount > 0;
+#endif
+
+        if (canTouchScroll)
+        {
+            if (e.type == EventType.MouseDown && outRect.Contains(e.mousePosition) && !scrollbarHitBox.Contains(e.mousePosition))
+            {
+                _touchStartY[mod] = e.mousePosition.y;
+                _touchStartScroll[mod] = currentScroll;
+                _isDragging[mod] = false;
+            }
+            else if ((e.type == EventType.MouseDrag || Input.GetMouseButton(0)) && _touchStartY.ContainsKey(mod))
+            {
+                float deltaY = _touchStartY[mod] - e.mousePosition.y;
+                if (Mathf.Abs(deltaY) > GUIManager.S(6f) || (_isDragging.TryGetValue(mod, out bool dragging) && dragging))
+                {
+                    _isDragging[mod] = true;
+                    MobileInputHandler.Reset();
+                    currentScroll = Mathf.Clamp(_touchStartScroll[mod] + deltaY, 0f, maxScroll);
+                    if (e.type == EventType.MouseDrag) e.Use();
+                }
+            }
+            else if (e.rawType == EventType.MouseUp || e.type == EventType.MouseUp || !Input.GetMouseButton(0))
+            {
+                _isDragging[mod] = false;
+                _touchStartY.Remove(mod);
+            }
+        }
+        else if (e.rawType == EventType.MouseUp || e.type == EventType.MouseUp || !Input.GetMouseButton(0))
+        {
+            _isDragging[mod] = false;
+            _touchStartY.Remove(mod);
+        }
+
+        return currentScroll;
+    }
 
     private static float CalculateTargetWidth(Modules.Module mod)
     {
@@ -278,7 +383,6 @@ public static class SettingsWindowDrawer
 
             if (skipSettings) continue;
 
-            // Wire up ModuleManager's window routing decoupled from the setting class itself
             if (setting is MultiSelectSetting multiSet)
             {
                 multiSet.OnWindowOpen = () =>
@@ -289,14 +393,19 @@ public static class SettingsWindowDrawer
                 };
             }
 
-            // Direct polymorphic draw call
             setting.Draw(ref y, width);
         }
 
         MiscDrawing.Seperator(ref y, width, ClientConfig.indent, ClientConfig.spacing, Translate("KeyBind"));
 
         Event e = Event.current;
+
+#if ANDROID
+        bool wasDragging = _isDragging.TryGetValue(mod, out bool isDrag) && isDrag;
+        bool isLeftClick = (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp) && e.button == 0 && !wasDragging;
+#else
         bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
+#endif
 
         // 1. Draw Keybind
         mod.KeyBind.Draw(ref y, width);
@@ -365,6 +474,6 @@ public static class SettingsWindowDrawer
         float handleY = trackY + (scrollPct * (trackHeight - handleHeight));
 
         GUI.Box(new Rect(trackX + GUIManager.S(5f), trackY, GUIManager.S(2f), trackHeight), "", ThemeManager.SeparatorStyle);
-        GUI.Box(new Rect(trackX, handleY, GUIManager.S(12f), handleHeight), "", ThemeManager.CategoryModuleOffStyle);
+        GUI.Box(new Rect(trackX, handleY, GUIManager.S(12f), handleHeight),"", _isDraggingScrollbar ? ThemeManager.CategoryModuleOnStyle : ThemeManager.CategoryModuleOffStyle);
     }
 }

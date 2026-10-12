@@ -1,6 +1,4 @@
 ﻿using Magnetar_Client.Api;
-using Magnetar_Client.Modules;
-using Magnetar_Client.UI.Setting;
 using Magnetar_Client.Utils;
 using Newtonsoft.Json.Linq;
 using System;
@@ -12,7 +10,6 @@ namespace Magnetar_Client.Core.ModuleManager_;
 
 public static class ModuleTranslationHandler
 {
-
     #region Lifecycle & Translation Reloading
 
     public static void OnLanguageChanged()
@@ -81,15 +78,6 @@ public static class ModuleTranslationHandler
         {
             TranslatorLogger.Error($"[ModuleTranslationHandler] Failed to reload translations for module '{mod.Name}': {ex.Message}");
         }
-    }
-
-    #endregion
-
-    #region Enum Translations
-
-    public static Dictionary<int, string> TranslateEnum(Type enumType)
-    {
-        return Translator.TranslateEnum(enumType);
     }
 
     #endregion

@@ -17,6 +17,12 @@ public static partial class NEFGUI
     private static float _gridScrollStartVal;
     private static bool _isGridSwiping;
 
+    // Momentum / Inertial Scrolling
+    private static float _scrollVelocity = 0f;
+    private static float _lastTouchSampleY = 0f;
+    private static float _lastTouchSampleTime = 0f;
+    private const float FrictionDecay = 4.5f;
+
     private static void DrawSearchAndGridPanel(Rect rightPanelRect, float rightPanelWidth, Event e)
     {
         float rx = rightPanelRect.x;
@@ -35,6 +41,7 @@ public static partial class NEFGUI
         {
             searchQuery = newQuery;
             currentScrollY = 0f;
+            _scrollVelocity = 0f;
             NEFData.PerformSearch();
         }
 
@@ -50,6 +57,7 @@ public static partial class NEFGUI
         {
             searchQuery = "";
             currentScrollY = 0f;
+            _scrollVelocity = 0f;
             NEFData.PerformSearch();
             e.Use();
         }
@@ -81,8 +89,23 @@ public static partial class NEFGUI
         float totalContentHeight = rowCount * (itemSize + cellPadding);
         float maxScrollY = Mathf.Max(0f, totalContentHeight - scrollRect.height);
 
+        // Apply Inertial Momentum Cooldown
+        if (!_isGridSwiping && Mathf.Abs(_scrollVelocity) > 0.5f)
+        {
+            float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
+            currentScrollY = Mathf.Clamp(currentScrollY + (_scrollVelocity * dt), 0f, maxScrollY);
+
+            _scrollVelocity = Mathf.Lerp(_scrollVelocity, 0f, 1f - Mathf.Exp(-FrictionDecay * dt));
+
+            if (currentScrollY <= 0f || currentScrollY >= maxScrollY || Mathf.Abs(_scrollVelocity) < 1f)
+            {
+                _scrollVelocity = 0f;
+            }
+        }
+
         if (scrollRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
         {
+            _scrollVelocity = 0f;
             currentScrollY += e.delta.y * GUIManager.S(30f);
             currentScrollY = Mathf.Clamp(currentScrollY, 0f, maxScrollY);
             e.Use();
@@ -93,6 +116,10 @@ public static partial class NEFGUI
             _gridTouchStart = e.mousePosition;
             _gridScrollStartVal = currentScrollY;
             _isGridSwiping = false;
+            _scrollVelocity = 0f;
+
+            _lastTouchSampleY = e.mousePosition.y;
+            _lastTouchSampleTime = Time.realtimeSinceStartup;
         }
 
         if (e.type == EventType.MouseDrag && !_isGridSwiping && scrollRect.Contains(_gridTouchStart))
@@ -110,6 +137,17 @@ public static partial class NEFGUI
         {
             float deltaY = _gridTouchStart.y - e.mousePosition.y;
             currentScrollY = Mathf.Clamp(_gridScrollStartVal + deltaY, 0f, maxScrollY);
+
+            // Sample fling velocity
+            float dt = Time.realtimeSinceStartup - _lastTouchSampleTime;
+            if (dt > 0.001f)
+            {
+                float rawVel = (_lastTouchSampleY - e.mousePosition.y) / dt;
+                _scrollVelocity = Mathf.Lerp(_scrollVelocity, rawVel, 0.4f);
+                _lastTouchSampleY = e.mousePosition.y;
+                _lastTouchSampleTime = Time.realtimeSinceStartup;
+            }
+
             e.Use();
         }
 
@@ -143,7 +181,7 @@ public static partial class NEFGUI
                 }
 #endif
 
-                if (!_isGridSwiping && plantBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseUp)
+                if (!_isGridSwiping && plantBtnRect.Contains(e.mousePosition) && (e.type == EventType.MouseUp || (e.type == EventType.Ignore && e.rawType == EventType.MouseUp)))
                 {
 #if ANDROID
                     if (!_hasTriggeredHold && e.button == 0)
@@ -176,8 +214,17 @@ public static partial class NEFGUI
         }
         GUI.EndGroup();
 
-        if (e.type == EventType.MouseUp)
+        if (e.type == EventType.MouseUp || (e.type == EventType.Ignore && e.rawType == EventType.MouseUp))
         {
+            if (_isGridSwiping)
+            {
+                float timeSinceSample = Time.realtimeSinceStartup - _lastTouchSampleTime;
+                if (timeSinceSample > 0.08f)
+                {
+                    _scrollVelocity = 0f;
+                }
+            }
+
             _isGridSwiping = false;
 #if ANDROID
             _heldEntity = null;

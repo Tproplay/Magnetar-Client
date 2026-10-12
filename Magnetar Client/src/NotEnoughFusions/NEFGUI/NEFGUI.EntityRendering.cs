@@ -1,16 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using Magnetar_Client.UI.Themes;
-using Magnetar_Client.Utils;
 using static Magnetar_Client.NEF.Data.NEFRecipes;
 using Magnetar_Client.UI;
 using Magnetar_Client.Core;
-
-
-
-#if MELONLOADER || RELEASE_MELON
-using Il2Cpp;
-#endif
 
 namespace Magnetar_Client.NEF;
 
@@ -60,46 +53,9 @@ public static partial class NEFGUI
             return style;
         }
 
-        Texture2D finalTex = null;
-
-        if (NEFData.LegacyLoadEntities.Contains(entity.Id) || entity.Id >= 3000)
-        {
-            finalTex = entity.IsZombie
-                ? ResourceManager.GetZombieTexture(entity.Id)
-                : ResourceManager.GetPlantTexture(entity.Id);
-        }
-
-        if (finalTex == null)
-        {
-            Sprite sprite = GetEntitySprite(entity);
-            if (sprite != null && sprite.texture != null)
-            {
-                if (sprite.rect.width == sprite.texture.width && sprite.rect.height == sprite.texture.height)
-                {
-                    finalTex = sprite.texture;
-                }
-                else
-                {
-                    RenderTexture tmp = RenderTexture.GetTemporary(
-                        sprite.texture.width,
-                        sprite.texture.height,
-                        0,
-                        RenderTextureFormat.Default,
-                        RenderTextureReadWrite.Linear);
-
-                    Graphics.Blit(sprite.texture, tmp);
-                    RenderTexture previous = RenderTexture.active;
-                    RenderTexture.active = tmp;
-
-                    finalTex = new Texture2D((int)sprite.rect.width, (int)sprite.rect.height, TextureFormat.RGBA32, false);
-                    finalTex.ReadPixels(new Rect(sprite.rect.x, sprite.rect.y, sprite.rect.width, sprite.rect.height), 0, 0);
-                    finalTex.Apply();
-
-                    RenderTexture.active = previous;
-                    RenderTexture.ReleaseTemporary(tmp);
-                }
-            }
-        }
+        Texture2D finalTex = entity.IsZombie
+            ? ResourceManager.GetZombieTexture(entity.Id)
+            : ResourceManager.GetPlantTexture(entity.Id);
 
         if (finalTex == null) return null;
 
@@ -108,36 +64,5 @@ public static partial class NEFGUI
         cachedEntityStyles[entity.Id] = newStyle;
 
         return newStyle;
-    }
-
-    private static Sprite GetEntitySprite(RecipeEntity entity)
-    {
-        if (GameAPP.resourcesManager == null) return null;
-
-        if (entity.IsZombie)
-        {
-            ZombieType zType = (ZombieType)entity.Id;
-            if (GameAPP.resourcesManager.zombieSprites.ContainsKey(zType))
-            {
-                return GameAPP.resourcesManager.zombieSprites[zType];
-            }
-        }
-        else
-        {
-            PlantType pType = (PlantType)entity.Id;
-            if (GameAPP.resourcesManager.plantPreviews.ContainsKey(pType))
-            {
-                GameObject previewObj = GameAPP.resourcesManager.plantPreviews[pType];
-                if (previewObj != null)
-                {
-                    SpriteRenderer sr = previewObj.GetComponent<SpriteRenderer>();
-                    if (sr != null) return sr.sprite;
-
-                    UnityEngine.UI.Image img = previewObj.GetComponent<UnityEngine.UI.Image>();
-                    if (img != null) return img.sprite;
-                }
-            }
-        }
-        return null;
     }
 }

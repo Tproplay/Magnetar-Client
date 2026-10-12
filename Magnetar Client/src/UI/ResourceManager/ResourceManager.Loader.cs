@@ -164,133 +164,6 @@ public static partial class ResourceManager
         _textureCache[textureName] = null;
         return null;
     }
-
-    private static Texture2D CreateReadableCroppedTexture(Sprite sprite)
-    {
-        if (sprite == null || sprite.texture == null) return null;
-
-        Texture2D sourceTex = sprite.texture;
-        Rect textureRect = sprite.textureRect;
-
-        int width = (int)textureRect.width;
-        int height = (int)textureRect.height;
-
-        RenderTexture tempRT = RenderTexture.GetTemporary(
-            sourceTex.width,
-            sourceTex.height,
-            0,
-            RenderTextureFormat.ARGB32,
-            RenderTextureReadWrite.Default
-        );
-
-        RenderTexture previousActive = RenderTexture.active;
-        RenderTexture.active = tempRT;
-
-        GL.Clear(false, true, new Color(1f, 1f, 1f, 0f));
-
-        Graphics.Blit(sourceTex, tempRT);
-
-        Texture2D readableCopy = new(sourceTex.width, sourceTex.height, TextureFormat.RGBA32, false);
-        readableCopy.ReadPixels(new Rect(0, 0, sourceTex.width, sourceTex.height), 0, 0);
-        readableCopy.Apply();
-
-        RenderTexture.active = previousActive;
-        RenderTexture.ReleaseTemporary(tempRT);
-
-        Texture2D readableCroppedTex = new(width, height, TextureFormat.RGBA32, false);
-
-        Color[] pixels = readableCopy.GetPixels((int)textureRect.x, (int)textureRect.y, width, height);
-
-        readableCroppedTex.SetPixels(pixels);
-        readableCroppedTex.Apply();
-
-        UnityEngine.Object.Destroy(readableCopy);
-
-        return readableCroppedTex;
-    }
-
-    public static Texture2D GetPlantTexture(int plantId)
-    {
-        if (PlantTextureOverrides.TryGetValue(plantId, out string texturePath))
-        {
-            Texture2D overrideTex = GetTexture(texturePath);
-            if (overrideTex != null) return overrideTex;
-        }
-
-        string rawName = ((PlantType)plantId).ToString();
-        string enumNameLower = rawName.ToLower();
-        string preferredPath = $"plants/{enumNameLower}/{enumNameLower}";
-
-        Texture2D tex = GetTexture(preferredPath);
-        string successfulPath = preferredPath;
-
-        if (tex == null)
-        {
-            tex = GetTexture(rawName);
-            successfulPath = rawName;
-        }
-
-#if MELONLOADER || BEPINEX
-        if (tex == null)
-        {
-            if (!PlantTextureOverrides.ContainsKey(plantId))
-            {
-                PlantTextureOverrides[plantId] = preferredPath;
-            }
-        }
-        else
-        {
-            if (!PlantTextureOverrides.ContainsKey(plantId))
-            {
-                PlantTextureOverrides[plantId] = successfulPath;
-            }
-        }
-#endif
-        return tex;
-    }
-
-    public static Texture2D GetZombieTexture(int zombieId)
-    {
-        if (ZombieTextureOverrides.TryGetValue(zombieId, out string texturePath))
-        {
-            Texture2D overrideTex = GetTexture(texturePath);
-            if (overrideTex != null) return overrideTex;
-        }
-
-        string rawName = ((ZombieType)zombieId).ToString();
-        string enumNameLower = rawName.ToLower();
-        string preferredPath = $"zombies/{enumNameLower}/{enumNameLower}";
-
-        Texture2D tex = GetTexture(preferredPath);
-        string successfulPath = preferredPath;
-
-        if (tex == null)
-        {
-            tex = GetTexture(rawName);
-            successfulPath = rawName;
-        }
-
-#if MELONLOADER || BEPINEX
-        if (tex == null)
-        {
-            if (!ZombieTextureOverrides.ContainsKey(zombieId))
-            {
-                ZombieTextureOverrides[zombieId] = preferredPath;
-                SaveLoad.Save();
-            }
-        }
-        else
-        {
-            if (!ZombieTextureOverrides.ContainsKey(zombieId))
-            {
-                ZombieTextureOverrides[zombieId] = successfulPath;
-                SaveLoad.Save();
-            }
-        }
-#endif
-        return tex;
-    }
-
     public static void SaveTextureOverrides()
     {
         string texturePath = PathsManager.TextureDataPath;
@@ -331,5 +204,104 @@ public static partial class ResourceManager
                 Magnetar_Logger.AutoSaveLogger.Error($"Failed to load TextureData: {ex.Message}");
             }
         }
+    }
+
+    public static Texture2D GetPlantTexture(int plantId)
+    {
+        string cacheKey = $"game_plant_preview_{plantId}";
+        if (_textureCache.TryGetValue(cacheKey, out Texture2D cached) && cached != null)
+            return cached;
+
+        try
+        {
+            var resManager = GameAPP.resourcesManager;
+            if (resManager != null && resManager.plantPreviews != null)
+            {
+                PlantType type = (PlantType)plantId;
+                if (resManager.plantPreviews.TryGetValue(type, out GameObject previewObj) && previewObj != null)
+                {
+                    SpriteRenderer sr = previewObj.GetComponent<SpriteRenderer>() ?? previewObj.GetComponentInChildren<SpriteRenderer>();
+                    Sprite sprite = sr != null ? sr.sprite : null;
+
+                    if (sprite == null)
+                    {
+                        var img = previewObj.GetComponent<UnityEngine.UI.Image>() ?? previewObj.GetComponentInChildren<UnityEngine.UI.Image>();
+                        if (img != null) sprite = img.sprite;
+                    }
+
+                    if (sprite != null)
+                    {
+                        Texture2D tex = CreateReadableCroppedTexture(sprite);
+                        if (tex != null)
+                        {
+                            _textureCache[cacheKey] = tex;
+                            return tex;
+                        }
+                    }
+                }
+            }
+        }
+        catch { }
+
+        return null;
+    }
+
+    public static Texture2D GetZombieTexture(int zombieId)
+    {
+        string cacheKey = $"game_zombie_sprite_{zombieId}";
+        if (_textureCache.TryGetValue(cacheKey, out Texture2D cached) && cached != null)
+            return cached;
+
+        try
+        {
+            var resManager = GameAPP.resourcesManager;
+            if (resManager != null && resManager.zombieSprites != null)
+            {
+                ZombieType type = (ZombieType)zombieId;
+                if (resManager.zombieSprites.TryGetValue(type, out Sprite zSprite) && zSprite != null)
+                {
+                    Texture2D tex = CreateReadableCroppedTexture(zSprite);
+                    if (tex != null)
+                    {
+                        _textureCache[cacheKey] = tex;
+                        return tex;
+                    }
+                }
+            }
+        }
+        catch { }
+
+        return null;
+    }
+
+    private static Texture2D CreateReadableCroppedTexture(Sprite sprite)
+    {
+        if (sprite == null || sprite.texture == null) return null;
+
+        if ((int)sprite.rect.width == sprite.texture.width &&
+            (int)sprite.rect.height == sprite.texture.height &&
+            sprite.rect.x == 0 && sprite.rect.y == 0)
+        {
+            return sprite.texture;
+        }
+
+        RenderTexture tmp = RenderTexture.GetTemporary(
+            sprite.texture.width,
+            sprite.texture.height,
+            0,
+            RenderTextureFormat.Default,
+            RenderTextureReadWrite.Linear);
+
+        Graphics.Blit(sprite.texture, tmp);
+        RenderTexture previous = RenderTexture.active;
+        RenderTexture.active = tmp;
+
+        Texture2D cropped = new Texture2D((int)sprite.rect.width, (int)sprite.rect.height, TextureFormat.RGBA32, false);
+        cropped.ReadPixels(new Rect(sprite.rect.x, sprite.rect.y, sprite.rect.width, sprite.rect.height), 0, 0);
+        cropped.Apply();
+
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(tmp);
+        return cropped;
     }
 }

@@ -75,7 +75,7 @@ public static class Actions
     public static Action OnLanguageChanged;
 
     /// <summary>
-    /// Invoked when the active configuration profile is switched or updated.
+    /// Invoked when the active configuration profile is switched.
     /// </summary>
     public static Action OnProfileChanged;
 }

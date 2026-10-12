@@ -286,8 +286,8 @@ public static class MobileMenuUI
     private static void DrawCloseButton(Event e)
     {
         Rect visibleScreen = GetVisibleScreenBounds();
-        float btnW = GUIManager.S(80f);
-        float btnH = GUIManager.S(65f);
+        float btnW = GUIManager.S(60f);
+        float btnH = GUIManager.S(45f);
         Rect closeRect = new(visibleScreen.xMax - btnW - GUIManager.S(12), visibleScreen.yMin + GUIManager.S(12f), btnW, btnH);
 
         bool isHover = closeRect.Contains(e.mousePosition);

@@ -159,7 +159,7 @@ public static class HUDManager
 
             bool isHovered = exitRect.Contains(e.mousePosition);
 
-            GUI.Box(exitRect, Translate("Exit Layout"), ThemeManager.SettingOn);
+            GUI.Box(exitRect, Translate("Exit Layout"), ThemeManager.CloseButtonStyle);
 
             if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
             {

@@ -118,7 +118,7 @@ public static class TopBar
         GUI.EndGroup();
     }
 
-    private class TopBarService : IMenuRenderable, ILanguageAware
+    private class TopBarService : ILanguageAware
     {
         public string Name => "TopBar";
         public int Priority => ServicePriority.Highest;

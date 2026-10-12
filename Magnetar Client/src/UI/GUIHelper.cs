@@ -3,17 +3,32 @@ using UnityEngine;
 
 namespace Magnetar_Client.UI;
 
+/// <summary>
+/// Contains helper methods for GUI Creation.
+/// </summary>
 public static class GUIHelper
 {
+    /// <summary>
+    /// Regex to match any rich text tag
+    /// </summary>
     public static readonly Regex RichTextTagRegex = new(@"<[^>]*>", RegexOptions.Compiled);
 
     /// <summary>
-    /// Regex to match opening color tags like <color=red>, <color=#FF0000> and closing </color> tags
+    /// Regex to match color tags
     /// </summary>
     public static readonly Regex ColorTagRegex = new(@"<\/?color(=[^>]+)?>", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static GUIStyle _cachedOutlineStyle;
 
+    /// <summary>
+    /// Renders text with an 8-directional drop outline around its perimeter.
+    /// </summary>
+    /// <param name="position">The bounding rectangle on the screen where the text should be rendered.</param>
+    /// <param name="text">The raw or rich-text formatted string to draw.</param>
+    /// <param name="style">The base <see cref="GUIStyle"/> to inherit typography, font settings, and alignment from.</param>
+    /// <param name="textColor">The main color used for the foreground center text.</param>
+    /// <param name="outlineColor">The color used to draw the background outline perimeter.</param>
+    /// <param name="borderRadius">The pixel offset distance for the surrounding outline passes.</param>
     public static void DrawBoxWithOutlinedText(
         Rect position, string text, GUIStyle style, Color textColor, Color outlineColor, int borderRadius = 1)
     {
@@ -21,7 +36,6 @@ public static class GUIHelper
 
         _cachedOutlineStyle ??= new GUIStyle();
 
-        // Copy relevant typography and layout properties without invoking stripped copy-constructors
         _cachedOutlineStyle.alignment = style.alignment;
         _cachedOutlineStyle.fontSize = style.fontSize;
         _cachedOutlineStyle.fontStyle = style.fontStyle;

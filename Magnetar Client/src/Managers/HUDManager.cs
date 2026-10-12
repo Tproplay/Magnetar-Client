@@ -213,7 +213,7 @@ public static class HUDManager
         HUDRenderer.RegisterElement(element);
     }
 
-    private class HUDManagerService : IUpdatable, IRenderable, IMenuRenderable, ICloseHandler, ILanguageAware
+    private class HUDManagerService : IUpdatable, IRenderable, ICloseHandler, ILanguageAware
     {
         public string Name => "HUDManager";
         public int Priority => ServicePriority.HUD;

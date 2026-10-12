@@ -5,6 +5,8 @@
 /// </summary>
 public static class ServicePriority
 {
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public const int Highest = -1000;
     public const int CriticalCore = -500;
     public const int Core = 0;
@@ -14,6 +16,7 @@ public static class ServicePriority
     public const int Addons = 500;
     public const int UI = 800;
     public const int Lowest = 1000;
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }
 
 /// <summary>
@@ -22,7 +25,7 @@ public static class ServicePriority
 public interface IClientService
 {
     /// <summary>
-    /// Unique identifier or readable name of the service (used for logging & diagnostics).
+    /// Unique identifier or readable name of the service (used for logging and diagnostics).
     /// </summary>
     string Name { get; }
 
@@ -38,6 +41,9 @@ public interface IClientService
 /// </summary>
 public interface IInitializable : IClientService
 {
+    /// <summary>
+    /// Runs during Initialization of the client.
+    /// </summary>
     void Initialize();
 }
 
@@ -46,6 +52,9 @@ public interface IInitializable : IClientService
 /// </summary>
 public interface IWarmUp : IClientService
 {
+    /// <summary>
+    /// Runs at the first frame of OnGUI
+    /// </summary>
     void OnWarmUp();
 }
 
@@ -54,22 +63,22 @@ public interface IWarmUp : IClientService
 /// </summary>
 public interface IUpdatable : IClientService
 {
+    /// <summary>
+    /// Runs Every Unity Engine Cycle
+    /// </summary>
     void OnUpdate();
 }
 
 /// <summary>
-/// Services that require rendering every OnGUI regardless of menu state.
+/// Services that require rendering every OnGUI.
 /// </summary>
 public interface IRenderable : IClientService
 {
+    /// <summary>
+    /// Renders regardless of whether Client Window is open or not.
+    /// </summary>
     void OnGUI();
-}
 
-/// <summary>
-/// Services that render within the transformed matrix GUI window when ClientConfig.showgui is true.
-/// </summary>
-public interface IMenuRenderable : IClientService
-{
     /// <summary>
     /// Renders menu components when the client window is open.
     /// </summary>
@@ -98,6 +107,9 @@ public interface ICloseHandler : IClientService
 /// </summary>
 public interface ILanguageAware : IClientService
 {
+    /// <summary>
+    /// Runs after the language is changed.
+    /// </summary>
     void OnLanguageChanged();
 }
 
@@ -106,7 +118,13 @@ public interface ILanguageAware : IClientService
 /// </summary>
 public interface IPersistent : IClientService
 {
+    /// <summary>
+    /// Runs just before the saving process starts.
+    /// </summary>
     void OnSave();
+    /// <summary>
+    /// Runs after a new save file is loaded.
+    /// </summary>
     void OnLoad();
 }
 
@@ -115,6 +133,9 @@ public interface IPersistent : IClientService
 /// </summary>
 public interface IQuittable : IClientService
 {
+    /// <summary>
+    /// Runs on Application quit request.
+    /// </summary>
     void OnApplicationQuit();
 }
 /// <summary>
@@ -122,11 +143,18 @@ public interface IQuittable : IClientService
 /// </summary>
 public interface IThemeAware : IClientService
 {
+    /// <summary>
+    /// Runs after the Theme is changed.
+    /// </summary>
     void OnThemeChanged();
 }
+/// <summary>
 /// Services that respond to GUI Scale changes.
 /// </summary>
 public interface IScaleAware : IClientService
 {
-    void OnGUIScaleChanged();
+    /// <summary>
+    /// Runs after the GUI Scale is changed.
+    /// </summary>
+    void OnGUIScaleChanged(float newScale);
 }

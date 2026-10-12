@@ -16,6 +16,9 @@ public static class ClientConfig
     public static TabType CurrentTab = TabType.MODULES;
 
 
+    public static float GUIScale => GUIManager.ScaleSetting.Value;
+    public static float ElementScale => GUIManager.ElementScaleSetting.Value;
+
     // GUI Settings
     public static float RainbowSpeed = 0.07f;
     public const float NativeWidth = 1920;

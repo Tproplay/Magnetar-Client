@@ -300,6 +300,18 @@ public static class PathsManager
     /// </remarks>
     public static string MagnetarUIABPath => Path.Combine(ResouceDataDir, "magnetar_ui");
 
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / Mods / Magnetar Data / FxData.json
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / plugins / Magnetar Data / FxData.json
+    /// </remarks>
+    public static string FXDataPath => Path.Combine(DataDir, "FxData.json");
+
+
+
     #endregion
 
 }

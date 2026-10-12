@@ -57,7 +57,7 @@ public static class NEFManager
         );
     }
 
-    private class NEFManagerService : IInitializable, IWarmUp, IMenuRenderable, ICloseHandler, ILanguageAware
+    private class NEFManagerService : IInitializable, IWarmUp, ICloseHandler, ILanguageAware
     {
         public string Name => "NEFManager";
         public int Priority => ServicePriority.Standard;

@@ -8,6 +8,7 @@
 		<RootNamespace>Magnetar_Client</RootNamespace>
 		<AssemblyName>Magnetar Client</AssemblyName>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<Configurations>melonloader;Release_Melon;Bepinex;Release_bepinex;Android</Configurations>
@@ -35,6 +36,10 @@
 	<PropertyGroup Condition="'$(Configuration)' == 'Android'">
 		<OutputPath>bin\Android\</OutputPath>
 		<DefineConstants>$(DefineConstants);RELEASE_BEPINEX</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<NoWarn>$(NoWarn);MSB3270</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

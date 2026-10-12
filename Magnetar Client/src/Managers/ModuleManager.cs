@@ -286,7 +286,7 @@ public static class ModuleManager
         }
     }
 
-    private class ModuleManagerService : IWarmUp, IUpdatable, IRenderable, IMenuRenderable, ICloseHandler, ILanguageAware
+    private class ModuleManagerService : IWarmUp, IUpdatable, IRenderable, ICloseHandler, ILanguageAware
     {
         public string Name => "ModuleManager";
         public int Priority => ServicePriority.Modules;

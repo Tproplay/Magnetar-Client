@@ -1,5 +1,4 @@
-﻿using Il2CppSystem.Threading.Tasks;
-using Magnetar_Client.Api;
+﻿using Magnetar_Client.Api;
 using Magnetar_Client.Core.GUIManager_;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Setting;
@@ -37,18 +36,21 @@ public static class GUIManager
         CustomNames = new Dictionary<int, string>()
     };
 
-    public static FloatSetting ScaleSetting = new("GUI Scale", 0.5f, 2.0f,
+    public static FloatSetting ScaleSetting { get; } = new("GUI Scale", 0.5f, 2.0f,
 #if ANDROID
         1.5f;
 #else
         1,
 #endif
+        decimalPlaces: 2, trueMin: 0.25f, trueMax: 3.0f)
+    {
+        OnValueChanged = (val) => ServiceRegistry.NotifyScaleChanged(val)
+    };
+
+    public static FloatSetting ElementScaleSetting { get; } = new("Element Scale", 0.5f, 2.0f, 1,
         decimalPlaces: 2, trueMin: 0.25f, trueMax: 3.0f);
 
-    public static FloatSetting ElementScaleSetting = new("Element Scale", 0.5f, 2.0f, 1,
-        decimalPlaces: 2, trueMin: 0.25f, trueMax: 3.0f);
-
-    public static FloatSetting FloatingIconOpacitySetting = new("Icon Opacity", 0.1f, 1.0f, 0.85f,
+    public static FloatSetting FloatingIconOpacitySetting { get; } = new("Icon Opacity", 0.1f, 1.0f, 0.85f,
         decimalPlaces: 3, trueMin: 0.05f, trueMax: 1.0f);
 
     private const float BaseElementHeight = 25f;
@@ -259,7 +261,7 @@ public static class GUIManager
         GUIControlsDrawer.Render(windowBgStyle);
     }
 
-    private class GUIManagerService : IWarmUp, IMenuRenderable, ICloseHandler, ILanguageAware
+    private class GUIManagerService : IWarmUp, ICloseHandler, ILanguageAware
     {
         public string Name => "GUIManager";
         public int Priority => ServicePriority.UI;
@@ -311,10 +313,10 @@ public static class GUIManager
     {
         ShowFloatingIcon = enabled;
 #if MELONLOADER || RELEASE_MELON
-    if (PreferenceManager.ShowFloatingIconEntry != null)
-    {
-        PreferenceManager.ShowFloatingIconEntry.Value = enabled;
-    }
+        if (PreferenceManager.ShowFloatingIconEntry != null)
+        {
+            PreferenceManager.ShowFloatingIconEntry.Value = enabled;
+        }
 #elif BEPINEX || RELEASE_BEPINEX || ANDROID
         if (Preferences.ShowFloatingIconEntry != null)
         {

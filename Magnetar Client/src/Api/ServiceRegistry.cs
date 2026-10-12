@@ -14,7 +14,6 @@ public static class ServiceRegistry
     private static IWarmUp[] _warmUps = Array.Empty<IWarmUp>();
     private static IUpdatable[] _updatables = Array.Empty<IUpdatable>();
     private static IRenderable[] _renderables = Array.Empty<IRenderable>();
-    private static IMenuRenderable[] _menuRenderables = Array.Empty<IMenuRenderable>();
     private static ICloseHandler[] _closeHandlers = Array.Empty<ICloseHandler>();
     private static ILanguageAware[] _languageAwares = Array.Empty<ILanguageAware>();
     private static IThemeAware[] _themeAwares = Array.Empty<IThemeAware>();
@@ -22,7 +21,13 @@ public static class ServiceRegistry
     private static IPersistent[] _persistents = Array.Empty<IPersistent>();
     private static IQuittable[] _quittables = Array.Empty<IQuittable>();
 
+    /// <summary>
+    /// Gets all registered services.
+    /// </summary>
     public static IReadOnlyList<IClientService> Services => _services;
+    /// <summary>
+    /// Gets all close handlers.
+    /// </summary>
     public static IReadOnlyList<ICloseHandler> CloseHandlers => _closeHandlers;
 
     /// <summary>
@@ -61,7 +66,6 @@ public static class ServiceRegistry
         _warmUps = _services.OfType<IWarmUp>().OrderBy(s => s.Priority).ToArray();
         _updatables = _services.OfType<IUpdatable>().OrderBy(s => s.Priority).ToArray();
         _renderables = _services.OfType<IRenderable>().OrderBy(s => s.Priority).ToArray();
-        _menuRenderables = _services.OfType<IMenuRenderable>().OrderBy(s => s.Priority).ToArray();
         _closeHandlers = _services.OfType<ICloseHandler>().OrderBy(s => s.Priority).ToArray();
         _languageAwares = _services.OfType<ILanguageAware>().OrderBy(s => s.Priority).ToArray();
         _persistents = _services.OfType<IPersistent>().OrderBy(s => s.Priority).ToArray();
@@ -130,15 +134,15 @@ public static class ServiceRegistry
 
     internal static void RenderMenuAll()
     {
-        for (int i = 0; i < _menuRenderables.Length; i++)
+        for (int i = 0; i < _renderables.Length; i++)
         {
             try
             {
-                _menuRenderables[i].OnMenuGUI();
+                _renderables[i].OnGUI();
             }
             catch (Exception ex)
             {
-                DebugLogger.Error($"[ServiceRegistry] Error rendering menu for '{_menuRenderables[i].Name}': {ex}");
+                DebugLogger.Error($"[ServiceRegistry] Error rendering menu for '{_renderables[i].Name}': {ex}");
             }
         }
     }
@@ -181,13 +185,13 @@ public static class ServiceRegistry
 #endif
     } 
 
-    internal static void NotifyScaleChanged()
+    internal static void NotifyScaleChanged(float newScale)
     {
         for (int i = 0; i < _scaleAwares.Length; i++)
         {
             try
             {
-                _scaleAwares[i].OnGUIScaleChanged();
+                _scaleAwares[i].OnGUIScaleChanged(newScale);
             }
             catch (Exception ex)
             {

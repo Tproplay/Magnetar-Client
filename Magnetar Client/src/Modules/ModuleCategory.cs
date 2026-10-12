@@ -5,11 +5,6 @@ using Magnetar_Client.Core;
 using Magnetar_Client.Core.ModuleManager_;
 using Magnetar_Client.Api;
 
-
-
-#if MELONLOADER || RELEASE_MELON
-#endif
-
 namespace Magnetar_Client.Modules;
 
 public class ModuleCategory : IEquatable<ModuleCategory>
@@ -20,13 +15,14 @@ public class ModuleCategory : IEquatable<ModuleCategory>
 
     public static IReadOnlyList<ModuleCategory> AllCategories => _allCategories;
 
-    // --- Built-in Categories registered upfront in your designated order ---
+    // --- Built-in Categories ---
     public static readonly ModuleCategory Level = RegisterInternal("Level", 10);
     public static readonly ModuleCategory Tools = RegisterInternal("Tools", 20);
     public static readonly ModuleCategory Plant = RegisterInternal("Plant", 30);
     public static readonly ModuleCategory Zombie = RegisterInternal("Zombie", 40);
     public static readonly ModuleCategory Misc = RegisterInternal("Misc", 50);
     public static readonly ModuleCategory Visual = RegisterInternal("Visual", 60);
+    public static ModuleCategory Addon => Register("Addon", 70);
 
     // Instance variables
     public int Id { get; }
@@ -65,8 +61,6 @@ public class ModuleCategory : IEquatable<ModuleCategory>
         _ = Zombie;
         _ = Misc;
         _ = Visual;
-
-        Actions.OnModuleCategoyInitialized?.Invoke();
     }
 
     /// <summary>

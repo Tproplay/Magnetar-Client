@@ -217,7 +217,7 @@ GUIManager.S(BaseWindowHeight));
         }
     }
 
-    private class ProfileGUIService : IInitializable, IWarmUp, IMenuRenderable, ICloseHandler
+    private class ProfileGUIService : IInitializable, IWarmUp, ICloseHandler
     {
         public string Name => "ProfileGUI";
         public int Priority => ServicePriority.UI;

@@ -9,15 +9,22 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Core;
 
+/// <summary>
+/// The Core of Magnetar Client that handles everything
+/// </summary>
 public class Main
 {
+    /// <summary>
+    /// Singleton Instance
+    /// </summary>
     public static Main Instance { get; private set; }
+    /// <summary>
+    /// Harmony in which all of the client's patches are registered
+    /// </summary>
     public static HarmonyLib.Harmony HarmonyInstance { get; private set; }
-    public bool HasWarmedUp { get; private set; }
+    private bool HasWarmedUp;
 
-    public static bool SafeToClose => SafeToCloseManager.CanClose();
-
-    public static void Initialize()
+    internal static void Initialize()
     {
         if (Instance != null)
         {
@@ -31,10 +38,10 @@ public class Main
 
         DebugLogger.Msg("Initializing Magnetar Client...");
 
+        Api.Actions.OnEarlyInitialize?.Invoke();
+
         // Load the IAddons first so that they can register their actions and sevices
         AddonManager.InitAddons();
-
-        Api.Actions.OnEarlyInitialize?.Invoke();
 
         // Apply the harmony patches
         ApplyHarmonyPatches();
@@ -74,7 +81,7 @@ public class Main
         TopBar.Init();
         MobileMenuUI.Init();
 
-        // 1. Initialize Built-in Managers (they self-register into ServiceRegistry)
+        // 1. Initialize Built-in Managers
         ModuleManager.Init();
         HUDManager.Init();
         GUIManager.Init();
@@ -82,13 +89,15 @@ public class Main
         ProfileGUI.Init();
         
 
-        // 2. Discover and register Addon modules, HUD elements, and services
+        // 2. Discover and register Addons
         AddonManager.InitModules();
         AddonManager.InitHUDElements();
         AddonManager.InitServices();
 
         // 3. Run unified pipeline across all registered services
         ServiceRegistry.InitializeAll();
+
+        Actions.OnInitializeCore?.Invoke();
 
         // 4. Load state, themes, and translations
         SaveLoad.Load();
@@ -98,7 +107,7 @@ public class Main
         DebugLogger.Msg("Magnetar Client Loaded!");
     }
 
-    public void OnUpdate()
+    internal void OnUpdate()
     {
         LockUI.BlockSKeysPatch.BlockKeys = false;
 
@@ -126,7 +135,7 @@ public class Main
                     return;
                 }
 
-                if (SafeToClose)
+                if (SafeToCloseManager.CanClose())
                 {
                     ClientConfig.showgui = false;
                     SaveLoad.Save();
@@ -141,7 +150,7 @@ public class Main
         if (ClientConfig.InGUI) LockUI.BlockSKeysPatch.BlockKeys = true;
     }
 
-    public void OnGUI()
+    internal void OnGUI()
     {
         LockUI.BlockSKeysPatch.BlockKeys = false;
 
@@ -201,7 +210,7 @@ public class Main
         if (ClientConfig.showgui) LockUI.BlockSKeysPatch.BlockKeys = true;
     }
 
-    public void OnApplicationQuit()
+    internal void OnApplicationQuit()
     {
         Api.Actions.OnApplicationQuit?.Invoke();
         ServiceRegistry.QuitAll();
@@ -209,7 +218,7 @@ public class Main
         DebugLogger.Msg("Preferences Saved!");
     }
 
-    public static void WarmUp()
+    internal static void WarmUp()
     {
         ResourceManager.Init();
         UI.Themes.ThemeManager.Init();

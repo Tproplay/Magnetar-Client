@@ -4,6 +4,7 @@ using HarmonyLib;
 using static Magnetar_Client.Game.AppData;
 using UnityEngine;
 using System.Linq;
+using System;
 using Magnetar_Client.Utils;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -70,7 +71,8 @@ public class MultiPlanting : Module
     [HarmonyPatch(typeof(CreatePlant))]
     public static class CreatePlantPatch
     {
-        static bool spawnByMod;
+        [ThreadStatic] static bool spawnByMod;
+        [ThreadStatic] static int _lastFrame;
 
         [HarmonyPatch(nameof(CreatePlant.SetPlant))]
         [HarmonyPostfix]
@@ -80,6 +82,8 @@ public class MultiPlanting : Module
             if (__result == null || instance == null || !instance.Active) return;
             if (theSeedType != Mouse.Instance.thePlantTypeOnMouse) return;
             if (ColumnGlove.MouseGlovePatch.IsMovedByGlove) return;
+            if (_lastFrame == Time.frameCount) return;
+            _lastFrame = Time.frameCount;
 
             spawnByMod = true;
 
@@ -138,10 +142,7 @@ public class MultiPlanting : Module
                     break;
             }
 
-
             spawnByMod = false;
-
-
         }
     }
 

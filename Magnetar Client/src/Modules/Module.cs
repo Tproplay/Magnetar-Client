@@ -86,7 +86,7 @@ public abstract class Module
     public virtual void OnUpdateActive() { }
 
     /// <summary>
-    /// Runs every frame on UnityEngine.OnGUI
+    /// Runs every frame on UnityEngine.OnEarlyGUI
     /// </summary>
     public virtual void OnGUI() { }
 

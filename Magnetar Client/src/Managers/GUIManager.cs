@@ -165,8 +165,7 @@ public static class GUIManager
             return true;
         });
 
-        Api.Actions.OnGUIShow += Render;
-        Api.Actions.OnWarmUp += Render;
+        TabType.GUI.OnGUI += Render;
 
         TabType.GUI.OnDeselected = () =>
         {
@@ -261,17 +260,10 @@ public static class GUIManager
         GUIControlsDrawer.Render(windowBgStyle);
     }
 
-    private class GUIManagerService : IWarmUp, ICloseHandler, ILanguageAware
+    private class GUIManagerService : ICloseHandler, ILanguageAware, IWarmUp
     {
         public string Name => "GUIManager";
         public int Priority => ServicePriority.UI;
-
-        public void OnWarmUp() => GUIManager.Render();
-
-        public void OnMenuGUI()
-        {
-            AnimationHandler.RenderWithTabAlpha(TabType.GUI, GUIManager.Render);
-        }
 
         public bool CanClose()
         {
@@ -305,6 +297,11 @@ public static class GUIManager
         }
 
         public void OnLanguageChanged() => RefreshThemeOptions();
+
+        public void OnWarmUp()
+        {
+            Render();
+        }
     }
 
     public static float S(float value) => value * ScaleSetting.Value;

@@ -47,7 +47,11 @@ public class IntSetting : Setting
 
     public void Commit()
     {
-        if (PendingValue.HasValue) { Value = PendingValue.Value; PendingValue = null; }
+        if (PendingValue.HasValue)
+        {
+            Value = PendingValue.Value;
+            PendingValue = null;
+        }
     }
 
     public IntSetting(string name, int min, int max, int defaultValue, int trueMin = int.MinValue, int trueMax = int.MaxValue, bool instantUpdate = false)
@@ -92,7 +96,6 @@ public class IntSetting : Setting
         }
         string translatedName = Translate(name);
         string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
-        
 
         float elemH = ClientConfig.elementHeight;
         float indent = ClientConfig.indent;
@@ -158,6 +161,8 @@ public class IntSetting : Setting
         // Expanded grab zone for thumb + track
         Rect grabHitBox = new(sliderStartX - 8f, y - 2f, sliderW + 16f, elemH + 4f);
 
+        bool isDraggingThis = ReferenceEquals(DrawSetting.activeNumericSetting, setting);
+
         if (e.type == EventType.MouseDown && e.button == 0)
         {
             if (grabHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition))
@@ -173,21 +178,26 @@ public class IntSetting : Setting
                 e.Use();
             }
         }
-
-        if (GUIUtility.hotControl == sliderControlId)
+        else if (isDraggingThis)
         {
-            if (e.type == EventType.MouseDrag)
+            if (Input.GetMouseButton(0))
             {
                 ApplyFromMouseX(e.mousePosition.x);
-                e.Use();
+                if (e.isMouse && e.type != EventType.Repaint && e.type != EventType.Layout)
+                {
+                    e.Use();
+                }
             }
-            else if (e.rawType == EventType.MouseUp || e.type == EventType.MouseUp)
+            else
             {
                 CommitSettingValue();
                 GUIUtility.hotControl = 0;
                 DrawSetting.ActiveSliderId = -1;
                 DrawSetting.activeNumericSetting = null;
-                e.Use();
+                if (e.type == EventType.MouseUp)
+                {
+                    e.Use();
+                }
             }
         }
 
@@ -215,6 +225,14 @@ public class IntSetting : Setting
             {
                 if (isFloat) ((FloatSetting)setting).SetPending((float)Math.Round(Mathf.Clamp((float)parsed, trueMin, trueMax), decPlaces));
                 else ((IntSetting)setting).SetPending((int)Math.Max(intTrueMin, Math.Min((long)parsed, intTrueMax)));
+            }
+
+            if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter))
+            {
+                CommitSettingValue();
+                DrawSetting.ActiveTextFieldId = -1;
+                GUIUtility.keyboardControl = 0;
+                e.Use();
             }
         }
 
@@ -269,7 +287,11 @@ public class FloatSetting : Setting
 
     public void Commit()
     {
-        if (PendingValue.HasValue) { Value = PendingValue.Value; PendingValue = null; }
+        if (PendingValue.HasValue)
+        {
+            Value = PendingValue.Value;
+            PendingValue = null;
+        }
     }
 
     public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces = 1, float trueMin = float.MinValue, float trueMax = float.MaxValue, bool instantUpdate = false)

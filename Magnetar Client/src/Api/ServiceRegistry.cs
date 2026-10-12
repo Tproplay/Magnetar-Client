@@ -138,7 +138,7 @@ public static class ServiceRegistry
         {
             try
             {
-                _renderables[i].OnGUI();
+                _renderables[i].OnMenuGUI();
             }
             catch (Exception ex)
             {

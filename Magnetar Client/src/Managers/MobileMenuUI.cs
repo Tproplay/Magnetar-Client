@@ -352,6 +352,8 @@ public static class MobileMenuUI
             Render();
         }
 
+        public void OnMenuGUI() { }
+
         public void OnThemeChanged()
         {
             RebuildCloseButton();

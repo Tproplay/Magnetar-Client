@@ -53,7 +53,7 @@ public interface IInitializable : IClientService
 public interface IWarmUp : IClientService
 {
     /// <summary>
-    /// Runs at the first frame of OnGUI
+    /// Runs at the first frame of OnEarlyGUI
     /// </summary>
     void OnWarmUp();
 }
@@ -70,7 +70,7 @@ public interface IUpdatable : IClientService
 }
 
 /// <summary>
-/// Services that require rendering every OnGUI.
+/// Services that require rendering every OnEarlyGUI.
 /// </summary>
 public interface IRenderable : IClientService
 {

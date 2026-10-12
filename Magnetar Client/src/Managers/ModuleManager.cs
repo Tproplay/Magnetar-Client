@@ -107,6 +107,7 @@ public static class ModuleManager
 
         AnimationHandler.SetViewImmediate(Group, WindowType.Modules.ToString(), 1f);
 
+        TabType.MODULES.OnGUI += Render;
         TabType.MODULES.OnDeselected = () =>
         {
             MultiSelectTabStorage.SaveState(TabType.MODULES);
@@ -149,6 +150,7 @@ public static class ModuleManager
         {
             var instance = (Modules.Module)Activator.CreateInstance(type);
             Modules.Add(instance);
+            SortModules();
 
             CategoryWindowDrawer.EnsureCategoryInitialized(instance.Category);
         }
@@ -156,6 +158,14 @@ public static class ModuleManager
         {
             DebugLogger.Error($"[ModuleManager] Failed to instantiate and register '{type.FullName}': {ex}");
         }
+    }
+
+    public static void SortModules()
+    {
+        Modules.Sort((a, b) => string.Compare(
+            Translator.Translate(a?.Name ?? string.Empty),
+            Translator.Translate(b?.Name ?? string.Empty),
+            StringComparison.OrdinalIgnoreCase));
     }
 
     public static void OpenModuleSettings(Modules.Module mod)
@@ -204,7 +214,7 @@ public static class ModuleManager
 
     public static void OnUpdate()
     {
-        if (!ClientConfig.showgui && !HUDManager.forceShow)
+        if (!ClientConfig.InGUI)
         {
             HandleHotkeys();
         }
@@ -295,10 +305,7 @@ public static class ModuleManager
         public void OnUpdate() => ModuleManager.OnUpdate();
         public void OnGUI() => RenderModulesGUI();
 
-        public void OnMenuGUI()
-        {
-            AnimationHandler.RenderWithTabAlpha(TabType.MODULES, ModuleManager.Render);
-            }
+        public void OnMenuGUI() { }
 
         public bool OnEscapePressed()
         {

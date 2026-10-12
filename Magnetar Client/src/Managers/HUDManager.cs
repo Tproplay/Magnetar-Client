@@ -41,6 +41,8 @@ public static class HUDManager
 
         HUDRenderer.Init();
 
+        TabType.HUD.OnGUI += RenderControlsWindow;
+
         TabType.HUD.OnDeselected = () =>
         {
             MultiSelectTabStorage.SaveState(TabType.HUD);
@@ -213,20 +215,13 @@ public static class HUDManager
         HUDRenderer.RegisterElement(element);
     }
 
-    private class HUDManagerService : IUpdatable, IRenderable, ICloseHandler, ILanguageAware
+    private class HUDManagerService : IUpdatable, ICloseHandler, ILanguageAware, IRenderable
     {
         public string Name => "HUDManager";
         public int Priority => ServicePriority.HUD;
         public void OnUpdate() => HUDRenderer.UpdateElements();
 
         public void OnGUI() => HUDManager.Render();
-
-        public void OnMenuGUI()
-        {
-            if (HUDManager.forceShow) return;
-
-            AnimationHandler.RenderWithTabAlpha(TabType.HUD, RenderControlsWindow);
-        }
 
         public bool CanClose()
         {
@@ -260,6 +255,8 @@ public static class HUDManager
         }
 
         public void OnLanguageChanged() => HUDManager.OnLanguageChange();
+
+        public void OnMenuGUI() { }
     }
 
     #region HUD Save Handler Implementation

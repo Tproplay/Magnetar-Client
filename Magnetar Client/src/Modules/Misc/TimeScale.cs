@@ -84,6 +84,8 @@ public class TimeScale : Module
 
     public override void OnUpdateActive()
     {
+        if (ClientConfig.InGUI) return;
+
         // Handle keybind shortcuts
         foreach (var section in ButtonsSection.Sections)
         {
@@ -91,6 +93,7 @@ public class TimeScale : Module
             if (GetKeyComboDown(key))
             {
                 var speed = ((FloatSetting)section.Find("Speed setting")).Value;
+
                 if (Mathf.Approximately(TargetSpeed, speed))
                 {
                     if (ResetOnDoubleActive.Value) SetGameSpeed(1f);

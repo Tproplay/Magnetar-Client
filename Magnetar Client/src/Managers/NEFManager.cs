@@ -37,6 +37,8 @@ public static class NEFManager
             return true;
         });
 
+        TabType.NEF.OnGUI += Render;
+
         DebugLogger.Msg("Initialized Not Enough Fusions");
     }
 
@@ -70,11 +72,6 @@ public static class NEFManager
             Magnetar_Client.NEF.Data.NEFBanned.InitHidden();
             Magnetar_Client.NEF.Data.NEFRecipes.InitRecipes();
             NEFManager.Render();
-        }
-
-        public void OnMenuGUI()
-        {
-            AnimationHandler.RenderWithTabAlpha(TabType.NEF, NEFManager.Render);
         }
 
         public bool CanClose()
@@ -115,5 +112,6 @@ public static class NEFManager
         {
             NEFData.OnLanguageChanged();
         }
+
     }
 }

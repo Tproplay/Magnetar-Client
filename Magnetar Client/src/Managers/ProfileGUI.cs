@@ -38,6 +38,8 @@ GUIManager.S(BaseWindowHeight));
             }
             return true;
         });
+
+        TabType.PROFILE.OnGUI += Render;
     }
 
     public static void Render()
@@ -224,11 +226,6 @@ GUIManager.S(BaseWindowHeight));
 
         public void Initialize() { }
         public void OnWarmUp() => ProfileGUI.Render();
-
-        public void OnMenuGUI()
-        {
-            AnimationHandler.RenderWithTabAlpha(TabType.PROFILE, ProfileGUI.Render);
-        }
 
         public bool CanClose()
         {

@@ -180,7 +180,7 @@ public class Main
 
             UI.Themes.ThemeManager.Rescale();
 
-            Actions.OnGUI?.Invoke();
+            Actions.OnEarlyGUI?.Invoke();
             ServiceRegistry.RenderAll();
 
             // Render menus with smooth fade transition
@@ -191,12 +191,14 @@ public class Main
                 
                 ClientConfig.CurrentTab?.OnGUI?.Invoke();
                 ServiceRegistry.RenderMenuAll();
-
+                Actions.OnGUIShow?.Invoke();
                 // Render TopBar on top
                 TopBar.Render();
                 
                 GUI.color = prevGuiColor;
             }
+
+            Actions.OnLateGUI?.Invoke();
         }
         catch (Exception ex)
         {
@@ -207,7 +209,7 @@ public class Main
             GUI.matrix = originalMatrix;
         }
 
-        if (ClientConfig.showgui) LockUI.BlockSKeysPatch.BlockKeys = true;
+        if (ClientConfig.InGUI) LockUI.BlockSKeysPatch.BlockKeys = true;
     }
 
     internal void OnApplicationQuit()

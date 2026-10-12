@@ -49,10 +49,14 @@ public static class Actions
     /// <summary>
     /// Invoked during Unity's IMGUI loop before client services and menus are drawn.
     /// </summary>
-    public static Action OnGUI;
+    public static Action OnEarlyGUI;
+    /// <summary>
+    /// Invoked during Unity's IMGUI loop after client services and menus are drawn.
+    /// </summary>
+    public static Action OnLateGUI;
 
     /// <summary>
-    /// Invoked when the client GUI transitions to being shown or drawn on screen[cite: 6].
+    /// Invoked at the main GUI phase, affected by transition color.
     /// </summary>
     public static Action OnGUIShow;
 
@@ -66,12 +70,12 @@ public static class Actions
     // --- Localization & Configuration ---
 
     /// <summary>
-    /// Invoked when the client localization changes and translation dictionaries have completed reloading[cite: 8].
+    /// Invoked when the client localization changes and translation dictionaries have completed reloading.
     /// </summary>
     public static Action OnLanguageChanged;
 
     /// <summary>
-    /// Invoked when the active configuration profile is switched or updated[cite: 5].
+    /// Invoked when the active configuration profile is switched or updated.
     /// </summary>
     public static Action OnProfileChanged;
 }

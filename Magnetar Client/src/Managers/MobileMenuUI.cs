@@ -19,7 +19,6 @@ public static class MobileMenuUI
     private static Texture2D _circleTex;
     private static GUIStyle _circleBtnStyle;
     private static GUIStyle _closeBtnStyle;
-    private static bool _attemptedLogoLoad;
     private static bool _isDormant;
     private static float _lastInteractionTime;
     private static float _lastClickTime;

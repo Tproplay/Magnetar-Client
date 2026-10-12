@@ -11,8 +11,14 @@ using Magnetar_Client.Core.HUDManager_;
 
 namespace Magnetar_Client.Core;
 
+/// <summary>
+/// Addon Manager Scans and loads addons from the 'Mods/Magnetar Addon' directory
+/// </summary>
 public static class AddonManager
 {
+    /// <summary>
+    /// All the addons loaded by the manager during Initialization.
+    /// </summary>
     public static readonly List<AddonInfo> LoadedAddons = new();
 
     private static readonly Dictionary<string, (Assembly Assembly, Type[] Types)> DiscoveredAssemblies = new();

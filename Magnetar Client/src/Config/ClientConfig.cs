@@ -7,26 +7,57 @@ namespace Magnetar_Client;
 public static class ClientConfig
 {
     // Preference Manager
+    /// <summary>
+    /// The key used to open the Menu (default Right-shift)
+    /// </summary>
     public static KeyCode MenuOpenKey => PreferenceManager.ModMenuKeyEntry != null ? PreferenceManager.ModMenuKeyEntry.Value : KeyCode.RightShift;
 
     // GUI
+    /// <summary>
+    /// True if the menu is open.
+    /// </summary>
+    /// <remarks>Use ClientConfig.InGUI in case you want to know if the user is in the Menu.</remarks>
     public static bool showgui;
+    /// <summary>
+    /// Show Dim Background?
+    /// </summary>
     public static bool dimBg;
+    /// <summary>
+    /// True if the user is in Client's gui menu.
+    /// </summary>
     public static bool InGUI => showgui || HUDManager.forceShow;
-    public static TabType CurrentTab = TabType.MODULES;
+    /// <summary>
+    /// The Current Tab that is opened.
+    /// </summary>
+    public static TabType CurrentTab { get; set; } = TabType.MODULES;
 
-
+    /// <summary>
+    /// The Current GUI Scale.
+    /// </summary>
+    /// <remarks>Use this to scale your UI.</remarks>
     public static float GUIScale => GUIManager.ScaleSetting.Value;
+    /// <summary>
+    /// The Current HUD Element Scale.
+    /// </summary>
     public static float ElementScale => GUIManager.ElementScaleSetting.Value;
 
     // GUI Settings
-    public static float RainbowSpeed = 0.07f;
+    public static float RainbowSpeed { get; set; } = 0.07f;
+    /// <summary>
+    /// The Native width for which this client was made. Other screen resoulutions are handled using Matrix4x4.
+    /// </summary>
     public const float NativeWidth = 1920;
+    /// <summary>
+    /// The Native height for which this client was made. Other screen resoulutions are handled using Matrix4x4.
+    /// </summary>
     public const float NativeHeight = 1080;
 
     // GUI Width
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     private const float BaseModuleWindowWidth = 200f;
     public static float ModuleWindowWidth => GUIManager.S(BaseModuleWindowWidth);
+
 
     private const float BaseElementHeight = 22f;
     public static float elementHeight => GUIManager.S(BaseElementHeight);
@@ -43,6 +74,8 @@ public static class ClientConfig
 
     private const float _baseSettingWidth = 200f;
     public static float SettingWidth => GUIManager.S(_baseSettingWidth);
+
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
     /// <summary>
     /// Resizes a Rect to the given width/height while keeping its current

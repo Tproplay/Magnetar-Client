@@ -8,40 +8,16 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Utils;
 
+/// <summary>
+/// Manages the profile creation and handeling.
+/// </summary>
 public static class ProfileManager
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public const string DefaultProfile = "Default";
     public static List<string> Profiles { get; private set; } = new() { ProfileManager.DefaultProfile };
     public static string CurrentProfile { get; set; } = "Default";
-
-    public static void Init()
-    {
-        RefreshProfiles();
-
-        if (!Profiles.Contains(ProfileManager.DefaultProfile, StringComparer.OrdinalIgnoreCase))
-        {
-            Profiles.Insert(0, ProfileManager.DefaultProfile);
-        }
-
-        string savedProfile = ProfileManager.DefaultProfile;
-
-        if (PreferenceManager.CurrentProfileEntry != null && !string.IsNullOrWhiteSpace(PreferenceManager.CurrentProfileEntry.Value))
-        {
-            savedProfile = PreferenceManager.CurrentProfileEntry.Value;
-        }
-
-        if (Profiles.Contains(savedProfile, StringComparer.OrdinalIgnoreCase))
-        {
-            ProfileManager.CurrentProfile = savedProfile;
-        }
-        else
-        {
-            ProfileManager.CurrentProfile = ProfileManager.DefaultProfile;
-            SaveCurrentProfileToPreferences(ProfileManager.DefaultProfile);
-        }
-
-        AutoSaveLogger.Msg($"Profile Manager initialized. Directory: '{ConfigDir}', Active profile: '{ProfileManager.CurrentProfile}'");
-    }
+    public const string SaveFilePrefix = "Magnetar_";
 
     private static void SaveCurrentProfileToPreferences(string profileName)
     {
@@ -59,6 +35,9 @@ public static class ProfileManager
         }
     }
 
+    /// <summary>
+    /// Reloads the profile files from the Profile's directory
+    /// </summary>
     public static void RefreshProfiles()
     {
         Profiles.Clear();
@@ -68,16 +47,15 @@ public static class ProfileManager
         {
             if (Directory.Exists(ConfigDir))
             {
-                var files = Directory.GetFiles(ConfigDir, "Magnetar_*.json");
+                var files = Directory.GetFiles(ConfigDir, SaveFilePrefix + "*.json");
                 foreach (var file in files)
                 {
                     string fileName = Path.GetFileNameWithoutExtension(file);
-                    if (fileName.StartsWith("Magnetar_"))
+                    if (fileName.StartsWith(SaveFilePrefix))
                     {
-                        string profileName = fileName.Substring("Magnetar_".Length);
+                        string profileName = fileName[SaveFilePrefix.Length..];
 
                         if (!string.IsNullOrWhiteSpace(profileName) &&
-                            !string.Equals(profileName, "ClientConfig", StringComparison.OrdinalIgnoreCase) &&
                             !Profiles.Contains(profileName, StringComparer.OrdinalIgnoreCase))
                         {
                             Profiles.Add(profileName);
@@ -89,69 +67,6 @@ public static class ProfileManager
         catch (Exception ex)
         {
             AutoSaveLogger.Error($"Error scanning profiles in '{ConfigDir}': {ex.Message}");
-        }
-    }
-
-    public static void DisableAllModules()
-    {
-        if (ModuleManager.Modules == null) return;
-
-        foreach (var mod in ModuleManager.Modules)
-        {
-            if (mod == null) continue;
-
-            if (mod.Active)
-            {
-                mod.Active = false;
-                try
-                {
-                    mod.OnDisable();
-                }
-                catch (Exception ex)
-                {
-                    AutoSaveLogger.Error($"Error disabling module '{mod.Name}': {ex.Message}");
-                }
-            }
-        }
-    }
-
-    public static void ResetAllModulesToDefault()
-    {
-        DisableAllModules();
-
-        if (ModuleManager.Modules == null) return;
-
-        foreach (var mod in ModuleManager.Modules)
-        {
-            if (mod == null) continue;
-
-            if (mod.KeyBind != null)
-            {
-                mod.KeyBind.Reset();
-            }
-
-            mod.HoldMode = mod.defaultHoldMode;
-            if (mod.Active != mod.defaultActive)
-            {
-                mod.Toggle();
-            }
-
-            if (mod.Settings != null)
-            {
-                foreach (var setting in mod.Settings)
-                {
-                    if (setting == null) continue;
-
-                    try
-                    {
-                        setting.Reset();
-                    }
-                    catch (Exception ex)
-                    {
-                        AutoSaveLogger.Error($"Error resetting setting '{setting.Name}' in module '{mod.Name}': {ex.Message}");
-                    }
-                }
-            }
         }
     }
 
@@ -224,7 +139,6 @@ public static class ProfileManager
 
         if (string.Equals(ProfileManager.CurrentProfile, profileName, StringComparison.OrdinalIgnoreCase))
         {
-            ResetAllModulesToDefault();
             ProfileManager.CurrentProfile = ProfileManager.DefaultProfile;
             SaveCurrentProfileToPreferences(ProfileManager.DefaultProfile);
             SaveLoad.Load();
@@ -233,4 +147,6 @@ public static class ProfileManager
         AutoSaveLogger.Warning($"Deleted profile: '{profileName}'");
         return true;
     }
+
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

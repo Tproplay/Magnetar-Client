@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Magnetar_Client.UI.WindowDrawing;
 
+/// <summary>
+/// Other drawing helper
+/// </summary>
 public static class MiscDrawing
 {
     

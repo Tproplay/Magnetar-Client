@@ -5,17 +5,18 @@ namespace Magnetar_Client.UI.WindowDrawing;
 
 public static partial class DrawSetting
 {
-    public static bool IsFocused
-    {
-        get
-        {
-            return FocusedControlId != -1
-                || ActiveSliderId != -1
-                || ActiveTextFieldId != -1
-                || ActiveDropdownId != -1;
-        }
-    }
+    /// <summary>
+    /// Check if any input field or dropdown is active
+    /// </summary>
+    public static bool IsFocused =>
+           FocusedControlId != -1
+        || ActiveSliderId != -1
+        || ActiveTextFieldId != -1
+        || ActiveDropdownId != -1;
 
+    /// <summary>
+    /// Unfocuses all the focused input fields ad dropdown
+    /// </summary>
     public static void ResetInputBind()
     {
         FocusedControlId = -1;
@@ -23,6 +24,7 @@ public static partial class DrawSetting
         ActiveSliderId = -1;
         ActiveTextFieldId = -1;
     }
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public static int FocusedControlId { get; set; } = -1;
     public static string CurrentInputBuffer { get; set; } = "";
     public static int ActiveSliderId { get; set; } = -1;
@@ -33,6 +35,7 @@ public static partial class DrawSetting
     public static int lastFocusedNumericControlId { get; set; } = -1;
     public static System.Action OnPostDraw;
 
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     private static GUIStyle _placeholderStyle;
     private static GUIStyle PlaceholderStyle
     {

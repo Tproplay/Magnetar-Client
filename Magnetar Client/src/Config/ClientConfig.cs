@@ -1,5 +1,6 @@
 ﻿using Il2CppSystem.Threading.Tasks;
 using Magnetar_Client.Core;
+using Magnetar_Client.Utils;
 using UnityEngine;
 
 namespace Magnetar_Client;
@@ -40,6 +41,10 @@ public static class ClientConfig
     /// The Current HUD Element Scale.
     /// </summary>
     public static float ElementScale => GUIManager.ElementScaleSetting.Value;
+    /// <summary>
+    /// The current active profile.
+    /// </summary>
+    public static string CurrentProfile => ProfileManager.CurrentProfile;
 
     // GUI Settings
     public static float RainbowSpeed { get; set; } = 0.07f;

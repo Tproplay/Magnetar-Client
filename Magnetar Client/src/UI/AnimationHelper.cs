@@ -5,8 +5,12 @@ using UnityEngine;
 
 namespace Magnetar_Client.UI;
 
+/// <summary>
+/// Handels the Fade transitions
+/// </summary>
 public static class AnimationHandler
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public static float FadeProgress { get; private set; }
     public static float FadeSpeed { get; set; } = 5.0f;
 
@@ -24,6 +28,7 @@ public static class AnimationHandler
 
     public static float CurrentEasedAlpha => EaseOut(FadeProgress);
     public static float CurrentEasedDimAlpha => EaseOut(DimAlpha);
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
     private class ViewState
     {
@@ -139,7 +144,7 @@ public static class AnimationHandler
         if (ClientConfig.dimBg) DimAlpha = 1f;
     }
 
-    public static bool ShouldRenderGUI => ClientConfig.showgui || FadeProgress > 0.001f;
+    internal static bool ShouldRenderGUI => ClientConfig.showgui || FadeProgress > 0.001f;
 
     /// <summary>
     /// Smoothly transitions a specific view inside a group toward a target alpha (0.0 to 1.0).

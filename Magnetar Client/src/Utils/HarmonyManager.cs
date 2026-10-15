@@ -5,9 +5,11 @@ using System.Reflection;
 
 namespace Magnetar_Client.Utils;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 public struct HarmonyPatchFailure
 {
     public string ClassName { get; }
+
     public Type TargetType { get; }
     public Exception Exception { get; }
 
@@ -47,6 +49,9 @@ public struct HarmonyPatchInfo
     }
 }
 
+/// <summary>
+/// Manager responsible for apply the Harmony Patches 
+/// </summary>
 public static class HarmonyManager
 {
     /// <summary>
@@ -108,3 +113,4 @@ public static class HarmonyManager
         );
     }
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

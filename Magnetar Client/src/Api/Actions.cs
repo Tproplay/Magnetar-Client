@@ -15,6 +15,11 @@ public static class Actions
     public static Action OnEarlyInitialize;
 
     /// <summary>
+    /// Invoked after the Harmony patches are applied.
+    /// </summary>
+    public static Action OnInitializeHarmony;
+
+    /// <summary>
     /// Invoked at the start of core initialization, before preferences, menus, and managers are instantiated.
     /// </summary>
     public static Action OnEarlyInitializeCore;

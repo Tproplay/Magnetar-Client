@@ -16,9 +16,18 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Core;
 
+/// <summary>
+/// Manages the HUD Configuration window.
+/// </summary>
 public static class HUDManager
 {
+    /// <summary>
+    /// Animation Group
+    /// </summary>
     public const string Group = "HUD";
+    /// <summary>
+    /// Animation 
+    /// </summary>
     public const string ViewMain = "Controls";
     public const string ViewSelector = "Selector";
     public static bool IsInitialized { get; private set; }

@@ -45,6 +45,7 @@ public class Main
 
         // Apply the harmony patches
         ApplyHarmonyPatches();
+        Actions.OnInitializeHarmony?.Invoke();
 
         // Initialize core systems and modules
         Instance.InitializeCore();

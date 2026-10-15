@@ -16,6 +16,9 @@ public interface ICoroutineHandle
     void Stop();
 }
 
+/// <summary>
+/// Coroutine Manager that supports running coroutines on both mod loaders
+/// </summary>
 public static class CoroutineManager
 {
 #if BEPINEX || RELEASE_BEPINEX
@@ -94,6 +97,10 @@ public static class CoroutineManager
     }
 #endif
 
+    /// <summary>
+    /// Starts a Coroutine.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"></exception>
     public static ICoroutineHandle Start(IEnumerator routine)
     {
         if (routine == null) throw new ArgumentNullException(nameof(routine));
@@ -111,6 +118,10 @@ public static class CoroutineManager
 #endif
     }
 
+    /// <summary>
+    /// Stops a routine.
+    /// </summary>
+    /// <param name="handle"></param>
     public static void Stop(ICoroutineHandle handle)
     {
         handle?.Stop();

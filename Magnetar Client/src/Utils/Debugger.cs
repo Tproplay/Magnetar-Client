@@ -1,4 +1,5 @@
-﻿#if MELONLOADER || RELEASE_MELON
+﻿using Magnetar_Client.Modules;
+#if MELONLOADER || RELEASE_MELON
 using MelonLoader;
 using MelonLoader.Logging;
 #elif BEPINEX || RELEASE_BEPINEX
@@ -77,12 +78,30 @@ public class CustomLogger
     }
 }
 
+/// <summary>
+/// Contains all the loggers of the mod.
+/// </summary>
 public static class Magnetar_Logger
 {
+    /// <summary>
+    /// Use by the Translator
+    /// </summary>
     public static CustomLogger TranslatorLogger;
+    /// <summary>
+    /// General logger for the client
+    /// </summary>
     public static CustomLogger DebugLogger;
+    /// <summary>
+    /// Logger for <see cref="SaveLoad"/>
+    /// </summary>
     public static CustomLogger AutoSaveLogger;
+    /// <summary>
+    /// Logger specially for <see cref="DebugMode"/>
+    /// </summary>
     public static CustomLogger DebugModeLogger;
+    /// <summary>
+    /// Logger for the core GUI
+    /// </summary>
     public static CustomLogger GUILogger;
 
 #if !ANDROID && (BEPINEX || RELEASE_BEPINEX)
@@ -100,7 +119,7 @@ public static class Magnetar_Logger
     private const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
 #endif
 
-    public static void Init()
+    internal static void Init()
     {
 #if !ANDROID && (BEPINEX || RELEASE_BEPINEX)
         try

@@ -1,5 +1,4 @@
 ﻿using Magnetar_Client.Api;
-using Magnetar_Client.Core;
 using Magnetar_Client.UI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -11,13 +10,19 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Utils;
 
+/// <summary>
+/// Manages the Save and Load of save files. Create a <see cref="ISaveHandler"/> and use the
+/// <see cref="RegisterHandler"/> to register a new saveload data.
+/// </summary>
 public static class SaveLoad
 {
     private static readonly Dictionary<string, ISaveHandler> _handlers = new(StringComparer.OrdinalIgnoreCase);
     private static float _lastSavedTime;
     private static readonly object _fileLock = new();
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public static float MinTimeBetweenSaves { get; set; } = 120f;
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
     #region Handler Registration API
 
@@ -69,6 +74,10 @@ public static class SaveLoad
 
     #region Core Save & Load
 
+    /// <summary>
+    /// Saves the profile data on to the disk.
+    /// </summary>
+    /// <param name="force">Ignore Minimum time b/w two saves</param>
     public static void Save(bool force = false)
     {
         if (!force)
@@ -130,6 +139,9 @@ public static class SaveLoad
         if (!force) AutoSaveLogger.Msg("Saved profile data.");
     }
 
+    /// <summary>
+    /// Loads the current profile.
+    /// </summary>
     public static void Load()
     {
         string loadPath = PathsManager.GetProfilePath(ProfileManager.CurrentProfile);

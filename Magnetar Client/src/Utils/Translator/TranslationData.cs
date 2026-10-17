@@ -6,6 +6,10 @@ using Magnetar_Client.Api;
 
 namespace Magnetar_Client.Utils;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+/// <summary>
+/// Save data format for Modules
+/// </summary>
 public class ModuleTranslationNode
 {
     [JsonProperty("Name")]
@@ -21,12 +25,18 @@ public class ModuleTranslationNode
     public Dictionary<string, string> Settings { get; set; } = new(StringComparer.Ordinal);
 }
 
+/// <summary>
+/// Save data format for HUD Elements
+/// </summary>
 public class HudTranslationNode
 {
     [JsonProperty("Name")]
     public string Name { get; set; }
 }
 
+/// <summary>
+/// Translation file Save Data
+/// </summary>
 public static class TranslationData
 {
     public static bool IsLoaded { get; set; } = false;
@@ -59,3 +69,4 @@ public static class TranslationData
         HudLinked = false;
     }
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

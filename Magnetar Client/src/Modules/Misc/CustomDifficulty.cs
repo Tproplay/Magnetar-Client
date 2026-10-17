@@ -243,6 +243,7 @@ public class CustomDifficulty : Module
         [HarmonyPostfix]
         public static void AwakePostfix(DifficultyMgr __instance)
         {
+            if (instance == null || !instance.Active) return;
             // Sync slider value as soon as the menu object wakes up
             SyncSliderToConfig(__instance);
         }

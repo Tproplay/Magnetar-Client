@@ -8,8 +8,6 @@ namespace Magnetar_Client.Utils;
 
 public partial class TranslationDomain
 {
-    #region Untranslated Management
-
     public void DumpEnglishTemplate()
     {
         string englishDir = GetEnglishDirectory();
@@ -148,5 +146,4 @@ public partial class TranslationDomain
         }
     }
 
-    #endregion
 }

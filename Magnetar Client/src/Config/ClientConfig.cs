@@ -1,10 +1,12 @@
-﻿using Il2CppSystem.Threading.Tasks;
-using Magnetar_Client.Core;
+﻿using Magnetar_Client.Core;
 using Magnetar_Client.Utils;
 using UnityEngine;
 
 namespace Magnetar_Client;
 
+/// <summary>
+/// Configuration settings for the client.
+/// </summary>
 public static class ClientConfig
 {
     // Preference Manager
@@ -47,6 +49,9 @@ public static class ClientConfig
     public static string CurrentProfile => ProfileManager.CurrentProfile;
 
     // GUI Settings
+    /// <summary>
+    /// Rainbow effect speed.
+    /// </summary>
     public static float RainbowSpeed { get; set; } = 0.07f;
     /// <summary>
     /// The Native width for which this client was made. Other screen resoulutions are handled using Matrix4x4.

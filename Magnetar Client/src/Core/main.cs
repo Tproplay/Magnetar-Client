@@ -116,10 +116,19 @@ public class Main
         AnimationHandler.UpdateTransition();
         Translator.Update();
 
+        // 1. Menu Toggle (Prevent closing here if MenuOpenKey is Escape so Handle Escape logic takes priority)
         if (Input.GetKeyDown(ClientConfig.MenuOpenKey) && !HUDManager.forceShow)
         {
-            ClientConfig.showgui = !ClientConfig.showgui;
-            if (!ClientConfig.showgui) SaveLoad.Save();
+            if (!ClientConfig.showgui)
+            {
+                ClientConfig.showgui = true;
+            }
+            else if (ClientConfig.MenuOpenKey != KeyCode.Escape)
+            {
+                ClientConfig.showgui = false;
+                DrawSetting.ResetInputBind();
+                SaveLoad.Save();
+            }
         }
 
         Api.Actions.OnUpdate?.Invoke();
@@ -130,12 +139,28 @@ public class Main
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
+                // Check if Escape was consumed by an input field in OnGUI this frame
+                bool consumedByTextField = (Time.frameCount == DrawSetting.LastEscapeFrame)
+                                        || (Time.unscaledTime - DrawSetting.LastEscapeTime < 0.15f);
+
+                // 2. Global Text Field Intercept: Unfocus and consume Escape without closing the menu
+                if (consumedByTextField || DrawSetting.IsFocused)
+                {
+                    DrawSetting.ResetInputBind();
+                    DrawSetting.LastEscapeTime = Time.unscaledTime;
+                    DrawSetting.LastEscapeFrame = Time.frameCount;
+                    Input.ResetInputAxes();
+                    return;
+                }
+
+                // 3. Sub-window / modal navigation
                 if (SafeToCloseManager.TryInterceptEscape())
                 {
                     Input.ResetInputAxes();
                     return;
                 }
 
+                // 4. Close GUI only if no inputs or sub-windows intercepted
                 if (SafeToCloseManager.CanClose())
                 {
                     ClientConfig.showgui = false;
@@ -145,7 +170,6 @@ public class Main
                 DrawSetting.ResetInputBind();
             }
         }
-        
         #endregion
 
         if (ClientConfig.InGUI) LockUI.BlockSKeysPatch.BlockKeys = true;

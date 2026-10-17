@@ -111,6 +111,9 @@ public static class HUDManager
 
         if (e.type == EventType.MouseDown && DrawSetting.ActiveSliderId == -1 && DrawSetting.ActiveDropdownId == -1)
         {
+            DrawSetting.ResetInputBind();
+            GUIUtility.keyboardControl = 0;
+            GUI.FocusControl(null);
             Input.ResetInputAxes();
         }
     }

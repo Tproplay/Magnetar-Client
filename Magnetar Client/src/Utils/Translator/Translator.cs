@@ -7,13 +7,16 @@ namespace Magnetar_Client.Utils;
 
 public static partial class Translator
 {
-    public static event Action OnTranslationsLoaded;
+    private static string TranslationRootDir => TranslationData.TranslationRootDir;
 
-    public static string TranslationRootDir => TranslationData.TranslationRootDir;
-    public static string CurrentLanguage => TranslationData.CurrentLanguage;
+    private static string CurrentLanguage => TranslationData.CurrentLanguage;
 
     private static readonly Dictionary<string, TranslationDomain> _domains = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Register a translation domain
+    /// </summary>
+    /// <exception cref="ArgumentNullException"></exception>
     public static TranslationDomain RegisterDomain(TranslationDomain domain)
     {
         if (domain == null) throw new ArgumentNullException(nameof(domain));
@@ -21,14 +24,26 @@ public static partial class Translator
         return domain;
     }
 
+    /// <summary>
+    /// Creates and registers a new translation domain
+    /// </summary>
     public static TranslationDomain CreateDomain(string domainName, params string[] sources) =>
         RegisterDomain(new TranslationDomain(domainName, sources));
 
+    /// <summary>
+    /// Tries to find a domain from name
+    /// </summary>
     public static TranslationDomain GetDomain(string domainName) =>
         _domains.TryGetValue(domainName, out var domain) ? domain : null;
 
+    /// <summary>
+    /// Get all the registered domains
+    /// </summary>
     public static IReadOnlyCollection<TranslationDomain> AllDomains => _domains.Values;
 
+    /// <summary>
+    /// Translates a string
+    /// </summary>
     public static string Translate(string input)
     {
         if (string.IsNullOrEmpty(input)) return input;
@@ -102,6 +117,10 @@ public static partial class Translator
         return input;
     }
 
+    /// <summary>
+    /// Translates an enum from the Enums folder in translation directory
+    /// </summary>
+    /// <param name="enumType">The enum to translate</param>
     public static Dictionary<int, string> TranslateEnum(Type enumType)
     {
         if (enumType == null)

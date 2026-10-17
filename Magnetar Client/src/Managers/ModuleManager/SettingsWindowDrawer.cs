@@ -383,16 +383,28 @@ internal static class SettingsWindowDrawer
 
             if (skipSettings) continue;
 
+            // Wire up top-level MultiSelectSetting
             if (setting is MultiSelectSetting multiSet)
             {
-                multiSet.OnWindowOpen = () =>
+                BindMultiSelectRouting(multiSet);
+            }
+            // Wire up nested MultiSelectSetting inside SectionSetting instances
+            else if (setting is SectionSetting secSet)
+            {
+                foreach (var sectionInstance in secSet.Sections)
                 {
-                    MultiSelectWindowDrawer.ActiveMultiSelect = multiSet;
-                    ModuleManager.CurrentWindow = ModuleManager.WindowType.SelectionGUI;
-                    AnimationHandler.SwitchView(ModuleManager.Group, ModuleManager.CurrentWindow.ToString());
-                };
+                    if (sectionInstance?.ChildSettings == null) continue;
+                    foreach (var child in sectionInstance.ChildSettings)
+                    {
+                        if (child is MultiSelectSetting nestedMulti)
+                        {
+                            BindMultiSelectRouting(nestedMulti);
+                        }
+                    }
+                }
             }
 
+            // Direct polymorphic draw call
             setting.Draw(ref y, width);
         }
 
@@ -461,6 +473,16 @@ internal static class SettingsWindowDrawer
         y += elemH + ClientConfig.spacing;
 
         return y - startY;
+    }
+
+    private static void BindMultiSelectRouting(MultiSelectSetting multiSet)
+    {
+        multiSet.OnWindowOpen = () =>
+        {
+            MultiSelectWindowDrawer.ActiveMultiSelect = multiSet;
+            ModuleManager.CurrentWindow = ModuleManager.WindowType.SelectionGUI;
+            AnimationHandler.SwitchView(ModuleManager.Group, ModuleManager.CurrentWindow.ToString());
+        };
     }
 
     private static void DrawSettingsScrollbar(float windowWidth, float headerHeight, float viewHeight, float targetContentHeight, float maxViewHeight, float currentScroll, float maxScroll)

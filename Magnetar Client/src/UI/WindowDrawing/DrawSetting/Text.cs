@@ -342,9 +342,17 @@ public static partial class DrawSetting
                     else if (cursorIndex < text.Length) { SaveState(); text = text.Remove(cursorIndex, 1); }
                     e.Use();
                 }
-                else if (k == KeyCode.Return || k == KeyCode.Escape)
+                else if (k == KeyCode.Return)
                 {
-                    ActiveTextFieldId = -1; e.Use();
+                    ActiveTextFieldId = -1;
+                    e.Use();
+                }
+                else if (k == KeyCode.Escape)
+                {
+                    ActiveTextFieldId = -1;
+                    LastEscapeTime = Time.unscaledTime;
+                    LastEscapeFrame = Time.frameCount;
+                    e.Use();
                 }
                 else if (c != '\0' && !char.IsControl(c))
                 {

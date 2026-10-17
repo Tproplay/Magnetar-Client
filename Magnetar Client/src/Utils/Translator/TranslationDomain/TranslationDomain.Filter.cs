@@ -5,8 +5,6 @@ namespace Magnetar_Client.Utils;
 
 public partial class TranslationDomain
 {
-    #region Filtering (Sources, Blacklist & Whitelist)
-
     public void Blacklist(string relativePath)
     {
         if (!string.IsNullOrWhiteSpace(relativePath))
@@ -92,6 +90,4 @@ public partial class TranslationDomain
         if (Sources.Count > 0 && !IsPathInSources(relativePath)) return false;
         return true;
     }
-
-    #endregion
 }

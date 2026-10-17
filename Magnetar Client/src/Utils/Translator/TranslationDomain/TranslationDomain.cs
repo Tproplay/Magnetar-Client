@@ -10,6 +10,9 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Utils;
 
+/// <summary>
+/// New Domain based Translation system that loads translations for specific files.
+/// </summary>
 public partial class TranslationDomain
 {
     public string DomainName { get; }

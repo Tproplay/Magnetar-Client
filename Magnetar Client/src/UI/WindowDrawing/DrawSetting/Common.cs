@@ -15,7 +15,7 @@ public static partial class DrawSetting
         || ActiveDropdownId != -1;
 
     /// <summary>
-    /// Unfocuses all the focused input fields ad dropdown
+    /// Unfocuses all the focused input fields and dropdowns
     /// </summary>
     public static void ResetInputBind()
     {
@@ -24,29 +24,33 @@ public static partial class DrawSetting
         ActiveSliderId = -1;
         ActiveTextFieldId = -1;
     }
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
+#pragma warning disable CS1591
     public static int FocusedControlId { get; set; } = -1;
     public static string CurrentInputBuffer { get; set; } = "";
     public static int ActiveSliderId { get; set; } = -1;
     public static int ActiveTextFieldId { get; set; } = -1;
     public static int ActiveDropdownId { get; set; } = -1;
 
+    public static float LastEscapeTime { get; set; } = -1f;
+    public static int LastEscapeFrame { get; set; } = -1;
+
     public static object activeNumericSetting { get; set; }
     public static int lastFocusedNumericControlId { get; set; } = -1;
     public static System.Action OnPostDraw;
+#pragma warning restore CS1591
 
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     private static GUIStyle _placeholderStyle;
     private static GUIStyle PlaceholderStyle
     {
         get
         {
             _placeholderStyle ??= new GUIStyle
-                {
-                    wordWrap = false,
-                    clipping = TextClipping.Clip,
-                    alignment = ThemeManager.TextStyle.alignment
-                };
+            {
+                wordWrap = false,
+                clipping = TextClipping.Clip,
+                alignment = ThemeManager.TextStyle.alignment
+            };
             _placeholderStyle.fontSize = ThemeManager.TextStyle.fontSize;
             _placeholderStyle.normal.textColor = ThemeManager.TextDim;
             return _placeholderStyle;

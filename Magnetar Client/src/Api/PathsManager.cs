@@ -241,6 +241,14 @@ public static class PathsManager
         return path;
     }
 
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / Mods / Magnetar Data / Magnetar Translation / targetLanguage
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / plugins / Magnetar Data / Magnetar Translation / targetLanguage
+    /// </remarks>
     public static string GetLanguageDir(string targetLanguage) => Path.Combine(TranslationRootDir, targetLanguage);
 
     /// <summary>
@@ -310,7 +318,22 @@ public static class PathsManager
     /// </remarks>
     public static string FXDataPath => Path.Combine(DataDir, "FxData.json");
 
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / Mods / Magnetar Data / Debug Mode
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / plugins / Magnetar Data / Debug Mode
+    /// </remarks>
+    public static string DebugModeDir => GetDebugModeDir();
 
+    private static string GetDebugModeDir()
+    {
+        var path = Path.Combine(DataDir, "Debug Mode");
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+        return path;
+    }
 
     #endregion
 

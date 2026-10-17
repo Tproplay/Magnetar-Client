@@ -278,7 +278,7 @@ public static class ModuleManager
             {
                 mod.Active = false;
                 try { mod.OnDisable(); } catch { }
-               
+
             }
 
             mod.KeyBind?.Reset();
@@ -290,7 +290,7 @@ public static class ModuleManager
                 foreach (var setting in mod.Settings)
                 {
                     try { setting?.Reset(); } catch { }
-                   
+
                 }
             }
         }
@@ -311,32 +311,31 @@ public static class ModuleManager
         {
             if (ClientConfig.CurrentTab != TabType.MODULES) return false;
 
-                if (DrawSetting.IsFocused)
-                {
-                    DrawSetting.ResetInputBind();
-                    return true;
-                }
+            if (DrawSetting.IsFocused)
+            {
+                DrawSetting.ResetInputBind();
+                return true;
+            }
 
             if (CurrentWindow != WindowType.Modules)
-                {
+            {
                 switch (CurrentWindow)
-                    {
+                {
                     case WindowType.Settings:
                         if (ActiveSettingsModule != null)
-                            {
+                        {
                             ActiveSettingsModule.ShowSettings = false;
-                            }
+                        }
                         CurrentWindow = WindowType.Modules;
-                            break;
+                        break;
                     case WindowType.SelectionGUI:
                         CurrentWindow = WindowType.Settings;
-                            break;
+                        break;
                 }
 
                 AnimationHandler.SwitchView(Group, CurrentWindow.ToString());
-                    DrawSetting.ResetInputBind();
-                    return true;
-                }
+                return true;
+            }
 
             return false;
         }
@@ -346,10 +345,10 @@ public static class ModuleManager
         public bool CanClose()
         {
             if (ClientConfig.CurrentTab == TabType.MODULES)
-                {
+            {
                 return CurrentWindow == WindowType.Modules && !DrawSetting.IsFocused;
-                }
-            return true;
             }
+            return true;
+        }
     }
 }

@@ -10,10 +10,16 @@ using Magnetar_Client.Api;
 
 namespace Magnetar_Client.Utils;
 
+/// <summary>
+/// Translator manages all the translations for the client.
+/// </summary>
 public static partial class Translator
 {
 
     private static string _language = "English";
+    /// <summary>
+    /// The current language loaded, direct assignment will load the new translation file 
+    /// </summary>
     public static string Language
     {
         get => _language;
@@ -31,7 +37,7 @@ public static partial class Translator
             });
         }
     }
-    public static void InvalidateBlacklist()
+    private static void InvalidateBlacklist()
     {
         TranslationData.BlacklistDirty = true;
     }
@@ -128,7 +134,7 @@ public static partial class Translator
         catch { }
     }
 
-    public static void DumpEnglishTemplate()
+    private static void DumpEnglishTemplate()
     {
         try
         {
@@ -258,48 +264,9 @@ public static partial class Translator
         }
     }
 
-    public static void DumpMissingStrings()
-    {
-        if (!TranslationData.MissingStringsDirty) return;
-
-        DumpEnglishTemplate();
-
-        string currentLang = CurrentLanguage;
-        if (string.Equals(currentLang, "English", StringComparison.OrdinalIgnoreCase))
-        {
-            TranslationData.MissingStringsDirty = false;
-            return;
-        }
-
-        try
-        {
-            SyncWithEnglishTemplate(currentLang);
-
-            string baseDir = Path.Combine(TranslationRootDir, currentLang);
-            string stringsPath = Path.Combine(baseDir, "translation_strings.json");
-
-            HashSet<string> blacklist = GetCachedBlacklist();
-
-            var cleanDict = TranslationData.ExactTranslations
-                .Where(kvp => !TranslationData.RegexMatchedInputs.Contains(kvp.Key) && !blacklist.Contains(kvp.Key))
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.Ordinal);
-
-            File.WriteAllText(stringsPath, JsonConvert.SerializeObject(cleanDict, Formatting.Indented));
-            TranslationData.MissingStringsDirty = false;
-        }
-        catch (Exception ex)
-        {
-            TranslatorLogger.Error($"Failed dumping missing translation strings: {ex.Message}");
-        }
-    }
-
-    public static bool SaveJson(string directory, string relativePath, object data, Formatting formatting = Formatting.Indented)
-    {
-        if (string.IsNullOrWhiteSpace(directory) || string.IsNullOrWhiteSpace(relativePath) || data == null)
-            return false;
-
-        return SaveJson(Path.Combine(directory, relativePath), data, formatting);
-    }
+    /// <summary>
+    /// Helper to save a object to disk
+    /// </summary>
 
     public static bool SaveJson(string filePath, object data, Formatting formatting = Formatting.Indented)
     {
@@ -322,6 +289,9 @@ public static partial class Translator
         }
     }
 
+    /// <summary>
+    /// Helper to create a dictionary from a array with same keys and values
+    /// </summary>
     public static Dictionary<string, string> CreateDictionary(string[] stringList)
     {
         var dictionary = new Dictionary<string, string>();
@@ -330,14 +300,14 @@ public static partial class Translator
         return dictionary;
     }
 
-    public static string SafeReadAllText(string filePath)
+    private static string SafeReadAllText(string filePath)
     {
         using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
     }
 
-    public static void SafeWriteAllText(string filePath, string content)
+    private static void SafeWriteAllText(string filePath, string content)
     {
         string dir = Path.GetDirectoryName(filePath);
         if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))

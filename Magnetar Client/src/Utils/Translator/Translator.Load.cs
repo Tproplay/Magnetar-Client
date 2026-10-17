@@ -20,9 +20,12 @@ public static partial class Translator
     private static readonly List<Action> _callbacks = new();
     private static readonly ConcurrentQueue<Action> _mainThreadQueue = new();
 
+    /// <summary>
+    /// Is new translation files being loaded
+    /// </summary>
     public static bool IsLoading { get; private set; }
 
-    public static void Update()
+    internal static void Update()
     {
         while (_mainThreadQueue.TryDequeue(out var action))
         {
@@ -37,7 +40,7 @@ public static partial class Translator
         }
     }
 
-    public static Task LoadTranslationsAsync(Action onComplete = null)
+    private static Task LoadTranslationsAsync(Action onComplete = null)
     {
         lock (_queueLock)
         {
@@ -121,8 +124,6 @@ public static partial class Translator
                         TranslatorLogger.Error($"Callback error: {ex}");
                     }
                 }
-
-                OnTranslationsLoaded?.Invoke();
             });
         }
         finally
@@ -140,13 +141,12 @@ public static partial class Translator
         }
     }
 
-    public static void LoadTranslations()
+    private static void LoadTranslations()
     {
         lock (_loadLock)
         {
             LoadTranslationsInternal();
         }
-        OnTranslationsLoaded?.Invoke();
     }
 
     private static void LoadTranslationsInternal()
@@ -374,7 +374,7 @@ public static partial class Translator
         }
     }
 
-    public static Dictionary<int, string> LoadEnumTranslations(Type enumType)
+    internal static Dictionary<int, string> LoadEnumTranslations(Type enumType)
     {
         string englishEnumsDir = Path.Combine(TranslationRootDir, "English", "Enums");
         if (!Directory.Exists(englishEnumsDir)) Directory.CreateDirectory(englishEnumsDir);

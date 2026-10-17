@@ -1,10 +1,15 @@
 ﻿using Magnetar_Client.Api;
+using Magnetar_Client.UI.WindowDrawing;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.UI;
 
+/// <summary>
+/// Manages the Escape key event
+/// </summary>
 public static class SafeToCloseManager
 {
     // Custom condition guards: return false to block GUI closure
@@ -64,6 +69,12 @@ public static class SafeToCloseManager
     /// </summary>
     public static bool CanClose()
     {
+        // Global Guard: Never allow GUI to close if a field is active or just consumed Escape
+        if (DrawSetting.IsFocused || (Time.unscaledTime - DrawSetting.LastEscapeTime < 0.15f))
+        {
+            return false;
+        }
+
         // 1. Evaluate registered ICloseHandler services
         var handlers = ServiceRegistry.CloseHandlers;
         for (int i = 0; i < handlers.Count; i++)
@@ -108,7 +119,13 @@ public static class SafeToCloseManager
     /// </summary>
     public static bool TryInterceptEscape()
     {
-        // 1. Check functional interceptor delegates first (most recently added runs first)
+        if (DrawSetting.IsFocused || (Time.unscaledTime - DrawSetting.LastEscapeTime < 0.15f))
+        {
+            DrawSetting.ResetInputBind();
+            return true;
+        }
+
+        // 1. Check functional interceptor delegates first (LIFO)
         for (int i = _escapeInterceptors.Count - 1; i >= 0; i--)
         {
             try

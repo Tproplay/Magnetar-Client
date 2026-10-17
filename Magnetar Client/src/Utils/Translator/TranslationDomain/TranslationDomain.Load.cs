@@ -11,8 +11,6 @@ namespace Magnetar_Client.Utils;
 
 public partial class TranslationDomain
 {
-    #region Loading & Synchronization
-
     public async Task LoadAsync(string language) => await Task.Run(() => Load(language));
 
     public void Load(string language)
@@ -189,5 +187,4 @@ public partial class TranslationDomain
 
     private static string NormalizePath(string path) => path.Replace('\\', '/').Trim('/');
 
-    #endregion
 }

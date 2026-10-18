@@ -38,8 +38,6 @@ GUIManager.S(BaseWindowHeight));
             }
             return true;
         });
-
-        TabType.PROFILE.OnGUI += Render;
     }
 
     public static void Render()
@@ -219,7 +217,7 @@ GUIManager.S(BaseWindowHeight));
         }
     }
 
-    private class ProfileGUIService : IInitializable, IWarmUp, ICloseHandler
+    private class ProfileGUIService : IInitializable, IWarmUp, ICloseHandler, IRenderable
     {
         public string Name => "ProfileGUI";
         public int Priority => ServicePriority.UI;
@@ -245,6 +243,13 @@ GUIManager.S(BaseWindowHeight));
             }
 
             return false;
+        }
+
+        public void OnGUI() { }
+
+        public void OnMenuGUI() 
+        {
+            AnimationHandler.RenderWithTabAlpha(TabType.PROFILE, Render);
         }
     }
 }

@@ -165,8 +165,6 @@ public static class GUIManager
             return true;
         });
 
-        TabType.GUI.OnGUI += Render;
-
         TabType.GUI.OnDeselected = () =>
         {
             MultiSelectTabStorage.SaveState(TabType.GUI);
@@ -260,7 +258,7 @@ public static class GUIManager
         GUIControlsDrawer.Render(windowBgStyle);
     }
 
-    private class GUIManagerService : ICloseHandler, ILanguageAware, IWarmUp
+    private class GUIManagerService : ICloseHandler, ILanguageAware, IWarmUp, IRenderable
     {
         public string Name => "GUIManager";
         public int Priority => ServicePriority.UI;
@@ -296,7 +294,14 @@ public static class GUIManager
             return false;
         }
 
+        public void OnMenuGUI()
+        {
+            AnimationHandler.RenderWithTabAlpha(TabType.GUI, Render);
+        }
+
         public void OnLanguageChanged() => RefreshThemeOptions();
+
+        public void OnGUI() { }
 
         public void OnWarmUp()
         {

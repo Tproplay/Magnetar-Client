@@ -11,7 +11,7 @@ namespace Magnetar_Client.Core;
 
 public static class TopBar
 {
-    private static readonly List<TabType> Order = new();
+    public static readonly List<TabType> Order = new();
     private static readonly Dictionary<TabType, float> BaseWidth = new();
     private static float[] baseOffsets = Array.Empty<float>();
 
@@ -51,6 +51,21 @@ public static class TopBar
             running += BaseWidth[Order[i]];
         }
         baseOffsets[Order.Count] = running;
+    }
+
+    /// <summary>
+    /// Properly switches to another tab
+    /// </summary>
+    public static void SwitchTab(TabType tab)
+    {
+        if (tab == null || ClientConfig.CurrentTab == tab) return;
+
+        TabType previousTab = ClientConfig.CurrentTab;
+        previousTab?.OnDeselected?.Invoke();
+
+        ClientConfig.CurrentTab = tab;
+        AnimationHandler.SwitchView(TabType.AnimationGroup, tab.Name);
+        tab.OnSelected?.Invoke();
     }
 
     public static void Render()
@@ -101,16 +116,7 @@ public static class TopBar
 
             if (e.type == EventType.MouseDown && e.button == 0 && btnRect.Contains(e.mousePosition))
             {
-                if (ClientConfig.CurrentTab != tab)
-                {
-                    TabType previousTab = ClientConfig.CurrentTab;
-                    previousTab?.OnDeselected?.Invoke();
-
-                    ClientConfig.CurrentTab = tab;
-                    AnimationHandler.SwitchView(TabType.AnimationGroup, tab.Name);
-                    tab.OnSelected?.Invoke();
-                }
-
+                SwitchTab(tab);
                 e.Use();
             }
         }

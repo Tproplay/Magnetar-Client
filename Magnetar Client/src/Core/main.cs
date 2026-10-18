@@ -88,7 +88,7 @@ public class Main
         GUIManager.Init();
         NEFManager.Init();
         ProfileGUI.Init();
-        
+
 
         // 2. Discover and register Addons
         AddonManager.InitModules();
@@ -116,7 +116,7 @@ public class Main
         AnimationHandler.UpdateTransition();
         Translator.Update();
 
-        // 1. Menu Toggle (Prevent closing here if MenuOpenKey is Escape so Handle Escape logic takes priority)
+        // Menu Toggle
         if (Input.GetKeyDown(ClientConfig.MenuOpenKey) && !HUDManager.forceShow)
         {
             if (!ClientConfig.showgui)
@@ -128,6 +128,33 @@ public class Main
                 ClientConfig.showgui = false;
                 DrawSetting.ResetInputBind();
                 SaveLoad.Save();
+            }
+        }
+
+        // Extra controls for GUI
+        if (ClientConfig.InGUI && !DrawSetting.IsFocused)
+        {
+            // Tab cycling (Tab for next, Shift+Tab for previous)
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                var tabList = TopBar.Order;
+                if (tabList.Count > 0)
+                {
+                    int index = tabList.IndexOf(ClientConfig.CurrentTab);
+                    bool reverse = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+                    int nextIndex;
+                    if (reverse)
+                    {
+                        nextIndex = (index <= 0) ? tabList.Count - 1 : index - 1;
+                    }
+                    else
+                    {
+                        nextIndex = (index == -1 || index >= tabList.Count - 1) ? 0 : index + 1;
+                    }
+
+                    TopBar.SwitchTab(tabList[nextIndex]);
+                }
             }
         }
 
@@ -143,7 +170,6 @@ public class Main
                 bool consumedByTextField = (Time.frameCount == DrawSetting.LastEscapeFrame)
                                         || (Time.unscaledTime - DrawSetting.LastEscapeTime < 0.15f);
 
-                // 2. Global Text Field Intercept: Unfocus and consume Escape without closing the menu
                 if (consumedByTextField || DrawSetting.IsFocused)
                 {
                     DrawSetting.ResetInputBind();
@@ -153,14 +179,12 @@ public class Main
                     return;
                 }
 
-                // 3. Sub-window / modal navigation
                 if (SafeToCloseManager.TryInterceptEscape())
                 {
                     Input.ResetInputAxes();
                     return;
                 }
 
-                // 4. Close GUI only if no inputs or sub-windows intercepted
                 if (SafeToCloseManager.CanClose())
                 {
                     ClientConfig.showgui = false;
@@ -213,13 +237,13 @@ public class Main
             {
                 Color prevGuiColor = GUI.color;
                 GUI.color = new Color(1f, 1f, 1f, AnimationHandler.FadeProgress);
-                
+
                 ClientConfig.CurrentTab?.OnGUI?.Invoke();
                 ServiceRegistry.RenderMenuAll();
                 Actions.OnGUIShow?.Invoke();
                 // Render TopBar on top
                 TopBar.Render();
-                
+
                 GUI.color = prevGuiColor;
             }
 

@@ -107,7 +107,6 @@ public static class ModuleManager
 
         AnimationHandler.SetViewImmediate(Group, WindowType.Modules.ToString(), 1f);
 
-        TabType.MODULES.OnGUI += Render;
         TabType.MODULES.OnDeselected = () =>
         {
             MultiSelectTabStorage.SaveState(TabType.MODULES);
@@ -303,9 +302,13 @@ public static class ModuleManager
 
         public void OnWarmUp() => Render();
         public void OnUpdate() => ModuleManager.OnUpdate();
-        public void OnGUI() => RenderModulesGUI();
+        public void OnMenuGUI()
+        {
+            AnimationHandler.RenderWithTabAlpha(TabType.MODULES, Render);
+            RenderModulesGUI();
+        }
 
-        public void OnMenuGUI() { }
+        public void OnGUI() { }
 
         public bool OnEscapePressed()
         {

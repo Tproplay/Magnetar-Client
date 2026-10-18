@@ -37,11 +37,9 @@ public static class NEFManager
             return true;
         });
 
-        TabType.NEF.OnGUI += Render;
-
         DebugLogger.Msg("Initialized Not Enough Fusions");
     }
-
+    
     public static void Render()
     {
         float margin = GUIManager.S(BaseMargin);
@@ -59,12 +57,10 @@ public static class NEFManager
         );
     }
 
-    private class NEFManagerService : IInitializable, IWarmUp, ICloseHandler, ILanguageAware
+    private class NEFManagerService : IWarmUp, ICloseHandler, ILanguageAware, IRenderable
     {
         public string Name => "NEFManager";
         public int Priority => ServicePriority.Standard;
-
-        public void Initialize() { }
 
         public void OnWarmUp()
         {
@@ -113,5 +109,11 @@ public static class NEFManager
             NEFData.OnLanguageChanged();
         }
 
+        public void OnMenuGUI()
+        {
+            AnimationHandler.RenderWithTabAlpha(TabType.NEF, Render);
+        }
+
+        public void OnGUI() { }
     }
 }

@@ -11,8 +11,13 @@ namespace Magnetar_Client.Utils;
 
 public partial class TranslationDomain
 {
+    /// <summary>
+    /// Loads the translation files for a language async.
+    /// </summary>
     public async Task LoadAsync(string language) => await Task.Run(() => Load(language));
-
+    /// <summary>
+    /// Loads the translation files for a language.
+    /// </summary>
     public void Load(string language)
     {
         string targetDir = GetLanguageDirectory(language);

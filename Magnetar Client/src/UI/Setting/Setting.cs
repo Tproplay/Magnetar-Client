@@ -5,7 +5,9 @@ using Magnetar_Client.Utils;
 using UnityEngine;
 
 namespace Magnetar_Client.UI.Setting;
-
+/// <summary>
+/// Base class for all settings
+/// </summary>
 public abstract class Setting
 {
     public string Name;

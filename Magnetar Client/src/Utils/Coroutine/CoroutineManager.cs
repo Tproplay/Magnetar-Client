@@ -10,11 +10,13 @@ using BepInEx.Unity.IL2CPP.Utils.Collections;
 
 namespace Magnetar_Client;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 public interface ICoroutineHandle
 {
     bool IsRunning { get; }
     void Stop();
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
 /// <summary>
 /// Coroutine Manager that supports running coroutines on both mod loaders

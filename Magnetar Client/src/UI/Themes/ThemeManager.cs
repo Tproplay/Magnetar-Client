@@ -10,6 +10,9 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.UI.Themes;
 
+/// <summary>
+/// Manages the Theme colors and styles
+/// </summary>
 public static class ThemeManager
 {
     private static string _theme = "Magnetar Default";

@@ -15,9 +15,17 @@ namespace Magnetar_Client.Utils;
 /// </summary>
 public partial class TranslationDomain
 {
-    public string DomainName { get; }
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
+    /// <summary>
+    /// Name of the domain
+    /// </summary>
+    public string DomainName { get; }
+    /// <summary>
+    /// Should the domain dump strings when translation is not found for a string
+    /// </summary>
     public bool DumpUntranslated { get; set; } = true;
+
     public bool IsLoaded { get; private set; } = false;
 
     // Sources registered at or after initialization (relative to the language directory)
@@ -25,6 +33,7 @@ public partial class TranslationDomain
 
     public HashSet<string> BlacklistedPaths { get; } = new(StringComparer.OrdinalIgnoreCase);
     public HashSet<string> WhitelistedPaths { get; } = new(StringComparer.OrdinalIgnoreCase);
+
 
     // Domain-wide translation dictionaries
     private Dictionary<string, string> _exactTranslations = new(StringComparer.Ordinal);
@@ -39,6 +48,7 @@ public partial class TranslationDomain
     private readonly object _dumpLock = new();
 
     public event Action<string> OnDumpEnglishTemplate;
+
 
     public TranslationDomain(string domainName, params string[] sources)
     {
@@ -56,39 +66,35 @@ public partial class TranslationDomain
     public string GetEnglishDirectory() => Path.Combine(TranslationRootDir, "English");
     public string GetLanguageDirectory(string language) => Path.Combine(TranslationRootDir, language);
 
-    #region Source Management
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
+    #region Source Management
+    /// <summary>
+    /// Adds a new file to search for translations
+    /// </summary>
     public void AddSource(string source)
     {
         if (!string.IsNullOrWhiteSpace(source))
             Sources.Add(NormalizePath(source));
     }
-
+    /// <summary>
+    /// Adds new files to search for translations
+    /// </summary>
     public void AddSources(params string[] sources)
     {
         if (sources == null) return;
         foreach (var s in sources) AddSource(s);
     }
-
+    /// <summary>
+    /// Adds new files to search for translations
+    /// </summary>
     public void AddSources(IEnumerable<string> sources)
     {
         if (sources == null) return;
         foreach (var s in sources) AddSource(s);
     }
 
-    public void SetSources(params string[] sources)
-    {
-        Sources.Clear();
-        AddSources(sources);
-    }
-
-    public void SetSources(IEnumerable<string> sources)
-    {
-        Sources.Clear();
-        AddSources(sources);
-    }
-
-    public string[] ResolveSources(string[] relativeFilesOrDir)
+    private string[] ResolveSources(string[] relativeFilesOrDir)
     {
         if (relativeFilesOrDir != null && relativeFilesOrDir.Length > 0)
             return relativeFilesOrDir;
@@ -103,6 +109,10 @@ public partial class TranslationDomain
 
     #region Translation Methods
 
+    /// <summary>
+    /// Tries to translate a text. Returns the input if the translation was missing and 
+    /// automtically dump if <see cref="DumpUntranslated"/> is True.
+    /// </summary>
     public string Translate(string input, string[] relativeFilesOrDir = null)
     {
         if (TryTranslate(input, out string translated, relativeFilesOrDir))
@@ -111,10 +121,15 @@ public partial class TranslationDomain
         RecordUntranslated(input);
         return input;
     }
-
+    /// <summary>
+    /// Tries to translate a text. Returns the input if the translation was missing and 
+    /// automtically dump if <see cref="DumpUntranslated"/> is True.
+    /// </summary>
     public string Translate(string input, string relativeFileOrDir) =>
         Translate(input, string.IsNullOrEmpty(relativeFileOrDir) ? null : new[] { relativeFileOrDir });
-
+    /// <summary>
+    /// Tries to translate a text. Returns false if the translation was missing.
+    /// </summary>
     public bool TryTranslate(string input, out string translated, string[] relativeFilesOrDir = null)
     {
         if (TryTranslateDirect(input, out translated, relativeFilesOrDir))
@@ -122,10 +137,14 @@ public partial class TranslationDomain
 
         return TryTranslateRegex(input, out translated, relativeFilesOrDir);
     }
-
+    /// <summary>
+    /// Tries to translate a text. Returns false if the translation was missing.
+    /// </summary>
     public bool TryTranslate(string input, out string translated, string relativeFileOrDir) =>
         TryTranslate(input, out translated, string.IsNullOrEmpty(relativeFileOrDir) ? null : new[] { relativeFileOrDir });
-
+    /// <summary>
+    /// Tries to translate a text from direct translation entries. Dumps the string if the translation was missing.
+    /// </summary>
     public string TranslateDirect(string input, string[] relativeFilesOrDir = null)
     {
         if (TryTranslateDirect(input, out string translated, relativeFilesOrDir))
@@ -134,10 +153,14 @@ public partial class TranslationDomain
         RecordUntranslated(input);
         return input;
     }
-
+    /// <summary>
+    /// Tries to translate a text from direct translation entries. Dumps the string if the translation was missing.
+    /// </summary>
     public string TranslateDirect(string input, string relativeFileOrDir) =>
         TranslateDirect(input, string.IsNullOrEmpty(relativeFileOrDir) ? null : new[] { relativeFileOrDir });
-
+    /// <summary>
+    /// Tries to translate a text from direct translation entries. Returns false if translation was missing.
+    /// </summary>
     public bool TryTranslateDirect(string input, out string translated, string[] relativeFilesOrDir = null)
     {
         translated = input;
@@ -187,7 +210,9 @@ public partial class TranslationDomain
 
         return false;
     }
-
+    /// <summary>
+    /// Tries to translate a text from regex translation entries. Dumps the string if the translation was missing.
+    /// </summary>
     public string TranslateRegex(string input, string[] relativeFilesOrDir = null)
     {
         if (TryTranslateRegex(input, out string translated, relativeFilesOrDir))
@@ -196,10 +221,14 @@ public partial class TranslationDomain
         RecordUntranslated(input);
         return input;
     }
-
+    /// <summary>
+    /// Tries to translate a text from regex translation entries. Dumps the string if the translation was missing.
+    /// </summary>
     public string TranslateRegex(string input, string relativeFileOrDir) =>
         TranslateRegex(input, string.IsNullOrEmpty(relativeFileOrDir) ? null : new[] { relativeFileOrDir });
-
+    /// <summary>
+    /// Tries to translate a text from regex translation entries. Returns false if the translation was missing.
+    /// </summary>
     public bool TryTranslateRegex(string input, out string translated, string[] relativeFilesOrDir = null)
     {
         translated = input;

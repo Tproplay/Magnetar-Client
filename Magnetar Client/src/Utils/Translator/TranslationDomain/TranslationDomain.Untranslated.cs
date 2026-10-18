@@ -8,6 +8,8 @@ namespace Magnetar_Client.Utils;
 
 public partial class TranslationDomain
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
     public void DumpEnglishTemplate()
     {
         string englishDir = GetEnglishDirectory();
@@ -40,6 +42,7 @@ public partial class TranslationDomain
         }
     }
 
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     private string GetUntranslatedFilePath(string targetDir)
     {
         string safeName = string.Join("_", DomainName.Split(Path.GetInvalidFileNameChars()));

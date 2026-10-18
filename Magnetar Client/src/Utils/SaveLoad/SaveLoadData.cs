@@ -9,6 +9,7 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Utils;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 public static class SaveLoadData
 {
     #region Entry Data Interface & Registries
@@ -314,4 +315,6 @@ public static class SaveLoadData
     }
 
     #endregion
+
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

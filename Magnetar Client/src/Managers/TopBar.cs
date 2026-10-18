@@ -9,6 +9,9 @@ using UnityEngine;
 
 namespace Magnetar_Client.Core;
 
+/// <summary>
+/// Manages the different Tabs present at the top. Create a new tab using <see cref="TabType"/>.
+/// </summary>
 public static class TopBar
 {
     public static readonly List<TabType> Order = new();

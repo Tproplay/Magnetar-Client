@@ -25,6 +25,9 @@ public class CustomLogger
 #endif
 
 #if MELONLOADER || RELEASE_MELON
+    /// <summary>
+    /// Create a new Logger
+    /// </summary>
     public CustomLogger(string name, ColorARGB melonColor)
     {
         _name = name;
@@ -32,19 +35,19 @@ public class CustomLogger
         _loggerColor = melonColor;
     }
 #elif BEPINEX || RELEASE_BEPINEX
+/// <summary>
+    /// Create a new Logger
+    /// </summary>
     public CustomLogger(string name, string bepInAnsiColor)
     {
         _name = name;
         _bepInExLogger = Logger.CreateLogSource(name);
         _ansiColorPrefix = bepInAnsiColor;
     }
-#else
-    public CustomLogger(string name)
-    {
-        _name = name;
-    }
 #endif
-
+    /// <summary>
+    /// Log a message to console
+    /// </summary>
     public void Msg(string message)
     {
 #if MELONLOADER || RELEASE_MELON
@@ -58,7 +61,10 @@ public class CustomLogger
 #endif
 #endif
     }
-
+    /// <summary>
+    /// Log a warning to console
+    /// </summary>
+    /// <param name="message"></param>
     public void Warning(string message)
     {
 #if MELONLOADER || RELEASE_MELON
@@ -67,7 +73,10 @@ public class CustomLogger
         _bepInExLogger.LogWarning(message);
 #endif
     }
-
+    /// <summary>
+    /// Log a error to console
+    /// </summary>
+    /// <param name="message"></param>
     public void Error(string message)
     {
 #if MELONLOADER || RELEASE_MELON

@@ -1,4 +1,7 @@
-﻿namespace Magnetar_Client.Modules;
+﻿using Magnetar_Client.Api;
+using Magnetar_Client.UI;
+
+namespace Magnetar_Client.Modules;
 
 public class DimBackground : Module
 {
@@ -21,7 +24,7 @@ public class DimBackground : Module
 
     public static DimBackground instance;
 
-    public  DimBackground()
+    public DimBackground()
     {
         instance = this;
         ClientConfig.dimBg = Active;
@@ -31,10 +34,22 @@ public class DimBackground : Module
     public override void OnEnable()
     {
         ClientConfig.dimBg = true;
+        Actions.OnMenuOpen += () => LockUI.BlockCanvas = true;
+        Actions.OnMenuClosed += () => LockUI.BlockCanvas = false;
+        if (ClientConfig.InGUI)
+        {
+            LockUI.BlockCanvas = true;
+        }
     }
 
     public override void OnDisable()
     {
         ClientConfig.dimBg = false;
+        Actions.OnMenuOpen -= () => LockUI.BlockCanvas = true;
+        Actions.OnMenuClosed -= () => LockUI.BlockCanvas = false;
+        if (ClientConfig.InGUI)
+        {
+            LockUI.BlockCanvas = false;
+        }
     }
 }

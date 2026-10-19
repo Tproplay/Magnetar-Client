@@ -1,7 +1,4 @@
-﻿using Magnetar_Client.Core;
-using Magnetar_Client.UI.Themes;
-using Magnetar_Client.UI.WindowDrawing;
-using Magnetar_Client.Utils;
+﻿using Magnetar_Client.UI.Themes;
 using UnityEngine;
 
 namespace Magnetar_Client.UI.Setting;

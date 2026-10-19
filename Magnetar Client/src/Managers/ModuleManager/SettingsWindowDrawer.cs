@@ -3,7 +3,6 @@ using Magnetar_Client.UI;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
-using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Translator;
 using System;
 using System.Collections.Generic;

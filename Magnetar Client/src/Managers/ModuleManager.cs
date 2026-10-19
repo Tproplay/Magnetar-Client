@@ -2,7 +2,6 @@
 using Magnetar_Client.Core.ModuleManager_;
 using Magnetar_Client.Modules;
 using Magnetar_Client.UI;
-using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.WindowDrawing;
 using Magnetar_Client.Utils;
 using System;

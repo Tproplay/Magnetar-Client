@@ -110,7 +110,7 @@ public class Main
 
     internal void OnUpdate()
     {
-        LockUI.BlockSKeysPatch.BlockKeys = false;
+        LockUI.BlockKeys = false;
 
         UI.GUIHelper.OnUpdate();
         AnimationHandler.UpdateTransition();
@@ -122,12 +122,14 @@ public class Main
             if (!ClientConfig.showgui)
             {
                 ClientConfig.showgui = true;
+                Actions.OnMenuOpen?.Invoke();
             }
             else if (ClientConfig.MenuOpenKey != KeyCode.Escape)
             {
                 ClientConfig.showgui = false;
                 DrawSetting.ResetInputBind();
                 SaveLoad.Save();
+                Actions.OnMenuClosed?.Invoke();
             }
         }
 
@@ -196,12 +198,12 @@ public class Main
         }
         #endregion
 
-        if (ClientConfig.InGUI) LockUI.BlockSKeysPatch.BlockKeys = true;
+        if (ClientConfig.InGUI) LockUI.BlockKeys = true;
     }
 
     internal void OnGUI()
     {
-        LockUI.BlockSKeysPatch.BlockKeys = false;
+        LockUI.BlockKeys = false;
 
         Matrix4x4 originalMatrix = GUI.matrix;
 
@@ -258,7 +260,7 @@ public class Main
             GUI.matrix = originalMatrix;
         }
 
-        if (ClientConfig.InGUI) LockUI.BlockSKeysPatch.BlockKeys = true;
+        if (ClientConfig.InGUI) LockUI.BlockKeys = true;
     }
 
     internal void OnApplicationQuit()

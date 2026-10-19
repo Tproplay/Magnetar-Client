@@ -45,6 +45,14 @@ public static class Actions
     /// Invoked every frame during Unity's update loop.
     /// </summary>
     public static Action OnUpdate;
+    /// <summary>
+    /// Invoked when opening the menu.
+    /// </summary>
+    public static Action OnMenuOpen;
+    /// <summary>
+    /// Invoked after closing the menu.
+    /// </summary>
+    public static Action OnMenuClosed;
 
     /// <summary>
     /// Invoked once on the first GUI frame when fonts, textures, themes, and UI services are warmed up.

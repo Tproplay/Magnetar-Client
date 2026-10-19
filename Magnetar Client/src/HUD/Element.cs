@@ -1,6 +1,5 @@
 ﻿using Magnetar_Client.Core;
 using Magnetar_Client.UI.Themes;
-using System;
 using UnityEngine;
 using Magnetar_Client.Core.HUDManager_;
 

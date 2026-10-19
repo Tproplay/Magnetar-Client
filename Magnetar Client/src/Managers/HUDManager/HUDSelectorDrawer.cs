@@ -1,7 +1,6 @@
 ﻿using Magnetar_Client.UI;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.WindowDrawing;
-using System;
 using UnityEngine;
 
 namespace Magnetar_Client.Core.HUDManager_;

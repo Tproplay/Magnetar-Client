@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using Magnetar_Client.Api;
 using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using UnityEngine;
-using Magnetar_Client.Core;
 
 
 #if MELONLOADER || RELEASE_MELON

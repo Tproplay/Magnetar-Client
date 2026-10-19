@@ -1,16 +1,10 @@
-﻿using static Magnetar_Client.Utils.Magnetar_Logger;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.NEF.Data.NEFRecipes;
 using Magnetar_Client.UI;
-using Magnetar_Client.Api;
-using Newtonsoft.Json;
-using System.IO;
 using static Magnetar_Client.Utils.Translator;
-
-using System.Text.RegularExpressions;
 using Magnetar_Client.Core;
 
 

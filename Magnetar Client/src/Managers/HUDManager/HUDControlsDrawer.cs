@@ -1,6 +1,5 @@
 ﻿using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
-using System;
 using UnityEngine;
 using static Magnetar_Client.Utils.Translator;
 

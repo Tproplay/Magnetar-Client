@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Magnetar_Client.Core;
 using Magnetar_Client.Core.ModuleManager_;
-using Magnetar_Client.Api;
 
 namespace Magnetar_Client.Modules;
 

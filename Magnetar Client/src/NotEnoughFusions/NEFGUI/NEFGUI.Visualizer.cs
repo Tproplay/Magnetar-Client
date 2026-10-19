@@ -1,8 +1,6 @@
 ﻿using Magnetar_Client.Core;
 using Magnetar_Client.UI;
-using Magnetar_Client.Utils;
 using UnityEngine;
-using static Magnetar_Client.NEF.Data.NEFRecipes;
 using static Magnetar_Client.UI.WindowDrawing.MiscDrawing;
 using static Magnetar_Client.Utils.Translator;
 

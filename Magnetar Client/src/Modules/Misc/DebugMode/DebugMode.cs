@@ -1,11 +1,6 @@
 ﻿using UnityEngine;
 using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
-using Magnetar_Client.Game;
-using System;
-using Magnetar_Client.NEF;
-using static Magnetar_Client.Modules.CustomKeybind;
-
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;

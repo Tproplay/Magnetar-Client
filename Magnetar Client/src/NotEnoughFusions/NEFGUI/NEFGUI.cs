@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 using Magnetar_Client.UI.Themes;
-using Magnetar_Client.Utils;
 using Magnetar_Client.Core;
 using Magnetar_Client.UI;
 

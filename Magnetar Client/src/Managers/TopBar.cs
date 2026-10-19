@@ -1,5 +1,4 @@
 ﻿using Magnetar_Client.Api;
-using Magnetar_Client.Core.ModuleManager_;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using static Magnetar_Client.Utils.Translator;

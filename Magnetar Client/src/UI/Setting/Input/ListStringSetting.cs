@@ -8,15 +8,44 @@ using Magnetar_Client.Core;
 
 namespace Magnetar_Client.UI.Setting;
 
+/// <summary>
+/// A setting module representing a dynamic list of editable strings, supporting addition, deletion,
+/// count limits, and optional bracket autocomplete variables.
+/// </summary>
 public class ListStringSetting : Setting
 {
+    /// <summary>
+    /// The collection of currently active string values.
+    /// </summary>
     public List<string> Values = new();
+
+    /// <summary>
+    /// The default string list restored when <see cref="Reset"/> is executed.
+    /// </summary>
     public List<string> DefaultValues = new();
+
+    /// <summary>
+    /// The maximum number of string entries allowed in this setting.
+    /// </summary>
     public int MaxCount { get; set; } = 10;
+
+    /// <summary>
+    /// Optional list of variable names available for bracket autocomplete (e.g. "{player}").
+    /// </summary>
     public List<string> AutocompleteVars;
 
+    /// <summary>
+    /// Event invoked whenever string items are added, edited, or removed.
+    /// </summary>
     public Action<List<string>> OnValueChanged { get; set; }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="ListStringSetting"/>.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="defaultValues">The initial and default string list.</param>
+    /// <param name="maxCount">The maximum allowed entries.</param>
+    /// <param name="autocompleteVars">Optional list of autocomplete placeholders.</param>
     public ListStringSetting(string name, List<string> defaultValues = null, int maxCount = 10, List<string> autocompleteVars = null)
     {
         Name = name;
@@ -29,12 +58,20 @@ public class ListStringSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Restores the string list back to <see cref="DefaultValues"/>.
+    /// </summary>
     public override void Reset()
     {
         Values = new List<string>(DefaultValues);
         OnValueChanged?.Invoke(Values);
     }
 
+    /// <summary>
+    /// Renders the list items, individual delete buttons, add button, and reset button in IMGUI layout.
+    /// </summary>
+    /// <param name="y">Reference to the vertical layout offset.</param>
+    /// <param name="width">The total available layout width.</param>
     public override void Draw(ref float y, float width)
     {
         Event e = Event.current;

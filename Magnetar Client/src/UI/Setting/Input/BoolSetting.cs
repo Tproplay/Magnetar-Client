@@ -5,14 +5,31 @@ using UnityEngine;
 
 namespace Magnetar_Client.UI.Setting;
 
+/// <summary>
+/// A setting module representing a toggleable boolean value (ON/OFF).
+/// </summary>
 public class BoolSetting : Setting
 {
     private bool _value;
+
+    /// <summary>
+    /// The default fallback value restored when <see cref="Reset"/> is executed.
+    /// </summary>
     public bool DefaultValue;
 
+    /// <summary>
+    /// Event invoked immediately before <see cref="Value"/> changes.
+    /// </summary>
     public Action<bool> OnValueChanging { get; set; }
+
+    /// <summary>
+    /// Event invoked after <see cref="Value"/> changes.
+    /// </summary>
     public Action<bool> OnValueChanged { get; set; }
 
+    /// <summary>
+    /// Gets or sets the boolean state of the toggle.
+    /// </summary>
     public bool Value
     {
         get => _value;
@@ -28,6 +45,11 @@ public class BoolSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="BoolSetting"/> with a display name and initial value.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="defaultValue">The initial and default boolean value.</param>
     public BoolSetting(string name, bool defaultValue)
     {
         Name = name;
@@ -35,8 +57,16 @@ public class BoolSetting : Setting
         DefaultValue = defaultValue;
     }
 
+    /// <summary>
+    /// Restores the setting back to <see cref="DefaultValue"/>.
+    /// </summary>
     public override void Reset() => Value = DefaultValue;
 
+    /// <summary>
+    /// Renders the toggle button, state label, and reset button in IMGUI layout.
+    /// </summary>
+    /// <param name="y">Reference to the vertical layout offset.</param>
+    /// <param name="width">The total available layout width.</param>
     public override void Draw(ref float y, float width)
     {
         Event e = Event.current;

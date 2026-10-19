@@ -7,23 +7,67 @@ using Magnetar_Client.Core;
 
 namespace Magnetar_Client.UI.Setting;
 
+/// <summary>
+/// A setting module representing an integer value with slider and numeric text field controls,
+/// supporting slider clamping, absolute boundaries, and deferred commit buffering.
+/// </summary>
 public class IntSetting : Setting
 {
     private int _value;
+
+    /// <summary>
+    /// The default fallback value restored when <see cref="Reset"/> is executed.
+    /// </summary>
     public int DefaultValue;
+
+    /// <summary>
+    /// Whether changes to the slider or text box immediately update <see cref="Value"/> rather than waiting for release/commit.
+    /// </summary>
     public bool InstantUpdate;
+
+    /// <summary>
+    /// The uncommitted pending value during slider dragging or active text box entry.
+    /// </summary>
     public int? PendingValue;
 
+    /// <summary>
+    /// The visual lower bound of the slider track.
+    /// </summary>
     public int Min;
+
+    /// <summary>
+    /// The visual upper bound of the slider track.
+    /// </summary>
     public int Max;
+
+    /// <summary>
+    /// The absolute lower clamping bound allowed when typing directly into the text field.
+    /// </summary>
     public int TrueMin;
+
+    /// <summary>
+    /// The absolute upper clamping bound allowed when typing directly into the text field.
+    /// </summary>
     public int TrueMax;
 
+    /// <summary>
+    /// Event invoked immediately before <see cref="Value"/> changes.
+    /// </summary>
     public Action<int> OnValueChanging { get; set; }
+
+    /// <summary>
+    /// Event invoked after <see cref="Value"/> changes.
+    /// </summary>
     public Action<int> OnValueChanged { get; set; }
 
+    /// <summary>
+    /// Gets the current value being displayed (either <see cref="PendingValue"/> if dragging/editing, or <see cref="Value"/>).
+    /// </summary>
     public int DisplayValue => PendingValue ?? _value;
 
+    /// <summary>
+    /// Gets or sets the committed integer value.
+    /// </summary>
     public int Value
     {
         get => _value;
@@ -39,12 +83,19 @@ public class IntSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Sets the pending uncommitted value, or commits immediately if <see cref="InstantUpdate"/> is enabled.
+    /// </summary>
+    /// <param name="val">The proposed integer value.</param>
     public void SetPending(int val)
     {
         if (InstantUpdate) { Value = val; PendingValue = null; }
         else PendingValue = val;
     }
 
+    /// <summary>
+    /// Commits <see cref="PendingValue"/> into <see cref="Value"/> and clears the pending state.
+    /// </summary>
     public void Commit()
     {
         if (PendingValue.HasValue)
@@ -54,6 +105,16 @@ public class IntSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="IntSetting"/>.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="min">The slider track lower bound.</param>
+    /// <param name="max">The slider track upper bound.</param>
+    /// <param name="defaultValue">The initial and default integer value.</param>
+    /// <param name="trueMin">The absolute minimum value allowed via manual text entry.</param>
+    /// <param name="trueMax">The absolute maximum value allowed via manual text entry.</param>
+    /// <param name="instantUpdate">Whether changes are applied immediately while dragging.</param>
     public IntSetting(string name, int min, int max, int defaultValue, int trueMin = int.MinValue, int trueMax = int.MaxValue, bool instantUpdate = false)
     {
         Name = name;
@@ -63,17 +124,42 @@ public class IntSetting : Setting
         DefaultValue = _value;
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="IntSetting"/>.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="min">The slider track lower bound.</param>
+    /// <param name="max">The slider track upper bound.</param>
+    /// <param name="defaultValue">The initial and default integer value.</param>
+    public IntSetting(string name, int min, int max, int defaultValue)
+    {
+        Name = name;
+        Min = min; Max = max; 
+        DefaultValue = defaultValue;
+    }
+
+    /// <summary>
+    /// Restores the setting back to <see cref="DefaultValue"/> and clears pending edits.
+    /// </summary>
     public override void Reset()
     {
         Value = DefaultValue;
         PendingValue = null;
     }
 
+    /// <summary>
+    /// Renders the setting row containing the label, slider track, numeric input field, and reset button.
+    /// </summary>
+    /// <param name="y">Reference to the vertical layout offset.</param>
+    /// <param name="width">The total available layout width.</param>
     public override void Draw(ref float y, float width)
     {
         DrawNumeric(this, ref y, width, false);
     }
 
+    /// <summary>
+    /// Internal drawing routine shared between <see cref="IntSetting"/> and <see cref="FloatSetting"/>.
+    /// </summary>
     internal static void DrawNumeric(object setting, ref float y, float width, bool isFloat)
     {
         float val, sliderMin, sliderMax, trueMin, trueMax;
@@ -246,24 +332,72 @@ public class IntSetting : Setting
     }
 }
 
+/// <summary>
+/// A setting module representing a floating-point value with slider and numeric text field controls,
+/// supporting decimal precision formatting, slider clamping, and deferred commit buffering.
+/// </summary>
 public class FloatSetting : Setting
 {
     private float _value;
+
+    /// <summary>
+    /// The default fallback value restored when <see cref="Reset"/> is executed.
+    /// </summary>
     public float DefaultValue;
+
+    /// <summary>
+    /// Whether changes to the slider or text box immediately update <see cref="Value"/> rather than waiting for release/commit.
+    /// </summary>
     public bool InstantUpdate;
+
+    /// <summary>
+    /// The uncommitted pending value during slider dragging or active text box entry.
+    /// </summary>
     public float? PendingValue;
 
+    /// <summary>
+    /// The visual lower bound of the slider track.
+    /// </summary>
     public float Min;
+
+    /// <summary>
+    /// The visual upper bound of the slider track.
+    /// </summary>
     public float Max;
+
+    /// <summary>
+    /// The absolute lower clamping bound allowed when typing directly into the text field.
+    /// </summary>
     public float TrueMin;
+
+    /// <summary>
+    /// The absolute upper clamping bound allowed when typing directly into the text field.
+    /// </summary>
     public float TrueMax;
+
+    /// <summary>
+    /// The number of decimal digits displayed and rounded to.
+    /// </summary>
     public int DecimalPlaces;
 
+    /// <summary>
+    /// Event invoked immediately before <see cref="Value"/> changes.
+    /// </summary>
     public Action<float> OnValueChanging { get; set; }
+
+    /// <summary>
+    /// Event invoked after <see cref="Value"/> changes.
+    /// </summary>
     public Action<float> OnValueChanged { get; set; }
 
+    /// <summary>
+    /// Gets the current value being displayed (either <see cref="PendingValue"/> if dragging/editing, or <see cref="Value"/>).
+    /// </summary>
     public float DisplayValue => PendingValue ?? _value;
 
+    /// <summary>
+    /// Gets or sets the committed floating-point value.
+    /// </summary>
     public float Value
     {
         get => _value;
@@ -279,12 +413,19 @@ public class FloatSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Sets the pending uncommitted value, or commits immediately if <see cref="InstantUpdate"/> is enabled.
+    /// </summary>
+    /// <param name="val">The proposed float value.</param>
     public void SetPending(float val)
     {
         if (InstantUpdate) { Value = val; PendingValue = null; }
         else PendingValue = val;
     }
 
+    /// <summary>
+    /// Commits <see cref="PendingValue"/> into <see cref="Value"/> and clears the pending state.
+    /// </summary>
     public void Commit()
     {
         if (PendingValue.HasValue)
@@ -294,6 +435,17 @@ public class FloatSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="FloatSetting"/>.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="min">The slider track lower bound.</param>
+    /// <param name="max">The slider track upper bound.</param>
+    /// <param name="defaultValue">The initial and default float value.</param>
+    /// <param name="decimalPlaces">The number of decimal places to format and round to.</param>
+    /// <param name="trueMin">The absolute minimum value allowed via manual text entry.</param>
+    /// <param name="trueMax">The absolute maximum value allowed via manual text entry.</param>
+    /// <param name="instantUpdate">Whether changes are applied immediately while dragging.</param>
     public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces = 1, float trueMin = float.MinValue, float trueMax = float.MaxValue, bool instantUpdate = false)
     {
         Name = name;
@@ -304,12 +456,36 @@ public class FloatSetting : Setting
         DefaultValue = _value;
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="FloatSetting"/>.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="min">The slider track lower bound.</param>
+    /// <param name="max">The slider track upper bound.</param>
+    /// <param name="defaultValue">The initial and default float value.</param>
+    /// <param name="decimalPlaces">The number of decimal places to format and round to.</param>
+    public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces = 1)
+    {
+        Name=name; 
+        Min = min; Max=max; 
+        DefaultValue = defaultValue;
+        DecimalPlaces=decimalPlaces;
+    }
+
+    /// <summary>
+    /// Restores the setting back to <see cref="DefaultValue"/> and clears pending edits.
+    /// </summary>
     public override void Reset()
     {
         Value = DefaultValue;
         PendingValue = null;
     }
 
+    /// <summary>
+    /// Renders the setting row containing the label, slider track, numeric input field, and reset button.
+    /// </summary>
+    /// <param name="y">Reference to the vertical layout offset.</param>
+    /// <param name="width">The total available layout width.</param>
     public override void Draw(ref float y, float width)
     {
         IntSetting.DrawNumeric(this, ref y, width, true);

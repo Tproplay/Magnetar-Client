@@ -7,15 +7,36 @@ using UnityEngine;
 
 namespace Magnetar_Client.UI.Setting;
 
+/// <summary>
+/// A setting module representing an editable single-line text string with optional bracket autocomplete support.
+/// </summary>
 public class StringSetting : Setting
 {
     private string _value;
+
+    /// <summary>
+    /// The default string value restored when <see cref="Reset"/> is executed.
+    /// </summary>
     public string DefaultValue;
+
+    /// <summary>
+    /// Optional list of variable names available for bracket autocomplete (e.g. "{player}").
+    /// </summary>
     public List<string> AutocompleteVars;
 
+    /// <summary>
+    /// Event invoked immediately before <see cref="Value"/> changes.
+    /// </summary>
     public Action<string> OnValueChanging { get; set; }
+
+    /// <summary>
+    /// Event invoked after <see cref="Value"/> changes.
+    /// </summary>
     public Action<string> OnValueChanged { get; set; }
 
+    /// <summary>
+    /// Gets or sets the text string value.
+    /// </summary>
     public string Value
     {
         get => _value;
@@ -31,6 +52,12 @@ public class StringSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="StringSetting"/> with a display name, initial value, and optional autocomplete variables.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="defaultValue">The initial and default string value.</param>
+    /// <param name="autocompleteVars">Optional list of variable names for bracket autocomplete.</param>
     public StringSetting(string name, string defaultValue, List<string> autocompleteVars = null)
     {
         Name = name;
@@ -39,11 +66,19 @@ public class StringSetting : Setting
         AutocompleteVars = autocompleteVars;
     }
 
+    /// <summary>
+    /// Restores the string value back to <see cref="DefaultValue"/>.
+    /// </summary>
     public override void Reset()
     {
         Value = DefaultValue;
     }
 
+    /// <summary>
+    /// Renders the label, text field, and reset button in IMGUI layout.
+    /// </summary>
+    /// <param name="y">Reference to the vertical layout offset.</param>
+    /// <param name="width">The total available layout width.</param>
     public override void Draw(ref float y, float width)
     {
         float elemH = ClientConfig.elementHeight;

@@ -8,15 +8,36 @@ using UnityEngine;
 
 namespace Magnetar_Client.UI.Setting;
 
+/// <summary>
+/// A setting module representing a customizable key combination or hotkey shortcut.
+/// </summary>
 public class BindSetting : Setting
 {
     private List<KeyCode> _bindKeys = new();
+
+    /// <summary>
+    /// The default key combination restored when <see cref="Reset"/> is executed.
+    /// </summary>
     public List<KeyCode> DefaultKeys { get; private set; } = new();
+
+    /// <summary>
+    /// Indicates whether this setting is actively listening for keyboard input to bind.
+    /// </summary>
     public bool IsBinding;
 
+    /// <summary>
+    /// Event invoked immediately before <see cref="BindKeys"/> changes, passing the new candidate keys.
+    /// </summary>
     public Action<List<KeyCode>> OnValueChanging { get; set; }
+
+    /// <summary>
+    /// Event invoked after <see cref="BindKeys"/> changes.
+    /// </summary>
     public Action<List<KeyCode>> OnValueChanged { get; set; }
 
+    /// <summary>
+    /// Gets or sets the list of bound keys forming the shortcut chord.
+    /// </summary>
     public List<KeyCode> BindKeys
     {
         get => _bindKeys;
@@ -33,6 +54,11 @@ public class BindSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="BindSetting"/> with a name and optional default key list.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="defaultKeys">The initial key combination.</param>
     public BindSetting(string name, List<KeyCode> defaultKeys = null)
     {
         Name = name;
@@ -43,18 +69,30 @@ public class BindSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Formats the current keybind combination into a user-readable string (e.g., "LeftControl + F").
+    /// </summary>
+    /// <returns>A formatted representation of the bound keys, or "None" if empty.</returns>
     public string GetBindString()
     {
         if (BindKeys == null || BindKeys.Count == 0) return "None";
         return string.Join(" + ", BindKeys.Select(k => k.ToString()).ToArray());
     }
 
+    /// <summary>
+    /// Restores the keybinds to <see cref="DefaultKeys"/> and cancels active listening.
+    /// </summary>
     public override void Reset()
     {
         BindKeys = new List<KeyCode>(DefaultKeys);
         IsBinding = false;
     }
 
+    /// <summary>
+    /// Renders the keybind button, handles key capture listening, and draws the reset button in IMGUI layout.
+    /// </summary>
+    /// <param name="y">Reference to the vertical layout offset.</param>
+    /// <param name="width">The total available layout width.</param>
     public override void Draw(ref float y, float width)
     {
         Event e = Event.current;

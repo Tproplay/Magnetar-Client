@@ -3,7 +3,9 @@ using UnityEngine;
 
 namespace Magnetar_Client.UI.Setting;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 public static class SettingValues
+
 {
     public static float SliderScrollStep = 0.04f;
 
@@ -97,3 +99,4 @@ public static class SettingValues
         set => _baseAutocompleteScrollSensitivity = value;
     }
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

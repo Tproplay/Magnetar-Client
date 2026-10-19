@@ -96,13 +96,23 @@ internal static class SettingsWindowDrawer
             }
         }
 
-        _settingsPositions[targetMod] = GUI.Window(
+        // 1. Draw Window
+        Rect winRect = GUI.Window(
             settingsId,
             _settingsPositions[targetMod],
             GetSettingsDelegate(targetMod),
             "",
             ThemeManager.SettingsWndowBgStyle
         );
+
+        // 2. Clamp window strictly within screen bounds
+        float maxX = Mathf.Max(0f, ClientConfig.NativeWidth - winRect.width);
+        float maxY = Mathf.Max(0f, ClientConfig.NativeHeight - winRect.height);
+
+        winRect.x = Mathf.Clamp(winRect.x, 0f, maxX);
+        winRect.y = Mathf.Clamp(winRect.y, 0f, maxY);
+
+        _settingsPositions[targetMod] = winRect;
 
         GUI.color = prevColor;
     }
@@ -132,11 +142,13 @@ internal static class SettingsWindowDrawer
         if (!_targetContentHeights.ContainsKey(mod)) _targetContentHeights[mod] = 0f;
         if (!_settingsScrollPositions.ContainsKey(mod)) _settingsScrollPositions[mod] = Vector2.zero;
 
+        // Top DragWindow call so it catches drag events immediately
+        float closeBtnSize = GUIManager.S(20f);
+        GUI.DragWindow(new Rect(0, 0, windowWidth - closeBtnSize - GUIManager.S(10f), headerHeight));
+
         // Header Banner using SettingsWndowStyle
         Rect headerBgRect = new(0, 0, windowWidth, headerHeight);
         GUI.Box(headerBgRect, Translate(mod.Name), ThemeManager.SettingsWndowStyle);
-
-        GUI.DragWindow(new Rect(0, 0, windowWidth, headerHeight));
 
         _moduleContentHeights[mod] = Mathf.Lerp(_moduleContentHeights[mod], _targetContentHeights[mod],
             Time.unscaledDeltaTime * ModuleManager.SettingsScrollLerpSpeed);
@@ -149,7 +161,6 @@ internal static class SettingsWindowDrawer
         float viewHeight = windowHeight - headerHeight;
 
         Event e = Event.current;
-        float closeBtnSize = GUIManager.S(20f);
 
         if (GUIManager.ShowMobileButtons)
         {
@@ -180,6 +191,11 @@ internal static class SettingsWindowDrawer
             {
                 r.y -= (windowHeight - prevHeight) / 2f;
             }
+
+            // Clamp on dynamic resize
+            r.x = Mathf.Clamp(r.x, 0f, Mathf.Max(0f, ClientConfig.NativeWidth - r.width));
+            r.y = Mathf.Clamp(r.y, 0f, Mathf.Max(0f, ClientConfig.NativeHeight - r.height));
+
             _settingsPositions[mod] = r;
         }
 
@@ -201,7 +217,7 @@ internal static class SettingsWindowDrawer
         GUI.BeginGroup(outRect);
         float actualHeightDrawn = DrawSettingsBody(mod, -currentScroll, contentWidth);
 
-        // 2. Update target content height and immediately clamp if content shrunk this frame
+        // Update target content height and immediately clamp if content shrunk this frame
         _targetContentHeights[mod] = actualHeightDrawn;
         float dynamicMaxScroll = Mathf.Max(0f, actualHeightDrawn - maxViewHeight);
         if (currentScroll > dynamicMaxScroll)
@@ -224,8 +240,6 @@ internal static class SettingsWindowDrawer
 
         GUI.color = prevColor;
         GUI.contentColor = prevContentColor;
-
-        
     }
 
     private static float HandleScrollInput(
@@ -282,7 +296,6 @@ internal static class SettingsWindowDrawer
 
             _isDraggingScrollbar = false;
         }
-
 
 #if ANDROID
         bool canTouchScroll = !DrawSetting.IsFocused && !_isDraggingScrollbar;
@@ -385,12 +398,10 @@ internal static class SettingsWindowDrawer
 
             if (skipSettings) continue;
 
-            // Wire up top-level MultiSelectSetting
             if (setting is MultiSelectSetting multiSet)
             {
                 BindMultiSelectRouting(multiSet);
             }
-            // Wire up nested MultiSelectSetting inside SectionSetting instances
             else if (setting is SectionSetting secSet)
             {
                 foreach (var sectionInstance in secSet.Sections)
@@ -406,7 +417,6 @@ internal static class SettingsWindowDrawer
                 }
             }
 
-            // Direct polymorphic draw call
             setting.Draw(ref y, width);
         }
 
@@ -421,7 +431,6 @@ internal static class SettingsWindowDrawer
         bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
 #endif
 
-        // 1. Draw Keybind
         mod.KeyBind.Draw(ref y, width);
 
         float resetBtnW = GUIManager.S(22f);
@@ -429,7 +438,7 @@ internal static class SettingsWindowDrawer
         float elemH = ClientConfig.elementHeight;
         float labelWidth = Mathf.Max(width * 0.40f, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth - resetBtnW - gap);
 
-        // --- 2. Hold Mode Toggle Row ---
+        // --- Hold Mode Toggle Row ---
         GUI.Label(new Rect(ClientConfig.indent, y, labelWidth, elemH), Translate("Hold Mode"), ThemeManager.SettingLabelStyle);
 
         Rect holdRect = new(width - ClientConfig.indent - resetBtnW - gap - ClientConfig.SettingWidth, y, ClientConfig.SettingWidth, elemH);
@@ -450,7 +459,7 @@ internal static class SettingsWindowDrawer
 
         y += elemH + ClientConfig.spacing;
 
-        // --- 3. Enabled Toggle Row ---
+        // --- Enabled Toggle Row ---
         GUI.Label(new Rect(ClientConfig.indent, y, labelWidth, elemH), Translate("Enabled"), ThemeManager.SettingLabelStyle);
 
         Rect enabledRect = new(width - ClientConfig.indent - resetBtnW - gap - ClientConfig.SettingWidth, y, ClientConfig.SettingWidth, elemH);
@@ -498,6 +507,6 @@ internal static class SettingsWindowDrawer
         float handleY = trackY + (scrollPct * (trackHeight - handleHeight));
 
         GUI.Box(new Rect(trackX + GUIManager.S(5f), trackY, GUIManager.S(2f), trackHeight), "", ThemeManager.SeparatorStyle);
-        GUI.Box(new Rect(trackX, handleY, GUIManager.S(12f), handleHeight),"", _isDraggingScrollbar ? ThemeManager.CategoryModuleOnStyle : ThemeManager.CategoryModuleOffStyle);
+        GUI.Box(new Rect(trackX, handleY, GUIManager.S(12f), handleHeight), "", _isDraggingScrollbar ? ThemeManager.CategoryModuleOnStyle : ThemeManager.CategoryModuleOffStyle);
     }
 }

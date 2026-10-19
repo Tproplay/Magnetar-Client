@@ -24,7 +24,7 @@ public class VanillaMode : Module
         }
     }
 
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
     // Mod Data
 
     public static VanillaMode instance;
@@ -43,7 +43,7 @@ public class VanillaMode : Module
         {
             Type moduleType = module.GetType();
 
-            if (!module.enableInVanillaMode && module.Active)
+            if (!module.EnableInVanillaMode && module.Active)
             {
                 module.Active = false;
                 module.OnDisable();
@@ -78,7 +78,7 @@ public class VanillaMode : Module
     {
         if (!Active) return true;
 
-        return module.enableInVanillaMode;
+        return module.EnableInVanillaMode;
 
     }
 

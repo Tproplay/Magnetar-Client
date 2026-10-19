@@ -16,7 +16,7 @@ public class SoundMuffler : Module
         "soundblocker audiosettings volumecontrol soundmute noisecontrol disablesounds soundcleaner audioblock " +
         "soundfix muteeffects audiomute soundmanager customaudio soundfilter audiodampener soundkiller";
     public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     // Mod Data
 

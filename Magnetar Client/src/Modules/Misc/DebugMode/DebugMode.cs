@@ -19,7 +19,7 @@ public partial class DebugMode : Module
         " debugtrace debugpanel infolog";
 
     public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     // Mod Data
     public static DebugMode instance;

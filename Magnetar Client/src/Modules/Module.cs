@@ -14,6 +14,9 @@ using Il2Cpp;
 
 namespace Magnetar_Client.Modules;
 
+/// <summary>
+/// Base class for all modules
+/// </summary>
 public abstract class Module
 {
     /// <summary>
@@ -37,7 +40,10 @@ public abstract class Module
     /// </summary>
     public abstract ModuleCategory Category { get; set; }
 
-    public virtual bool enableInVanillaMode { get; set; }
+    /// <summary>
+    /// Should this module be allowed in Vanilla Mode
+    /// </summary>
+    public virtual bool EnableInVanillaMode { get; set; }
 
     // These will be in Every ModuleManager.
     // Edit if you want a different default keybind or want it to be enabled by default.
@@ -122,22 +128,34 @@ public abstract class Module
         return names;
     }
 
+    /// <summary>
+    /// Translates a Enum to { Enum_val : Translated_name }
+    /// </summary>
     public static Dictionary<int, string> TranslateEnum<T>() => TranslateEnum(typeof(T));
+    /// <summary>
+    /// Translates a Enum to { Enum_val : Translated_name }
+    /// </summary>
     public static Dictionary<int, string> TranslateEnum<T>(bool enumKey = true) => TranslateEnum(typeof(T), enumKey);
 
+    /// <summary>
+    /// Override the width of this Module
+    /// </summary>
     public virtual float SettingsWidth { get; set; } = ModuleManager.SettingsWidth;
 
     /// <summary>
-    /// Creates a new Category. Use EndCategory() to define the end.
+    /// Creates a new Category. Use <see cref="EndCategory"/> to define the end.
     /// </summary>
     public void CreateCategory(string name, bool defaultExpanded = true)
     {
-        Settings.Add(new CategorySetting(name, defaultExpanded));
+        AddSettings(new CategorySetting(name, defaultExpanded));
     }
 
+    /// <summary>
+    /// Ends a Category
+    /// </summary>
     public void EndCategory()
     {
-        Settings.Add(new EndCategorySetting());
+        AddSettings(new EndCategorySetting());
     }
 
     public static bool GetKeyComboDown(List<KeyCode> keyCodes)
@@ -201,6 +219,9 @@ public abstract class Module
         }
     }
 
+    /// <summary>
+    /// Should the data of this module be saved in profile
+    /// </summary>
     public virtual bool SaveData { get; } = true;
 
     #region Custom Saved Profile Data

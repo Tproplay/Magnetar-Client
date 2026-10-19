@@ -20,7 +20,7 @@ public class AntiLagSpawns : Module
         " counterbreak zombiecounter smoothspawn logicbreak massspawnfix antilagmod lagspawns antispawnlag laglessspawns";
     public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
 
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     public static AntiLagSpawns instance;
 

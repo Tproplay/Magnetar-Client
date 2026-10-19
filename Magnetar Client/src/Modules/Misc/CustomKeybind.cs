@@ -25,7 +25,7 @@ public class CustomKeybind : Module
         " keyremapping settingskey binds bind";
 
     public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     // Mod Data
 

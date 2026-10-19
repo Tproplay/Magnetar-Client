@@ -26,7 +26,7 @@ public class NoRender : Module
         "hidelawn seebackground hiderenderer seeground norend hidedraw no particles remove particles particletypes remove" +
         "particles disable particles clear particles";
     public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     // Mod Data
     public static NoRender instance;

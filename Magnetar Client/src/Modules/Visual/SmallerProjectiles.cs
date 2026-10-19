@@ -21,7 +21,7 @@ public class SmallerProjectiles : Module
         "projectilesize projectil smallbullet clear screen projectilevisual smallammo ammoclutter pea size hitclutter tinyprojectiles " +
         "lagclutter projectils";
     public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     public static SmallerProjectiles instance;
 

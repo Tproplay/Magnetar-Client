@@ -138,7 +138,7 @@ public static class AnimationHandler
     /// <summary>
     /// Instantly complete the current fade transition
     /// </summary>
-    public static void SnapToVisible()      
+    public static void SnapToVisible()
     {
         FadeProgress = 1f;
         if (ClientConfig.dimBg) DimAlpha = 1f;

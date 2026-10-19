@@ -10,9 +10,13 @@ namespace Magnetar_Client.Core;
 
 public static class NEFManager
 {
-    public const string Group = "NEF";
-    public const string ViewTree = "Tree";
-    public const string ViewUsages = "Usages";
+    public static class AnimationGroup
+    {
+        public const string Group = "NEF";
+        public const string ViewTree = "Tree";
+        public const string ViewUsages = "Usages";
+
+    }
 
     private const float BaseMargin = 60f;
 
@@ -22,8 +26,8 @@ public static class NEFManager
 
     public static void Init()
     {
-        AnimationHandler.SetViewImmediate(Group, ViewTree, 1.0f);
-        AnimationHandler.SetViewImmediate(Group, ViewUsages, 0.0f);
+        AnimationHandler.SetViewImmediate(AnimationGroup.Group, AnimationGroup.ViewTree, 1.0f);
+        AnimationHandler.SetViewImmediate(AnimationGroup.Group, AnimationGroup.ViewUsages, 0.0f);
 
         NEFData.Init();
         ServiceRegistry.Register(new NEFManagerService());
@@ -89,7 +93,7 @@ public static class NEFManager
             if (NEFGUI.showUsagesView)
             {
                 NEFGUI.showUsagesView = false;
-                AnimationHandler.SwitchView(Group, ViewTree);
+                AnimationHandler.SwitchView(AnimationGroup.Group, AnimationGroup.ViewTree);
                 Input.ResetInputAxes();
                 return true;
             }

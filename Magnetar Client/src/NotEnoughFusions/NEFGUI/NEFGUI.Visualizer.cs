@@ -258,7 +258,7 @@ public static partial class NEFGUI
             else if (e.button == 1)
             {
                 showUsagesView = true;
-                AnimationHandler.SwitchView(NEFManager.Group, NEFManager.ViewUsages);
+                AnimationHandler.SwitchView(NEFManager.AnimationGroup.Group, NEFManager.AnimationGroup.ViewUsages);
                 NEFData.GenerateUsagesView(node.Entity);
             }
             e.Use();

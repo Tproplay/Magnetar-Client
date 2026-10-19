@@ -29,7 +29,7 @@ public static partial class NEFGUI
         if (backBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
             showUsagesView = false;
-            AnimationHandler.SwitchView(NEFManager.Group, NEFManager.ViewTree);
+            AnimationHandler.SwitchView(NEFManager.AnimationGroup.Group, NEFManager.AnimationGroup.ViewTree);
             e.Use();
         }
 
@@ -125,12 +125,12 @@ public static partial class NEFGUI
                 if (e.button == 0)
                 {
                     showUsagesView = false;
-                    AnimationHandler.SwitchView(NEFManager.Group, NEFManager.ViewTree);
+                    AnimationHandler.SwitchView(NEFManager.AnimationGroup.Group, NEFManager.AnimationGroup.ViewTree);
                     NEFData.GeneratePyramid(resultEntity);
                 }
                 else if (e.button == 1)
                 {
-                    AnimationHandler.SwitchView(NEFManager.Group, NEFManager.ViewUsages);
+                    AnimationHandler.SwitchView(NEFManager.AnimationGroup.Group, NEFManager.AnimationGroup.ViewUsages);
                     NEFData.GenerateUsagesView(resultEntity);
                 }
                 e.Use();

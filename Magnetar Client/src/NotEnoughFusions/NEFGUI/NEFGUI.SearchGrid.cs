@@ -194,13 +194,13 @@ public static partial class NEFGUI
 #else
                     if (e.button == 0)
                     {
-                        if (showUsagesView) AnimationHandler.SwitchView(NEFManager.Group, NEFManager.ViewTree);
+                        if (showUsagesView) AnimationHandler.SwitchView(NEFManager.AnimationGroup.Group, NEFManager.AnimationGroup.ViewTree);
                         showUsagesView = false;
                         NEFData.GeneratePyramid(entity);
                     }
                     else if (e.button == 1)
                     {
-                        if (!showUsagesView) AnimationHandler.SwitchView(NEFManager.Group, NEFManager.ViewUsages);
+                        if (!showUsagesView) AnimationHandler.SwitchView(NEFManager.AnimationGroup.Group, NEFManager.AnimationGroup.ViewUsages);
                         showUsagesView = true;
                         NEFData.GenerateUsagesView(entity);
                     }

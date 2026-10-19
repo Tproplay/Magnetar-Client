@@ -24,16 +24,17 @@ public static class HUDManager
     /// <summary>
     /// Animation Group
     /// </summary>
-    public const string Group = "HUD";
-    /// <summary>
-    /// Animation 
-    /// </summary>
-    public const string ViewMain = "Controls";
-    public const string ViewSelector = "Selector";
+    public static class Animation
+    {
+        public const string Group = "HUD";
+        public const string ViewMain = "Controls";
+        public const string ViewSelector = "Selector";
+    }
+    
     public static bool IsInitialized { get; private set; }
     public static bool Enabled = true;
     public static bool forceShow { get; set; }
-    public static bool IsSelectingElements => AnimationHandler.GetViewAlpha(Group, ViewSelector) > 0.001f;
+    public static bool IsSelectingElements => AnimationHandler.GetViewAlpha(Animation.Group, Animation.ViewSelector) > 0.001f;
     public static bool showBackground;
 
     private const float BaseElementHeight = 25f;
@@ -43,8 +44,8 @@ public static class HUDManager
     {
         if (IsInitialized) return;
 
-        AnimationHandler.SetViewImmediate(Group, ViewMain, 1.0f);
-        AnimationHandler.SetViewImmediate(Group, ViewSelector, 0.0f);
+        AnimationHandler.SetViewImmediate(Animation.Group, Animation.ViewMain, 1.0f);
+        AnimationHandler.SetViewImmediate(Animation.Group, Animation.ViewSelector, 0.0f);
 
         ServiceRegistry.Register(new HUDManagerService());
 
@@ -72,7 +73,7 @@ public static class HUDManager
         forceShow = false;
         ClientConfig.showgui = true;
         AnimationHandler.SnapToVisible();
-        AnimationHandler.SwitchView(Group, ViewMain);
+        AnimationHandler.SwitchView(Animation.Group, Animation.ViewMain);
 
         SaveLoad.Save();
         DrawSetting.ResetInputBind();
@@ -81,7 +82,7 @@ public static class HUDManager
 
     public static void OnClose()
     {
-        AnimationHandler.SwitchView(Group, ViewMain);
+        AnimationHandler.SwitchView(Animation.Group, Animation.ViewMain);
         DrawSetting.activeMultiSelect = null;
     }
 
@@ -264,11 +265,10 @@ public static class HUDManager
 
         public void OnLanguageChanged() => HUDManager.OnLanguageChange();
 
-        public void OnGUI() { }
+        public void OnGUI() { HUDManager.Render(); }
         public void OnMenuGUI()
         {
             AnimationHandler.RenderWithTabAlpha(TabType.HUD, RenderControlsWindow);
-            HUDManager.Render();
         }
     }
 

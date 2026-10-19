@@ -1,7 +1,10 @@
-﻿using System;
+﻿#if false
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Magnetar_Client.Api;
 using Magnetar_Client.Game;
 using Magnetar_Client.UI.Setting;
@@ -56,6 +59,38 @@ public class VideoPlayer : Module
     private Plant[][,] colorGrids;
 
     private readonly Dictionary<int, string> _discoveredFiles = new();
+
+    // ---------------------------------------------------------------------
+    // Async loading / incremental spawning state
+    // ---------------------------------------------------------------------
+    private enum LoadState { Idle, Loading, Spawning, Playing }
+
+    /// <summary>Max milliseconds per game frame spent spawning plants during setup.</summary>
+    private const float SpawnBudgetMs = 4f;
+
+    private LoadState loadState = LoadState.Idle;
+    private Task<LoadResult> loadTask;
+    private CancellationTokenSource loadCts;
+
+    // Settings snapshot taken when spawning starts, so mid-setup UI changes can't desync the grid
+    private int spawnCols;
+    private int spawnRows;
+    private bool spawnPuff;
+    private List<int> spawnColors;
+    private Dictionary<int, PlantType> spawnTypes;
+    private long spawnIndex;
+    private string loadedFileName;
+
+    /// <summary>Plain-data result produced on the worker thread (no Unity objects allowed in here).</summary>
+    private sealed class LoadResult
+    {
+        public string FileName;
+        public List<List<List<int>>> Frames;
+        public List<int> Colors = new();   // distinct color channels, ascending
+        public int MaxColorIndex;
+        public string Error;
+        public bool Cancelled;
+    }
 
     public VideoPlayer()
     {
@@ -120,9 +155,9 @@ public class VideoPlayer : Module
         EndCategory();
 
         CreateCategory("Placement & Offsets");
-        Offset = new Vector2Setting("Offset", new Vector2(0,0));
+        Offset = new Vector2Setting("Offset", new Vector2(0, 0));
 
-        StartPos = new Vector2Setting("Start X", new Vector2(0,0));
+        StartPos = new Vector2Setting("Start X", new Vector2(0, 0));
 
         AddSettings(Offset, StartPos);
 
@@ -131,17 +166,12 @@ public class VideoPlayer : Module
 
     private List<Setting> CreateColorSectionTemplate(int index)
     {
-        var bannedPlants = new HashSet<int>
-        {
-            (int)PlantType.Nothing,
-            257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 246, 247
-        };
 
         var plantSetting = new MultiSelectSetting("Plant", typeof(PlantType))
         {
             MaxSelection = 1,
-            Blacklist = bannedPlants,
-            CustomNames = GetFormattedPlantNames()
+            Blacklist = Banned.PlantTypeBanned,
+            CustomNames = TranslateEnum<PlantType>(),
         };
 
         return new List<Setting> { plantSetting };
@@ -164,21 +194,8 @@ public class VideoPlayer : Module
         }
     }
 
-    private Dictionary<int, string> GetFormattedPlantNames()
-    {
-        var translated = Translator.TranslateEnum(typeof(PlantType));
-        var formatted = new Dictionary<int, string>();
-        foreach (var kvp in translated)
-        {
-            formatted[kvp.Key] = $"{kvp.Value} ({kvp.Key})";
-        }
-        return formatted;
-    }
-
     public override void OnLanguageChanged()
     {
-        base.OnLanguageChanged();
-        var names = GetFormattedPlantNames();
         if (ColorSection != null)
         {
             foreach (var section in ColorSection.Sections)
@@ -186,7 +203,7 @@ public class VideoPlayer : Module
                 var plantSetting = section.Find<MultiSelectSetting>("Plant");
                 if (plantSetting != null)
                 {
-                    plantSetting.CustomNames = names;
+                    plantSetting.CustomNames = TranslateEnum<PlantType>();
                 }
             }
         }
@@ -194,6 +211,9 @@ public class VideoPlayer : Module
 
     public override void OnEnable()
     {
+        // Make sure nothing from a previous run (or an unfinished load) is still alive
+        Teardown();
+
         if (AppData.BoardInstanceIsNull)
         {
             DebugLogger.Warning("[Video Player] No Board Instance Found!");
@@ -225,48 +245,125 @@ public class VideoPlayer : Module
             return;
         }
 
+        // Read + parse + scan on a worker thread. Only plain data crosses back to the main thread.
+        loadedFileName = selectedFileName;
+        loadCts = new CancellationTokenSource();
+        CancellationToken token = loadCts.Token;
+        loadState = LoadState.Loading;
+        DebugLogger.Msg($"[Video Player] Loading '{selectedFileName}' in the background...");
+        loadTask = Task.Run(() => LoadVideoFile(filePath, selectedFileName, token), token);
+    }
+
+    /// <summary>
+    /// Runs on a worker thread. Must not touch Unity objects, settings, or the logger.
+    /// </summary>
+    private static LoadResult LoadVideoFile(string filePath, string fileName, CancellationToken token)
+    {
+        var result = new LoadResult { FileName = fileName };
         try
         {
-            string json = File.ReadAllText(filePath);
-            frames = JsonConvert.DeserializeObject<List<List<List<int>>>>(json);
-            DebugLogger.Msg($"[Video Player] Successfully loaded {frames.Count} frames from '{selectedFileName}'");
+            // Stream straight from disk instead of building one giant string first
+            using (var stream = File.OpenRead(filePath))
+            using (var reader = new StreamReader(stream))
+            using (var jsonReader = new JsonTextReader(reader))
+            {
+                result.Frames = new JsonSerializer().Deserialize<List<List<List<int>>>>(jsonReader);
+            }
+
+            token.ThrowIfCancellationRequested();
+
+            if (result.Frames == null || result.Frames.Count == 0)
+            {
+                result.Error = "Video file has no frame data!";
+                return result;
+            }
+
+            // Collect all distinct color channel indices used in the video
+            var unique = new HashSet<int>();
+            foreach (var frame in result.Frames)
+            {
+                token.ThrowIfCancellationRequested();
+                if (frame == null) continue;
+                foreach (var row in frame)
+                {
+                    if (row == null) continue;
+                    foreach (int pixel in row)
+                    {
+                        unique.Add(pixel);
+                    }
+                }
+            }
+
+            if (unique.Count > 0 && unique.Min() < 0)
+            {
+                result.Error = $"File '{fileName}' contains a negative color value ({unique.Min()}), which is invalid.";
+                return result;
+            }
+
+            result.Colors = unique.OrderBy(c => c).ToList();
+            result.MaxColorIndex = result.Colors.Count > 0 ? result.Colors[result.Colors.Count - 1] : 0;
+        }
+        catch (OperationCanceledException)
+        {
+            result.Cancelled = true;
         }
         catch (Exception ex)
         {
-            DebugLogger.Warning($"[Video Player] JSON Parsing Error: {ex.Message}");
-            Active = false;
+            result.Error = $"JSON Parsing Error: {ex.Message}";
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Main thread: checks whether the background load finished and, if so, validates it against the
+    /// current settings and starts the incremental spawn phase.
+    /// </summary>
+    private void PollLoad()
+    {
+        if (loadTask == null || !loadTask.IsCompleted) return;
+
+        Task<LoadResult> task = loadTask;
+        loadTask = null;
+
+        if (task.IsCanceled)
+        {
+            Teardown();
             return;
         }
 
-        if (frames == null || frames.Count == 0)
+        if (task.IsFaulted)
         {
-            DebugLogger.Warning("[Video Player] Video file has no frame data!");
-            Active = false;
+            Fail($"Failed to load video: {task.Exception?.GetBaseException().Message}");
             return;
         }
 
-        // Collect all distinct color channel indices used in the video
-        HashSet<int> uniqueColorsInFile = new();
-        foreach (var frame in frames)
+        LoadResult result = task.Result;
+        if (result.Cancelled)
         {
-            foreach (var row in frame)
-            {
-                foreach (int pixel in row)
-                {
-                    uniqueColorsInFile.Add(pixel);
-                }
-            }
+            Teardown();
+            return;
         }
 
-        int maxColorIndex = uniqueColorsInFile.Count > 0 ? uniqueColorsInFile.Max() : 0;
+        if (result.Error != null)
+        {
+            Fail(result.Error);
+            return;
+        }
+
+        BeginSpawn(result);
+    }
+
+    private void BeginSpawn(LoadResult result)
+    {
+        int maxColorIndex = result.MaxColorIndex;
         int activeMaxAllowed = MaxColorsSetting.Value;
 
         // Ensure file does not require channels beyond the configured Max Colors
         if (maxColorIndex >= activeMaxAllowed)
         {
-            DebugLogger.Warning($"[Video Player] File '{selectedFileName}' uses color channel {maxColorIndex}, " +
-                               $"which exceeds the Max Colors setting ({activeMaxAllowed})! Increase 'Max Colors' first.");
-            Active = false;
+            Fail($"File '{result.FileName}' uses color channel {maxColorIndex}, " +
+                 $"which exceeds the Max Colors setting ({activeMaxAllowed})! Increase 'Max Colors' first.");
             return;
         }
 
@@ -275,7 +372,7 @@ public class VideoPlayer : Module
         List<string> unassignedColorErrors = new();
         Dictionary<int, PlantType> resolvedTypes = new();
 
-        foreach (int colorIdx in uniqueColorsInFile)
+        foreach (int colorIdx in result.Colors)
         {
             if (colorIdx >= ColorSection.Sections.Count)
             {
@@ -298,65 +395,114 @@ public class VideoPlayer : Module
 
         if (missingSectionErrors.Count > 0)
         {
-            DebugLogger.Warning($"[Video Player] Missing sections for required channels: {string.Join(", ", missingSectionErrors)}. " +
-                               $"Please add more sections to the Colors setting.");
-            Active = false;
+            Fail($"Missing sections for required channels: {string.Join(", ", missingSectionErrors)}. " +
+                 $"Please add more sections to the Colors setting.");
             return;
         }
 
         if (unassignedColorErrors.Count > 0)
         {
-            DebugLogger.Warning($"[Video Player] Cannot start animation! The following color channels have no plant selected: " +
-                               $"{string.Join(", ", unassignedColorErrors)}.");
-            Active = false;
+            Fail($"Cannot start animation! The following color channels have no plant selected: " +
+                 $"{string.Join(", ", unassignedColorErrors)}.");
             return;
         }
+
+        if (AppData.BoardInstanceIsNull)
+        {
+            Fail("Board went away while the video was loading.");
+            return;
+        }
+
+        frames = result.Frames;
+        DebugLogger.Msg($"[Video Player] Successfully loaded {frames.Count} frames from '{result.FileName}'");
 
         currentFrame = 0;
         timer = 0f;
 
-        int cols = ColumnSetting.Value;
-        int rows = RowSetting.Value;
+        spawnCols = ColumnSetting.Value;
+        spawnRows = RowSetting.Value;
+        spawnPuff = PuffMode.Value;
+        spawnColors = result.Colors;
+        spawnTypes = resolvedTypes;
+        spawnIndex = 0;
 
-        gridState = new int[cols, rows];
+        gridState = new int[spawnCols, spawnRows];
+        for (int col = 0; col < spawnCols; col++)
+        {
+            for (int row = 0; row < spawnRows; row++)
+            {
+                gridState[col, row] = -1;
+            }
+        }
 
         // Allocate jagged array sized to highest color index + 1
         colorGrids = new Plant[maxColorIndex + 1][,];
-        foreach (int colorIdx in uniqueColorsInFile)
+        foreach (int colorIdx in spawnColors)
         {
-            colorGrids[colorIdx] = new Plant[cols, rows];
+            colorGrids[colorIdx] = new Plant[spawnCols, spawnRows];
         }
 
-        // Spawn pixel grids
-        for (int col = 0; col < cols; col++)
+        loadState = LoadState.Spawning;
+        long total = (long)spawnCols * spawnRows * spawnColors.Count;
+        DebugLogger.Msg($"[Video Player] Spawning {total} plants over multiple frames...");
+    }
+
+    /// <summary>
+    /// Spawns plants in small batches (Unity objects can only be created on the main thread),
+    /// spending at most SpawnBudgetMs per frame so the game doesn't hitch.
+    /// </summary>
+    private void StepSpawn()
+    {
+        int colorCount = spawnColors.Count;
+        long total = (long)spawnCols * spawnRows * colorCount;
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+
+        while (spawnIndex < total)
         {
-            for (int row = 0; row < rows; row++)
+            long cell = spawnIndex / colorCount;
+            int colorIdx = spawnColors[(int)(spawnIndex % colorCount)];
+            int col = (int)(cell / spawnRows);
+            int row = (int)(cell % spawnRows);
+            spawnIndex++;
+
+            try
             {
-                gridState[col, row] = -1;
-
-                foreach (int colorIdx in uniqueColorsInFile)
+                Plant p = SpawnPlant(col, row, spawnTypes[colorIdx]);
+                if (spawnPuff)
                 {
-                    try
-                    {
-                        Plant p = SpawnPlant(col, row, resolvedTypes[colorIdx]);
-                        if (PuffMode.Value)
-                        {
-                            SetupVideoPixel(p, col, row);
-                        }
-                        colorGrids[colorIdx][col, row] = p;
-                    }
-                    catch (Exception e)
-                    {
-                        DebugLogger.Error($"[Video Player] Error spawning Color {colorIdx} at ({col},{row}): {e.Message}");
-                    }
+                    SetupVideoPixel(p, col, row);
                 }
+                colorGrids[colorIdx][col, row] = p;
             }
+            catch (Exception e)
+            {
+                DebugLogger.Error($"[Video Player] Error spawning Color {colorIdx} at ({col},{row}): {e.Message}");
+            }
+
+            if (sw.Elapsed.TotalMilliseconds >= SpawnBudgetMs) break;
         }
+
+        if (spawnIndex >= total)
+        {
+            spawnColors = null;
+            spawnTypes = null;
+            currentFrame = 0;
+            timer = 0f;
+            loadState = LoadState.Playing;
+            DebugLogger.Msg($"[Video Player] Setup complete, starting playback of '{loadedFileName}'.");
+        }
+    }
+
+    private void Fail(string message)
+    {
+        DebugLogger.Warning($"[Video Player] {message}");
+        Teardown();
+        Active = false;
     }
 
     public override void OnUpdateActive()
     {
-        if (frames == null || frames.Count == 0) return;
+        if (loadState == LoadState.Idle) return;
 
         if (AppData.BoardInstanceIsNull)
         {
@@ -365,6 +511,25 @@ public class VideoPlayer : Module
             Active = false;
             return;
         }
+
+        switch (loadState)
+        {
+            case LoadState.Loading:
+                PollLoad();
+                return;
+
+            case LoadState.Spawning:
+                StepSpawn();
+                return;
+
+            case LoadState.Playing:
+                break;
+
+            default:
+                return;
+        }
+
+        if (frames == null || frames.Count == 0) return;
 
         timer += Time.deltaTime;
         float frameDuration = 1f / Mathf.Max(1, FpsSetting.Value);
@@ -382,8 +547,9 @@ public class VideoPlayer : Module
     private void RenderFrame(int frameIndex)
     {
         var frameData = frames[frameIndex];
-        int maxCol = ColumnSetting.Value;
-        int maxRow = RowSetting.Value;
+        // Use the grid size that was actually spawned, not the live setting values
+        int maxCol = gridState.GetLength(0);
+        int maxRow = gridState.GetLength(1);
 
         for (int row = 0; row < frameData.Count; row++)
         {
@@ -413,7 +579,7 @@ public class VideoPlayer : Module
     {
         if (CreatePlant.Instance == null) return null;
 
-        if (PuffMode.Value)
+        if (spawnPuff)
             return CreatePlant.Instance.SetPlant(col / 4, row / 4, type, puffV: new Vector2(col * Offset.Value.x, -row * Offset.Value.y));
         else
             return CreatePlant.Instance.SetPlant(col, row, type);
@@ -444,6 +610,20 @@ public class VideoPlayer : Module
 
     public override void OnDisable()
     {
+        Teardown();
+    }
+
+    /// <summary>
+    /// Cancels any in-flight load, kills every spawned plant (even a half-finished spawn) and resets state.
+    /// Safe to call repeatedly.
+    /// </summary>
+    private void Teardown()
+    {
+        try { loadCts?.Cancel(); } catch { }
+        loadCts = null;
+        loadTask = null;
+        loadState = LoadState.Idle;
+
         if (colorGrids != null)
         {
             for (int c = 0; c < colorGrids.Length; c++)
@@ -466,5 +646,9 @@ public class VideoPlayer : Module
         frames = null;
         colorGrids = null;
         gridState = null;
+        spawnColors = null;
+        spawnTypes = null;
+        spawnIndex = 0;
     }
 }
+#endif

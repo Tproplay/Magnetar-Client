@@ -23,7 +23,7 @@ GUIManager.S(BaseHeight));
 
     public static void Render(GUIStyle windowBgStyle)
     {
-        float viewAlpha = AnimationHandler.GetViewAlpha(HUDManager.Group, HUDManager.ViewMain);
+        float viewAlpha = AnimationHandler.GetViewAlpha(HUDManager.Animation.Group, HUDManager.Animation.ViewMain);
         if (viewAlpha <= 0.001f) return;
 
         ClientConfig.RescaleAroundCenter(ref WindowRect, GUIManager.S(BaseWidth), WindowRect.height);

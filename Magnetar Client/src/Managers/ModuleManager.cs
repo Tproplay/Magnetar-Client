@@ -200,6 +200,8 @@ public static class ModuleManager
         {
             MultiSelectWindowDrawer.Render(currentEvent);
         }
+
+        RenderModulesGUI();
     }
 
     public static void RenderModulesGUI()
@@ -305,7 +307,6 @@ public static class ModuleManager
         public void OnMenuGUI()
         {
             AnimationHandler.RenderWithTabAlpha(TabType.MODULES, Render);
-            RenderModulesGUI();
         }
 
         public void OnGUI() { }

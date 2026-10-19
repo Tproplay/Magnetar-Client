@@ -136,6 +136,8 @@ internal static class SettingsWindowDrawer
         Rect headerBgRect = new(0, 0, windowWidth, headerHeight);
         GUI.Box(headerBgRect, Translate(mod.Name), ThemeManager.SettingsWndowStyle);
 
+        GUI.DragWindow(new Rect(0, 0, windowWidth, headerHeight));
+
         _moduleContentHeights[mod] = Mathf.Lerp(_moduleContentHeights[mod], _targetContentHeights[mod],
             Time.unscaledDeltaTime * ModuleManager.SettingsScrollLerpSpeed);
 
@@ -220,10 +222,10 @@ internal static class SettingsWindowDrawer
             DrawSettingsScrollbar(windowWidth, headerHeight, viewHeight, _targetContentHeights[mod], maxViewHeight, currentScroll, dynamicMaxScroll);
         }
 
-        GUI.DragWindow(new Rect(0, 0, windowWidth - closeBtnSize - GUIManager.S(10f), headerHeight));
-
         GUI.color = prevColor;
         GUI.contentColor = prevContentColor;
+
+        
     }
 
     private static float HandleScrollInput(

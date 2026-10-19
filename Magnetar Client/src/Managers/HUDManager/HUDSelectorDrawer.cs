@@ -36,12 +36,12 @@ GUIManager.S(BaseSelectorHeight));
         float targetH = Mathf.Min(GUIManager.S(BaseSelectorHeight), ClientConfig.NativeHeight * 0.8f);
         SelectorRect = new Rect((ClientConfig.NativeWidth - targetW) / 2f, (ClientConfig.NativeHeight - targetH) / 2f, targetW, targetH);
 
-        AnimationHandler.SwitchView(HUDManager.Group, HUDManager.ViewSelector);
+        AnimationHandler.SwitchView(HUDManager.Animation.Group, HUDManager.Animation.ViewSelector);
     }
 
     public static void Render(GUIStyle windowBgStyle)
     {
-        float viewAlpha = AnimationHandler.GetViewAlpha(HUDManager.Group, HUDManager.ViewSelector);
+        float viewAlpha = AnimationHandler.GetViewAlpha(HUDManager.Animation.Group, HUDManager.Animation.ViewSelector);
         if (viewAlpha <= 0.001f) return;
 
         float targetW = GUIManager.S(BaseSelectorWidth);

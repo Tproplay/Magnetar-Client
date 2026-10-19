@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using Magnetar_Client.UI.Setting;
 using HarmonyLib;
-using static Magnetar_Client.Game.AppData;
+
 using UnityEngine;
 using System.Linq;
 using System;
 using Magnetar_Client.Utils;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -90,26 +92,26 @@ public class MultiPlanting : Module
             switch (instance.Mode.Value)
             {
                 case 0: // Column
-                    for (int i = 0; i < BoardInstance.rowNum; i++)
+                    for (int i = 0; i < GameData.BoardInstance.rowNum; i++)
                     {
                         if (i == newRow) continue;
                         __instance.SetPlant(newColumn, i, theSeedType);
                     }
                     break;
                 case 1: // Row
-                    for (int i = 0; i < BoardInstance.columnNum; i++)
+                    for (int i = 0; i < GameData.BoardInstance.columnNum; i++)
                     {
                         if (i == newColumn) continue;
                         __instance.SetPlant(i, newRow, theSeedType);
                     }
                     break;
                 case 2: // Rook
-                    for (int i = 0; i < BoardInstance.rowNum; i++)
+                    for (int i = 0; i < GameData.BoardInstance.rowNum; i++)
                     {
                         if (i == newRow) continue;
                         __instance.SetPlant(newColumn, i, theSeedType);
                     }
-                    for (int i = 0; i < BoardInstance.columnNum; i++)
+                    for (int i = 0; i < GameData.BoardInstance.columnNum; i++)
                     {
                         if (i == newColumn) continue;
                         __instance.SetPlant(i, newRow, theSeedType);
@@ -126,8 +128,8 @@ public class MultiPlanting : Module
                     break;
                 case 4: // Full Lawn
 
-                    int r_num = BoardInstance.rowNum;
-                    int c_num = BoardInstance.columnNum;
+                    int r_num = GameData.BoardInstance.rowNum;
+                    int c_num = GameData.BoardInstance.columnNum;
 
                     int n = r_num * c_num;
 

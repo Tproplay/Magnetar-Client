@@ -1,8 +1,8 @@
-﻿using Magnetar_Client.Game;
-using Magnetar_Client.UI.Setting;
+﻿using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 using UnityEngine;
-using static Magnetar_Client.Game.AppData;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -63,7 +63,7 @@ public class BuffZombies : Module
     // Mod Logic
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         float multiplier = HpMultiplierSettig.Value;
 

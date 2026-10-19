@@ -1,7 +1,8 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
-using static Magnetar_Client.Game.GameData;
+using static Magnetar_Client.GameData;
 using UnityEngine;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif

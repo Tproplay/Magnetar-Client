@@ -1,7 +1,8 @@
 ﻿using Magnetar_Client.UI.Setting;
 using UnityEngine;
-using static Magnetar_Client.Game.AppData;
-using static Magnetar_Client.Game.GameData;
+
+using static Magnetar_Client.GameData;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif

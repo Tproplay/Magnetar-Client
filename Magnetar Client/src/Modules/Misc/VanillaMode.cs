@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using static Magnetar_Client.Game.AppData;
+
 
 namespace Magnetar_Client.Modules;
 
@@ -20,7 +20,7 @@ public class VanillaMode : Module
         get => base.Active;
         set
         {
-            if (BoardInstanceIsNull) base.Active = value;
+            if (GameData.BoardInstanceIsNull) base.Active = value;
         }
     }
 

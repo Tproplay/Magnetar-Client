@@ -1,5 +1,4 @@
-﻿using static Magnetar_Client.Game.AppData;
-#if MELONLOADER || RELEASE_MELON
+﻿#if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
 
@@ -31,10 +30,10 @@ public class OdysseyPlants : Module
     // Mod Logic
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) // Out of the game
+        if (GameData.BoardInstanceIsNull) // Out of the game
         { wasAlreadyEnabled = null; return; }
         if
-            (!BoardInstance.boardTag.isColumn) // Reset Level
+            (!GameData.BoardInstance.boardTag.isColumn) // Reset Level
         {
             wasAlreadyEnabled = null;
         }
@@ -42,23 +41,23 @@ public class OdysseyPlants : Module
 
         if (wasAlreadyEnabled != null) return;
 
-        wasAlreadyEnabled = BoardInstance.boardTag.enableAllTravelPlant ? "Yes" : "No";
+        wasAlreadyEnabled = GameData.BoardInstance.boardTag.enableAllTravelPlant ? "Yes" : "No";
 
-        Board.BoardTag boardTags = BoardInstance.boardTag;
+        Board.BoardTag boardTags = GameData.BoardInstance.boardTag;
         boardTags.enableAllTravelPlant = true;
-
-        BoardInstance.boardTag = boardTags;
+        GameData.
+                BoardInstance.boardTag = boardTags;
 
     }
 
     public override void OnDisable()
     {
-        if (BoardInstanceIsNull || wasAlreadyEnabled == null || wasAlreadyEnabled == "Yes") { wasAlreadyEnabled = null; return; }
+        if (GameData.BoardInstanceIsNull || wasAlreadyEnabled == null || wasAlreadyEnabled == "Yes") { wasAlreadyEnabled = null; return; }
 
-        Board.BoardTag boardTags = BoardInstance.boardTag;
+        Board.BoardTag boardTags = GameData.BoardInstance.boardTag;
         boardTags.enableAllTravelPlant = false;
-
-        BoardInstance.boardTag = boardTags;
+        GameData.
+                BoardInstance.boardTag = boardTags;
         wasAlreadyEnabled = null;
     }
 }

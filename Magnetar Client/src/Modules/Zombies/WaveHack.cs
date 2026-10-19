@@ -1,9 +1,11 @@
-﻿using static Magnetar_Client.Game.AppData;
+﻿
 using System;
 using Magnetar_Client.UI.Setting;
 using HarmonyLib;
 using System.Collections;
 using UnityEngine;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #elif BEPINEX || RELEASE_BEPINEX
@@ -73,24 +75,24 @@ public class WaveHack : Module
 
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         if (instance.FreezeWaveSetting.Value)
         {
             if (last_val <= 0) last_val = 1f;
-
-            BoardInstance.timeUntilNextWave = last_val;
+            GameData.
+                        BoardInstance.timeUntilNextWave = last_val;
         }
 
         if (instance.Active_WaveCooldownSetting.Value)
         {
-            if (BoardInstance.timeUntilNextWave > Math.Min(last_val, instance.WaveCooldownSetting.Value))
-                BoardInstance.timeUntilNextWave = instance.WaveCooldownSetting.Value;
+            if (GameData.BoardInstance.timeUntilNextWave > Math.Min(last_val, instance.WaveCooldownSetting.Value))
+                GameData.BoardInstance.timeUntilNextWave = instance.WaveCooldownSetting.Value;
         }
 
-        last_val = BoardInstance.timeUntilNextWave;
+        last_val = GameData.BoardInstance.timeUntilNextWave;
 
-        if (TotalClearance.Value) BoardInstance.zombieSpawnHealth = 0;
+        if (TotalClearance.Value) GameData.BoardInstance.zombieSpawnHealth = 0;
 
     }
 

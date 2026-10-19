@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Magnetar_Client.UI.Setting;
-using static Magnetar_Client.Game.AppData;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -60,7 +61,7 @@ public class KeepShooting : Module
         [HarmonyPostfix]
         public static void ShootablePostfix(Plant __instance, ref bool __result)
         {
-            if (instance == null || BoardInstanceIsNull) return;
+            if (instance == null || GameData.BoardInstanceIsNull) return;
             if (!instance.Active) return;
 
             if (instance.PlantsSelectedSetting.IsSelected((int)__instance.thePlantType))

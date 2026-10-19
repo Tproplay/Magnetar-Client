@@ -1,8 +1,8 @@
-﻿using Magnetar_Client.Game;
-using Magnetar_Client.UI.Setting;
+﻿using Magnetar_Client.UI.Setting;
 using System.Linq;
 using UnityEngine;
-using static Magnetar_Client.Game.AppData;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -56,7 +56,7 @@ public class ClampZombies : Module
         if (Time.time - lastCheckTime < 1f) return;
         lastCheckTime = Time.time;
 
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         int currentZombies = GameData.ZombieList.Count;
         int limit = MaxZombiesSetting.Value;

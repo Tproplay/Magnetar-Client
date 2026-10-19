@@ -3,7 +3,8 @@ using Magnetar_Client.UI.Setting;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static Magnetar_Client.Game.AppData;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -101,7 +102,7 @@ public class SmallerProjectiles : Module
 
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) originalScales.Clear();
+        if (GameData.BoardInstanceIsNull) originalScales.Clear();
     }
 
     public static Dictionary<IntPtr, Vector3> originalScales = new();

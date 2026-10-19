@@ -5,6 +5,9 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Api;
 
+/// <summary>
+/// Managers Services for different actions.
+/// </summary>
 public static class ServiceRegistry
 {
     private static readonly List<IClientService> _services = new();

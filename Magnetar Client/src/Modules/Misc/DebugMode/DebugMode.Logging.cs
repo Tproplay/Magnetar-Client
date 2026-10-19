@@ -4,11 +4,10 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using static Magnetar_Client.Utils.Magnetar_Logger;
-using static Magnetar_Client.Game.AppData;
-using Magnetar_Client.Game;
 using System;
 using System.Runtime.InteropServices;
 using Magnetar_Client.NEF;
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -30,15 +29,15 @@ public partial class DebugMode
 
         if (selected.IsSelected((int)Options.BoardTag))
         {
-            if (!BoardInstanceIsNull)
+            if (!GameData.BoardInstanceIsNull)
             {
                 StringBuilder sb = new();
                 sb.AppendLine("Dumping boardTag Fields:");
 
-                FieldInfo[] fields = BoardInstance.boardTag.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+                FieldInfo[] fields = GameData.BoardInstance.boardTag.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
                 foreach (FieldInfo field in fields)
                 {
-                    object value = field.GetValue(BoardInstance.boardTag);
+                    object value = field.GetValue(GameData.BoardInstance.boardTag);
                     sb.AppendLine($"   -> {field.Name}: {value}");
                 }
                 DebugModeLogger.Msg(sb.ToString());

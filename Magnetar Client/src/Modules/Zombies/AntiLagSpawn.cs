@@ -3,7 +3,7 @@ using Il2Cpp;
 #endif
 using UnityEngine;
 using System.Collections.Generic;
-using static Magnetar_Client.Game.AppData;
+
 using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 
@@ -70,7 +70,7 @@ public class AntiLagSpawns : Module
     // Mod Logic
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         framesSinceLastSpawn++;
 

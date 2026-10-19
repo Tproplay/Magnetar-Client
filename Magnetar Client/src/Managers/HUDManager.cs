@@ -1,7 +1,6 @@
 ﻿using static Magnetar_Client.Utils.Translator;
 using Magnetar_Client.Api;
 using Magnetar_Client.Core.HUDManager_;
-using Magnetar_Client.Game;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
@@ -201,7 +200,7 @@ public static class HUDManager
     {
         if (!GUIManager.ShowMainMenuCredits) return;
         if (ClientConfig.showgui || HUDManager.forceShow) return;
-        if (!AppData.InMainMenu) return;
+        if (!GameData.InMainMenu) return;
 
         string Text = "Magnetar Client <color=white>by</color> <color=red>Tproplay</color>";
         GUIContent content = new(Text);

@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using Magnetar_Client.UI.Setting;
-using static Magnetar_Client.Game.AppData;
-using Magnetar_Client.Game;
 using UnityEngine;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -110,7 +109,7 @@ public class SmallerPlants : Module
     Dictionary<Plant, Vector3> originalthePlantScale = new();
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         foreach (var plant in GameData.PlantList)
         {

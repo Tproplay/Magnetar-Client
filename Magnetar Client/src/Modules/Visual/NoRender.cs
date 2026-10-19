@@ -7,6 +7,8 @@ using System.IO;
 using UnityEngine;
 using System.Linq;
 using Magnetar_Client.Api;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -151,7 +153,7 @@ public class NoRender : Module
 
     public override void OnUpdateActive()
     {
-        if (Game.AppData.BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         // Particles
         if (ParticlesSetting.SelectedValues.Count != 0)

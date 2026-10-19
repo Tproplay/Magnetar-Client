@@ -7,8 +7,8 @@ using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static Magnetar_Client.Game.AppData;
-using static Magnetar_Client.Game.GameData;
+
+using static Magnetar_Client.GameData;
 using static Magnetar_Client.Utils.Maths;
 using static Magnetar_Client.Utils.Translator;
 using Magnetar_Client.Core;

@@ -1,10 +1,10 @@
 ﻿using HarmonyLib;
 using Magnetar_Client.UI.Setting;
-using Magnetar_Client.Game;
 using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -172,7 +172,7 @@ public class AutoPlant : Module
             if (card != null && card.onCardBank)
             {
                 if (card.isExtra && !UseExtraPlant.Value) continue;
-                if (card.CD >= card.fullCD && AppData.BoardInstance.theSun >= card.theSeedCost)
+                if (card.CD >= card.fullCD && GameData.BoardInstance.theSun >= card.theSeedCost)
                 {
                     availableCards.Add(card);
                 }
@@ -197,7 +197,7 @@ public class AutoPlant : Module
         {
             CardUI card = availableCards[i];
 
-            if (AppData.BoardInstance.theSun < card.theSeedCost) continue;
+            if (GameData.BoardInstance.theSun < card.theSeedCost) continue;
 
             List<GhostPlantRequest> candidates = new();
             foreach (var req in activeGhostsByTile.Values)
@@ -222,7 +222,7 @@ public class AutoPlant : Module
                 {
                     card.CD = 0f;
                     card.isAvailable = false;
-                    AppData.BoardInstance.UseSun(card.theSeedCost);
+                    GameData.BoardInstance.UseSun(card.theSeedCost);
 
                     chosen.targetPlantTypes.RemoveAt(0);
 
@@ -285,7 +285,7 @@ public class AutoPlant : Module
     private int GetPuffCount(int col, int row)
     {
         int count = 0;
-        if (!AppData.BoardInstanceIsNull && GameData.PlantList != null)
+        if (!GameData.BoardInstanceIsNull && GameData.PlantList != null)
         {
             for (int i = 0; i < GameData.PlantList.Count; i++)
             {
@@ -451,7 +451,7 @@ public class AutoPlant : Module
         bool hasBasePlant = false;
         bool isLegalStack = true;
 
-        if (!AppData.BoardInstanceIsNull && GameData.PlantList != null)
+        if (!GameData.BoardInstanceIsNull && GameData.PlantList != null)
         {
             for (int i = 0; i < GameData.PlantList.Count; i++)
             {
@@ -605,7 +605,7 @@ public class AutoPlant : Module
             CardUI heldCard = __instance.theCardOnMouse;
             if (heldCard == null || Board.Instance == null) return true;
 
-            if (heldCard.CD > 0f || AppData.BoardInstance.theSun < heldCard.theSeedCost)
+            if (heldCard.CD > 0f || GameData.BoardInstance.theSun < heldCard.theSeedCost)
             {
                 int col = __instance.theMouseColumn;
                 int row = __instance.theMouseRow;

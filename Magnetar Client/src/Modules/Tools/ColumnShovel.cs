@@ -4,7 +4,8 @@ using Magnetar_Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Magnetar_Client.Game.GameData;
+using static Magnetar_Client.GameData;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif

@@ -1,8 +1,8 @@
 ﻿using HarmonyLib;
 using Magnetar_Client.UI.Setting;
-using Magnetar_Client.Game;
 using System.Collections.Generic;
-using static Magnetar_Client.Game.AppData;
+
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -133,7 +133,7 @@ public class FasterPlants : Module
     // Mod Logic
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         foreach (var plant in GameData.PlantList)
         {

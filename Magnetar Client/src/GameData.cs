@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
+using System;
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -8,85 +9,7 @@ using Il2CppTMPro;
 using TMPro;
 #endif
 
-namespace Magnetar_Client.Game;
-
-/// <summary>
-/// Contains Useful App Stats, mainly used for code optimization
-/// </summary>
-public static class AppData
-{
-    public static Board BoardInstance;
-    public static bool BoardInstanceIsNull = true;
-
-    [HarmonyPatch(typeof(Board))]
-    private static class BoardPatch
-    {
-        [HarmonyPatch(nameof(Board.Awake))]
-        [HarmonyPostfix]
-        public static void AwakePostfix(Board __instance)
-        {
-            BoardInstance = __instance;
-            BoardInstanceIsNull = false;
-        }
-
-        [HarmonyPatch(nameof(Board.OnDestroy))]
-        [HarmonyPrefix]
-        public static void OnDestroyPrefix(Board __instance)
-        {
-            if (BoardInstance != null && BoardInstance.Pointer == __instance.Pointer)
-            {
-                BoardInstance = null;
-                BoardInstanceIsNull = true;
-            }
-        }
-    }
-
-    public static Wheel WheelInstance;
-
-    [HarmonyPatch(typeof(InGameTool))]
-    public static class WheelPatch
-    {
-        [HarmonyPatch("Start")]
-        [HarmonyPostfix]
-        public static void StartPostfix(InGameTool __instance)
-        {
-            if (__instance == null) return;
-
-            var wheelInstance = __instance.TryCast<Wheel>();
-            if (wheelInstance != null)
-            {
-                WheelInstance = wheelInstance;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Checks if the player is on the MainMenu
-    /// </summary>
-    public static bool InMainMenu 
-    { 
-        get 
-        {
-            if (GameAPP.canvas == null) return true;
-            return (GameAPP.canvas.Find("MainMenu(Clone)") != null ||
-              GameAPP.canvas.Find("MainMenu_travel(Clone)") != null) && !InAlmanac;
-        } 
-    }
-
-    /// <summary>
-    /// Checks if the player is checking the Almanac
-    /// </summary>
-    public static bool InAlmanac
-    {
-        get
-        {
-            if (GameAPP.canvasUp == null) return false;
-            return GameAPP.canvasUp.Find("AlmanacMenu(Clone)") != null;
-        }
-    }
-}
-
-
+namespace Magnetar_Client;
 
 /// <summary>
 /// Contains useful Game Stats like the plants place, zombies in the lawn, etc.
@@ -98,6 +21,15 @@ public static class GameData
     /// Sorted List of the current active plants on the BoardInstance.
     /// </summary>
     public static List<Plant> PlantList => GetPlants();
+    /// <summary>
+    /// Invoked when a <see cref="Plant"/> is spawned/created
+    /// </summary>
+    public static Action<Plant> OnPlantSpawned;
+    /// <summary>
+    /// Invoked when a <see cref="Plant"/> is about to die, after it has been removed from <see cref="PlantList"/>.
+    /// </summary>
+    public static Action<Plant> OnPlantDie;
+
 
     private static List<Plant> _plantList = new();
     static int _currentPlantCheckFrame;
@@ -122,26 +54,27 @@ public static class GameData
     }
 
     [HarmonyPatch(typeof(Plant))]
-    private static class PlantListPatch
+    static class PlantListPatch
     {
         [HarmonyPatch(nameof(Plant.Start))]
         [HarmonyPostfix]
         public static void StartPostFix(Plant __instance)
         {
-            if (AppData.BoardInstanceIsNull) return;
-
             if (!PlantList.Contains(__instance))
+            {
                 PlantList.Add(__instance);
+                OnPlantSpawned?.Invoke(__instance);
+            }
         }
 
         [HarmonyPatch(nameof(Plant.Die))]
         [HarmonyPrefix]
         public static void DiePreFix(Plant __instance)
         {
-            if (AppData.BoardInstanceIsNull) return;
-
-            PlantList.Remove(__instance);
-            
+            if (PlantList.Remove(__instance))
+            {
+                OnPlantDie?.Invoke(__instance);
+            }
         }
     }
 
@@ -153,7 +86,10 @@ public static class GameData
         public static void SetPlantPostfix(Plant __result)
         {
             if (!PlantList.Contains(__result))
+            {
                 PlantList.Add(__result);
+                OnPlantSpawned?.Invoke(__result);
+            }
         }
     }
 
@@ -164,6 +100,15 @@ public static class GameData
     /// Sorted List of the current active (non-idle) zombies on the BoardInstance.
     /// </summary>
     public static List<Zombie> ZombieList => GetZombies();
+    /// <summary>
+    /// Invoked when a <see cref="Zombie"/> is spawned/created
+    /// </summary>
+    public static Action<Zombie> OnZombieSpawned;
+    /// <summary>
+    /// Invoked when a <see cref="Zombie"/> is about to die, after it has been removed from <see cref="ZombieList"/>.
+    /// </summary>
+    public static Action<Zombie> OnZombieDie;
+
     private static List<Zombie> _zombieList = new();
     static int _currentZombieCheckFrame;
     static List<Zombie> GetZombies()
@@ -194,21 +139,20 @@ public static class GameData
         [HarmonyPostfix]
         public static void StartPostFix(Zombie __instance)
         {
-            if (AppData.BoardInstanceIsNull || __instance.gameObject==null ||
-                __instance.theZombieType==ZombieType.Nothing) return;
-
             if (!_zombieList.Contains(__instance))
+            {
                 _zombieList.Add(__instance);
+                OnZombieSpawned?.Invoke(__instance);
+            }
         }
 
         [HarmonyPatch(nameof(Zombie.Die))]
         [HarmonyPrefix]
         public static void DiePreFix(Zombie __instance)
         {
-            if (_zombieList.Contains(__instance))
+            if (_zombieList.Remove(__instance))
             { 
-                _zombieList.Remove(__instance);
-                Hypno_Zombies_Killed++;
+                OnZombieDie?.Invoke(__instance);
             }
         }
 
@@ -216,10 +160,9 @@ public static class GameData
         [HarmonyPrefix]
         public static void DestoryZombiePreFix(Zombie __instance)
         {
-            if (_zombieList.Contains(__instance))
+            if (_zombieList.Remove(__instance))
             {
-                _zombieList.Remove(__instance);
-                Hypno_Zombies_Killed++;
+                OnZombieDie?.Invoke(__instance);
             }
         }
     }
@@ -231,96 +174,101 @@ public static class GameData
         [HarmonyPostfix]
         public static void SetZombiePostfix(Zombie __result)
         {
-            if (!ZombieList.Contains(__result))
-                ZombieList.Add(__result);
-
+            if (!_zombieList.Contains(__result))
+            {
+                _zombieList.Add(__result);
+                OnZombieSpawned?.Invoke(__result);
+            }
         }
     }
 
     #endregion
 
-    #region Zombies
-
-    public static int Hypno_Zombies_Spawned;
-    public static int Hypno_Zombies_Killed;
-
-    [HarmonyPatch(typeof(Zombie))]
-    private static class ZombieStatsPatch
-    {
-        [HarmonyPatch(nameof(Zombie.Start))]
-        [HarmonyPostfix]
-        public static void StartPostfix(Zombie __instance)
-        {
-            if (__instance == null || !__instance.isMindControlled) return;
-            Hypno_Zombies_Spawned++;
-        }
-
-        [HarmonyPatch(nameof(Zombie.SetMindControl))]
-        [HarmonyPostfix]
-        public static void SetMindControlPostfix(Zombie __instance)
-        {
-            if (__instance == null) return;
-            Hypno_Zombies_Spawned++;
-        }
-    }
-
-    #endregion
-
-    #region Bullets
-
-    public static long TotalNumberOfBulletsSpawned;
-    [HarmonyPatch(typeof(Bullet))]
-    private class BulletPatch
-    {
-        [HarmonyPatch(nameof(Bullet.InitData))]
-        [HarmonyPostfix]
-        public static void InitDataPatch(Bullet __instance)
-        {
-            if (__instance == null) return;
-
-            TotalNumberOfBulletsSpawned++;
-        }
-    }
-    
-
-
-    #endregion
-
-    #region Reset Values
     [HarmonyPatch(typeof(Board))]
-    public class BoardPatch
+    static class BoardPatch
     {
         [HarmonyPatch(nameof(Board.Awake))]
         [HarmonyPostfix]
         static void AwakePostFix(Board __instance)
         {
-            // Things to be reset at the start of a level
             PlantList.Clear();
             _zombieList.Clear();
-
-            TotalNumberOfBulletsSpawned = 0;
-
-            Hypno_Zombies_Spawned = 0; Hypno_Zombies_Killed = 0;
-            
         }
 
         [HarmonyPatch(nameof(Board.Die))]
         [HarmonyPostfix]
         static void DiePostFix(Board __instance)
         {
-            // Things to be reset at the end of a level
             PlantList.Clear();
             _zombieList.Clear();
 
         }
     }
 
-    
+    #region Board Instance
+
+    /// <summary>
+    /// Instance of Board Active.
+    /// </summary>
+    public static Board BoardInstance;
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    public static bool BoardInstanceIsNull = true;
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
+    [HarmonyPatch(typeof(Board))]
+    static class BoardInstancePatch
+    {
+        [HarmonyPatch(nameof(Board.Awake))]
+        [HarmonyPostfix]
+        static void AwakePostfix(Board __instance)
+        {
+            GameData.BoardInstance = __instance;
+            GameData.BoardInstanceIsNull = false;
+        }
+
+        [HarmonyPatch(nameof(Board.OnDestroy))]
+        [HarmonyPrefix]
+        static void OnDestroyPrefix(Board __instance)
+        {
+            if (GameData.BoardInstance != null && GameData.BoardInstance.Pointer == __instance.Pointer)
+            {
+                GameData.BoardInstance = null;
+                GameData.BoardInstanceIsNull = true;
+            }
+        }
+    }
+
     #endregion
 
-    #region Get Level Name
+    #region Wheel Barrow
+
     /// <summary>
-    /// Get the Name of the level being played.
+    /// Instance of Wheel Barrow.
+    /// </summary>
+    public static Wheel WheelInstance;
+
+    [HarmonyPatch(typeof(InGameTool))]
+    static class WheelPatch
+    {
+        [HarmonyPatch("Start")]
+        [HarmonyPostfix]
+        static void StartPostfix(InGameTool __instance)
+        {
+            if (__instance == null) return;
+
+            var wheelInstance = __instance.TryCast<Wheel>();
+            if (wheelInstance != null)
+            {
+                GameData.WheelInstance = wheelInstance;
+            }
+        }
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Get the Name of the level being played. Returns Unknown if name was not found.
     /// </summary>
     public static string GetLevelName()
     {
@@ -339,5 +287,29 @@ public static class GameData
 
         return "Unknown";
     }
-    #endregion
+
+    /// <summary>
+    /// Checks if the player is on the MainMenu
+    /// </summary>
+    public static bool InMainMenu
+    {
+        get
+        {
+            if (GameAPP.canvas == null) return true;
+            return (GameAPP.canvas.Find("MainMenu(Clone)") != null ||
+              GameAPP.canvas.Find("MainMenu_travel(Clone)") != null) && !InAlmanac;
+        }
+    }
+
+    /// <summary>
+    /// Checks if the player is checking the Almanac
+    /// </summary>
+    public static bool InAlmanac
+    {
+        get
+        {
+            if (GameAPP.canvasUp == null) return false;
+            return GameAPP.canvasUp.Find("AlmanacMenu(Clone)") != null;
+        }
+    }
 }

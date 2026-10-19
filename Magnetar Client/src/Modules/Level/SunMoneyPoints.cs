@@ -1,7 +1,9 @@
 ﻿using System;
 using Magnetar_Client.UI.Setting;
-using static Magnetar_Client.Game.AppData;
+
 using HarmonyLib;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -81,19 +83,19 @@ public class SunHack : Module
     private static bool wasAutoSun = true;
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         // --- Unlimited Sun ---
         if (UnlimitedSun.Value != _lastUnlimitedState)
         {
             if (UnlimitedSun.Value) // Just turned ON
             {
-                originalSunAmount = BoardInstance.theSun;
+                originalSunAmount = GameData.BoardInstance.theSun;
             }
             else // Just turned OFF
             {
                 if (originalSunAmount >= 0 && preserveOriginalSetting.Value)
-                    BoardInstance.theSun = originalSunAmount;
+                    GameData.BoardInstance.theSun = originalSunAmount;
 
                 originalSunAmount = -1_853_721_342;
             }
@@ -103,7 +105,7 @@ public class SunHack : Module
         // Execution
         if (UnlimitedSun.Value)
         {
-            BoardInstance.theSun = sunSetting.Value;
+            GameData.BoardInstance.theSun = sunSetting.Value;
         }
 
         // --- Sun Multiplier ---
@@ -111,11 +113,11 @@ public class SunHack : Module
         {
             if (SunMultipier.Value) // Just turned ON
             {
-                _originalSunEfficiency = BoardInstance.sunEfficiency;
+                _originalSunEfficiency = GameData.BoardInstance.sunEfficiency;
             }
             else // Just turned OFF
             {
-                BoardInstance.sunEfficiency = _originalSunEfficiency;
+                GameData.BoardInstance.sunEfficiency = _originalSunEfficiency;
             }
             _lastMultiplierState = SunMultipier.Value;
         }
@@ -123,49 +125,49 @@ public class SunHack : Module
         // Execution
         if (SunMultipier.Value)
         {
-            BoardInstance.sunEfficiency = sunMultiplierSetting.Value;
+            GameData.BoardInstance.sunEfficiency = sunMultiplierSetting.Value;
         }
 
         // Auto Sun Drop
 
         if (Active_AutoSunCD.Value)
         {
-            if (BoardInstance.theFallingSunCountDown > Math.Min(AutoSunCD.Value,last_fallsuncd))
-                BoardInstance.theFallingSunCountDown = AutoSunCD.Value;
+            if (GameData.BoardInstance.theFallingSunCountDown > Math.Min(AutoSunCD.Value,last_fallsuncd))
+                GameData.BoardInstance.theFallingSunCountDown = AutoSunCD.Value;
 
             // Update fall sun cd manually (if allow sun drop anywhere)
-            if (AllowSunDropAnywhere.Value && last_fallsuncd == BoardInstance.theFallingSunCountDown && Time.timeScale !=0)
-                BoardInstance.theFallingSunCountDown -= Time.deltaTime;
+            if (AllowSunDropAnywhere.Value && last_fallsuncd == GameData.BoardInstance.theFallingSunCountDown && Time.timeScale !=0)
+                GameData.BoardInstance.theFallingSunCountDown -= Time.deltaTime;
 
-            last_fallsuncd = BoardInstance.theFallingSunCountDown;
+            last_fallsuncd = GameData.BoardInstance.theFallingSunCountDown;
         }
 
         if (AllowSunDropAnywhere.Value)
         {
-            if (!BoardInstance.fallSun)
+            if (!GameData.BoardInstance.fallSun)
             {
                 wasAutoSun = false;
-                BoardInstance.fallSun = true;
+                GameData.BoardInstance.fallSun = true;
             }
 
-            if (BoardInstance.theFallingSunCountDown <= 0 && GameAPP.theGameStatus == GameStatus.InGame)
+            if (GameData.BoardInstance.theFallingSunCountDown <= 0 && GameAPP.theGameStatus == GameStatus.InGame)
             {
                 int col = UnityEngine.Random.RandomRangeInt(3, 10);
                 createManualFallSun(col);
-                BoardInstance.theFallingSunCountDown = 7.5f;
+                GameData.BoardInstance.theFallingSunCountDown = 7.5f;
             }
         }
     }
 
     public override void OnDisable()
     {
-        if (!BoardInstanceIsNull)
+        if (!GameData.BoardInstanceIsNull)
         {
             // Clean up Unlimited Sun
             if (_lastUnlimitedState)
             {
                 if (originalSunAmount >= 0 && preserveOriginalSetting.Value)
-                    BoardInstance.theSun = originalSunAmount;
+                    GameData.BoardInstance.theSun = originalSunAmount;
 
                 originalSunAmount = -1_853_721_342;
                 _lastUnlimitedState = false;
@@ -174,7 +176,7 @@ public class SunHack : Module
             // Clean up Multiplier
             if (_lastMultiplierState)
             {
-                BoardInstance.sunEfficiency = _originalSunEfficiency;
+                GameData.BoardInstance.sunEfficiency = _originalSunEfficiency;
                 _lastMultiplierState = false;
             }
 
@@ -188,7 +190,7 @@ public class SunHack : Module
     {
         if (enable) return;
 
-        if (!BoardInstanceIsNull) BoardInstance.fallSun = wasAutoSun;
+        if (!GameData.BoardInstanceIsNull) GameData.BoardInstance.fallSun = wasAutoSun;
         wasAutoSun = true;
     }
 
@@ -262,13 +264,13 @@ public class MoneyHack : Module
     // Mod Logic
     public override void OnDisable()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         // Clean up Unlimited Money
         if (_lastUnlimitedState)
         {
             if (originalMoneyAmount >= 0 && preserveOriginalSetting.Value)
-                BoardInstance.theMoney = originalMoneyAmount;
+                GameData.BoardInstance.theMoney = originalMoneyAmount;
 
             originalMoneyAmount = -1_853_721_342;
             _lastUnlimitedState = false;
@@ -277,26 +279,26 @@ public class MoneyHack : Module
         // Clean up Multiplier
         if (_lastMultiplierState)
         {
-            BoardInstance.moneyEfficiency = _originalMoneyEfficiency;
+            GameData.BoardInstance.moneyEfficiency = _originalMoneyEfficiency;
             _lastMultiplierState = false;
         }
     }
 
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         // --- Unlimited Money ---
         if (UnlimitedMoney.Value != _lastUnlimitedState)
         {
             if (UnlimitedMoney.Value) // Just turned ON
             {
-                originalMoneyAmount = BoardInstance.theMoney;
+                originalMoneyAmount = GameData.BoardInstance.theMoney;
             }
             else // Just turned OFF
             {
                 if (originalMoneyAmount >= 0 && preserveOriginalSetting.Value)
-                    BoardInstance.theMoney = originalMoneyAmount;
+                    GameData.BoardInstance.theMoney = originalMoneyAmount;
 
                 originalMoneyAmount = -1_853_721_342;
             }
@@ -306,7 +308,7 @@ public class MoneyHack : Module
         // Execution
         if (UnlimitedMoney.Value)
         {
-            BoardInstance.theMoney = moneySetting.Value;
+            GameData.BoardInstance.theMoney = moneySetting.Value;
         }
 
         // --- Money Multiplier ---
@@ -314,11 +316,11 @@ public class MoneyHack : Module
         {
             if (MoneyMultiplier.Value) // Just turned ON
             {
-                _originalMoneyEfficiency = BoardInstance.moneyEfficiency;
+                _originalMoneyEfficiency = GameData.BoardInstance.moneyEfficiency;
             }
             else // Just turned OFF
             {
-                BoardInstance.moneyEfficiency = _originalMoneyEfficiency;
+                GameData.BoardInstance.moneyEfficiency = _originalMoneyEfficiency;
             }
             _lastMultiplierState = MoneyMultiplier.Value;
         }
@@ -326,7 +328,7 @@ public class MoneyHack : Module
         // Execution
         if (MoneyMultiplier.Value)
         {
-            BoardInstance.moneyEfficiency = moneyMultiplierSetting.Value;
+            GameData.BoardInstance.moneyEfficiency = moneyMultiplierSetting.Value;
         }
     }
 }
@@ -384,13 +386,13 @@ public class PointsHack : Module
     // Mod Logic
     public override void OnDisable()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         // Clean up Unlimited Points
         if (_lastUnlimitedState)
         {
             if (originalPointsAmount >= 0 && preserveOriginalSetting.Value)
-                BoardInstance.thePoints = originalPointsAmount;
+                GameData.BoardInstance.thePoints = originalPointsAmount;
 
             originalPointsAmount = -1_853_721_342;
             _lastUnlimitedState = false;
@@ -403,19 +405,19 @@ public class PointsHack : Module
 
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         // --- Unlimited Points ---
         if (UnlimitedPoints.Value != _lastUnlimitedState)
         {
             if (UnlimitedPoints.Value) // Just turned ON
             {
-                originalPointsAmount = BoardInstance.thePoints;
+                originalPointsAmount = GameData.BoardInstance.thePoints;
             }
             else // Just turned OFF
             {
                 if (originalPointsAmount >= 0 && preserveOriginalSetting.Value)
-                    BoardInstance.thePoints = originalPointsAmount;
+                    GameData.BoardInstance.thePoints = originalPointsAmount;
 
                 originalPointsAmount = -1_853_721_342;
             }
@@ -425,7 +427,7 @@ public class PointsHack : Module
         // Execution
         if (UnlimitedPoints.Value)
         {
-            BoardInstance.thePoints = pointsSetting.Value;
+            GameData.BoardInstance.thePoints = pointsSetting.Value;
         }
 
         // --- Points Multiplier ---
@@ -433,7 +435,7 @@ public class PointsHack : Module
         {
             if (PointsMultiplier.Value) // Just turned ON
             {
-                _pointsAmount = BoardInstance.thePoints;
+                _pointsAmount = GameData.BoardInstance.thePoints;
             }
             else // Just turned OFF
             {
@@ -445,7 +447,7 @@ public class PointsHack : Module
         // Execution (Since Points don't have an efficiency field)
         if (PointsMultiplier.Value)
         {
-            float points = BoardInstance.thePoints;
+            float points = GameData.BoardInstance.thePoints;
 
             if (_pointsAmount == -9476224.35443f || points == pointsSetting.Value)
                 _pointsAmount = points;
@@ -453,9 +455,9 @@ public class PointsHack : Module
             if (points != _pointsAmount)
             {
                 if ((points - _pointsAmount) > 0)
-                    BoardInstance.thePoints += (points - _pointsAmount) * (pointsMultiplierSetting.Value - 1);
+                    GameData.BoardInstance.thePoints += (points - _pointsAmount) * (pointsMultiplierSetting.Value - 1);
 
-                _pointsAmount = BoardInstance.thePoints;
+                _pointsAmount = GameData.BoardInstance.thePoints;
             }
         }
     }

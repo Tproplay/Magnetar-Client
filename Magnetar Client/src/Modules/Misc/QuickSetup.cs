@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using static Magnetar_Client.Game.AppData;
-using static Magnetar_Client.Game.GameData;
+
+using static Magnetar_Client.GameData;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Api.PathsManager;
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;

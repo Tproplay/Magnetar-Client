@@ -1,7 +1,9 @@
-﻿using static Magnetar_Client.Game.AppData;
+﻿
 using System.Linq;
 
 using Magnetar_Client.UI.Setting;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -49,14 +51,14 @@ public class ChangeMap : Module
     public void ChangeMapNow()
     {
         if (!Active) return;
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         if (MapSetting.SelectedValues.Count != 1) return;
 
         int map = MapSetting.SelectedValues.First();
-
-        BoardInstance.StartCoroutine(
-            BoardInstance.SmoothlyChangeMap((SceneType)map)
+        GameData.
+                BoardInstance.StartCoroutine(
+GameData.BoardInstance.SmoothlyChangeMap((SceneType)map)
             );
 
     }

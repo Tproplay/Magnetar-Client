@@ -1,11 +1,12 @@
 ﻿#if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
+
 #elif BEPINEX || RELEASE_BEPINEX
 #endif
 using Magnetar_Client.UI.Setting;
 using UnityEngine;
-using static Magnetar_Client.Game.AppData;
-using static Magnetar_Client.Game.GameData;
+
+using static Magnetar_Client.GameData;
 
 namespace Magnetar_Client.Modules;
 
@@ -30,8 +31,8 @@ public class KillPlants : Module
 
     public bool TurnOffAfterUse = true;
     public BoolSetting AutoTurnOff;
-    public override bool Active { get; set; } = false;
-    public static float deltaTime = 0;
+    public override bool Active { get; set; }
+    public static float deltaTime;
 
     public KillPlants()
     {
@@ -42,7 +43,7 @@ public class KillPlants : Module
         PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
         {
             Blacklist = Banned.PlantTypeBanned,
-            CustomNames = TranslatedNames(typeof(PlantType))
+            CustomNames = TranslateEnum(typeof(PlantType))
         };
 
         PlantsSelectedSetting.SelectAll(setDefault: true);
@@ -61,7 +62,7 @@ public class KillPlants : Module
 
     public override void OnLanguageChanged()
     {
-        PlantsSelectedSetting.CustomNames = TranslatedNames(typeof(PlantType));
+        PlantsSelectedSetting.CustomNames = TranslateEnum(typeof(PlantType));
     }
 
     // Mod Logic

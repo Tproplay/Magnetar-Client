@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using static Magnetar_Client.UI.Themes.Magnetar_Default;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 
 namespace Magnetar_Client.HUDElements;
 
@@ -42,7 +42,7 @@ public class CPUElement : HudElement
 
     public override void OnEnable()
     {
-        displayText = $"<color=cyan>{cpuName}</color>\n";
+        displayText = $"<color=cyan>{cpuName}</color>";
 
         AdjustWidthToText(displayText, HUDElementStyle, 10);
     }

@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using Magnetar_Client.UI.Setting;
-using static Magnetar_Client.Game.AppData;
-using static Magnetar_Client.Game.GameData;
+
+using static Magnetar_Client.GameData;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -31,7 +32,7 @@ public class HypnotizeZombies : Module
     public readonly bool TurnOffAfterUse = true;
     public BoolSetting AutoTurnOff;
 
-    public static float deltaTime = 0;
+    public static float deltaTime;
 
     public HypnotizeZombies()
     {
@@ -41,7 +42,7 @@ public class HypnotizeZombies : Module
 
         ZombiesSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
 
         };
@@ -56,7 +57,7 @@ public class HypnotizeZombies : Module
 
     public override void OnLanguageChanged()
     {
-        ZombiesSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
+        ZombiesSelectedSetting.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
     // Mod Logic

@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-
-using Magnetar_Client.UI.Setting;
+﻿using Magnetar_Client.UI.Setting;
+using UnityEngine;
 namespace Magnetar_Client.Modules;
 
 public class FPSLimit : Module
@@ -12,7 +11,7 @@ public class FPSLimit : Module
         "maxfps fpsfix fpsunlocked framecap framepersecond fpslimiter fpxlimit fpaslimit fps-limit fpsbypass bypassfps nofpslimit " +
         "unlimitedfps fpsset setfps fps-cap morefps fpsboost lagfix frameslimit";
     public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     // Mod Data
 

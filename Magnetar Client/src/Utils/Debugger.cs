@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+﻿using Magnetar_Client.Modules;
 #if MELONLOADER || RELEASE_MELON
 using MelonLoader;
 using MelonLoader.Logging;
@@ -25,6 +25,9 @@ public class CustomLogger
 #endif
 
 #if MELONLOADER || RELEASE_MELON
+    /// <summary>
+    /// Create a new Logger
+    /// </summary>
     public CustomLogger(string name, ColorARGB melonColor)
     {
         _name = name;
@@ -32,19 +35,19 @@ public class CustomLogger
         _loggerColor = melonColor;
     }
 #elif BEPINEX || RELEASE_BEPINEX
+/// <summary>
+    /// Create a new Logger
+    /// </summary>
     public CustomLogger(string name, string bepInAnsiColor)
     {
         _name = name;
         _bepInExLogger = Logger.CreateLogSource(name);
         _ansiColorPrefix = bepInAnsiColor;
     }
-#else
-    public CustomLogger(string name)
-    {
-        _name = name;
-    }
 #endif
-
+    /// <summary>
+    /// Log a message to console
+    /// </summary>
     public void Msg(string message)
     {
 #if MELONLOADER || RELEASE_MELON
@@ -58,7 +61,10 @@ public class CustomLogger
 #endif
 #endif
     }
-
+    /// <summary>
+    /// Log a warning to console
+    /// </summary>
+    /// <param name="message"></param>
     public void Warning(string message)
     {
 #if MELONLOADER || RELEASE_MELON
@@ -67,7 +73,10 @@ public class CustomLogger
         _bepInExLogger.LogWarning(message);
 #endif
     }
-
+    /// <summary>
+    /// Log a error to console
+    /// </summary>
+    /// <param name="message"></param>
     public void Error(string message)
     {
 #if MELONLOADER || RELEASE_MELON
@@ -78,12 +87,30 @@ public class CustomLogger
     }
 }
 
+/// <summary>
+/// Contains all the loggers of the mod.
+/// </summary>
 public static class Magnetar_Logger
 {
+    /// <summary>
+    /// Use by the Translator
+    /// </summary>
     public static CustomLogger TranslatorLogger;
+    /// <summary>
+    /// General logger for the client
+    /// </summary>
     public static CustomLogger DebugLogger;
+    /// <summary>
+    /// Logger for <see cref="SaveLoad"/>
+    /// </summary>
     public static CustomLogger AutoSaveLogger;
+    /// <summary>
+    /// Logger specially for <see cref="DebugMode"/>
+    /// </summary>
     public static CustomLogger DebugModeLogger;
+    /// <summary>
+    /// Logger for the core GUI
+    /// </summary>
     public static CustomLogger GUILogger;
 
 #if !ANDROID && (BEPINEX || RELEASE_BEPINEX)
@@ -101,7 +128,7 @@ public static class Magnetar_Logger
     private const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
 #endif
 
-    public static void Init()
+    internal static void Init()
     {
 #if !ANDROID && (BEPINEX || RELEASE_BEPINEX)
         try

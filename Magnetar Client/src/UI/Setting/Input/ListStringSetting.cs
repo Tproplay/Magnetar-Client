@@ -1,21 +1,51 @@
-﻿using System;
+﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.WindowDrawing;
+using static Magnetar_Client.Utils.Translator;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Magnetar_Client.UI.Themes;
-using Magnetar_Client.UI.WindowDrawing;
-using Magnetar_Client.Utils;
+using Magnetar_Client.Core;
 
 namespace Magnetar_Client.UI.Setting;
 
+/// <summary>
+/// A setting module representing a dynamic list of editable strings, supporting addition, deletion,
+/// count limits, and optional bracket autocomplete variables.
+/// </summary>
 public class ListStringSetting : Setting
 {
+    /// <summary>
+    /// The collection of currently active string values.
+    /// </summary>
     public List<string> Values = new();
+
+    /// <summary>
+    /// The default string list restored when <see cref="Reset"/> is executed.
+    /// </summary>
     public List<string> DefaultValues = new();
+
+    /// <summary>
+    /// The maximum number of string entries allowed in this setting.
+    /// </summary>
     public int MaxCount { get; set; } = 10;
+
+    /// <summary>
+    /// Optional list of variable names available for bracket autocomplete (e.g. "{player}").
+    /// </summary>
     public List<string> AutocompleteVars;
 
+    /// <summary>
+    /// Event invoked whenever string items are added, edited, or removed.
+    /// </summary>
     public Action<List<string>> OnValueChanged { get; set; }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="ListStringSetting"/>.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="defaultValues">The initial and default string list.</param>
+    /// <param name="maxCount">The maximum allowed entries.</param>
+    /// <param name="autocompleteVars">Optional list of autocomplete placeholders.</param>
     public ListStringSetting(string name, List<string> defaultValues = null, int maxCount = 10, List<string> autocompleteVars = null)
     {
         Name = name;
@@ -28,26 +58,34 @@ public class ListStringSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Restores the string list back to <see cref="DefaultValues"/>.
+    /// </summary>
     public override void Reset()
     {
         Values = new List<string>(DefaultValues);
         OnValueChanged?.Invoke(Values);
     }
 
+    /// <summary>
+    /// Renders the list items, individual delete buttons, add button, and reset button in IMGUI layout.
+    /// </summary>
+    /// <param name="y">Reference to the vertical layout offset.</param>
+    /// <param name="width">The total available layout width.</param>
     public override void Draw(ref float y, float width)
     {
         Event e = Event.current;
-        float elemH = Config.elementHeight;
-        float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
-        float actionBtnW = Config.SettingsInput.ResetButtonW;
-        float addBtnW = Config.SettingWidth;
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
+        float actionBtnW = SettingValues.ResetButtonW;
+        float addBtnW = ClientConfig.SettingWidth;
 
         // Label on the left
-        float labelW = Mathf.Max(width * 0.35f, Config.S(120f));
+        float labelW = Mathf.Max(width * 0.35f, GUIManager.S(120f));
         Rect labelRect = new(indent, y, labelW, elemH);
-        GUI.Label(labelRect, Translator.Translate(Name), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Input fields right column area
         float rightBoxW = width - (indent * 2f) - labelW - gap;
@@ -64,7 +102,7 @@ public class ListStringSetting : Setting
 
             Values[i] = DrawSetting.DrawManualTextField(rowRect, Values[i] ?? "", "", AutocompleteVars);
 
-            GUI.Box(delRect, "—", Magnetar_Default.ListRemoveButtonStyle);
+            GUI.Box(delRect, "—", ThemeManager.ListRemoveButtonStyle);
             if (delRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
             {
                 removeIndex = i;
@@ -88,9 +126,9 @@ public class ListStringSetting : Setting
         Rect addBtnRect = new(addStartX, y, addBtnW, elemH);
 
         bool canAdd = Values.Count < MaxCount;
-        GUIStyle addStyle = canAdd ? Magnetar_Default.ListAddButtonStyle : Magnetar_Default.CategoryModuleOffStyle;
+        GUIStyle addStyle = canAdd ? ThemeManager.ListAddButtonStyle : ThemeManager.CategoryModuleOffStyle;
 
-        GUI.Box(addBtnRect, Translator.Translate(canAdd ? "Add" : "Max Reached"), addStyle);
+        GUI.Box(addBtnRect, Translate(canAdd ? "Add" : "Max Reached"), addStyle);
 
         if (canAdd && addBtnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
@@ -104,6 +142,6 @@ public class ListStringSetting : Setting
             Reset();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
     }
 }

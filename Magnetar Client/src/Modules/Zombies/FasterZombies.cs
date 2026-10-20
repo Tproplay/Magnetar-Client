@@ -1,9 +1,9 @@
 ﻿using HarmonyLib;
 using Magnetar_Client.UI.Setting;
-using Magnetar_Client.Game;
 using System;
 using System.Collections.Generic;
-using static Magnetar_Client.Game.AppData;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -29,7 +29,7 @@ public class FasterZombies : Module
 
     public MultiSelectSetting ZombieSelectedSetting;
     public FloatSetting theSpeedSetting;
-    public override bool Active { get; set; } = false;
+    public override bool Active { get; set; }
 
     public static Dictionary<IntPtr, float> originalSpeedData = new();
 
@@ -41,7 +41,7 @@ public class FasterZombies : Module
 
         ZombieSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
         };
         ZombieSelectedSetting.SelectAll(setDefault: true);
@@ -54,13 +54,13 @@ public class FasterZombies : Module
 
     public override void OnLanguageChanged()
     {
-        ZombieSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
+        ZombieSelectedSetting.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
     // Mod Logic
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         float currentMultiplier = theSpeedSetting.Value;
         var selectedZombies = ZombieSelectedSetting.SelectedValues;

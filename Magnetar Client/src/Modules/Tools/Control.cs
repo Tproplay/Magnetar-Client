@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using Magnetar_Client.UI.Setting;
-using static Magnetar_Client.Game.AppData;
+
 using UnityEngine;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -46,7 +48,7 @@ public class Control : Module
 
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         if (GetKeyComboDown(ControlKey.BindKeys))
         {
@@ -57,9 +59,10 @@ public class Control : Module
                 Plant plant = cast.collider.gameObject.GetComponent<Plant>();
                 if (plant!= null)
                 {
-                    var current_plant = BoardInstance.controledPlant;
-                    if (BoardInstance.controledPlant != plant) { BoardInstance.controledPlant = plant; current_plant?.UpdateText(); }
-                    else BoardInstance.controledPlant = null;
+                    var current_plant = GameData.BoardInstance.controledPlant;
+                    if (GameData.BoardInstance.controledPlant != plant) { GameData.BoardInstance.controledPlant = plant; current_plant?.UpdateText(); }
+                    else
+                        GameData.BoardInstance.controledPlant = null;
                     plant.UpdateText();
                 }
             }
@@ -67,14 +70,14 @@ public class Control : Module
 
         if (SinglePlantMode.Value)
         {
-            if (BoardInstance.controledPlant == null) BoardInstance.controledPlant = Lawnf.GetAllPlants()?.Count > 0 ? Lawnf.GetAllPlants()[0] : null;
+            if (GameData.BoardInstance.controledPlant == null) GameData.BoardInstance.controledPlant = Lawnf.GetAllPlants()?.Count > 0 ? Lawnf.GetAllPlants()[0] : null;
         }
     }
 
     public override void OnDisable()
     {
-        if (BoardInstanceIsNull) return;
-        BoardInstance.controledPlant = null;
+        if (GameData.BoardInstanceIsNull) return;
+        GameData.BoardInstance.controledPlant = null;
     }
 
 }

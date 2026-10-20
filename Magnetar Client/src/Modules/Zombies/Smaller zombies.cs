@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using Magnetar_Client.UI.Setting;
-using static Magnetar_Client.Game.AppData;
-using Magnetar_Client.Game;
 using UnityEngine;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -37,7 +36,7 @@ public class SmallerZombies : Module
 
         selectedZombies = new MultiSelectSetting("Entities", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
         };
         selectedZombies.SelectAll(setDefault: true);
@@ -51,7 +50,7 @@ public class SmallerZombies : Module
 
     public override void OnLanguageChanged()
     {
-        selectedZombies.CustomNames = TranslatedNames(typeof(ZombieType));
+        selectedZombies.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
     // Mod Logic
@@ -59,7 +58,7 @@ public class SmallerZombies : Module
     Dictionary<Zombie, Vector3> originaltheZombieScale = new();
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         foreach (var zombie in GameData.ZombieList)
         {

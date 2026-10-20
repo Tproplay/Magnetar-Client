@@ -1,0 +1,255 @@
+﻿using Magnetar_Client.Api;
+using Magnetar_Client.UI;
+using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.WindowDrawing;
+using Magnetar_Client.Utils;
+using System;
+using UnityEngine;
+using static Magnetar_Client.Utils.Translator;
+
+namespace Magnetar_Client.Core;
+
+public static class ProfileGUI
+{
+    private const float BaseWindowWidth = 480f;
+    private const float BaseWindowHeight = 420f;
+    private const float BaseElementHeight = 30f;
+
+    public static Rect WindowRect = new(
+        (ClientConfig.NativeWidth - GUIManager.S(BaseWindowWidth)) / 2,
+        (ClientConfig.NativeHeight - GUIManager.S(BaseWindowHeight)) / 2,
+GUIManager.S(BaseWindowWidth),
+GUIManager.S(BaseWindowHeight));
+
+    private static string newProfileInput = "";
+    private static float scrollY;
+    private static float elementHeight => GUIManager.S(BaseElementHeight);
+
+    public static void Init()
+    {
+        ServiceRegistry.Register(new ProfileGUIService());
+
+        SafeToCloseManager.RegisterGuard(() =>
+        {
+            if (ClientConfig.CurrentTab == TabType.PROFILE)
+            {
+                return DrawSetting.ActiveTextFieldId == -1
+                       && DrawSetting.FocusedControlId == -1;
+            }
+            return true;
+        });
+    }
+
+    public static void Render()
+    {
+        ClientConfig.RescaleAroundCenter(ref WindowRect, GUIManager.S(BaseWindowWidth), GUIManager.S(BaseWindowHeight));
+
+        GUIStyle windowBgStyle = ThemeManager.SettingsWndowBgStyle ?? ThemeManager.CategoryWindowStyle;
+
+        WindowRect = GUI.Window(
+            4002,
+            WindowRect,
+            (GUI.WindowFunction)DrawProfileWindow,
+            "",
+            windowBgStyle
+        );
+    }
+
+    private static void DrawProfileWindow(int windowID)
+    {
+        Color prevColor = GUI.color;
+        Color prevContentColor = GUI.contentColor;
+        float currentAlpha = AnimationHandler.CurrentEasedAlpha;
+
+        GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
+        GUI.contentColor = new Color(prevContentColor.r, prevContentColor.g, prevContentColor.b, prevContentColor.a * currentAlpha);
+
+        try
+        {
+            Event e = Event.current;
+            float w = WindowRect.width;
+            float indent = GUIManager.S(12f);
+            float y = GUIManager.S(35f);
+
+            Rect headerBgRect = new(0, 0, w, y - indent);
+            GUI.Box(headerBgRect, Translate("Profile Manager"), ThemeManager.SettingsWndowStyle);
+
+            GUI.Label(
+                new Rect(indent, y, w - (indent * 2), elementHeight),
+                $"{Translate("Current Active Profile")}: <color=yellow>{ProfileManager.CurrentProfile}</color>",
+                ThemeManager.SettingTextStyle
+            );
+
+            y += elementHeight + GUIManager.S(10f);
+
+            // --- CREATE NEW PROFILE ROW ---
+            float labelW = GUIManager.S(100f);
+            float btnW = GUIManager.S(90f);
+            float gap = GUIManager.S(8f);
+            float inputW = w - (indent * 2f) - labelW - btnW - (gap * 2f);
+
+            Rect labelRect = new(indent, y, labelW, elementHeight);
+            GUI.Label(labelRect, Translate("New Profile:"), ThemeManager.SettingTextStyle);
+
+            Rect inputRect = new(indent + labelW + gap, y, inputW, elementHeight);
+            newProfileInput = DrawSetting.DrawManualTextField(inputRect, newProfileInput, Translate("Enter profile name..."));
+
+            Rect createBtnRect = new(w - indent - btnW, y, btnW, elementHeight);
+            bool isCreateHover = createBtnRect.Contains(e.mousePosition);
+
+            Color prevBg = GUI.backgroundColor;
+            if (isCreateHover) GUI.backgroundColor = new Color(1.25f, 1.25f, 1.25f, 1.0f);
+            GUI.Box(createBtnRect, Translate("Create"), ThemeManager.SettingOff);
+            GUI.backgroundColor = prevBg;
+
+            if (e.type == EventType.MouseDown && e.button == 0 && isCreateHover)
+            {
+                if (!string.IsNullOrWhiteSpace(newProfileInput))
+                {
+                    if (ProfileManager.CreateProfile(newProfileInput))
+                    {
+                        newProfileInput = "";
+                        scrollY = 0f;
+                    }
+                }
+                e.Use();
+            }
+
+            y += elementHeight + GUIManager.S(14f);
+
+            float lineThickness = Mathf.Max(1f, GUIManager.S(1f));
+            GUI.Box(new Rect(indent, y, w - (indent * 2f), lineThickness), "", ThemeManager.SeparatorStyle);
+            y += lineThickness + GUIManager.S(10f);
+
+            // --- AVAILABLE PROFILES LIST ---
+            GUI.Label(new Rect(indent, y, w - (indent * 2f), elementHeight), Translate("Available Profiles:"), ThemeManager.SettingTextStyle);
+            y += elementHeight + GUIManager.S(5f);
+
+            float scrollAreaHeight = WindowRect.height - y - GUIManager.S(15f);
+            Rect scrollOuterRect = new(indent, y, w - (indent * 2f), scrollAreaHeight);
+
+            var profilesList = ProfileManager.Profiles;
+            float rowSpacing = GUIManager.S(6f);
+            float contentHeight = profilesList.Count * (elementHeight + rowSpacing);
+            float maxScroll = Mathf.Max(0f, contentHeight - scrollAreaHeight);
+
+            if (scrollOuterRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
+            {
+                scrollY += e.delta.y * GUIManager.S(20f);
+                scrollY = Mathf.Clamp(scrollY, 0f, maxScroll);
+                e.Use();
+            }
+
+            GUI.BeginGroup(scrollOuterRect);
+
+            float itemY = -scrollY;
+            for (int i = 0; i < profilesList.Count; i++)
+            {
+                string profileName = profilesList[i];
+                bool isActive = string.Equals(ProfileManager.CurrentProfile, profileName, StringComparison.OrdinalIgnoreCase);
+                bool isDefault = string.Equals(ProfileManager.DefaultProfile, profileName, StringComparison.OrdinalIgnoreCase);
+
+                if (itemY + elementHeight >= 0 && itemY <= scrollAreaHeight)
+                {
+                    Rect itemRect = new(0, itemY, scrollOuterRect.width, elementHeight);
+                    float delBtnW = GUIManager.S(65f);
+                    float delBtnH = elementHeight - GUIManager.S(6f);
+                    Rect deleteBtnRect = new(itemRect.width - delBtnW - GUIManager.S(4f), itemY + GUIManager.S(3f), delBtnW, delBtnH);
+
+                    bool isItemHovered = itemRect.Contains(e.mousePosition);
+                    bool isDeleteHovered = !isDefault && deleteBtnRect.Contains(e.mousePosition);
+
+                    GUIStyle rowStyle = isActive
+                        ? ThemeManager.SettingOn
+                        : (isItemHovered && !isDeleteHovered ? ThemeManager.SettingOff : ThemeManager.CategoryModuleOffStyle);
+
+                    GUI.Box(itemRect, "", rowStyle);
+
+                    string labelText = isActive
+                        ? $"<b><color=yellow>{profileName}</color> ({Translate("Active")})</b>"
+                        : profileName;
+
+                    float textWidth = !isDefault ? itemRect.width - delBtnW - GUIManager.S(20f) : itemRect.width - GUIManager.S(20f);
+                    Rect textRect = new(GUIManager.S(10f), itemY, textWidth, elementHeight);
+
+                    GUI.Label(textRect, labelText, ThemeManager.SettingTextStyle);
+
+                    if (!isDefault)
+                    {
+                        Color oldBg = GUI.backgroundColor;
+                        GUI.backgroundColor = isDeleteHovered ? new Color(1f, 0.35f, 0.35f, 1f) : new Color(0.85f, 0.25f, 0.25f, 1f);
+                        GUI.Box(deleteBtnRect, Translate("Delete"), ThemeManager.SettingOff);
+                        GUI.backgroundColor = oldBg;
+                    }
+
+                    if (e.type == EventType.MouseDown && e.button == 0 && isItemHovered)
+                    {
+                        if (isDeleteHovered)
+                        {
+                            ProfileManager.DeleteProfile(profileName);
+                            e.Use();
+                        }
+                        else if (!isActive)
+                        {
+                            ProfileManager.SwitchProfile(profileName);
+                            e.Use();
+                        }
+                    }
+                }
+
+                itemY += elementHeight + rowSpacing;
+            }
+
+            GUI.EndGroup();
+
+            GUI.DragWindow(new Rect(0, 0, w, GUIManager.S(25f)));
+
+            if (WindowRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
+            {
+                Input.ResetInputAxes();
+                e.Use();
+            }
+        }
+        finally
+        {
+            GUI.color = prevColor;
+            GUI.contentColor = prevContentColor;
+        }
+    }
+
+    private class ProfileGUIService : IInitializable, IWarmUp, ICloseHandler, IRenderable
+    {
+        public string Name => "ProfileGUI";
+        public int Priority => ServicePriority.UI;
+
+        public void Initialize() { }
+        public void OnWarmUp() => ProfileGUI.Render();
+
+        public bool CanClose()
+        {
+            return DrawSetting.ActiveTextFieldId == -1
+                   && DrawSetting.FocusedControlId == -1;
+        }
+
+        public bool OnEscapePressed()
+        {
+            if (ClientConfig.CurrentTab != TabType.PROFILE) return false;
+
+            if (DrawSetting.ActiveTextFieldId != -1 || DrawSetting.FocusedControlId != -1)
+            {
+                DrawSetting.ResetInputBind();
+                Input.ResetInputAxes();
+                return true;
+            }
+
+            return false;
+        }
+
+        public void OnGUI() { }
+
+        public void OnMenuGUI() 
+        {
+            AnimationHandler.RenderWithTabAlpha(TabType.PROFILE, Render);
+        }
+    }
+}

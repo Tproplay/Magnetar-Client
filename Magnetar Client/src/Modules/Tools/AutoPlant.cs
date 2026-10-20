@@ -1,10 +1,9 @@
 ﻿using HarmonyLib;
 using Magnetar_Client.UI.Setting;
-using Magnetar_Client.Game;
-using Magnetar_Client.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -26,7 +25,7 @@ public class AutoPlant : Module
 
     // Mod Data
 
-    public static AutoPlant instance;
+    public static AutoPlant Instance { get; private set; }
 
     public class GhostPlantRequest
     {
@@ -36,8 +35,8 @@ public class AutoPlant : Module
         public int row;
         public GameObject ghostVisual;
 
-        public bool isProjectedSpread = false;
-        public GhostPlantRequest parentSpread = null;
+        public bool isProjectedSpread;
+        public GhostPlantRequest parentSpread;
     }
 
     public List<GhostPlantRequest> PendingPlants = new();
@@ -50,7 +49,14 @@ public class AutoPlant : Module
 
     public AutoPlant()
     {
-        instance = this;
+        Instance = this;
+
+        RegisterTranslations(new Dictionary<string, string>
+        {
+            { "First", "First" },
+            { "Last", "Last" },
+            { "Random", "Random" }
+        });
 
         CreateCategory("General");
         RenderGhost = new BoolSetting("Render Ghost Plant", true);
@@ -60,11 +66,11 @@ public class AutoPlant : Module
         PlantingOrderSetting = new SelectSetting("Planting Order", 0)
         {
             Options = new Dictionary<int, string>
-            {
-                {0, "First" },
-                {1, "Last" },
-                {2, "Random" },
-            }
+        {
+            { 0, "First" },
+            { 1, "Last" },
+            { 2, "Random" },
+        }
         };
 
         AddSettings(RenderGhost, GhostOpacity, MultiPlant, UseExtraPlant, PlantingOrderSetting);
@@ -73,8 +79,14 @@ public class AutoPlant : Module
 
     public override void OnLanguageChanged()
     {
-        PlantingOrderSetting.CustomNames = PlantingOrderSetting.Options
-            .ToDictionary(kvp => kvp.Key, kvp => Translator.Translate(kvp.Value));
+        base.OnLanguageChanged();
+
+        // Uses this module's scoped Translate() method rather than the global translator
+        if (PlantingOrderSetting?.Options != null)
+        {
+            PlantingOrderSetting.CustomNames = PlantingOrderSetting.Options
+                .ToDictionary(kvp => kvp.Key, kvp => Translate(kvp.Value));
+        }
     }
 
     // Mod Logic
@@ -159,7 +171,7 @@ public class AutoPlant : Module
             if (card != null && card.onCardBank)
             {
                 if (card.isExtra && !UseExtraPlant.Value) continue;
-                if (card.CD >= card.fullCD && AppData.BoardInstance.theSun >= card.theSeedCost)
+                if (card.CD >= card.fullCD && GameData.BoardInstance.theSun >= card.theSeedCost)
                 {
                     availableCards.Add(card);
                 }
@@ -184,7 +196,7 @@ public class AutoPlant : Module
         {
             CardUI card = availableCards[i];
 
-            if (AppData.BoardInstance.theSun < card.theSeedCost) continue;
+            if (GameData.BoardInstance.theSun < card.theSeedCost) continue;
 
             List<GhostPlantRequest> candidates = new();
             foreach (var req in activeGhostsByTile.Values)
@@ -200,7 +212,7 @@ public class AutoPlant : Module
                 GhostPlantRequest chosen = null;
 
                 if (PlantingOrderSetting.Value == 0) chosen = candidates[0];
-                else if (PlantingOrderSetting.Value == 1) chosen = candidates[candidates.Count - 1];
+                else if (PlantingOrderSetting.Value == 1) chosen = candidates[^1];
                 else if (PlantingOrderSetting.Value == 2) chosen = candidates[UnityEngine.Random.Range(0, candidates.Count)];
 
                 Plant nativePlantResult = CreatePlant.Instance.SetPlant(chosen.column, chosen.row, card.thePlantType);
@@ -209,7 +221,7 @@ public class AutoPlant : Module
                 {
                     card.CD = 0f;
                     card.isAvailable = false;
-                    AppData.BoardInstance.UseSun(card.theSeedCost);
+                    GameData.BoardInstance.UseSun(card.theSeedCost);
 
                     chosen.targetPlantTypes.RemoveAt(0);
 
@@ -272,7 +284,7 @@ public class AutoPlant : Module
     private int GetPuffCount(int col, int row)
     {
         int count = 0;
-        if (!AppData.BoardInstanceIsNull && GameData.PlantList != null)
+        if (!GameData.BoardInstanceIsNull && GameData.PlantList != null)
         {
             for (int i = 0; i < GameData.PlantList.Count; i++)
             {
@@ -349,7 +361,7 @@ public class AutoPlant : Module
         }
     }
 
-    private bool CanStack(PlantType basePlant, PlantType topPlant)
+    private static bool CanStack(PlantType basePlant, PlantType topPlant)
     {
         if (basePlant == topPlant)
         {
@@ -438,7 +450,7 @@ public class AutoPlant : Module
         bool hasBasePlant = false;
         bool isLegalStack = true;
 
-        if (!AppData.BoardInstanceIsNull && GameData.PlantList != null)
+        if (!GameData.BoardInstanceIsNull && GameData.PlantList != null)
         {
             for (int i = 0; i < GameData.PlantList.Count; i++)
             {
@@ -536,7 +548,7 @@ public class AutoPlant : Module
         {
             __state = new UpdateState { wasSpoofed = false };
 
-            if (instance == null || !instance.Active) return;
+            if (Instance == null || !Instance.Active) return;
 
             if (GameAPP.theGameStatus == GameStatus.Selecting) return;
             if (!Input.GetMouseButtonDown(0)) return;
@@ -587,12 +599,12 @@ public class AutoPlant : Module
         [HarmonyPrefix]
         public static bool Prefix(Mouse __instance)
         {
-            if (instance == null || !instance.Active) return true;
+            if (Instance == null || !Instance.Active) return true;
 
             CardUI heldCard = __instance.theCardOnMouse;
             if (heldCard == null || Board.Instance == null) return true;
 
-            if (heldCard.CD > 0f || AppData.BoardInstance.theSun < heldCard.theSeedCost)
+            if (heldCard.CD > 0f || GameData.BoardInstance.theSun < heldCard.theSeedCost)
             {
                 int col = __instance.theMouseColumn;
                 int row = __instance.theMouseRow;
@@ -603,9 +615,9 @@ public class AutoPlant : Module
                 float y = __instance.GetBoxYFromRow(row);
                 Vector3 worldPos = new(x, y, 0f);
 
-                if (instance.QueueGhostPlant(heldCard.thePlantType, col, row, worldPos))
+                if (Instance.QueueGhostPlant(heldCard.thePlantType, col, row, worldPos))
                 {
-                    if (!instance.MultiPlant.Value)
+                    if (!Instance.MultiPlant.Value)
                     {
                         if (__instance.theItemOnMouse != null)
                         {
@@ -630,10 +642,7 @@ public class AutoPlant : Module
         [HarmonyPostfix]
         public static void Postfix()
         {
-            if (instance != null)
-            {
-                instance.ClearGhostPlants();
-            }
+            Instance?.ClearGhostPlants();
         }
     }
 }

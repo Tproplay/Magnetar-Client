@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Magnetar_Client.UI.Setting;
-using static Magnetar_Client.Game.AppData;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -35,7 +36,7 @@ public class KeepShooting : Module
         PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
         {
             Blacklist = Banned.PlantTypeBanned,
-            CustomNames = TranslatedNames(typeof(PlantType))
+            CustomNames = TranslateEnum(typeof(PlantType))
         };
 
         PlantsSelectedSetting.SelectAll(setDefault: true);
@@ -47,7 +48,7 @@ public class KeepShooting : Module
 
     public override void OnLanguageChanged()
     {
-        PlantsSelectedSetting.CustomNames = TranslatedNames(typeof(PlantType));
+        PlantsSelectedSetting.CustomNames = TranslateEnum(typeof(PlantType));
     }
 
     // Mod Logic
@@ -60,7 +61,7 @@ public class KeepShooting : Module
         [HarmonyPostfix]
         public static void ShootablePostfix(Plant __instance, ref bool __result)
         {
-            if (instance == null || BoardInstanceIsNull) return;
+            if (instance == null || GameData.BoardInstanceIsNull) return;
             if (!instance.Active) return;
 
             if (instance.PlantsSelectedSetting.IsSelected((int)__instance.thePlantType))

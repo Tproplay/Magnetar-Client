@@ -1,7 +1,8 @@
 ﻿using Magnetar_Client.UI.Setting;
 using System.Linq;
 using HarmonyLib;
-using static Magnetar_Client.Game.AppData;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -36,7 +37,7 @@ public class ChangeBullet : Module
 
         selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
         {
-            CustomNames = TranslatedNames(typeof(BulletType)),
+            CustomNames = TranslateEnum(typeof(BulletType)),
         };
 
         selectBulletsSetting.SelectAll(setDefault: true);
@@ -50,7 +51,7 @@ public class ChangeBullet : Module
 
     public override void OnLanguageChanged()
     {
-        selectBulletsSetting.CustomNames = TranslatedNames(typeof(BulletType));
+        selectBulletsSetting.CustomNames = TranslateEnum(typeof(BulletType));
     }
 
     // Mod Logic
@@ -63,7 +64,7 @@ public class ChangeBullet : Module
         [HarmonyPrefix]
         public static void SetBulletPrefix(ref BulletType theBulletType, ref bool fromEnermy)
         {
-            if (instance == null || BoardInstanceIsNull) return;
+            if (instance == null || GameData.BoardInstanceIsNull) return;
             if (!instance.Active || fromEnermy) return;
 
             BulletType newType = theBulletType;

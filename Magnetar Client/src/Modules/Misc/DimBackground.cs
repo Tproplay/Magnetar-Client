@@ -1,4 +1,7 @@
-﻿namespace Magnetar_Client.Modules;
+﻿using Magnetar_Client.Api;
+using Magnetar_Client.UI;
+
+namespace Magnetar_Client.Modules;
 
 public class DimBackground : Module
 {
@@ -14,27 +17,39 @@ public class DimBackground : Module
     public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
 
     public override bool Active { get; set; } = true;
-    public override bool defaultActive { get; set; } = true;
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool defaultActive { get; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     // Mod Data
 
     public static DimBackground instance;
 
-    public  DimBackground()
+    public DimBackground()
     {
         instance = this;
-        Config.dimBg = Active;
+        ClientConfig.dimBg = Active;
     }
 
     // Mod Logic
     public override void OnEnable()
     {
-        Config.dimBg = true;
+        ClientConfig.dimBg = true;
+        Actions.OnMenuOpen += () => LockUI.BlockCanvas = true;
+        Actions.OnMenuClosed += () => LockUI.BlockCanvas = false;
+        if (ClientConfig.InGUI)
+        {
+            LockUI.BlockCanvas = true;
+        }
     }
 
     public override void OnDisable()
     {
-        Config.dimBg = false;
+        ClientConfig.dimBg = false;
+        Actions.OnMenuOpen -= () => LockUI.BlockCanvas = true;
+        Actions.OnMenuClosed -= () => LockUI.BlockCanvas = false;
+        if (ClientConfig.InGUI)
+        {
+            LockUI.BlockCanvas = false;
+        }
     }
 }

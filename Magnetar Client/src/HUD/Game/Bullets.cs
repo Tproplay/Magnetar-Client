@@ -1,6 +1,7 @@
-﻿using UnityEngine;
-using static Magnetar_Client.Game.GameData;
-using static Magnetar_Client.UI.Themes.Magnetar_Default;
+﻿using Il2Cpp;
+using UnityEngine;
+using HarmonyLib;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
 
 namespace Magnetar_Client.HUDElements;
@@ -9,6 +10,8 @@ public class NumberOfBulletsSpawned : HudElement
 {
     public NumberOfBulletsSpawned() : base("Number of Bullets Spawned", HudElement.NewRect(100))
     { UpdateInterval = 0.5f; }
+
+    static int TotalNumberOfBulletsSpawned;
 
     string displayText = "Bullets Spawned: Na";
     protected override void DrawContent(float width, float height)
@@ -24,5 +27,28 @@ public class NumberOfBulletsSpawned : HudElement
     public override void OnEnable()
     {
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
+    }
+
+    [HarmonyPatch(typeof(Bullet))]
+    private class BulletPatch
+    {
+        [HarmonyPatch(nameof(Bullet.InitData))]
+        [HarmonyPostfix]
+        public static void InitDataPatch(Bullet __instance)
+        {
+            if (__instance == null) return;
+
+            TotalNumberOfBulletsSpawned++;
+        }
+    }
+    [HarmonyPatch(typeof(Board))]
+    public class BoardPatch
+    {
+        [HarmonyPatch(nameof(Board.Awake))]
+        [HarmonyPostfix]
+        static void AwakePostFix(Board __instance)
+        {
+            TotalNumberOfBulletsSpawned = 0;
+        }
     }
 }

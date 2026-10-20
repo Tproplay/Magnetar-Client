@@ -1,6 +1,8 @@
-﻿using static Magnetar_Client.Game.AppData;
+﻿
 
 using Magnetar_Client.UI.Setting;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -44,16 +46,16 @@ public class LevelSetup : Module
     public void SetGravesNow()
     {
         if (!Active) return;
-        if (BoardInstanceIsNull) return;
-
-        BoardInstance.SetGrave();
+        if (GameData.BoardInstanceIsNull) return;
+        GameData.
+                BoardInstance.SetGrave();
     }
     public void SpawnGraveZombiesNow()
     {
         if (!Active) return;
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
-        foreach (var item in BoardInstance.griditemArray)
+        foreach (var item in GameData.BoardInstance.griditemArray)
         {
             if (item is Grave grave)
             {
@@ -65,9 +67,9 @@ public class LevelSetup : Module
     public void SetFreezedPlantsNow()
     {
         if (!Active) return;
-        if (BoardInstanceIsNull) return;
-
-        BoardInstance.SetFreezedPlant();
+        if (GameData.BoardInstanceIsNull) return;
+        GameData.
+                BoardInstance.SetFreezedPlant();
 
     }
 }

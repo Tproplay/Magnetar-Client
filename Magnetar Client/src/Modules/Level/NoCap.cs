@@ -1,6 +1,8 @@
-﻿using static Magnetar_Client.Game.AppData;
+﻿
 using HarmonyLib;
 using Magnetar_Client.UI.Setting;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -60,16 +62,16 @@ public class NoCap : Module
 
     public override void OnDisable()
     {
-        if (BoardInstanceIsNull) { originalMoneyLimit = -1; originalSunLimit = -1; return; }
+        if (GameData.BoardInstanceIsNull) { originalMoneyLimit = -1; originalSunLimit = -1; return; }
 
         if (originalSunLimit != -1)
         {
-            BoardInstance.maxSun = originalSunLimit;
+            GameData.BoardInstance.maxSun = originalSunLimit;
             originalSunLimit = -1;
         }
         if (originalMoneyLimit != -1)
         {
-            BoardInstance.maxMoney = originalMoneyLimit;
+            GameData.BoardInstance.maxMoney = originalMoneyLimit;
             originalMoneyLimit = -1;
         }
 
@@ -77,14 +79,14 @@ public class NoCap : Module
 
     void SetSunLimit(int value)
     {
-        if (BoardInstanceIsNull) return;
-        BoardInstance.maxSun = value;
+        if (GameData.BoardInstanceIsNull) return;
+        GameData.BoardInstance.maxSun = value;
     }
 
     void SetMoneyLimit(int value)
     {
-        if (BoardInstanceIsNull) return;
-        BoardInstance.maxMoney = value;
+        if (GameData.BoardInstanceIsNull) return;
+        GameData.BoardInstance.maxMoney = value;
     }
 
     [HarmonyPatch(typeof(Board))]

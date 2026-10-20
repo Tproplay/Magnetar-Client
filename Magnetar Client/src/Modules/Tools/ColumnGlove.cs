@@ -1,7 +1,8 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
-using static Magnetar_Client.Game.GameData;
+using static Magnetar_Client.GameData;
 using UnityEngine;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -29,7 +30,7 @@ public class ColumnGlove : Module
     [HarmonyPatch(typeof(Mouse), nameof(Mouse.TryToSetPlantByGlove))]
     public static class MouseGlovePatch
     {
-        public static bool IsMovedByGlove = false;
+        public static bool IsMovedByGlove;
 
         [HarmonyPrefix]
         public static void Prefix()
@@ -47,7 +48,7 @@ public class ColumnGlove : Module
     [HarmonyPatch(typeof(CreatePlant))]
     public static class CreatePlantPatch
     {
-        private static bool _isByMod = false;
+        private static bool _isByMod;
 
         [HarmonyPatch(nameof(CreatePlant.SetPlant))]
         [HarmonyPrefix]

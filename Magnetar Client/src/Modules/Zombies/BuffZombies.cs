@@ -1,8 +1,8 @@
-﻿using Magnetar_Client.Game;
-using Magnetar_Client.UI.Setting;
+﻿using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 using UnityEngine;
-using static Magnetar_Client.Game.AppData;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -29,7 +29,7 @@ public class BuffZombies : Module
 
     public FloatSetting HpMultiplierSettig;
 
-    public override bool Active { get; set; } = false;
+    public override bool Active { get; set; }
     public BuffZombies()
     {
         instance = this;
@@ -38,7 +38,7 @@ public class BuffZombies : Module
 
         ZombieSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
 
         };
@@ -54,7 +54,7 @@ public class BuffZombies : Module
 
     public override void OnLanguageChanged()
     {
-        ZombieSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
+        ZombieSelectedSetting.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
     // Tracks the original max healths: [0] = Base, [1] = Armor1, [2] = Armor2
@@ -63,7 +63,7 @@ public class BuffZombies : Module
     // Mod Logic
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         float multiplier = HpMultiplierSettig.Value;
 
@@ -84,12 +84,12 @@ public class BuffZombies : Module
                     };
 
                 // 2. Multiply Max Healths
-                zombie.theMaxHealth = Mathf.RoundToInt(zombie.theMaxHealth * multiplier);
+                zombie.theMaxHealth = (long)System.Math.Round(zombie.theMaxHealth * multiplier);
                 zombie.theFirstArmorMaxHealth = Mathf.RoundToInt(zombie.theFirstArmorMaxHealth * multiplier);
                 zombie.theSecondArmorMaxHealth = Mathf.RoundToInt(zombie.theSecondArmorMaxHealth * multiplier);
 
                 // 3. Multiply Current Healths
-                zombie.theHealth = Mathf.RoundToInt(zombie.theHealth * multiplier);
+                zombie.theHealth = (long)System.Math.Round(zombie.theHealth * multiplier);
                 zombie.theFirstArmorHealth = Mathf.RoundToInt(zombie.theFirstArmorHealth * multiplier);
                 zombie.theSecondArmorHealth = Mathf.RoundToInt(zombie.theSecondArmorHealth * multiplier);
 

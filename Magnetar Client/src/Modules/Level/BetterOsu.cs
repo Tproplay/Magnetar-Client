@@ -4,8 +4,10 @@ using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static Magnetar_Client.Game.AppData;
+
 using static Magnetar_Client.Utils.Magnetar_Logger;
+
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -31,13 +33,13 @@ public class BetterOsu : Module
 
     public static BetterOsu instance;
     
-    public int currentCombo = 0;
+    public int currentCombo;
     public BoolSetting HelperPetSetting;
     public MultiSelectSetting PetTypeSetting;
 
     public IntSetting BulletsDamageIncreaseSetting;
 
-    private bool RandomBullet = false;
+    private bool RandomBullet;
     public BoolSetting RandomBulletSetting;
 
     public MultiSelectSetting selectBulletsSetting;
@@ -58,7 +60,7 @@ public class BetterOsu : Module
         PetTypeSetting = new MultiSelectSetting("Pet Type", typeof(PetType))
         {
             MaxSelection = 1,
-            CustomNames = TranslatedNames(typeof(PetType))
+            CustomNames = TranslateEnum(typeof(PetType))
         };
 
         PetTypeSetting.Select((int)PetType.PetSnowBoss);
@@ -67,7 +69,7 @@ public class BetterOsu : Module
 
         selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
         {
-            CustomNames = TranslatedNames(typeof(BulletType))
+            CustomNames = TranslateEnum(typeof(BulletType))
         };
 
         selectBulletsSetting.Options.Keys.ToList().ForEach(selectBulletsSetting.Select);
@@ -90,12 +92,12 @@ public class BetterOsu : Module
 
     public override void OnLanguageChanged()
     {
-        PetTypeSetting.CustomNames = TranslatedNames(typeof(PetType));
-        selectBulletsSetting.CustomNames = TranslatedNames(typeof(BulletType));
+        PetTypeSetting.CustomNames = TranslateEnum(typeof(PetType));
+        selectBulletsSetting.CustomNames = TranslateEnum(typeof(BulletType));
     }
 
     float DamageBuff = 1;
-    public int SpawnedPets = 0;
+    public int SpawnedPets;
 
     // Mod Logic
 
@@ -110,7 +112,7 @@ public class BetterOsu : Module
     {
         RhythmGameManager rhythmGameManager = RhythmGameManager.Instance;
 
-        if (rhythmGameManager == null || BoardInstanceIsNull)
+        if (rhythmGameManager == null || GameData.BoardInstanceIsNull)
         {
             if (originalDamage.Count == 0 && currentCombo == 0 && SpawnedPets == 0) return;
 
@@ -140,7 +142,7 @@ public class BetterOsu : Module
             if (SpawnedPets == 0)
             {
                 Vector2 centerWorldPos = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.nearClipPlane));
-                MiniPet pet = MiniPet.SetPet(BoardInstance, centerWorldPos, (PetType)PetTypeSetting.SelectedValues.First());
+                MiniPet pet = MiniPet.SetPet(GameData.BoardInstance, centerWorldPos, (PetType)PetTypeSetting.SelectedValues.First());
                 SpawnedPets++;
 
                 DebugLogger.Msg("[Better Osu] Spawned Pet");
@@ -201,8 +203,8 @@ public class BetterOsu : Module
         [HarmonyPrefix]
         public static void UpdatePatch(Bullet __instance)
         {
-            if (BoardInstanceIsNull || instance == null) return;
-            if (!instance.Active || !BoardInstance.boardTag.rhythmGame) return;
+            if (GameData.BoardInstanceIsNull || instance == null) return;
+            if (!instance.Active || !GameData.BoardInstance.boardTag.rhythmGame) return;
 
             if (instance.BulletsDamageIncreaseSetting.Value <= instance.currentCombo)
             {
@@ -239,7 +241,7 @@ public class BetterOsu : Module
         [HarmonyPrefix]
         public static void SetBulletPrefix(ref BulletType theBulletType, bool fromEnermy)
         {
-            if (instance == null || BoardInstanceIsNull || !instance.Active ||
+            if (instance == null || GameData.BoardInstanceIsNull || !instance.Active ||
                 RhythmGameManager.Instance == null || !instance.RandomBulletSetting.Value|| 
                 fromEnermy) return;
 #if MELONLOADER || BEPINEX

@@ -1,14 +1,15 @@
-﻿using Magnetar_Client.Utils;
-using Magnetar_Client.UI.Setting;
+﻿using Magnetar_Client.UI.Setting;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using static Magnetar_Client.Game.AppData;
-using static Magnetar_Client.Game.GameData;
+
+using static Magnetar_Client.GameData;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+using static Magnetar_Client.Api.PathsManager;
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -35,7 +36,7 @@ public class QuickSetup : Module
 
     private Dictionary<string, string> _savedSetups = new(StringComparer.OrdinalIgnoreCase);
 
-    private static string SetupsFilePath => Path.Combine(ProfileManager.ConfigDir, "Custom_Setups.json");
+    private static string SetupsFilePath => Path.Combine(ConfigDir, "Custom_Setups.json");
 
     public QuickSetup()
     {
@@ -191,7 +192,7 @@ public class QuickSetup : Module
             if (plant == null) continue;
 
             // Arithmetic encoding: (plantType * 10000) + (col * 100) + row
-            long code = ((long)(int)plant.thePlantType * 10000L) + (plant.thePlantColumn * 100) + plant.thePlantRow;
+            long code = ((int)plant.thePlantType * 10000L) + (plant.thePlantColumn * 100) + plant.thePlantRow;
 
             if (sb.Length > 0) sb.Append('-');
             sb.Append(ToBase62(code));

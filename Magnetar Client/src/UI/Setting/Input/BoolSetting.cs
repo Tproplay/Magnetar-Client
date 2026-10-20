@@ -1,18 +1,35 @@
-﻿using System;
+﻿using Magnetar_Client.UI.Themes;
+using static Magnetar_Client.Utils.Translator;
+using System;
 using UnityEngine;
-using Magnetar_Client.UI.Themes;
-using Magnetar_Client.Utils;
 
 namespace Magnetar_Client.UI.Setting;
 
+/// <summary>
+/// A setting module representing a toggleable boolean value (ON/OFF).
+/// </summary>
 public class BoolSetting : Setting
 {
     private bool _value;
+
+    /// <summary>
+    /// The default fallback value restored when <see cref="Reset"/> is executed.
+    /// </summary>
     public bool DefaultValue;
 
+    /// <summary>
+    /// Event invoked immediately before <see cref="Value"/> changes.
+    /// </summary>
     public Action<bool> OnValueChanging { get; set; }
+
+    /// <summary>
+    /// Event invoked after <see cref="Value"/> changes.
+    /// </summary>
     public Action<bool> OnValueChanged { get; set; }
 
+    /// <summary>
+    /// Gets or sets the boolean state of the toggle.
+    /// </summary>
     public bool Value
     {
         get => _value;
@@ -28,6 +45,11 @@ public class BoolSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="BoolSetting"/> with a display name and initial value.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="defaultValue">The initial and default boolean value.</param>
     public BoolSetting(string name, bool defaultValue)
     {
         Name = name;
@@ -35,31 +57,39 @@ public class BoolSetting : Setting
         DefaultValue = defaultValue;
     }
 
+    /// <summary>
+    /// Restores the setting back to <see cref="DefaultValue"/>.
+    /// </summary>
     public override void Reset() => Value = DefaultValue;
 
+    /// <summary>
+    /// Renders the toggle button, state label, and reset button in IMGUI layout.
+    /// </summary>
+    /// <param name="y">Reference to the vertical layout offset.</param>
+    /// <param name="width">The total available layout width.</param>
     public override void Draw(ref float y, float width)
     {
         Event e = Event.current;
 
-        float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
-        float btnW = Config.SettingWidth;
+        float indent = ClientConfig.indent;
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
+        float btnW = ClientConfig.SettingWidth;
 
         // Label: occupies remaining width on the left
         float labelW = width - (indent * 2f) - btnW - gap - resetBtnW;
-        Rect labelRect = new(indent, y, labelW, Config.elementHeight);
-        GUI.Label(labelRect, Translator.Translate(Name), Magnetar_Default.SettingLabelStyle);
+        Rect labelRect = new(indent, y, labelW, ClientConfig.elementHeight);
+        GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Right-aligned elements: [Toggle Button] [gap] [Reset Button]
         float resetStartX = width - indent - resetBtnW;
         float btnStartX = resetStartX - gap - btnW;
 
-        Rect btnRect = new(btnStartX, y, btnW, Config.elementHeight);
-        Rect resetRect = new(resetStartX, y, resetBtnW, Config.elementHeight);
+        Rect btnRect = new(btnStartX, y, btnW, ClientConfig.elementHeight);
+        Rect resetRect = new(resetStartX, y, resetBtnW, ClientConfig.elementHeight);
 
-        GUI.Box(btnRect, Value ? Translator.Translate("ON") : Translator.Translate("OFF"),
-            Value ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+        GUI.Box(btnRect, Value ? Translate("ON") : Translate("OFF"),
+            Value ? ThemeManager.SettingOn : ThemeManager.SettingOff);
 
         if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
@@ -72,6 +102,6 @@ public class BoolSetting : Setting
             Reset();
         }
 
-        y += Config.elementHeight + Config.spacing;
+        y += ClientConfig.elementHeight + ClientConfig.spacing;
     }
 }

@@ -43,7 +43,7 @@ public class Volley : Module
 
         selectedBulletsSetting = new MultiSelectSetting("Projectiles", typeof(BulletType))
         {
-            CustomNames = TranslatedNames(typeof(BulletType)),
+            CustomNames = TranslateEnum(typeof(BulletType)),
         };
 
         selectedBulletsSetting.SelectAll(setDefault: true);
@@ -62,7 +62,7 @@ public class Volley : Module
 
     public override void OnLanguageChanged()
     {
-        selectedBulletsSetting.CustomNames = TranslatedNames(typeof(BulletType));
+        selectedBulletsSetting.CustomNames = TranslateEnum(typeof(BulletType));
     }
 
 

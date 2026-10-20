@@ -9,7 +9,6 @@ namespace Magnetar_Client.NEF.Data;
 
 public static class NEFRecipes
 {
-    // UNIFIED ENTITY WRAPPER
     public struct RecipeEntity : System.IEquatable<RecipeEntity>
     {
         public int Id;

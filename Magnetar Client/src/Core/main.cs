@@ -1,116 +1,220 @@
-﻿using UnityEngine;
-using HarmonyLib;
-using System;
-using static Magnetar_Client.Utils.Magnetar_Logger;
-using Magnetar_Client;
+﻿using Magnetar_Client.Api;
+using Magnetar_Client.UI;
+using Magnetar_Client.UI.WindowDrawing;
 using Magnetar_Client.Utils;
-
-#if MELONLOADER || RELEASE_MELON
-using MelonLoader;
-[assembly: MelonInfo(typeof(Magnetar_Client.Core.main), Magnetar_Info.ModName, Magnetar_Info.Version, Magnetar_Info.Developer)]
-[assembly: MelonGame("LanPiaoPiao", "PlantsVsZombiesRH")]
-#elif BEPINEX || RELEASE_BEPINEX
-using BepInEx;
-using BepInEx.Unity.IL2CPP;
-#endif
+using System;
+using System.Reflection;
+using UnityEngine;
+using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Core;
 
-#if MELONLOADER || RELEASE_MELON
-public class main : MelonMod
-#elif BEPINEX || RELEASE_BEPINEX
-[BepInPlugin("com.tproplay.magnetar", Magnetar_Info.ModName, Magnetar_Info.Version)]
-public class main : BasePlugin
-#endif
+/// <summary>
+/// The Core of Magnetar Client that handles everything
+/// </summary>
+public class Main
 {
-    public static main Instance { get; private set; }
-    public static new HarmonyLib.Harmony HarmonyInstance { get; private set; }
-    public bool hasWarmedUp = false;
+    /// <summary>
+    /// Singleton Instance
+    /// </summary>
+    public static Main Instance { get; private set; }
+    /// <summary>
+    /// Harmony in which all of the client's patches are registered
+    /// </summary>
+    public static HarmonyLib.Harmony HarmonyInstance { get; private set; }
+    private bool HasWarmedUp;
 
-#if MELONLOADER || RELEASE_MELON
-    public override void OnInitializeMelon()
+    internal static void Initialize()
     {
-        Instance = this;
+        if (Instance != null)
+        {
+            DebugLogger.Error("Attempted to initialize Main multiple times! Aborting duplicate call.");
+            return;
+        }
+        Instance = new Main();
+
+        // Initialize the logger first so subsequent diagnostics are captured
         Utils.Magnetar_Logger.Init();
-        HarmonyInstance = new HarmonyLib.Harmony("com.tproplay.magnetar");
 
-        InitializeCore();
+        DebugLogger.Msg("Initializing Magnetar Client...");
+
+        Api.Actions.OnEarlyInitialize?.Invoke();
+
+        // Load the IAddons first so that they can register their actions and sevices
+        AddonManager.InitAddons();
+
+        // Apply the harmony patches
+        ApplyHarmonyPatches();
+        Actions.OnInitializeHarmony?.Invoke();
+
+        // Initialize core systems and modules
+        Instance.InitializeCore();
     }
-#elif BEPINEX || RELEASE_BEPINEX
-    public override void Load()
+
+    static void ApplyHarmonyPatches()
     {
-        Instance = this;
+        HarmonyInstance = new HarmonyLib.Harmony(MagnetarInfo.HarmonyId);
 
-        Utils.Magnetar_Logger.Init();
-        HarmonyInstance = new HarmonyLib.Harmony("com.tproplay.magnetar");
+        Assembly currentAssembly = typeof(Main).Assembly;
 
-        SafePatchAll();
-        InitializeCore();
-        AddComponent<MagnetarHooks>();
+        HarmonyPatchInfo patchInfo = HarmonyManager.HarmonyPatchAll(currentAssembly, HarmonyInstance);
+
+        DebugLogger.Msg($"Applied all Harmony patches - Succeeded: {patchInfo.SuccessCount} | Failed: {patchInfo.FailCount}");
+
+        // Log detailed failure diagnostics and exceptions if any patch failed
+        if (patchInfo.HasFailures)
+        {
+            DebugLogger.Warning($"{patchInfo.FailCount} patch classes failed to apply:");
+            for (int i = 0; i < patchInfo.Failures.Count; i++)
+            {
+                var failure = patchInfo.Failures[i];
+                DebugLogger.Error($"-> Failure #{i + 1} on '{failure.ClassName}':\nException: {failure.Exception.GetType().Name} - {failure.Exception.Message}\nStack: {failure.Exception.StackTrace}");
+            }
+        }
     }
-#endif
 
-    public void InitializeCore()
+    void InitializeCore()
     {
-        Api.Api.EarlyInitializeCore?.Invoke();
+        Api.Actions.OnEarlyInitializeCore?.Invoke();
 
-        SaveLoad.InitializePreferences();
-        
-        // Load theme definitions from JSON first so they are known to the system
-        UI.Themes.Magnetar_Default.LoadThemesFromJson();
+        PreferenceManager.InitializePreferences();
 
-        ModuleManager.Init();
-        HUDRenderer.Init();
-        NEFManager.Init();
         TopBar.Init();
-        ProfileManager.Init();
+        MobileMenuUI.Init();
 
-        Utils.Translator.LoadTranslations();
+        // 1. Initialize Built-in Managers
+        ModuleManager.Init();
+        HUDManager.Init();
+        GUIManager.Init();
+        NEFManager.Init();
+        ProfileGUI.Init();
 
-        // Load saved configurations (Config.Theme, Language, etc.)
+
+        // 2. Discover and register Addons
+        AddonManager.InitModules();
+        AddonManager.InitHUDElements();
+        AddonManager.InitServices();
+
+        // 3. Run unified pipeline across all registered services
+        ServiceRegistry.InitializeAll();
+
+        Actions.OnInitializeCore?.Invoke();
+
+        // 4. Load state, themes, and translations
         SaveLoad.Load();
 
-        // Initialize GUIManager AFTER SaveLoad.Load so it picks up the loaded theme/language
-        GUIManager.Init();
-
-        Api.Api.LateInitializeCore?.Invoke();
+        Api.Actions.OnLateInitializeCore?.Invoke();
 
         DebugLogger.Msg("Magnetar Client Loaded!");
     }
 
-    public void CoreApplicationQuit()
+    internal void OnUpdate()
     {
-        try
+        LockUI.BlockKeys = false;
+
+        UI.GUIHelper.OnUpdate();
+        AnimationHandler.UpdateTransition();
+        Translator.Update();
+
+        // Menu Toggle
+        if (Input.GetKeyDown(ClientConfig.MenuOpenKey) && !HUDManager.forceShow)
         {
-            Api.Api.OnApplicationQuit?.Invoke();
-        }
-        catch (Exception ex)
-        {
-            DebugLogger.Error($"[Api] Exception in OnApplicationQuit event: {ex}");
+            if (!ClientConfig.showgui)
+            {
+                ClientConfig.showgui = true;
+                Actions.OnMenuOpen?.Invoke();
+            }
+            else if (ClientConfig.MenuOpenKey != KeyCode.Escape)
+            {
+                ClientConfig.showgui = false;
+                DrawSetting.ResetInputBind();
+                SaveLoad.Save();
+                Actions.OnMenuClosed?.Invoke();
+            }
         }
 
-        SaveLoad.Save(true);
-        Api.Api.OnConfigSaved?.Invoke();
-        DebugLogger.Msg("Magnetar Preferences Saved!");
+        // Extra controls for GUI
+        if (ClientConfig.InGUI && !DrawSetting.IsFocused)
+        {
+            // Tab cycling (Tab for next, Shift+Tab for previous)
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                var tabList = TopBar.Order;
+                if (tabList.Count > 0)
+                {
+                    int index = tabList.IndexOf(ClientConfig.CurrentTab);
+                    bool reverse = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+                    int nextIndex;
+                    if (reverse)
+                    {
+                        nextIndex = (index <= 0) ? tabList.Count - 1 : index - 1;
+                    }
+                    else
+                    {
+                        nextIndex = (index == -1 || index >= tabList.Count - 1) ? 0 : index + 1;
+                    }
+
+                    TopBar.SwitchTab(tabList[nextIndex]);
+                }
+            }
+        }
+
+        Api.Actions.OnUpdate?.Invoke();
+        ServiceRegistry.UpdateAll();
+
+        #region Handle Escape
+        if (ClientConfig.showgui)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                // Check if Escape was consumed by an input field in OnGUI this frame
+                bool consumedByTextField = (Time.frameCount == DrawSetting.LastEscapeFrame)
+                                        || (Time.unscaledTime - DrawSetting.LastEscapeTime < 0.15f);
+
+                if (consumedByTextField || DrawSetting.IsFocused)
+                {
+                    DrawSetting.ResetInputBind();
+                    DrawSetting.LastEscapeTime = Time.unscaledTime;
+                    DrawSetting.LastEscapeFrame = Time.frameCount;
+                    Input.ResetInputAxes();
+                    return;
+                }
+
+                if (SafeToCloseManager.TryInterceptEscape())
+                {
+                    Input.ResetInputAxes();
+                    return;
+                }
+
+                if (SafeToCloseManager.CanClose())
+                {
+                    ClientConfig.showgui = false;
+                    SaveLoad.Save();
+                    Input.ResetInputAxes();
+                }
+                DrawSetting.ResetInputBind();
+            }
+        }
+        #endregion
+
+        if (ClientConfig.InGUI) LockUI.BlockKeys = true;
     }
 
-    public void CoreGUI()
+    internal void OnGUI()
     {
-        if (!ModuleManager.IsInitialized) return;
-
-        Event e = Event.current;
-        if (e == null) return;
+        LockUI.BlockKeys = false;
 
         Matrix4x4 originalMatrix = GUI.matrix;
 
         try
         {
-            float scaleX = (float)Screen.width / Magnetar_Client.Config.NativeWidth;
-            float scaleY = (float)Screen.height / Magnetar_Client.Config.NativeHeight;
+            float scaleX = Screen.width / ClientConfig.NativeWidth;
+            float scaleY = Screen.height / ClientConfig.NativeHeight;
             float uniformScale = Mathf.Min(scaleX, scaleY);
 
-            float offsetX = (Screen.width - (Magnetar_Client.Config.NativeWidth * uniformScale)) * 0.5f;
-            float offsetY = (Screen.height - (Magnetar_Client.Config.NativeHeight * uniformScale)) * 0.5f;
+            float offsetX = (Screen.width - (ClientConfig.NativeWidth * uniformScale)) * 0.5f;
+            float offsetY = (Screen.height - (ClientConfig.NativeHeight * uniformScale)) * 0.5f;
 
             GUI.matrix = Matrix4x4.TRS(
                 new Vector3(offsetX, offsetY, 0),
@@ -118,36 +222,36 @@ public class main : BasePlugin
                 new Vector3(uniformScale, uniformScale, 1)
             );
 
-            if (!hasWarmedUp)
+            // On first frame we call the WarmUp method
+            if (!HasWarmedUp)
             {
                 WarmUp();
-                hasWarmedUp = true;
-                Api.Api.OnGUIWarmUp?.Invoke();
+                HasWarmedUp = true;
             }
 
-            UI.Themes.Magnetar_Default.Rescale();
+            UI.Themes.ThemeManager.Rescale();
 
-            MobileMenuUI.Render();
-            HUDManager.Render();
+            Actions.OnEarlyGUI?.Invoke();
+            ServiceRegistry.RenderAll();
 
-            foreach (var mod in ModuleManager.Modules)
+            // Render menus with smooth fade transition
+            if (AnimationHandler.ShouldRenderGUI)
             {
-                mod.OnGUI();
-            }
+                Color prevGuiColor = GUI.color;
+                GUI.color = new Color(1f, 1f, 1f, AnimationHandler.FadeProgress);
 
-            Api.Api.OnGUI?.Invoke();
-
-            if (Magnetar_Client.Config.showgui)
-            {
+                ClientConfig.CurrentTab?.OnGUI?.Invoke();
+                ServiceRegistry.RenderMenuAll();
+                Actions.OnGUIShow?.Invoke();
+                // Render TopBar on top
                 TopBar.Render();
 
-                if (Magnetar_Client.Config.CurrentTab == TabType.MODULES) ModuleManager.Render();
-                if (Magnetar_Client.Config.CurrentTab == TabType.NEF) NEFManager.Render();
-                if (Magnetar_Client.Config.CurrentTab == TabType.GUI) GUIManager.Render();
-                if (Magnetar_Client.Config.CurrentTab == TabType.PROFILE) ProfileGUI.Render();
+                GUI.color = prevGuiColor;
             }
+
+            Actions.OnLateGUI?.Invoke();
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             DebugLogger.Error($"[CoreGUI] Render exception: {ex}");
         }
@@ -155,161 +259,25 @@ public class main : BasePlugin
         {
             GUI.matrix = originalMatrix;
         }
+
+        if (ClientConfig.InGUI) LockUI.BlockKeys = true;
     }
 
-    public void CoreUpdate()
+    internal void OnApplicationQuit()
     {
-        UI.GUIHelper._UpdateRainbowColor();
-
-        if (HUDRenderer.Elements.Count != 0)
-            HUDRenderer.UpdateElements();
-
-        if (!ModuleManager.IsInitialized) return;
-
-        if (Input.GetKeyDown(KeyCode.RightShift) && !HUDManager.forceShow)
-        {
-            BlockSKeysPatch.BlockEscKey = true;
-            Magnetar_Client.Config.showgui = !Magnetar_Client.Config.showgui;
-            SaveLoad.Save();
-            Api.Api.OnConfigSaved?.Invoke();
-        }
-
-        if (!Magnetar_Client.Config.showgui && !HUDManager.forceShow)
-        {
-            ModuleManager.HandleHotkeys();
-        }
-
-        foreach (var mod in ModuleManager.Modules)
-        {
-            if (mod != null) mod.OnUpdate();
-        }
-
-        Api.Api.OnUpdate?.Invoke();
-
-        if (!hasWarmedUp) return;
-
-        #region handle Escape Key
-        if (!Magnetar_Client.Config.showgui) BlockSKeysPatch.BlockEscKey = false;
-
-        if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape && ModuleManager.showModules)
-        {
-            Magnetar_Client.Config.showgui = false;
-            Event.current.Use();
-            SaveLoad.Save();
-            Api.Api.OnConfigSaved?.Invoke();
-            ResetInputBind();
-        }
-        else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape &&
-            !ModuleManager.showModules && ModuleManager.showSettings)
-        {
-            if (ModuleManager.bindingModuleId == -1 && UI.WindowDrawing.DrawSetting.focusedControlId == -1)
-            {
-                ModuleManager.showModules = true;
-                ModuleManager.showSettings = false;
-                ModuleManager.showSelectionGui = false;
-                foreach (var m in ModuleManager.Modules) { m.ShowSettings = false; }
-                ResetInputBind();
-                Event.current.Use();
-            }
-        }
-        else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape &&
-            !ModuleManager.showModules && !ModuleManager.showSettings && ModuleManager.showSelectionGui)
-        {
-            if (ModuleManager.bindingModuleId == -1 && UI.WindowDrawing.DrawSetting.focusedControlId == -1)
-            {
-                ModuleManager.showSettings = true;
-                ModuleManager.showSelectionGui = false;
-                ResetInputBind();
-                Event.current.Use();
-            }
-        }
-        #endregion
+        Api.Actions.OnApplicationQuit?.Invoke();
+        ServiceRegistry.QuitAll();
+        SaveLoad.Save(true);
+        DebugLogger.Msg("Preferences Saved!");
     }
 
-    public static void ResetInputBind()
+    internal static void WarmUp()
     {
-        Magnetar_Client.UI.WindowDrawing.DrawSetting.activeDropdownId = -1;
-        Magnetar_Client.UI.WindowDrawing.DrawSetting.activeSliderId = -1;
-        Magnetar_Client.UI.WindowDrawing.DrawSetting.activeTextFieldId = -1;
-        ModuleManager.bindingModuleId = -1;
-    }
+        ResourceManager.Init();
+        UI.Themes.ThemeManager.Init();
 
-    public static void WarmUp()
-    {
-        Magnetar_Client.Utils.LoadFont.Init();
-        UI.Themes.Magnetar_Default.Init();
+        ServiceRegistry.WarmUpAll();
 
-        ModuleManager.Render();
-        NEFManager.Render();
-        GUIManager.Render();
-    }
-
-    public void SafePatchAll()
-    {
-        var assembly = typeof(main).Assembly;
-        Type[] types;
-
-        try { types = assembly.GetTypes(); }
-        catch (System.Reflection.ReflectionTypeLoadException e)
-        {
-            types = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Where(e.Types, t => t != null));
-        }
-
-        int successCount = 0;
-        int failCount = 0;
-
-        foreach (var type in types)
-        {
-            if (type == null) continue;
-            try
-            {
-                var patchedMethods = HarmonyInstance.CreateClassProcessor(type).Patch();
-                if (patchedMethods != null && patchedMethods.Count > 0) successCount++;
-            }
-            catch (Exception ex)
-            {
-                DebugLogger.Error($"[Harmony] Failed to apply patch '{type.Name}'. Reason: {ex.Message}");
-                failCount++;
-            }
-        }
-
-        DebugLogger.Msg($"[Harmony] Successfully applied {successCount} patch classes! Failed patches: {failCount}");
-    }
-
-#if MELONLOADER || RELEASE_MELON
-    public override void OnApplicationQuit() => CoreApplicationQuit();
-    public override void OnGUI() => CoreGUI();
-    public override void OnUpdate() => CoreUpdate();
-#endif
-
-    [HarmonyPatch(typeof(Input), "GetKeyDown", new[] { typeof(KeyCode) })]
-    public static class BlockSKeysPatch
-    {
-        public static bool BlockEscKey;
-        public static bool Prefix(KeyCode key, ref bool __result)
-        {
-            if ((Magnetar_Client.Config.showgui || HUDManager.forceShow) && key != KeyCode.RightShift)
-            {
-                __result = false;
-                return false;
-            }
-
-            if (BlockEscKey && key == KeyCode.Escape)
-            {
-                __result = false;
-                return false;
-            }
-
-            return true;
-        }
+        Api.Actions.OnWarmUp?.Invoke();
     }
 }
-
-#if BEPINEX || RELEASE_BEPINEX
-public class MagnetarHooks : MonoBehaviour
-{
-    void Update() { if (main.Instance != null) main.Instance.CoreUpdate(); }
-    void OnGUI() { if (main.Instance != null) main.Instance.CoreGUI(); }
-    void OnApplicationQuit() { if (main.Instance != null) main.Instance.CoreApplicationQuit(); }
-}
-#endif

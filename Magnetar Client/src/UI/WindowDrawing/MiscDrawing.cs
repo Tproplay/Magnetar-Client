@@ -1,8 +1,12 @@
-﻿using Magnetar_Client.UI.Themes;
+﻿using Magnetar_Client.Core;
+using Magnetar_Client.UI.Themes;
 using UnityEngine;
 
 namespace Magnetar_Client.UI.WindowDrawing;
 
+/// <summary>
+/// Other drawing helper
+/// </summary>
 public static class MiscDrawing
 {
     
@@ -11,9 +15,9 @@ public static class MiscDrawing
     /// </summary>
     public static void SeperatorFull(ref float y, float width, float spacing)
     {
-        float lineThickness = Mathf.Max(1f, Config.S(1f));
+        float lineThickness = Mathf.Max(1f, GUIManager.S(1f));
 
-        GUI.Box(new Rect(0, y, width, lineThickness), "", Magnetar_Default.SeparatorStyle);
+        GUI.Box(new Rect(0, y, width, lineThickness), "", ThemeManager.SeparatorStyle);
 
         y += (spacing * 2f);
     }
@@ -24,31 +28,31 @@ public static class MiscDrawing
     public static bool Seperator(ref float y, float width, float indent, float spacing, string name = "", bool isCollapsible = false, bool isExpanded = true, Color? customTextColor = null)
     {
         y += spacing;
-        float lineThickness = Mathf.Max(1f, Config.S(1f));
+        float lineThickness = Mathf.Max(1f, GUIManager.S(1f));
 
         if (string.IsNullOrEmpty(name))
         {
-            GUI.Box(new Rect(indent, y, width - (indent * 2f), lineThickness), "", Magnetar_Default.SeparatorStyle);
+            GUI.Box(new Rect(indent, y, width - (indent * 2f), lineThickness), "", ThemeManager.SeparatorStyle);
 
             y += lineThickness + spacing;
             return isExpanded;
         }
 
         // --- Labeled & Collapsible Category Separator ---
-        float elementH = Config.elementHeight;
+        float elementH = ClientConfig.elementHeight;
         float lineY = Mathf.Round(y + (elementH / 2f) - (lineThickness / 2f));
 
         string displayName = isCollapsible ? (isExpanded ? $"▼ {name}" : $"▶ {name}") : name;
 
-        float textPadding = Config.S(12f);
-        float textWidth = Magnetar_Default.SeparatorTextStyle.CalcSize(new GUIContent(displayName)).x + textPadding;
+        float textPadding = GUIManager.S(12f);
+        float textWidth = ThemeManager.SeparatorTextStyle.CalcSize(new GUIContent(displayName)).x + textPadding;
         float lineW = Mathf.Max(0f, (width - (indent * 2f) - textWidth) / 2f);
 
         // 1. Draw Left & Right Horizontal Lines
         if (lineW > 0f)
         {
-            GUI.Box(new Rect(indent, lineY, lineW, lineThickness), "", Magnetar_Default.SeparatorStyle);
-            GUI.Box(new Rect(indent + lineW + textWidth, lineY, lineW, lineThickness), "", Magnetar_Default.SeparatorStyle);
+            GUI.Box(new Rect(indent, lineY, lineW, lineThickness), "", ThemeManager.SeparatorStyle);
+            GUI.Box(new Rect(indent + lineW + textWidth, lineY, lineW, lineThickness), "", ThemeManager.SeparatorStyle);
         }
 
         Rect textRect = new(indent + lineW, y, textWidth, elementH);
@@ -71,7 +75,7 @@ public static class MiscDrawing
             GUI.contentColor = customTextColor.Value;
         }
 
-        GUI.Label(textRect, displayName, Magnetar_Default.SeparatorTextStyle);
+        GUI.Label(textRect, displayName, ThemeManager.SeparatorTextStyle);
 
         if (customTextColor.HasValue)
         {
@@ -90,17 +94,17 @@ public static class MiscDrawing
         Color oldColor = GUI.color;
         GUI.color = Color.white;
 
-        float thickness = Mathf.Max(1f, Config.S(3f) * Zoom);
+        float thickness = Mathf.Max(1f, GUIManager.S(3f) * Zoom);
         float halfThick = thickness / 2f;
         float midY = (pointA.y + pointB.y) / 2f;
 
-        GUI.Box(new Rect(pointA.x - halfThick, pointA.y, thickness, midY - pointA.y + halfThick), "", Magnetar_Default.NEFLineStyle);
+        GUI.Box(new Rect(pointA.x - halfThick, pointA.y, thickness, midY - pointA.y + halfThick), "", ThemeManager.NEFLineStyle);
 
         float minX = Mathf.Min(pointA.x, pointB.x);
         float maxX = Mathf.Max(pointA.x, pointB.x);
-        GUI.Box(new Rect(minX - halfThick, midY - halfThick, (maxX - minX) + thickness, thickness), "", Magnetar_Default.NEFLineStyle);
+        GUI.Box(new Rect(minX - halfThick, midY - halfThick, (maxX - minX) + thickness, thickness), "", ThemeManager.NEFLineStyle);
 
-        GUI.Box(new Rect(pointB.x - halfThick, midY - halfThick, thickness, pointB.y - midY + halfThick), "", Magnetar_Default.NEFLineStyle);
+        GUI.Box(new Rect(pointB.x - halfThick, midY - halfThick, thickness, pointB.y - midY + halfThick), "", ThemeManager.NEFLineStyle);
 
         GUI.color = oldColor;
     }

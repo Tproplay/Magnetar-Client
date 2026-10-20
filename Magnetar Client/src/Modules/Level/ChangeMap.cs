@@ -1,7 +1,9 @@
-﻿using static Magnetar_Client.Game.AppData;
+﻿
 using System.Linq;
 
 using Magnetar_Client.UI.Setting;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -32,7 +34,7 @@ public class ChangeMap : Module
         MapSetting = new MultiSelectSetting("Map", typeof(SceneType))
         {
             MaxSelection = 1,
-            CustomNames = TranslatedNames(typeof(SceneType)),
+            CustomNames = TranslateEnum(typeof(SceneType)),
         };
 
         ChangeMapButton = new ButtonSetting("Change Map Now", ChangeMapNow);
@@ -43,20 +45,20 @@ public class ChangeMap : Module
 
     public override void OnLanguageChanged()
     {
-        MapSetting.CustomNames = TranslatedNames(typeof(SceneType));
+        MapSetting.CustomNames = TranslateEnum(typeof(SceneType));
     }
 
     public void ChangeMapNow()
     {
         if (!Active) return;
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         if (MapSetting.SelectedValues.Count != 1) return;
 
         int map = MapSetting.SelectedValues.First();
-
-        BoardInstance.StartCoroutine(
-            BoardInstance.SmoothlyChangeMap((SceneType)map)
+        GameData.
+                BoardInstance.StartCoroutine(
+GameData.BoardInstance.SmoothlyChangeMap((SceneType)map)
             );
 
     }

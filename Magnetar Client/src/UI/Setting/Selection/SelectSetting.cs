@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.WindowDrawing;
+using static Magnetar_Client.Utils.Translator;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Magnetar_Client.UI.Themes;
-using Magnetar_Client.UI.WindowDrawing;
-using Magnetar_Client.Utils;
 
 namespace Magnetar_Client.UI.Setting;
 
@@ -61,16 +61,16 @@ public class SelectSetting : Setting
         Event e = Event.current;
         int controlId = GetHashCode();
 
-        float elemH = Config.elementHeight;
-        float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
-        float btnW = Config.SettingWidth;
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
+        float btnW = ClientConfig.SettingWidth;
 
         // Label on the left: fills remaining horizontal space
         float labelW = width - (indent * 2f) - btnW - gap - resetBtnW;
         Rect labelRect = new(indent, y, labelW, elemH);
-        GUI.Label(labelRect, Translator.Translate(Name), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Right-to-left layout: [Dropdown Button] [gap] [Reset Button]
         float resetStartX = width - indent - resetBtnW;
@@ -87,19 +87,19 @@ public class SelectSetting : Setting
 
         if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
-            DrawSetting.activeDropdownId = (DrawSetting.activeDropdownId == controlId) ? -1 : controlId;
+            DrawSetting.ActiveDropdownId = (DrawSetting.ActiveDropdownId == controlId) ? -1 : controlId;
             DrawSetting.dropdownScrollY = 0f;
-            DrawSetting.focusedControlId = -1;
+            DrawSetting.FocusedControlId = -1;
             e.Use();
         }
 
-        string arrow = (DrawSetting.activeDropdownId == controlId) ? " ▲" : " ▼";
-        GUI.Box(btnRect, currentValName + arrow, Magnetar_Default.SettingOff);
+        string arrow = (DrawSetting.ActiveDropdownId == controlId) ? " ▲" : " ▼";
+        GUI.Box(btnRect, currentValName + arrow, ThemeManager.SettingOff);
 
-        if (DrawSetting.activeDropdownId == controlId)
+        if (DrawSetting.ActiveDropdownId == controlId)
         {
-            float rowHeight = Config.SettingsInput.DropdownRowHeight;
-            int maxVisibleRows = Config.SettingsInput.DropdownMaxVisibleRows;
+            float rowHeight = SettingValues.DropdownRowHeight;
+            int maxVisibleRows = SettingValues.DropdownMaxVisibleRows;
             int itemCount = Options.Count;
             float dropHeight = Mathf.Min(itemCount * rowHeight, maxVisibleRows * rowHeight);
 
@@ -107,7 +107,7 @@ public class SelectSetting : Setting
 
             if (dropRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
             {
-                DrawSetting.dropdownScrollY = Mathf.Clamp(DrawSetting.dropdownScrollY + e.delta.y * Config.SettingsInput.DropdownScrollSensitivity,
+                DrawSetting.dropdownScrollY = Mathf.Clamp(DrawSetting.dropdownScrollY + e.delta.y * SettingValues.DropdownScrollSensitivity,
                     0, Mathf.Max(0, (itemCount * rowHeight) - dropHeight));
                 e.Use();
             }
@@ -122,7 +122,7 @@ public class SelectSetting : Setting
                     if (idx == clickedIndex)
                     {
                         Value = kvp.Key;
-                        DrawSetting.activeDropdownId = -1;
+                        DrawSetting.ActiveDropdownId = -1;
                         e.Use();
                         break;
                     }
@@ -132,13 +132,13 @@ public class SelectSetting : Setting
 
             if (e.type == EventType.MouseDown && !btnRect.Contains(e.mousePosition) && !dropRect.Contains(e.mousePosition))
             {
-                DrawSetting.activeDropdownId = -1;
+                DrawSetting.ActiveDropdownId = -1;
             }
 
             float scrollY = DrawSetting.dropdownScrollY;
             DrawSetting.OnPostDraw += () =>
             {
-                GUI.Box(dropRect, "", Magnetar_Default.SettingOff);
+                GUI.Box(dropRect, "", ThemeManager.SettingOff);
                 GUI.BeginGroup(dropRect);
                 int i = 0;
                 foreach (var kvp in Options)
@@ -148,7 +148,7 @@ public class SelectSetting : Setting
                     {
                         Rect row = new(0, drawY, dropRect.width, rowHeight);
                         string disp = (CustomNames != null && CustomNames.ContainsKey(kvp.Key)) ? CustomNames[kvp.Key] : kvp.Value;
-                        GUI.Box(row, disp, (Value == kvp.Key) ? Magnetar_Default.SettingOn : Magnetar_Default.SettingOff);
+                        GUI.Box(row, disp, (Value == kvp.Key) ? ThemeManager.SettingOn : ThemeManager.SettingOff);
                     }
                     i++;
                 }
@@ -161,6 +161,6 @@ public class SelectSetting : Setting
             Reset();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
     }
 }

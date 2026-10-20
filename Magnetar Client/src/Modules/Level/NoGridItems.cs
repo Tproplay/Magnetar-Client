@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using Magnetar_Client.UI.Setting;
-using static Magnetar_Client.Game.AppData;
+
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using HarmonyLib;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -42,7 +44,7 @@ public class NoCraters : Module
 
     // Mod Logic
 
-    public static float deltaTime = 0;
+    public static float deltaTime;
     public override void OnUpdateActive()
     {
         // Handle auto turn off
@@ -58,11 +60,11 @@ public class NoCraters : Module
     }
     public override void OnEnable()
     {
-        if (BoardInstanceIsNull || BoardInstance.griditemArray == null) return;
+        if (GameData.BoardInstanceIsNull || GameData.BoardInstance.griditemArray == null) return;
 
-        for (int i = BoardInstance.griditemArray.Count - 1; i >= 0; i--)
+        for (int i = GameData.BoardInstance.griditemArray.Count - 1; i >= 0; i--)
         {
-            GridItem item = BoardInstance.griditemArray[i];
+            GridItem item = GameData.BoardInstance.griditemArray[i];
             if (item == null) continue;
             if (item.theItemType == GridItemType.CraterDay || item.theItemType == GridItemType.CraterNight)
                 item.Die();
@@ -119,33 +121,33 @@ public class NoGridItem : Module
 
         CreateCategory("General");
 
-        selectedGridItems = new MultiSelectSetting("Grid Items")
+        selectedGridItems = new MultiSelectSetting("Grid Items", typeof(GridItemType))
         {
-            CustomNames = TranslatedNames(typeof(GridItemType))
+            CustomNames = TranslateEnum(typeof(GridItemType))
         };
-        Settings.Add(selectedGridItems);
+        AddSettings(selectedGridItems);
 
         EndCategory();
         CreateCategory("Extra");
 
         AutoTurnOff = new BoolSetting("Auto Turn Off", TurnOffAfterUse);
-        Settings.Add(AutoTurnOff);
+        AddSettings(AutoTurnOff);
 
-        EndCategory();
 #if MELONLOADER || BEPINEX
         DebugMode = new BoolSetting("Debug Mode", false);
-        Settings.Add(DebugMode);
+        AddSettings(DebugMode);
 #endif
+        EndCategory();
     }
 
     public override void OnLanguageChanged()
     {
-        selectedGridItems.CustomNames = TranslatedNames(typeof(GridItemType));
+        selectedGridItems.CustomNames = TranslateEnum(typeof(GridItemType));
     }
 
     // Mod Logic
 
-    public static float deltaTime = 0;
+    public static float deltaTime;
     public override void OnUpdateActive()
     {
         // Handle auto turn off
@@ -159,21 +161,21 @@ public class NoGridItem : Module
     }
     public override void OnEnable()
     {
-        if (BoardInstanceIsNull || BoardInstance.griditemArray == null) return;
+        if (GameData.BoardInstanceIsNull || GameData.BoardInstance.griditemArray == null) return;
 
 #if MELONLOADER || BEPINEX
         if (DebugMode.Value)
         {
-            DebugLogger.Msg("Found " + BoardInstance.griditemArray.Count + " grid items.");
+            DebugLogger.Msg("Found " + GameData.BoardInstance.griditemArray.Count + " grid items.");
         }
 #endif
 
-        for (int i = BoardInstance.griditemArray.Count - 1; i >= 0; i--)
+        for (int i = GameData.BoardInstance.griditemArray.Count - 1; i >= 0; i--)
         {
 #if MELONLOADER || BEPINEX
             if (DebugMode.Value) DebugLogger.Msg($"Checking Grid Item at index {i}");
 #endif
-            GridItem item = BoardInstance.griditemArray[i];
+            GridItem item = GameData.BoardInstance.griditemArray[i];
             if (item == null) continue;
             if (selectedGridItems.IsSelected((int)item.theItemType))
             { 

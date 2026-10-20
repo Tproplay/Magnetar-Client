@@ -1,22 +1,39 @@
 ﻿using Magnetar_Client.Core;
 using Magnetar_Client.UI.Themes;
 using UnityEngine;
-using System;
+using Magnetar_Client.Core.HUDManager_;
 
 namespace Magnetar_Client.HUDElements;
 
+/// <summary>
+/// Base Class for all HudElements.
+/// </summary>
 public abstract class HudElement
 {
-    private bool _isCurrentlyEnabled = false;
+    private bool _isCurrentlyEnabled;
+    /// <summary>
+    /// The name to be displayed in the HUD Element selector's gui.
+    /// </summary>
     public string Name { get; set; }
+    /// <summary>
+    /// The backround area on which this element gets rendered.
+    /// </summary>
     public Rect Bounds;
+    /// <summary>
+    /// Window Id of the element, automatically set.
+    /// </summary>
     public int WindowId { get; set; }
-
+    /// <summary>
+    /// The active element's Id.
+    /// </summary>
     public static int ActiveDragId = -1;
     private Vector2 dragOffset;
 
-    public float UpdateInterval = 0;
-    private float _updateInterval = 0;
+    /// <summary>
+    /// The interval at which OnUpdateActive is called.
+    /// </summary>
+    public float UpdateInterval;
+    private float _updateInterval;
 
     private GUI.WindowFunction _cachedWindowDelegate;
 
@@ -24,20 +41,35 @@ public abstract class HudElement
     {
         if (_cachedWindowDelegate == null)
         {
-            _cachedWindowDelegate = Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>((Action<int>)DrawWindowContext);
+            _cachedWindowDelegate = Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>(DrawWindowContext);
         }
         return _cachedWindowDelegate;
     }
 
+    /// <summary>
+    /// Initializes a new HUD Element.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="defaultBounds"></param>
     public HudElement(string name, Rect defaultBounds)
     {
         Name = name;
         Bounds = defaultBounds;
     }
 
+    /// <summary>
+    /// Called when the element is selected.
+    /// </summary>
     public virtual void OnEnable() { }
+
+    /// <summary>
+    /// Called when the element is deselected.
+    /// </summary>
     public virtual void OnDisable() { }
 
+    /// <summary>
+    /// Called on every Unity's Update Cycle.
+    /// </summary>
     public virtual void OnUpdate()
     {
         if (_isCurrentlyEnabled)
@@ -57,10 +89,13 @@ public abstract class HudElement
             }
         }
     }
-
+    /// <summary>
+    /// Called while the element is active and is being displayed on the screen.
+    /// </summary>
+    /// <remarks>Make sure to call base.OnUpdate() otherwise this method won't be triggered.</remarks>
     public virtual void OnUpdateActive() { }
 
-    public void HandleLifecycle(bool isEnabled)
+    internal void HandleLifecycle(bool isEnabled)
     {
         if (isEnabled && !_isCurrentlyEnabled)
         {
@@ -76,7 +111,7 @@ public abstract class HudElement
         OnUpdate();
     }
 
-    public void Render()
+    internal void Render()
     {
         Event e = Event.current;
 
@@ -112,7 +147,7 @@ public abstract class HudElement
         }
 
         // --- 2. RENDER THE ELEMENT ---
-        GUIStyle windowStyle = (HUDManager.forceShow || HUDManager.showBackground) ? Magnetar_Default.CategoryModuleOffStyle : GUIStyle.none;
+        GUIStyle windowStyle = (HUDManager.forceShow || HUDManager.showBackground) ? ThemeManager.CategoryModuleOffStyle : GUIStyle.none;
 
         if (HUDManager.forceShow)
         {
@@ -170,7 +205,7 @@ public abstract class HudElement
 
     private Rect CalculateFlushDocking(Rect rect)
     {
-        float snapThreshold = 14f * Mathf.Max(1f, Config.ElementScale);
+        float snapThreshold = 14f * Mathf.Max(1f, GUIManager.ElementScaleSetting.Value);
         float canvasWidth = 1920f;
         float canvasHeight = 1080f;
 
@@ -268,23 +303,28 @@ public abstract class HudElement
             if ((localBounds.Contains(e.mousePosition) || ActiveDragId == WindowId) && HUDManager.forceShow)
             {
                 GUI.backgroundColor = new Color(1f, 0f, 0f, 0.3f);
-                GUI.Box(localBounds, "", Magnetar_Default.CategoryModuleOnStyle);
+                GUI.Box(localBounds, "", ThemeManager.CategoryModuleOnStyle);
                 GUI.backgroundColor = Color.white;
             }
         }
 
         DrawContent(width, height);
     }
-
+    /// <summary>
+    /// Add the label to be displayed here.
+    /// </summary>
     protected abstract void DrawContent(float width, float height);
 
+    /// <summary>
+    /// Auto-adjusts the Bounds to match this text.
+    /// </summary>
     protected void AdjustWidthToText(string text, GUIStyle style, float padding = 8f)
     {
         if (style == null || string.IsNullOrEmpty(text)) return;
 
         Vector2 textSize = style.CalcSize(new GUIContent(text));
-        float targetWidth = textSize.x + (padding * Config.ElementScale);
-        float targetHeight = textSize.y + (4f * Config.ElementScale);
+        float targetWidth = textSize.x + (padding * GUIManager.ElementScaleSetting.Value);
+        float targetHeight = textSize.y + (4f * GUIManager.ElementScaleSetting.Value);
 
         if (Mathf.Abs(Bounds.width - targetWidth) > 0.5f)
         {
@@ -297,10 +337,13 @@ public abstract class HudElement
     }
 
     private static Vector2 windowPos = new(10, 10);
+    /// <summary>
+    /// Creates a new Rect with position that doesn't over laps other elements.
+    /// </summary>
     public static Rect NewRect(float width = 250, float height = 24)
     {
-        float actualHeight = height * Config.ElementScale;
-        Rect rect = new(windowPos.x, windowPos.y, width * Config.ElementScale, actualHeight);
+        float actualHeight = height * GUIManager.ElementScaleSetting.Value;
+        Rect rect = new(windowPos.x, windowPos.y, width * GUIManager.ElementScaleSetting.Value, actualHeight);
 
         if (windowPos.y > 800)
         {

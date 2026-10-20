@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using System.Linq;
+using Magnetar_Client.Api;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -14,6 +17,7 @@ namespace Magnetar_Client.Modules;
 
 public class NoRender : Module
 {
+    // Mod Info
     public override string Name { get; set; } = "No Render";
     public override string Description { get; set; } = "Now you can see your lawn.";
     public override string SearchHints { get; set; } = "norender blank lawn invisible invisibleplants novisual" +
@@ -22,8 +26,9 @@ public class NoRender : Module
         "hidelawn seebackground hiderenderer seeground norend hidedraw no particles remove particles particletypes remove" +
         "particles disable particles clear particles";
     public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
+    // Mod Data
     public static NoRender instance;
 
     public MultiSelectSetting ParticlesSetting;
@@ -36,35 +41,30 @@ public class NoRender : Module
     public BoolSetting ScreenShakeSetting;
 
     private Dictionary<int, string> fxDatabase = new();
-    private readonly string filePath;
-    private int nextId = 0;
+    private int nextId;
 
-    public enum ParticleTypes { Empty }
     public NoRender()
     {
         instance = this;
 
+        var strings = new string[]
+        {
+            "Ice shroom effect", "Doom shroom effect", "Jalapeno fire line", "Doom shroom smoke cloud", "Falling Sun",
+            "Falling Coin",
+        };
+
+        RegisterTranslations(Translator.CreateDictionary(strings));
+
         CreateCategory("General");
 
         #region Particle
-        // 1. Setup Path & Ensure Directory Exists
-        string baseModsDir = SaveLoad.ModsDir;
-        string dirPath = Path.Combine(baseModsDir, "Magnetar Data");
-
-        if (!Directory.Exists(dirPath))
-        {
-            Directory.CreateDirectory(dirPath);
-        }
-
-        filePath = Path.Combine(dirPath, "FxData.json");
         Dictionary<int, string> menuNames = new();
 
-        // 2. Load the JSON
-        if (File.Exists(filePath))
+        if (File.Exists(PathsManager.FXDataPath))
         {
             try
             {
-                string json = File.ReadAllText(filePath);
+                string json = File.ReadAllText(PathsManager.FXDataPath);
                 List<string> loadedEffects = Newtonsoft.Json.JsonConvert.DeserializeObject<List<string>>(json);
 
                 if (loadedEffects != null)
@@ -80,10 +80,12 @@ public class NoRender : Module
             catch { }
         }
 
+        if (menuNames.Count == 0) menuNames[-1] = "Empty";
+
         // 3. Menu
-        ParticlesSetting = new MultiSelectSetting("Particles", typeof(ParticleTypes))
+        ParticlesSetting = new MultiSelectSetting("Particles")
         {
-            CustomNames = menuNames
+            Options = menuNames
         };
 
         AddSettings(ParticlesSetting);
@@ -91,19 +93,19 @@ public class NoRender : Module
 
         ParticleTypeSetting = new MultiSelectSetting("Particle Types", typeof(ParticleType))
         {
-            CustomNames = TranslatedNames(typeof(ParticleType))
+            CustomNames = TranslateEnum(typeof(ParticleType))
         };
         AddSettings(ParticleTypeSetting);
 
         GameObjectsSetting = new MultiSelectSetting("Game Objects", typeof(BucketType))
         {
-            CustomNames = TranslatedNames(typeof(BucketType))
+            CustomNames = TranslateEnum(typeof(BucketType))
         };
         AddSettings(GameObjectsSetting);
 
         BulletSetting = new MultiSelectSetting("Bullets", typeof(BulletType))
         {
-            CustomNames = TranslatedNames(typeof(BulletType))
+            CustomNames = TranslateEnum(typeof(BulletType))
         };
         AddSettings(BulletSetting);
 
@@ -142,16 +144,16 @@ public class NoRender : Module
 
     public override void OnLanguageChanged()
     {
-        GameObjectsSetting.CustomNames = TranslatedNames(typeof(BucketType));
-        BulletSetting.CustomNames = TranslatedNames(typeof(BulletType));
+        GameObjectsSetting.CustomNames = TranslateEnum(typeof(BucketType));
+        BulletSetting.CustomNames = TranslateEnum(typeof(BulletType));
 
         EffectSetting.CustomNames = EffectSetting.Options
-            .ToDictionary(kvp => kvp.Key, kvp => Translator.Translate(kvp.Value));
+            .ToDictionary(kvp => kvp.Key, kvp => Translate(kvp.Value));
     }
 
     public override void OnUpdateActive()
     {
-        if (Game.AppData.BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         // Particles
         if (ParticlesSetting.SelectedValues.Count != 0)
@@ -202,7 +204,7 @@ public class NoRender : Module
     {
         List<string> effectsList = new(fxDatabase.Values);
         string json = Newtonsoft.Json.JsonConvert.SerializeObject(effectsList, Newtonsoft.Json.Formatting.Indented);
-        File.WriteAllText(filePath, json);
+        File.WriteAllText(PathsManager.FXDataPath, json);
     }
 
     public override void OnDisable()

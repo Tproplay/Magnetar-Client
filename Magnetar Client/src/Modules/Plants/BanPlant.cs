@@ -33,7 +33,7 @@ public class BanPlant : Module
 
         selectedPlants = new MultiSelectSetting("Entities", typeof(PlantType))
         {
-            CustomNames = TranslatedNames(typeof(PlantType)),
+            CustomNames = TranslateEnum(typeof(PlantType)),
             Blacklist = Banned.PlantTypeBanned,
             OnSelectionChanged = UpdateSelection
         };
@@ -44,7 +44,7 @@ public class BanPlant : Module
 
     public override void OnLanguageChanged()
     {
-        selectedPlants.CustomNames = TranslatedNames(typeof(PlantType));
+        selectedPlants.CustomNames = TranslateEnum(typeof(PlantType));
     }
 
     private void UpdateSelection(int id, bool val)

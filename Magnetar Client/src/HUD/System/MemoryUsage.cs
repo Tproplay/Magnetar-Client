@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Profiling;
-using static Magnetar_Client.UI.Themes.Magnetar_Default;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 
 namespace Magnetar_Client.HUDElements;
 
@@ -19,7 +19,7 @@ public class RAMElement : HudElement
         UpdateInterval = 1;
     }
 
-    string displayText = "RAM: <color=yellow>{Na</color>";
+    string displayText = "RAM: <color=yellow>Na</color>";
     protected override void DrawContent(float width, float height)
     {
         GUI.Label(new Rect(5, 5, width - 5, height - 5), displayText, HUDElementStyle);
@@ -37,11 +37,11 @@ public class RAMElement : HudElement
 
         displayText = $"RAM: <color={color}>{displayValue} MB</color>";
 
-        AdjustWidthToText(displayText, HUDElementStyle, 10);
+        AdjustWidthToText(displayText, HUDElementStyle, 8);
     }
     public override void OnEnable()
     {
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        AdjustWidthToText(displayText, HUDElementStyle, 8);
     }
 }
 
@@ -69,7 +69,7 @@ public class SystemRAMElement : HudElement
     private Process currentProc;
     private string totalInstalled;
     private string systemLoad;
-    private float nextActionTime = 0f;
+    private float nextActionTime;
 
     public SystemRAMElement() : base("System RAM Usage", HudElement.NewRect(200))
     {

@@ -1,26 +1,22 @@
-﻿using Magnetar_Client.Utils;
-using Magnetar_Client.UI.Setting;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Magnetar_Client.Core;
+using Magnetar_Client.UI.Setting;
+using Magnetar_Client.Utils;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
 
 namespace Magnetar_Client.Modules;
 
-public enum ModuleCategory
-{
-    Level,
-    Tools,
-    Plant,
-    Zombie,
-    Misc,
-    Visual,
-    Addon
-}
-
-
+/// <summary>
+/// Base class for all modules
+/// </summary>
 public abstract class Module
 {
     /// <summary>
@@ -44,7 +40,10 @@ public abstract class Module
     /// </summary>
     public abstract ModuleCategory Category { get; set; }
 
-    public virtual bool enableInVanillaMode { get; set; } = false;
+    /// <summary>
+    /// Should this module be allowed in Vanilla Mode
+    /// </summary>
+    public virtual bool EnableInVanillaMode { get; set; }
 
     // These will be in Every ModuleManager.
     // Edit if you want a different default keybind or want it to be enabled by default.
@@ -54,13 +53,12 @@ public abstract class Module
     public string GetBindString() => KeyBind.GetBindString();
 
     public List<KeyCode> BindKeys => KeyBind.BindKeys;
-    public virtual bool HoldMode { get; set; } = false;
-    public virtual bool Active { get; set; } = false;
+    public virtual bool HoldMode { get; set; }
+    public virtual bool Active { get; set; }
     /// <summary>
     /// Used to determine whether the setting window of the module is opened.
     /// </summary>
-    public virtual bool ShowSettings { get; set; } = false;
-
+    public virtual bool ShowSettings { get; set; }
 
     /// <summary>
     /// Used to store all the settings for the module.
@@ -83,7 +81,6 @@ public abstract class Module
     /// </summary>
     public virtual void OnDisable() { }
 
-
     /// <summary>
     /// Runs every frame regardless of whether the module is active or not.
     /// </summary>
@@ -95,7 +92,7 @@ public abstract class Module
     public virtual void OnUpdateActive() { }
 
     /// <summary>
-    /// Runs every frame on UnityEngine.OnGUI
+    /// Runs every frame on UnityEngine.OnEarlyGUI
     /// </summary>
     public virtual void OnGUI() { }
 
@@ -106,49 +103,59 @@ public abstract class Module
     {
         Settings.AddRange(settings);
     }
-    public virtual bool Initialized { get; set; } = false;
 
     /// <summary>
-    /// Runs When a the mod's language is changed
+    /// Runs when the mod's language is changed.
     /// </summary>
     public virtual void OnLanguageChanged() { }
 
-    public static Dictionary<int, string> TranslatedNames(System.Type enumType)
+    /// <summary>
+    /// Translates an enum using the central Translator.
+    /// </summary>
+    public static Dictionary<int, string> TranslateEnum(Type enumType, bool enumKey = true)
     {
         if (enumType == null || !enumType.IsEnum) return new Dictionary<int, string>();
 
-        Dictionary<int, string> names = new();
-
-#if ANDROID
-        foreach (var val in System.Enum.GetValues(enumType))
+        var names = Translator.TranslateEnum(enumType);
+        if (enumKey)
         {
-            int key = System.Convert.ToInt32(val);
-            string name = System.Enum.GetName(enumType, val) ?? val.ToString();
-            names[key] = $"{name} ({key})";
+            foreach (var kvp in names.ToList())
+            {
+                names[kvp.Key] = $"{kvp.Value} ({kvp.Key})";
+            }
         }
-#else
-        names = Translator.TranslateEnum(enumType);
-
-        foreach (var kvp in names.ToList())
-        {
-            names[kvp.Key] = $"{kvp.Value} ({kvp.Key})";
-}
-#endif
 
         return names;
     }
 
-    public virtual float SettingsWidth { get; set; } = Config.ModuleManager.SettingsWidth;
+    /// <summary>
+    /// Translates a Enum to { Enum_val : Translated_name }
+    /// </summary>
+    public static Dictionary<int, string> TranslateEnum<T>() => TranslateEnum(typeof(T));
+    /// <summary>
+    /// Translates a Enum to { Enum_val : Translated_name }
+    /// </summary>
+    public static Dictionary<int, string> TranslateEnum<T>(bool enumKey = true) => TranslateEnum(typeof(T), enumKey);
 
-    // Add these category helper methods anywhere inside the ModuleManager class
+    /// <summary>
+    /// Override the width of this Module
+    /// </summary>
+    public virtual float SettingsWidth { get; set; } = ModuleManager.SettingsWidth;
+
+    /// <summary>
+    /// Creates a new Category. Use <see cref="EndCategory"/> to define the end.
+    /// </summary>
     public void CreateCategory(string name, bool defaultExpanded = true)
     {
-        Settings.Add(new CategorySetting(name, defaultExpanded));
+        AddSettings(new CategorySetting(name, defaultExpanded));
     }
 
+    /// <summary>
+    /// Ends a Category
+    /// </summary>
     public void EndCategory()
     {
-        Settings.Add(new EndCategorySetting());
+        AddSettings(new EndCategorySetting());
     }
 
     public static bool GetKeyComboDown(List<KeyCode> keyCodes)
@@ -168,6 +175,9 @@ public abstract class Module
         return true;
     }
 
+    /// <summary>
+    /// Contains default Banned HashSets for Plants and Zombies
+    /// </summary>
     public struct Banned
     {
         public static HashSet<int> PlantTypeBanned = new()
@@ -191,8 +201,8 @@ public abstract class Module
         };
     }
 
-    public virtual bool defaultHoldMode { get; set; } = false;
-    public virtual bool defaultActive { get; set; } = false;
+    public virtual bool defaultHoldMode { get; }
+    public virtual bool defaultActive { get; }
 
     public virtual void ResetBuiltIns()
     {
@@ -209,4 +219,137 @@ public abstract class Module
         }
     }
 
+    /// <summary>
+    /// Should the data of this module be saved in profile
+    /// </summary>
+    public virtual bool SaveData { get; } = true;
+
+    #region Custom Saved Profile Data
+
+    /// <summary>
+    /// Arbitrary key-value store for module state (floats, ints, bools, strings, objects).
+    /// Serialized into the profile save file by ModuleManager and restored on profile load.
+    /// </summary>
+    public Dictionary<string, object> SavedData { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public void SetSaved<T>(string key, T value)
+    {
+        SavedData[key] = value;
+    }
+
+    public T GetSaved<T>(string key, T defaultValue = default)
+    {
+        if (SavedData != null && SavedData.TryGetValue(key, out var raw))
+        {
+            if (raw is T typed) return typed;
+            if (raw == null) return defaultValue;
+
+            try
+            {
+                if (raw is JToken token)
+                    return token.ToObject<T>();
+
+                Type targetType = typeof(T);
+                if (targetType.IsEnum)
+                    return (T)Enum.ToObject(targetType, raw);
+
+                return (T)Convert.ChangeType(raw, targetType);
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+        return defaultValue;
+    }
+
+    #endregion
+
+    #region Custom Module Translations & Regex
+
+    /// <summary>
+    /// Key-value pairs for module-specific phrases. Loaded from the module's 
+    /// translation JSON and overwritten with translated values when a language loads.
+    /// </summary>
+    public Dictionary<string, string> SavedTranslationData { get; set; } = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Custom regex replacement rules (RegexPattern -> ReplacementTemplate).
+    /// </summary>
+    public Dictionary<string, string> SavedRegexTranslations { get; set; } = new();
+
+    public void RegisterTranslation(string key, string defaultValue)
+    {
+        if (!SavedTranslationData.ContainsKey(key))
+            SavedTranslationData[key] = defaultValue;
+    }
+
+    public void RegisterTranslations(Dictionary<string, string> translations)
+    {
+        if (translations == null) return;
+        foreach (var kvp in translations)
+        {
+            if (!SavedTranslationData.ContainsKey(kvp.Key))
+                SavedTranslationData[kvp.Key] = kvp.Value;
+        }
+    }
+
+    public void RegisterRegexTranslation(string pattern, string replacement)
+    {
+        SavedRegexTranslations[pattern] = replacement;
+    }
+
+    /// <summary>
+    /// Translates an input string checking module-specific translations and regexes first,
+    /// then falling back to the global Translator.
+    /// </summary>
+    public string Translate(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+
+        // 1. Exact match from SavedTranslationData
+        if (SavedTranslationData != null && SavedTranslationData.TryGetValue(input, out string exact) && !string.IsNullOrEmpty(exact))
+        {
+            return exact;
+        }
+
+        // 2. Module-specific regex rules
+        if (SavedRegexTranslations != null && SavedRegexTranslations.Count > 0)
+        {
+            foreach (var kvp in SavedRegexTranslations)
+            {
+                try
+                {
+                    Match match = Regex.Match(input, kvp.Key);
+                    if (match.Success)
+                    {
+                        string template = kvp.Value;
+                        for (int i = 1; i < match.Groups.Count; i++)
+                        {
+                            if (match.Groups[i].Success)
+                            {
+                                string val = match.Groups[i].Value;
+                                string sub = val;
+
+                                // Guard: Do not translate captured groups if they are numeric
+                                if (!long.TryParse(val, out _) && SavedTranslationData != null && SavedTranslationData.TryGetValue(val, out var transSub))
+                                {
+                                    sub = transSub;
+                                }
+
+                                template = template.Replace($"{{{i}}}", sub);
+                            }
+                        }
+                        return template;
+                    }
+                }
+                catch { }
+            }
+        }
+
+        // 3. Fallback to global Translator
+        return Translator.Translate(input);
+    }
+
+    #endregion
 }

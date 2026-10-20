@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using static Magnetar_Client.Game.AppData;
+
 
 namespace Magnetar_Client.Modules;
 
@@ -20,11 +20,11 @@ public class VanillaMode : Module
         get => base.Active;
         set
         {
-            if (BoardInstanceIsNull) base.Active = value;
+            if (GameData.BoardInstanceIsNull) base.Active = value;
         }
     }
 
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
     // Mod Data
 
     public static VanillaMode instance;
@@ -43,7 +43,7 @@ public class VanillaMode : Module
         {
             Type moduleType = module.GetType();
 
-            if (!module.enableInVanillaMode && module.Active)
+            if (!module.EnableInVanillaMode && module.Active)
             {
                 module.Active = false;
                 module.OnDisable();
@@ -78,7 +78,7 @@ public class VanillaMode : Module
     {
         if (!Active) return true;
 
-        return module.enableInVanillaMode;
+        return module.EnableInVanillaMode;
 
     }
 

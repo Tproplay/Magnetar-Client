@@ -3,8 +3,10 @@ using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static Magnetar_Client.Game.AppData;
+
 using static Magnetar_Client.Utils.Magnetar_Logger;
+
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -23,7 +25,7 @@ public class CustomKeybind : Module
         " keyremapping settingskey binds bind";
 
     public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     // Mod Data
 
@@ -119,13 +121,13 @@ public class CustomKeybind : Module
 
     
 
-    private static bool RanbyMod = false;
+    private static bool RanbyMod;
 
     public override void OnUpdateActive()
     {
         RanbyMod = true;
         
-        if (!BoardInstanceIsNull && GameAPP.theGameStatus == GameStatus.InGame)
+        if (!GameData.BoardInstanceIsNull && GameAPP.theGameStatus == GameStatus.InGame)
         {
             // In Game
 
@@ -135,8 +137,8 @@ public class CustomKeybind : Module
                 Glove.Instance.OnClick(Mouse.Instance);
             if (GetKeyComboDown(PickUpHammer.BindKeys) && Hammer.Instance != null)
                 Hammer.Instance.OnClick(Mouse.Instance);
-            if (GetKeyComboDown(PickUpWheel.BindKeys) && WheelInstance != null)
-                WheelInstance.OnClick(Mouse.Instance);
+            if (GetKeyComboDown(PickUpWheel.BindKeys) && GameData.WheelInstance != null)
+                GameData.WheelInstance.OnClick(Mouse.Instance);
 
             if (GetKeyComboDown(CoffeeBean.BindKeys) && itemBtn != null) 
                 Mouse.Instance.theItemOnMouse = itemBtn.Clicked();
@@ -168,8 +170,8 @@ public class CustomKeybind : Module
 
 
             }  
-            if (GetKeyComboDown(ShowPlantHP.BindKeys)) BoardInstance.ShowPlantHealth();
-            if (GetKeyComboDown(ShowZombieHP.BindKeys)) BoardInstance.ShowZombieHealth();
+            if (GetKeyComboDown(ShowPlantHP.BindKeys)) GameData.BoardInstance.ShowPlantHealth();
+            if (GetKeyComboDown(ShowZombieHP.BindKeys)) GameData.BoardInstance.ShowZombieHealth();
             if (GetKeyComboDown(ToggleUI.BindKeys))
             {
                 if (GameAPP.canvas != null && GameAPP.canvasUp != null)
@@ -222,7 +224,7 @@ public class CustomKeybind : Module
 
         if (targetCard != null && Mouse.Instance != null)
         {
-            if (AutoPlant.instance == null || !AutoPlant.instance.Active)
+            if (AutoPlant.Instance == null || !AutoPlant.Instance.Active)
             {
                 Mouse.Instance.ClickOnCard(targetCard);
             }

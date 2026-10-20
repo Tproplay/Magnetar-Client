@@ -3,7 +3,8 @@ using Magnetar_Client.UI.Setting;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static Magnetar_Client.Game.AppData;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -20,7 +21,7 @@ public class SmallerProjectiles : Module
         "projectilesize projectil smallbullet clear screen projectilevisual smallammo ammoclutter pea size hitclutter tinyprojectiles " +
         "lagclutter projectils";
     public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     public static SmallerProjectiles instance;
 
@@ -36,7 +37,7 @@ public class SmallerProjectiles : Module
 
         BulletTypeSetting = new MultiSelectSetting("Bullet Types", typeof(BulletType))
         {
-            CustomNames = TranslatedNames(typeof(BulletType)),
+            CustomNames = TranslateEnum(typeof(BulletType)),
         };
 
         BulletTypeSetting.SelectAll(setDefault: true);
@@ -51,7 +52,7 @@ public class SmallerProjectiles : Module
 
     public override void OnLanguageChanged()
     {
-        BulletTypeSetting.CustomNames = TranslatedNames(typeof(BulletType));
+        BulletTypeSetting.CustomNames = TranslateEnum(typeof(BulletType));
     }
 
 
@@ -101,7 +102,7 @@ public class SmallerProjectiles : Module
 
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) originalScales.Clear();
+        if (GameData.BoardInstanceIsNull) originalScales.Clear();
     }
 
     public static Dictionary<IntPtr, Vector3> originalScales = new();

@@ -1,7 +1,9 @@
-﻿using static Magnetar_Client.Game.AppData;
+﻿
 using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using System.Reflection;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -23,7 +25,7 @@ public class CustomBoardTags : Module
 
     // Mod Data
 
-    bool _active = false;
+    bool _active;
     public override bool Active 
     { 
         get => _active;
@@ -99,15 +101,15 @@ public class CustomBoardTags : Module
 
     void ApplyTagChange(int tag, bool enable)
     {
-        if (tag < 0 || tag >= BoardTagFields.Length || BoardInstanceIsNull) return;
+        if (tag < 0 || tag >= BoardTagFields.Length || GameData.BoardInstanceIsNull) return;
 
-        var boardTag = BoardInstance.boardTag;
+        var boardTag = GameData.BoardInstance.boardTag;
 
         object boxedTag = boardTag;
 
         BoardTagFields[tag].SetValue(boxedTag, enable);
-
-        BoardInstance.boardTag = (Board.BoardTag)boxedTag;
+        GameData.
+                BoardInstance.boardTag = (Board.BoardTag)boxedTag;
     }
 
 

@@ -16,7 +16,7 @@ public class SoundMuffler : Module
         "soundblocker audiosettings volumecontrol soundmute noisecontrol disablesounds soundcleaner audioblock " +
         "soundfix muteeffects audiomute soundmanager customaudio soundfilter audiodampener soundkiller";
     public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     // Mod Data
 
@@ -32,7 +32,7 @@ public class SoundMuffler : Module
 
         blacklistedTypes = new MultiSelectSetting("Blacklisted", typeof(SoundType))
         {
-            CustomNames = TranslatedNames(typeof(SoundType))
+            CustomNames = TranslateEnum(typeof(SoundType))
         };
         AddSettings(blacklistedTypes);
 
@@ -41,7 +41,7 @@ public class SoundMuffler : Module
 
     public override void OnLanguageChanged()
     {
-        blacklistedTypes.CustomNames = TranslatedNames(typeof(SoundType));
+        blacklistedTypes.CustomNames = TranslateEnum(typeof(SoundType));
     }
 
     // Mod Logic

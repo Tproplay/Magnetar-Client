@@ -2,179 +2,31 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEngine;
-using Magnetar_Client.Core;
+using static Magnetar_Client.Api.PathsManager;
 using static Magnetar_Client.Utils.Magnetar_Logger;
-
-
-#if MELONLOADER || RELEASE_MELON
-using MelonLoader;
-using MelonLoader.Utils;
-#elif BEPINEX || RELEASE_BEPINEX
-using BepInEx;
-using BepInEx.Configuration;
-#endif
 
 namespace Magnetar_Client.Utils;
 
+/// <summary>
+/// Manages the profile creation and handeling.
+/// </summary>
 public static class ProfileManager
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public const string DefaultProfile = "Default";
-
-    /// <summary>
-    /// List of all detected profile names.
-    /// </summary>
-    public static List<string> Profiles { get; private set; } = new List<string> { DefaultProfile };
-
-#if MELONLOADER || RELEASE_MELON
-    private static MelonPreferences_Entry<string> prefCurrentProfile;
-#elif BEPINEX || RELEASE_BEPINEX
-    private static ConfigEntry<string> prefCurrentProfile;
-#endif
-
-    private static string _cachedConfigDir;
-
-    public static string ConfigDir
-    {
-        get
-        {
-            if (!string.IsNullOrEmpty(_cachedConfigDir) && Directory.Exists(_cachedConfigDir))
-            {
-                return _cachedConfigDir;
-            }
-
-            string targetDir = null;
-
-#if ANDROID
-            // 1. Mobile BepInEx path
-            string mobileBepInExConfig = "/storage/emulated/0/PVZRH_Launcher/com.LanPiaoPiao.PlantsVsZombiesRH/BepInEx/config";
-
-            try
-            {
-                if (Directory.Exists("/storage/emulated/0/PVZRH_Launcher/com.LanPiaoPiao.PlantsVsZombiesRH/BepInEx"))
-                {
-                    targetDir = mobileBepInExConfig;
-                }
-            }
-            catch { }
-
-            // 2. Fallback to BepInEx Paths.ConfigPath if available
-            if (string.IsNullOrEmpty(targetDir))
-            {
-                try
-                {
-#if BEPINEX || RELEASE_BEPINEX
-                    if (!string.IsNullOrEmpty(Paths.ConfigPath))
-                    {
-                        targetDir = Paths.ConfigPath;
-                    }
-#endif
-                }
-                catch { }
-            }
-
-            // 3. Fallback to internal app sandbox storage
-            if (string.IsNullOrEmpty(targetDir))
-            {
-                targetDir = Path.Combine(Application.persistentDataPath, "Magnetar", "Config");
-            }
-#elif MELONLOADER || RELEASE_MELON
-            targetDir = MelonEnvironment.UserDataDirectory;
-#elif BEPINEX || RELEASE_BEPINEX
-            targetDir = Paths.ConfigPath;
-#else
-            targetDir = Path.Combine(Application.persistentDataPath, "Magnetar", "Config");
-#endif
-
-            try
-            {
-                if (!Directory.Exists(targetDir))
-                {
-                    Directory.CreateDirectory(targetDir);
-                }
-                _cachedConfigDir = targetDir;
-            }
-            catch (Exception ex)
-            {
-                AutoSaveLogger.Error($"[ProfileManager] Failed to create config dir '{targetDir}': {ex.Message}");
-                _cachedConfigDir = Application.persistentDataPath;
-                return _cachedConfigDir;
-            }
-
-            return targetDir;
-        }
-    }
-
-    public static string GetProfilePath(string profileName)
-    {
-        string safeName = string.Join("_", profileName.Split(Path.GetInvalidFileNameChars()));
-        return Path.Combine(ConfigDir, $"Magnetar_{safeName}.json");
-    }
-
-    public static void Init()
-    {
-        _ = ConfigDir;
-
-#if MELONLOADER || RELEASE_MELON
-        prefCurrentProfile = Preferences.MagnetarCategory.CreateEntry("CurrentProfile", DefaultProfile, "Active Profile");
-#elif BEPINEX || RELEASE_BEPINEX
-        try
-        {
-            if (Preferences.BepInExConfig != null)
-            {
-                prefCurrentProfile = Preferences.BepInExConfig.Bind("ProfileManager", "CurrentProfile", DefaultProfile, "Active Profile");
-            }
-        }
-        catch (Exception ex)
-        {
-            AutoSaveLogger.Error($"Failed to bind BepInEx preference: {ex.Message}");
-        }
-#endif
-
-        RefreshProfiles();
-
-        if (!Profiles.Contains(DefaultProfile, StringComparer.OrdinalIgnoreCase))
-        {
-            Profiles.Insert(0, DefaultProfile);
-        }
-
-        string savedProfile = DefaultProfile;
-
-        if (prefCurrentProfile != null && !string.IsNullOrWhiteSpace(prefCurrentProfile.Value))
-        {
-            savedProfile = prefCurrentProfile.Value;
-        }
-
-        if (Profiles.Contains(savedProfile, StringComparer.OrdinalIgnoreCase))
-        {
-            Config.CurrentProfile = savedProfile;
-        }
-        else
-        {
-            Config.CurrentProfile = DefaultProfile;
-            SaveCurrentProfileToPreferences(DefaultProfile);
-        }
-
-        AutoSaveLogger.Msg($"Profile Manager initialized. Directory: '{ConfigDir}', Active profile: '{Config.CurrentProfile}'");
-    }
+    public static List<string> Profiles { get; private set; } = new() { ProfileManager.DefaultProfile };
+    public static string CurrentProfile { get; set; } = "Default";
+    public const string SaveFilePrefix = "Magnetar_";
 
     private static void SaveCurrentProfileToPreferences(string profileName)
     {
         try
         {
-#if MELONLOADER || RELEASE_MELON
-            if (prefCurrentProfile != null)
+            if (PreferenceManager.CurrentProfileEntry != null)
             {
-                prefCurrentProfile.Value = profileName;
-                Preferences.MagnetarCategory.SaveToFile();
+                PreferenceManager.CurrentProfileEntry.Value = profileName;
+                PreferenceManager.CurrentProfileEntry.Save();
             }
-#elif BEPINEX || RELEASE_BEPINEX
-            if (prefCurrentProfile != null && Preferences.BepInExConfig != null)
-            {
-                prefCurrentProfile.Value = profileName;
-                Preferences.BepInExConfig.Save();
-            }
-#endif
         }
         catch (Exception ex)
         {
@@ -183,27 +35,26 @@ public static class ProfileManager
     }
 
     /// <summary>
-    /// Scans the config directory for all Magnetar_{profile}.json save files.
+    /// Reloads the profile files from the Profile's directory
     /// </summary>
     public static void RefreshProfiles()
     {
         Profiles.Clear();
-        Profiles.Add(DefaultProfile);
+        Profiles.Add(ProfileManager.DefaultProfile);
 
         try
         {
             if (Directory.Exists(ConfigDir))
             {
-                var files = Directory.GetFiles(ConfigDir, "Magnetar_*.json");
+                var files = Directory.GetFiles(ConfigDir, SaveFilePrefix + "*.json");
                 foreach (var file in files)
                 {
                     string fileName = Path.GetFileNameWithoutExtension(file);
-                    if (fileName.StartsWith("Magnetar_"))
+                    if (fileName.StartsWith(SaveFilePrefix))
                     {
-                        string profileName = fileName.Substring("Magnetar_".Length);
+                        string profileName = fileName[SaveFilePrefix.Length..];
 
                         if (!string.IsNullOrWhiteSpace(profileName) &&
-                            !string.Equals(profileName, "Config", StringComparison.OrdinalIgnoreCase) &&
                             !Profiles.Contains(profileName, StringComparer.OrdinalIgnoreCase))
                         {
                             Profiles.Add(profileName);
@@ -218,131 +69,51 @@ public static class ProfileManager
         }
     }
 
-    public static void DisableAllModules()
-    {
-        if (ModuleManager.Modules == null) return;
-
-        foreach (var mod in ModuleManager.Modules)
-        {
-            if (mod == null) continue;
-
-            if (mod.Active)
-            {
-                mod.Active = false;
-                try
-                {
-                    mod.OnDisable();
-                }
-                catch (Exception ex)
-                {
-                    AutoSaveLogger.Error($"Error disabling module '{mod.Name}': {ex.Message}");
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// Disables all modules and resets every setting polymorphically to default values.
-    /// </summary>
-    public static void ResetAllModulesToDefault()
-    {
-        DisableAllModules();
-
-        if (ModuleManager.Modules == null) return;
-
-        foreach (var mod in ModuleManager.Modules)
-        {
-            if (mod == null) continue;
-
-            if (mod.KeyBind != null)
-            {
-                mod.KeyBind.Reset();
-            }
-
-            mod.HoldMode = mod.defaultHoldMode;
-            if (mod.Active != mod.defaultActive)
-            {
-                mod.Toggle();
-            }
-
-            if (mod.Settings != null)
-            {
-                foreach (var setting in mod.Settings)
-                {
-                    if (setting == null) continue;
-
-                    try
-                    {
-                        setting.Reset();
-                    }
-                    catch (Exception ex)
-                    {
-                        AutoSaveLogger.Error($"Error resetting setting '{setting.Name}' in module '{mod.Name}': {ex.Message}");
-                    }
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// Creates a new profile, saves current profile state, resets modules to default, and updates preferences.
-    /// </summary>
     public static bool CreateProfile(string profileName)
     {
         if (string.IsNullOrWhiteSpace(profileName)) return false;
-
         profileName = profileName.Trim();
 
         if (Profiles.Contains(profileName, StringComparer.OrdinalIgnoreCase))
-        {
-            AutoSaveLogger.Error($"Profile '{profileName}' already exists.");
             return false;
-        }
 
         SaveLoad.Save(force: true);
-        ResetAllModulesToDefault();
+        SaveLoad.ResetAll();
 
         Profiles.Add(profileName);
-        Config.CurrentProfile = profileName;
+        ProfileManager.CurrentProfile = profileName;
 
         SaveCurrentProfileToPreferences(profileName);
         SaveLoad.Save(force: true);
-        Config.showgui = true;
+        ClientConfig.showgui = true;
 
         AutoSaveLogger.Msg($"Created and loaded new profile: '{profileName}'");
         return true;
     }
 
-    /// <summary>
-    /// Saves current profile, resets modules to clean defaults, and loads the target profile.
-    /// </summary>
     public static void SwitchProfile(string targetProfile)
     {
-        if (string.IsNullOrWhiteSpace(targetProfile) || string.Equals(Config.CurrentProfile, targetProfile, StringComparison.OrdinalIgnoreCase)) return;
+        if (string.IsNullOrWhiteSpace(targetProfile) || string.Equals(ProfileManager.CurrentProfile, targetProfile, StringComparison.OrdinalIgnoreCase)) return;
 
         SaveLoad.Save(force: true);
-        ResetAllModulesToDefault();
+        SaveLoad.ResetAll();
 
         if (!Profiles.Contains(targetProfile, StringComparer.OrdinalIgnoreCase))
         {
             Profiles.Add(targetProfile);
         }
-
-        Config.CurrentProfile = targetProfile;
+        ProfileManager.CurrentProfile = targetProfile;
         SaveCurrentProfileToPreferences(targetProfile);
 
         SaveLoad.Load();
-        Config.showgui = true;
+        ClientConfig.showgui = true;
 
-        AutoSaveLogger.Msg($"Switched active profile to: '{Config.CurrentProfile}'");
+        AutoSaveLogger.Msg($"Switched active profile to: '{ProfileManager.CurrentProfile}'");
     }
 
-    /// <summary>
-    /// Deletes a profile file and removes it from the list. Fallbacks to Default if active.
-    /// </summary>
     public static bool DeleteProfile(string profileName)
     {
-        if (string.Equals(profileName, DefaultProfile, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(profileName, ProfileManager.DefaultProfile, StringComparison.OrdinalIgnoreCase))
         {
             AutoSaveLogger.Error("Cannot delete the Default profile.");
             return false;
@@ -365,15 +136,16 @@ public static class ProfileManager
 
         Profiles.RemoveAll(p => string.Equals(p, profileName, StringComparison.OrdinalIgnoreCase));
 
-        if (string.Equals(Config.CurrentProfile, profileName, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(ProfileManager.CurrentProfile, profileName, StringComparison.OrdinalIgnoreCase))
         {
-            ResetAllModulesToDefault();
-            Config.CurrentProfile = DefaultProfile;
-            SaveCurrentProfileToPreferences(DefaultProfile);
+            ProfileManager.CurrentProfile = ProfileManager.DefaultProfile;
+            SaveCurrentProfileToPreferences(ProfileManager.DefaultProfile);
             SaveLoad.Load();
         }
 
         AutoSaveLogger.Warning($"Deleted profile: '{profileName}'");
         return true;
     }
+
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

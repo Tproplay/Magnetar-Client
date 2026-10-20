@@ -1,8 +1,8 @@
 ﻿using HarmonyLib;
 using Magnetar_Client.UI.Setting;
-using System.Linq;
 using System.Collections.Generic;
-using static Magnetar_Client.Game.AppData;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -33,7 +33,7 @@ public class CustomCDGlove : Module
 
     public BoolSetting resetCDonEnable;
 
-    public override bool Active { get; set; } = false;
+    public override bool Active { get; set; }
 
     public CustomCDGlove()
     {
@@ -109,7 +109,7 @@ public class CustomCDHammer : Module
 
     public BoolSetting resetCDonEnable;
 
-    public override bool Active { get; set; } = false;
+    public override bool Active { get; set; }
 
     public CustomCDHammer()
     {
@@ -204,7 +204,7 @@ public class CustomCDWheel : Module
 
     public BoolSetting resetCDonEnable;
 
-    public override bool Active { get; set; } = false;
+    public override bool Active { get; set; }
 
     public CustomCDWheel()
     {
@@ -231,7 +231,7 @@ public class CustomCDWheel : Module
 
     public override void OnUpdateActive()
     {
-        if (WheelInstance==null)
+        if (GameData.WheelInstance ==null)
         {
             originalCD = -1f;
             return;
@@ -239,15 +239,16 @@ public class CustomCDWheel : Module
         
 
         // Save Original CD
-        if (originalCD == -1f) originalCD = WheelInstance.fullCD;
+        if (originalCD == -1f) originalCD = GameData.WheelInstance.fullCD;
 
-        if (WheelInstance.CD > CustomCD.Value)
+        if (GameData.WheelInstance.CD > CustomCD.Value)
         {
-            WheelInstance.CD = CustomCD.Value;
-            WheelInstance.CDUpdate();
+            GameData.WheelInstance.CD = CustomCD.Value;
+            GameData.WheelInstance.CDUpdate();
         }
 
-        WheelInstance.fullCD = CustomCD.Value;
+        GameData.
+                WheelInstance.fullCD = CustomCD.Value;
 
 
     }
@@ -255,21 +256,21 @@ public class CustomCDWheel : Module
     public override void OnDisable()
     {
 
-        if (WheelInstance == null) return;
+        if (GameData.WheelInstance == null) return;
 
         if (originalCD >= 0 && preserveOriginal.Value)
         {
-            WheelInstance.fullCD = originalCD;
+            GameData.WheelInstance.fullCD = originalCD;
         }
         originalCD = -1f;
     }
 
     public override void OnEnable()
     {
-        if (WheelInstance == null) return;
+        if (GameData.WheelInstance == null) return;
         if (resetCDonEnable.Value)
         {
-            WheelInstance.CD = CustomCD.Value;
+            GameData.WheelInstance.CD = CustomCD.Value;
         }
     }
 }
@@ -302,23 +303,21 @@ public class CustomCDCards : Module
 
         CreateCategory("General");
 
-        selectedSeeds = new MultiSelectSetting(
-            "Cards", typeof(PlantType))
+        selectedSeeds = new MultiSelectSetting("Cards", typeof(PlantType))
         {
             Blacklist = Banned.PlantTypeBanned,
-            CustomNames = TranslatedNames(typeof(PlantType))
+            CustomNames = TranslateEnum(typeof(PlantType))
         };
 
-        selectedSeeds.Options.Keys.ToList().ForEach(selectedSeeds.Select);
+        selectedSeeds.SelectAll();
 
-        selectedSeeds_dup = new MultiSelectSetting(
-            "Duplicate Cards", typeof(PlantType))
+        selectedSeeds_dup = new MultiSelectSetting("Duplicate Cards", typeof(PlantType))
         {
             Blacklist = Banned.PlantTypeBanned,
-            CustomNames = TranslatedNames(typeof(PlantType))
+            CustomNames = TranslateEnum(typeof(PlantType)),
         };
 
-        selectedSeeds_dup.Options.Keys.ToList().ForEach(selectedSeeds_dup.Select);
+        selectedSeeds_dup.SelectAll();
 
         CustomCDSetting = new FloatSetting("Custom CD Multiplier", 0.001f, 10, 1_000_000,3, 0.001f);
 
@@ -332,7 +331,7 @@ public class CustomCDCards : Module
     private Dictionary<CardUI,float> originalCD = new();
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull || InGameUI.Instance == null || InGameUI.Instance.Cards.Count == 0)
+        if (GameData.BoardInstanceIsNull || InGameUI.Instance == null || InGameUI.Instance.Cards.Count == 0)
         {
             originalCD.Clear();
             return;

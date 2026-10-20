@@ -1,8 +1,10 @@
 ﻿using HarmonyLib;
 using System.Linq;
 using UnityEngine;
-using static Magnetar_Client.Game.AppData;
+
 using System.Collections.Generic;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -37,26 +39,26 @@ public class UnlimitedLawnMowers : Module
 
     public override void OnEnable()
     {
-        if (BoardInstanceIsNull || CreateMower.Instance == null || BoardInstance == null || BoardInstance.mowerArray == null)
+        if (GameData.BoardInstanceIsNull || CreateMower.Instance == null || GameData.BoardInstance == null || GameData.BoardInstance.mowerArray == null)
             return;
-        bool[] rowHasMower = new bool[BoardInstance.rowNum];
+        bool[] rowHasMower = new bool[GameData.BoardInstance.rowNum];
 
-        for (int i = 0; i < BoardInstance.mowerArray.Count; i++)
+        for (int i = 0; i < GameData.BoardInstance.mowerArray.Count; i++)
         {
-            Mower m = BoardInstance.mowerArray[i];
-            if (m != null && m.theMowerRow >= 0 && m.theMowerRow < BoardInstance.rowNum)
+            Mower m = GameData.BoardInstance.mowerArray[i];
+            if (m != null && m.theMowerRow >= 0 && m.theMowerRow < GameData.BoardInstance.rowNum)
             {
                 rowHasMower[m.theMowerRow] = true;
             }
         }
-        for (int i = 0; i < BoardInstance.rowNum; i++)
+        for (int i = 0; i < GameData.BoardInstance.rowNum; i++)
         {
             if (!rowHasMower[i])
             {
-                CreateMower.Instance.SetMowerOnRoad(BoardInstance.roadType[i], i);
-                for (int j = 0; j < BoardInstance.mowerArray.Count; j++)
+                CreateMower.Instance.SetMowerOnRoad(GameData.BoardInstance.roadType[i], i);
+                for (int j = 0; j < GameData.BoardInstance.mowerArray.Count; j++)
                 {
-                    Mower newMower = BoardInstance.mowerArray[j];
+                    Mower newMower = GameData.BoardInstance.mowerArray[j];
                     if (newMower != null && newMower.theMowerRow == i && !newMower.started)
                     {
                         newMower.transform.position = new UnityEngine.Vector3(

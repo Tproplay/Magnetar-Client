@@ -1,9 +1,10 @@
 ﻿using HarmonyLib;
 using Magnetar_Client.UI.Setting;
-using static Magnetar_Client.Game.AppData;
-using static Magnetar_Client.Game.GameData;
+
+using static Magnetar_Client.GameData;
 using static Magnetar_Client.Utils.Maths;
 using System;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 using Il2CppTMPro;
@@ -26,8 +27,8 @@ public class BetterHealthDisplay : Module
     public override ModuleCategory Category { get; set; } = ModuleCategory.Visual;
 
     public override bool Active { get; set; } = true; // On by default
-    public override bool defaultActive { get; set; } = true;
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool defaultActive { get; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     // Mod Data
     public static BetterHealthDisplay instance;
@@ -66,7 +67,7 @@ public class BetterHealthDisplay : Module
 
         SelectedPlants = new MultiSelectSetting("Whitelist Plants", typeof(PlantType))
         {
-            CustomNames = TranslatedNames(typeof(PlantType)),
+            CustomNames = TranslateEnum(typeof(PlantType)),
             Blacklist = Banned.PlantTypeBanned,
         };
         SelectedPlants.SelectAll(setDefault: true);
@@ -79,7 +80,7 @@ public class BetterHealthDisplay : Module
 
         SelectedZombies = new MultiSelectSetting("Whitelist Zombies", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
         };
         SelectedZombies.SelectAll(setDefault: true);

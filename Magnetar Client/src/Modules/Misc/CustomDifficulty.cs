@@ -236,13 +236,14 @@ public class CustomDifficulty : Module
     [HarmonyPatch(typeof(DifficultyMgr))]
     public static class DifficultyMgrPatch
     {
-        private static bool _isSyncing = false;
-        private static DifficultyMgr _lastActiveMgr = null;
+        private static bool _isSyncing;
+        private static DifficultyMgr _lastActiveMgr;
 
         [HarmonyPatch(nameof(DifficultyMgr.Start))]
         [HarmonyPostfix]
         public static void AwakePostfix(DifficultyMgr __instance)
         {
+            if (instance == null || !instance.Active) return;
             // Sync slider value as soon as the menu object wakes up
             SyncSliderToConfig(__instance);
         }
@@ -368,7 +369,7 @@ public class CustomDifficulty : Module
             if (config == null) return true;
 
             int difficulty = config.difficulty;
-            float totalZombieHp = (float)(__instance.theFirstArmorHealth + __instance.theHealth);
+            float totalZombieHp = __instance.theFirstArmorHealth + __instance.theHealth;
 
             // 2. Difficulty thresholds for instant char/ash kill
             bool canBeCharred = false;

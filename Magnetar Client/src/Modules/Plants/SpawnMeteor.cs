@@ -1,16 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Collections;
-using static Magnetar_Client.Game.AppData;
+
 using UnityEngine;
 using System.Linq;
 using Magnetar_Client.Utils;
-
-#if MELONLOADER || RELEASE_MELON
-using Il2Cpp;
-using MelonLoader;
-#elif BEPINEX || RELEASE_BEPINEX
-using BepInEx.Unity.IL2CPP.Utils;
-#endif
 
 using Magnetar_Client.UI.Setting;
 
@@ -36,6 +29,13 @@ public class SpawnMeteor : Module
     public SpawnMeteor()
     {
         instance = this;
+
+        var strings = new string[]
+        {
+            "Passive Meteorite", "Active Meteorite", "Ultimate Meteorite", "Ultimate Meteorite (skin)",
+        };
+
+        RegisterTranslations(Translator.CreateDictionary(strings));
 
         CreateCategory("General");
 
@@ -67,7 +67,7 @@ public class SpawnMeteor : Module
         foreach (var instance in MeteorSectionSetting.Sections)
         {
             var select = (SelectSetting)instance.ChildSettings[0];
-            select.CustomNames = select.Options.ToDictionary(kvp =>  kvp.Key, kvp => Translator.Translate(kvp.Value));
+            select.CustomNames = select.Options.ToDictionary(kvp =>  kvp.Key, kvp => Translate(kvp.Value));
         }
     }
 
@@ -75,7 +75,7 @@ public class SpawnMeteor : Module
 
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         foreach (var instance in MeteorSectionSetting.Sections)
         {
@@ -97,8 +97,8 @@ public class SpawnMeteor : Module
             case 0:
                 for (int _  = 0; _ < count; _++)
                 {
-                    if (BoardInstanceIsNull) yield break;
-                    BoardInstance.CreatePassiveMateorite();
+                    if (GameData.BoardInstanceIsNull) yield break;
+                    GameData.BoardInstance.CreatePassiveMateorite();
                     yield return new WaitForSeconds(delay);
 
                 }
@@ -107,8 +107,8 @@ public class SpawnMeteor : Module
             case 1:
                 for (int _ = 0; _ < count; _++)
                 {
-                    if (BoardInstanceIsNull) yield break;
-                    BoardInstance.CreateActiveMateorite();
+                    if (GameData.BoardInstanceIsNull) yield break;
+                    GameData.BoardInstance.CreateActiveMateorite();
                     yield return new WaitForSeconds(delay);
 
                 }
@@ -117,8 +117,8 @@ public class SpawnMeteor : Module
             case 2:
                 for (int _ = 0; _ < count; _++)
                 {
-                    if (BoardInstanceIsNull) yield break;
-                    BoardInstance.CreateUltimateMateorite();
+                    if (GameData.BoardInstanceIsNull) yield break;
+                    GameData.BoardInstance.CreateUltimateMateorite();
                     yield return new WaitForSeconds(delay);
 
                 }
@@ -127,8 +127,8 @@ public class SpawnMeteor : Module
             case 3:
                 for (int _ = 0; _ < count; _++)
                 {
-                    if (BoardInstanceIsNull) yield break;
-                    BoardInstance.CreateUltimateMateorite2();
+                    if (GameData.BoardInstanceIsNull) yield break;
+                    GameData.BoardInstance.CreateUltimateMateorite2();
                     yield return new WaitForSeconds(delay);
 
                 }

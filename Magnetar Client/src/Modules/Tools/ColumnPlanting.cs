@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
 using Magnetar_Client.UI.Setting;
 using HarmonyLib;
-using static Magnetar_Client.Game.AppData;
+
 using UnityEngine;
 using System.Linq;
+using System;
 using Magnetar_Client.Utils;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -35,6 +38,13 @@ public class MultiPlanting : Module
     {
         instance = this;
 
+        var strings = new string[]
+        {
+            "Column", "Row", "Rook", "3x3", "Full Lawn",
+        };
+
+        RegisterTranslations(Translator.CreateDictionary(strings));
+
         CreateCategory("General");
 
         Mode = new SelectSetting("Mode", 0)
@@ -55,7 +65,7 @@ public class MultiPlanting : Module
     public override void OnLanguageChanged()
     {
         Mode.CustomNames = Mode.Options
-            .ToDictionary(kvp => kvp.Key, kvp => Translator.Translate(kvp.Value));
+            .ToDictionary(kvp => kvp.Key, kvp => Translate(kvp.Value));
     }
 
     // Mod Logic
@@ -63,7 +73,8 @@ public class MultiPlanting : Module
     [HarmonyPatch(typeof(CreatePlant))]
     public static class CreatePlantPatch
     {
-        static bool spawnByMod = false;
+        [ThreadStatic] static bool spawnByMod;
+        [ThreadStatic] static int _lastFrame;
 
         [HarmonyPatch(nameof(CreatePlant.SetPlant))]
         [HarmonyPostfix]
@@ -73,32 +84,34 @@ public class MultiPlanting : Module
             if (__result == null || instance == null || !instance.Active) return;
             if (theSeedType != Mouse.Instance.thePlantTypeOnMouse) return;
             if (ColumnGlove.MouseGlovePatch.IsMovedByGlove) return;
+            if (_lastFrame == Time.frameCount) return;
+            _lastFrame = Time.frameCount;
 
             spawnByMod = true;
 
             switch (instance.Mode.Value)
             {
                 case 0: // Column
-                    for (int i = 0; i < BoardInstance.rowNum; i++)
+                    for (int i = 0; i < GameData.BoardInstance.rowNum; i++)
                     {
                         if (i == newRow) continue;
                         __instance.SetPlant(newColumn, i, theSeedType);
                     }
                     break;
                 case 1: // Row
-                    for (int i = 0; i < BoardInstance.columnNum; i++)
+                    for (int i = 0; i < GameData.BoardInstance.columnNum; i++)
                     {
                         if (i == newColumn) continue;
                         __instance.SetPlant(i, newRow, theSeedType);
                     }
                     break;
                 case 2: // Rook
-                    for (int i = 0; i < BoardInstance.rowNum; i++)
+                    for (int i = 0; i < GameData.BoardInstance.rowNum; i++)
                     {
                         if (i == newRow) continue;
                         __instance.SetPlant(newColumn, i, theSeedType);
                     }
-                    for (int i = 0; i < BoardInstance.columnNum; i++)
+                    for (int i = 0; i < GameData.BoardInstance.columnNum; i++)
                     {
                         if (i == newColumn) continue;
                         __instance.SetPlant(i, newRow, theSeedType);
@@ -115,8 +128,8 @@ public class MultiPlanting : Module
                     break;
                 case 4: // Full Lawn
 
-                    int r_num = BoardInstance.rowNum;
-                    int c_num = BoardInstance.columnNum;
+                    int r_num = GameData.BoardInstance.rowNum;
+                    int c_num = GameData.BoardInstance.columnNum;
 
                     int n = r_num * c_num;
 
@@ -131,10 +144,7 @@ public class MultiPlanting : Module
                     break;
             }
 
-
             spawnByMod = false;
-
-
         }
     }
 

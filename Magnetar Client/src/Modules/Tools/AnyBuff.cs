@@ -25,8 +25,8 @@ public class AnyBuff : Module
     public AnyBuff() { instance = this; }
 
     // Mod Logic
-    bool wasAlreadyShowAll = false;
-    bool changed = false;
+    bool wasAlreadyShowAll;
+    bool changed;
     public override void OnUpdateActive()
     {
         if (!changed && TravelLookMenu.Instance != null)

@@ -1,32 +1,87 @@
-﻿using System;
+﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.WindowDrawing;
+using static Magnetar_Client.Utils.Translator;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Magnetar_Client.Core;
-using Magnetar_Client.UI.Themes;
-using Magnetar_Client.UI.WindowDrawing;
-using Magnetar_Client.Utils;
 
 namespace Magnetar_Client.UI.Setting;
 
+/// <summary>
+/// A setting for having multiple options selectable from a list
+/// </summary>
 public class MultiSelectSetting : Setting
 {
+    /// <summary>
+    /// The maximum number of items that can be selected simultaneously. Set to -1 for unlimited selection.
+    /// </summary>
     public int MaxSelection = -1;
-    public Dictionary<int, string> Options { get; set; } = new();
-    public HashSet<int> SelectedValues = new();
-    public HashSet<int> DefaultSelectedValues = new();
-    public HashSet<int> Blacklist = new();
-    public HashSet<string> NameBlacklist = new();
-    public System.Type EnumType { get; private set; }
 
+    /// <summary>
+    /// The map of all available options, where the key is the option's integer ID and the value is its internal name.
+    /// </summary>
+    public Dictionary<int, string> Options { get; set; } = new();
+
+    /// <summary>
+    /// The collection of currently selected option IDs.
+    /// </summary>
+    public HashSet<int> SelectedValues = new();
+
+    /// <summary>
+    /// The fallback set of option IDs restored when <see cref="Reset"/> is executed.
+    /// </summary>
+    public HashSet<int> DefaultSelectedValues = new();
+
+    /// <summary>
+    /// Option IDs explicitly forbidden from being selected or rendered in selection views.
+    /// </summary>
+    public HashSet<int> Blacklist = new();
+
+    /// <summary>
+    /// Option internal names explicitly forbidden from being selected or rendered in selection views.
+    /// </summary>
+    public HashSet<string> NameBlacklist = new();
+
+    /// <summary>
+    /// The underlying Enum type if this setting was constructed from an Enum.
+    /// </summary>
+    public Type EnumType { get; private set; }
+
+    /// <summary>
+    /// Callback triggered when an option's selection state changes.
+    /// First parameter is the option ID; second parameter is <c>true</c> if selected, <c>false</c> if deselected.
+    /// </summary>
     public Action<int, bool> OnSelectionChanged { get; set; }
 
+    /// <summary>
+    /// Action invoked when the selection view is opened.
+    /// </summary>
+    public Action OnWindowOpen { get; set; }
+
+    /// <summary>
+    /// Optional dictionary providing localized or custom formatted display names overriding default names.
+    /// </summary>
     public Dictionary<int, string> CustomNames;
 
+    /// <summary>
+    /// Whether the options inside the selection window should be sorted alphabetically by display name.
+    /// </summary>
+    public bool DisplayAlphabetically;
+
+    /// <summary>
+    /// Initializes an empty <see cref="MultiSelectSetting"/> with the specified display name.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
     public MultiSelectSetting(string name)
     {
         Name = name;
     }
 
+    /// <summary>
+    /// Initializes a new <see cref="MultiSelectSetting"/> populated with the integer values and names of an enum.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="enumType">The enum type whose entries define the selectable options.</param>
     public MultiSelectSetting(string name, System.Type enumType)
     {
         Name = name;
@@ -39,6 +94,66 @@ public class MultiSelectSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Initializes a new <see cref="MultiSelectSetting"/> populated from an existing dictionary of options.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="options">Dictionary mapping integer IDs to option display labels.</param>
+    public MultiSelectSetting(string name, Dictionary<int, string> options)
+    {
+        Name = name;
+        if (options != null)
+        {
+            foreach (var kvp in options)
+            {
+                Options[kvp.Key] = kvp.Value;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="MultiSelectSetting"/> from a list of option strings.
+    /// Each item's list index is used as its option ID.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="options">List of option labels.</param>
+    public MultiSelectSetting(string name, List<string> options)
+    {
+        Name = name;
+        if (options != null)
+        {
+            for (int i = 0; i < options.Count; i++)
+            {
+                Options[i] = options[i];
+            }
+        }
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="MultiSelectSetting"/> from an array of option strings.
+    /// Each item's array index is used as its option ID.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="options">Array of option labels.</param>
+    public MultiSelectSetting(string name, string[] options)
+    {
+        Name = name;
+        if (options != null)
+        {
+            for (int i = 0; i < options.Length; i++)
+            {
+                Options[i] = options[i];
+            }
+        }
+    }
+
+    /// <summary>
+    /// Resolves the user-facing display name for a given option ID. Checks <see cref="CustomNames"/> first,
+    /// then <see cref="Options"/>, and finally falls back to <paramref name="fallbackName"/> or the ID string.
+    /// </summary>
+    /// <param name="id">The option ID to look up.</param>
+    /// <param name="fallbackName">Fallback text to use if no key match is found.</param>
+    /// <returns>The resolved display string.</returns>
     public string GetDisplayName(int id, string fallbackName = null)
     {
         if (CustomNames != null && CustomNames.TryGetValue(id, out string customName))
@@ -54,8 +169,17 @@ public class MultiSelectSetting : Setting
         return fallbackName ?? id.ToString();
     }
 
+    /// <summary>
+    /// Adds or updates an option in the available options dictionary.
+    /// </summary>
+    /// <param name="id">The unique identifier of the option.</param>
+    /// <param name="displayName">The label shown for the option.</param>
     public void AddOption(int id, string displayName) => Options[id] = displayName;
 
+    /// <summary>
+    /// Removes an option from both available options and current selections.
+    /// </summary>
+    /// <param name="id">The option ID to remove.</param>
     public void RemoveOption(int id)
     {
         if (IsDisabled) return;
@@ -63,6 +187,10 @@ public class MultiSelectSetting : Setting
             OnSelectionChanged?.Invoke(id, false);
     }
 
+    /// <summary>
+    /// Toggles the selection status of the given option ID.
+    /// </summary>
+    /// <param name="id">The option ID to toggle.</param>
     public void Toggle(int id)
     {
         if (IsDisabled) return;
@@ -70,6 +198,10 @@ public class MultiSelectSetting : Setting
         else Select(id);
     }
 
+    /// <summary>
+    /// Selects an option if not already selected, not blacklisted, and within the <see cref="MaxSelection"/> bound.
+    /// </summary>
+    /// <param name="id">The option ID to select.</param>
     public void Select(int id)
     {
         if (IsDisabled || SelectedValues.Contains(id) || Blacklist.Contains(id)) return;
@@ -80,6 +212,10 @@ public class MultiSelectSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Deselects the given option ID if it is currently selected.
+    /// </summary>
+    /// <param name="id">The option ID to deselect.</param>
     public void Deselect(int id)
     {
         if (IsDisabled) return;
@@ -87,30 +223,43 @@ public class MultiSelectSetting : Setting
             OnSelectionChanged?.Invoke(id, false);
     }
 
+    /// <summary>
+    /// Checks whether an option ID is currently selected.
+    /// </summary>
+    /// <param name="id">The option ID to check.</param>
+    /// <returns><c>true</c> if selected; otherwise, <c>false</c>.</returns>
     public bool IsSelected(int id) => SelectedValues.Contains(id);
 
+    /// <summary>
+    /// Restores the selection set to match <see cref="DefaultSelectedValues"/>.
+    /// </summary>
     public override void Reset()
     {
         SelectedValues.Clear();
         foreach (var v in DefaultSelectedValues) SelectedValues.Add(v);
     }
 
+    /// <summary>
+    /// Renders the setting row in the window, showing the label, current count, select button, and reset button.
+    /// </summary>
+    /// <param name="y">Reference to the vertical position accumulator.</param>
+    /// <param name="width">Total available width for this settings row.</param>
     public override void Draw(ref float y, float width)
     {
         Event e = Event.current;
-        float elemH = Config.elementHeight;
-        float indent = Config.indent;
-        float gap = Config.SettingsInput.Gap;
-        float resetBtnW = Config.SettingsInput.ResetButtonW;
-        float selectBtnW = Config.selectButtonWidth;
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
+        float gap = SettingValues.Gap;
+        float resetBtnW = SettingValues.ResetButtonW;
+        float selectBtnW = ClientConfig.selectButtonWidth;
 
-        string countText = '(' + Translator.Translate($"{SelectedValues.Count} selected") + ')';
-        float countTextW = Magnetar_Default.SettingLabelStyle.CalcSize(new GUIContent(countText)).x;
+        string countText = '(' + Translate($"{SelectedValues.Count} selected") + ')';
+        float countTextW = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(countText)).x;
 
         // Label fills the remaining space on the left
         float labelW = width - (indent * 2f) - selectBtnW - countTextW - (gap * 2f) - resetBtnW;
         Rect labelRect = new(indent, y, labelW, elemH);
-        GUI.Label(labelRect, Translator.Translate(Name), Magnetar_Default.SettingLabelStyle);
+        GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
 
         // Right-to-left layout: [Select Button] [gap] [Count Text] [gap] [Reset Button]
         float resetStartX = width - indent - resetBtnW;
@@ -123,21 +272,17 @@ public class MultiSelectSetting : Setting
 
         if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
-            ModuleManager.showModules = false;
-            ModuleManager.showSettings = false;
-            ModuleManager.showSelectionGui = true;
-
-            MultiSelectWindowDrawer.ActiveMultiSelect = this;
+            OnWindowOpen?.Invoke();
             DrawSetting.multiSelectSearchQuery = "";
             DrawSetting.manualScrollY = 0f;
             e.Use();
         }
 
-        GUI.Box(btnRect, Translator.Translate("Select"), Magnetar_Default.SettingOff);
+        GUI.Box(btnRect, Translate("Select"), ThemeManager.SettingOff);
 
         Color orig = GUI.contentColor;
-        GUI.contentColor = Magnetar_Default.TextDim;
-        GUI.Label(countRect, countText, Magnetar_Default.SettingLabelStyle);
+        GUI.contentColor = ThemeManager.TextDim;
+        GUI.Label(countRect, countText, ThemeManager.SettingLabelStyle);
         GUI.contentColor = orig;
 
         if (DrawResetButton(resetRect))
@@ -145,12 +290,13 @@ public class MultiSelectSetting : Setting
             Reset();
         }
 
-        y += elemH + Config.spacing;
+        y += elemH + ClientConfig.spacing;
     }
 
     /// <summary>
     /// Selects all valid options (excluding blacklists) and optionally caches them as the default state.
     /// </summary>
+    /// <param name="setDefault">If <c>true</c>, updates <see cref="DefaultSelectedValues"/> to match the current selection.</param>
     public void SelectAll(bool setDefault = true)
     {
         SelectedValues.Clear();
@@ -172,7 +318,7 @@ public class MultiSelectSetting : Setting
     }
 
     /// <summary>
-    /// Saves the current selection state into DefaultSelectedValues for reset operations.
+    /// Saves the current selection state into <see cref="DefaultSelectedValues"/> for subsequent reset operations.
     /// </summary>
     public void SetCurrentAsDefault()
     {

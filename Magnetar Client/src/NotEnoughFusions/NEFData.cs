@@ -1,9 +1,13 @@
-﻿using Magnetar_Client.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static Magnetar_Client.NEF.Data.NEFRecipes;
+using Magnetar_Client.UI;
+using static Magnetar_Client.Utils.Translator;
+using Magnetar_Client.Core;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -21,7 +25,7 @@ public static class NEFData
     public static int NextCustomPlantId = 30000;
 
     // Internal Data State
-    public static bool hasSyncedCustomizeLib = false;
+    public static bool hasSyncedCustomizeLib;
 
     public static List<RecipeEntity> searchResults = new();
     public static List<RecipeNode> currentPyramidRoots = new();
@@ -61,13 +65,11 @@ public static class NEFData
         {
             if (!CustomNames.ContainsKey((int)pt)) CustomNames[(int)pt] = pt.ToString();
         }
-        foreach (var Entry in Translator.TranslateEnum(typeof(PlantType)))
+        foreach (var Entry in TranslateEnum(typeof(PlantType)))
         {
             CustomNames[Entry.Key] = Entry.Value;
         }
-        Magnetar_Client.NEF.Data.NEFBanned.InitBan();
-        Magnetar_Client.NEF.Data.NEFBanned.InitHidden();
-        Magnetar_Client.NEF.Data.NEFRecipes.InitRecipes();
+        
     }
 
     public static void SyncCustomizeLib()
@@ -97,10 +99,23 @@ public static class NEFData
                 foreach (var pt in customPlantTypes)
                 {
                     int id = Convert.ToInt32(pt);
-                    if (!CustomNames.ContainsKey(id))
+                    if (CustomNames.ContainsKey(id)) continue;
+
+                    string defaultRawName = Enum.IsDefined(typeof(PlantType), id)
+                        ? ((PlantType)id).ToString()
+                        : $"Custom Plant #{id}";
+
+                    // 1. Check NEF's translation domain scoped to PlantType enum or general NEF strings
+                    string translated = Translate(defaultRawName);
+
+                    // 2. If untranslated and raw name was just a number or default, assign fallback label
+                    if (string.Equals(translated, defaultRawName, StringComparison.Ordinal))
                     {
-                        string translated = Utils.Translator.Translate(((PlantType)id).ToString());
-                        CustomNames[id] = (translated != ((PlantType)id).ToString()) ? translated : $"Custom Plant #{id}";
+                        CustomNames[id] = defaultRawName;
+                    }
+                    else
+                    {
+                        CustomNames[id] = translated;
                     }
                 }
             }
@@ -136,19 +151,40 @@ public static class NEFData
         }
     }
 
+    private static readonly Dictionary<Type, Dictionary<int, string>> _nefEnumCache = new();
+
     public static void OnLanguageChanged()
     {
-        foreach (var Entry in Translator.TranslateEnum(typeof(PlantType)))
+        _nefEnumCache.Clear();
+
+        CustomNames ??= new Dictionary<int, string>();
+
+        // 1. Translate PlantType enums scoped to the NEF domain
+        foreach (var entry in TranslateEnum(typeof(PlantType)))
         {
-            CustomNames[Entry.Key] = Entry.Value;
+            CustomNames[entry.Key] = entry.Value;
         }
+
+        // 2. Translate ZombieType enums scoped to the NEF domain (if used in recipes/usages)
+        foreach (var entry in TranslateEnum(typeof(ZombieType)))
+        {
+            CustomNames[entry.Key] = entry.Value;
+        }
+
+        // 3. Refresh active tree layouts and search results with new localized strings
+        if (currentPyramidRoots != null && currentPyramidRoots.Count > 0)
+        {
+            RelayoutCurrentTrees();
+        }
+
+        PerformSearch();
     }
 
     public static RecipeEntity RegisterCustomEntity(string displayName, string texturePath, bool legacyLoad = false)
     {
         int id = NextCustomPlantId++;
         CustomNames[id] = displayName;
-        TextureLoader.PlantTextureOverrides[id] = texturePath;
+        ResourceManager.PlantTextureOverrides[id] = texturePath;
 
         if (legacyLoad)
         {
@@ -284,16 +320,16 @@ public static class NEFData
         if (currentPyramidRoots == null || currentPyramidRoots.Count == 0) return;
 
         // Spacing scales dynamically with GUI Scale to prevent overlap
-        float spacingX = Config.S(160f);
-        float spacingY = Config.S(160f);
-        float treeGap = Config.S(220f);
+        float spacingX = GUIManager.S(160f);
+        float spacingY = GUIManager.S(160f);
+        float treeGap = GUIManager.S(220f);
 
         float currentStartX = 0f;
         foreach (var root in currentPyramidRoots)
         {
             currentStartX = CalculateTreeLayout(root, currentStartX, 0f, spacingX, spacingY) + treeGap;
         }
-        lastCalculatedScale = Config.GUIScale;
+        lastCalculatedScale = GUIManager.ScaleSetting.Value;
     }
 
     public static void GeneratePyramid(RecipeEntity target)

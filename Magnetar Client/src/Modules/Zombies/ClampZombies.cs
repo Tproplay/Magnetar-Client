@@ -1,8 +1,8 @@
-﻿using Magnetar_Client.Game;
-using Magnetar_Client.UI.Setting;
+﻿using Magnetar_Client.UI.Setting;
 using System.Linq;
 using UnityEngine;
-using static Magnetar_Client.Game.AppData;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -24,7 +24,7 @@ public class ClampZombies : Module
     public static ClampZombies instance;
 
     public IntSetting MaxZombiesSetting;
-    private float lastCheckTime = 0f;
+    private float lastCheckTime;
 
     public FloatSetting SpeedReductionSetting;
     public FloatSetting HpAdditionPercentageSetting;
@@ -56,7 +56,7 @@ public class ClampZombies : Module
         if (Time.time - lastCheckTime < 1f) return;
         lastCheckTime = Time.time;
 
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         int currentZombies = GameData.ZombieList.Count;
         int limit = MaxZombiesSetting.Value;
@@ -93,8 +93,8 @@ public class ClampZombies : Module
 
 
                 // Sum Healths
-                rightZombie.theMaxHealth += (int)(leftZombie.theHealth * HpAdditionPercentageSetting.Value/100);
-                rightZombie.theHealth += (int)(leftZombie.theHealth * HpAdditionPercentageSetting.Value / 100);
+                rightZombie.theMaxHealth += (long)(leftZombie.theHealth * HpAdditionPercentageSetting.Value/100);
+                rightZombie.theHealth += (long)(leftZombie.theHealth * HpAdditionPercentageSetting.Value / 100);
 
                 if (leftZombie.theFirstArmorHealth > 0)
                 {

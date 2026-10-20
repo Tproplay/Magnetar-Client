@@ -3,7 +3,7 @@ using Il2Cpp;
 #endif
 using UnityEngine;
 using System.Collections.Generic;
-using static Magnetar_Client.Game.AppData;
+
 using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 
@@ -20,17 +20,17 @@ public class AntiLagSpawns : Module
         " counterbreak zombiecounter smoothspawn logicbreak massspawnfix antilagmod lagspawns antispawnlag laglessspawns";
     public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
 
-    public override bool enableInVanillaMode { get; set; } = true;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     public static AntiLagSpawns instance;
 
     public IntSetting FrameDelaySetting;
 
     public static Queue<Zombie> staggerQueue = new();
-    public static int framesSinceLastSpawn = 0;
+    public static int framesSinceLastSpawn;
 
-    public static int lastFrameCount = 0;
-    public static int spawnsThisFrame = 0;
+    public static int lastFrameCount;
+    public static int spawnsThisFrame;
 
     public MultiSelectSetting UnaffectedZombies;
 
@@ -45,7 +45,7 @@ public class AntiLagSpawns : Module
 
         UnaffectedZombies = new MultiSelectSetting("Unaffected Entities", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             SelectedValues = new HashSet<int>
             {
                 (int)ZombieType.ImpKing,
@@ -64,13 +64,13 @@ public class AntiLagSpawns : Module
 
     public override void OnLanguageChanged()
     {
-        UnaffectedZombies.CustomNames = TranslatedNames(typeof(ZombieType));
+        UnaffectedZombies.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
     // Mod Logic
     public override void OnUpdateActive()
     {
-        if (BoardInstanceIsNull) return;
+        if (GameData.BoardInstanceIsNull) return;
 
         framesSinceLastSpawn++;
 

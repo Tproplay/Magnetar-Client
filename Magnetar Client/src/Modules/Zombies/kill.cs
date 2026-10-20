@@ -1,7 +1,8 @@
 ﻿using Magnetar_Client.UI.Setting;
 using UnityEngine;
-using static Magnetar_Client.Game.AppData;
-using static Magnetar_Client.Game.GameData;
+
+using static Magnetar_Client.GameData;
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -30,8 +31,8 @@ public class KillZombies : Module
 
     public bool TurnOffAfterUse = true;
     public BoolSetting AutoTurnOff;
-    public override bool Active { get; set; } = false;
-    public static float deltaTime = 0;
+    public override bool Active { get; set; }
+    public static float deltaTime;
 
     public KillZombies()
     {
@@ -41,14 +42,14 @@ public class KillZombies : Module
 
         ZombiesSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
         };
         ZombiesSelectedSetting.SelectAll(setDefault: true);
 
         HypnoZombiesSelectedSetting = new MultiSelectSetting("Hypnotized Entities", typeof(ZombieType))
         {
-            CustomNames = TranslatedNames(typeof(ZombieType)),
+            CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
         };
         HypnoZombiesSelectedSetting.SelectAll(setDefault: true);
@@ -67,8 +68,8 @@ public class KillZombies : Module
 
     public override void OnLanguageChanged()
     {
-        HypnoZombiesSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
-        ZombiesSelectedSetting.CustomNames = TranslatedNames(typeof(ZombieType));
+        HypnoZombiesSelectedSetting.CustomNames = TranslateEnum(typeof(ZombieType));
+        ZombiesSelectedSetting.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
     // Mod Logic

@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Magnetar_Client.UI.Setting;
-using static Magnetar_Client.Game.AppData;
+
+
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -36,7 +37,7 @@ public class GodMode : Module
         PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
         {
             Blacklist = Banned.PlantTypeBanned,
-            CustomNames = TranslatedNames(typeof(PlantType))
+            CustomNames = TranslateEnum(typeof(PlantType))
         };
 
         PlantsSelectedSetting.SelectAll(setDefault: true);
@@ -56,7 +57,7 @@ public class GodMode : Module
 
     public override void OnLanguageChanged()
     {
-        PlantsSelectedSetting.CustomNames = TranslatedNames(typeof(PlantType));
+        PlantsSelectedSetting.CustomNames = TranslateEnum(typeof(PlantType));
     }
 
 
@@ -70,7 +71,7 @@ public class GodMode : Module
         [HarmonyPrefix]
         public static bool RealTakeDamagePrefix(Plant __instance, int damage)
         {
-            if (instance == null || BoardInstanceIsNull) return true;
+            if (instance == null || GameData.BoardInstanceIsNull) return true;
             if (!instance.Active || !instance.ImmuneToDamage.Value) return true;
 
             if (instance.PlantsSelectedSetting.IsSelected((int)__instance.thePlantType))
@@ -83,7 +84,7 @@ public class GodMode : Module
         [HarmonyPrefix]
         public static bool TakeDamagePrefix(Plant __instance, int damage, int damageType)
         {
-            if (instance == null || BoardInstanceIsNull) return true;
+            if (instance == null || GameData.BoardInstanceIsNull) return true;
             if (!instance.Active || !instance.ImmuneToDamage.Value) return true;
 
             if (instance.PlantsSelectedSetting.IsSelected((int)__instance.thePlantType))
@@ -96,7 +97,7 @@ public class GodMode : Module
         [HarmonyPrefix]
         public static bool CrashedPatch(Plant __instance, int level, int soundID, Zombie zombie)
         {
-            if (instance == null || BoardInstanceIsNull) return true;
+            if (instance == null || GameData.BoardInstanceIsNull) return true;
             if (!instance.Active || !instance.ImmuneToVehicle.Value) return true;
 
             if (instance.PlantsSelectedSetting.IsSelected((int)__instance.thePlantType))
@@ -109,7 +110,7 @@ public class GodMode : Module
         [HarmonyPrefix]
         public static bool DiePatch(Plant __instance, Plant.DieReason reason)
         {
-            if (instance == null || BoardInstanceIsNull || !instance.Active) return true;
+            if (instance == null || GameData.BoardInstanceIsNull || !instance.Active) return true;
 
             if (instance.PlantsSelectedSetting.IsSelected((int)__instance.thePlantType))
             {

@@ -53,7 +53,7 @@ public class CustomConveyor : Module
 
         ConveyorPlantsSetting = new MultiSelectSetting("Allowed Plants", typeof(PlantType))
         {
-            CustomNames = TranslatedNames(typeof(PlantType)),
+            CustomNames = TranslateEnum(typeof(PlantType)),
             Blacklist = Banned.PlantTypeBanned,
             OnSelectionChanged = UpdatePlantList,
         };
@@ -64,7 +64,7 @@ public class CustomConveyor : Module
 
     public override void OnLanguageChanged()
     {
-        ConveyorPlantsSetting.CustomNames = TranslatedNames(typeof(PlantType));
+        ConveyorPlantsSetting.CustomNames = TranslateEnum(typeof(PlantType));
     }
 
     // Mod Logic

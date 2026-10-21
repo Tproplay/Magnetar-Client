@@ -315,7 +315,7 @@ public class CustomDifficulty : Module
                     slider.value = lockDifficulty;
                     _isSyncing = false;
                 }
-                displayText = "已锁定";
+                displayText = "Locked";
             }
             else
             {
@@ -325,12 +325,12 @@ public class CustomDifficulty : Module
                 {
                     displayText = targetDifficulty switch
                     {
-                        0 => "休闲模式",
-                        1 => "简单模式",
-                        2 => "正常模式",
-                        3 => "困难模式",
-                        4 => "极难模式",
-                        5 => "你确定？",
+                        0 => "<size=20><color=#00C853>0: Easy Mode</color></size>",
+                        1 => "<size=20><color=#64DD17>1: Casual Mode</color></size>",
+                        2 => "<size=20><color=#AEEA00>2: Normal Mode</color></size>",
+                        3 => "<size=20><color=#FFD600>3: Veteran Mode</color></size>",
+                        4 => "<size=20><color=#FF6D00>4: Merciless Mode</color></size>",
+                        5 => "<size=20><color=#D50000>5: Are You Sure?</color></size>",
                         _ => $"Difficulty: {targetDifficulty}",
                     };
                 }

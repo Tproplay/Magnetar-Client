@@ -4,6 +4,7 @@ using MelonLoader;
 
 [assembly: MelonInfo(typeof(Magnetar_Client.Core.MelonLoaderEntry), MagnetarInfo.ModName, MagnetarInfo.Version, MagnetarInfo.Developer)]
 [assembly: MelonGame("LanPiaoPiao", "PlantsVsZombiesRH")]
+[assembly: HarmonyDontPatchAll]
 
 namespace Magnetar_Client.Core;
 

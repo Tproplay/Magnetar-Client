@@ -74,7 +74,6 @@ public class MultiPlanting : Module
     public static class CreatePlantPatch
     {
         [ThreadStatic] static bool spawnByMod;
-        [ThreadStatic] static int _lastFrame;
 
         [HarmonyPatch(nameof(CreatePlant.SetPlant))]
         [HarmonyPostfix]
@@ -84,8 +83,6 @@ public class MultiPlanting : Module
             if (__result == null || instance == null || !instance.Active) return;
             if (theSeedType != Mouse.Instance.thePlantTypeOnMouse) return;
             if (ColumnGlove.MouseGlovePatch.IsMovedByGlove) return;
-            if (_lastFrame == Time.frameCount) return;
-            _lastFrame = Time.frameCount;
 
             spawnByMod = true;
 

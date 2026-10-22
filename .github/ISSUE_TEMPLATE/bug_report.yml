@@ -1,22 +1,23 @@
-name: Bug / Crash Report
-description: Report a bug, crash, or unexpected behavior in Magnetar Client.
+name: "Bug / Crash Report"
+description: "Report a bug, crash, or unexpected behavior in Magnetar Client."
 title: "[Bug]: "
-labels: ["bug"]
+labels:
+  - "bug"
 body:
   - type: textarea
     id: description
     attributes:
-      label: Description of the bug
-      description: Provide a clear and concise description of what went wrong.
-      placeholder: Explain what happened, including any visual glitches or freeze behavior...
+      label: "Description of the bug"
+      description: "Provide a clear and concise description of what went wrong."
+      placeholder: "Explain what happened, including any visual glitches or freeze behavior..."
     validations:
       required: true
 
   - type: textarea
     id: reproduction
     attributes:
-      label: Steps to recreate the bug
-      description: What steps cause this issue to appear?
+      label: "Steps to recreate the bug"
+      description: "What steps cause this issue to appear?"
       placeholder: |
         1. Launch PvZ Fusion via...
         2. Enter level / screen...
@@ -28,8 +29,8 @@ body:
   - type: textarea
     id: log_file
     attributes:
-      label: Log File / Error Trace (Optional)
-      description: Paste relevant MelonLoader/BepInEx terminal logs, stack traces, or drag and drop `.log` / screenshot files directly into this box.
+      label: "Log File / Error Trace (Optional)"
+      description: "Paste relevant MelonLoader/BepInEx terminal logs, stack traces, or drag and drop .log / screenshot files directly into this box."
       render: shell
     validations:
       required: false
@@ -37,40 +38,40 @@ body:
   - type: input
     id: magnetar_version
     attributes:
-      label: Magnetar Client Version
-      description: Which version or release of Magnetar Client are you running?
-      placeholder: e.g., v1.0.4, commit hash, etc.
+      label: "Magnetar Client Version"
+      description: "Which version or release of Magnetar Client are you running?"
+      placeholder: "e.g., v1.0.4, commit hash, etc."
     validations:
       required: true
 
   - type: input
     id: pvz_fusion_version
     attributes:
-      label: PvZ Fusion Game Version
-      description: Which PvZ Fusion game version is installed?
-      placeholder: e.g., 2.1.4, 2.1.5
+      label: "PvZ Fusion Game Version"
+      description: "Which PvZ Fusion game version is installed?"
+      placeholder: "e.g., 2.1.4, 2.1.5"
     validations:
       required: true
 
   - type: dropdown
     id: platform
     attributes:
-      label: Platform / Loader
-      description: Select your runtime platform and mod loader.
+      label: "Platform / Loader"
+      description: "Select your runtime platform and mod loader."
       options:
-        - MelonLoader
-        - BepInEx
-        - Android BepInEx
+        - "MelonLoader"
+        - "BepInEx"
+        - "Android BepInEx"
     validations:
       required: true
 
   - type: checkboxes
     id: checklist
     attributes:
-      label: Before submitting a bug report
-      description: Please verify the following before opening this issue:
+      label: "Before submitting a bug report"
+      description: "Please verify the following before opening this issue:"
       options:
-        - label: This bug wasn't already reported.
+        - label: "This bug wasn't already reported."
           required: true
-        - label: This is a valid bug.
+        - label: "This is a valid bug."
           required: true

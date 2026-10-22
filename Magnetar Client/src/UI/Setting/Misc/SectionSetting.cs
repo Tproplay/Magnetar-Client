@@ -378,7 +378,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
         float gap = SettingValues.Gap;
         float actionBtnW = SettingValues.ResetButtonW;
 
-        // 1. Group Header[cite: 16]
+        // 1. Group Header
         string countSuffix = ShowCountInHeader ? $" ({Sections.Count})" : "";
         string title = $"{Translate(Name)}{countSuffix}";
         Rect titleRect = new(indent, y, width - (indent * 2f), elemH);
@@ -388,7 +388,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
         int removeIdx = -1;
         bool canRemoveAny = AllowRemove && (MinSections == -1 || Sections.Count > MinSections);
 
-        // 2. Render each section instance[cite: 16]
+        // 2. Render each section instance
         for (int i = 0; i < Sections.Count; i++)
         {
             var section = Sections[i];
@@ -415,7 +415,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
             string secLabel = foldArrow + Translate(section.Title);
 
             // Sub-header bar box visual
-            GUI.Box(secHeaderRect, secLabel, Magnetar_Default.SectionHeaderStyle);
+            GUI.Box(secHeaderRect, secLabel, ThemeManager.SectionHeaderStyle);
 
             if (e.type == EventType.MouseDown && e.button == 0 && secHeaderRect.Contains(e.mousePosition))
             {
@@ -423,7 +423,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
                 section.IsExpanded = !section.IsExpanded;
             }
 
-            // Remove button[cite: 16]
+            // Remove button
             if (canRemoveAny)
             {
                 GUI.Box(delRect, "—", ThemeManager.SectionRemoveButtonStyle);
@@ -436,7 +436,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
 
             y += headerH + gap;
 
-            // Render children if expanded[cite: 16]
+            // Render children if expanded
             if (section.IsExpanded)
             {
                 for (int c = 0; c < section.ChildSettings.Count; c++)
@@ -453,7 +453,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
             RemoveSection(removeIdx);
         }
 
-        // 3. Add Section & Reset Button Row[cite: 16]
+        // 3. Add Section & Reset Button Row
         if (AllowAdd || ShowResetButton)
         {
             bool canAdd = AllowAdd && (MaxSections == -1 || Sections.Count < MaxSections);
@@ -480,11 +480,8 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
             {
                 GUIStyle addStyle = canAdd ? ThemeManager.SectionAddButtonStyle : ThemeManager.CategoryModuleOffStyle;
                 string buttonText = canAdd ? Translate(AddButtonText) : Translate("Max Sections Reached");
-
-        GUIStyle addStyle = canAdd ? Magnetar_Default.SectionAddButtonStyle : Magnetar_Default.CategoryModuleOffStyle;
-        string buttonText = canAdd ? Translator.Translate("+ Add Section") : Translator.Translate("Max Sections Reached");
-
-        GUI.Box(addBtnRect, buttonText, addStyle);
+                GUI.Box(addBtnRect, buttonText, addStyle);
+            }
         if (canAdd && e.type == EventType.MouseDown && e.button == 0 && addBtnRect.Contains(e.mousePosition))
         {
             e.Use();

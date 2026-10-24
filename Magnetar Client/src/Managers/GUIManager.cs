@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Api;
+using Magnetar_Client.Api;
 using Magnetar_Client.Core.GUIManager_;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Setting;
@@ -258,7 +258,7 @@ public static class GUIManager
         GUIControlsDrawer.Render(windowBgStyle);
     }
 
-    private class GUIManagerService : ICloseHandler, ILanguageAware, IWarmUp, IRenderable
+    private class GUIManagerService : ICloseHandler, ILanguageAware, IWarmUp, IMenuRenderable
     {
         public string Name => "GUIManager";
         public int Priority => ServicePriority.UI;
@@ -300,8 +300,6 @@ public static class GUIManager
         }
 
         public void OnLanguageChanged() => RefreshThemeOptions();
-
-        public void OnGUI() { }
 
         public void OnWarmUp()
         {

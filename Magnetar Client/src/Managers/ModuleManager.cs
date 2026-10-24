@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Api;
+using Magnetar_Client.Api;
 using Magnetar_Client.Core.ModuleManager_;
 using Magnetar_Client.Modules;
 using Magnetar_Client.UI;
@@ -296,7 +296,7 @@ public static class ModuleManager
         }
     }
 
-    private class ModuleManagerService : IWarmUp, IUpdatable, IRenderable, ICloseHandler, ILanguageAware
+    private class ModuleManagerService : IWarmUp, IUpdatable, IMenuRenderable, ICloseHandler, ILanguageAware
     {
         public string Name => "ModuleManager";
         public int Priority => ServicePriority.Modules;
@@ -307,8 +307,6 @@ public static class ModuleManager
         {
             AnimationHandler.RenderWithTabAlpha(TabType.MODULES, Render);
         }
-
-        public void OnGUI() { }
 
         public bool OnEscapePressed()
         {

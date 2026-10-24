@@ -1,4 +1,4 @@
-﻿using static Magnetar_Client.Utils.Translator;
+using static Magnetar_Client.Utils.Translator;
 using Magnetar_Client.Api;
 using Magnetar_Client.Core.HUDManager_;
 using Magnetar_Client.UI;
@@ -224,7 +224,7 @@ public static class HUDManager
         HUDRenderer.RegisterElement(element);
     }
 
-    private class HUDManagerService : IUpdatable, ICloseHandler, ILanguageAware, IRenderable
+    private class HUDManagerService : IUpdatable, ICloseHandler, ILanguageAware, IRenderable, IMenuRenderable
     {
         public string Name => "HUDManager";
         public int Priority => ServicePriority.HUD;

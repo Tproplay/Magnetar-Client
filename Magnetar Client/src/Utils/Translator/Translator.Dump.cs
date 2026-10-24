@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,7 +33,7 @@ public static partial class Translator
             _ = Translator.LoadTranslationsAsync(() =>
             {
                 ServiceRegistry.NotifyLanguageChanged();
-                Actions.OnLanguageChanged?.Invoke();
+                Actions.Invoke_OnLanguageChanged();
             });
         }
     }

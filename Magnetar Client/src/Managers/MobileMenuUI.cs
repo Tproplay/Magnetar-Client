@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Api;
+using Magnetar_Client.Api;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.Utils;
@@ -350,8 +350,6 @@ public static class MobileMenuUI
         {
             Render();
         }
-
-        public void OnMenuGUI() { }
 
         public void OnThemeChanged()
         {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -68,8 +68,16 @@ public abstract class Module
     public void Toggle()
     {
         Active = !Active;
-        if (Active) OnEnable();
-        else OnDisable();
+        if (Active)
+        {
+            OnEnable();
+            Api.Actions.Invoke_OnModuleEnabled(this);
+        }
+        else
+        {
+            OnDisable();
+            Api.Actions.Invoke_OnModuleDisabled(this);
+        }
     }
 
     /// <summary>

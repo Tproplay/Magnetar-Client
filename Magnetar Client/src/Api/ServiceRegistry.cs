@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Magnetar_Client.Utils.Magnetar_Logger;
@@ -16,7 +16,8 @@ public static class ServiceRegistry
     private static IInitializable[] _initializables = Array.Empty<IInitializable>();
     private static IWarmUp[] _warmUps = Array.Empty<IWarmUp>();
     private static IUpdatable[] _updatables = Array.Empty<IUpdatable>();
-    private static IRenderable[] _renderables = Array.Empty<IRenderable>();
+    private static IRenderable[] _alwaysRenderables = Array.Empty<IRenderable>();
+    private static IMenuRenderable[] _menuRenderables = Array.Empty<IMenuRenderable>();
     private static ICloseHandler[] _closeHandlers = Array.Empty<ICloseHandler>();
     private static ILanguageAware[] _languageAwares = Array.Empty<ILanguageAware>();
     private static IThemeAware[] _themeAwares = Array.Empty<IThemeAware>();
@@ -68,9 +69,12 @@ public static class ServiceRegistry
         _initializables = _services.OfType<IInitializable>().OrderBy(s => s.Priority).ToArray();
         _warmUps = _services.OfType<IWarmUp>().OrderBy(s => s.Priority).ToArray();
         _updatables = _services.OfType<IUpdatable>().OrderBy(s => s.Priority).ToArray();
-        _renderables = _services.OfType<IRenderable>().OrderBy(s => s.Priority).ToArray();
+        _alwaysRenderables = _services.OfType<IRenderable>().OrderBy(s => s.Priority).ToArray();
+        _menuRenderables = _services.OfType<IMenuRenderable>().OrderBy(s => s.Priority).ToArray();
         _closeHandlers = _services.OfType<ICloseHandler>().OrderBy(s => s.Priority).ToArray();
         _languageAwares = _services.OfType<ILanguageAware>().OrderBy(s => s.Priority).ToArray();
+        _themeAwares = _services.OfType<IThemeAware>().OrderBy(s => s.Priority).ToArray();
+        _scaleAwares = _services.OfType<IScaleAware>().OrderBy(s => s.Priority).ToArray();
         _persistents = _services.OfType<IPersistent>().OrderBy(s => s.Priority).ToArray();
         _quittables = _services.OfType<IQuittable>().OrderBy(s => s.Priority).ToArray();
     }
@@ -122,30 +126,30 @@ public static class ServiceRegistry
 
     internal static void RenderAll()
     {
-        for (int i = 0; i < _renderables.Length; i++)
+        for (int i = 0; i < _alwaysRenderables.Length; i++)
         {
             try
             {
-                _renderables[i].OnGUI();
+                _alwaysRenderables[i].OnGUI();
             }
             catch (Exception ex)
             {
-                DebugLogger.Error($"[ServiceRegistry] Error rendering '{_renderables[i].Name}': {ex}");
+                DebugLogger.Error($"[ServiceRegistry] Error rendering '{_alwaysRenderables[i].Name}': {ex}");
             }
         }
     }
 
     internal static void RenderMenuAll()
     {
-        for (int i = 0; i < _renderables.Length; i++)
+        for (int i = 0; i < _menuRenderables.Length; i++)
         {
             try
             {
-                _renderables[i].OnMenuGUI();
+                _menuRenderables[i].OnMenuGUI();
             }
             catch (Exception ex)
             {
-                DebugLogger.Error($"[ServiceRegistry] Error rendering menu for '{_renderables[i].Name}': {ex}");
+                DebugLogger.Error($"[ServiceRegistry] Error rendering menu for '{_menuRenderables[i].Name}': {ex}");
             }
         }
     }
@@ -183,6 +187,8 @@ public static class ServiceRegistry
             }
         }
 
+        Actions.Invoke_OnThemeChanged();
+
 #if MELONLOADER
         DebugLogger.Msg($"[ServiceRegistry] Invoked OnThemeChanged across {_themeAwares.Length} Services");
 #endif
@@ -201,6 +207,8 @@ public static class ServiceRegistry
                 DebugLogger.Error($"[ServiceRegistry] Error in OnGUIScaleChanged for '{_scaleAwares[i].Name}': {ex}");
             }
         }
+
+        Actions.Invoke_OnGUIScaleChanged(newScale);
 
 #if MELONLOADER
         DebugLogger.Msg($"[ServiceRegistry] Invoked OnGUIScaleChanged across {_scaleAwares.Length} Services");

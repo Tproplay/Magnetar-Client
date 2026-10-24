@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Api;
+using Magnetar_Client.Api;
 using Magnetar_Client.NEF;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
@@ -61,7 +61,7 @@ public static class NEFManager
         );
     }
 
-    private class NEFManagerService : IWarmUp, ICloseHandler, ILanguageAware, IRenderable
+    private class NEFManagerService : IWarmUp, ICloseHandler, ILanguageAware, IMenuRenderable
     {
         public string Name => "NEFManager";
         public int Priority => ServicePriority.Standard;
@@ -117,7 +117,5 @@ public static class NEFManager
         {
             AnimationHandler.RenderWithTabAlpha(TabType.NEF, Render);
         }
-
-        public void OnGUI() { }
     }
 }

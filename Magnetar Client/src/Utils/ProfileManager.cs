@@ -109,6 +109,8 @@ public static class ProfileManager
         ClientConfig.showgui = true;
 
         AutoSaveLogger.Msg($"Switched active profile to: '{ProfileManager.CurrentProfile}'");
+
+        Api.Actions.Invoke_OnProfileChanged();
     }
 
     public static bool DeleteProfile(string profileName)
@@ -141,6 +143,7 @@ public static class ProfileManager
             ProfileManager.CurrentProfile = ProfileManager.DefaultProfile;
             SaveCurrentProfileToPreferences(ProfileManager.DefaultProfile);
             SaveLoad.Load();
+            Api.Actions.Invoke_OnProfileChanged();
         }
 
         AutoSaveLogger.Warning($"Deleted profile: '{profileName}'");

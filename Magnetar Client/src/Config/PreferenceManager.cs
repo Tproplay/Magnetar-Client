@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Magnetar_Client.Api;
 using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Magnetar_Logger;
@@ -133,6 +133,6 @@ public static class PreferenceManager
             AutoSaveLogger.Error($"Failed initializing preferences: {ex.Message}");
         }
 
-        Actions.OnInitializePreferences?.Invoke();
+        Actions.Invoke_OnInitializePreferences();
     }
 }

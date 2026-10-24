@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Api;
+using Magnetar_Client.Api;
 using Magnetar_Client.HUDElements;
 using System;
 using System.Collections.Generic;
@@ -309,6 +309,7 @@ public static class AddonManager
                     {
                         var serviceInstance = (IClientService)Activator.CreateInstance(svcType);
                         ServiceRegistry.Register(serviceInstance);
+                        addonInfo.RegisteredServices.Add(serviceInstance);
                         totalServices++;
                     }
                     catch (Exception ex)

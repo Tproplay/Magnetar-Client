@@ -1,4 +1,4 @@
-﻿namespace Magnetar_Client.Api;
+namespace Magnetar_Client.Api;
 
 /// <summary>
 /// Common priorities for deterministic execution order. Lower numbers execute earlier.
@@ -70,15 +70,21 @@ public interface IUpdatable : IClientService
 }
 
 /// <summary>
-/// Services that require rendering every OnEarlyGUI.
+/// Services that render every GUI frame regardless of whether the client window is open.
 /// </summary>
 public interface IRenderable : IClientService
 {
     /// <summary>
-    /// Renders regardless of whether Client Window is open or not.
+    /// Renders regardless of whether the client window is open or not.
     /// </summary>
     void OnGUI();
+}
 
+/// <summary>
+/// Services that render menu components only when the client window is open.
+/// </summary>
+public interface IMenuRenderable : IClientService
+{
     /// <summary>
     /// Renders menu components when the client window is open.
     /// </summary>

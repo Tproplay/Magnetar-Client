@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Api;
+using Magnetar_Client.Api;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
@@ -217,7 +217,7 @@ GUIManager.S(BaseWindowHeight));
         }
     }
 
-    private class ProfileGUIService : IInitializable, IWarmUp, ICloseHandler, IRenderable
+    private class ProfileGUIService : IInitializable, IWarmUp, ICloseHandler, IMenuRenderable
     {
         public string Name => "ProfileGUI";
         public int Priority => ServicePriority.UI;
@@ -244,8 +244,6 @@ GUIManager.S(BaseWindowHeight));
 
             return false;
         }
-
-        public void OnGUI() { }
 
         public void OnMenuGUI() 
         {

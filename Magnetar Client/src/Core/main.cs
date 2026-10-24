@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Api;
+using Magnetar_Client.Api;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.WindowDrawing;
 using Magnetar_Client.Utils;
@@ -38,14 +38,14 @@ public class Main
 
         DebugLogger.Msg("Initializing Magnetar Client...");
 
-        Api.Actions.OnEarlyInitialize?.Invoke();
+        Api.Actions.Invoke_OnEarlyInitialize();
 
         // Load the IAddons first so that they can register their actions and sevices
         AddonManager.InitAddons();
 
         // Apply the harmony patches
         ApplyHarmonyPatches();
-        Actions.OnInitializeHarmony?.Invoke();
+        Actions.Invoke_OnInitializeHarmony();
 
         // Initialize core systems and modules
         Instance.InitializeCore();
@@ -75,7 +75,7 @@ public class Main
 
     void InitializeCore()
     {
-        Api.Actions.OnEarlyInitializeCore?.Invoke();
+        Api.Actions.Invoke_OnEarlyInitializeCore();
 
         PreferenceManager.InitializePreferences();
 
@@ -98,12 +98,12 @@ public class Main
         // 3. Run unified pipeline across all registered services
         ServiceRegistry.InitializeAll();
 
-        Actions.OnInitializeCore?.Invoke();
+        Actions.Invoke_OnInitializeCore();
 
         // 4. Load state, themes, and translations
         SaveLoad.Load();
 
-        Api.Actions.OnLateInitializeCore?.Invoke();
+        Api.Actions.Invoke_OnLateInitializeCore();
 
         DebugLogger.Msg("Magnetar Client Loaded!");
     }
@@ -122,14 +122,14 @@ public class Main
             if (!ClientConfig.showgui)
             {
                 ClientConfig.showgui = true;
-                Actions.OnMenuOpen?.Invoke();
+                Actions.Invoke_OnMenuOpen();
             }
             else if (ClientConfig.MenuOpenKey != KeyCode.Escape)
             {
                 ClientConfig.showgui = false;
                 DrawSetting.ResetInputBind();
                 SaveLoad.Save();
-                Actions.OnMenuClosed?.Invoke();
+                Actions.Invoke_OnMenuClosed();
             }
         }
 
@@ -160,7 +160,7 @@ public class Main
             }
         }
 
-        Api.Actions.OnUpdate?.Invoke();
+        Api.Actions.Invoke_OnUpdate();
         ServiceRegistry.UpdateAll();
 
         #region Handle Escape
@@ -231,7 +231,7 @@ public class Main
 
             UI.Themes.ThemeManager.Rescale();
 
-            Actions.OnEarlyGUI?.Invoke();
+            Actions.Invoke_OnEarlyGUI();
             ServiceRegistry.RenderAll();
 
             // Render menus with smooth fade transition
@@ -242,14 +242,14 @@ public class Main
 
                 ClientConfig.CurrentTab?.OnGUI?.Invoke();
                 ServiceRegistry.RenderMenuAll();
-                Actions.OnGUIShow?.Invoke();
+                Actions.Invoke_OnGUIShow();
                 // Render TopBar on top
                 TopBar.Render();
 
                 GUI.color = prevGuiColor;
             }
 
-            Actions.OnLateGUI?.Invoke();
+            Actions.Invoke_OnLateGUI();
         }
         catch (Exception ex)
         {
@@ -265,7 +265,7 @@ public class Main
 
     internal void OnApplicationQuit()
     {
-        Api.Actions.OnApplicationQuit?.Invoke();
+        Api.Actions.Invoke_OnApplicationQuit();
         ServiceRegistry.QuitAll();
         SaveLoad.Save(true);
         DebugLogger.Msg("Preferences Saved!");
@@ -278,6 +278,6 @@ public class Main
 
         ServiceRegistry.WarmUpAll();
 
-        Api.Actions.OnWarmUp?.Invoke();
+        Api.Actions.Invoke_OnWarmUp();
     }
 }

@@ -1,0 +1,8 @@
+# Disables the "Open a blank issue" button to enforce template usage
+blank_issues_enabled: false
+
+# Useful links displayed at the top of the issue selection screen
+contact_links:
+  - name: Discord Community & Support
+    url: https://discord.gg/mDeAWbfnKP
+    about: Ask setup questions, troubleshoot installation, or chat with the community instead of opening an issue.

@@ -1,0 +1,25 @@
+name: "Suggestion"
+description: "Propose a new feature, QoL improvement, or expansion for Magnetar Client."
+title: "[Suggestion]: "
+labels:
+  - "enhancement"
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: "Describe the feature"
+      description: "Clearly describe the feature, improvement, or quality-of-life update you want added."
+      placeholder: "Describe the idea, why it's useful, and how you imagine it working in-game..."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "Before submitting a suggestion"
+      description: "Please verify the following before submitting your idea:"
+      options:
+        - label: "This feature doesn't already exist."
+          required: true
+        - label: "This wasn't already suggested."
+          required: true

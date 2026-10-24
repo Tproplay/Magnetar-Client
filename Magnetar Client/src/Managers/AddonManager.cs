@@ -183,7 +183,8 @@ public static class AddonManager
                 var moduleTypes = cachedData.Types
                     .Where(t => t.IsClass
                                 && !t.IsAbstract
-                                && typeof(Modules.Module).IsAssignableFrom(t))
+                                && typeof(Modules.Module).IsAssignableFrom(t)
+                                && !t.IsDefined(typeof(MagnetarDoNotRegisterAttribute), inherit: false))
                     .OrderBy(t => t.Name, StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
@@ -240,7 +241,8 @@ public static class AddonManager
                 var hudTypes = cachedData.Types
                     .Where(t => t.IsClass
                                 && !t.IsAbstract
-                                && t.IsSubclassOf(typeof(HudElement)))
+                                && t.IsSubclassOf(typeof(HudElement))
+                                && !t.IsDefined(typeof(MagnetarDoNotRegisterAttribute), inherit: false))
                     .OrderBy(t => t.Name, StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
@@ -296,7 +298,8 @@ public static class AddonManager
                 var serviceTypes = cachedData.Types
                     .Where(t => t.IsClass
                                 && !t.IsAbstract
-                                && typeof(IClientService).IsAssignableFrom(t))
+                                && typeof(IClientService).IsAssignableFrom(t)
+                                && !t.IsDefined(typeof(MagnetarDoNotRegisterAttribute), inherit: false))
                     .OrderBy(t => t.Name, StringComparer.OrdinalIgnoreCase)
                     .ToList();
 

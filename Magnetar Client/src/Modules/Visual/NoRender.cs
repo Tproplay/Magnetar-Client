@@ -57,7 +57,6 @@ public class NoRender : Module
 
         CreateCategory("General");
 
-        #region Particle
         Dictionary<int, string> menuNames = new();
 
         if (File.Exists(PathsManager.FXDataPath))
@@ -82,32 +81,59 @@ public class NoRender : Module
 
         if (menuNames.Count == 0) menuNames[-1] = "Empty";
 
-        // 3. Menu
         ParticlesSetting = new MultiSelectSetting("Particles")
         {
-            Options = menuNames
+            Options = menuNames,
+            OnSelectionChanged = (effectId, selected) =>
+            {
+                if (!Active || GameData.BoardInstanceIsNull) return;
+                foreach (var ps in UnityEngine.Object.FindObjectsOfType<ParticleSystem>())
+                {
+                    if (ps == null || ps.gameObject == null) continue;
+                    string psName = ps.gameObject.name;
+                    if (psName.EndsWith("(Clone)")) psName = psName.Substring(0, psName.Length - 7);
+                    bool dirty = false;
+                    if (GetOrRegisterEffect(psName, ref dirty) != effectId) continue;
+                    ps.emission.enabled = !selected;
+                    if (selected) ps.Clear();
+                }
+            }
         };
-
-        AddSettings(ParticlesSetting);
-        #endregion
 
         ParticleTypeSetting = new MultiSelectSetting("Particle Types", typeof(ParticleType))
         {
             CustomNames = TranslateEnum(typeof(ParticleType))
         };
-        AddSettings(ParticleTypeSetting);
 
         GameObjectsSetting = new MultiSelectSetting("Game Objects", typeof(BucketType))
         {
-            CustomNames = TranslateEnum(typeof(BucketType))
+            CustomNames = TranslateEnum(typeof(BucketType)),
+            OnSelectionChanged = (bucketTypeId, selected) =>
+            {
+                if (!Active || GameData.BoardInstanceIsNull) return;
+                foreach (var bucket in GameObject.FindObjectsOfType<Bucket>())
+                {
+                    if (bucket == null || (int)bucket.theBucketType != bucketTypeId) continue;
+                    foreach (var r in bucket.GetComponentsInChildren<Renderer>(true))
+                        if (r != null) r.enabled = !selected;
+                }
+            }
         };
-        AddSettings(GameObjectsSetting);
 
         BulletSetting = new MultiSelectSetting("Bullets", typeof(BulletType))
         {
-            CustomNames = TranslateEnum(typeof(BulletType))
+            CustomNames = TranslateEnum(typeof(BulletType)),
+            OnSelectionChanged = (bulletTypeId, selected) =>
+            {
+                if (!Active || GameData.BoardInstanceIsNull) return;
+                foreach (var kv in BulletPatch.RendererCache)
+                {
+                    if (kv.Key == null || (int)kv.Key.theBulletType != bulletTypeId) continue;
+                    foreach (var r in kv.Value)
+                        if (r != null) r.enabled = !selected;
+                }
+            }
         };
-        AddSettings(BulletSetting);
 
         EffectSetting = new MultiSelectSetting("Effects")
         {
@@ -117,9 +143,42 @@ public class NoRender : Module
                 { 2, "Doom shroom effect" },
                 { 3, "Jalapeno fire line" },
                 { 4, "Doom shroom smoke cloud" }
+            },
+            OnSelectionChanged = (effectId, selected) =>
+            {
+                if (!Active || GameData.BoardInstanceIsNull) return;
+                if (effectId == 1)
+                {
+                    foreach (var ice in GameObject.FindObjectsOfType<IceExplodeControl>())
+                    {
+                        if (ice == null) continue;
+                        var sr = ice.GetComponent<SpriteRenderer>();
+                        if (sr != null) sr.enabled = !selected;
+                    }
+                }
+                else if (effectId == 2 || effectId == 4)
+                {
+                    foreach (var doom in GameObject.FindObjectsOfType<Doom>())
+                    {
+                        if (doom == null) continue;
+                        if (effectId == 2)
+                        {
+                            var sprit = doom.transform.Find("sprit");
+                            if (sprit != null) sprit.gameObject.active = !selected;
+                        }
+                        else
+                        {
+                            for (int i = 0; i < doom.transform.childCount; i++)
+                            {
+                                Transform child = doom.transform.GetChild(i);
+                                if (child != null && child.gameObject != null)
+                                    child.gameObject.active = !selected;
+                            }
+                        }
+                    }
+                }
             }
         };
-        AddSettings(EffectSetting);
 
         OtherSetting = new MultiSelectSetting("Others")
         {
@@ -127,10 +186,32 @@ public class NoRender : Module
             {
                 { 0, "Falling Sun" },
                 { 1, "Falling Coin" },
+            },
+            OnSelectionChanged = (otherId, selected) =>
+            {
+                if (!Active || GameData.BoardInstanceIsNull) return;
+                if (otherId == 0)
+                {
+                    foreach (var sun in GameObject.FindObjectsOfType<CoinSun>())
+                    {
+                        if (sun == null) continue;
+                        foreach (var sr in sun.GetComponentsInChildren<SpriteRenderer>())
+                            if (sr != null) sr.enabled = !selected;
+                    }
+                }
+                else if (otherId == 1)
+                {
+                    foreach (var coin in GameObject.FindObjectsOfType<CoinMoney>())
+                    {
+                        if (coin == null) continue;
+                        foreach (var sr in coin.GetComponentsInChildren<SpriteRenderer>())
+                            if (sr != null) sr.enabled = !selected;
+                    }
+                }
             }
         };
 
-        AddSettings(OtherSetting);
+        AddSettings(ParticlesSetting, ParticleTypeSetting, GameObjectsSetting, BulletSetting, EffectSetting, OtherSetting);
         EndCategory();
 
         CreateCategory("Extra");
@@ -139,7 +220,6 @@ public class NoRender : Module
 
         AddSettings(ScreenShakeSetting);
         EndCategory();
-
     }
 
     public override void OnLanguageChanged()
@@ -228,7 +308,7 @@ public class NoRender : Module
             var renderers = bucket.GetComponentsInChildren<Renderer>(true);
             foreach (var renderer in renderers)
             {
-                if (renderer != null && renderer.Pointer != IntPtr.Zero)
+                if (renderer != null)
                 {
                     renderer.enabled = true;
                 }
@@ -236,18 +316,13 @@ public class NoRender : Module
         }
 
         // Bullets
-
-        var Bullets = GameObject.FindObjectsOfType<Bullet>();
-
-        foreach (var bullet in Bullets)
+        foreach (var bullet in BulletPatch.RendererCache.Keys)
         {
-            var renderers = bullet.GetComponentsInChildren<Renderer>(true);
-            foreach (var renderer in renderers)
+            if (bullet == null) continue;
+            foreach (var renderer in BulletPatch.RendererCache[bullet])
             {
-                if (renderer != null && renderer.Pointer != IntPtr.Zero)
-                {
+                if (renderer != null)
                     renderer.enabled = true;
-                }
             }
         }
     }
@@ -264,7 +339,7 @@ public class NoRender : Module
                 var renderers = bucket.GetComponentsInChildren<Renderer>(true);
                 foreach (var renderer in renderers)
                 {
-                    if (renderer != null && renderer.Pointer != IntPtr.Zero)
+                    if (renderer != null)
                     {
                         renderer.enabled = false;
                     }
@@ -273,21 +348,13 @@ public class NoRender : Module
         }
 
         // Bullets
-
-        var Bullets = GameObject.FindObjectsOfType<Bullet>();
-
-        foreach (var bullet in Bullets)
+        foreach (var bullet in BulletPatch.RendererCache.Keys)
         {
-            if (BulletSetting.IsSelected((int)bullet.theBulletType))
+            if (bullet == null || !BulletSetting.IsSelected((int)bullet.theBulletType)) continue;
+            foreach (var renderer in BulletPatch.RendererCache[bullet])
             {
-                var renderers = bullet.GetComponentsInChildren<Renderer>(true);
-                foreach (var renderer in renderers)
-                {
-                    if (renderer != null && renderer.Pointer != IntPtr.Zero)
-                    {
-                        renderer.enabled = false;
-                    }
-                }
+                if (renderer != null)
+                    renderer.enabled = false;
             }
         }
     }
@@ -315,22 +382,36 @@ public class NoRender : Module
     [HarmonyPatch(typeof(Bullet))]
     public static class BulletPatch
     {
+        public static readonly Dictionary<Bullet, Renderer[]> RendererCache = new();
+
         [HarmonyPatch(nameof(Bullet.InitData))]
         [HarmonyPostfix]
         public static void InitDataPatch(Bullet __instance)
         {
-            if (instance == null || !instance.Active || 
-                !instance.BulletSetting.IsSelected((int)__instance.theBulletType)) return;
+            if (instance == null) return;
 
-            var comp = __instance.GetComponentsInChildren<Renderer>(true);
+            // Populate cache on first encounter of this Bullet instance.
+            if (!RendererCache.TryGetValue(__instance, out var comp))
+            {
+                comp = __instance.GetComponentsInChildren<Renderer>(true);
+                RendererCache[__instance] = comp;
+            }
+
+            bool shouldHide = instance.Active && instance.BulletSetting.IsSelected((int)__instance.theBulletType);
 
             foreach (var renderer in comp)
             {
-                if (renderer != null && renderer.Pointer != IntPtr.Zero)
-                {
-                    renderer.enabled = false;
-                }
+                if (renderer != null)
+                    renderer.enabled = !shouldHide;
             }
+        }
+
+        [HarmonyPatch(typeof(Board))]
+        public static class BoardCacheClearPatch
+        {
+            [HarmonyPatch(nameof(Board.OnDestroy))]
+            [HarmonyPostfix]
+            public static void OnDestroyPostfix() => RendererCache.Clear();
         }
     }
 

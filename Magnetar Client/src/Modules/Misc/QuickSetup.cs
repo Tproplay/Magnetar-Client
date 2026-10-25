@@ -36,8 +36,6 @@ public class QuickSetup : Module
 
     private Dictionary<string, string> _savedSetups = new(StringComparer.OrdinalIgnoreCase);
 
-    private static string SetupsFilePath => Path.Combine(ConfigDir, "Custom_Setups.json");
-
     public QuickSetup()
     {
         instance = this;
@@ -210,10 +208,9 @@ public class QuickSetup : Module
     {
         try
         {
-            string path = SetupsFilePath;
-            if (File.Exists(path))
+            if (File.Exists(SavedSetupPlantPath))
             {
-                string json = File.ReadAllText(path);
+                string json = File.ReadAllText(SavedSetupPlantPath);
                 _savedSetups = JsonConvert.DeserializeObject<Dictionary<string, string>>(json)
                                ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
@@ -231,14 +228,7 @@ public class QuickSetup : Module
     {
         try
         {
-            string path = SetupsFilePath;
-            string dir = Path.GetDirectoryName(path);
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-
-            File.WriteAllText(path, JsonConvert.SerializeObject(_savedSetups, Formatting.Indented));
+            File.WriteAllText(SavedSetupPlantPath, JsonConvert.SerializeObject(_savedSetups, Formatting.Indented));
         }
         catch (Exception ex)
         {
@@ -279,8 +269,8 @@ public class QuickSetup : Module
 
         while (value > 0)
         {
-            buffer[i++] = alphabet[(int)(value % 62)];
-            value /= 62;
+            buffer[i++] = alphabet[(int)(value % alphabet.Length)];
+            value /= alphabet.Length;
         }
 
         Array.Reverse(buffer, 0, i);

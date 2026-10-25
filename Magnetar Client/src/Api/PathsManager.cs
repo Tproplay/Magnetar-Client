@@ -204,6 +204,16 @@ public static class PathsManager
         return Path.Combine(ProfilesDir, $"Magnetar_{safeName}.json");
     }
 
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / UserData / Custom_Setups.json
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / config / Custom_Setups.json
+    /// </remarks>
+    public static string SavedSetupPlantPath => Path.Combine(ConfigDir, "Custom_Setups.json");
+
     #endregion
 
     #region Magnetar Data

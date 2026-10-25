@@ -1,9 +1,10 @@
-﻿#if MELONLOADER || RELEASE_MELON
-#endif
-using HarmonyLib;
-using Il2Cpp;
+﻿using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
+
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.UI;
 

@@ -1,10 +1,12 @@
 ﻿using Magnetar_Client.Modules;
+
 #if MELONLOADER || RELEASE_MELON
 using MelonLoader;
 using MelonLoader.Logging;
 #elif BEPINEX || RELEASE_BEPINEX
 using BepInEx.Logging;
 using System;
+using System.Runtime.InteropServices;
 #endif
 
 namespace Magnetar_Client.Utils;
@@ -14,13 +16,13 @@ namespace Magnetar_Client.Utils;
 /// </summary>
 public class CustomLogger
 {
-    private string _name;
+    private readonly string _name;
 #if MELONLOADER || RELEASE_MELON
     private MelonLogger.Instance _melonLogger;
     private ColorARGB _loggerColor;
 #elif BEPINEX || RELEASE_BEPINEX
-    private ManualLogSource _bepInExLogger;
-    private string _ansiColorPrefix;
+    private readonly ManualLogSource _bepInExLogger;
+    private readonly string _ansiColorPrefix;
     private const string AnsiReset = "\x1b[0m";
 #endif
 
@@ -95,23 +97,23 @@ public static class Magnetar_Logger
     /// <summary>
     /// Use by the Translator
     /// </summary>
-    public static CustomLogger TranslatorLogger;
+    public static CustomLogger TranslatorLogger { get; private set; }
     /// <summary>
     /// General logger for the client
     /// </summary>
-    public static CustomLogger DebugLogger;
+    public static CustomLogger DebugLogger { get; private set; }
     /// <summary>
     /// Logger for <see cref="SaveLoad"/>
     /// </summary>
-    public static CustomLogger AutoSaveLogger;
+    public static CustomLogger AutoSaveLogger { get; private set; }
     /// <summary>
     /// Logger specially for <see cref="DebugMode"/>
     /// </summary>
-    public static CustomLogger DebugModeLogger;
+    public static CustomLogger DebugModeLogger { get; private set; }
     /// <summary>
     /// Logger for the core GUI
     /// </summary>
-    public static CustomLogger GUILogger;
+    public static CustomLogger GUILogger { get; private set; }
 
 #if !ANDROID && (BEPINEX || RELEASE_BEPINEX)
     // Completely strip P/Invoke declarations on Android

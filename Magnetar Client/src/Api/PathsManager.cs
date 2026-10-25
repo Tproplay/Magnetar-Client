@@ -1,8 +1,13 @@
-﻿using MelonLoader.Utils;
-using System;
+﻿using System;
 using System.IO;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
+
+#if MELONLOADER || RELEASE_MELON
+using MelonLoader.Utils;
+#elif BEPINEX || RELEASE_BEPINEX
+using BepInEx;
+#endif
 
 namespace Magnetar_Client.Api;
 

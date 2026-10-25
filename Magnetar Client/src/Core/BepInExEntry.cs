@@ -9,7 +9,7 @@ using Magnetar_Client.Core;
 
 namespace Magnetar_Client.Core;
 
-[BepInPlugin(Magnetar_Info.HarmonyId, Magnetar_Info.ModName, Magnetar_Info.Version)]
+[BepInPlugin(MagnetarInfo.HarmonyId, MagnetarInfo.ModName, MagnetarInfo.Version)]
 public class BepInExEntry : BasePlugin
 {
     public override void Load()
@@ -25,8 +25,10 @@ public class MagnetarUnityHook : MonoBehaviour
 {
     public MagnetarUnityHook(IntPtr ptr) : base(ptr) { }
 
+#pragma warning disable CA1822 // Mark members as static
     private void Update() => Main.Instance?.OnUpdate();
     private void OnGUI() => Main.Instance?.OnGUI();
     private void OnApplicationQuit() => Main.Instance?.OnApplicationQuit();
+#pragma warning restore CA1822 // Mark members as static
 }
 #endif

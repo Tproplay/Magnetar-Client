@@ -1,8 +1,11 @@
-﻿using Il2Cpp;
-using UnityEngine;
+﻿using UnityEngine;
 using HarmonyLib;
 using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
+
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.HUDElements;
 
@@ -46,7 +49,7 @@ public class NumberOfBulletsSpawned : HudElement
     {
         [HarmonyPatch(nameof(Board.Awake))]
         [HarmonyPostfix]
-        static void AwakePostFix(Board __instance)
+        static void AwakePostFix()
         {
             TotalNumberOfBulletsSpawned = 0;
         }

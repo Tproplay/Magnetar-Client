@@ -9,6 +9,7 @@ using UnityEngine;
 using MelonLoader;
 #elif BEPINEX || RELEASE_BEPINEX || ANDROID
 using BepInEx.Configuration;
+using System.IO;
 #endif
 
 namespace Magnetar_Client;

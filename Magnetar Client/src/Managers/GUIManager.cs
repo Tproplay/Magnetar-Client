@@ -67,7 +67,7 @@ public static class GUIManager
             PreferenceManager.ShowFloatingIconEntry.Value = value;
 
 #if BEPINEX || RELEASE_BEPINEX || ANDROID
-            Preferences.BepInExConfig.Save();
+            PreferenceManager.BepInExConfig.Save();
 #endif
         }
     }
@@ -81,7 +81,7 @@ public static class GUIManager
             PreferenceManager.ShowMobileButtonsEntry.Value = value;
 
 #if BEPINEX || RELEASE_BEPINEX || ANDROID
-            Preferences.BepInExConfig?.Save();
+            PreferenceManager.BepInExConfig?.Save();
 #endif
         }
     }
@@ -318,10 +318,10 @@ public static class GUIManager
             PreferenceManager.ShowFloatingIconEntry.Value = enabled;
         }
 #elif BEPINEX || RELEASE_BEPINEX || ANDROID
-        if (Preferences.ShowFloatingIconEntry != null)
+        if (PreferenceManager.ShowFloatingIconEntry != null)
         {
-            Preferences.ShowFloatingIconEntry.Value = enabled;
-            Preferences.BepInExConfig?.Save();
+            PreferenceManager.ShowFloatingIconEntry.Value = enabled;
+            PreferenceManager.BepInExConfig?.Save();
         }
 #endif
         Utils.SaveLoad.Save();

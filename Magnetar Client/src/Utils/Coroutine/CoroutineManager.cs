@@ -6,6 +6,7 @@ using MelonLoader;
 #elif BEPINEX || RELEASE_BEPINEX
 using Il2CppInterop.Runtime.Injection;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
+using UnityEngine;
 #endif
 
 namespace Magnetar_Client;

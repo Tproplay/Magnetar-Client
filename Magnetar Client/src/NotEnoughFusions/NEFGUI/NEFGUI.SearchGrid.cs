@@ -1,10 +1,13 @@
-﻿using Il2Cpp;
-using Magnetar_Client.Core;
+﻿using Magnetar_Client.Core;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using UnityEngine;
 using static Magnetar_Client.Utils.Translator;
 using static Magnetar_Client.NEF.Data.NEFRecipes;
+
+#if MELONLOADER || RELEASE_MELON
+using Il2Cpp;
+#endif
 
 namespace Magnetar_Client.NEF;
 

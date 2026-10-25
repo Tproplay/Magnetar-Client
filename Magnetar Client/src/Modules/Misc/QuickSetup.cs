@@ -128,10 +128,7 @@ public class QuickSetup : Module
             var currentPlants = PlantList.ToArray();
             for (int i = 0; i < currentPlants.Length; i++)
             {
-                if (currentPlants[i] != null)
-                {
-                    currentPlants[i].Die();
-                }
+                currentPlants[i]?.Die();
             }
         }
 
@@ -178,7 +175,7 @@ public class QuickSetup : Module
         }
     }
 
-    public string GenerateSetupCode()
+    public static string GenerateSetupCode()
     {
         if (PlantList == null || PlantList.Count == 0) return string.Empty;
 
@@ -199,7 +196,7 @@ public class QuickSetup : Module
         return sb.ToString();
     }
 
-    private void SpawnPlant(int col, int row, int plantType)
+    private static void SpawnPlant(int col, int row, int plantType)
     {
         CreatePlant.Instance.SetPlant(col, row, (PlantType)plantType);
     }

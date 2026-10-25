@@ -25,6 +25,10 @@ public static partial class DrawSetting
     private static bool isShiftDragging;
     private static bool dragTargetState;
     private static readonly HashSet<int> draggedItemsSession = new();
+    private static readonly List<(int Key, string DisplayName)> _cachedFilteredItems = new();
+    private static object _cachedMultiSelectRef = null;
+    private static string _cachedMultiSelectQuery = null;
+    private static int _cachedOptionsCount = -1;
 
     private static Vector2 _listTouchStart = Vector2.zero;
     private static float _scrollStartVal;
@@ -116,36 +120,49 @@ public static partial class DrawSetting
             _scrollVelocity = 0f;
         }
 
-        var filteredItems = new List<(int Key, string DisplayName)>();
         string cleanQuery = multiSelectSearchQuery?.Replace(" ", "") ?? "";
-        bool hasQuery = !string.IsNullOrEmpty(cleanQuery);
+        bool needsRebuild = _cachedMultiSelectRef != activeMultiSelect
+            || _cachedMultiSelectQuery != cleanQuery
+            || _cachedOptionsCount != options.Count;
 
-        foreach (var kvp in options)
+        if (needsRebuild)
         {
-            int intVal = kvp.Key;
-            string internalName = kvp.Value;
+            _cachedMultiSelectRef = activeMultiSelect;
+            _cachedMultiSelectQuery = cleanQuery;
+            _cachedOptionsCount = options.Count;
 
-            if (activeMultiSelect.Blacklist != null && activeMultiSelect.Blacklist.Contains(intVal)) continue;
-            if (activeMultiSelect.NameBlacklist != null && activeMultiSelect.NameBlacklist.Contains(internalName)) continue;
-            string displayName = activeMultiSelect.GetDisplayName(intVal, internalName);
+            _cachedFilteredItems.Clear();
+            bool hasQuery = !string.IsNullOrEmpty(cleanQuery);
 
-            if (hasQuery)
+            foreach (var kvp in options)
             {
-                bool matchesDisplay = displayName.Replace(" ", "").IndexOf(cleanQuery, StringComparison.OrdinalIgnoreCase) >= 0;
-                bool matchesInternal = !string.IsNullOrEmpty(internalName) &&
-                                       internalName.Replace(" ", "").IndexOf(cleanQuery, StringComparison.OrdinalIgnoreCase) >= 0;
+                int intVal = kvp.Key;
+                string internalName = kvp.Value;
 
-                if (!matchesDisplay && !matchesInternal)
-                    continue;
+                if (activeMultiSelect.Blacklist != null && activeMultiSelect.Blacklist.Contains(intVal)) continue;
+                if (activeMultiSelect.NameBlacklist != null && activeMultiSelect.NameBlacklist.Contains(internalName)) continue;
+                string displayName = activeMultiSelect.GetDisplayName(intVal, internalName);
+
+                if (hasQuery)
+                {
+                    bool matchesDisplay = displayName.Replace(" ", "").IndexOf(cleanQuery, StringComparison.OrdinalIgnoreCase) >= 0;
+                    bool matchesInternal = !string.IsNullOrEmpty(internalName) &&
+                                           internalName.Replace(" ", "").IndexOf(cleanQuery, StringComparison.OrdinalIgnoreCase) >= 0;
+
+                    if (!matchesDisplay && !matchesInternal)
+                        continue;
+                }
+
+                _cachedFilteredItems.Add((intVal, displayName));
             }
 
-            filteredItems.Add((intVal, displayName));
+            if (activeMultiSelect.DisplayAlphabetically)
+            {
+                _cachedFilteredItems.Sort((a, b) => string.Compare(a.DisplayName, b.DisplayName, StringComparison.CurrentCultureIgnoreCase));
+            }
         }
 
-        if (activeMultiSelect.DisplayAlphabetically)
-        {
-            filteredItems.Sort((a, b) => string.Compare(a.DisplayName, b.DisplayName, StringComparison.CurrentCultureIgnoreCase));
-        }
+        var filteredItems = _cachedFilteredItems;
 
         totalContentHeight = filteredItems.Count * rowStep;
         int selectedCount = activeMultiSelect.SelectedValues.Count;

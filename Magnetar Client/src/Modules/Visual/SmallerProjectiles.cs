@@ -64,26 +64,25 @@ public class SmallerProjectiles : Module
 
         foreach (var __instance in Bullets)
         {
+            if (__instance == null) continue;
             IntPtr ptr = __instance.Pointer;
 
-            if (!originalScales.ContainsKey(ptr))
+            if (!originalScales.TryGetValue(ptr, out Vector3 orig))
             {
-                originalScales[ptr] = __instance.transform.localScale;
+                orig = __instance.transform.localScale;
+                originalScales[ptr] = orig;
             }
 
             if (instance != null && instance.Active && instance.BulletTypeSetting.IsSelected((int)__instance.theBulletType))
             {
-                Vector3 orig = originalScales[ptr];
                 float mult = instance.ScaleSetting.Value;
-
                 __instance.transform.localScale = new Vector3(orig.x * mult, orig.y * mult, orig.z);
             }
             else
             {
-                __instance.transform.localScale = originalScales[ptr];
+                __instance.transform.localScale = orig;
             }
         }
-
     }
 
     public override void OnDisable()
@@ -116,26 +115,23 @@ public class SmallerProjectiles : Module
         {
             if (__instance == null) return;
 
-
             IntPtr ptr = __instance.Pointer;
 
-            if (!originalScales.ContainsKey(ptr))
+            if (!originalScales.TryGetValue(ptr, out Vector3 orig))
             {
-                originalScales[ptr] = __instance.transform.localScale;
+                orig = __instance.transform.localScale;
+                originalScales[ptr] = orig;
             }
 
             if (instance != null && instance.Active && instance.BulletTypeSetting.IsSelected((int)__instance.theBulletType))
             {
-                Vector3 orig = originalScales[ptr];
                 float mult = instance.ScaleSetting.Value;
-
                 __instance.transform.localScale = new Vector3(orig.x * mult, orig.y * mult, orig.z);
             }
             else
             {
-                __instance.transform.localScale = originalScales[ptr];
+                __instance.transform.localScale = orig;
             }
-     
         }
     }
 

@@ -38,9 +38,11 @@ GUIManager.S(BaseWindowHeight));
             }
             return true;
         });
+
+        ProfileManager.RefreshProfiles();
     }
 
-    public static void Render()
+    public static void Render() 
     {
         ClientConfig.RescaleAroundCenter(ref WindowRect, GUIManager.S(BaseWindowWidth), GUIManager.S(BaseWindowHeight));
 
@@ -217,12 +219,11 @@ GUIManager.S(BaseWindowHeight));
         }
     }
 
-    private class ProfileGUIService : IInitializable, IWarmUp, ICloseHandler, IMenuRenderable
+    private class ProfileGUIService : IWarmUp, ICloseHandler, IMenuRenderable
     {
         public string Name => "ProfileGUI";
         public int Priority => ServicePriority.UI;
 
-        public void Initialize() { }
         public void OnWarmUp() => ProfileGUI.Render();
 
         public bool CanClose()

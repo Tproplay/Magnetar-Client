@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using Il2CppSystem;
 using Magnetar_Client.Utils;
@@ -41,7 +41,9 @@ public class NoRender : Module
     public BoolSetting ScreenShakeSetting;
 
     private Dictionary<int, string> fxDatabase = new();
+    private Dictionary<string, int> fxNameToId = new(System.StringComparer.OrdinalIgnoreCase);
     private int nextId;
+    private float _particleScanTimer;
 
     public NoRender()
     {
@@ -71,6 +73,7 @@ public class NoRender : Module
                     foreach (string effect in loadedEffects)
                     {
                         fxDatabase.Add(nextId, effect);
+                        fxNameToId[effect] = nextId;
                         menuNames.Add(nextId, effect);
                         nextId++;
                     }
@@ -87,16 +90,17 @@ public class NoRender : Module
             OnSelectionChanged = (effectId, selected) =>
             {
                 if (!Active || GameData.BoardInstanceIsNull) return;
+                bool dirty = false;
                 foreach (var ps in UnityEngine.Object.FindObjectsOfType<ParticleSystem>())
                 {
                     if (ps == null || ps.gameObject == null) continue;
                     string psName = ps.gameObject.name;
                     if (psName.EndsWith("(Clone)")) psName = psName.Substring(0, psName.Length - 7);
-                    bool dirty = false;
                     if (GetOrRegisterEffect(psName, ref dirty) != effectId) continue;
                     ps.emission.enabled = !selected;
                     if (selected) ps.Clear();
                 }
+                if (dirty) SaveToJson();
             }
         };
 
@@ -235,9 +239,12 @@ public class NoRender : Module
     {
         if (GameData.BoardInstanceIsNull) return;
 
-        // Particles
         if (ParticlesSetting.SelectedValues.Count != 0)
         {
+            _particleScanTimer += Time.deltaTime;
+            if (_particleScanTimer < 0.25f) return;
+            _particleScanTimer = 0f;
+
             bool isFileDirty = false;
             var allParticleSystems = UnityEngine.Object.FindObjectsOfType<ParticleSystem>();
 
@@ -248,7 +255,6 @@ public class NoRender : Module
                 string name = ps.gameObject.name;
                 if (name.EndsWith("(Clone)")) name = name.Substring(0, name.Length - 7);
 
-                // Fetch the ID, and automatically register it if it is new
                 int effectId = GetOrRegisterEffect(name, ref isFileDirty);
 
                 if (ParticlesSetting.IsSelected(effectId))
@@ -264,16 +270,14 @@ public class NoRender : Module
 
     private int GetOrRegisterEffect(string effectName, ref bool isFileDirty)
     {
-        foreach (var pair in fxDatabase)
+        if (fxNameToId.TryGetValue(effectName, out int existingId))
         {
-            if (string.Equals(pair.Value, effectName, System.StringComparison.OrdinalIgnoreCase))
-            {
-                return pair.Key;
-            }
+            return existingId;
         }
 
         int newId = nextId++;
         fxDatabase.Add(newId, effectName);
+        fxNameToId[effectName] = newId;
         ParticlesSetting.Options.Add(newId, effectName);
 
         isFileDirty = true;
@@ -289,15 +293,18 @@ public class NoRender : Module
 
     public override void OnDisable()
     {
-        // Particles
         var allParticleSystems = UnityEngine.Object.FindObjectsOfType<ParticleSystem>();
         foreach (var ps in allParticleSystems)
         {
-            if (ps != null && 
-                ParticlesSetting.IsSelected(
-                    ParticlesSetting.Options.FirstOrDefault(key=>key.Value==ps.gameObject.name).Key
-                    )
-                ) ps.emission.enabled = true;
+            if (ps != null && ps.gameObject != null)
+            {
+                string psName = ps.gameObject.name;
+                if (psName.EndsWith("(Clone)")) psName = psName.Substring(0, psName.Length - 7);
+                if (fxNameToId.TryGetValue(psName, out int effectId) && ParticlesSetting.IsSelected(effectId))
+                {
+                    ps.emission.enabled = true;
+                }
+            }
         }
 
         // Buckets

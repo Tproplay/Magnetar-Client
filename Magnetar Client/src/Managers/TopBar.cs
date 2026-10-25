@@ -16,6 +16,7 @@ public static class TopBar
     public static readonly List<TabType> Order = new();
     private static readonly Dictionary<TabType, float> BaseWidth = new();
     private static float[] baseOffsets = Array.Empty<float>();
+    private static float[] scaledOffsets = Array.Empty<float>();
 
     private const float BaseHeight = 30f;
 
@@ -53,6 +54,20 @@ public static class TopBar
             running += BaseWidth[Order[i]];
         }
         baseOffsets[Order.Count] = running;
+        RebuildScaledOffsets();
+    }
+
+    public static void RebuildScaledOffsets()
+    {
+        int count = Order.Count;
+        if (scaledOffsets.Length != count + 1)
+        {
+            scaledOffsets = new float[count + 1];
+        }
+        for (int i = 0; i <= count; i++)
+        {
+            scaledOffsets[i] = Mathf.Round(GUIManager.S(baseOffsets[i]));
+        }
     }
 
     /// <summary>
@@ -75,10 +90,9 @@ public static class TopBar
         int count = Order.Count;
         if (count == 0) return;
 
-        float[] scaledOffsets = new float[count + 1];
-        for (int i = 0; i <= count; i++)
+        if (scaledOffsets.Length != count + 1)
         {
-            scaledOffsets[i] = Mathf.Round(GUIManager.S(baseOffsets[i]));
+            RebuildScaledOffsets();
         }
 
         float scaledTotalWidth = scaledOffsets[count];
@@ -126,7 +140,7 @@ public static class TopBar
         GUI.EndGroup();
     }
 
-    private class TopBarService : ILanguageAware
+    private class TopBarService : ILanguageAware, IScaleAware
     {
         public string Name => "TopBar";
         public int Priority => ServicePriority.Highest;
@@ -144,6 +158,11 @@ public static class TopBar
         public void OnLanguageChanged()
         {
             TopBar.RebuildOffsets();
+        }
+
+        public void OnGUIScaleChanged(float newScale)
+        {
+            TopBar.RebuildScaledOffsets();
         }
     }
 }

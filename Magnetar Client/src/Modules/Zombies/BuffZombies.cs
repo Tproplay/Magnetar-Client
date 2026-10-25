@@ -1,4 +1,5 @@
-﻿using Magnetar_Client.UI.Setting;
+using HarmonyLib;
+using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -57,8 +58,21 @@ public class BuffZombies : Module
         ZombieSelectedSetting.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
-    // Tracks the original max healths: [0] = Base, [1] = Armor1, [2] = Armor2
-    public static Dictionary<Zombie, List<long>> originalHpData = new();
+    public readonly struct ZombieHpData
+    {
+        public readonly long BaseMax;
+        public readonly int Armor1Max;
+        public readonly int Armor2Max;
+
+        public ZombieHpData(long baseMax, int armor1Max, int armor2Max)
+        {
+            BaseMax = baseMax;
+            Armor1Max = armor1Max;
+            Armor2Max = armor2Max;
+        }
+    }
+
+    public static Dictionary<Zombie, ZombieHpData> originalHpData = new();
 
     // Mod Logic
     public override void OnUpdateActive()
@@ -76,24 +90,21 @@ public class BuffZombies : Module
             {
                 if (!originalHpData.ContainsKey(zombie))
                 {
-                    // 1. Store the original maximums
-                    originalHpData[zombie] = new List<long> {
+                    originalHpData[zombie] = new ZombieHpData(
                         zombie.theMaxHealth,
                         zombie.theFirstArmorMaxHealth,
                         zombie.theSecondArmorMaxHealth
-                    };
+                    );
 
-                // 2. Multiply Max Healths
-                zombie.theMaxHealth = (long)System.Math.Round(zombie.theMaxHealth * multiplier);
-                zombie.theFirstArmorMaxHealth = Mathf.RoundToInt(zombie.theFirstArmorMaxHealth * multiplier);
-                zombie.theSecondArmorMaxHealth = Mathf.RoundToInt(zombie.theSecondArmorMaxHealth * multiplier);
+                    zombie.theMaxHealth = (long)System.Math.Round(zombie.theMaxHealth * multiplier);
+                    zombie.theFirstArmorMaxHealth = Mathf.RoundToInt(zombie.theFirstArmorMaxHealth * multiplier);
+                    zombie.theSecondArmorMaxHealth = Mathf.RoundToInt(zombie.theSecondArmorMaxHealth * multiplier);
 
-                // 3. Multiply Current Healths
-                zombie.theHealth = (long)System.Math.Round(zombie.theHealth * multiplier);
-                zombie.theFirstArmorHealth = Mathf.RoundToInt(zombie.theFirstArmorHealth * multiplier);
-                zombie.theSecondArmorHealth = Mathf.RoundToInt(zombie.theSecondArmorHealth * multiplier);
+                    zombie.theHealth = (long)System.Math.Round(zombie.theHealth * multiplier);
+                    zombie.theFirstArmorHealth = Mathf.RoundToInt(zombie.theFirstArmorHealth * multiplier);
+                    zombie.theSecondArmorHealth = Mathf.RoundToInt(zombie.theSecondArmorHealth * multiplier);
 
-                zombie.UpdateHealthText();
+                    zombie.UpdateHealthText();
                 }
             }
         }
@@ -105,12 +116,11 @@ public class BuffZombies : Module
         {
             if (zombie == null) continue;
 
-            if (originalHpData.ContainsKey(zombie))
+            if (originalHpData.TryGetValue(zombie, out ZombieHpData origData))
             {
-                List<long> origData = originalHpData[zombie];
-                long origMaxHp = origData[0];
-                long origFirstArmorMax = origData[1];
-                long origSecondArmorMax = origData[2];
+                long origMaxHp = origData.BaseMax;
+                long origFirstArmorMax = origData.Armor1Max;
+                long origSecondArmorMax = origData.Armor2Max;
 
                 // 1. Calculate current health ratios (safeguard against divide by zero for unarmored zombies)
                 float hpRatio = zombie.theMaxHealth > 0 ? (float)zombie.theHealth / zombie.theMaxHealth : 0f;
@@ -131,5 +141,31 @@ public class BuffZombies : Module
 
         // Clean up memory
         originalHpData.Clear();
+    }
+
+    [HarmonyPatch(typeof(Zombie))]
+    public static class ZombieCleanupPatch
+    {
+        [HarmonyPatch(nameof(Zombie.Die))]
+        [HarmonyPostfix]
+        public static void DiePostfix(Zombie __instance)
+        {
+            if (__instance != null) originalHpData.Remove(__instance);
+        }
+
+        [HarmonyPatch(nameof(Zombie.DestoryZombie))]
+        [HarmonyPostfix]
+        public static void DestroyPostfix(Zombie __instance)
+        {
+            if (__instance != null) originalHpData.Remove(__instance);
+        }
+    }
+
+    [HarmonyPatch(typeof(Board))]
+    public static class BoardCleanupPatch
+    {
+        [HarmonyPatch(nameof(Board.OnDestroy))]
+        [HarmonyPostfix]
+        public static void OnDestroyPostfix() => originalHpData.Clear();
     }
 }

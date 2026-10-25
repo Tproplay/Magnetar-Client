@@ -32,25 +32,24 @@ public static class GameData
 
 
     private static List<Plant> _plantList = new();
+    private static HashSet<Plant> _plantSet = new();
     static int _currentPlantCheckFrame;
     static List<Plant> GetPlants()
     {
-        if (_currentPlantCheckFrame == UnityEngine.Time.frameCount) return _plantList;
-        else
+        int frame = UnityEngine.Time.frameCount;
+        if (frame - _currentPlantCheckFrame < 30) return _plantList;
+        _currentPlantCheckFrame = frame;
+
+        for (int i = _plantList.Count - 1; i >= 0; i--)
         {
-            _currentPlantCheckFrame = UnityEngine.Time.frameCount;
-
-            for (int i = _plantList.Count - 1; i >= 0; i--)
+            Plant plant = _plantList[i];
+            if (plant == null || plant.gameObject == null)
             {
-                Plant plant = _plantList[i];
-
-                if (plant == null || plant.gameObject == null)
-                {
-                    _plantList.RemoveAt(i);
-                }
+                if (plant != null) _plantSet.Remove(plant);
+                _plantList.RemoveAt(i);
             }
-            return _plantList;
         }
+        return _plantList;
     }
 
     [HarmonyPatch(typeof(Plant))]
@@ -60,9 +59,9 @@ public static class GameData
         [HarmonyPostfix]
         public static void StartPostFix(Plant __instance)
         {
-            if (!PlantList.Contains(__instance))
+            if (_plantSet.Add(__instance))
             {
-                PlantList.Add(__instance);
+                _plantList.Add(__instance);
                 OnPlantSpawned?.Invoke(__instance);
             }
         }
@@ -71,8 +70,9 @@ public static class GameData
         [HarmonyPrefix]
         public static void DiePreFix(Plant __instance)
         {
-            if (PlantList.Remove(__instance))
+            if (_plantSet.Remove(__instance))
             {
+                _plantList.Remove(__instance);
                 OnPlantDie?.Invoke(__instance);
             }
         }
@@ -85,9 +85,9 @@ public static class GameData
         [HarmonyPostfix]
         public static void SetPlantPostfix(Plant __result)
         {
-            if (!PlantList.Contains(__result))
+            if (_plantSet.Add(__result))
             {
-                PlantList.Add(__result);
+                _plantList.Add(__result);
                 OnPlantSpawned?.Invoke(__result);
             }
         }
@@ -110,27 +110,25 @@ public static class GameData
     public static Action<Zombie> OnZombieDie;
 
     private static List<Zombie> _zombieList = new();
+    private static HashSet<Zombie> _zombieSet = new();
     static int _currentZombieCheckFrame;
     static List<Zombie> GetZombies()
     {
-        if (_currentZombieCheckFrame == UnityEngine.Time.frameCount) return _zombieList;
-        else
+        int frame = UnityEngine.Time.frameCount;
+        if (frame - _currentZombieCheckFrame < 30) return _zombieList;
+        _currentZombieCheckFrame = frame;
+
+        for (int i = _zombieList.Count - 1; i >= 0; i--)
         {
-            _currentZombieCheckFrame = UnityEngine.Time.frameCount;
-
-            for (int i = _zombieList.Count - 1; i >= 0; i--)
+            Zombie zombie = _zombieList[i];
+            if (zombie == null || zombie.gameObject == null)
             {
-                Zombie zombie = _zombieList[i];
-
-                if (zombie == null || zombie.gameObject == null)
-                {
-                    _zombieList.RemoveAt(i);
-                }
+                if (zombie != null) _zombieSet.Remove(zombie);
+                _zombieList.RemoveAt(i);
             }
-            return _zombieList;
         }
+        return _zombieList;
     }
-
 
     [HarmonyPatch(typeof(Zombie))]
     private static class ZombieListPatch
@@ -139,7 +137,7 @@ public static class GameData
         [HarmonyPostfix]
         public static void StartPostFix(Zombie __instance)
         {
-            if (!_zombieList.Contains(__instance))
+            if (_zombieSet.Add(__instance))
             {
                 _zombieList.Add(__instance);
                 OnZombieSpawned?.Invoke(__instance);
@@ -150,7 +148,7 @@ public static class GameData
         [HarmonyPrefix]
         public static void DiePreFix(Zombie __instance)
         {
-            if (_zombieList.Remove(__instance))
+            if (_zombieSet.Remove(__instance))
             { 
                 OnZombieDie?.Invoke(__instance);
             }
@@ -160,7 +158,7 @@ public static class GameData
         [HarmonyPrefix]
         public static void DestoryZombiePreFix(Zombie __instance)
         {
-            if (_zombieList.Remove(__instance))
+            if (_zombieSet.Remove(__instance))
             {
                 OnZombieDie?.Invoke(__instance);
             }
@@ -174,7 +172,7 @@ public static class GameData
         [HarmonyPostfix]
         public static void SetZombiePostfix(Zombie __result)
         {
-            if (!_zombieList.Contains(__result))
+            if (_zombieSet.Add(__result))
             {
                 _zombieList.Add(__result);
                 OnZombieSpawned?.Invoke(__result);
@@ -191,17 +189,24 @@ public static class GameData
         [HarmonyPostfix]
         static void AwakePostFix(Board __instance)
         {
-            PlantList.Clear();
+            _plantList.Clear();
+            _plantSet.Clear();
             _zombieList.Clear();
+            _zombieSet.Clear();
+            _currentPlantCheckFrame = 0;
+            _currentZombieCheckFrame = 0;
         }
 
         [HarmonyPatch(nameof(Board.Die))]
         [HarmonyPostfix]
         static void DiePostFix(Board __instance)
         {
-            PlantList.Clear();
+            _plantList.Clear();
+            _plantSet.Clear();
             _zombieList.Clear();
-
+            _zombieSet.Clear();
+            _currentPlantCheckFrame = 0;
+            _currentZombieCheckFrame = 0;
         }
     }
 

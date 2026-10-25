@@ -23,6 +23,7 @@ internal static class SettingsWindowDrawer
     private static readonly Dictionary<Modules.Module, bool> _isDragging = new();
     private static bool _isDraggingScrollbar;
     private static Modules.Module _lastActiveModule;
+    private static readonly Dictionary<Modules.Module, float> _cachedTargetWidths = new();
 
     private static GUI.WindowFunction GetSettingsDelegate(Modules.Module mod)
     {
@@ -64,11 +65,16 @@ internal static class SettingsWindowDrawer
         GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * currentAlpha);
 
         int settingsId = Mathf.Abs(targetMod.GetHashCode()) + 1000;
-        float targetWidth = CalculateTargetWidth(targetMod);
+        if (!_cachedTargetWidths.TryGetValue(targetMod, out float targetWidth))
+        {
+            targetWidth = CalculateTargetWidth(targetMod);
+            _cachedTargetWidths[targetMod] = targetWidth;
+        }
 
         if (!_settingsPositions.ContainsKey(targetMod) || ModuleManager.resetWindowPos)
         {
             ModuleManager.resetWindowPos = false;
+            _cachedTargetWidths.Remove(targetMod);
             float popupHeight = GUIManager.S(25f);
 
             _settingsPositions[targetMod] = new Rect(

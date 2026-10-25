@@ -57,10 +57,13 @@ public class CleanWeather : Module
         
     }
 
+    private SnowMap _lastSnowMapInstance;
+
     public override void OnUpdateActive()
     {
-        if (ClearSnowFall.Value && SnowMap.Instance != null)
+        if (ClearSnowFall.Value && SnowMap.Instance != null && SnowMap.Instance != _lastSnowMapInstance)
         {
+            _lastSnowMapInstance = SnowMap.Instance;
             var Partcles = SnowMap.Instance.GetComponentsInChildren<ParticleSystem>();
             foreach (var part in Partcles)
             {
@@ -70,10 +73,15 @@ public class CleanWeather : Module
                 }
             }
         }
+        else if (!ClearSnowFall.Value)
+        {
+            _lastSnowMapInstance = null;
+        }
     }
 
     public override void OnDisable()
     {
+        _lastSnowMapInstance = null;
         if (FogMgr.Instance != null)
             foreach (var block in FogMgr.Instance.fogList)
             {

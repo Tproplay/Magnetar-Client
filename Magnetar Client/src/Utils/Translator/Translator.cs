@@ -62,11 +62,11 @@ public static partial class Translator
             TranslationData.HudLinked = true;
         }
 
-        string trimmedInput = input.Trim();
-        if (string.IsNullOrWhiteSpace(trimmedInput)) return input;
-
         if (TranslationData.ExactTranslations.TryGetValue(input, out string exactMatch))
             return exactMatch;
+
+        string trimmedInput = input.Trim();
+        if (string.IsNullOrWhiteSpace(trimmedInput)) return input;
 
         if (TranslationData.ExactTranslations.TryGetValue(trimmedInput, out string trimmedMatch))
             return input.StartsWith(" ") || input.EndsWith(" ") ? input.Replace(trimmedInput, trimmedMatch) : trimmedMatch;

@@ -19,6 +19,7 @@ public static class CategoryWindowDrawer
     private static ModuleCategory _clickCategory;
     private static Vector2 _clickStartMousePos = Vector2.zero;
     private static Vector2 _clickStartWindowPos = Vector2.zero;
+    private static GUIStyle _arrowStyle;
 
 #if ANDROID
     private static readonly Dictionary<ModuleCategory, float> _touchStartY = new();
@@ -94,8 +95,10 @@ public static class CategoryWindowDrawer
 
         GUI.color = new Color(prevColor.r, prevColor.g, prevColor.b, prevColor.a * compositeAlpha);
 
-        foreach (var cat in ModuleCategory.AllCategories.ToList())
+        var allCats = ModuleCategory.AllCategories;
+        for (int catIdx = 0; catIdx < allCats.Count; catIdx++)
         {
+            var cat = allCats[catIdx];
             int id = cat.Id;
             Rect syncedPos = WindowPositions[cat];
             if (!Mathf.Approximately(syncedPos.width, ClientConfig.ModuleWindowWidth))
@@ -139,7 +142,16 @@ public static class CategoryWindowDrawer
 
         try
         {
-            ModuleCategory category = ModuleCategory.AllCategories.FirstOrDefault(c => c.Id == id);
+            ModuleCategory category = null;
+            var allCategories = ModuleCategory.AllCategories;
+            for (int i = 0; i < allCategories.Count; i++)
+            {
+                if (allCategories[i].Id == id)
+                {
+                    category = allCategories[i];
+                    break;
+                }
+            }
             if (category == null) return;
 
             var categoryModules = FilterModulesByCategory(category);
@@ -161,13 +173,13 @@ public static class CategoryWindowDrawer
             Rect foldBtnRect = new(windowWidth - GUIManager.S(24f), (headerHeight - GUIManager.S(20f)) / 2f, GUIManager.S(20f), GUIManager.S(20f));
             string foldIndicator = isFolded ? "▶" : "▼";
 
-            GUIStyle arrowStyle = new()
+            _arrowStyle ??= new GUIStyle
             {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = Mathf.RoundToInt(GUIManager.S(11f)),
                 normal = { textColor = ThemeManager.TextWhite }
             };
-            GUI.Label(foldBtnRect, foldIndicator, arrowStyle);
+            _arrowStyle.fontSize = Mathf.RoundToInt(GUIManager.S(11f));
+            GUI.Label(foldBtnRect, foldIndicator, _arrowStyle);
 
             // 3. Title Bar: Click to Collapse vs Drag to Move
             if (e.type == EventType.MouseDown && e.button == 0 && titleBarRect.Contains(e.mousePosition))
@@ -252,19 +264,39 @@ public static class CategoryWindowDrawer
         }
     }
 
+    private static string _lastSearchQuery = null;
+    private static readonly Dictionary<ModuleCategory, List<Modules.Module>> _cachedCategoryModules = new();
+
     private static List<Modules.Module> FilterModulesByCategory(ModuleCategory category)
     {
-        string cleanSearch = (SearchWindowDrawer.SearchQuery ?? "").Trim().Replace(" ", "").ToLower();
-
-        return ModuleManager.Modules.Where(m =>
+        string currentQuery = SearchWindowDrawer.SearchQuery ?? "";
+        if (currentQuery != _lastSearchQuery)
         {
-            if (m.Category != category) return false;
-            if (string.IsNullOrEmpty(cleanSearch)) return true;
+            _lastSearchQuery = currentQuery;
+            _cachedCategoryModules.Clear();
+        }
 
-            // Search ONLY the search hints
-            string cleanHints = (m.SearchHints ?? "").Replace(" ", "").ToLower();
-            return cleanHints.Contains(cleanSearch);
-        }).ToList();
+        if (_cachedCategoryModules.TryGetValue(category, out var cached))
+            return cached;
+
+        string cleanSearch = currentQuery.Trim().Replace(" ", "").ToLower();
+        bool hasSearch = !string.IsNullOrEmpty(cleanSearch);
+
+        var list = new List<Modules.Module>();
+        for (int i = 0; i < ModuleManager.Modules.Count; i++)
+        {
+            var m = ModuleManager.Modules[i];
+            if (m.Category != category) continue;
+            if (hasSearch)
+            {
+                string cleanHints = (m.SearchHints ?? "").Replace(" ", "").ToLower();
+                if (!cleanHints.Contains(cleanSearch)) continue;
+            }
+            list.Add(m);
+        }
+
+        _cachedCategoryModules[category] = list;
+        return list;
     }
 
     private static float HandleScrollInput(ModuleCategory category, Rect viewRect, float currentScroll, float maxScroll, bool needsScroll, Event e)

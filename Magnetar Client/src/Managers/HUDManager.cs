@@ -1,4 +1,4 @@
-using static Magnetar_Client.Utils.Translator;
+﻿using static Magnetar_Client.Utils.Translator;
 using Magnetar_Client.Api;
 using Magnetar_Client.Core.HUDManager_;
 using Magnetar_Client.UI;
@@ -195,28 +195,34 @@ public static class HUDManager
         }
     }
 
+    private static readonly string _creditText = "Magnetar Client <color=white>by</color> <color=red>Tproplay</color>";
+    private static GUIContent _creditContent;
+    private static GUIStyle _creditStyle;
+    private static float _creditWidth = -1f;
+
     public static void RenderModCredit()
     {
         if (!GUIManager.ShowMainMenuCredits) return;
         if (ClientConfig.showgui || HUDManager.forceShow) return;
         if (!GameData.InMainMenu) return;
 
-        string Text = "Magnetar Client <color=white>by</color> <color=red>Tproplay</color>";
-        GUIContent content = new(Text);
-
-        GUIStyle style = new()
+        _creditContent ??= new GUIContent(_creditText);
+        if (_creditStyle == null)
         {
-            alignment = TextAnchor.UpperRight,
-            richText = true,
-            normal = { textColor = Color.white },
-            fontStyle = FontStyle.Bold,
-            fontSize = (int)ClientConfig.NativeHeight / 36
-        };
+            _creditStyle = new GUIStyle
+            {
+                alignment = TextAnchor.UpperRight,
+                richText = true,
+                normal = { textColor = Color.white },
+                fontStyle = FontStyle.Bold,
+                fontSize = (int)ClientConfig.NativeHeight / 36
+            };
+            _creditWidth = _creditStyle.CalcSize(_creditContent).x;
+        }
 
-        float width = style.CalcSize(content).x;
-        Rect rect = new() { x = ClientConfig.NativeWidth * 0.995f - width, width = width };
+        Rect rect = new() { x = ClientConfig.NativeWidth * 0.995f - _creditWidth, width = _creditWidth };
 
-        GUIHelper.DrawBoxWithOutlinedText(rect, Text, style, GUIHelper.RainbowColor, Color.black);
+        GUIHelper.DrawBoxWithOutlinedText(rect, _creditText, _creditStyle, GUIHelper.RainbowColor, Color.black);
     }
 
     public static void RegisterElement(Type element)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Magnetar_Client.Api;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,21 +45,18 @@ public static class ProfileManager
 
         try
         {
-            if (Directory.Exists(ConfigDir))
+            var files = Directory.GetFiles(PathsManager.ProfilesDir, SaveFilePrefix + "*.json");
+            foreach (var file in files)
             {
-                var files = Directory.GetFiles(ConfigDir, SaveFilePrefix + "*.json");
-                foreach (var file in files)
+                string fileName = Path.GetFileNameWithoutExtension(file);
+                if (fileName.StartsWith(SaveFilePrefix))
                 {
-                    string fileName = Path.GetFileNameWithoutExtension(file);
-                    if (fileName.StartsWith(SaveFilePrefix))
-                    {
-                        string profileName = fileName[SaveFilePrefix.Length..];
+                    string profileName = fileName[SaveFilePrefix.Length..];
 
-                        if (!string.IsNullOrWhiteSpace(profileName) &&
-                            !Profiles.Contains(profileName, StringComparer.OrdinalIgnoreCase))
-                        {
-                            Profiles.Add(profileName);
-                        }
+                    if (!string.IsNullOrWhiteSpace(profileName) &&
+                        !Profiles.Contains(profileName, StringComparer.OrdinalIgnoreCase))
+                    {
+                        Profiles.Add(profileName);
                     }
                 }
             }

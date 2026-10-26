@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using static Magnetar_Client.UI.Themes.ThemeManager;
 
 namespace Magnetar_Client.HUDElements;
@@ -6,7 +6,11 @@ namespace Magnetar_Client.HUDElements;
 public class FpsElement : HudElement
 {
     public FpsElement() : base("FPS Counter", HudElement.NewRect(90))
-    { UpdateInterval = 0.7f; }
+    {
+        UpdateInterval = 0.7f;
+        RegisterTranslation("FPS: <color=yellow>Na</color>", "FPS: <color=yellow>Na</color>");
+        RegisterRegexTranslation(@"FPS: <color={colorName}>(\d+)</color>", "FPS: <color={colorName}>{1}</color>");
+    }
 
     float fps;
     string displayText = "FPS: <color=yellow>Na</color>";
@@ -24,12 +28,13 @@ public class FpsElement : HudElement
         }
         string colorName = fps > 55 ? "lime" : (fps > 30 ? "yellow" : "red");
 
-        displayText = $"FPS: <color={colorName}>{(int)fps}</color>";
+        displayText = Translate($"FPS: <color={colorName}>{(int)fps}</color>");
 
         AdjustWidthToText(displayText, HUDElementStyle, 10);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }
@@ -37,7 +42,11 @@ public class FpsElement : HudElement
 public class RealFpsElement : HudElement
 {
     public RealFpsElement() : base("Real FPS Counter", HudElement.NewRect(90))
-    { UpdateInterval = 0.7f; }
+    {
+        UpdateInterval = 0.7f;
+        RegisterTranslation("FPS (Real): <color=yellow>Na</color>", "FPS (Real): <color=yellow>Na</color>");
+        RegisterRegexTranslation(@"FPS (Real): <color={colorName}>(\d+)</color>", "FPS (Real): <color={colorName}>{1}</color>");
+    }
 
     float fps;
     string displayText = "FPS (Real): <color=yellow>Na</color>";
@@ -52,12 +61,13 @@ public class RealFpsElement : HudElement
         fps = 1.0f / Time.unscaledDeltaTime;
         string colorName = fps > 55 ? "lime" : (fps > 30 ? "yellow" : "red");
 
-        displayText = $"FPS (Real): <color={colorName}>{(int)fps}</color>";
+        displayText = Translate($"FPS (Real): <color={colorName}>{(int)fps}</color>");
 
         AdjustWidthToText(displayText, HUDElementStyle, 10);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10);
     }
 }
@@ -65,7 +75,11 @@ public class RealFpsElement : HudElement
 public class FrameTimeElement : HudElement
 {
     public FrameTimeElement() : base("Frame Time", HudElement.NewRect(155))
-    { UpdateInterval = 0.7f;}
+    {
+        UpdateInterval = 0.7f;
+        RegisterTranslation("FrameTime: <color=yellow>Na</color>", "FrameTime: <color=yellow>Na</color>");
+        RegisterRegexTranslation(@"FrameTime: <color={colorName}>(\d+)</color>ms", "FrameTime: <color={colorName}>{1}</color>ms");
+    }
 
     float currentFrameTime;
     string displayText = "FrameTime: <color=yellow>Na</color>";
@@ -82,13 +96,14 @@ public class FrameTimeElement : HudElement
 
         string colorName = currentFrameTime < 1 / 55f ? "lime" : (currentFrameTime < 1 / 30f ? "yellow" : "red");
 
-        displayText = $"FrameTime: <color={colorName}>{currentFrameTime * 1000:f0}</color>ms";
+        displayText = Translate($"FrameTime: <color={colorName}>{currentFrameTime * 1000:f0}</color>ms");
 
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
         
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }

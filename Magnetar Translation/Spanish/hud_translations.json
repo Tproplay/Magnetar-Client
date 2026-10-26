@@ -1,12 +1,18 @@
 {
   "FPS Counter": {
-    "Name": "Contador de FPS"
+    "Name": "Contador de FPS",
+    "FPS: <color={colorName}>(\\d+)</color>": "FPS: <color={colorName}>{1}</color>",
+    "FPS: <color=yellow>Na</color>": "FPS: <color=yellow>N/D</color>"
   },
   "Real FPS Counter": {
-    "Name": "Contador de FPS real"
+    "Name": "Contador de FPS real",
+    "FPS (Real): <color={colorName}>(\\d+)</color>": "FPS (Real): <color={colorName}>{1}</color>",
+    "FPS (Real): <color=yellow>Na</color>": "FPS (Real): <color=yellow>N/D</color>"
   },
   "Frame Time": {
-    "Name": "Tiempo en frames"
+    "Name": "Tiempo en frames",
+    "FrameTime: <color={colorName}>(\\d+)</color>ms": "TiempoCuadro: <color={colorName}>{1}</color>ms",
+    "FrameTime: <color=yellow>Na</color>": "TiempoCuadro: <color=yellow>N/D</color>"
   },
   "Game Name and Version": {
     "Name": "Juego y versión"

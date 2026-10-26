@@ -1,4 +1,4 @@
-﻿using static Magnetar_Client.UI.Themes.ThemeManager;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.GameData;
 using UnityEngine;
 using System.Linq;
@@ -8,7 +8,11 @@ namespace Magnetar_Client.HUDElements;
 public class NumberOfHypnotizedZombies : HudElement
 {
     public NumberOfHypnotizedZombies() : base("Hypnotized Zombies On Lawn", HudElement.NewRect(100))
-    { UpdateInterval = 0.2f; }
+    {
+        UpdateInterval = 0.2f;
+        RegisterTranslation("Hypno Zombies On Lawn: Na", "Hypno Zombies On Lawn: Na");
+        RegisterRegexTranslation(@"^Hypno Zombies On Lawn: (.*)$", "Hypno Zombies On Lawn: {1}");
+    }
 
     string displayText = "Hypno Zombies On Lawn: Na";
     protected override void DrawContent(float width, float height)
@@ -20,12 +24,13 @@ public class NumberOfHypnotizedZombies : HudElement
     {
         if (BoardInstanceIsNull) return;
 
-        displayText = $"Hypno Zombies On Lawn: {ZombieList.Count(z => z.isMindControlled)}";
+        displayText = Translate($"Hypno Zombies On Lawn: {ZombieList.Count(z => z.isMindControlled)}");
 
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }

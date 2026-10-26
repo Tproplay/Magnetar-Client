@@ -289,16 +289,31 @@ public static partial class Translator
         if (Core.HUDManager_.HUDRenderer.Elements == null || Core.HUDManager_.HUDRenderer.Elements.Count == 0) return;
 
         string englishDir = Path.Combine(TranslationRootDir, "English");
+        string engHudPath = Path.Combine(englishDir, "hud_translations.json");
+
+        // 1. Ensure English HUD templates are dumped
         DumpHudEnglishTemplate(englishDir);
+
+        // 2. Sync to all target language directories
+        if (Directory.Exists(TranslationRootDir))
+        {
+            foreach (string langDir in Directory.GetDirectories(TranslationRootDir))
+            {
+                string lang = Path.GetFileName(langDir);
+                if (string.Equals(lang, "English", StringComparison.OrdinalIgnoreCase)) continue;
+                SyncHudJson(engHudPath, Path.Combine(langDir, "hud_translations.json"));
+            }
+        }
 
         string currentLang = CurrentLanguage;
         if (!string.Equals(currentLang, "English", StringComparison.OrdinalIgnoreCase))
         {
-            string engHudPath = Path.Combine(englishDir, "hud_translations.json");
             string targetHudPath = Path.Combine(TranslationRootDir, currentLang, "hud_translations.json");
-            SyncHudJson(engHudPath, targetHudPath);
             LoadHudJsonFile(targetHudPath);
         }
+
+        // 3. Reload element-specific translations and regexes for all HUD elements
+        Core.HUDManager_.HudTranslationHandler.ReloadAllHudTranslations(currentLang);
 
         if (Core.HUDManager_.HUDRenderer.Elements != null)
         {
@@ -662,7 +677,13 @@ public static partial class Translator
         }
     }
 
-    private static void SyncHudJson(string engPath, string targetPath)
+    /// <summary>
+    /// Synchronizes hud_translations.json from the English template to a target language file,
+    /// syncing missing elements, translated element names, and custom translation/regex properties.
+    /// </summary>
+    /// <param name="engPath">Path to English hud_translations.json</param>
+    /// <param name="targetPath">Path to target language hud_translations.json</param>
+    public static void SyncHudJson(string engPath, string targetPath)
     {
         if (!File.Exists(engPath)) return;
 
@@ -686,10 +707,13 @@ public static partial class Translator
                     }
                     else if (prop.Value is JObject engSub && targetObj[prop.Name] is JObject targetSub)
                     {
-                        if (targetSub["Name"] == null || string.IsNullOrEmpty(targetSub["Name"].ToString()))
+                        foreach (var subProp in engSub.Properties())
                         {
-                            targetSub["Name"] = engSub["Name"];
-                            dirty = true;
+                            if (targetSub[subProp.Name] == null || string.IsNullOrEmpty(targetSub[subProp.Name]?.ToString()))
+                            {
+                                targetSub[subProp.Name] = subProp.Value.DeepClone();
+                                dirty = true;
+                            }
                         }
                     }
                     else if (prop.Value.Type == JTokenType.String && string.IsNullOrEmpty(targetObj[prop.Name]?.ToString()))

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -17,6 +17,8 @@ public class RAMElement : HudElement
     {
         currentProcess = Process.GetCurrentProcess();
         UpdateInterval = 1;
+        RegisterTranslation("RAM: <color=yellow>Na</color>", "RAM: <color=yellow>Na</color>");
+        RegisterRegexTranslation(@"RAM: <color={color}>(\d+(?:\.\d+)?) MB</color>", "RAM: <color={color}>{1} MB</color>");
     }
 
     string displayText = "RAM: <color=yellow>Na</color>";
@@ -35,12 +37,13 @@ public class RAMElement : HudElement
         string color = "white";
         if (float.Parse(displayValue) > 1500) color = "red"; // Over 2GB turns red
 
-        displayText = $"RAM: <color={color}>{displayValue} MB</color>";
+        displayText = Translate($"RAM: <color={color}>{displayValue} MB</color>");
 
         AdjustWidthToText(displayText, HUDElementStyle, 8);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 8);
     }
 }
@@ -80,6 +83,8 @@ public class SystemRAMElement : HudElement
             totalInstalled = (memStatus.ullTotalPhys / 1024f / 1024f / 1024f).ToString(); // GB
         }
         UpdateInterval = 1;
+        RegisterTranslation("RAM: <color=yellow>Na</color>", "RAM: <color=yellow>Na</color>");
+        RegisterRegexTranslation(@"RAM: <color=white>(\d+)% of (.*)GB</color>", "RAM: <color=white>{1}% of {2}GB</color>");
     }
 
     string displayText = "RAM: <color=yellow>Na</color>";
@@ -95,8 +100,13 @@ public class SystemRAMElement : HudElement
         if (GlobalMemoryStatusEx(memStatus))
             systemLoad = memStatus.dwMemoryLoad.ToString(); // % total system use
 
-        displayText = $"RAM: <color=white>{systemLoad}% of {totalInstalled.Substring(0, 5)}GB</color>";
+        displayText = Translate($"RAM: <color=white>{systemLoad}% of {totalInstalled.Substring(0, 5)}GB</color>");
 
+        AdjustWidthToText(displayText, HUDElementStyle, 10);
+    }
+    public override void OnEnable()
+    {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10);
     }
 }
@@ -119,6 +129,8 @@ public class CPUUsageElement : HudElement
         lastSampleTime = System.DateTime.Now;
 
         UpdateInterval = 1f;
+        RegisterTranslation("CPU: <color=yellow>Na</color>", "CPU: <color=yellow>Na</color>");
+        RegisterRegexTranslation(@"CPU: <color={color}>(\d+(?:\.\d+)?)%</color>", "CPU: <color={color}>{1}%</color>");
     }
 
     string displayText = "CPU: <color=yellow>Na</color>";
@@ -145,12 +157,13 @@ public class CPUUsageElement : HudElement
         lastSampleTime = currentTime;
 
         string color = cpuUsage > 80 ? "red" : (cpuUsage > 40 ? "yellow" : "lime");
-        displayText = $"CPU: <color={color}>{Mathf.Clamp(cpuUsage, 0, 100):F1}%</color>";
+        displayText = Translate($"CPU: <color={color}>{Mathf.Clamp(cpuUsage, 0, 100):F1}%</color>");
 
         AdjustWidthToText(displayText, HUDElementStyle, 10);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }
@@ -167,6 +180,8 @@ public class VramUsageElement : HudElement
     public VramUsageElement() : base("VRAM Usage", HudElement.NewRect(200))
     {
         totalVram = SystemInfo.graphicsMemorySize;
+        RegisterTranslation("VRAM: <color=yellow>Na</color>", "VRAM: <color=yellow>Na</color>");
+        RegisterRegexTranslation(@"^VRAM: (.*) / (.*) MB$", "VRAM: {1} / {2} MB");
     }
 
     string displayText = "VRAM: <color=yellow>Na</color>";
@@ -189,12 +204,13 @@ public class VramUsageElement : HudElement
 
         float displayVram = Mathf.Min(lastVramMb, totalVram);
 
-        displayText = $"VRAM: {displayVram:F0} / {totalVram} MB";
+        displayText = Translate($"VRAM: {displayVram:F0} / {totalVram} MB");
 
         AdjustWidthToText(displayText, HUDElementStyle, 10);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }

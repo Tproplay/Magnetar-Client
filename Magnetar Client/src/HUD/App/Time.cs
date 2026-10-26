@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using UnityEngine;
 using static Magnetar_Client.UI.Themes.ThemeManager;

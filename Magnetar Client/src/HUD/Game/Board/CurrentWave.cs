@@ -1,4 +1,4 @@
-﻿using static Magnetar_Client.UI.Themes.ThemeManager;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 using UnityEngine;
 
 namespace Magnetar_Client.HUDElements;
@@ -6,7 +6,11 @@ namespace Magnetar_Client.HUDElements;
 public class CurrentWave : HudElement
 {
     public CurrentWave() : base("Current Wave", HudElement.NewRect(235))
-    { UpdateInterval = 1f; }
+    {
+        UpdateInterval = 1f;
+        RegisterTranslation("Wave: Na", "Wave: Na");
+        RegisterRegexTranslation(@"^Wave: (\d+)/(\d+)$", "Wave: {1}/{2}");
+    }
 
     string displayText = "Wave: Na";
     protected override void DrawContent(float width, float height)
@@ -18,11 +22,11 @@ public class CurrentWave : HudElement
     {
         if (!GameData.BoardInstanceIsNull)
         {
-            displayText = $"Wave: {GameData.BoardInstance.theWave}/{GameData.BoardInstance.theMaxWave}";
+            displayText = Translate($"Wave: {GameData.BoardInstance.theWave}/{GameData.BoardInstance.theMaxWave}");
         }
         else
         {
-            displayText = "Wave: Na";
+            displayText = Translate("Wave: Na");
         }
 
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
@@ -30,6 +34,7 @@ public class CurrentWave : HudElement
 
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 

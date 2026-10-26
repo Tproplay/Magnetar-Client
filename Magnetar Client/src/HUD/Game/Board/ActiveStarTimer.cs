@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
@@ -8,7 +8,12 @@ namespace Magnetar_Client.HUDElements;
 public class ActiveStarTimer : HudElement
 {
     public ActiveStarTimer() : base("Active Star drop Cooldown", HudElement.NewRect(180))
-    { UpdateInterval = 0.1f; }
+    {
+        UpdateInterval = 0.1f;
+        RegisterTranslation("Active Star drop: NA", "Active Star drop: NA");
+        RegisterTranslation("Active Star drop: Na", "Active Star drop: Na");
+        RegisterRegexTranslation(@"^Active Star drop: (.*)$", "Active Star drop: {1}");
+    }
 
     string displayText = "Active Star drop: NA";
     protected override void DrawContent(float width, float height)
@@ -18,13 +23,14 @@ public class ActiveStarTimer : HudElement
     public override void OnUpdateActive()
     {
         if (!GameData.BoardInstanceIsNull)
-            displayText = $"Active Star drop: {FormatTime((int)GameData.BoardInstance.bigStarActiveCountDown)}";
+            displayText = Translate($"Active Star drop: {FormatTime((int)GameData.BoardInstance.bigStarActiveCountDown)}");
         else
-            displayText = "Active Star drop: Na";
+            displayText = Translate("Active Star drop: Na");
         AdjustWidthToText(displayText, HUDElementStyle, 10);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }

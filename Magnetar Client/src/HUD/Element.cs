@@ -1,7 +1,10 @@
-﻿using Magnetar_Client.Core;
+using Magnetar_Client.Core;
 using Magnetar_Client.UI.Themes;
 using UnityEngine;
 using Magnetar_Client.Core.HUDManager_;
+using Magnetar_Client.Utils;
+using System;
+using System.Collections.Generic;
 
 namespace Magnetar_Client.HUDElements;
 
@@ -357,4 +360,114 @@ public abstract class HudElement
 
         return rect;
     }
+
+    #region Translations
+
+    /// <summary>
+    /// Stores element-specific exact translations (Phrase -> Translated Phrase).
+    /// </summary>
+    public Dictionary<string, string> SavedTranslationData { get; set; } = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Stores element-specific regex translations (Pattern -> Replacement).
+    /// </summary>
+    public Dictionary<string, string> SavedRegexTranslations { get; set; } = new();
+
+    /// <summary>
+    /// Saves the HUD element's custom phrases and regex translations to disk in hud_translations.json.
+    /// </summary>
+    /// <param name="language">Optional target language (defaults to current language).</param>
+    public void SaveTranslations(string language = null) =>
+        HudTranslationHandler.SaveHudElementTranslations(this, language);
+
+    /// <summary>
+    /// Registers a translation key-value pair for this element.
+    /// </summary>
+    public void RegisterTranslation(string key, string defaultValue)
+    {
+        if (!SavedTranslationData.ContainsKey(key))
+        {
+            SavedTranslationData[key] = defaultValue;
+            if (TranslationData.HudLinked)
+            {
+                SaveTranslations();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Registers a dictionary of translations for this element.
+    /// </summary>
+    public void RegisterTranslations(Dictionary<string, string> translations)
+    {
+        if (translations == null) return;
+        bool added = false;
+        foreach (var kvp in translations)
+        {
+            if (!SavedTranslationData.ContainsKey(kvp.Key))
+            {
+                SavedTranslationData[kvp.Key] = kvp.Value;
+                added = true;
+            }
+        }
+        if (added && TranslationData.HudLinked)
+        {
+            SaveTranslations();
+        }
+    }
+
+    /// <summary>
+    /// Registers a regex translation rule for this element.
+    /// </summary>
+    public void RegisterRegexTranslation(string pattern, string replacement)
+    {
+        SavedRegexTranslations[pattern] = replacement;
+        if (TranslationData.HudLinked)
+        {
+            SaveTranslations();
+        }
+    }
+
+    /// <summary>
+    /// Called when the client's language changes. By default re-triggers OnUpdateActive() if active.
+    /// </summary>
+    public virtual void OnLanguageChanged()
+    {
+        if (_isCurrentlyEnabled)
+        {
+            OnUpdateActive();
+        }
+    }
+
+    /// <summary>
+    /// Translates an input string checking element-specific translations and regexes first,
+    /// then falling back to the global Translator.
+    /// </summary>
+    public string Translate(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+
+        // 1. Exact match from SavedTranslationData
+        if (SavedTranslationData != null && SavedTranslationData.TryGetValue(input, out string exact) && !string.IsNullOrEmpty(exact))
+        {
+            return exact;
+        }
+
+        // 2. Element-specific regex rules
+        if (SavedRegexTranslations != null && SavedRegexTranslations.Count > 0)
+        {
+            foreach (var kvp in SavedRegexTranslations)
+            {
+                if (Translator.TryApplyRegexReplacement(input, kvp.Key, kvp.Value, SavedTranslationData, out string replaced))
+                {
+                    return replaced;
+                }
+            }
+        }
+
+        // 3. Fallback to global Translator
+        return Translator.Translate(input);
+    }
+
+    #endregion
 }

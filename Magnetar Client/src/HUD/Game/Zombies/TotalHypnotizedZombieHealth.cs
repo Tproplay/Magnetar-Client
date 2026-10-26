@@ -1,4 +1,4 @@
-﻿using static Magnetar_Client.UI.Themes.ThemeManager;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.GameData;
 using static Magnetar_Client.Utils.Maths;
 using UnityEngine;
@@ -12,7 +12,11 @@ namespace Magnetar_Client.HUDElements;
 public class TotalHypnotizedZombieHealth : HudElement
 {
     public TotalHypnotizedZombieHealth() : base("Hypnotized Zombies Health", HudElement.NewRect(235))
-    { UpdateInterval = 0.2f; }
+    {
+        UpdateInterval = 0.2f;
+        RegisterTranslation("Hypno Zombies Health: Na", "Hypno Zombies Health: Na");
+        RegisterRegexTranslation(@"^Hypno Zombies Health: (.*)$", "Hypno Zombies Health: {1}");
+    }
 
     string displayText = "Hypno Zombies Health: Na";
 
@@ -36,11 +40,12 @@ public class TotalHypnotizedZombieHealth : HudElement
     public override void OnUpdateActive()
     {
         if (GameData.BoardInstanceIsNull) return;
-        displayText = $"Hypno Zombies Health: {FormatInternational(GetZombieHealth())}";
+        displayText = Translate($"Hypno Zombies Health: {FormatInternational(GetZombieHealth())}");
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }

@@ -351,32 +351,10 @@ public abstract class Module
         {
             foreach (var kvp in SavedRegexTranslations)
             {
-                try
+                if (Translator.TryApplyRegexReplacement(input, kvp.Key, kvp.Value, SavedTranslationData, out string replaced))
                 {
-                    Match match = Regex.Match(input, kvp.Key);
-                    if (match.Success)
-                    {
-                        string template = kvp.Value;
-                        for (int i = 1; i < match.Groups.Count; i++)
-                        {
-                            if (match.Groups[i].Success)
-                            {
-                                string val = match.Groups[i].Value;
-                                string sub = val;
-
-                                // Guard: Do not translate captured groups if they are numeric
-                                if (!long.TryParse(val, out _) && SavedTranslationData != null && SavedTranslationData.TryGetValue(val, out var transSub))
-                                {
-                                    sub = transSub;
-                                }
-
-                                template = template.Replace($"{{{i}}}", sub);
-                            }
-                        }
-                        return template;
-                    }
+                    return replaced;
                 }
-                catch { }
             }
         }
 

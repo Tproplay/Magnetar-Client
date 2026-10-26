@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
@@ -8,7 +8,11 @@ namespace Magnetar_Client.HUDElements;
 public class SunSpent : HudElement
 {
     public SunSpent() : base("Total Sun Spent", HudElement.NewRect(100))
-    { UpdateInterval = 0.5f; }
+    {
+        UpdateInterval = 0.5f;
+        RegisterTranslation("Sun Spent: Na", "Sun Spent: Na");
+        RegisterRegexTranslation(@"^Sun Spent: (.*)$", "Sun Spent: {1}");
+    }
 
     int value;
     string displayText = "Sun Spent: Na";
@@ -24,12 +28,13 @@ public class SunSpent : HudElement
         {
             value = GameData.BoardInstance.boardStatistics.sunConsumed;
         }
-        displayText = $"Sun Spent: {FormatInternational(value)}";
+        displayText = Translate($"Sun Spent: {FormatInternational(value)}");
 
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }

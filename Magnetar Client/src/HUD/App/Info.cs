@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using static Magnetar_Client.UI.Themes.ThemeManager;
 
 namespace Magnetar_Client.HUDElements;
@@ -7,7 +7,9 @@ namespace Magnetar_Client.HUDElements;
 public class GameVersion : HudElement
 {
     public GameVersion() : base("Game Name and Version", HudElement.NewRect(90))
-    { }
+    {
+        RegisterRegexTranslation(@"^Plants Vs\. Zombies Fusion v(.*)$", "Plants Vs. Zombies Fusion v{1}");
+    }
     private static string displayText;
 
     protected override void DrawContent(float width, float height)
@@ -17,8 +19,12 @@ public class GameVersion : HudElement
 
     public override void OnEnable()
     {
-        displayText = $"Plants Vs. Zombies Fusion v{Application.version}";
+        displayText = Translate($"Plants Vs. Zombies Fusion v{Application.version}");
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 
+    public override void OnLanguageChanged()
+    {
+        OnEnable();
+    }
 }

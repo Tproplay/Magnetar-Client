@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
@@ -8,7 +8,11 @@ namespace Magnetar_Client.HUDElements;
 public class AverageDamageStatsPlant : HudElement
 {
     public AverageDamageStatsPlant() : base("Average Damage by Plants", HudElement.NewRect(100))
-    { UpdateInterval = 0.1f; }
+    {
+        UpdateInterval = 0.1f;
+        RegisterTranslation("Plant DPS: 0", "Plant DPS: 0");
+        RegisterRegexTranslation(@"^Plant DPS: (.*)$", "Plant DPS: {1}");
+    }
 
     private List<long> damageHistory = new();
 
@@ -27,7 +31,7 @@ public class AverageDamageStatsPlant : HudElement
             Dps = (damageHistory[9] - damageHistory[0])/5;
         }
 
-        displayText = $"Plant DPS: {FormatInternational(Dps)}";
+        displayText = Translate($"Plant DPS: {FormatInternational(Dps)}");
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
         
     }
@@ -39,6 +43,7 @@ public class AverageDamageStatsPlant : HudElement
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }

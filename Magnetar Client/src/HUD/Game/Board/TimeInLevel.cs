@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 using static Magnetar_Client.UI.Themes.ThemeManager;
@@ -8,7 +8,10 @@ namespace Magnetar_Client.HUDElements;
 public class TimeInLevel : HudElement
 {
     public TimeInLevel() : base("Time In Current Level", HudElement.NewRect(180))
-    { UpdateInterval = 0.1f; }
+    {
+        UpdateInterval = 0.1f;
+        RegisterRegexTranslation(@"^Playing For: (.*)$", "Playing For: {1}");
+    }
 
     DateTime StartTime = DateTime.Now;
     bool saved;
@@ -28,11 +31,12 @@ public class TimeInLevel : HudElement
 
     public override void OnUpdateActive()
     {
-        displayText = $"Playing For: {(DateTime.Now - StartTime):hh\\:mm\\:ss}";
+        displayText = Translate($"Playing For: {(DateTime.Now - StartTime):hh\\:mm\\:ss}");
         AdjustWidthToText(displayText, HUDElementStyle, 10);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }

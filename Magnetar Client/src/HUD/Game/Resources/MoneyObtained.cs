@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
@@ -8,7 +8,11 @@ namespace Magnetar_Client.HUDElements;
 public class MoneyObtained : HudElement
 {
     public MoneyObtained() : base("Total Money Obtained", HudElement.NewRect(100))
-    { UpdateInterval = 0.5f; }
+    {
+        UpdateInterval = 0.5f;
+        RegisterTranslation("Money Obtained: Na", "Money Obtained: Na");
+        RegisterRegexTranslation(@"^Money Obtained: (.*)$", "Money Obtained: {1}");
+    }
 
     int value;
     string displayText = "Money Obtained: Na";
@@ -24,12 +28,13 @@ public class MoneyObtained : HudElement
             value = GameData.BoardInstance.boardStatistics.moneyEarned;
         }
 
-        displayText = $"Money Obtained: {FormatInternational(value)}";
+        displayText = Translate($"Money Obtained: {FormatInternational(value)}");
 
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }

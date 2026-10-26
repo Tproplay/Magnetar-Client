@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -44,6 +45,9 @@ public class HudTranslationNode
 {
     [JsonProperty("Name")]
     public string Name { get; set; }
+
+    [JsonExtensionData]
+    public IDictionary<string, JToken> ExtraData { get; set; } = new Dictionary<string, JToken>(StringComparer.Ordinal);
 }
 
 /// <summary>

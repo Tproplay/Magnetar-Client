@@ -1,4 +1,4 @@
-﻿using static Magnetar_Client.UI.Themes.ThemeManager;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 using UnityEngine;
 
 namespace Magnetar_Client.HUDElements;
@@ -6,7 +6,11 @@ namespace Magnetar_Client.HUDElements;
 public class NumberOfZombiesSpawned : HudElement
 {
     public NumberOfZombiesSpawned() : base("Zombies Spawned", HudElement.NewRect(100))
-    { UpdateInterval = 0.2f; }
+    {
+        UpdateInterval = 0.2f;
+        RegisterTranslation("Zombies Spawned: Na", "Zombies Spawned: Na");
+        RegisterRegexTranslation(@"^Zombies Spawned: (.*)$", "Zombies Spawned: {1}");
+    }
 
     string displayText = "Zombies Spawned: Na";
 
@@ -19,12 +23,13 @@ public class NumberOfZombiesSpawned : HudElement
     {
         if (GameData.BoardInstanceIsNull) return;
 
-        displayText = $"Zombies Spawned: {GameData.BoardInstance.boardStatistics.zombiesKilled + GameData.ZombieList.Count}";
+        displayText = Translate($"Zombies Spawned: {GameData.BoardInstance.boardStatistics.zombiesKilled + GameData.ZombieList.Count}");
 
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }

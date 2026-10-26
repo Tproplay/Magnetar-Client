@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -277,6 +278,7 @@ public static partial class Translator
 
     /// <summary>
     /// Dumps English HUD translation templates for all registered HUD elements.
+    /// Preserves existing entries and populates element custom translations and regexes.
     /// </summary>
     public static void DumpHudEnglishTemplate(string englishDir = null)
     {
@@ -289,19 +291,62 @@ public static partial class Translator
             if (!Directory.Exists(englishDir)) Directory.CreateDirectory(englishDir);
 
             string hudPath = Path.Combine(englishDir, "hud_translations.json");
-            var engHud = new Dictionary<string, HudTranslationNode>();
+            var engHud = new Dictionary<string, HudTranslationNode>(StringComparer.Ordinal);
             if (File.Exists(hudPath))
             {
-                try { engHud = JsonConvert.DeserializeObject<Dictionary<string, HudTranslationNode>>(SafeReadAllText(hudPath)) ?? new(); } catch { }
+                try { engHud = JsonConvert.DeserializeObject<Dictionary<string, HudTranslationNode>>(SafeReadAllText(hudPath)) ?? new(StringComparer.Ordinal); } catch { }
             }
 
             bool dirty = false;
             foreach (var el in Core.HUDManager_.HUDRenderer.Elements)
             {
-                if (el != null && !string.IsNullOrWhiteSpace(el.Name) && !engHud.ContainsKey(el.Name))
+                if (el == null || string.IsNullOrWhiteSpace(el.Name)) continue;
+
+                if (!engHud.TryGetValue(el.Name, out var node) || node == null)
                 {
-                    engHud[el.Name] = new HudTranslationNode { Name = el.Name };
+                    node = new HudTranslationNode { Name = el.Name };
+                    engHud[el.Name] = node;
                     dirty = true;
+                }
+
+                if (string.IsNullOrEmpty(node.Name))
+                {
+                    node.Name = el.Name;
+                    dirty = true;
+                }
+
+                node.ExtraData ??= new Dictionary<string, JToken>(StringComparer.Ordinal);
+
+                if (el.SavedTranslationData != null && el.SavedTranslationData.Count > 0)
+                {
+                    foreach (var kvp in el.SavedTranslationData)
+                    {
+                        if (!node.ExtraData.ContainsKey(kvp.Key))
+                        {
+                            node.ExtraData[kvp.Key] = JToken.FromObject(kvp.Value);
+                            dirty = true;
+                        }
+                        else
+                        {
+                            el.SavedTranslationData[kvp.Key] = node.ExtraData[kvp.Key]?.ToString() ?? kvp.Value;
+                        }
+                    }
+                }
+
+                if (el.SavedRegexTranslations != null && el.SavedRegexTranslations.Count > 0)
+                {
+                    foreach (var kvp in el.SavedRegexTranslations)
+                    {
+                        if (!node.ExtraData.ContainsKey(kvp.Key))
+                        {
+                            node.ExtraData[kvp.Key] = JToken.FromObject(kvp.Value);
+                            dirty = true;
+                        }
+                        else
+                        {
+                            el.SavedRegexTranslations[kvp.Key] = node.ExtraData[kvp.Key]?.ToString() ?? kvp.Value;
+                        }
+                    }
                 }
             }
 

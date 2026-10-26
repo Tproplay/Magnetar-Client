@@ -1,4 +1,4 @@
-﻿using static Magnetar_Client.Utils.Translator;
+using static Magnetar_Client.Utils.Translator;
 using Magnetar_Client.Api;
 using Magnetar_Client.Core.HUDManager_;
 using Magnetar_Client.UI;
@@ -180,6 +180,8 @@ public static class HUDManager
 
     public static void OnLanguageChange()
     {
+        HudTranslationHandler.OnLanguageChanged();
+
         if (HUDRenderer.HudToggles?.Options == null) return;
 
         HUDRenderer.HudToggles.CustomNames ??= new Dictionary<int, string>();

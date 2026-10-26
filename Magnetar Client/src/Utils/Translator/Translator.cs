@@ -65,6 +65,74 @@ public static partial class Translator
     }
 
     /// <summary>
+    /// Applies a regex translation template to an input string, supporting named placeholders
+    /// (e.g. {colorName}), numbered capture groups ({1}, {2}), and optional group lookup in local translations.
+    /// </summary>
+    /// <param name="input">The input string to match and replace.</param>
+    /// <param name="pattern">The regex pattern or placeholder template.</param>
+    /// <param name="replacement">The replacement template with placeholders or group numbers.</param>
+    /// <param name="exactLookup">Optional local translation dictionary to translate captured non-numeric groups.</param>
+    /// <param name="result">The resulting string after replacement if matched.</param>
+    /// <returns>True if matched and replaced; otherwise false.</returns>
+    public static bool TryApplyRegexReplacement(string input, string pattern, string replacement, Dictionary<string, string> exactLookup, out string result)
+    {
+        result = input;
+        if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(pattern) || string.IsNullOrEmpty(replacement))
+            return false;
+
+        try
+        {
+            // A. Escape literal unescaped parentheses around simple words (e.g. "(Real)" -> "\(Real\)")
+            string normalizedPattern = Regex.Replace(pattern, @"(?<!\\)\(([a-zA-Z0-9_\s]+)\)", @"\($1\)");
+
+            // B. Convert named variable placeholders like "{colorName}" into named regex capture groups
+            normalizedPattern = Regex.Replace(normalizedPattern, @"\{([a-zA-Z_][a-zA-Z0-9_]*)\}", "(?<$1>[^>]+)");
+
+            Match match = Regex.Match(input, normalizedPattern);
+            if (!match.Success)
+            {
+                match = Regex.Match(input, pattern);
+                if (!match.Success) return false;
+            }
+
+            string templated = replacement;
+
+            // 1. Replace named placeholders first: {colorName} -> captured group value
+            foreach (Group g in match.Groups)
+            {
+                if (!int.TryParse(g.Name, out _))
+                {
+                    templated = templated.Replace($"{{{g.Name}}}", g.Value);
+                }
+            }
+
+            // 2. Replace numbered placeholders: {1}, {2}, etc.
+            for (int i = 1; i < match.Groups.Count; i++)
+            {
+                if (match.Groups[i].Success)
+                {
+                    string val = match.Groups[i].Value;
+                    string sub = val;
+
+                    if (!long.TryParse(val, out _) && exactLookup != null && exactLookup.TryGetValue(val, out var transSub))
+                    {
+                        sub = transSub;
+                    }
+
+                    templated = templated.Replace($"{{{i}}}", sub);
+                }
+            }
+
+            result = templated;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Translates a string
     /// </summary>
     public static string Translate(string input)

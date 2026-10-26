@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 using static Magnetar_Client.GameData;
 using static Magnetar_Client.UI.Themes.ThemeManager;
@@ -8,7 +8,11 @@ namespace Magnetar_Client.HUDElements;
 public class NumberOfPlantsSpawned : HudElement
 {
     public NumberOfPlantsSpawned() : base("Plants Placed", HudElement.NewRect(100))
-    { UpdateInterval = 1f; }
+    {
+        UpdateInterval = 1f;
+        RegisterTranslation("Plants Placed: Na", "Plants Placed: Na");
+        RegisterRegexTranslation(@"^Plants Placed: (.*)$", "Plants Placed: {1}");
+    }
 
     int value;
     string displayText = "Plants Placed: Na";
@@ -24,11 +28,12 @@ public class NumberOfPlantsSpawned : HudElement
             value = BoardInstance.boardStatistics.plantsPlanted;
         }
 
-        displayText = $"Plants Placed: {value}";
+        displayText = Translate($"Plants Placed: {value}");
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 }

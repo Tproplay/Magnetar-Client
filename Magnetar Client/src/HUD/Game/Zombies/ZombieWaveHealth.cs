@@ -1,4 +1,4 @@
-﻿using static Magnetar_Client.UI.Themes.ThemeManager;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
 using UnityEngine;
 
@@ -7,7 +7,11 @@ namespace Magnetar_Client.HUDElements;
 public class ZombieWaveHealth : HudElement
 {
     public ZombieWaveHealth() : base("Current Zombie Wave Health", HudElement.NewRect(235))
-    { UpdateInterval = 0.2f; }
+    {
+        UpdateInterval = 0.2f;
+        RegisterTranslation("Wave Health: Na", "Wave Health: Na");
+        RegisterRegexTranslation(@"^Wave Health: (.*)/(.*)$", "Wave Health: {1}/{2}");
+    }
 
     string displayText = "Wave Health: Na";
     
@@ -20,19 +24,20 @@ public class ZombieWaveHealth : HudElement
     {
         if (!GameData.BoardInstanceIsNull)
         {
-            displayText = 
+            displayText = Translate(
                 $"Wave Health: {FormatInternational(GameData.BoardInstance.zombieCurrentWaveHealth)}/" +
-                $"{FormatInternational(GameData.BoardInstance.zombieSpawnHealth)}";
+                $"{FormatInternational(GameData.BoardInstance.zombieSpawnHealth)}");
         }
         else
         {
-            displayText = $"Wave Health: Na";
+            displayText = Translate("Wave Health: Na");
         }
         
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 

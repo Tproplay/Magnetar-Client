@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using HarmonyLib;
 using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
@@ -12,7 +12,11 @@ namespace Magnetar_Client.HUDElements;
 public class NumberOfBulletsSpawned : HudElement
 {
     public NumberOfBulletsSpawned() : base("Number of Bullets Spawned", HudElement.NewRect(100))
-    { UpdateInterval = 0.5f; }
+    {
+        UpdateInterval = 0.5f;
+        RegisterTranslation("Bullets Spawned: Na", "Bullets Spawned: Na");
+        RegisterRegexTranslation(@"^Bullets Spawned: (.*)$", "Bullets Spawned: {1}");
+    }
 
     static int TotalNumberOfBulletsSpawned;
 
@@ -24,11 +28,12 @@ public class NumberOfBulletsSpawned : HudElement
 
     public override void OnUpdateActive()
     {
-        displayText = $"Bullets Spawned: {FormatInternational(TotalNumberOfBulletsSpawned)}";
+        displayText = Translate($"Bullets Spawned: {FormatInternational(TotalNumberOfBulletsSpawned)}");
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 

@@ -1,4 +1,4 @@
-﻿using static Magnetar_Client.UI.Themes.ThemeManager;
+using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.GameData;
 using UnityEngine;
 using HarmonyLib;
@@ -15,6 +15,8 @@ public class NumberOfHypnotizedZombiesSpawned : HudElement
     { 
         UpdateInterval = 0.2f;
         GameData.OnZombieSpawned += (zombie) => Hypno_Zombies_Spawned += zombie.isMindControlled ? 1 : 0;
+        RegisterTranslation("Hypno Zombies Spawned: Na", "Hypno Zombies Spawned: Na");
+        RegisterRegexTranslation(@"^Hypno Zombies Spawned: (.*)$", "Hypno Zombies Spawned: {1}");
     }
 
     string displayText = "Hypno Zombies Spawned: Na";
@@ -27,12 +29,13 @@ public class NumberOfHypnotizedZombiesSpawned : HudElement
     {
         if (GameData.BoardInstanceIsNull) return;
 
-        displayText = $"Hypno Zombies Spawned: {Hypno_Zombies_Spawned}";
+        displayText = Translate($"Hypno Zombies Spawned: {Hypno_Zombies_Spawned}");
 
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
     public override void OnEnable()
     {
+        displayText = Translate(displayText);
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
     }
 

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using static Magnetar_Client.UI.Themes.ThemeManager;
 
 namespace Magnetar_Client.HUDElements;
@@ -11,6 +11,7 @@ public class GpuNameElement : HudElement
     public GpuNameElement() : base("GPU Name", HudElement.NewRect(400))
     {
         gpuName = SystemInfo.graphicsDeviceName;
+        RegisterRegexTranslation(@"^<color=cyan>(.*)</color>$", "<color=cyan>{1}</color>");
     }
 
     protected override void DrawContent(float width, float height)
@@ -20,9 +21,13 @@ public class GpuNameElement : HudElement
 
     public override void OnEnable()
     {
-        displayText = $"<color=cyan>{gpuName}</color>";
-
+        displayText = Translate($"<color=cyan>{gpuName}</color>");
         AdjustWidthToText(displayText, HUDElementStyle, 10);
+    }
+
+    public override void OnLanguageChanged()
+    {
+        OnEnable();
     }
 }
 
@@ -33,6 +38,7 @@ public class CPUElement : HudElement
     public CPUElement() : base("CPU Name", HudElement.NewRect(400))
     {
         cpuName = SystemInfo.processorType;
+        RegisterRegexTranslation(@"^<color=cyan>(.*)</color>$", "<color=cyan>{1}</color>");
     }
 
     protected override void DrawContent(float width, float height)
@@ -42,9 +48,13 @@ public class CPUElement : HudElement
 
     public override void OnEnable()
     {
-        displayText = $"<color=cyan>{cpuName}</color>";
-
+        displayText = Translate($"<color=cyan>{cpuName}</color>");
         AdjustWidthToText(displayText, HUDElementStyle, 10);
+    }
+
+    public override void OnLanguageChanged()
+    {
+        OnEnable();
     }
 }
 #endif

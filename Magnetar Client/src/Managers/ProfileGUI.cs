@@ -40,6 +40,7 @@ GUIManager.S(BaseWindowHeight));
         });
 
         ProfileManager.RefreshProfiles();
+        ProfileManager.CurrentProfile = PreferenceManager.CurrentProfileEntry.Value;
     }
 
     public static void Render() 

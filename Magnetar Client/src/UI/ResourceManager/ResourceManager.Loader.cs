@@ -15,176 +15,10 @@ namespace Magnetar_Client.UI;
 
 public static partial class ResourceManager
 {
-    private static readonly Dictionary<string, Sprite> _spriteMemoryCache = new();
-    private static readonly Dictionary<string, Texture2D> _rawTexMemoryCache = new();
-    private static bool _hasScannedMemory;
-
     public static Dictionary<int, string> PlantTextureOverrides = new();
     public static Dictionary<int, string> ZombieTextureOverrides = new();
 
-    private static void RefreshMemoryCache()
-    {
-        _spriteMemoryCache.Clear();
-        _rawTexMemoryCache.Clear();
-
-        var allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
-        for (int i = 0; i < allSprites.Count; i++)
-        {
-            Sprite s = allSprites[i];
-            if (s != null && !string.IsNullOrEmpty(s.name))
-            {
-                if (!_spriteMemoryCache.ContainsKey(s.name))
-                    _spriteMemoryCache[s.name] = s;
-            }
-        }
-
-        var allTextures = Resources.FindObjectsOfTypeAll<Texture2D>();
-        for (int i = 0; i < allTextures.Count; i++)
-        {
-            Texture2D t = allTextures[i];
-            if (t != null && !string.IsNullOrEmpty(t.name))
-            {
-                if (!_rawTexMemoryCache.ContainsKey(t.name))
-                    _rawTexMemoryCache[t.name] = t;
-            }
-        }
-        _hasScannedMemory = true;
-    }
-
-    public static Texture2D GetTexture(string textureName)
-    {
-        if (string.IsNullOrEmpty(textureName)) return null;
-
-        if (_textureCache.TryGetValue(textureName, out Texture2D cachedTex))
-            return cachedTex;
-
-        Texture2D directDiskTex = LoadTexture(textureName);
-        if (directDiskTex != null)
-        {
-            _textureCache[textureName] = directDiskTex;
-            return directDiskTex;
-        }
-
-        bool isExplicitPath = textureName.Contains("/");
-
-        if (isExplicitPath)
-        {
-            string cleanPath = textureName.ToLower();
-            int targetIndex = 0;
-            bool useSubAsset = false;
-
-            if (cleanPath.EndsWith("]"))
-            {
-                int openBracket = cleanPath.LastIndexOf('[');
-                if (openBracket != -1)
-                {
-                    string idxStr = cleanPath.Substring(openBracket + 1, cleanPath.Length - openBracket - 2);
-                    if (int.TryParse(idxStr, out int parsedIdx))
-                    {
-                        targetIndex = parsedIdx;
-                        useSubAsset = true;
-                        cleanPath = cleanPath.Substring(0, openBracket);
-                    }
-                }
-            }
-
-            Texture2D diskCleanTex = LoadTexture(cleanPath);
-            if (diskCleanTex != null)
-            {
-                _textureCache[textureName] = diskCleanTex;
-                return diskCleanTex;
-            }
-
-            string resPath = cleanPath.Replace(".png", "").Replace(".jpg", "");
-
-            if (useSubAsset)
-            {
-                var subAssets = Resources.LoadAll<Sprite>(resPath);
-                if (subAssets != null && subAssets.Length > 0)
-                {
-                    int safeIndex = (targetIndex >= 0 && targetIndex < subAssets.Length) ? targetIndex : 0;
-                    Texture2D isolatedTex = CreateReadableCroppedTexture(subAssets[safeIndex]);
-                    if (isolatedTex != null)
-                    {
-                        _textureCache[textureName] = isolatedTex;
-                        return isolatedTex;
-                    }
-                }
-            }
-            else
-            {
-                Sprite resSprite = Resources.Load<Sprite>(resPath);
-                if (resSprite != null)
-                {
-                    Texture2D isolatedTex = CreateReadableCroppedTexture(resSprite);
-                    if (isolatedTex != null)
-                    {
-                        _textureCache[textureName] = isolatedTex;
-                        return isolatedTex;
-                    }
-                }
-            }
-
-            _textureCache[textureName] = null;
-            return null;
-        }
-
-        if (!_hasScannedMemory) RefreshMemoryCache();
-
-        if (_spriteMemoryCache.TryGetValue(textureName, out Sprite sprite))
-        {
-            if (sprite != null)
-            {
-                Texture2D isolatedTex = CreateReadableCroppedTexture(sprite);
-                if (isolatedTex != null)
-                {
-                    _textureCache[textureName] = isolatedTex;
-                    return isolatedTex;
-                }
-            }
-            else
-            {
-                _spriteMemoryCache.Remove(textureName);
-            }
-        }
-
-        if (_rawTexMemoryCache.TryGetValue(textureName, out Texture2D tex))
-        {
-            if (tex != null)
-            {
-                _textureCache[textureName] = tex;
-                return tex;
-            }
-            else
-            {
-                _rawTexMemoryCache.Remove(textureName);
-            }
-        }
-
-        _textureCache[textureName] = null;
-        return null;
-    }
-    public static void SaveTextureOverrides()
-    {
-        string texturePath = PathsManager.TextureDataPath;
-        try
-        {
-            var texData = new SaveLoadData.TextureSaveData
-            {
-                PlantTextureOverrides = PlantTextureOverrides ?? new(),
-                ZombieTextureOverrides = ZombieTextureOverrides ?? new()
-            };
-            string dir = Path.GetDirectoryName(texturePath);
-            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-            File.WriteAllText(texturePath, Newtonsoft.Json.JsonConvert.SerializeObject(texData, Newtonsoft.Json.Formatting.Indented));
-        }
-        catch (Exception ex)
-        {
-            Magnetar_Logger.AutoSaveLogger.Error($"Failed to save TextureData: {ex.Message}");
-        }
-    }
-
-    public static void LoadTextureOverrides()
+    internal static void LoadTextureOverrides()
     {
         string texturePath = PathsManager.TextureDataPath;
         if (File.Exists(texturePath))
@@ -245,7 +79,7 @@ public static partial class ResourceManager
 
         return null;
     }
-
+    public static Texture2D GetPlantTexture(PlantType plantType) => GetPlantTexture((int)plantType);
     public static Texture2D GetZombieTexture(int zombieId)
     {
         string cacheKey = $"game_zombie_sprite_{zombieId}";
@@ -273,6 +107,7 @@ public static partial class ResourceManager
 
         return null;
     }
+    public static Texture2D GetZombieTexture(ZombieType zombieType) => GetZombieTexture((int)zombieType);
 
     private static Texture2D CreateReadableCroppedTexture(Sprite sprite)
     {

@@ -20,7 +20,7 @@ public static partial class ResourceManager
     private static readonly Dictionary<string, Sprite> _spriteCache = new(StringComparer.OrdinalIgnoreCase);
     private static readonly Dictionary<string, Font> _fontCache = new(StringComparer.OrdinalIgnoreCase);
 
-    public static void Init()
+    internal static void Init()
     {
         ServiceRegistry.Register(new ResourceManagerService());
     }
@@ -53,56 +53,56 @@ public static partial class ResourceManager
         return null;
     }
 
-    public static Texture2D LoadTexture(string assetName)
+    public static Texture2D LoadTextureFromAB(string name)
     {
-        if (string.IsNullOrWhiteSpace(assetName)) return null;
+        if (string.IsNullOrWhiteSpace(name)) return null;
 
-        if (_textureCache.TryGetValue(assetName, out var cached) && cached != null)
+        if (_textureCache.TryGetValue(name, out var cached) && cached != null)
             return cached;
 
-        string cleanName = Path.GetFileNameWithoutExtension(assetName);
+        string cleanName = Path.GetFileNameWithoutExtension(name);
 
         AssetBundle bundle = LoadClientBundle();
         if (bundle != null)
         {
             try
             {
-                string[] targets = new[] { assetName, cleanName, $"assets/assets/{assetName}", $"assets/assets/{cleanName}.png" };
-                foreach (string name in targets)
+                string[] targets = new[] { name, cleanName };
+                foreach (string targetName in targets)
                 {
 #if MELONLOADER || RELEASE_MELON
-                    Texture2D tex = bundle.LoadAsset<Texture2D>(name);
+                    Texture2D tex = bundle.LoadAsset<Texture2D>(targetName);
                     if (tex != null)
                     {
-                        _textureCache[assetName] = tex;
+                        _textureCache[name] = tex;
                         return tex;
                     }
 
-                    Sprite spr = bundle.LoadAsset<Sprite>(name);
+                    Sprite spr = bundle.LoadAsset<Sprite>(targetName);
                     if (spr != null && spr.texture != null)
                     {
-                        _textureCache[assetName] = spr.texture;
+                        _textureCache[name] = spr.texture;
                         return spr.texture;
                     }
 #elif BEPINEX || RELEASE_BEPINEX || ANDROID
-                    var rawTex = bundle.LoadAsset(name, Il2CppType.Of<Texture2D>());
+                    var rawTex = bundle.LoadAsset(targetName, Il2CppType.Of<Texture2D>());
                     if (rawTex != null)
                     {
                         Texture2D tex = rawTex.TryCast<Texture2D>();
                         if (tex != null)
                         {
-                            _textureCache[assetName] = tex;
+                            _textureCache[name] = tex;
                             return tex;
                         }
                     }
 
-                    var rawSpr = bundle.LoadAsset(name, Il2CppType.Of<Sprite>());
+                    var rawSpr = bundle.LoadAsset(targetName, Il2CppType.Of<Sprite>());
                     if (rawSpr != null)
                     {
                         Sprite spr = rawSpr.TryCast<Sprite>();
                         if (spr != null && spr.texture != null)
                         {
-                            _textureCache[assetName] = spr.texture;
+                            _textureCache[name] = spr.texture;
                             return spr.texture;
                         }
                     }
@@ -111,16 +111,25 @@ public static partial class ResourceManager
             }
             catch (Exception ex)
             {
-                GUILogger.Error($"Error loading Texture '{assetName}' from AssetBundle: {ex.Message}");
+                GUILogger.Error($"Error loading Texture '{name}' from AssetBundle: {ex.Message}");
             }
         }
 
-        string diskPath = ResolveDiskPath(assetName);
-        if (diskPath != null && File.Exists(diskPath))
+        return null;
+    }
+
+    public static Texture2D LoadTextureFromDisk(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return null;
+
+        if (_textureCache.TryGetValue(path, out var cached) && cached != null)
+            return cached;
+
+        if (File.Exists(path))
         {
             try
             {
-                byte[] rawBytes = File.ReadAllBytes(diskPath);
+                byte[] rawBytes = File.ReadAllBytes(path);
                 Texture2D diskTex = new(2, 2, TextureFormat.RGBA32, false)
                 {
                     filterMode = FilterMode.Bilinear,
@@ -130,33 +139,15 @@ public static partial class ResourceManager
 
                 if (ImageConversion.LoadImage(diskTex, rawBytes))
                 {
-                    _textureCache[assetName] = diskTex;
+                    _textureCache[path] = diskTex;
                     return diskTex;
                 }
             }
             catch (Exception ex)
             {
-                GUILogger.Error($"Failed loading loose texture from '{diskPath}': {ex.Message}");
+                GUILogger.Error($"Failed loading loose texture from '{path}': {ex.Message}");
             }
         }
-
-        return null;
-    }
-
-    public static Texture2D LoadLogoTexture()
-    {
-        return LoadTexture("magnetar_logo")
-            ?? LoadTexture("Magnetar_logo.png")
-            ?? LoadTexture("logo");
-    }
-
-    private static string ResolveDiskPath(string relativePath)
-    {
-        string direct = Path.Combine(ResouceDataDir, relativePath);
-        if (File.Exists(direct)) return direct;
-
-        string withExt = direct.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ? direct : direct + ".png";
-        if (File.Exists(withExt)) return withExt;
 
         return null;
     }

@@ -78,6 +78,7 @@ public class Main
         Api.Actions.Invoke_OnEarlyInitializeCore();
 
         PreferenceManager.InitializePreferences();
+        ResourceManager.LoadTextureOverrides();
 
         TopBar.Init();
         MobileMenuUI.Init();

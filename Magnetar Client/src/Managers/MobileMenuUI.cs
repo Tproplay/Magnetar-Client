@@ -116,7 +116,7 @@ public static class MobileMenuUI
     private static void CreateFloatingIcon()
     {
         // Load the texture
-        Texture2D rawLogo = ResourceManager.LoadTexture("Magnetar_logo.png"); ;
+        Texture2D rawLogo = ResourceManager.LoadTextureFromDisk(PathsManager.MagnetarLogoPath); ;
         if (rawLogo != null)
         {
             int borderThickness = Mathf.Max(4, Mathf.RoundToInt(rawLogo.width * 0.045f));

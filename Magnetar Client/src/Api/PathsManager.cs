@@ -350,6 +350,16 @@ public static class PathsManager
         return path;
     }
 
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / Mods / Magnetar Data / Resources / Magnetar_logo.png
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / plugins / Magnetar Data / Resources / Magnetar_logo.png
+    /// </remarks>
+    public static string MagnetarLogoPath => Path.Combine(ResouceDataDir, "Magnetar_logo.png");
+
     #endregion
 
 }

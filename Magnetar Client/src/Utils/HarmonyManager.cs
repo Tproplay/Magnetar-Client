@@ -6,7 +6,7 @@ using System.Reflection;
 namespace Magnetar_Client.Utils;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-public struct HarmonyPatchFailure
+public readonly struct HarmonyPatchFailure
 {
     public string ClassName { get; }
 
@@ -21,7 +21,7 @@ public struct HarmonyPatchFailure
     }
 }
 
-public struct HarmonyPatchInfo
+public readonly struct HarmonyPatchInfo
 {
     public int SuccessCount { get; }
     public int FailCount { get; }

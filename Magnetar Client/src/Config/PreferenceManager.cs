@@ -14,6 +14,9 @@ using System.IO;
 
 namespace Magnetar_Client;
 
+/// <summary>
+/// Allows adding prefrences entries supported by both mod loaders.
+/// </summary>
 public static class PreferenceManager
 {
     public interface IPreferenceEntry<T>
@@ -89,7 +92,7 @@ public static class PreferenceManager
 #endif
     }
 
-    public static void InitializePreferences()
+    internal static void InitializePreferences()
     {
         try
         {

@@ -25,6 +25,9 @@ public static partial class ResourceManager
         ServiceRegistry.Register(new ResourceManagerService());
     }
 
+    /// <summary>
+    /// Loads the 'magnetar_ui' Asset Bundle
+    /// </summary>
     public static AssetBundle LoadClientBundle()
     {
         foreach (var b in AssetBundle.GetAllLoadedAssetBundles().ToArray())
@@ -52,7 +55,9 @@ public static partial class ResourceManager
 
         return null;
     }
-
+    /// <summary>
+    /// Loads a Texture from Asset Bundle
+    /// </summary>
     public static Texture2D LoadTextureFromAB(string name)
     {
         if (string.IsNullOrWhiteSpace(name)) return null;
@@ -117,19 +122,21 @@ public static partial class ResourceManager
 
         return null;
     }
-
-    public static Texture2D LoadTextureFromDisk(string path)
+    /// <summary>
+    /// Loads a Texture from the Disk
+    /// </summary>
+    public static Texture2D LoadTextureFromDisk(string absolutePath)
     {
-        if (string.IsNullOrWhiteSpace(path)) return null;
+        if (string.IsNullOrWhiteSpace(absolutePath)) return null;
 
-        if (_textureCache.TryGetValue(path, out var cached) && cached != null)
+        if (_textureCache.TryGetValue(absolutePath, out var cached) && cached != null)
             return cached;
 
-        if (File.Exists(path))
+        if (File.Exists(absolutePath))
         {
             try
             {
-                byte[] rawBytes = File.ReadAllBytes(path);
+                byte[] rawBytes = File.ReadAllBytes(absolutePath);
                 Texture2D diskTex = new(2, 2, TextureFormat.RGBA32, false)
                 {
                     filterMode = FilterMode.Bilinear,
@@ -139,24 +146,17 @@ public static partial class ResourceManager
 
                 if (ImageConversion.LoadImage(diskTex, rawBytes))
                 {
-                    _textureCache[path] = diskTex;
+                    _textureCache[absolutePath] = diskTex;
                     return diskTex;
                 }
             }
             catch (Exception ex)
             {
-                GUILogger.Error($"Failed loading loose texture from '{path}': {ex.Message}");
+                GUILogger.Error($"Failed loading loose texture from '{absolutePath}': {ex.Message}");
             }
         }
 
         return null;
-    }
-
-    public static void ClearCache()
-    {
-        _textureCache.Clear();
-        _spriteCache.Clear();
-        _fontCache.Clear();
     }
 
     private class ResourceManagerService : IWarmUp

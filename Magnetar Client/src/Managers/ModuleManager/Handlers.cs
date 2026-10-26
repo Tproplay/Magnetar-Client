@@ -4,8 +4,8 @@ namespace Magnetar_Client.Core.ModuleManager_;
 
 public static class MobileInputHandler
 {
-    private static Modules.Module _pressedModule;
 #if ANDROID
+    private static Modules.Module _pressedModule;
     private static float _pressStartTime = 0f;
     private static Vector2 _pressStartScreenPos = Vector2.zero;
     private static bool _hasTriggeredLongPress = false;
@@ -14,8 +14,8 @@ public static class MobileInputHandler
 
     public static void Reset()
     {
-        _pressedModule = null;
 #if ANDROID
+        _pressedModule = null;
         _hasTriggeredLongPress = false;
 #endif
     }

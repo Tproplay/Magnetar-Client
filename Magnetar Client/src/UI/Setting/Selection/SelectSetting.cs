@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
 using static Magnetar_Client.Utils.Translator;
 using System;
@@ -7,16 +7,41 @@ using UnityEngine;
 
 namespace Magnetar_Client.UI.Setting;
 
+/// <summary>
+/// A setting representing a single-choice dropdown selection from a collection of options or an enum.
+/// </summary>
 public class SelectSetting : Setting
 {
     private int _value;
+
+    /// <summary>
+    /// The default selected option value restored when <see cref="Reset"/> is executed.
+    /// </summary>
     public int DefaultValue;
+
+    /// <summary>
+    /// Dictionary of available options mapping integer keys to their default display names.
+    /// </summary>
     public Dictionary<int, string> Options { get; set; } = new();
+
+    /// <summary>
+    /// The enum type used to populate options, or <see langword="null"/> if not created from an enum.
+    /// </summary>
     public System.Type EnumType { get; private set; }
+
+    /// <summary>
+    /// Optional dictionary mapping integer keys to custom display name overrides.
+    /// </summary>
     public Dictionary<int, string> CustomNames { get; set; } = new();
 
+    /// <summary>
+    /// Event invoked when the selected option value changes.
+    /// </summary>
     public Action<int> OnSelectionChanged { get; set; }
 
+    /// <summary>
+    /// Gets or sets the currently selected option value.
+    /// </summary>
     public int Value
     {
         get => _value;
@@ -31,6 +56,11 @@ public class SelectSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="SelectSetting"/> with a display name and default value.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="defaultValue">The initial and default integer value.</param>
     public SelectSetting(string name, int defaultValue)
     {
         Name = name;
@@ -38,6 +68,12 @@ public class SelectSetting : Setting
         DefaultValue = defaultValue;
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="SelectSetting"/> populated from the values of an enum type.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="enumType">The enumeration type used to populate options.</param>
+    /// <param name="defaultValue">The initial and default integer value.</param>
     public SelectSetting(string name, System.Type enumType, int defaultValue)
     {
         Name = name;
@@ -52,10 +88,23 @@ public class SelectSetting : Setting
         }
     }
 
+    /// <summary>
+    /// Adds or updates an available option with the specified ID and display name.
+    /// </summary>
+    /// <param name="id">The integer key identifying the option.</param>
+    /// <param name="displayName">The display text shown for the option.</param>
     public void AddOption(int id, string displayName) => Options[id] = displayName;
 
+    /// <summary>
+    /// Restores the selected value back to <see cref="DefaultValue"/>.
+    /// </summary>
     public override void Reset() => Value = DefaultValue;
 
+    /// <summary>
+    /// Renders the select dropdown setting control within the GUI window.
+    /// </summary>
+    /// <param name="y">The vertical drawing coordinate reference.</param>
+    /// <param name="width">The total available width for the control.</param>
     public override void Draw(ref float y, float width)
     {
         Event e = Event.current;

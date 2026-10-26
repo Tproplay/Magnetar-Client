@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Setting;
+using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
 using static Magnetar_Client.Utils.Translator;
 using System.Collections.Generic;
@@ -12,14 +12,42 @@ public static partial class DrawSetting
     private static int cursorIndex;
     private static int selectIndex;
     private static float scrollOffset;
+    /// <summary>
+    /// Gets or sets the vertical scroll offset of the autocomplete dropdown list.
+    /// </summary>
     public static float autocompleteScrollY;
+
+    /// <summary>
+    /// Gets or sets the zero-based index of the currently selected autocomplete item.
+    /// </summary>
     public static int autocompleteSelectedIndex;
 
+    /// <summary>
+    /// Represents an undoable/redoable snapshot of a text field's content and selection state.
+    /// </summary>
     public struct TextState
     {
+        /// <summary>
+        /// The text value in this snapshot.
+        /// </summary>
         public string Text;
+
+        /// <summary>
+        /// The cursor position index in this snapshot.
+        /// </summary>
         public int Cursor;
+
+        /// <summary>
+        /// The selection anchor index in this snapshot.
+        /// </summary>
         public int Select;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TextState"/> struct.
+        /// </summary>
+        /// <param name="t">The text content.</param>
+        /// <param name="c">The cursor position index.</param>
+        /// <param name="s">The selection anchor index.</param>
         public TextState(string t, int c, int s) { Text = t; Cursor = c; Select = s; }
     }
 
@@ -33,6 +61,12 @@ public static partial class DrawSetting
     private static int _activeMobileKeyboardId = -1;
 #endif
 
+    /// <summary>
+    /// Renders a string setting control with a label and editable text input box.
+    /// </summary>
+    /// <param name="strSet">The <see cref="StringSetting"/> to draw and handle.</param>
+    /// <param name="y">The vertical drawing coordinate reference.</param>
+    /// <param name="width">The total available width for the control.</param>
     public static void HandleStringSetting(StringSetting strSet, ref float y, float width)
     {
         float elemH = ClientConfig.elementHeight;
@@ -49,6 +83,14 @@ public static partial class DrawSetting
         strSet.Value = DrawManualTextField(inputRect, strSet.Value, "", strSet.AutocompleteVars);
     }
 
+    /// <summary>
+    /// Draws and handles an interactive manual text field supporting text editing, selection, undo/redo, and optional autocomplete.
+    /// </summary>
+    /// <param name="rect">The bounding box where the text field is drawn.</param>
+    /// <param name="text">The current text content of the field.</param>
+    /// <param name="defaultText">The placeholder text displayed when the field is empty and unfocused.</param>
+    /// <param name="autocompleteVars">Optional list of variable names for bracket autocomplete.</param>
+    /// <returns>The updated text string after processing user input.</returns>
     public static string DrawManualTextField(Rect rect, string text, string defaultText = "", List<string> autocompleteVars = null)
     {
         Event e = Event.current;
@@ -137,12 +179,56 @@ public static partial class DrawSetting
                 foreach (var v in autocompleteVars)
                     if (v.ToLower().Contains(currentFilter)) filteredVars.Add(v);
                 if (filteredVars.Count == 0) showAutocomplete = false;
+                else autocompleteSelectedIndex = Mathf.Clamp(autocompleteSelectedIndex, 0, filteredVars.Count - 1);
             }
+        }
+
+        float rowHeight = SettingValues.AutocompleteRowHeight;
+        float maxDropdownHeight = SettingValues.AutocompleteMaxHeight;
+        float totalHeight = filteredVars.Count * rowHeight;
+        float dropHeight = Mathf.Min(totalHeight, maxDropdownHeight);
+        Rect dropRect = new(rect.x, rect.y + rect.height, rect.width, dropHeight);
+
+#if !ANDROID
+        void SaveState()
+        {
+            undoStack.Add(new TextState(text, cursorIndex, selectIndex));
+            if (undoStack.Count > undoStackCount) undoStack.RemoveAt(0);
+            redoStack.Clear();
+        }
+#endif
+
+        void ApplyAutocomplete(string chosen)
+        {
+#if !ANDROID
+            SaveState();
+#endif
+            int endIndex = cursorIndex;
+            while (endIndex < text.Length)
+            {
+                char ch = text[endIndex];
+                if (ch == '}')
+                {
+                    endIndex++;
+                    break;
+                }
+                if (ch == '{' || char.IsWhiteSpace(ch))
+                {
+                    break;
+                }
+                endIndex++;
+            }
+
+            int removeStart = bracketStartIndex + 1;
+            int removeLength = endIndex - removeStart;
+            text = text.Remove(removeStart, removeLength);
+            text = text.Insert(removeStart, chosen + "}");
+            cursorIndex = selectIndex = bracketStartIndex + chosen.Length + 2;
+            showAutocomplete = false;
         }
 
         if (e.type == EventType.MouseDown && e.button == 0)
         {
-            Rect dropRect = new(rect.x, rect.y + rect.height, rect.width, 150f);
             bool clickingDropdown = showAutocomplete && dropRect.Contains(e.mousePosition);
 
             if (rect.Contains(e.mousePosition))
@@ -190,13 +276,6 @@ public static partial class DrawSetting
             int selStart = Mathf.Min(cursorIndex, selectIndex);
             int selEnd = Mathf.Max(cursorIndex, selectIndex);
 
-            void SaveState()
-            {
-                undoStack.Add(new TextState(text, cursorIndex, selectIndex));
-                if (undoStack.Count > undoStackCount) undoStack.RemoveAt(0);
-                redoStack.Clear();
-            }
-
             void DeleteSelection()
             {
                 text = text.Remove(selStart, selEnd - selStart);
@@ -231,11 +310,11 @@ public static partial class DrawSetting
                 else if (k == KeyCode.UpArrow) { autocompleteSelectedIndex = Mathf.Max(autocompleteSelectedIndex - 1, 0); interceptedForAutocomplete = true; e.Use(); }
                 else if (k == KeyCode.Return || k == KeyCode.Tab)
                 {
-                    SaveState();
-                    string chosen = filteredVars[autocompleteSelectedIndex];
-                    text = text.Remove(bracketStartIndex + 1, cursorIndex - bracketStartIndex - 1);
-                    text = text.Insert(bracketStartIndex + 1, chosen + "}");
-                    cursorIndex = selectIndex = bracketStartIndex + chosen.Length + 2;
+                    if (autocompleteSelectedIndex >= 0 && autocompleteSelectedIndex < filteredVars.Count)
+                    {
+                        string chosen = filteredVars[autocompleteSelectedIndex];
+                        ApplyAutocomplete(chosen);
+                    }
                     interceptedForAutocomplete = true; showAutocomplete = false; e.Use();
                 }
             }
@@ -413,22 +492,6 @@ public static partial class DrawSetting
 
         if (showAutocomplete && filteredVars.Count > 0)
         {
-            float rowHeight = SettingValues.AutocompleteRowHeight;
-            float maxDropdownHeight = SettingValues.AutocompleteMaxHeight;
-            float totalHeight = filteredVars.Count * rowHeight;
-            float dropHeight = Mathf.Min(totalHeight, maxDropdownHeight);
-
-            Rect dropRect = new(rect.x, rect.y + rect.height, rect.width, dropHeight);
-
-#if !ANDROID
-            void SaveState()
-            {
-                undoStack.Add(new TextState(text, cursorIndex, selectIndex));
-                if (undoStack.Count > undoStackCount) undoStack.RemoveAt(0);
-                redoStack.Clear();
-            }
-#endif
-
             if (e.type == EventType.Layout || e.type == EventType.Repaint)
             {
                 autocompleteSelectedIndex = Mathf.Clamp(autocompleteSelectedIndex, 0, filteredVars.Count - 1);
@@ -452,44 +515,45 @@ public static partial class DrawSetting
                 }
                 else if (e.type == EventType.MouseDown && e.button == 0)
                 {
-#if !ANDROID
-                    SaveState();
-#endif
-                    string chosen = filteredVars[autocompleteSelectedIndex];
-                    text = text.Remove(bracketStartIndex + 1, cursorIndex - bracketStartIndex - 1);
-                    text = text.Insert(bracketStartIndex + 1, chosen + "}");
-                    cursorIndex = selectIndex = bracketStartIndex + chosen.Length + 2;
-                    ActiveTextFieldId = controlId;
+                    if (autocompleteSelectedIndex >= 0 && autocompleteSelectedIndex < filteredVars.Count)
+                    {
+                        string chosen = filteredVars[autocompleteSelectedIndex];
+                        ApplyAutocomplete(chosen);
+                        ActiveTextFieldId = controlId;
 
 #if ANDROID
-                    if (_mobileKeyboard != null)
-                    {
-                        _mobileKeyboard.text = text;
-                    }
+                        if (_mobileKeyboard != null)
+                        {
+                            _mobileKeyboard.text = text;
+                        }
 #endif
+                    }
                     e.Use();
                 }
             }
 
-            float _autocompleteScrollY = autocompleteScrollY;
-            int _autocompleteSelectedIndex = autocompleteSelectedIndex;
-
-            OnPostDraw = () =>
+            if (showAutocomplete)
             {
-                GUI.Box(dropRect, "", ThemeManager.SettingOff);
-                GUI.BeginGroup(dropRect);
-                for (int i = 0; i < filteredVars.Count; i++)
+                float _autocompleteScrollY = autocompleteScrollY;
+                int _autocompleteSelectedIndex = autocompleteSelectedIndex;
+
+                OnPostDraw = () =>
                 {
-                    float drawY = (i * rowHeight) - _autocompleteScrollY;
-                    if (drawY + rowHeight > 0 && drawY < dropHeight)
+                    GUI.Box(dropRect, "", ThemeManager.SettingOff);
+                    GUI.BeginGroup(dropRect);
+                    for (int i = 0; i < filteredVars.Count; i++)
                     {
-                        Rect rowRect = new(0, drawY, dropRect.width, rowHeight);
-                        GUIStyle rowStyle = (i == _autocompleteSelectedIndex) ? ThemeManager.SettingOn : ThemeManager.SettingOff;
-                        GUI.Box(rowRect, "{" + filteredVars[i] + "}", rowStyle);
+                        float drawY = (i * rowHeight) - _autocompleteScrollY;
+                        if (drawY + rowHeight > 0 && drawY < dropHeight)
+                        {
+                            Rect rowRect = new(0, drawY, dropRect.width, rowHeight);
+                            GUIStyle rowStyle = (i == _autocompleteSelectedIndex) ? ThemeManager.SettingOn : ThemeManager.SettingOff;
+                            GUI.Box(rowRect, "{" + filteredVars[i] + "}", rowStyle);
+                        }
                     }
-                }
-                GUI.EndGroup();
-            };
+                    GUI.EndGroup();
+                };
+            }
         }
 
         return text;

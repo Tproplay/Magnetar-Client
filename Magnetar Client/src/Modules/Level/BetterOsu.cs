@@ -38,8 +38,6 @@ public class BetterOsu : Module
     public MultiSelectSetting PetTypeSetting;
 
     public IntSetting BulletsDamageIncreaseSetting;
-
-    private bool RandomBullet;
     public BoolSetting RandomBulletSetting;
 
     public MultiSelectSetting selectBulletsSetting;
@@ -65,7 +63,7 @@ public class BetterOsu : Module
 
         PetTypeSetting.Select((int)PetType.PetSnowBoss);
 
-        RandomBulletSetting = new BoolSetting("Random Bullets", RandomBullet);
+        RandomBulletSetting = new BoolSetting("Random Bullets", false);
 
         selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
         {

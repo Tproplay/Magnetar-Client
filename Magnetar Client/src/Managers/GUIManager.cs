@@ -38,7 +38,7 @@ public static class GUIManager
 
     public static FloatSetting ScaleSetting { get; } = new("GUI Scale", 0.5f, 2.0f,
 #if ANDROID
-        1.5f;
+        1.5f,
 #else
         1,
 #endif

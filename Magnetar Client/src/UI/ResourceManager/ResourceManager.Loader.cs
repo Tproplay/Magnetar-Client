@@ -13,10 +13,26 @@ using BepInEx;
 
 namespace Magnetar_Client.UI;
 
+/// <summary>
+/// Manages loading textures and fonts.
+/// </summary>
 public static partial class ResourceManager
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public static Dictionary<int, string> PlantTextureOverrides = new();
     public static Dictionary<int, string> ZombieTextureOverrides = new();
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
+    /// <summary>
+    /// Internal Json deserialization format
+    /// </summary>
+    public class TextureSaveData
+    {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+        public Dictionary<int, string> PlantTextureOverrides = new();
+        public Dictionary<int, string> ZombieTextureOverrides = new();
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+    }
 
     internal static void LoadTextureOverrides()
     {
@@ -26,7 +42,7 @@ public static partial class ResourceManager
             try
             {
                 string json = File.ReadAllText(texturePath);
-                var data = Newtonsoft.Json.JsonConvert.DeserializeObject<SaveLoadData.TextureSaveData>(json);
+                var data = Newtonsoft.Json.JsonConvert.DeserializeObject<TextureSaveData>(json);
                 if (data != null)
                 {
                     PlantTextureOverrides = data.PlantTextureOverrides ?? new();
@@ -39,7 +55,9 @@ public static partial class ResourceManager
             }
         }
     }
-
+    /// <summary>
+    /// Gets the texture of plant from <see cref="ResourcesManager.plantPreviews"/>
+    /// </summary>
     public static Texture2D GetPlantTexture(int plantId)
     {
         string cacheKey = $"game_plant_preview_{plantId}";
@@ -79,7 +97,13 @@ public static partial class ResourceManager
 
         return null;
     }
+    /// <summary>
+    /// Gets the texture of plant from <see cref="ResourcesManager.plantPreviews"/>
+    /// </summary>
     public static Texture2D GetPlantTexture(PlantType plantType) => GetPlantTexture((int)plantType);
+    /// <summary>
+    /// Gets the texture of zombie from <see cref="ResourcesManager.zombieSprites"/>
+    /// </summary>
     public static Texture2D GetZombieTexture(int zombieId)
     {
         string cacheKey = $"game_zombie_sprite_{zombieId}";
@@ -107,6 +131,9 @@ public static partial class ResourceManager
 
         return null;
     }
+    /// <summary>
+    /// Gets the texture of zombie from <see cref="ResourcesManager.zombieSprites"/>
+    /// </summary>
     public static Texture2D GetZombieTexture(ZombieType zombieType) => GetZombieTexture((int)zombieType);
 
     private static Texture2D CreateReadableCroppedTexture(Sprite sprite)

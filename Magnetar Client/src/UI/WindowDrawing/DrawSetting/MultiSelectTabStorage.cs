@@ -1,9 +1,12 @@
-﻿using Magnetar_Client.Core;
+using Magnetar_Client.Core;
 using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 
 namespace Magnetar_Client.UI.WindowDrawing;
 
+/// <summary>
+/// Manages per-tab state persistence for the multi-select modal dialog.
+/// </summary>
 public static class MultiSelectTabStorage
 {
     private class TabSelectorState
@@ -16,6 +19,10 @@ public static class MultiSelectTabStorage
 
     private static readonly Dictionary<TabType, TabSelectorState> _states = new();
 
+    /// <summary>
+    /// Saves the current multi-select dialog state for the specified tab.
+    /// </summary>
+    /// <param name="tab">The tab whose state should be saved.</param>
     public static void SaveState(TabType tab)
     {
         if (tab == null) return;
@@ -28,6 +35,10 @@ public static class MultiSelectTabStorage
         };
     }
 
+    /// <summary>
+    /// Restores the previously saved multi-select dialog state for the specified tab, or resets to default if none exists.
+    /// </summary>
+    /// <param name="tab">The tab whose state should be restored.</param>
     public static void RestoreState(TabType tab)
     {
         if (tab == null) return;

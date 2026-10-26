@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Setting;
+using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
 using static Magnetar_Client.Utils.Translator;
 using UnityEngine;
@@ -8,6 +8,13 @@ namespace Magnetar_Client.UI.WindowDrawing;
 
 public static partial class DrawSetting
 {
+    /// <summary>
+    /// Renders a numeric setting control (slider and manual input field) and handles user interaction.
+    /// </summary>
+    /// <param name="setting">The numeric setting object, which must be a <see cref="FloatSetting"/> or <see cref="IntSetting"/>.</param>
+    /// <param name="y">The vertical drawing coordinate reference.</param>
+    /// <param name="width">The total available width for the control.</param>
+    /// <param name="isFloat"><see langword="true"/> if the setting is a <see cref="FloatSetting"/>; otherwise <see langword="false"/> for <see cref="IntSetting"/>.</param>
     public static void HandleNumericSetting(object setting, ref float y, float width, bool isFloat)
     {
         float val, sliderMin, sliderMax, trueMin, trueMax;

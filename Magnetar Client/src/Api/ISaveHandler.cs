@@ -2,6 +2,9 @@
 
 namespace Magnetar_Client.Api;
 
+/// <summary>
+/// Interface for creating a Save Handler
+/// </summary>
 public interface ISaveHandler
 {
     /// <summary>

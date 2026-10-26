@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Setting;
+using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
 using static Magnetar_Client.Utils.Translator;
 using UnityEngine;
@@ -7,8 +7,17 @@ namespace Magnetar_Client.UI.WindowDrawing;
 
 public static partial class DrawSetting
 {
+    /// <summary>
+    /// Gets or sets the vertical scroll position of the currently open dropdown list.
+    /// </summary>
     public static float dropdownScrollY;
 
+    /// <summary>
+    /// Renders a dropdown selection setting control and handles user interaction.
+    /// </summary>
+    /// <param name="selSet">The <see cref="SelectSetting"/> to draw and handle.</param>
+    /// <param name="y">The vertical drawing coordinate reference.</param>
+    /// <param name="width">The total available width for the control.</param>
     public static void HandleSelectSetting(SelectSetting selSet, ref float y, float width)
     {
         Event e = Event.current;

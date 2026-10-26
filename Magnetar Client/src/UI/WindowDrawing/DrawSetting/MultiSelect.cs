@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Setting;
+using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
 using static Magnetar_Client.Utils.Translator;
 using System;
@@ -10,15 +10,36 @@ namespace Magnetar_Client.UI.WindowDrawing;
 
 public static partial class DrawSetting
 {
+    /// <summary>
+    /// Gets or sets the <see cref="MultiSelectSetting"/> currently displayed in the multi-select modal dialog.
+    /// </summary>
     public static MultiSelectSetting activeMultiSelect;
+
+    /// <summary>
+    /// Gets or sets the search filter query entered into the multi-select modal dialog.
+    /// </summary>
     public static string multiSelectSearchQuery = "";
 
+    /// <summary>
+    /// Gets or sets the current vertical scroll position of the multi-select options list.
+    /// </summary>
     public static float manualScrollY;
+
+    /// <summary>
+    /// Gets or sets the smoothed target vertical scroll position of the multi-select options list.
+    /// </summary>
     public static float targetScrollY;
     private static float _scrollbarDragStartMouseY;
     private static float _scrollbarDragStartScrollY;
 
+    /// <summary>
+    /// Gets or sets the total computed content height of the items list in the multi-select window.
+    /// </summary>
     public static float totalContentHeight;
+
+    /// <summary>
+    /// Gets or sets the timestamp when the scroll slider position was last updated.
+    /// </summary>
     public static float lastSliderUpdateTime;
 
     private static int lastHoveredIndex = -1;
@@ -50,6 +71,12 @@ public static partial class DrawSetting
     private const float MobileShiftHoldThreshold = 0.50f;
 #endif
 
+    /// <summary>
+    /// Renders the multi-select modal window dialog, including searching, scrolling, and toggle interaction.
+    /// </summary>
+    /// <param name="multiSelectWindowRect">The bounding rectangle of the multi-select window.</param>
+    /// <param name="activeMultiSelect">The multi-select setting being edited.</param>
+    /// <param name="onClose">Optional callback invoked when the window is closed.</param>
     public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, dynamic activeMultiSelect, Action onClose = null)
     {
         if (activeMultiSelect == null) return;

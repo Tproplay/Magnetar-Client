@@ -13,7 +13,7 @@ public static partial class ResourceManager
 {
     private static Font DefaultFont;
 
-    public static Font LoadFont(string assetName = "Magnetar_font")
+    static Font LoadFont(string assetName = "Magnetar_font")
     {
         if (string.IsNullOrWhiteSpace(assetName)) return null;
 
@@ -70,7 +70,7 @@ public static partial class ResourceManager
         return null;
     }
 
-    public static void InitFont()
+    internal static void InitFont()
     {
         if (GUI.skin != null && DefaultFont != null && GUI.skin.font == DefaultFont) return;
 

@@ -112,12 +112,6 @@ public static class SaveLoadData
         public Dictionary<string, object> Entries = new(StringComparer.OrdinalIgnoreCase);
     }
 
-    public class TextureSaveData
-    {
-        public Dictionary<int, string> PlantTextureOverrides = new();
-        public Dictionary<int, string> ZombieTextureOverrides = new();
-    }
-
     public class ModuleSaveData
     {
         public bool Active;

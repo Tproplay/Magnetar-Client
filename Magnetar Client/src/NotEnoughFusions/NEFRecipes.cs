@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -172,24 +174,14 @@ public static class NEFRecipes
             NEFData.AddedRecipes.Remove(plantRecipe);
     }
 
-    public static void InitRecipes()
+    internal static void InitRecipes()
     {
-        foreach (CustomRecipe plantRecipe in GetTitanRecipes())
-        {
-            AddToList(plantRecipe);
-        }
+        var allRecipes = GetTitanRecipes()
+        .Concat(SpawnedPlants)
+        .Concat(MiscellaneousPlants)
+        .Concat(GetFurnanceRecipes());
 
-        foreach (CustomRecipe plantRecipe in SpawnedPlants)
-        {
-            AddToList(plantRecipe);
-        }
-
-        foreach (CustomRecipe plantRecipe in MiscellaneousPlants)
-        {
-            AddToList(plantRecipe);
-        }
-
-        foreach (CustomRecipe plantRecipe in GetFurnanceRecipes())
+        foreach (CustomRecipe plantRecipe in allRecipes)
         {
             AddToList(plantRecipe);
         }

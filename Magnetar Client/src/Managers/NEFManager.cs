@@ -68,8 +68,7 @@ public static class NEFManager
 
         public void OnWarmUp()
         {
-            Magnetar_Client.NEF.Data.NEFBanned.InitBan();
-            Magnetar_Client.NEF.Data.NEFBanned.InitHidden();
+            Magnetar_Client.NEF.Data.NEFBanned.Init();
             Magnetar_Client.NEF.Data.NEFRecipes.InitRecipes();
             NEFManager.Render();
         }

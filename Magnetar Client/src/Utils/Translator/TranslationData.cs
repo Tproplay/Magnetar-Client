@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -23,6 +23,18 @@ public class ModuleTranslationNode
 
     [JsonProperty("settings")]
     public Dictionary<string, string> Settings { get; set; } = new(StringComparer.Ordinal);
+
+    [JsonProperty("Translations", NullValueHandling = NullValueHandling.Ignore)]
+    public Dictionary<string, string> Translations { get; set; }
+
+    [JsonProperty("CustomTranslations", NullValueHandling = NullValueHandling.Ignore)]
+    private Dictionary<string, string> CustomTranslations
+    {
+        set => Translations ??= value;
+    }
+
+    [JsonProperty("RegexTranslations", NullValueHandling = NullValueHandling.Ignore)]
+    public Dictionary<string, string> RegexTranslations { get; set; }
 }
 
 /// <summary>

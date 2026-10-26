@@ -103,6 +103,7 @@ public class Main
 
         // 4. Load state, themes, and translations
         SaveLoad.Load();
+        Translator.EnsureInitialized();
 
         Api.Actions.Invoke_OnLateInitializeCore();
 

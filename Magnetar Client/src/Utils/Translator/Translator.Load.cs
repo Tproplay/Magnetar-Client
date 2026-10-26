@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
@@ -286,10 +286,19 @@ public static partial class Translator
 
     private static void LinkHudTranslations()
     {
-        string currentLang = CurrentLanguage;
-        if (string.Equals(currentLang, "English", StringComparison.OrdinalIgnoreCase)) return;
+        if (Core.HUDManager_.HUDRenderer.Elements == null || Core.HUDManager_.HUDRenderer.Elements.Count == 0) return;
 
-        LoadHudJsonFile(Path.Combine(TranslationRootDir, currentLang, "hud_translations.json"));
+        string englishDir = Path.Combine(TranslationRootDir, "English");
+        DumpHudEnglishTemplate(englishDir);
+
+        string currentLang = CurrentLanguage;
+        if (!string.Equals(currentLang, "English", StringComparison.OrdinalIgnoreCase))
+        {
+            string engHudPath = Path.Combine(englishDir, "hud_translations.json");
+            string targetHudPath = Path.Combine(TranslationRootDir, currentLang, "hud_translations.json");
+            SyncHudJson(engHudPath, targetHudPath);
+            LoadHudJsonFile(targetHudPath);
+        }
 
         if (Core.HUDManager_.HUDRenderer.Elements != null)
         {
@@ -315,8 +324,37 @@ public static partial class Translator
 
     private static void LinkModuleTranslations()
     {
+        if (Core.ModuleManager.Modules == null || Core.ModuleManager.Modules.Count == 0) return;
+
+        string englishDir = Path.Combine(TranslationRootDir, "English");
+        string englishModulesDir = Path.Combine(englishDir, "Modules");
+
+        // 1. Ensure English module templates are dumped
+        DumpModulesEnglishTemplate(englishDir);
+
+        // 2. Sync to all target language directories
+        if (Directory.Exists(TranslationRootDir))
+        {
+            foreach (string langDir in Directory.GetDirectories(TranslationRootDir))
+            {
+                string lang = Path.GetFileName(langDir);
+                if (string.Equals(lang, "English", StringComparison.OrdinalIgnoreCase)) continue;
+                SyncModulesDirectory(englishModulesDir, Path.Combine(langDir, "Modules"));
+            }
+        }
+
         string currentLang = CurrentLanguage;
-        if (string.Equals(currentLang, "English", StringComparison.OrdinalIgnoreCase)) return;
+
+        // 3. If English, reload any user-customized translations from English JSON files
+        if (string.Equals(currentLang, "English", StringComparison.OrdinalIgnoreCase))
+        {
+            foreach (var mod in Core.ModuleManager.Modules)
+            {
+                if (mod == null) continue;
+                Core.ModuleManager_.ModuleTranslationHandler.ReloadModuleTranslations(mod, "English");
+            }
+            return;
+        }
 
         string modulesDir = Path.Combine(TranslationRootDir, currentLang, "Modules");
         if (!Directory.Exists(modulesDir)) return;
@@ -339,31 +377,33 @@ public static partial class Translator
                 catch { }
             }
 
-            if (Core.ModuleManager.Modules != null)
+            foreach (var mod in Core.ModuleManager.Modules)
             {
-                foreach (var mod in Core.ModuleManager.Modules)
+                if (mod == null) continue;
+
+                string sanitizedName = SanitizeFileName(mod.Name);
+                if (!modulesDict.TryGetValue(sanitizedName, out var node))
+                    modulesDict.TryGetValue(mod.Name, out node);
+
+                if (node != null)
                 {
-                    string sanitizedName = SanitizeFileName(mod.Name);
-                    if (!modulesDict.TryGetValue(sanitizedName, out var node))
-                        modulesDict.TryGetValue(mod.Name, out node);
+                    if (!string.IsNullOrEmpty(node.Name)) TranslationData.ExactTranslations[mod.Name] = node.Name;
+                    if (!string.IsNullOrEmpty(node.Description)) TranslationData.ExactTranslations[mod.Description] = node.Description;
+                    if (!string.IsNullOrEmpty(node.SearchHints) && !string.IsNullOrEmpty(mod.SearchHints)) TranslationData.ExactTranslations[mod.SearchHints] = node.SearchHints;
 
-                    if (node != null)
+                    if (mod.Settings != null && node.Settings != null)
                     {
-                        if (!string.IsNullOrEmpty(node.Name)) TranslationData.ExactTranslations[mod.Name] = node.Name;
-                        if (!string.IsNullOrEmpty(node.Description)) TranslationData.ExactTranslations[mod.Description] = node.Description;
-                        if (!string.IsNullOrEmpty(node.SearchHints) && !string.IsNullOrEmpty(mod.SearchHints)) TranslationData.ExactTranslations[mod.SearchHints] = node.SearchHints;
-
-                        if (mod.Settings != null && node.Settings != null)
+                        foreach (var setting in mod.Settings)
                         {
-                            foreach (var setting in mod.Settings)
-                            {
-                                if (string.IsNullOrWhiteSpace(setting.Name)) continue;
-                                if (node.Settings.TryGetValue(setting.Name, out var setTrans))
-                                    TranslationData.ExactTranslations[setting.Name] = setTrans;
-                            }
+                            if (string.IsNullOrWhiteSpace(setting.Name)) continue;
+                            if (node.Settings.TryGetValue(setting.Name, out var setTrans))
+                                TranslationData.ExactTranslations[setting.Name] = setTrans;
                         }
                     }
                 }
+
+                // Reload translated custom phrases and regexes into the module
+                Core.ModuleManager_.ModuleTranslationHandler.ReloadModuleTranslations(mod, currentLang);
             }
 
             InvalidateBlacklist();
@@ -530,7 +570,13 @@ public static partial class Translator
         }
     }
 
-    private static void SyncModulesDirectory(string engDir, string targetDir)
+    /// <summary>
+    /// Synchronizes module translation JSON files from the English directory to the target language directory,
+    /// adding missing keys, settings, custom translations, and regex translations.
+    /// </summary>
+    /// <param name="engDir">Path to the English modules directory.</param>
+    /// <param name="targetDir">Path to the target language modules directory.</param>
+    public static void SyncModulesDirectory(string engDir, string targetDir)
     {
         if (!Directory.Exists(engDir)) return;
         if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
@@ -557,7 +603,9 @@ public static partial class Translator
                     Name = engNode.Name,
                     Description = engNode.Description,
                     SearchHints = engNode.SearchHints,
-                    Settings = engNode.Settings != null ? new Dictionary<string, string>(engNode.Settings) : new()
+                    Settings = engNode.Settings != null ? new Dictionary<string, string>(engNode.Settings) : new(),
+                    Translations = engNode.Translations != null ? new Dictionary<string, string>(engNode.Translations) : null,
+                    RegexTranslations = engNode.RegexTranslations != null ? new Dictionary<string, string>(engNode.RegexTranslations) : null
                 };
                 dirty = true;
             }
@@ -575,6 +623,32 @@ public static partial class Translator
                         if (!targetNode.Settings.ContainsKey(s.Key) || string.IsNullOrEmpty(targetNode.Settings[s.Key]))
                         {
                             targetNode.Settings[s.Key] = s.Value;
+                            dirty = true;
+                        }
+                    }
+                }
+
+                if (engNode.Translations != null && engNode.Translations.Count > 0)
+                {
+                    if (targetNode.Translations == null) { targetNode.Translations = new(StringComparer.Ordinal); dirty = true; }
+                    foreach (var t in engNode.Translations)
+                    {
+                        if (!targetNode.Translations.ContainsKey(t.Key) || string.IsNullOrEmpty(targetNode.Translations[t.Key]))
+                        {
+                            targetNode.Translations[t.Key] = t.Value;
+                            dirty = true;
+                        }
+                    }
+                }
+
+                if (engNode.RegexTranslations != null && engNode.RegexTranslations.Count > 0)
+                {
+                    if (targetNode.RegexTranslations == null) { targetNode.RegexTranslations = new(); dirty = true; }
+                    foreach (var r in engNode.RegexTranslations)
+                    {
+                        if (!targetNode.RegexTranslations.ContainsKey(r.Key) || string.IsNullOrEmpty(targetNode.RegexTranslations[r.Key]))
+                        {
+                            targetNode.RegexTranslations[r.Key] = r.Value;
                             dirty = true;
                         }
                     }

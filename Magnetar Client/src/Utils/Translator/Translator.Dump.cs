@@ -42,7 +42,10 @@ public static partial class Translator
         TranslationData.BlacklistDirty = true;
     }
 
-    private static string SanitizeFileName(string name)
+    /// <summary>
+    /// Sanitizes a file name by replacing invalid file system characters with underscores.
+    /// </summary>
+    public static string SanitizeFileName(string name)
     {
         string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()));
         return Regex.Replace(name, $"[{invalidChars}]", "_");
@@ -154,39 +157,8 @@ public static partial class Translator
             foreach (var ctrl in defaultControls)
                 TranslationData.KnownEnglishStrings.Add(ctrl);
 
-            if (Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
-            {
-                string englishModulesDir = Path.Combine(englishDir, "Modules");
-                if (!Directory.Exists(englishModulesDir)) Directory.CreateDirectory(englishModulesDir);
-
-                foreach (var mod in Core.ModuleManager.Modules)
-                {
-                    var node = new ModuleTranslationNode
-                    {
-                        Name = mod.Name,
-                        Description = mod.Description,
-                        SearchHints = mod.SearchHints ?? ""
-                    };
-
-                    if (mod.Settings != null)
-                        ExtractSettingNames(mod.Settings, name => node.Settings[name] = name);
-
-                    string modFilePath = Path.Combine(englishModulesDir, $"{SanitizeFileName(mod.Name)}.json");
-                    SafeWriteAllText(modFilePath, JsonConvert.SerializeObject(node, Formatting.Indented));
-                }
-            }
-
-            if (Core.HUDManager_.HUDRenderer.Elements != null && Core.HUDManager_.HUDRenderer.Elements.Count > 0)
-            {
-                var engHud = new Dictionary<string, HudTranslationNode>();
-
-                foreach (var el in Core.HUDManager_.HUDRenderer.Elements)
-                {
-                    engHud[el.Name] = new HudTranslationNode { Name = el.Name };
-                }
-
-                SafeWriteAllText(Path.Combine(englishDir, "hud_translations.json"), JsonConvert.SerializeObject(engHud, Formatting.Indented));
-            }
+            DumpModulesEnglishTemplate(englishDir);
+            DumpHudEnglishTemplate(englishDir);
 
             HashSet<string> blacklist = GetCachedBlacklist();
             string stringsPath = Path.Combine(englishDir, "translation_strings.json");
@@ -220,6 +192,127 @@ public static partial class Translator
         catch (Exception ex)
         {
             TranslatorLogger.Error($"Failed to dump English template: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Dumps English module translation templates for all registered modules.
+    /// Preserves existing entries and populates Settings, Translations, and RegexTranslations.
+    /// </summary>
+    public static void DumpModulesEnglishTemplate(string englishDir = null)
+    {
+        if (Core.ModuleManager.Modules == null || Core.ModuleManager.Modules.Count == 0)
+            return;
+
+        try
+        {
+            englishDir ??= Path.Combine(TranslationRootDir, "English");
+            string englishModulesDir = Path.Combine(englishDir, "Modules");
+            if (!Directory.Exists(englishModulesDir)) Directory.CreateDirectory(englishModulesDir);
+
+            foreach (var mod in Core.ModuleManager.Modules)
+            {
+                if (mod == null || string.IsNullOrWhiteSpace(mod.Name)) continue;
+
+                string modFilePath = Path.Combine(englishModulesDir, $"{SanitizeFileName(mod.Name)}.json");
+                ModuleTranslationNode node = null;
+                if (File.Exists(modFilePath))
+                {
+                    try { node = JsonConvert.DeserializeObject<ModuleTranslationNode>(SafeReadAllText(modFilePath)); } catch { }
+                }
+
+                node ??= new ModuleTranslationNode();
+                node.Name = string.IsNullOrEmpty(node.Name) ? mod.Name : node.Name;
+                node.Description = string.IsNullOrEmpty(node.Description) ? mod.Description : node.Description;
+                node.SearchHints = mod.SearchHints ?? node.SearchHints ?? "";
+
+                node.Settings ??= new(StringComparer.Ordinal);
+                if (mod.Settings != null)
+                {
+                    ExtractSettingNames(mod.Settings, name =>
+                    {
+                        if (!node.Settings.ContainsKey(name))
+                            node.Settings[name] = name;
+                    });
+                }
+
+                if (mod.SavedTranslationData != null && mod.SavedTranslationData.Count > 0)
+                {
+                    node.Translations ??= new(StringComparer.Ordinal);
+                    foreach (var kvp in mod.SavedTranslationData)
+                    {
+                        if (!node.Translations.ContainsKey(kvp.Key))
+                            node.Translations[kvp.Key] = kvp.Value;
+                    }
+
+                    foreach (var kvp in node.Translations)
+                    {
+                        mod.SavedTranslationData[kvp.Key] = kvp.Value;
+                    }
+                }
+
+                if (mod.SavedRegexTranslations != null && mod.SavedRegexTranslations.Count > 0)
+                {
+                    node.RegexTranslations ??= new();
+                    foreach (var kvp in mod.SavedRegexTranslations)
+                    {
+                        if (!node.RegexTranslations.ContainsKey(kvp.Key))
+                            node.RegexTranslations[kvp.Key] = kvp.Value;
+                    }
+
+                    foreach (var kvp in node.RegexTranslations)
+                    {
+                        mod.SavedRegexTranslations[kvp.Key] = kvp.Value;
+                    }
+                }
+
+                SafeWriteAllText(modFilePath, JsonConvert.SerializeObject(node, Formatting.Indented));
+            }
+        }
+        catch (Exception ex)
+        {
+            TranslatorLogger.Error($"Failed dumping English modules template: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Dumps English HUD translation templates for all registered HUD elements.
+    /// </summary>
+    public static void DumpHudEnglishTemplate(string englishDir = null)
+    {
+        if (Core.HUDManager_.HUDRenderer.Elements == null || Core.HUDManager_.HUDRenderer.Elements.Count == 0)
+            return;
+
+        try
+        {
+            englishDir ??= Path.Combine(TranslationRootDir, "English");
+            if (!Directory.Exists(englishDir)) Directory.CreateDirectory(englishDir);
+
+            string hudPath = Path.Combine(englishDir, "hud_translations.json");
+            var engHud = new Dictionary<string, HudTranslationNode>();
+            if (File.Exists(hudPath))
+            {
+                try { engHud = JsonConvert.DeserializeObject<Dictionary<string, HudTranslationNode>>(SafeReadAllText(hudPath)) ?? new(); } catch { }
+            }
+
+            bool dirty = false;
+            foreach (var el in Core.HUDManager_.HUDRenderer.Elements)
+            {
+                if (el != null && !string.IsNullOrWhiteSpace(el.Name) && !engHud.ContainsKey(el.Name))
+                {
+                    engHud[el.Name] = new HudTranslationNode { Name = el.Name };
+                    dirty = true;
+                }
+            }
+
+            if (dirty || !File.Exists(hudPath))
+            {
+                SafeWriteAllText(hudPath, JsonConvert.SerializeObject(engHud, Formatting.Indented));
+            }
+        }
+        catch (Exception ex)
+        {
+            TranslatorLogger.Error($"Failed dumping English HUD template: {ex.Message}");
         }
     }
 

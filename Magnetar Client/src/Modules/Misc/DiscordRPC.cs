@@ -1,4 +1,4 @@
-﻿#if MELONLOADER || RELEASE_MELON
+#if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
 using Magnetar_Client.UI.Setting;
@@ -6,6 +6,7 @@ using DiscordRPC;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Magnetar_Client.Utils;
 
 using static Magnetar_Client.GameData;
 using static Magnetar_Client.Utils.Maths;
@@ -71,20 +72,22 @@ public class DiscordRPC : Module
         instance = this;
 
         // 1. Register module-specific phrases to SavedTranslationData
-        RegisterTranslations(new Dictionary<string, string>
-        {
-            { "Browsing Magnetar's GUI", "Browsing Magnetar's GUI" },
-            { "Looking at the Main Menu", "Looking at the Main Menu" },
-            { "Checking out the almanac", "Checking out the almanac" },
-            { "Started a level", "Started a level" },
-            { "Picking Seeds", "Picking Seeds" },
-            { "Roaming in the Garden", "Roaming in the Garden" },
-            { "Growing Seeds", "Growing Seeds" },
-            { "Waterning plants", "Waterning plants" },
-            { "Sequential", "Sequential" },
-            { "Random", "Random" },
-            { "Made By Tproplay", "Made By Tproplay" }
-        });
+        RegisterTranslations(Translator.CreateDictionary(
+            new string[]
+            {
+                "Browsing Magnetar's GUI",
+                "Looking at the Main Menu",
+                "Checking out the almanac",
+                "Started a level",
+                "Picking Seeds",
+                "Roaming in the Garden",
+                "Growing Seeds",
+                "Waterning plants",
+                "Sequential",
+                "Random",
+                "Made By Tproplay",
+            }
+            ));
 
         // 2. Register module-specific regex translations
         RegisterRegexTranslation(@"^Playing:\s*(.*)$", "Playing: {1}");
@@ -135,9 +138,6 @@ public class DiscordRPC : Module
 
     public override void OnLanguageChanged()
     {
-        base.OnLanguageChanged();
-
-        // Translates options using this module's Translate() method
         InGame_Randomizer_mode.CustomNames = InGame_Randomizer_mode.Options
             .ToDictionary(kvp => kvp.Key, kvp => Translate(kvp.Value));
     }

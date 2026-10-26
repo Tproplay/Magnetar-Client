@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using static Magnetar_Client.Utils.Magnetar_Logger;
@@ -40,6 +40,29 @@ public static partial class Translator
     /// Get all the registered domains
     /// </summary>
     public static IReadOnlyCollection<TranslationDomain> AllDomains => _domains.Values;
+
+    /// <summary>
+    /// Ensures that translations are loaded and that module and HUD templates are dumped, synced, and linked.
+    /// </summary>
+    public static void EnsureInitialized()
+    {
+        if (!TranslationData.IsLoaded)
+        {
+            LoadTranslations();
+        }
+
+        if (!TranslationData.ModulesLinked && Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
+        {
+            LinkModuleTranslations();
+            TranslationData.ModulesLinked = true;
+        }
+
+        if (!TranslationData.HudLinked && Core.HUDManager_.HUDRenderer.Elements != null && Core.HUDManager_.HUDRenderer.Elements.Count > 0)
+        {
+            LinkHudTranslations();
+            TranslationData.HudLinked = true;
+        }
+    }
 
     /// <summary>
     /// Translates a string

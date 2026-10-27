@@ -166,8 +166,9 @@ public abstract class Module
         AddSettings(new EndCategorySetting());
     }
 
-    public static bool GetKeyComboDown(List<KeyCode> keyCodes)
+    public static bool GetKeyComboDown(List<KeyCode> keyCodes, bool ignoreGUI = false)
     {
+        if (!ignoreGUI && ClientConfig.InGUI) return false;
         if (keyCodes == null || keyCodes.Count == 0) return false;
 
         KeyCode triggerKey = keyCodes[keyCodes.Count - 1];

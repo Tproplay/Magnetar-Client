@@ -79,6 +79,7 @@ public class Main
 
         PreferenceManager.InitializePreferences();
         ResourceManager.LoadTextureOverrides();
+        GameData.Init();
 
         TopBar.Init();
         MobileMenuUI.Init();

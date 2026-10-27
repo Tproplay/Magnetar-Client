@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -88,6 +88,9 @@ public class TypographyTheme
 
     [JsonProperty("secondary", NullValueHandling = NullValueHandling.Ignore)]
     public string Secondary { get; set; }
+
+    [JsonProperty("rich text", NullValueHandling = NullValueHandling.Ignore)]
+    public string RichText { get; set; }
 
     [JsonProperty("primary", NullValueHandling = NullValueHandling.Ignore)]
     public string Primary { get => Text; set => Text = value; }
@@ -240,6 +243,8 @@ public static class ThemeData
     public static Color SettingOnColor { get; set; }
     public static Color SettingOffColor { get; set; }
     public static Color SeparatorColor { get; set; }
+    public static Color RichTextColor { get; set; } = new Color(1f, 0.47f, 0.47f, 1f);
+    public static string RichTextColorHex { get; set; } = "#FF7878FF";
 
     // --- Hardcoded Default Theme ---
     public static readonly ThemeDefinition InternalDefaultTheme = new()
@@ -322,7 +327,8 @@ public static class ThemeData
             Text = "#FFFFFFFF",
             Secondary = "#FFFFFFFF",
             HighlightText = "#FFFFFFFF",
-            HighlightBackground = "#FF3D3DFF"
+            HighlightBackground = "#FF3D3DFF",
+            RichText = "#FF7878FF"
         },
         NEF = new NefTheme
         {
@@ -429,7 +435,8 @@ public static class ThemeData
             Text = "#E6EDF3FF",
             Secondary = "#8B949EFF",
             HighlightText = "#FFFFFFFF",
-            HighlightBackground = "#203e6ec4"
+            HighlightBackground = "#203e6ec4",
+            RichText = "#FF7878FF"
         },
         NEF = new NefTheme
         {
@@ -478,6 +485,19 @@ public static class ThemeData
 
         ColorUtility.TryParseHtmlString(defaultHex, out Color defCol);
         return defCol;
+    }
+
+    /// <summary>
+    /// Converts a UnityEngine Color to an HTML hex color string.
+    /// </summary>
+    public static string ColorToHex(Color color, bool includeAlpha = true)
+    {
+        byte r = (byte)Mathf.Clamp(Mathf.RoundToInt(color.r * 255f), 0, 255);
+        byte g = (byte)Mathf.Clamp(Mathf.RoundToInt(color.g * 255f), 0, 255);
+        byte b = (byte)Mathf.Clamp(Mathf.RoundToInt(color.b * 255f), 0, 255);
+        if (!includeAlpha) return $"#{r:X2}{g:X2}{b:X2}";
+        byte a = (byte)Mathf.Clamp(Mathf.RoundToInt(color.a * 255f), 0, 255);
+        return $"#{r:X2}{g:X2}{b:X2}{a:X2}";
     }
 
     private static readonly Dictionary<Color, Texture2D> _texCache = new();

@@ -12,6 +12,11 @@ public static partial class DrawSetting
     private static int cursorIndex;
     private static int selectIndex;
     private static float scrollOffset;
+    private static float lastClickTime = -1f;
+    private static int lastClickIndex = -1;
+    private static float lastDoubleClickTime = -1f;
+
+    private static bool IsWordChar(char c) => char.IsLetterOrDigit(c) || c == '_';
     /// <summary>
     /// Gets or sets the vertical scroll offset of the autocomplete dropdown list.
     /// </summary>
@@ -81,6 +86,20 @@ public static partial class DrawSetting
 
         GUI.Label(labelRect, translatedName, ThemeManager.SettingLabelStyle);
         strSet.Value = DrawManualTextField(inputRect, strSet.Value, "", strSet.AutocompleteVars);
+    }
+
+    /// <summary>
+    /// Wraps text inside brackets (including brackets) with rich text color tags using <see cref="ThemeManager.RichTextColorHex"/>.
+    /// </summary>
+    /// <param name="input">The raw text string to format.</param>
+    /// <returns>The formatted string with rich text color tags around bracket tokens.</returns>
+    public static string FormatBracketRichText(string input)
+    {
+        if (string.IsNullOrEmpty(input) || !input.Contains("{"))
+            return input;
+
+        string colorHex = ThemeManager.RichTextColorHex ?? "#FF7878FF";
+        return System.Text.RegularExpressions.Regex.Replace(input, @"\{[^}\r\n]*(?:\}|$)", match => $"<color={colorHex}>{match.Value}</color>");
     }
 
     /// <summary>
@@ -169,15 +188,61 @@ public static partial class DrawSetting
                 {
                     showAutocomplete = true;
                     bracketStartIndex = i;
-                    currentFilter = text.Substring(i + 1, cursorIndex - i - 1).ToLower();
+                    currentFilter = text.Substring(i + 1, cursorIndex - i - 1);
                     break;
                 }
             }
 
             if (showAutocomplete)
             {
+                HashSet<string> seen = new(System.StringComparer.OrdinalIgnoreCase);
+
+                int lastDot = currentFilter.LastIndexOf('.');
+                string committedPrefix = lastDot >= 0 ? currentFilter.Substring(0, lastDot + 1) : "";
+                string subFilter = lastDot >= 0 ? currentFilter.Substring(lastDot + 1) : currentFilter;
+
                 foreach (var v in autocompleteVars)
-                    if (v.ToLower().Contains(currentFilter)) filteredVars.Add(v);
+                {
+                    if (string.IsNullOrEmpty(v)) continue;
+
+                    if (!string.IsNullOrEmpty(committedPrefix))
+                    {
+                        if (!v.StartsWith(committedPrefix, System.StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        string remainder = v.Substring(committedPrefix.Length);
+                        int nextDot = remainder.IndexOf('.');
+                        string suggestion = nextDot >= 0 ? committedPrefix + remainder.Substring(0, nextDot + 1) : v;
+                        string segment = nextDot >= 0 ? remainder.Substring(0, nextDot) : remainder;
+
+                        if (string.IsNullOrEmpty(subFilter) || segment.IndexOf(subFilter, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            if (seen.Add(suggestion))
+                                filteredVars.Add(suggestion);
+                        }
+                    }
+                    else
+                    {
+                        int firstDot = v.IndexOf('.');
+                        string suggestion = firstDot >= 0 ? v.Substring(0, firstDot + 1) : v;
+                        string segment = firstDot >= 0 ? v.Substring(0, firstDot) : v;
+
+                        if (string.IsNullOrEmpty(subFilter) || segment.IndexOf(subFilter, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            if (seen.Add(suggestion))
+                                filteredVars.Add(suggestion);
+                        }
+                        else if (v.IndexOf(subFilter, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            int matchIdx = v.IndexOf(subFilter, System.StringComparison.OrdinalIgnoreCase);
+                            int nextDotAfter = v.IndexOf('.', matchIdx);
+                            string deepSuggestion = nextDotAfter >= 0 ? v.Substring(0, nextDotAfter + 1) : v;
+                            if (seen.Add(deepSuggestion))
+                                filteredVars.Add(deepSuggestion);
+                        }
+                    }
+                }
+
                 if (filteredVars.Count == 0) showAutocomplete = false;
                 else autocompleteSelectedIndex = Mathf.Clamp(autocompleteSelectedIndex, 0, filteredVars.Count - 1);
             }
@@ -203,28 +268,59 @@ public static partial class DrawSetting
 #if !ANDROID
             SaveState();
 #endif
-            int endIndex = cursorIndex;
-            while (endIndex < text.Length)
+            int endBracket = -1;
+            for (int i = cursorIndex; i < text.Length; i++)
             {
-                char ch = text[endIndex];
-                if (ch == '}')
+                if (text[i] == '}')
                 {
-                    endIndex++;
+                    endBracket = i;
                     break;
                 }
-                if (ch == '{' || char.IsWhiteSpace(ch))
+                if (text[i] == '{')
                 {
                     break;
                 }
-                endIndex++;
             }
 
             int removeStart = bracketStartIndex + 1;
-            int removeLength = endIndex - removeStart;
-            text = text.Remove(removeStart, removeLength);
-            text = text.Insert(removeStart, chosen + "}");
-            cursorIndex = selectIndex = bracketStartIndex + chosen.Length + 2;
-            showAutocomplete = false;
+
+            if (chosen.EndsWith("."))
+            {
+                if (endBracket >= 0)
+                {
+                    int removeLength = endBracket - removeStart;
+                    text = text.Remove(removeStart, removeLength);
+                    text = text.Insert(removeStart, chosen);
+                    cursorIndex = selectIndex = removeStart + chosen.Length;
+                }
+                else
+                {
+                    int removeLength = cursorIndex - removeStart;
+                    text = text.Remove(removeStart, removeLength);
+                    text = text.Insert(removeStart, chosen + "}");
+                    cursorIndex = selectIndex = removeStart + chosen.Length;
+                }
+                showAutocomplete = true;
+                autocompleteSelectedIndex = 0;
+            }
+            else
+            {
+                if (endBracket >= 0)
+                {
+                    int removeLength = (endBracket + 1) - removeStart;
+                    text = text.Remove(removeStart, removeLength);
+                    text = text.Insert(removeStart, chosen + "}");
+                    cursorIndex = selectIndex = removeStart + chosen.Length + 1;
+                }
+                else
+                {
+                    int removeLength = cursorIndex - removeStart;
+                    text = text.Remove(removeStart, removeLength);
+                    text = text.Insert(removeStart, chosen + "}");
+                    cursorIndex = selectIndex = removeStart + chosen.Length + 1;
+                }
+                showAutocomplete = false;
+            }
         }
 
         if (e.type == EventType.MouseDown && e.button == 0)
@@ -241,8 +337,69 @@ public static partial class DrawSetting
                     _activeMobileKeyboardId = controlId;
 #endif
                 }
-                cursorIndex = GetIndexFromMouse(e.mousePosition.x - rect.x);
-                if (!e.shift) selectIndex = cursorIndex;
+
+                int clickIdx = GetIndexFromMouse(e.mousePosition.x - rect.x);
+
+                bool isDoubleClick = e.clickCount == 2 ||
+                    (e.clickCount < 2 && Time.unscaledTime - lastClickTime < 0.35f && Mathf.Abs(clickIdx - lastClickIndex) <= 1);
+                bool isTripleClick = e.clickCount >= 3 ||
+                    (isDoubleClick && Time.unscaledTime - lastDoubleClickTime < 0.35f);
+
+                if (isTripleClick)
+                {
+                    selectIndex = 0;
+                    cursorIndex = text.Length;
+                    lastClickTime = -1f;
+                    lastDoubleClickTime = -1f;
+                }
+                else if (isDoubleClick)
+                {
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        selectIndex = cursorIndex = 0;
+                    }
+                    else
+                    {
+                        int idx = Mathf.Clamp(clickIdx, 0, text.Length);
+                        if (idx > 0 && (idx == text.Length || !IsWordChar(text[idx])) && IsWordChar(text[idx - 1]))
+                            idx--;
+                        if (idx >= text.Length) idx = text.Length - 1;
+
+                        int start = idx;
+                        int end = idx;
+
+                        if (IsWordChar(text[idx]))
+                        {
+                            while (start > 0 && IsWordChar(text[start - 1])) start--;
+                            while (end < text.Length && IsWordChar(text[end])) end++;
+                        }
+                        else if (char.IsWhiteSpace(text[idx]))
+                        {
+                            while (start > 0 && char.IsWhiteSpace(text[start - 1])) start--;
+                            while (end < text.Length && char.IsWhiteSpace(text[end])) end++;
+                        }
+                        else
+                        {
+                            while (start > 0 && text[start - 1] == text[idx]) start--;
+                            while (end < text.Length && text[end] == text[idx]) end++;
+                        }
+
+                        selectIndex = start;
+                        cursorIndex = end;
+                    }
+
+                    lastDoubleClickTime = Time.unscaledTime;
+                    lastClickTime = Time.unscaledTime;
+                    lastClickIndex = clickIdx;
+                }
+                else
+                {
+                    cursorIndex = clickIdx;
+                    if (!e.shift) selectIndex = cursorIndex;
+                    lastClickTime = Time.unscaledTime;
+                    lastClickIndex = clickIdx;
+                }
+
                 e.Use();
             }
             else if (ActiveTextFieldId == controlId && !clickingDropdown)
@@ -315,7 +472,14 @@ public static partial class DrawSetting
                         string chosen = filteredVars[autocompleteSelectedIndex];
                         ApplyAutocomplete(chosen);
                     }
-                    interceptedForAutocomplete = true; showAutocomplete = false; e.Use();
+                    interceptedForAutocomplete = true;
+                    e.Use();
+                }
+                else if (k == KeyCode.Escape)
+                {
+                    showAutocomplete = false;
+                    interceptedForAutocomplete = true;
+                    e.Use();
                 }
             }
 
@@ -479,7 +643,7 @@ public static partial class DrawSetting
                 GUI.Box(selRect, "", ThemeManager.TextHighlightedStyle);
             }
 
-            GUI.Label(new Rect(5 - scrollOffset, 0, 2000, rect.height), text, ThemeManager.TextStyle);
+            GUI.Label(new Rect(5 - scrollOffset, 0, 2000, rect.height), FormatBracketRichText(text), ThemeManager.TextRichStyle);
 
             if (ActiveTextFieldId == controlId && (int)(Time.realtimeSinceStartup * 2) % 2 == 0)
             {

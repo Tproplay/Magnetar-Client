@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Api;
+using Magnetar_Client.Api;
 using Magnetar_Client.Core;
 using Newtonsoft.Json;
 using System;
@@ -41,6 +41,8 @@ public static class ThemeManager
     public static Color SettingOnColor => ThemeData.SettingOnColor;
     public static Color SettingOffColor => ThemeData.SettingOffColor;
     public static Color SeparatorColor => ThemeData.SeparatorColor;
+    public static Color RichTextColor => ThemeData.RichTextColor;
+    public static string RichTextColorHex => ThemeData.RichTextColorHex;
 
     public static Dictionary<string, ThemeDefinition> LoadedThemes => ThemeData.LoadedThemes;
     public static ThemeDefinition InternalDefaultTheme => ThemeData.InternalDefaultTheme;
@@ -70,6 +72,7 @@ public static class ThemeManager
     public static GUIStyle SeparatorStyle { get; private set; }
     public static GUIStyle SeparatorTextStyle { get; private set; }
     public static GUIStyle TextStyle { get; private set; }
+    public static GUIStyle TextRichStyle { get; private set; }
     public static GUIStyle TextHighlightedStyle { get; private set; }
     public static GUIStyle DimBackgroundStyle { get; private set; }
     public static GUIStyle HUDElementStyle { get; private set; }
@@ -347,6 +350,13 @@ public static class ThemeManager
         Color baseText = ThemeData.ParseColor(theme.Typography?.Text, d.Typography.Text);
         SettingTextStyle.normal.textColor = baseText;
         TextStyle.normal.textColor = baseText;
+        TextRichStyle.normal.textColor = baseText;
+        TextRichStyle.hover.textColor = baseText;
+
+        string rawRichHex = theme.Typography?.RichText ?? d.Typography?.RichText ?? "#FF7878FF";
+        Color richColor = ThemeData.ParseColor(rawRichHex, "#FF7878FF");
+        ThemeData.RichTextColor = richColor;
+        ThemeData.RichTextColorHex = ThemeData.ColorToHex(richColor);
 
         TextHighlightedStyle.normal.textColor = ThemeData.ParseColor(theme.Typography?.HighlightText, d.Typography.HighlightText);
         Texture2D hiBgTex = ThemeData.GetTex(ThemeData.ParseColor(theme.Typography?.HighlightBackground, d.Typography.HighlightBackground));
@@ -438,6 +448,7 @@ public static class ThemeManager
         SettingAuthorStyle = new GUIStyle { fontStyle = FontStyle.Italic, alignment = TextAnchor.MiddleLeft, richText = true };
         SettingTextStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = true, clipping = TextClipping.Clip };
         TextStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = false, clipping = TextClipping.Clip };
+        TextRichStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = true, clipping = TextClipping.Clip };
         TextHighlightedStyle = new GUIStyle { wordWrap = false, alignment = TextAnchor.MiddleLeft, richText = false, clipping = TextClipping.Clip };
 
         SeparatorStyle = new GUIStyle();
@@ -524,6 +535,7 @@ public static class ThemeManager
 
         SettingTextStyle.fontSize = S(TextFontSize);
         TextStyle.fontSize = S(TextFontSize);
+        TextRichStyle.fontSize = S(TextFontSize);
         TextHighlightedStyle.fontSize = TextStyle.fontSize;
 
         // Separators & HUD

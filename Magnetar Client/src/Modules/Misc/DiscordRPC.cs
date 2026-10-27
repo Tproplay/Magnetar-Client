@@ -5,12 +5,14 @@ using Magnetar_Client.UI.Setting;
 using DiscordRPC;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using Magnetar_Client.Utils;
 
 using static Magnetar_Client.GameData;
 using static Magnetar_Client.Utils.Maths;
 using Magnetar_Client.Core;
+using Magnetar_Client.Api;
 
 #if !ANDROID
 namespace Magnetar_Client.Modules;
@@ -32,23 +34,10 @@ public class DiscordRPC : Module
 
     public FloatSetting SwitchSpeed;
 
-    #region Lines
-
     public ListStringSetting InGameLine1;
     public ListStringSetting InGameLine2;
 
     public SelectSetting InGame_Randomizer_mode;
-
-    #endregion
-
-    public enum Status
-    {
-        InGame, Menu, Transition, Selecting, Big_Garden,
-        Magnetar_GUI, InAlamanc
-    }
-   
-
-    public static Status status = Status.Menu;
 
     public List<string> Line1Cycle = new();
     public List<string> Line2Cycle = new();
@@ -105,8 +94,8 @@ public class DiscordRPC : Module
         InGameLine1 = new ListStringSetting("Line 1",
             new List<string>
             {
-                "Magnetar Client v{Magnetar_Version}",
-                "Playing: {Level_Name}",
+                "Magnetar Client v{Magnetar.Version}",
+                "Playing: {Level.Name}",
             },
             15, In_Game_AutoCompleteArgs
             );
@@ -114,9 +103,9 @@ public class DiscordRPC : Module
         InGameLine2 = new ListStringSetting("Line 2",
             new List<string>
             {
-                "Sun: {Sun} | Money: {Money}",
-                "Wave: {Current_Wave}/{Max_Wave}",
-                "Plants: {number_of_plants} | Zombies: { number_of_zombies }",
+                "Sun: {Level.Sun} | Money: {Level.Money}",
+                "Wave: {Level.Current_Wave}/{Level.Max_Wave}",
+                "Plants: {Level.Number_Of_Plants} | Zombies: {Level.Number_Of_Zombies}",
             },
             15, In_Game_AutoCompleteArgs
             );
@@ -134,6 +123,68 @@ public class DiscordRPC : Module
 
         AddSettings(InGame_Randomizer_mode);
         EndCategory();
+
+        // Legacy Compatibility
+        Actions.OnLateInitializeCore += UpdateLegacyStrings;
+    }
+
+    private static readonly Dictionary<string, string> legacyAutoComplete = new(System.StringComparer.OrdinalIgnoreCase)
+    {
+        { "Magnetar_Version", "Magnetar.Version" },
+        { "Game_Version", "Game.Version" },
+        { "Level_Name", "Level.Name" },
+        { "Sun", "Level.Sun" },
+        { "Money", "Level.Money" },
+        { "Current_Wave", "Level.Current_Wave" },
+        { "Max_Wave", "Level.Max_Wave" },
+        { "number_of_plants", "Level.Number_Of_Plants" },
+        { "number_of_zombies", "Level.Number_Of_Zombies" },
+        { "movers_left", "Level.Movers_Left" }
+    };
+
+    private void UpdateLegacyStrings()
+    {
+        UpdateListSetting(InGameLine1);
+        UpdateListSetting(InGameLine2);
+    }
+
+    private void UpdateListSetting(ListStringSetting setting)
+    {
+        if (setting?.Values == null) return;
+
+        bool modified = false;
+        for (int i = 0; i < setting.Values.Count; i++)
+        {
+            string line = setting.Values[i];
+            if (string.IsNullOrEmpty(line)) continue;
+
+            string updatedLine = ReplaceLegacyKeys(line);
+            if (updatedLine != line)
+            {
+                setting.Values[i] = updatedLine;
+                modified = true;
+            }
+        }
+
+        if (modified)
+        {
+            setting.OnValueChanged?.Invoke(setting.Values);
+        }
+    }
+
+    private static string ReplaceLegacyKeys(string input)
+    {
+        if (string.IsNullOrEmpty(input) || !input.Contains("{")) return input;
+
+        return Regex.Replace(input, @"\{\s*([^{}\s]+)\s*\}", match =>
+        {
+            string key = match.Groups[1].Value;
+            if (legacyAutoComplete.TryGetValue(key, out string replacement))
+            {
+                return $"{{{replacement}}}";
+            }
+            return match.Value;
+        });
     }
 
     public override void OnLanguageChanged()
@@ -185,46 +236,7 @@ public class DiscordRPC : Module
         Line1Cycle.Clear();
         Line2Cycle.Clear();
 
-        GameStatus Gamestatus = GameAPP.theGameStatus;
-
-        if (Gamestatus == GameStatus.InGame && !BoardInstanceIsNull) // In Game
-        {
-            status = Status.InGame;
-        }
-        else if (InMainMenu && (ClientConfig.showgui || HUDManager.forceShow)) // Menu & Magnetar GUI
-        {
-            status = Status.Magnetar_GUI;
-            Line1Cycle.Add(Translate("Browsing Magnetar's GUI"));
-        }
-        else if (InMainMenu) // Menu
-        {
-            status = Status.Menu;
-            Line1Cycle.Add(Translate("Looking at the Main Menu"));
-        }
-        else if (InAlmanac)
-        {
-            status = Status.InAlamanc;
-            Line1Cycle.Add(Translate("Checking out the almanac"));
-        }
-        else if (Gamestatus == GameStatus.InInterlude) // In Transition
-        {
-            status = Status.Transition;
-            Line1Cycle.Add(Translate("Started a level"));
-        }
-        else if (Gamestatus == GameStatus.Selecting) // Picking seeds
-        {
-            status = Status.Selecting;
-            Line1Cycle.Add(Translate("Picking Seeds"));
-        }
-        else if (Gamestatus == GameStatus.BigGarden)
-        {
-            status = Status.Big_Garden;
-            Line1Cycle.Add(Translate("Roaming in the Garden"));
-            Line2Cycle.Add(Translate("Growing Seeds"));
-            Line2Cycle.Add(Translate("Waterning plants"));
-        }
-
-        switch (status)
+        switch (CurrentStatus)
         {
             case Status.InGame:
                 {
@@ -240,35 +252,62 @@ public class DiscordRPC : Module
                     }
                     break;
                 }
+            case Status.Magnetar_GUI:
+                Line1Cycle.Add(Translate("Browsing Magnetar's GUI"));
+                break;
+            case Status.Menu:
+                Line1Cycle.Add(Translate("Looking at the Main Menu"));
+                break;
+            case Status.InAlmanac:
+                Line1Cycle.Add(Translate("Checking out the almanac"));
+                break;
+            case Status.Transition:
+                Line1Cycle.Add(Translate("Started a level"));
+                break;
+            case Status.Selecting:
+                Line1Cycle.Add(Translate("Picking Seeds"));
+                break;
+            case Status.Big_Garden:
+                Line1Cycle.Add(Translate("Roaming in the Garden"));
+                Line2Cycle.Add(Translate("Growing Seeds"));
+                Line2Cycle.Add(Translate("Waterning plants"));
+                break;
         }
     }
 
     public static List<string> In_Game_AutoCompleteArgs = new()
     {
-        "Magnetar_Version","Game_Version",
-        "Level_Name","Sun","Money","Current_Wave","Max_Wave",
-        "number_of_plants","number_of_zombies",
-        "movers_left"
+        // Game Info
+        "Magnetar.Version","Game.Version",
+
+        // Level
+        "Level.Name",
+        "Level.Sun","Level.Money",
+        "Level.Current_Wave","Level.Max_Wave",
+        "Level.Number_Of_Plants","Level.Number_Of_Zombies",
+        "Level.Movers_Left"
     };
 
     private string In_Game_FormatString(string input)
     {
         if (string.IsNullOrEmpty(input)) return input;
-        string result = input;
+        string result = ReplaceLegacyKeys(input);
 
-        result = result.Replace("{Magnetar_Version}", MagnetarInfo.Version);
-        result = result.Replace("{Game_Version}", Application.version);
-        result = result.Replace("{Level_Name}", GetLevelName());
-        result = result.Replace("{Sun}", FormatInternational(BoardInstance.theSun));
-        result = result.Replace("{Money}", FormatInternational(BoardInstance.theMoney));
-        result = result.Replace("{Current_Wave}", BoardInstance.theWave.ToString());
-        result = result.Replace("{Max_Wave}", BoardInstance.theMaxWave.ToString());
-        result = result.Replace("{number_of_plants}", PlantList.Count.ToString());
-        result = result.Replace("{number_of_zombies}", ZombieList.Count.ToString());
-        result = result.Replace("{movers_left}", BoardInstance.mowerArray.Count.ToString());
+        // Game Info
+        result = result.Replace("{Magnetar.Version}", MagnetarInfo.Version);
+        result = result.Replace("{Game.Version}", Application.version);
 
-        // Applies regex translation matching if needed (e.g., "Playing: {Level_Name}")
-        return Translate(result);
+        // Level
+        result = result.Replace("{Level.Name}", GetLevelName());
+        result = result.Replace("{Level.Sun}", FormatInternational(BoardInstance.theSun));
+        result = result.Replace("{Level.Money}", FormatInternational(BoardInstance.theMoney));
+        result = result.Replace("{Level.Current_Wave}", BoardInstance.theWave.ToString());
+        result = result.Replace("{Level.Max_Wave}", BoardInstance.theMaxWave.ToString());
+        result = result.Replace("{Level.Number_Of_Plants}", PlantList.Count.ToString());
+        result = result.Replace("{Level.Number_Of_Zombies}", ZombieList.Count.ToString());
+        result = result.Replace("{Level.Movers_Left}", BoardInstance.mowerArray.Count.ToString());
+
+        return result;
     }
 
     private static readonly System.Random _random = new();

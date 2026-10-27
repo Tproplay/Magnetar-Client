@@ -1,6 +1,8 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using System.Collections.Generic;
 using System;
+using Magnetar_Client.Api;
+using Magnetar_Client.Core;
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -317,4 +319,119 @@ public static class GameData
             return GameAPP.canvasUp.Find("AlmanacMenu(Clone)") != null;
         }
     }
+
+    #region Status
+
+    /// <summary>
+    /// Represents the high-level game status detected by Magnetar Client.
+    /// </summary>
+    public enum Status
+    {
+        // Menu
+        /// <summary>Navigating the main menu.</summary>
+        Menu,
+        /// <summary>Magnetar GUI is open on top of the main menu.</summary>
+        Magnetar_GUI,
+
+        // Game
+        /// <summary>Interlude / transitioning between states or starting a level.</summary>
+        Transition,
+        /// <summary>Selecting seeds for the level.</summary>
+        Selecting,
+        /// <summary>Currently playing in a level.</summary>
+        InGame,
+        /// <summary>Roaming in the Zen / Big Garden.</summary>
+        
+        // Extra
+        Big_Garden,
+        /// <summary>Browsing the Almanac.</summary>
+        InAlmanac,
+    }
+
+    private static Status _status = Status.Menu;
+
+    /// <summary>
+    /// Current high-level game status.
+    /// </summary>
+    public static Status CurrentStatus
+    {
+        get => _status;
+        set
+        {
+            if (_status != value)
+            {
+                Status previous = _status;
+                _status = value;
+                OnStatusChanged?.Invoke(previous, value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Invoked when <see cref="CurrentStatus"/> changes (previousStatus, newStatus).
+    /// </summary>
+    public static Action<Status, Status> OnStatusChanged;
+
+    /// <summary>
+    /// Updates <see cref="CurrentStatus"/> based on the current game state and UI visibility.
+    /// </summary>
+    public static void UpdateStatus()
+    {
+        try
+        {
+            GameStatus Gamestatus = GameAPP.theGameStatus;
+
+            if (Gamestatus == GameStatus.InGame && !BoardInstanceIsNull)
+            {
+                CurrentStatus = Status.InGame;
+            }
+            else if (InMainMenu && (ClientConfig.InGUI))
+            {
+                CurrentStatus = Status.Magnetar_GUI;
+            }
+            else if (InMainMenu)
+            {
+                CurrentStatus = Status.Menu;
+            }
+            else if (InAlmanac)
+            {
+                CurrentStatus = Status.InAlmanac;
+            }
+            else if (Gamestatus == GameStatus.InInterlude)
+            {
+                CurrentStatus = Status.Transition;
+            }
+            else if (Gamestatus == GameStatus.Selecting)
+            {
+                CurrentStatus = Status.Selecting;
+            }
+            else if (Gamestatus == GameStatus.BigGarden)
+            {
+                CurrentStatus = Status.Big_Garden;
+            }
+        }
+        catch
+        {
+            // Ignore during early initialization or if game objects are invalid
+        }
+    }
+
+    #endregion
+
+    #region Service Lifecycle
+
+    internal static void Init()
+    {
+        ServiceRegistry.Register(new GameDataService());
+    }
+
+    private class GameDataService : IClientService, IUpdatable
+    {
+        public string Name => "GameData";
+        public int Priority => ServicePriority.Highest;
+
+        public void OnUpdate() => UpdateStatus();
+    }
+
+    #endregion
 }

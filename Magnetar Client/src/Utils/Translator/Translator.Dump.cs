@@ -368,37 +368,79 @@ public static partial class Translator
         try
         {
             string targetLang = CurrentLanguage;
-            if (string.Equals(targetLang, "English", StringComparison.OrdinalIgnoreCase)) return;
 
-            string baseDir = Path.Combine(TranslationRootDir, targetLang);
-            if (!Directory.Exists(baseDir)) Directory.CreateDirectory(baseDir);
+            // 1. Dump to active language untranslated_strings.json
+            AppendStringToUntranslatedFile(input, targetLang);
 
-            string untranslatedPath = Path.Combine(baseDir, "untranslated_strings.json");
-            Dictionary<string, string> dict = new(StringComparer.Ordinal);
-
-            lock (TranslationData.UntranslatedFileLock)
+            // 2. If active language is not English, also dump to English folder so English template tracks it
+            if (!string.Equals(targetLang, "English", StringComparison.OrdinalIgnoreCase))
             {
-                if (File.Exists(untranslatedPath))
-                {
-                    try
-                    {
-                        string json = SafeReadAllText(untranslatedPath);
-                        dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(json) ?? new(StringComparer.Ordinal);
-                    }
-                    catch { }
-                }
-
-                if (!dict.ContainsKey(input))
-                {
-                    dict[input] = input;
-                    SafeWriteAllText(untranslatedPath, JsonConvert.SerializeObject(dict, Formatting.Indented));
-                    TranslatorLogger.Warning($"Dumped untranslated string: \"{input}\"");
-                }
+                AppendStringToUntranslatedFile(input, "English");
             }
+
+            // 3. Keep English translation_strings.json template updated with the new string
+            AppendEnglishTranslationString(input);
         }
         catch (Exception ex)
         {
             TranslatorLogger.Error($"Failed dumping untranslated string '{input}': {ex.Message}");
+        }
+    }
+
+    private static void AppendStringToUntranslatedFile(string input, string language)
+    {
+        string baseDir = Path.Combine(TranslationRootDir, language);
+        if (!Directory.Exists(baseDir)) Directory.CreateDirectory(baseDir);
+
+        string untranslatedPath = Path.Combine(baseDir, "untranslated_strings.json");
+        Dictionary<string, string> dict = new(StringComparer.Ordinal);
+
+        lock (TranslationData.UntranslatedFileLock)
+        {
+            if (File.Exists(untranslatedPath))
+            {
+                try
+                {
+                    string json = SafeReadAllText(untranslatedPath);
+                    dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(json) ?? new(StringComparer.Ordinal);
+                }
+                catch { }
+            }
+
+            if (!dict.ContainsKey(input))
+            {
+                dict[input] = input;
+                SafeWriteAllText(untranslatedPath, JsonConvert.SerializeObject(dict, Formatting.Indented));
+                TranslatorLogger.Warning($"Dumped untranslated string ({language}): \"{input}\"");
+            }
+        }
+    }
+
+    private static void AppendEnglishTranslationString(string input)
+    {
+        string englishDir = Path.Combine(TranslationRootDir, "English");
+        if (!Directory.Exists(englishDir)) Directory.CreateDirectory(englishDir);
+
+        string stringsPath = Path.Combine(englishDir, "translation_strings.json");
+        lock (TranslationData.UntranslatedFileLock)
+        {
+            Dictionary<string, string> dict = new(StringComparer.Ordinal);
+            if (File.Exists(stringsPath))
+            {
+                try
+                {
+                    string json = SafeReadAllText(stringsPath);
+                    dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(json) ?? new(StringComparer.Ordinal);
+                }
+                catch { }
+            }
+
+            if (!dict.ContainsKey(input))
+            {
+                dict[input] = input;
+                SafeWriteAllText(stringsPath, JsonConvert.SerializeObject(dict, Formatting.Indented));
+                TranslatorLogger.Msg($"Added to English translation_strings: \"{input}\"");
+            }
         }
     }
 

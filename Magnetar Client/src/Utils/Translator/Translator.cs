@@ -194,9 +194,6 @@ public static partial class Translator
 
         TranslationData.ExactTranslations[input] = input;
 
-        if (string.Equals(CurrentLanguage, "English", StringComparison.OrdinalIgnoreCase))
-            return input;
-
         HashSet<string> blacklist = GetCachedBlacklist();
         if (!blacklist.Contains(input) && !blacklist.Contains(trimmedInput))
         {

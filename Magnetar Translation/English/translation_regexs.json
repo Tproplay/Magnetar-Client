@@ -1,5 +1,4 @@
 {
-  "(\\d+) selected": "{1} selected",
-  "Seed Slot (\\d+)":"Seed Slot {1}",
-  "Section #(\\d+)": "Section #{1}"
+    "(\\d+) selected": "{1} selected",
+    "Section #(\\d+)": "Section #{1}"
 }

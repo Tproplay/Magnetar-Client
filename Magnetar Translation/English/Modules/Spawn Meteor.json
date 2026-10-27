@@ -9,5 +9,11 @@
     "Keybind": "Keybind",
     "Count of Meteors": "Count of Meteors",
     "Delay between each meteor": "Delay between each meteor"
+  },
+  "Translations": {
+    "Passive Meteorite": "Passive Meteorite",
+    "Active Meteorite": "Active Meteorite",
+    "Ultimate Meteorite": "Ultimate Meteorite",
+    "Ultimate Meteorite (skin)": "Ultimate Meteorite (skin)"
   }
 }

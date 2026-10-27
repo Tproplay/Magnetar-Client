@@ -5,5 +5,12 @@
   "settings": {
     "General": "General",
     "Mode": "Mode"
+  },
+  "Translations": {
+    "Column": "Column",
+    "Row": "Row",
+    "Rook": "Rook",
+    "3x3": "3x3",
+    "Full Lawn": "Full Lawn"
   }
 }

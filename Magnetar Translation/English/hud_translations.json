@@ -1,197 +1,199 @@
 {
-    "FPS Counter":  {
-                        "Name":  "FPS Counter",
-                        "FPS: \u003ccolor={colorName}\u003e(\\d+)\u003c/color\u003e":  "FPS: \u003ccolor={colorName}\u003e{1}\u003c/color\u003e",
-                        "FPS: \u003ccolor=yellow\u003eNa\u003c/color\u003e":  "FPS: \u003ccolor=yellow\u003eNa\u003c/color\u003e"
-                    },
-    "Real FPS Counter":  {
-                             "Name":  "Real FPS Counter",
-                             "FPS (Real): \u003ccolor={colorName}\u003e(\\d+)\u003c/color\u003e":  "FPS (Real): \u003ccolor={colorName}\u003e{1}\u003c/color\u003e",
-                             "FPS (Real): \u003ccolor=yellow\u003eNa\u003c/color\u003e":  "FPS (Real): \u003ccolor=yellow\u003eNa\u003c/color\u003e"
-                         },
-    "Frame Time":  {
-                       "Name":  "Frame Time",
-                       "FrameTime: \u003ccolor={colorName}\u003e(\\d+)\u003c/color\u003ems":  "FrameTime: \u003ccolor={colorName}\u003e{1}\u003c/color\u003ems",
-                       "FrameTime: \u003ccolor=yellow\u003eNa\u003c/color\u003e":  "FrameTime: \u003ccolor=yellow\u003eNa\u003c/color\u003e"
-                   },
-    "Game Name and Version":  {
-                                  "Name":  "Game Name and Version",
-                                  "^Plants Vs\\. Zombies Fusion v(.*)$":  "Plants Vs. Zombies Fusion v{1}"
-                              },
-    "Magnetar Name and Version":  {
-                                      "Name":  "Magnetar Name and Version",
-                                      "^Magnetar Client v(.*)$":  "Magnetar Client v{1}"
-                                  },
-    "Using Vanilla Mode":  {
-                               "Name":  "Using Vanilla Mode",
-                               "Active":  "Active",
-                               "Inactive":  "Inactive",
-                               "Vanilla Mode: \u003ccolor=yellow\u003eNa\u003c/color\u003e":  "Vanilla Mode: \u003ccolor=yellow\u003eNa\u003c/color\u003e",
-                               "Vanilla Mode: \u003ccolor={color}\u003e(.*)\u003c/color\u003e":  "Vanilla Mode: \u003ccolor={color}\u003e{1}\u003c/color\u003e"
-                           },
-    "Up Time":  {
-                    "Name":  "Up Time"
-                },
-    "Number of Bullets Spawned":  {
-                                      "Name":  "Number of Bullets Spawned",
-                                      "Bullets Spawned: Na":  "Bullets Spawned: Na",
-                                      "^Bullets Spawned: (.*)$":  "Bullets Spawned: {1}"
-                                  },
-    "Total Damage by Plants":  {
-                                   "Name":  "Total Damage by Plants",
-                                   "Plant Damage: Na":  "Plant Damage: Na",
-                                   "^Plant Damage: (.*)$":  "Plant Damage: {1}"
-                               },
-    "Average Damage by Plants":  {
-                                     "Name":  "Average Damage by Plants",
-                                     "Plant DPS: 0":  "Plant DPS: 0",
-                                     "^Plant DPS: (.*)$":  "Plant DPS: {1}"
-                                 },
-    "Total Plants":  {
-                         "Name":  "Total Plants",
-                         "Total Plants: Na":  "Total Plants: Na",
-                         "^Total Plants: (.*)$":  "Total Plants: {1}"
-                     },
-    "Plants Placed":  {
-                          "Name":  "Plants Placed",
-                          "Plants Placed: Na":  "Plants Placed: Na",
-                          "^Plants Placed: (.*)$":  "Plants Placed: {1}"
-                      },
-    "Plant Deaths":  {
-                         "Name":  "Plant Deaths",
-                         "Plant Death: Na":  "Plant Death: Na",
-                         "^Plant Death: (.*)$":  "Plant Death: {1}"
-                     },
-    "Total Sun Obtained":  {
-                               "Name":  "Total Sun Obtained",
-                               "Sun Obtained: Na":  "Sun Obtained: Na",
-                               "^Sun Obtained: (.*)$":  "Sun Obtained: {1}"
-                           },
-    "Total Sun Spent":  {
-                            "Name":  "Total Sun Spent",
-                            "Sun Spent: Na":  "Sun Spent: Na",
-                            "^Sun Spent: (.*)$":  "Sun Spent: {1}"
-                        },
-    "Total Money Obtained":  {
-                                 "Name":  "Total Money Obtained",
-                                 "Money Obtained: Na":  "Money Obtained: Na",
-                                 "^Money Obtained: (.*)$":  "Money Obtained: {1}"
-                             },
-    "Total Money Spent":  {
-                              "Name":  "Total Money Spent",
-                              "Money Spent: Na":  "Money Spent: Na",
-                              "^Money Spent: (.*)$":  "Money Spent: {1}"
-                          },
-    "Auto drop/fall sun timer":  {
-                                     "Name":  "Auto drop/fall sun timer",
-                                     "Auto Sun: Na":  "Auto Sun: Na",
-                                     "Auto Sun: 0s":  "Auto Sun: 0s",
-                                     "^Auto Sun: (.*)$":  "Auto Sun: {1}"
-                                 },
-    "Time In Current Level":  {
-                                  "Name":  "Time In Current Level",
-                                  "^Playing For: (.*)$":  "Playing For: {1}"
-                              },
-    "Next wave arrival time":  {
-                                   "Name":  "Next wave arrival time",
-                                   "Next Wave arrival: Na":  "Next Wave arrival: Na",
-                                   "^Next Wave arrival: (.*)$":  "Next Wave arrival: {1}"
-                               },
-    "Active Star drop Cooldown":  {
-                                      "Name":  "Active Star drop Cooldown",
-                                      "Active Star drop: Na":  "Active Star drop: Na",
-                                      "^Active Star drop: (.*)$":  "Active Star drop: {1}"
-                                  },
-    "Passive Star drop Cooldown":  {
-                                       "Name":  "Passive Star drop Cooldown",
-                                       "Passive Star drop: Na":  "Passive Star drop: Na",
-                                       "^Passive Star drop: (.*)$":  "Passive Star drop: {1}"
-                                   },
-    "Game Speed":  {
-                       "Name":  "Game Speed",
-                       "TimeScale: 0":  "TimeScale: 0",
-                       "^TimeScale: (.*)$":  "TimeScale: {1}"
-                   },
-    "Zombies On Lawn":  {
-                            "Name":  "Zombies On Lawn",
-                            "Zombies On Lawn: Na":  "Zombies On Lawn: Na",
-                            "^Zombies On Lawn: (.*)$":  "Zombies On Lawn: {1}"
-                        },
-    "Hypnotized Zombies On Lawn":  {
-                                       "Name":  "Hypnotized Zombies On Lawn",
-                                       "Hypno Zombies On Lawn: Na":  "Hypno Zombies On Lawn: Na",
-                                       "^Hypno Zombies On Lawn: (.*)$":  "Hypno Zombies On Lawn: {1}"
-                                   },
-    "Zombies Spawned":  {
-                            "Name":  "Zombies Spawned",
-                            "Zombies Spawned: Na":  "Zombies Spawned: Na",
-                            "^Zombies Spawned: (.*)$":  "Zombies Spawned: {1}"
-                        },
-    "Hypnotized Zombies Spawned":  {
-                                       "Name":  "Hypnotized Zombies Spawned",
-                                       "Hypno Zombies Spawned: Na":  "Hypno Zombies Spawned: Na",
-                                       "^Hypno Zombies Spawned: (.*)$":  "Hypno Zombies Spawned: {1}"
-                                   },
-    "Zombies Killed":  {
-                           "Name":  "Zombies Killed",
-                           "Zombies Killed: Na":  "Zombies Killed: Na",
-                           "^Zombies Killed: (.*)$":  "Zombies Killed: {1}"
-                       },
-    "Hypnotized Zombies Killed":  {
-                                      "Name":  "Hypnotized Zombies Killed",
-                                      "Hypno Zombies Killed: Na":  "Hypno Zombies Killed: Na",
-                                      "^Hypno Zombies Killed: (.*)$":  "Hypno Zombies Killed: {1}"
-                                  },
-    "Current Zombie Wave Health":  {
-                                       "Name":  "Current Zombie Wave Health",
-                                       "Wave Health: Na":  "Wave Health: Na",
-                                       "^Wave Health: (.*)/(.*)$":  "Wave Health: {1}/{2}"
-                                   },
-    "Total Zombies Health":  {
-                                 "Name":  "Total Zombies Health",
-                                 "Total Zombies Health: Na":  "Total Zombies Health: Na",
-                                 "^Total Zombies Health: (.*)$":  "Total Zombies Health: {1}"
-                             },
-    "Hypnotized Zombies Health":  {
-                                      "Name":  "Hypnotized Zombies Health",
-                                      "Hypno Zombies Health: Na":  "Hypno Zombies Health: Na",
-                                      "^Hypno Zombies Health: (.*)$":  "Hypno Zombies Health: {1}"
-                                  },
-    "Current Wave":  {
-                         "Name":  "Current Wave",
-                         "Wave: Na":  "Wave: Na",
-                         "^Wave: (\\d+)/(\\d+)$":  "Wave: {1}/{2}"
-                     },
-    "RAM Usage":  {
-                      "Name":  "RAM Usage",
-                      "RAM: \u003ccolor=yellow\u003eNa\u003c/color\u003e":  "RAM: \u003ccolor=yellow\u003eNa\u003c/color\u003e",
-                      "RAM: \u003ccolor={color}\u003e(\\d+(?:\\.\\d+)?) MB\u003c/color\u003e":  "RAM: \u003ccolor={color}\u003e{1} MB\u003c/color\u003e"
-                  },
-    "System RAM Usage":  {
-                             "Name":  "System RAM Usage",
-                             "RAM: \u003ccolor=yellow\u003eNa\u003c/color\u003e":  "RAM: \u003ccolor=yellow\u003eNa\u003c/color\u003e",
-                             "RAM: \u003ccolor=white\u003e(\\d+)% of (.*)GB\u003c/color\u003e":  "RAM: \u003ccolor=white\u003e{1}% of {2}GB\u003c/color\u003e"
-                         },
-    "CPU Usage":  {
-                      "Name":  "CPU Usage",
-                      "CPU: \u003ccolor=yellow\u003eNa\u003c/color\u003e":  "CPU: \u003ccolor=yellow\u003eNa\u003c/color\u003e",
-                      "CPU: \u003ccolor={color}\u003e(\\d+(?:\\.\\d+)?)%\u003c/color\u003e":  "CPU: \u003ccolor={color}\u003e{1}%\u003c/color\u003e"
-                  },
-    "VRAM Usage":  {
-                       "Name":  "VRAM Usage",
-                       "VRAM: \u003ccolor=yellow\u003eNa\u003c/color\u003e":  "VRAM: \u003ccolor=yellow\u003eNa\u003c/color\u003e",
-                       "^VRAM: (.*) / (.*) MB$":  "VRAM: {1} / {2} MB"
-                   },
-    "GPU Name":  {
-                     "Name":  "GPU Name",
-                     "^\u003ccolor=cyan\u003e(.*)\u003c/color\u003e$":  "\u003ccolor=cyan\u003e{1}\u003c/color\u003e"
-                 },
-    "CPU Name":  {
-                     "Name":  "CPU Name",
-                     "^\u003ccolor=cyan\u003e(.*)\u003c/color\u003e$":  "\u003ccolor=cyan\u003e{1}\u003c/color\u003e"
-                 },
-    "Current Time":  {
-                         "Name":  "Current Time",
-                         "^\u003ccolor=white\u003e(.*)\u003c/color\u003e$":  "\u003ccolor=white\u003e{1}\u003c/color\u003e"
-                     }
+  "FPS Counter": {
+    "Name": "FPS Counter",
+    "FPS: <color=yellow>Na</color>": "FPS: <color=yellow>Na</color>",
+    "FPS: <color={colorName}>(\\d+)</color>": "FPS: <color={colorName}>{1}</color>"
+  },
+  "Real FPS Counter": {
+    "Name": "Real FPS Counter",
+    "FPS (Real): <color=yellow>Na</color>": "FPS (Real): <color=yellow>Na</color>",
+    "FPS (Real): <color={colorName}>(\\d+)</color>": "FPS (Real): <color={colorName}>{1}</color>"
+  },
+  "Frame Time": {
+    "Name": "Frame Time",
+    "FrameTime: <color=yellow>Na</color>": "FrameTime: <color=yellow>Na</color>",
+    "FrameTime: <color={colorName}>(\\d+)</color>ms": "FrameTime: <color={colorName}>{1}</color>ms"
+  },
+  "Game Name and Version": {
+    "Name": "Game Name and Version",
+    "^Plants Vs\\. Zombies Fusion v(.*)$": "Plants Vs. Zombies Fusion v{1}"
+  },
+  "Magnetar Name and Version": {
+    "Name": "Magnetar Name and Version",
+    "^Magnetar Client v(.*)$": "Magnetar Client v{1}"
+  },
+  "Using Vanilla Mode": {
+    "Name": "Using Vanilla Mode",
+    "Active": "Active",
+    "Inactive": "Inactive",
+    "Vanilla Mode: <color=yellow>Na</color>": "Vanilla Mode: <color=yellow>Na</color>",
+    "Vanilla Mode: <color={color}>(.*)</color>": "Vanilla Mode: <color={color}>{1}</color>"
+  },
+  "Up Time": {
+    "Name": "Up Time"
+  },
+  "Active Star drop Cooldown": {
+    "Name": "Active Star drop Cooldown",
+    "Active Star drop: NA": "Active Star drop: NA",
+    "Active Star drop: Na": "Active Star drop: Na",
+    "^Active Star drop: (.*)$": "Active Star drop: {1}"
+  },
+  "Current Wave": {
+    "Name": "Current Wave",
+    "Wave: Na": "Wave: Na",
+    "^Wave: (\\d+)/(\\d+)$": "Wave: {1}/{2}"
+  },
+  "Passive Star drop Cooldown": {
+    "Name": "Passive Star drop Cooldown",
+    "Passive Star drop: NA": "Passive Star drop: NA",
+    "Passive Star drop: Na": "Passive Star drop: Na",
+    "^Passive Star drop: (.*)$": "Passive Star drop: {1}"
+  },
+  "Time In Current Level": {
+    "Name": "Time In Current Level",
+    "^Playing For: (.*)$": "Playing For: {1}"
+  },
+  "Game Speed": {
+    "Name": "Game Speed",
+    "TimeScale: 0": "TimeScale: 0",
+    "^TimeScale: (.*)$": "TimeScale: {1}"
+  },
+  "Next wave arrival time": {
+    "Name": "Next wave arrival time",
+    "Next Wave arrival: Na": "Next Wave arrival: Na",
+    "^Next Wave arrival: (.*)$": "Next Wave arrival: {1}"
+  },
+  "Number of Bullets Spawned": {
+    "Name": "Number of Bullets Spawned",
+    "Bullets Spawned: Na": "Bullets Spawned: Na",
+    "^Bullets Spawned: (.*)$": "Bullets Spawned: {1}"
+  },
+  "Average Damage by Plants": {
+    "Name": "Average Damage by Plants",
+    "Plant DPS: 0": "Plant DPS: 0",
+    "^Plant DPS: (.*)$": "Plant DPS: {1}"
+  },
+  "Total Damage by Plants": {
+    "Name": "Total Damage by Plants",
+    "Plant Damage: Na": "Plant Damage: Na",
+    "^Plant Damage: (.*)$": "Plant Damage: {1}"
+  },
+  "Total Plants": {
+    "Name": "Total Plants",
+    "Total Plants: Na": "Total Plants: Na",
+    "^Total Plants: (.*)$": "Total Plants: {1}"
+  },
+  "Plant Deaths": {
+    "Name": "Plant Deaths",
+    "Plant Death: Na": "Plant Death: Na",
+    "^Plant Death: (.*)$": "Plant Death: {1}"
+  },
+  "Plants Placed": {
+    "Name": "Plants Placed",
+    "Plants Placed: Na": "Plants Placed: Na",
+    "^Plants Placed: (.*)$": "Plants Placed: {1}"
+  },
+  "Auto drop/fall sun timer": {
+    "Name": "Auto drop/fall sun timer",
+    "Auto Sun: Na": "Auto Sun: Na",
+    "Auto Sun: 0s": "Auto Sun: 0s",
+    "^Auto Sun: (.*)$": "Auto Sun: {1}"
+  },
+  "Total Money Obtained": {
+    "Name": "Total Money Obtained",
+    "Money Obtained: Na": "Money Obtained: Na",
+    "^Money Obtained: (.*)$": "Money Obtained: {1}"
+  },
+  "Total Money Spent": {
+    "Name": "Total Money Spent",
+    "Money Spent: Na": "Money Spent: Na",
+    "^Money Spent: (.*)$": "Money Spent: {1}"
+  },
+  "Total Sun Obtained": {
+    "Name": "Total Sun Obtained",
+    "Sun Obtained: Na": "Sun Obtained: Na",
+    "^Sun Obtained: (.*)$": "Sun Obtained: {1}"
+  },
+  "Total Sun Spent": {
+    "Name": "Total Sun Spent",
+    "Sun Spent: Na": "Sun Spent: Na",
+    "^Sun Spent: (.*)$": "Sun Spent: {1}"
+  },
+  "Hypnotized Zombies On Lawn": {
+    "Name": "Hypnotized Zombies On Lawn",
+    "Hypno Zombies On Lawn: Na": "Hypno Zombies On Lawn: Na",
+    "^Hypno Zombies On Lawn: (.*)$": "Hypno Zombies On Lawn: {1}"
+  },
+  "Hypnotized Zombies Killed": {
+    "Name": "Hypnotized Zombies Killed",
+    "Hypno Zombies Killed: Na": "Hypno Zombies Killed: Na",
+    "^Hypno Zombies Killed: (.*)$": "Hypno Zombies Killed: {1}"
+  },
+  "Hypnotized Zombies Spawned": {
+    "Name": "Hypnotized Zombies Spawned",
+    "Hypno Zombies Spawned: Na": "Hypno Zombies Spawned: Na",
+    "^Hypno Zombies Spawned: (.*)$": "Hypno Zombies Spawned: {1}"
+  },
+  "Zombies On Lawn": {
+    "Name": "Zombies On Lawn",
+    "Zombies On Lawn: Na": "Zombies On Lawn: Na",
+    "^Zombies On Lawn: (.*)$": "Zombies On Lawn: {1}"
+  },
+  "Zombies Killed": {
+    "Name": "Zombies Killed",
+    "Zombies Killed: Na": "Zombies Killed: Na",
+    "^Zombies Killed: (.*)$": "Zombies Killed: {1}"
+  },
+  "Zombies Spawned": {
+    "Name": "Zombies Spawned",
+    "Zombies Spawned: Na": "Zombies Spawned: Na",
+    "^Zombies Spawned: (.*)$": "Zombies Spawned: {1}"
+  },
+  "Hypnotized Zombies Health": {
+    "Name": "Hypnotized Zombies Health",
+    "Hypno Zombies Health: Na": "Hypno Zombies Health: Na",
+    "^Hypno Zombies Health: (.*)$": "Hypno Zombies Health: {1}"
+  },
+  "Total Zombies Health": {
+    "Name": "Total Zombies Health",
+    "Total Zombies Health: Na": "Total Zombies Health: Na",
+    "^Total Zombies Health: (.*)$": "Total Zombies Health: {1}"
+  },
+  "Current Zombie Wave Health": {
+    "Name": "Current Zombie Wave Health",
+    "Wave Health: Na": "Wave Health: Na",
+    "^Wave Health: (.*)/(.*)$": "Wave Health: {1}/{2}"
+  },
+  "RAM Usage": {
+    "Name": "RAM Usage",
+    "RAM: <color=yellow>Na</color>": "RAM: <color=yellow>Na</color>",
+    "RAM: <color={color}>(\\d+(?:\\.\\d+)?) MB</color>": "RAM: <color={color}>{1} MB</color>"
+  },
+  "System RAM Usage": {
+    "Name": "System RAM Usage",
+    "RAM: <color=yellow>Na</color>": "RAM: <color=yellow>Na</color>",
+    "RAM: <color=white>(\\d+)% of (.*)GB</color>": "RAM: <color=white>{1}% of {2}GB</color>"
+  },
+  "CPU Usage": {
+    "Name": "CPU Usage",
+    "CPU: <color=yellow>Na</color>": "CPU: <color=yellow>Na</color>",
+    "CPU: <color={color}>(\\d+(?:\\.\\d+)?)%</color>": "CPU: <color={color}>{1}%</color>"
+  },
+  "VRAM Usage": {
+    "Name": "VRAM Usage",
+    "VRAM: <color=yellow>Na</color>": "VRAM: <color=yellow>Na</color>",
+    "^VRAM: (.*) / (.*) MB$": "VRAM: {1} / {2} MB"
+  },
+  "GPU Name": {
+    "Name": "GPU Name",
+    "^<color=cyan>(.*)</color>$": "<color=cyan>{1}</color>"
+  },
+  "CPU Name": {
+    "Name": "CPU Name",
+    "^<color=cyan>(.*)</color>$": "<color=cyan>{1}</color>"
+  },
+  "Current Time": {
+    "Name": "Current Time",
+    "^<color=white>(.*)</color>$": "<color=white>{1}</color>"
+  }
 }

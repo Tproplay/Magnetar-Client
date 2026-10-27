@@ -9,5 +9,22 @@
     "Line 1": "Line 1",
     "Line 2": "Line 2",
     "Iteration Mode": "Iteration Mode"
+  },
+  "Translations": {
+    "Browsing Magnetar's GUI": "Browsing Magnetar's GUI",
+    "Looking at the Main Menu": "Looking at the Main Menu",
+    "Checking out the almanac": "Checking out the almanac",
+    "Started a level": "Started a level",
+    "Picking Seeds": "Picking Seeds",
+    "Roaming in the Garden": "Roaming in the Garden",
+    "Growing Seeds": "Growing Seeds",
+    "Waterning plants": "Waterning plants",
+    "Sequential": "Sequential",
+    "Random": "Random",
+    "Made By Tproplay": "Made By Tproplay"
+  },
+  "RegexTranslations": {
+    "^Playing:\\s*(.*)$": "Playing: {1}",
+    "^Pvz Fusion v(.*)$": "Pvz Fusion v{1}"
   }
 }

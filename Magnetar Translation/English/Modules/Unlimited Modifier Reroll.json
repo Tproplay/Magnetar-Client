@@ -5,6 +5,7 @@
   "settings": {
     "General": "General",
     "Reroll Count": "Reroll Count",
-    "Preserve Original Count": "Preserve Original Count"
+    "Preserve Original Count": "Preserve Original Count",
+    "Debug Mode": "Debug Mode"
   }
 }

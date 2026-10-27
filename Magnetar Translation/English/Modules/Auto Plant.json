@@ -9,5 +9,10 @@
     "Multi Plant": "Multi Plant",
     "Use Extra Plant": "Use Extra Plant",
     "Planting Order": "Planting Order"
+  },
+  "Translations": {
+    "First": "First",
+    "Last": "Last",
+    "Random": "Random"
   }
 }

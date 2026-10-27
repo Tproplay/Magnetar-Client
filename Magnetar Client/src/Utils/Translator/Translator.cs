@@ -51,13 +51,13 @@ public static partial class Translator
             LoadTranslations();
         }
 
-        if (!TranslationData.ModulesLinked && Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
+        if (!TranslationData.ModulesLinked && Core.ModuleManager.IsInitialized && Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
         {
             LinkModuleTranslations();
             TranslationData.ModulesLinked = true;
         }
 
-        if (!TranslationData.HudLinked && Core.HUDManager_.HUDRenderer.Elements != null && Core.HUDManager_.HUDRenderer.Elements.Count > 0)
+        if (!TranslationData.HudLinked && Core.HUDManager.IsInitialized && Core.HUDManager_.HUDRenderer.Elements != null && Core.HUDManager_.HUDRenderer.Elements.Count > 0)
         {
             LinkHudTranslations();
             TranslationData.HudLinked = true;
@@ -141,13 +141,13 @@ public static partial class Translator
 
         if (!TranslationData.IsLoaded) LoadTranslations();
 
-        if (!TranslationData.ModulesLinked && Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
+        if (!TranslationData.ModulesLinked && Core.ModuleManager.IsInitialized && Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
         {
             LinkModuleTranslations();
             TranslationData.ModulesLinked = true;
         }
 
-        if (!TranslationData.HudLinked && Core.HUDManager_.HUDRenderer.Elements != null && Core.HUDManager_.HUDRenderer.Elements.Count > 0)
+        if (!TranslationData.HudLinked && Core.HUDManager.IsInitialized && Core.HUDManager_.HUDRenderer.Elements != null && Core.HUDManager_.HUDRenderer.Elements.Count > 0)
         {
             LinkHudTranslations();
             TranslationData.HudLinked = true;

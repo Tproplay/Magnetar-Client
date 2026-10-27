@@ -38,7 +38,10 @@ public static partial class Translator
             });
         }
     }
-    private static void InvalidateBlacklist()
+    /// <summary>
+    /// Marks the translator blacklist as dirty so it is re-evaluated.
+    /// </summary>
+    public static void InvalidateBlacklist()
     {
         TranslationData.BlacklistDirty = true;
     }
@@ -92,10 +95,12 @@ public static partial class Translator
 
         TranslationData.CachedBlacklist.Clear();
 
-        if (Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
+        if (Core.ModuleManager.IsInitialized && Core.ModuleManager.Modules != null && Core.ModuleManager.Modules.Count > 0)
         {
-            foreach (var mod in Core.ModuleManager.Modules)
+            var modules = Core.ModuleManager.GetModulesSnapshot();
+            foreach (var mod in modules)
             {
+                if (mod == null) continue;
                 if (!string.IsNullOrEmpty(mod.Name)) TranslationData.CachedBlacklist.Add(mod.Name);
                 if (!string.IsNullOrEmpty(mod.Description)) TranslationData.CachedBlacklist.Add(mod.Description);
                 if (!string.IsNullOrEmpty(mod.SearchHints)) TranslationData.CachedBlacklist.Add(mod.SearchHints);
@@ -105,10 +110,38 @@ public static partial class Translator
             }
         }
 
-        if (Core.HUDManager_.HUDRenderer.Elements != null && Core.HUDManager_.HUDRenderer.Elements.Count > 0)
+        string engModulesDir = Path.Combine(TranslationRootDir, "English", "Modules");
+        if (Directory.Exists(engModulesDir))
         {
-            foreach (var element in Core.HUDManager_.HUDRenderer.Elements)
+            try
             {
+                foreach (var file in Directory.GetFiles(engModulesDir, "*.json"))
+                {
+                    string json = SafeReadAllText(file);
+                    var node = JsonConvert.DeserializeObject<ModuleTranslationNode>(json);
+                    if (node != null)
+                    {
+                        if (!string.IsNullOrEmpty(node.Name)) TranslationData.CachedBlacklist.Add(node.Name);
+                        if (!string.IsNullOrEmpty(node.Description)) TranslationData.CachedBlacklist.Add(node.Description);
+                        if (!string.IsNullOrEmpty(node.SearchHints)) TranslationData.CachedBlacklist.Add(node.SearchHints);
+
+                        if (node.Settings != null)
+                        {
+                            foreach (var s in node.Settings.Keys)
+                                TranslationData.CachedBlacklist.Add(s);
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        if (Core.HUDManager.IsInitialized && Core.HUDManager_.HUDRenderer.Elements != null && Core.HUDManager_.HUDRenderer.Elements.Count > 0)
+        {
+            var elements = Core.HUDManager_.HUDRenderer.GetElementsSnapshot();
+            foreach (var element in elements)
+            {
+                if (element == null) continue;
                 if (!string.IsNullOrEmpty(element.Name))
                     TranslationData.CachedBlacklist.Add(element.Name);
 
@@ -128,7 +161,7 @@ public static partial class Translator
         if (!File.Exists(filePath)) return;
         try
         {
-            var dict = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(filePath));
+            var dict = JsonConvert.DeserializeObject<Dictionary<string, object>>(SafeReadAllText(filePath));
             if (dict != null)
             {
                 foreach (var k in dict.Keys)
@@ -158,8 +191,11 @@ public static partial class Translator
             foreach (var ctrl in defaultControls)
                 TranslationData.KnownEnglishStrings.Add(ctrl);
 
-            DumpModulesEnglishTemplate(englishDir);
-            DumpHudEnglishTemplate(englishDir);
+            if (Core.ModuleManager.IsInitialized)
+                DumpModulesEnglishTemplate(englishDir);
+
+            if (Core.HUDManager.IsInitialized)
+                DumpHudEnglishTemplate(englishDir);
 
             HashSet<string> blacklist = GetCachedBlacklist();
             string stringsPath = Path.Combine(englishDir, "translation_strings.json");
@@ -167,7 +203,7 @@ public static partial class Translator
 
             if (File.Exists(stringsPath))
             {
-                try { engStrings = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(stringsPath)) ?? new(StringComparer.Ordinal); } catch { }
+                try { engStrings = JsonConvert.DeserializeObject<Dictionary<string, string>>(SafeReadAllText(stringsPath)) ?? new(StringComparer.Ordinal); } catch { }
             }
 
             var cleanedEngStrings = engStrings
@@ -189,6 +225,12 @@ public static partial class Translator
             {
                 SafeWriteAllText(stringsPath, JsonConvert.SerializeObject(cleanedEngStrings, Formatting.Indented));
             }
+
+            string oldEnglishUntranslated = Path.Combine(englishDir, "untranslated_strings.json");
+            if (File.Exists(oldEnglishUntranslated))
+            {
+                try { File.Delete(oldEnglishUntranslated); } catch { }
+            }
         }
         catch (Exception ex)
         {
@@ -202,7 +244,7 @@ public static partial class Translator
     /// </summary>
     public static void DumpModulesEnglishTemplate(string englishDir = null)
     {
-        if (Core.ModuleManager.Modules == null || Core.ModuleManager.Modules.Count == 0)
+        if (!Core.ModuleManager.IsInitialized || Core.ModuleManager.Modules == null || Core.ModuleManager.Modules.Count == 0)
             return;
 
         try
@@ -211,7 +253,8 @@ public static partial class Translator
             string englishModulesDir = Path.Combine(englishDir, "Modules");
             if (!Directory.Exists(englishModulesDir)) Directory.CreateDirectory(englishModulesDir);
 
-            foreach (var mod in Core.ModuleManager.Modules)
+            var modules = Core.ModuleManager.GetModulesSnapshot();
+            foreach (var mod in modules)
             {
                 if (mod == null || string.IsNullOrWhiteSpace(mod.Name)) continue;
 
@@ -282,7 +325,7 @@ public static partial class Translator
     /// </summary>
     public static void DumpHudEnglishTemplate(string englishDir = null)
     {
-        if (Core.HUDManager_.HUDRenderer.Elements == null || Core.HUDManager_.HUDRenderer.Elements.Count == 0)
+        if (!Core.HUDManager.IsInitialized || Core.HUDManager_.HUDRenderer.Elements == null || Core.HUDManager_.HUDRenderer.Elements.Count == 0)
             return;
 
         try
@@ -298,7 +341,8 @@ public static partial class Translator
             }
 
             bool dirty = false;
-            foreach (var el in Core.HUDManager_.HUDRenderer.Elements)
+            var elements = Core.HUDManager_.HUDRenderer.GetElementsSnapshot();
+            foreach (var el in elements)
             {
                 if (el == null || string.IsNullOrWhiteSpace(el.Name)) continue;
 
@@ -369,16 +413,12 @@ public static partial class Translator
         {
             string targetLang = CurrentLanguage;
 
-            // 1. Dump to active language untranslated_strings.json
-            AppendStringToUntranslatedFile(input, targetLang);
-
-            // 2. If active language is not English, also dump to English folder so English template tracks it
+            // If active language is not English, dump to active language's untranslated_strings.json
             if (!string.Equals(targetLang, "English", StringComparison.OrdinalIgnoreCase))
             {
-                AppendStringToUntranslatedFile(input, "English");
+                AppendStringToUntranslatedFile(input, targetLang);
             }
 
-            // 3. Keep English translation_strings.json template updated with the new string
             AppendEnglishTranslationString(input);
         }
         catch (Exception ex)
@@ -389,6 +429,9 @@ public static partial class Translator
 
     private static void AppendStringToUntranslatedFile(string input, string language)
     {
+        HashSet<string> blacklist = GetCachedBlacklist();
+        if (blacklist.Contains(input)) return;
+
         string baseDir = Path.Combine(TranslationRootDir, language);
         if (!Directory.Exists(baseDir)) Directory.CreateDirectory(baseDir);
 
@@ -418,6 +461,9 @@ public static partial class Translator
 
     private static void AppendEnglishTranslationString(string input)
     {
+        HashSet<string> blacklist = GetCachedBlacklist();
+        if (blacklist.Contains(input)) return;
+
         string englishDir = Path.Combine(TranslationRootDir, "English");
         if (!Directory.Exists(englishDir)) Directory.CreateDirectory(englishDir);
 

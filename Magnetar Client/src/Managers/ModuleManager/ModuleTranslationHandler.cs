@@ -19,9 +19,10 @@ public static class ModuleTranslationHandler
 
         if (ModuleManager.Modules != null)
         {
-            for (int i = 0; i < ModuleManager.Modules.Count; i++)
+            var modules = ModuleManager.GetModulesSnapshot();
+            for (int i = 0; i < modules.Length; i++)
             {
-                var mod = ModuleManager.Modules[i];
+                var mod = modules[i];
                 if (mod == null) continue;
 
                 ReloadModuleTranslations(mod, currentLang);

@@ -62,6 +62,8 @@ public static class HUDManager
         SaveLoad.RegisterHandler(new HUDSaveHandler());
 
         IsInitialized = true;
+        Translator.InvalidateBlacklist();
+        Translator.LinkHudTranslations();
 
         DebugLogger.Msg("Initialized HUD Manager");
     }

@@ -233,6 +233,16 @@ public static partial class Translator
                 try { domain.Load(targetLanguage); } catch { }
             }
 
+            if (Core.ModuleManager.IsInitialized)
+            {
+                LinkModuleTranslations();
+            }
+
+            if (Core.HUDManager.IsInitialized)
+            {
+                LinkHudTranslations();
+            }
+
             TranslationData.IsLoaded = true;
         }
         catch (Exception ex)
@@ -284,9 +294,12 @@ public static partial class Translator
         }
     }
 
-    private static void LinkHudTranslations()
+    /// <summary>
+    /// Links, syncs, and reloads HUD translations across all languages.
+    /// </summary>
+    public static void LinkHudTranslations()
     {
-        if (Core.HUDManager_.HUDRenderer.Elements == null || Core.HUDManager_.HUDRenderer.Elements.Count == 0) return;
+        if (!Core.HUDManager.IsInitialized || Core.HUDManager_.HUDRenderer.Elements == null || Core.HUDManager_.HUDRenderer.Elements.Count == 0) return;
 
         string englishDir = Path.Combine(TranslationRootDir, "English");
         string engHudPath = Path.Combine(englishDir, "hud_translations.json");
@@ -317,8 +330,10 @@ public static partial class Translator
 
         if (Core.HUDManager_.HUDRenderer.Elements != null)
         {
-            foreach (var element in Core.HUDManager_.HUDRenderer.Elements)
+            var elements = Core.HUDManager_.HUDRenderer.GetElementsSnapshot();
+            foreach (var element in elements)
             {
+                if (element == null) continue;
                 string typeName = element.GetType().Name;
 
                 if (TranslationData.ExactTranslations.TryGetValue(element.Name, out var transName))
@@ -334,12 +349,16 @@ public static partial class Translator
             }
         }
 
+        TranslationData.HudLinked = true;
         InvalidateBlacklist();
     }
 
-    private static void LinkModuleTranslations()
+    /// <summary>
+    /// Links, syncs, and reloads module translations across all languages.
+    /// </summary>
+    public static void LinkModuleTranslations()
     {
-        if (Core.ModuleManager.Modules == null || Core.ModuleManager.Modules.Count == 0) return;
+        if (!Core.ModuleManager.IsInitialized || Core.ModuleManager.Modules == null || Core.ModuleManager.Modules.Count == 0) return;
 
         string englishDir = Path.Combine(TranslationRootDir, "English");
         string englishModulesDir = Path.Combine(englishDir, "Modules");
@@ -363,11 +382,13 @@ public static partial class Translator
         // 3. If English, reload any user-customized translations from English JSON files
         if (string.Equals(currentLang, "English", StringComparison.OrdinalIgnoreCase))
         {
-            foreach (var mod in Core.ModuleManager.Modules)
+            var modules = Core.ModuleManager.GetModulesSnapshot();
+            foreach (var mod in modules)
             {
                 if (mod == null) continue;
                 Core.ModuleManager_.ModuleTranslationHandler.ReloadModuleTranslations(mod, "English");
             }
+            TranslationData.ModulesLinked = true;
             return;
         }
 
@@ -392,7 +413,8 @@ public static partial class Translator
                 catch { }
             }
 
-            foreach (var mod in Core.ModuleManager.Modules)
+            var modules = Core.ModuleManager.GetModulesSnapshot();
+            foreach (var mod in modules)
             {
                 if (mod == null) continue;
 
@@ -421,6 +443,7 @@ public static partial class Translator
                 Core.ModuleManager_.ModuleTranslationHandler.ReloadModuleTranslations(mod, currentLang);
             }
 
+            TranslationData.ModulesLinked = true;
             InvalidateBlacklist();
         }
         catch (Exception ex)

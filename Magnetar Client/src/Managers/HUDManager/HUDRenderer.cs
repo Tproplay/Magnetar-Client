@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.HUDElements;
+using Magnetar_Client.HUDElements;
 using Magnetar_Client.UI.Setting;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,16 @@ namespace Magnetar_Client.Core.HUDManager_;
 
 public static class HUDRenderer
 {
+    public static readonly object ElementsLock = new();
     public static List<HudElement> Elements = new();
+
+    public static HudElement[] GetElementsSnapshot()
+    {
+        lock (ElementsLock)
+        {
+            return Elements.ToArray();
+        }
+    }
     public static MultiSelectSetting HudToggles = new("Active Elements")
     {
         CustomNames = new Dictionary<int, string>(),
@@ -37,7 +46,10 @@ public static class HUDRenderer
     {
         HudElement instance = (HudElement)Activator.CreateInstance(element);
         instance.WindowId = currentWindowId;
-        Elements.Add(instance);
+        lock (ElementsLock)
+        {
+            Elements.Add(instance);
+        }
         HudToggles.AddOption(instance.WindowId, instance.Name);
         HudToggles.CustomNames[instance.WindowId] = instance.Name;
         currentWindowId++;

@@ -24,6 +24,18 @@ public static class HudTranslationHandler
     {
         string currentLang = Translator.Language ?? "English";
         ReloadAllHudTranslations(currentLang);
+
+        if (HUDRenderer.Elements != null)
+        {
+            var elements = HUDRenderer.GetElementsSnapshot();
+            for (int i = 0; i < elements.Length; i++)
+            {
+                var el = elements[i];
+                if (el == null) continue;
+
+                el.OnLanguageChanged();
+            }
+        }
     }
 
     /// <summary>
@@ -36,13 +48,13 @@ public static class HudTranslationHandler
 
         if (HUDRenderer.Elements != null)
         {
-            for (int i = 0; i < HUDRenderer.Elements.Count; i++)
+            var elements = HUDRenderer.GetElementsSnapshot();
+            for (int i = 0; i < elements.Length; i++)
             {
-                var el = HUDRenderer.Elements[i];
+                var el = elements[i];
                 if (el == null) continue;
 
                 ReloadHudElementTranslations(el, language);
-                el.OnLanguageChanged();
             }
         }
     }

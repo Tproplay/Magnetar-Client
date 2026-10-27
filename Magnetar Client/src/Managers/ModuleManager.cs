@@ -26,7 +26,16 @@ public static class ModuleManager
     public const string Group = "ModuleManager";
 
     public static bool IsInitialized { get; private set; }
+    public static readonly object ModulesLock = new();
     public static readonly List<Modules.Module> Modules = new();
+
+    public static Modules.Module[] GetModulesSnapshot()
+    {
+        lock (ModulesLock)
+        {
+            return Modules.ToArray();
+        }
+    }
     public static WindowType CurrentWindow { get; set; } = WindowType.Modules;
     public static Modules.Module ActiveSettingsModule { get; set; }
 #if !ANDROID
@@ -98,6 +107,11 @@ public static class ModuleManager
         }
         #endregion
 
+        IsInitialized = true;
+        Translator.InvalidateBlacklist();
+        Translator.LinkModuleTranslations();
+        SortModules();
+
         CategoryWindowDrawer.InitializeLayout();
         MultiSelectWindowDrawer.InitializeLayout();
         SearchWindowDrawer.Initialize();
@@ -120,7 +134,6 @@ public static class ModuleManager
 
         SaveLoad.RegisterHandler(new ModuleSaveHandler());
 
-        IsInitialized = true;
         DebugLogger.Msg($"Loaded {Modules.Count} modules");
     }
 
@@ -147,10 +160,18 @@ public static class ModuleManager
         try
         {
             var instance = (Modules.Module)Activator.CreateInstance(type);
-            Modules.Add(instance);
-            SortModules();
+            lock (ModulesLock)
+            {
+                Modules.Add(instance);
+            }
 
-            CategoryWindowDrawer.EnsureCategoryInitialized(instance.Category);
+            if (IsInitialized)
+            {
+                Translator.InvalidateBlacklist();
+                Translator.LinkModuleTranslations();
+                SortModules();
+                CategoryWindowDrawer.EnsureCategoryInitialized(instance.Category);
+            }
         }
         catch (Exception ex)
         {
@@ -160,10 +181,13 @@ public static class ModuleManager
 
     public static void SortModules()
     {
-        Modules.Sort((a, b) => string.Compare(
-            Translator.Translate(a?.Name ?? string.Empty),
-            Translator.Translate(b?.Name ?? string.Empty),
-            StringComparison.OrdinalIgnoreCase));
+        lock (ModulesLock)
+        {
+            Modules.Sort((a, b) => string.Compare(
+                Translator.Translate(a?.Name ?? string.Empty),
+                Translator.Translate(b?.Name ?? string.Empty),
+                StringComparison.OrdinalIgnoreCase));
+        }
     }
 
     public static void OpenModuleSettings(Modules.Module mod)
@@ -341,7 +365,11 @@ public static class ModuleManager
             return false;
         }
 
-        public void OnLanguageChanged() => ModuleTranslationHandler.OnLanguageChanged();
+        public void OnLanguageChanged()
+        {
+            ModuleTranslationHandler.OnLanguageChanged();
+            SortModules();
+        }
 
         public bool CanClose()
         {

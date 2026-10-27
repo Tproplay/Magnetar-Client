@@ -14,11 +14,11 @@ public class TotalHypnotizedZombieHealth : HudElement
     public TotalHypnotizedZombieHealth() : base("Hypnotized Zombies Health", HudElement.NewRect(235))
     {
         UpdateInterval = 0.2f;
-        RegisterTranslation("Hypno Zombies Health: Na", "Hypno Zombies Health: Na");
+        RegisterTranslation("Hypno Zombies Health: NA", "Hypno Zombies Health: NA");
         RegisterRegexTranslation(@"^Hypno Zombies Health: (.*)$", "Hypno Zombies Health: {1}");
     }
 
-    string displayText = "Hypno Zombies Health: Na";
+    string displayText = "Hypno Zombies Health: NA";
 
     protected override void DrawContent(float width, float height)
     {

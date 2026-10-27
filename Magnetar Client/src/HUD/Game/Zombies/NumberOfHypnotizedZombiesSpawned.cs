@@ -15,11 +15,11 @@ public class NumberOfHypnotizedZombiesSpawned : HudElement
     { 
         UpdateInterval = 0.2f;
         GameData.OnZombieSpawned += (zombie) => Hypno_Zombies_Spawned += zombie.isMindControlled ? 1 : 0;
-        RegisterTranslation("Hypno Zombies Spawned: Na", "Hypno Zombies Spawned: Na");
+        RegisterTranslation("Hypno Zombies Spawned: NA", "Hypno Zombies Spawned: NA");
         RegisterRegexTranslation(@"^Hypno Zombies Spawned: (.*)$", "Hypno Zombies Spawned: {1}");
     }
 
-    string displayText = "Hypno Zombies Spawned: Na";
+    string displayText = "Hypno Zombies Spawned: NA";
     protected override void DrawContent(float width, float height)
     {
         GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);

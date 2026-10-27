@@ -10,12 +10,12 @@ public class FallSunCD : HudElement
     public FallSunCD() : base("Auto drop/fall sun timer", HudElement.NewRect(180))
     {
         UpdateInterval = 0.5f;
-        RegisterTranslation("Auto Sun: Na", "Auto Sun: Na");
+        RegisterTranslation("Auto Sun: NA", "Auto Sun: NA");
         RegisterTranslation("Auto Sun: 0s", "Auto Sun: 0s");
         RegisterRegexTranslation(@"^Auto Sun: (.*)$", "Auto Sun: {1}");
     }
 
-    string displayText = "Auto Sun: Na";
+    string displayText = "Auto Sun: NA";
     protected override void DrawContent(float width, float height)
     {
         GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);

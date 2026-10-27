@@ -10,12 +10,12 @@ public class SunSpent : HudElement
     public SunSpent() : base("Total Sun Spent", HudElement.NewRect(100))
     {
         UpdateInterval = 0.5f;
-        RegisterTranslation("Sun Spent: Na", "Sun Spent: Na");
+        RegisterTranslation("Sun Spent: NA", "Sun Spent: NA");
         RegisterRegexTranslation(@"^Sun Spent: (.*)$", "Sun Spent: {1}");
     }
 
     int value;
-    string displayText = "Sun Spent: Na";
+    string displayText = "Sun Spent: NA";
 
     protected override void DrawContent(float width, float height)
     {

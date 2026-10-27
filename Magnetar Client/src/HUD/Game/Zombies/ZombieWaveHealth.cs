@@ -9,11 +9,11 @@ public class ZombieWaveHealth : HudElement
     public ZombieWaveHealth() : base("Current Zombie Wave Health", HudElement.NewRect(235))
     {
         UpdateInterval = 0.2f;
-        RegisterTranslation("Wave Health: Na", "Wave Health: Na");
+        RegisterTranslation("Wave Health: NA", "Wave Health: NA");
         RegisterRegexTranslation(@"^Wave Health: (.*)/(.*)$", "Wave Health: {1}/{2}");
     }
 
-    string displayText = "Wave Health: Na";
+    string displayText = "Wave Health: NA";
     
     protected override void DrawContent(float width, float height)
     {
@@ -30,7 +30,7 @@ public class ZombieWaveHealth : HudElement
         }
         else
         {
-            displayText = Translate("Wave Health: Na");
+            displayText = Translate("Wave Health: NA");
         }
         
         AdjustWidthToText(displayText, HUDElementStyle, 10f);

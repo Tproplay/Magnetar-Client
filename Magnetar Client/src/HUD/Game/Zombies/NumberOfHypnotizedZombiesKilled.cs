@@ -9,11 +9,11 @@ public class NumberOfHypnotizedZombiesKilled : HudElement
     { 
         UpdateInterval = 0.2f;
         GameData.OnZombieDie += (zombie) => Hypno_Zombies_Killed += zombie.isMindControlled ? 1 : 0;
-        RegisterTranslation("Hypno Zombies Killed: Na", "Hypno Zombies Killed: Na");
+        RegisterTranslation("Hypno Zombies Killed: NA", "Hypno Zombies Killed: NA");
         RegisterRegexTranslation(@"^Hypno Zombies Killed: (.*)$", "Hypno Zombies Killed: {1}");
     }
     int Hypno_Zombies_Killed;
-    string displayText = "Hypno Zombies Killed: Na";
+    string displayText = "Hypno Zombies Killed: NA";
 
     protected override void DrawContent(float width, float height)
     {

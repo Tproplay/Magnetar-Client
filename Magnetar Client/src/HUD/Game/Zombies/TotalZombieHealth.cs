@@ -14,11 +14,11 @@ public class TotalZombieHealth : HudElement
     public TotalZombieHealth() : base("Total Zombies Health", HudElement.NewRect(235))
     {
         UpdateInterval = 0.2f;
-        RegisterTranslation("Total Zombies Health: Na", "Total Zombies Health: Na");
+        RegisterTranslation("Total Zombies Health: NA", "Total Zombies Health: NA");
         RegisterRegexTranslation(@"^Total Zombies Health: (.*)$", "Total Zombies Health: {1}");
     }
 
-    string displayText = "Total Zombies Health: Na";
+    string displayText = "Total Zombies Health: NA";
     protected override void DrawContent(float width, float height)
     {
         GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);

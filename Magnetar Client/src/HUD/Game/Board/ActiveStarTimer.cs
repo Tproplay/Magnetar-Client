@@ -11,7 +11,6 @@ public class ActiveStarTimer : HudElement
     {
         UpdateInterval = 0.1f;
         RegisterTranslation("Active Star drop: NA", "Active Star drop: NA");
-        RegisterTranslation("Active Star drop: Na", "Active Star drop: Na");
         RegisterRegexTranslation(@"^Active Star drop: (.*)$", "Active Star drop: {1}");
     }
 
@@ -25,7 +24,7 @@ public class ActiveStarTimer : HudElement
         if (!GameData.BoardInstanceIsNull)
             displayText = Translate($"Active Star drop: {FormatTime((int)GameData.BoardInstance.bigStarActiveCountDown)}");
         else
-            displayText = Translate("Active Star drop: Na");
+            displayText = Translate("Active Star drop: NA");
         AdjustWidthToText(displayText, HUDElementStyle, 10);
     }
     public override void OnEnable()

@@ -9,12 +9,12 @@ public class DamageStatsPlant : HudElement
     public DamageStatsPlant() : base("Total Damage by Plants", HudElement.NewRect(100))
     {
         UpdateInterval = 0.5f;
-        RegisterTranslation("Plant Damage: Na", "Plant Damage: Na");
+        RegisterTranslation("Plant Damage: NA", "Plant Damage: NA");
         RegisterRegexTranslation(@"^Plant Damage: (.*)$", "Plant Damage: {1}");
     }
 
     float value;
-    string displayText = "Plant Damage: Na";
+    string displayText = "Plant Damage: NA";
     protected override void DrawContent(float width, float height)
     {
         GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);

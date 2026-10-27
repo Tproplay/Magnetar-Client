@@ -10,11 +10,11 @@ public class NumberOfPlants : HudElement
     public NumberOfPlants() : base("Total Plants", HudElement.NewRect(150))
     {
         UpdateInterval = 1f;
-        RegisterTranslation("Total Plants: Na", "Total Plants: Na");
+        RegisterTranslation("Total Plants: NA", "Total Plants: NA");
         RegisterRegexTranslation(@"^Total Plants: (.*)$", "Total Plants: {1}");
     }
 
-    string displayText = "Total Plants: Na";
+    string displayText = "Total Plants: NA";
     protected override void DrawContent(float width, float height)
     {
         GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);

@@ -10,12 +10,12 @@ public class MoneySpent : HudElement
     public MoneySpent() : base("Total Money Spent", HudElement.NewRect(100))
     {
         UpdateInterval = 0.5f;
-        RegisterTranslation("Money Spent: Na", "Money Spent: Na");
+        RegisterTranslation("Money Spent: NA", "Money Spent: NA");
         RegisterRegexTranslation(@"^Money Spent: (.*)$", "Money Spent: {1}");
     }
 
     int value;
-    string displayText = "Money Spent: Na";
+    string displayText = "Money Spent: NA";
     protected override void DrawContent(float width, float height)
     {
         GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);

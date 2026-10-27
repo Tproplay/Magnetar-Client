@@ -10,12 +10,12 @@ public class NumberOfPlantsSpawned : HudElement
     public NumberOfPlantsSpawned() : base("Plants Placed", HudElement.NewRect(100))
     {
         UpdateInterval = 1f;
-        RegisterTranslation("Plants Placed: Na", "Plants Placed: Na");
+        RegisterTranslation("Plants Placed: NA", "Plants Placed: NA");
         RegisterRegexTranslation(@"^Plants Placed: (.*)$", "Plants Placed: {1}");
     }
 
     int value;
-    string displayText = "Plants Placed: Na";
+    string displayText = "Plants Placed: NA";
     protected override void DrawContent(float width, float height)
     {
         GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);

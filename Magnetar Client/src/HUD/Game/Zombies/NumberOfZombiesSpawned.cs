@@ -8,11 +8,11 @@ public class NumberOfZombiesSpawned : HudElement
     public NumberOfZombiesSpawned() : base("Zombies Spawned", HudElement.NewRect(100))
     {
         UpdateInterval = 0.2f;
-        RegisterTranslation("Zombies Spawned: Na", "Zombies Spawned: Na");
+        RegisterTranslation("Zombies Spawned: NA", "Zombies Spawned: NA");
         RegisterRegexTranslation(@"^Zombies Spawned: (.*)$", "Zombies Spawned: {1}");
     }
 
-    string displayText = "Zombies Spawned: Na";
+    string displayText = "Zombies Spawned: NA";
 
     protected override void DrawContent(float width, float height)
     {

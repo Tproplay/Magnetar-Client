@@ -35,18 +35,16 @@
   "Active Star drop Cooldown": {
     "Name": "Active Star drop Cooldown",
     "Active Star drop: NA": "Active Star drop: NA",
-    "Active Star drop: Na": "Active Star drop: Na",
     "^Active Star drop: (.*)$": "Active Star drop: {1}"
   },
   "Current Wave": {
     "Name": "Current Wave",
-    "Wave: Na": "Wave: Na",
+    "Wave: NA": "Wave: NA",
     "^Wave: (\\d+)/(\\d+)$": "Wave: {1}/{2}"
   },
   "Passive Star drop Cooldown": {
     "Name": "Passive Star drop Cooldown",
     "Passive Star drop: NA": "Passive Star drop: NA",
-    "Passive Star drop: Na": "Passive Star drop: Na",
     "^Passive Star drop: (.*)$": "Passive Star drop: {1}"
   },
   "Time In Current Level": {
@@ -60,12 +58,12 @@
   },
   "Next wave arrival time": {
     "Name": "Next wave arrival time",
-    "Next Wave arrival: Na": "Next Wave arrival: Na",
+    "Next Wave arrival: NA": "Next Wave arrival: NA",
     "^Next Wave arrival: (.*)$": "Next Wave arrival: {1}"
   },
   "Number of Bullets Spawned": {
     "Name": "Number of Bullets Spawned",
-    "Bullets Spawned: Na": "Bullets Spawned: Na",
+    "Bullets Spawned: NA": "Bullets Spawned: NA",
     "^Bullets Spawned: (.*)$": "Bullets Spawned: {1}"
   },
   "Average Damage by Plants": {
@@ -75,93 +73,93 @@
   },
   "Total Damage by Plants": {
     "Name": "Total Damage by Plants",
-    "Plant Damage: Na": "Plant Damage: Na",
+    "Plant Damage: NA": "Plant Damage: NA",
     "^Plant Damage: (.*)$": "Plant Damage: {1}"
   },
   "Total Plants": {
     "Name": "Total Plants",
-    "Total Plants: Na": "Total Plants: Na",
+    "Total Plants: NA": "Total Plants: NA",
     "^Total Plants: (.*)$": "Total Plants: {1}"
   },
   "Plant Deaths": {
     "Name": "Plant Deaths",
-    "Plant Death: Na": "Plant Death: Na",
+    "Plant Death: NA": "Plant Death: NA",
     "^Plant Death: (.*)$": "Plant Death: {1}"
   },
   "Plants Placed": {
     "Name": "Plants Placed",
-    "Plants Placed: Na": "Plants Placed: Na",
+    "Plants Placed: NA": "Plants Placed: NA",
     "^Plants Placed: (.*)$": "Plants Placed: {1}"
   },
   "Auto drop/fall sun timer": {
     "Name": "Auto drop/fall sun timer",
-    "Auto Sun: Na": "Auto Sun: Na",
+    "Auto Sun: NA": "Auto Sun: NA",
     "Auto Sun: 0s": "Auto Sun: 0s",
     "^Auto Sun: (.*)$": "Auto Sun: {1}"
   },
   "Total Money Obtained": {
     "Name": "Total Money Obtained",
-    "Money Obtained: Na": "Money Obtained: Na",
+    "Money Obtained: NA": "Money Obtained: NA",
     "^Money Obtained: (.*)$": "Money Obtained: {1}"
   },
   "Total Money Spent": {
     "Name": "Total Money Spent",
-    "Money Spent: Na": "Money Spent: Na",
+    "Money Spent: NA": "Money Spent: NA",
     "^Money Spent: (.*)$": "Money Spent: {1}"
   },
   "Total Sun Obtained": {
     "Name": "Total Sun Obtained",
-    "Sun Obtained: Na": "Sun Obtained: Na",
+    "Sun Obtained: NA": "Sun Obtained: NA",
     "^Sun Obtained: (.*)$": "Sun Obtained: {1}"
   },
   "Total Sun Spent": {
     "Name": "Total Sun Spent",
-    "Sun Spent: Na": "Sun Spent: Na",
+    "Sun Spent: NA": "Sun Spent: NA",
     "^Sun Spent: (.*)$": "Sun Spent: {1}"
   },
   "Hypnotized Zombies On Lawn": {
     "Name": "Hypnotized Zombies On Lawn",
-    "Hypno Zombies On Lawn: Na": "Hypno Zombies On Lawn: Na",
+    "Hypno Zombies On Lawn: NA": "Hypno Zombies On Lawn: NA",
     "^Hypno Zombies On Lawn: (.*)$": "Hypno Zombies On Lawn: {1}"
   },
   "Hypnotized Zombies Killed": {
     "Name": "Hypnotized Zombies Killed",
-    "Hypno Zombies Killed: Na": "Hypno Zombies Killed: Na",
+    "Hypno Zombies Killed: NA": "Hypno Zombies Killed: NA",
     "^Hypno Zombies Killed: (.*)$": "Hypno Zombies Killed: {1}"
   },
   "Hypnotized Zombies Spawned": {
     "Name": "Hypnotized Zombies Spawned",
-    "Hypno Zombies Spawned: Na": "Hypno Zombies Spawned: Na",
+    "Hypno Zombies Spawned: NA": "Hypno Zombies Spawned: NA",
     "^Hypno Zombies Spawned: (.*)$": "Hypno Zombies Spawned: {1}"
   },
   "Zombies On Lawn": {
     "Name": "Zombies On Lawn",
-    "Zombies On Lawn: Na": "Zombies On Lawn: Na",
+    "Zombies On Lawn: NA": "Zombies On Lawn: NA",
     "^Zombies On Lawn: (.*)$": "Zombies On Lawn: {1}"
   },
   "Zombies Killed": {
     "Name": "Zombies Killed",
-    "Zombies Killed: Na": "Zombies Killed: Na",
+    "Zombies Killed: NA": "Zombies Killed: NA",
     "^Zombies Killed: (.*)$": "Zombies Killed: {1}"
   },
   "Zombies Spawned": {
     "Name": "Zombies Spawned",
-    "Zombies Spawned: Na": "Zombies Spawned: Na",
+    "Zombies Spawned: NA": "Zombies Spawned: NA",
     "^Zombies Spawned: (.*)$": "Zombies Spawned: {1}"
   },
   "Hypnotized Zombies Health": {
     "Name": "Hypnotized Zombies Health",
-    "Hypno Zombies Health: Na": "Hypno Zombies Health: Na",
+    "Hypno Zombies Health: NA": "Hypno Zombies Health: NA",
     "^Hypno Zombies Health: (.*)$": "Hypno Zombies Health: {1}"
   },
   "Total Zombies Health": {
     "Name": "Total Zombies Health",
-    "Total Zombies Health: Na": "Total Zombies Health: Na",
+    "Total Zombies Health: NA": "Total Zombies Health: NA",
     "^Total Zombies Health: (.*)$": "Total Zombies Health: {1}"
   },
   "Current Zombie Wave Health": {
     "Name": "Current Zombie Wave Health",
-    "Wave Health: Na": "Wave Health: Na",
+    "Wave Health: NA": "Wave Health: NA",
     "^Wave Health: (.*)/(.*)$": "Wave Health: {1}/{2}"
   },
   "RAM Usage": {

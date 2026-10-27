@@ -10,11 +10,11 @@ public class NumberOfHypnotizedZombies : HudElement
     public NumberOfHypnotizedZombies() : base("Hypnotized Zombies On Lawn", HudElement.NewRect(100))
     {
         UpdateInterval = 0.2f;
-        RegisterTranslation("Hypno Zombies On Lawn: Na", "Hypno Zombies On Lawn: Na");
+        RegisterTranslation("Hypno Zombies On Lawn: NA", "Hypno Zombies On Lawn: NA");
         RegisterRegexTranslation(@"^Hypno Zombies On Lawn: (.*)$", "Hypno Zombies On Lawn: {1}");
     }
 
-    string displayText = "Hypno Zombies On Lawn: Na";
+    string displayText = "Hypno Zombies On Lawn: NA";
     protected override void DrawContent(float width, float height)
     {
         GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);

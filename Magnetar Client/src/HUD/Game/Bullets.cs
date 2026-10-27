@@ -14,13 +14,13 @@ public class NumberOfBulletsSpawned : HudElement
     public NumberOfBulletsSpawned() : base("Number of Bullets Spawned", HudElement.NewRect(100))
     {
         UpdateInterval = 0.5f;
-        RegisterTranslation("Bullets Spawned: Na", "Bullets Spawned: Na");
+        RegisterTranslation("Bullets Spawned: NA", "Bullets Spawned: NA");
         RegisterRegexTranslation(@"^Bullets Spawned: (.*)$", "Bullets Spawned: {1}");
     }
 
     static int TotalNumberOfBulletsSpawned;
 
-    string displayText = "Bullets Spawned: Na";
+    string displayText = "Bullets Spawned: NA";
     protected override void DrawContent(float width, float height)
     {
         GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);

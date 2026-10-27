@@ -10,11 +10,11 @@ public class WaveTimer : HudElement
     public WaveTimer() : base("Next wave arrival time", HudElement.NewRect(180))
     {
         UpdateInterval = 0.1f;
-        RegisterTranslation("Next Wave arrival: Na", "Next Wave arrival: Na");
+        RegisterTranslation("Next Wave arrival: NA", "Next Wave arrival: NA");
         RegisterRegexTranslation(@"^Next Wave arrival: (.*)$", "Next Wave arrival: {1}");
     }
 
-    string displayText = "Next Wave arrival: Na";
+    string displayText = "Next Wave arrival: NA";
     protected override void DrawContent(float width, float height)
     {
         GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
@@ -24,7 +24,7 @@ public class WaveTimer : HudElement
         if (!GameData.BoardInstanceIsNull)
             displayText = Translate($"Next Wave arrival: {FormatTime((int)GameData.BoardInstance.timeUntilNextWave >= 0 ? (int)GameData.BoardInstance.timeUntilNextWave : 0)}");
         else
-            displayText = Translate("Next Wave arrival: Na");
+            displayText = Translate("Next Wave arrival: NA");
         AdjustWidthToText(displayText, HUDElementStyle, 10);
     }
     public override void OnEnable()

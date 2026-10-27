@@ -9,11 +9,11 @@ public class NumberOfZombiesKilled : HudElement
     public NumberOfZombiesKilled() : base("Zombies Killed", HudElement.NewRect(220))
     {
         UpdateInterval = 0.2f;
-        RegisterTranslation("Zombies Killed: Na", "Zombies Killed: Na");
+        RegisterTranslation("Zombies Killed: NA", "Zombies Killed: NA");
         RegisterRegexTranslation(@"^Zombies Killed: (.*)$", "Zombies Killed: {1}");
     }
 
-    string displayText = "Zombies Killed: Na";
+    string displayText = "Zombies Killed: NA";
 
     protected override void DrawContent(float width, float height)
     {

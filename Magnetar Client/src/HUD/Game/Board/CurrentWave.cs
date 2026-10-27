@@ -8,11 +8,11 @@ public class CurrentWave : HudElement
     public CurrentWave() : base("Current Wave", HudElement.NewRect(235))
     {
         UpdateInterval = 1f;
-        RegisterTranslation("Wave: Na", "Wave: Na");
+        RegisterTranslation("Wave: NA", "Wave: NA");
         RegisterRegexTranslation(@"^Wave: (\d+)/(\d+)$", "Wave: {1}/{2}");
     }
 
-    string displayText = "Wave: Na";
+    string displayText = "Wave: NA";
     protected override void DrawContent(float width, float height)
     {
         GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
@@ -26,7 +26,7 @@ public class CurrentWave : HudElement
         }
         else
         {
-            displayText = Translate("Wave: Na");
+            displayText = Translate("Wave: NA");
         }
 
         AdjustWidthToText(displayText, HUDElementStyle, 10f);

@@ -11,7 +11,6 @@ public class PassiveStarTimer : HudElement
     {
         UpdateInterval = 0.1f;
         RegisterTranslation("Passive Star drop: NA", "Passive Star drop: NA");
-        RegisterTranslation("Passive Star drop: Na", "Passive Star drop: Na");
         RegisterRegexTranslation(@"^Passive Star drop: (.*)$", "Passive Star drop: {1}");
     }
 
@@ -25,7 +24,7 @@ public class PassiveStarTimer : HudElement
         if (!GameData.BoardInstanceIsNull)
             displayText = Translate($"Passive Star drop: {FormatTime((int)GameData.BoardInstance.bigStarPassiveCountDown)}");
         else
-            displayText = Translate("Passive Star drop: Na");
+            displayText = Translate("Passive Star drop: NA");
         AdjustWidthToText(displayText, HUDElementStyle, 10);
     }
     public override void OnEnable()

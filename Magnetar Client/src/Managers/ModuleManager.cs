@@ -184,8 +184,8 @@ public static class ModuleManager
         lock (ModulesLock)
         {
             Modules.Sort((a, b) => string.Compare(
-                Translator.Translate(a?.Name ?? string.Empty),
-                Translator.Translate(b?.Name ?? string.Empty),
+                a?.Name ?? string.Empty,
+                b?.Name ?? string.Empty,
                 StringComparison.OrdinalIgnoreCase));
         }
     }

@@ -129,6 +129,11 @@ public static class PreferenceManager
                 "Active Profile", "The active configuration profile name.");
             LanguageEntry = CreateEntry("Localization", "Language", "English", "Language", "Active client language.");
 
+            if (LanguageEntry != null && !string.IsNullOrWhiteSpace(LanguageEntry.Value))
+            {
+                Translator.Language = LanguageEntry.Value;
+            }
+
             ModMenuKeyEntry = CreateEntry("UI", "MenuBind", KeyCode.RightShift, "MenuBind", "KeyCode to open the gui.");
 
         }

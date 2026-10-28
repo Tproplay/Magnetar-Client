@@ -148,6 +148,17 @@ public static class GUIManager
             }
         };
 
+        ThemeSetting.OnSelectionChanged = (selectedId, isSelected) =>
+        {
+            if (!isSelected) return;
+
+            if (ThemeSetting.Options.TryGetValue(selectedId, out string chosenTheme))
+            {
+                ThemeManager.Theme = chosenTheme;
+                Utils.SaveLoad.Save(force: true);
+            }
+        };
+
         RefreshThemeOptions();
 
         if (ScaleSetting.Value <= 0.1f) ScaleSetting.Value = 1.0f;
@@ -176,28 +187,18 @@ public static class GUIManager
         };
 
         // SaveLoad entries
-        SaveLoad.RegisterEntry("Language", () => Translator.Language, val =>
+        SaveLoad.RegisterEntry("Theme", () => ThemeManager.Theme, val =>
         {
-            if (!string.Equals(Translator.Language, val, StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(val)) return;
+
+            if (string.Equals(val, "Default", StringComparison.OrdinalIgnoreCase))
             {
-                Translator.Language = val;
+                val = ThemeData.InternalDefaultTheme.Name;
             }
 
-            if (LanguageSetting?.Options != null)
-            {
-                foreach (var kvp in LanguageSetting.Options)
-                {
-                    if (string.Equals(kvp.Value, val, StringComparison.OrdinalIgnoreCase))
-                    {
-                        LanguageSetting.SelectedValues.Clear();
-                        LanguageSetting.SelectedValues.Add(kvp.Key);
-                        break;
-                    }
-                }
-            }
-        }, "English");
-
-        SaveLoad.RegisterEntry("Theme", () => ThemeManager.Theme, val => ThemeManager.Theme = val, "Default");
+            ThemeManager.Theme = val;
+            RefreshThemeOptions();
+        }, ThemeData.InternalDefaultTheme.Name);
         SaveLoad.RegisterEntry("GUIScale", () => ScaleSetting.Value, val => ScaleSetting.Value = val, 1.0f);
         SaveLoad.RegisterEntry("ElementScale", () => ElementScaleSetting.Value, val => ElementScaleSetting.Value = val, 1.0f);
         SaveLoad.RegisterEntry("ShowMainMenuCredits", () => ShowMainMenuCredits, val => ShowMainMenuCredits = val, true);

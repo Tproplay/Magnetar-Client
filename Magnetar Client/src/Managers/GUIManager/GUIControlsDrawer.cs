@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI;
+using Magnetar_Client.UI;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
@@ -203,15 +203,6 @@ GUIManager.S(BaseHeight));
         );
 
         // 2. Theme Row
-        string currentTheme = ThemeManager.Theme;
-        if (GUIManager.ThemeSetting?.SelectedValues != null && GUIManager.ThemeSetting.SelectedValues.Count > 0)
-        {
-            int selThemeId = GUIManager.ThemeSetting.SelectedValues.First();
-            if (GUIManager.ThemeSetting.Options.ContainsKey(selThemeId))
-                currentTheme = GUIManager.ThemeSetting.Options[selThemeId];
-        }
-        ThemeManager.Theme = currentTheme;
-
         DrawButtonRow(
             $"{Translate("Theme")}: <color=yellow>{ThemeManager.Theme}</color>",
             Translate("Change"),

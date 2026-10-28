@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.Themes;
 using UnityEngine;
 
 namespace Magnetar_Client.UI.Setting;
@@ -12,6 +12,24 @@ public abstract class Setting
     /// The display name or localization key for this setting.
     /// </summary>
     public string Name;
+
+    /// <summary>
+    /// Optional override for the serialization/persistence key name.
+    /// If null or empty, defaults to <see cref="Name"/> (or Name + "_Category" for <see cref="CategorySetting"/>).
+    /// </summary>
+    public string CustomSaveKey { get; set; }
+
+    /// <summary>
+    /// Optional collection of legacy or alternative keys to check when loading saved data.
+    /// </summary>
+    public System.Collections.Generic.List<string> FallbackSaveKeys { get; set; }
+
+    /// <summary>
+    /// Gets the unique persistence key used when saving and loading this setting.
+    /// </summary>
+    public virtual string SaveKey => !string.IsNullOrEmpty(CustomSaveKey)
+        ? CustomSaveKey
+        : Name;
 
     /// <summary>
     /// Gets or sets whether this setting is disabled, suppressing modifications and user interactions.

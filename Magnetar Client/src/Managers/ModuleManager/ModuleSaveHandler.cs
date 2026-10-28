@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Api;
+using Magnetar_Client.Api;
 using Magnetar_Client.Modules;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.Utils;
@@ -40,10 +40,23 @@ public class ModuleSaveHandler : ISaveHandler
 
                 if (mod.Settings != null)
                 {
+                    var seenKeys = new HashSet<string>();
                     foreach (var setting in mod.Settings)
                     {
                         if (setting == null || string.IsNullOrEmpty(setting.Name)) continue;
-                        string saveKey = setting is CategorySetting ? setting.Name + "_Category" : setting.Name;
+                        string saveKey = setting.SaveKey;
+                        if (seenKeys.Contains(saveKey))
+                        {
+                            int counter = 2;
+                            string uniqueKey = $"{saveKey} {counter}";
+                            while (seenKeys.Contains(uniqueKey))
+                            {
+                                counter++;
+                                uniqueKey = $"{saveKey} {counter}";
+                            }
+                            saveKey = uniqueKey;
+                        }
+                        seenKeys.Add(saveKey);
                         object serialized = SaveLoadData.SerializeSettingValue(setting);
                         if (serialized != null) modData.Settings[saveKey] = serialized;
                     }
@@ -123,9 +136,43 @@ public class ModuleSaveHandler : ISaveHandler
             {
                 if (setting == null || string.IsNullOrEmpty(setting.Name)) continue;
 
-                string loadKey = setting is CategorySetting ? setting.Name + "_Category" : setting.Name;
-                if (modData.Settings.TryGetValue(loadKey, out object rawValue) ||
-                    modData.Settings.TryGetValue(setting.Name, out rawValue))
+                string loadKey = setting.SaveKey;
+                object rawValue = null;
+                bool found = false;
+
+                if (modData.Settings.TryGetValue(loadKey, out rawValue))
+                {
+                    found = true;
+                }
+                else if (!string.IsNullOrEmpty(setting.CustomSaveKey) && modData.Settings.TryGetValue(setting.CustomSaveKey, out rawValue))
+                {
+                    found = true;
+                }
+                else if (setting.FallbackSaveKeys != null && setting.FallbackSaveKeys.Count > 0)
+                {
+                    foreach (var fallback in setting.FallbackSaveKeys)
+                    {
+                        if (!string.IsNullOrEmpty(fallback) && modData.Settings.TryGetValue(fallback, out rawValue))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!found)
+                {
+                    if (setting is CategorySetting && modData.Settings.TryGetValue(setting.Name + "_Category", out rawValue))
+                    {
+                        found = true;
+                    }
+                    else if (modData.Settings.TryGetValue(setting.Name, out rawValue))
+                    {
+                        found = true;
+                    }
+                }
+
+                if (found)
                 {
                     SaveLoadData.RestoreSettingValue(setting, rawValue);
                 }

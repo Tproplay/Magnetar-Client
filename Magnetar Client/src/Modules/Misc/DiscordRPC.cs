@@ -110,6 +110,8 @@ public class DiscordRPC : Module
 
         InGame_Randomizer_mode1 = new SelectSetting("Iteration Mode", 0)
         {
+            CustomSaveKey = "Iteration Mode 1",
+            FallbackSaveKeys = new List<string> { "Iteration Mode" },
             Options = new Dictionary<int, string>
             {
                 { 0, "Sequential" },
@@ -131,6 +133,8 @@ public class DiscordRPC : Module
 
         InGame_Randomizer_mode2 = new SelectSetting("Iteration Mode", 0)
         {
+            CustomSaveKey = "Iteration Mode 2",
+            FallbackSaveKeys = new List<string> { "Iteration Mode" },
             Options = new Dictionary<int, string>
             {
                 { 0, "Sequential" },

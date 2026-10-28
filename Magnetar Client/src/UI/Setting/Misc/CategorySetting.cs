@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.WindowDrawing;
+using Magnetar_Client.UI.WindowDrawing;
 using static Magnetar_Client.Utils.Translator;
 
 namespace Magnetar_Client.UI.Setting;
@@ -22,6 +22,13 @@ public class CategorySetting : Setting
     /// Indicates that this category header supports resetting to its default expanded state.
     /// </summary>
     public override bool CanReset => true;
+
+    /// <summary>
+    /// Gets the unique persistence key used when saving and loading this category header setting.
+    /// </summary>
+    public override string SaveKey => !string.IsNullOrEmpty(CustomSaveKey)
+        ? CustomSaveKey
+        : (Name + "_Category");
 
     /// <summary>
     /// Initializes a new instance of <see cref="CategorySetting"/>.

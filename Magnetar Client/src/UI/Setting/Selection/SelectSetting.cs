@@ -61,6 +61,7 @@ public class SelectSetting : Setting
     /// </summary>
     /// <param name="name">The display name of the setting.</param>
     /// <param name="defaultValue">The initial and default integer value.</param>
+    /// <param name="customSaveKey">Optional custom key for persistence.</param>
     public SelectSetting(string name, int defaultValue)
     {
         Name = name;

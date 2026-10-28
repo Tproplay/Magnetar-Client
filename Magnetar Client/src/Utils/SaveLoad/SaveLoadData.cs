@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Setting;
+using Magnetar_Client.UI.Setting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -185,10 +185,23 @@ public static class SaveLoadData
             foreach (var section in sec.Sections)
             {
                 var sDict = new Dictionary<string, object>();
+                var seenSectionKeys = new HashSet<string>();
                 foreach (var child in section.ChildSettings)
                 {
                     if (child == null || string.IsNullOrEmpty(child.Name)) continue;
-                    string childKey = child is CategorySetting ? child.Name + "_Category" : child.Name;
+                    string childKey = child.SaveKey;
+                    if (seenSectionKeys.Contains(childKey))
+                    {
+                        int counter = 2;
+                        string uniqueKey = $"{childKey} {counter}";
+                        while (seenSectionKeys.Contains(uniqueKey))
+                        {
+                            counter++;
+                            uniqueKey = $"{childKey} {counter}";
+                        }
+                        childKey = uniqueKey;
+                    }
+                    seenSectionKeys.Add(childKey);
 
                     object childVal = SerializeSettingValue(child);
                     if (childVal != null)
@@ -289,10 +302,43 @@ public static class SaveLoadData
                         foreach (var child in childList)
                         {
                             if (child == null || string.IsNullOrEmpty(child.Name)) continue;
-                            string loadKey = child is CategorySetting ? child.Name + "_Category" : child.Name;
+                            string loadKey = child.SaveKey;
+                            object childVal = null;
+                            bool found = false;
 
-                            if (secData[s].TryGetValue(loadKey, out var childVal) ||
-                                secData[s].TryGetValue(child.Name, out childVal))
+                            if (secData[s].TryGetValue(loadKey, out childVal))
+                            {
+                                found = true;
+                            }
+                            else if (!string.IsNullOrEmpty(child.CustomSaveKey) && secData[s].TryGetValue(child.CustomSaveKey, out childVal))
+                            {
+                                found = true;
+                            }
+                            else if (child.FallbackSaveKeys != null && child.FallbackSaveKeys.Count > 0)
+                            {
+                                foreach (var fallback in child.FallbackSaveKeys)
+                                {
+                                    if (!string.IsNullOrEmpty(fallback) && secData[s].TryGetValue(fallback, out childVal))
+                                    {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!found)
+                            {
+                                if (child is CategorySetting && secData[s].TryGetValue(child.Name + "_Category", out childVal))
+                                {
+                                    found = true;
+                                }
+                                else if (secData[s].TryGetValue(child.Name, out childVal))
+                                {
+                                    found = true;
+                                }
+                            }
+
+                            if (found)
                             {
                                 RestoreSettingValue(child, childVal);
                             }

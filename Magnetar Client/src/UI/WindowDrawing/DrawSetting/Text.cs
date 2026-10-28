@@ -89,7 +89,7 @@ public static partial class DrawSetting
     }
 
     /// <summary>
-    /// Wraps text inside brackets (including brackets) with rich text color tags using <see cref="ThemeManager.RichTextColorHex"/>.
+    /// Wraps text inside brackets (including brackets) with rich text color tags using <see cref="ThemeManager.RichTextColor"/>.
     /// </summary>
     /// <param name="input">The raw text string to format.</param>
     /// <returns>The formatted string with rich text color tags around bracket tokens.</returns>
@@ -98,7 +98,7 @@ public static partial class DrawSetting
         if (string.IsNullOrEmpty(input) || !input.Contains("{"))
             return input;
 
-        string colorHex = ThemeManager.RichTextColorHex ?? "#FF7878FF";
+        string colorHex = ThemeData.ColorToHex(ThemeManager.RichTextColor);
         return System.Text.RegularExpressions.Regex.Replace(input, @"\{[^}\r\n]*(?:\}|$)", match => $"<color={colorHex}>{match.Value}</color>");
     }
 

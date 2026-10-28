@@ -42,7 +42,6 @@ public static class ThemeManager
     public static Color SettingOffColor => ThemeData.SettingOffColor;
     public static Color SeparatorColor => ThemeData.SeparatorColor;
     public static Color RichTextColor => ThemeData.RichTextColor;
-    public static string RichTextColorHex => ThemeData.RichTextColorHex;
 
     public static Dictionary<string, ThemeDefinition> LoadedThemes => ThemeData.LoadedThemes;
     public static ThemeDefinition InternalDefaultTheme => ThemeData.InternalDefaultTheme;
@@ -353,11 +352,6 @@ public static class ThemeManager
         TextRichStyle.normal.textColor = baseText;
         TextRichStyle.hover.textColor = baseText;
 
-        string rawRichHex = theme.Typography?.RichText ?? d.Typography?.RichText ?? "#FF7878FF";
-        Color richColor = ThemeData.ParseColor(rawRichHex, "#FF7878FF");
-        ThemeData.RichTextColor = richColor;
-        ThemeData.RichTextColorHex = ThemeData.ColorToHex(richColor);
-
         TextHighlightedStyle.normal.textColor = ThemeData.ParseColor(theme.Typography?.HighlightText, d.Typography.HighlightText);
         Texture2D hiBgTex = ThemeData.GetTex(ThemeData.ParseColor(theme.Typography?.HighlightBackground, d.Typography.HighlightBackground));
         TextHighlightedStyle.normal.background = hiBgTex;
@@ -407,6 +401,7 @@ public static class ThemeManager
         ThemeData.SettingOnColor = catModOnBg.normal;
         ThemeData.SettingOffColor = catModOffBg.normal;
         ThemeData.SeparatorColor = ThemeData.ParseColor(theme.Misc?.Separator, d.Misc.Separator);
+        ThemeData.RichTextColor = ThemeData.ParseColor(theme.Typography?.RichText, d.Typography.RichText);
 
         _lastScale = -1f;
         _lastElementScale = -1f;

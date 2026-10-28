@@ -243,8 +243,7 @@ public static class ThemeData
     public static Color SettingOnColor { get; set; }
     public static Color SettingOffColor { get; set; }
     public static Color SeparatorColor { get; set; }
-    public static Color RichTextColor { get; set; } = new Color(1f, 0.47f, 0.47f, 1f);
-    public static string RichTextColorHex { get; set; } = "#FF7878FF";
+    public static Color RichTextColor { get; set; }
 
     // --- Hardcoded Default Theme ---
     public static readonly ThemeDefinition InternalDefaultTheme = new()
@@ -436,7 +435,7 @@ public static class ThemeData
             Secondary = "#8B949EFF",
             HighlightText = "#FFFFFFFF",
             HighlightBackground = "#203e6ec4",
-            RichText = "#FF7878FF"
+            RichText = "#7D00F1FF"
         },
         NEF = new NefTheme
         {

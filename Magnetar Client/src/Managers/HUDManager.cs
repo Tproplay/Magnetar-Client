@@ -208,7 +208,7 @@ public static class HUDManager
     {
         if (!GUIManager.ShowMainMenuCredits) return;
         if (ClientConfig.showgui || HUDManager.forceShow) return;
-        if (!GameData.InMainMenu) return;
+        if (!GameData.StatusCheck.InMainMenu) return;
 
         _creditContent ??= new GUIContent(_creditText);
         if (_creditStyle == null)

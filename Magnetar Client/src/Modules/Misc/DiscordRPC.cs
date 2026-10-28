@@ -35,9 +35,10 @@ public class DiscordRPC : Module
     public FloatSetting SwitchSpeed;
 
     public ListStringSetting InGameLine1;
+    public SelectSetting InGame_Randomizer_mode1;
     public ListStringSetting InGameLine2;
+    public SelectSetting InGame_Randomizer_mode2;
 
-    public SelectSetting InGame_Randomizer_mode;
 
     public List<string> Line1Cycle = new();
     public List<string> Line2Cycle = new();
@@ -64,16 +65,23 @@ public class DiscordRPC : Module
         RegisterTranslations(Translator.CreateDictionary(
             new string[]
             {
+                // status
                 "Browsing Magnetar's GUI",
                 "Looking at the Main Menu",
                 "Checking out the almanac",
+                "Viewing plants in the almanac",
+                "Viewing zombies in the almanac",
                 "Started a level",
                 "Picking Seeds",
                 "Roaming in the Garden",
                 "Growing Seeds",
                 "Waterning plants",
+
+                // Iteration order
                 "Sequential",
                 "Random",
+
+                // Extra
                 "Made By Tproplay",
             }
             ));
@@ -100,6 +108,17 @@ public class DiscordRPC : Module
             15, In_Game_AutoCompleteArgs
             );
 
+        InGame_Randomizer_mode1 = new SelectSetting("Iteration Mode", 0)
+        {
+            Options = new Dictionary<int, string>
+            {
+                { 0, "Sequential" },
+                { 1, "Random" }
+            }
+        };
+
+        AddSettings(InGameLine1, InGame_Randomizer_mode1);
+
         InGameLine2 = new ListStringSetting("Line 2",
             new List<string>
             {
@@ -110,9 +129,7 @@ public class DiscordRPC : Module
             15, In_Game_AutoCompleteArgs
             );
 
-        AddSettings(InGameLine1, InGameLine2);
-
-        InGame_Randomizer_mode = new SelectSetting("Iteration Mode", 0)
+        InGame_Randomizer_mode2 = new SelectSetting("Iteration Mode", 0)
         {
             Options = new Dictionary<int, string>
             {
@@ -121,7 +138,8 @@ public class DiscordRPC : Module
             }
         };
 
-        AddSettings(InGame_Randomizer_mode);
+        AddSettings(InGameLine2, InGame_Randomizer_mode2);
+
         EndCategory();
 
         // Legacy Compatibility
@@ -189,7 +207,9 @@ public class DiscordRPC : Module
 
     public override void OnLanguageChanged()
     {
-        InGame_Randomizer_mode.CustomNames = InGame_Randomizer_mode.Options
+        InGame_Randomizer_mode1.CustomNames = InGame_Randomizer_mode1.Options
+            .ToDictionary(kvp => kvp.Key, kvp => Translate(kvp.Value));
+        InGame_Randomizer_mode2.CustomNames = InGame_Randomizer_mode2.Options
             .ToDictionary(kvp => kvp.Key, kvp => Translate(kvp.Value));
     }
 
@@ -236,42 +256,51 @@ public class DiscordRPC : Module
         Line1Cycle.Clear();
         Line2Cycle.Clear();
 
-        switch (CurrentStatus)
+        if (StatusCheck.InGamePickingSeeds)
         {
-            case Status.InGame:
-                {
-                    foreach (var line in InGameLine1.Values)
-                    {
-                        if (string.IsNullOrEmpty(line)) continue;
-                        Line1Cycle.Add(In_Game_FormatString(line));
-                    }
-                    foreach (var line in InGameLine2.Values)
-                    {
-                        if (string.IsNullOrEmpty(line)) continue;
-                        Line2Cycle.Add(In_Game_FormatString(line));
-                    }
-                    break;
-                }
-            case Status.Magnetar_GUI:
-                Line1Cycle.Add(Translate("Browsing Magnetar's GUI"));
-                break;
-            case Status.Menu:
-                Line1Cycle.Add(Translate("Looking at the Main Menu"));
-                break;
-            case Status.InAlmanac:
-                Line1Cycle.Add(Translate("Checking out the almanac"));
-                break;
-            case Status.Transition:
-                Line1Cycle.Add(Translate("Started a level"));
-                break;
-            case Status.Selecting:
-                Line1Cycle.Add(Translate("Picking Seeds"));
-                break;
-            case Status.Big_Garden:
-                Line1Cycle.Add(Translate("Roaming in the Garden"));
-                Line2Cycle.Add(Translate("Growing Seeds"));
-                Line2Cycle.Add(Translate("Waterning plants"));
-                break;
+            Line1Cycle.Add(Translate("Picking Seeds"));
+        }
+        else if (StatusCheck.InGameLevel)
+        {
+            foreach (var line in InGameLine1.Values)
+            {
+                if (string.IsNullOrEmpty(line)) continue;
+                Line1Cycle.Add(In_Game_FormatString(line));
+            }
+            foreach (var line in InGameLine2.Values)
+            {
+                if (string.IsNullOrEmpty(line)) continue;
+                Line2Cycle.Add(In_Game_FormatString(line));
+            }
+        }
+        else if (StatusCheck.OnGameEnterAnimation)
+        {
+            Line1Cycle.Add(Translate("Started a level"));
+        }
+        else if (StatusCheck.OnMainMenu && ClientConfig.showgui)
+        {
+            Line1Cycle.Add(Translate("Browsing Magnetar's GUI"));
+        }
+        else if (StatusCheck.OnMainMenu)
+        {
+            Line1Cycle.Add(Translate("Looking at the Main Menu"));
+        }
+        else if (StatusCheck.InAlmanac)
+        {
+            Line1Cycle.Add(Translate("Checking out the almanac"));
+            if (StatusCheck.OnAlmanacPlant) Line1Cycle.Add(Translate("Viewing plants in the almanac"));
+            else if (StatusCheck.OnAlmanacZombie) Line1Cycle.Add(Translate("Viewing zombies in the almanac"));
+        }
+        else if (StatusCheck.InBigZenGarden)
+        {
+            Line1Cycle.Add(Translate("Roaming in the Big Garden"));
+            Line2Cycle.Add(Translate("Growing Seeds"));
+            Line2Cycle.Add(Translate("Waterning plants"));
+        }
+        else if (StatusCheck.InZenGarden)
+        {
+            Line2Cycle.Add(Translate("Growing Seeds"));
+            Line2Cycle.Add(Translate("Waterning plants"));
         }
     }
 
@@ -314,25 +343,30 @@ public class DiscordRPC : Module
 
     private void RotateIndices()
     {
-        if (InGame_Randomizer_mode.Value == 0) // Sequential
+        // Line 1 Rotation
+        if (Line1Cycle != null && Line1Cycle.Count > 0)
         {
-            if (Line1Cycle != null && Line1Cycle.Count > 0)
-                index1 = (index1 + 1) % Line1Cycle.Count;
-            else index1 = 0;
-
-            if (Line2Cycle != null && Line2Cycle.Count > 0)
-                index2 = (index2 + 1) % Line2Cycle.Count;
-            else index2 = 0;
-        }
-        else if (InGame_Randomizer_mode.Value == 1) // Random
-        {
-            if (Line1Cycle != null && Line1Cycle.Count > 0)
+            if (InGame_Randomizer_mode1.Value == 1) // Random
                 index1 = _random.Next(Line1Cycle.Count);
-            else index1 = 0;
+            else // Sequential (0)
+                index1 = (index1 + 1) % Line1Cycle.Count;
+        }
+        else
+        {
+            index1 = 0;
+        }
 
-            if (Line2Cycle != null && Line2Cycle.Count > 0)
+        // Line 2 Rotation
+        if (Line2Cycle != null && Line2Cycle.Count > 0)
+        {
+            if (InGame_Randomizer_mode2.Value == 1) // Random
                 index2 = _random.Next(Line2Cycle.Count);
-            else index2 = 0;
+            else // Sequential (0)
+                index2 = (index2 + 1) % Line2Cycle.Count;
+        }
+        else
+        {
+            index2 = 0;
         }
     }
 

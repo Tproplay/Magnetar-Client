@@ -432,7 +432,7 @@ public static partial class Translator
                     {
                         foreach (var setting in mod.Settings)
                         {
-                            if (string.IsNullOrWhiteSpace(setting.Name)) continue;
+                            if (string.IsNullOrWhiteSpace(setting.Name) || !setting.SaveTranslation) continue;
                             if (node.Settings.TryGetValue(setting.Name, out var setTrans))
                                 TranslationData.ExactTranslations[setting.Name] = setTrans;
                         }

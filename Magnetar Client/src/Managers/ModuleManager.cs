@@ -194,12 +194,29 @@ public static class ModuleManager
     {
         MobileInputHandler.Reset();
 
+        if (ActiveSettingsModule != null && ActiveSettingsModule != mod)
+        {
+            ActiveSettingsModule.ShowSettings = false;
+        }
+
         CurrentWindow = WindowType.Settings;
         ActiveSettingsModule = mod;
 
         mod.ShowSettings = true;
         resetWindowPos = true;
 
+        AnimationHandler.SwitchView(Group, CurrentWindow.ToString());
+    }
+
+    public static void CloseModuleSettings()
+    {
+        if (ActiveSettingsModule != null)
+        {
+            ActiveSettingsModule.ShowSettings = false;
+            ActiveSettingsModule = null;
+        }
+
+        CurrentWindow = WindowType.Modules;
         AnimationHandler.SwitchView(Group, CurrentWindow.ToString());
     }
 
@@ -347,11 +364,7 @@ public static class ModuleManager
                 switch (CurrentWindow)
                 {
                     case WindowType.Settings:
-                        if (ActiveSettingsModule != null)
-                        {
-                            ActiveSettingsModule.ShowSettings = false;
-                        }
-                        CurrentWindow = WindowType.Modules;
+                        CloseModuleSettings();
                         break;
                     case WindowType.SelectionGUI:
                         CurrentWindow = WindowType.Settings;

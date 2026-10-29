@@ -120,6 +120,16 @@ public static class Actions
     /// </summary>
     public static event Action<Module> OnModuleDisabled;
 
+    /// <summary>
+    /// Invoked when any module's settings window is opened. Parameter is the module instance.
+    /// </summary>
+    public static event Action<Module> OnModuleSettingOpened;
+
+    /// <summary>
+    /// Invoked when any module's settings window is closed. Parameter is the module instance.
+    /// </summary>
+    public static event Action<Module> OnModuleSettingClosed;
+
     // --- Internal Invoke Helpers (called by the client internals only) ---
 
     internal static void Invoke_OnEarlyInitialize() => OnEarlyInitialize?.Invoke();
@@ -142,4 +152,6 @@ public static class Actions
     internal static void Invoke_OnGUIScaleChanged(float scale) => OnGUIScaleChanged?.Invoke(scale);
     internal static void Invoke_OnModuleEnabled(Module m) => OnModuleEnabled?.Invoke(m);
     internal static void Invoke_OnModuleDisabled(Module m) => OnModuleDisabled?.Invoke(m);
+    internal static void Invoke_OnModuleSettingOpened(Module m) => OnModuleSettingOpened?.Invoke(m);
+    internal static void Invoke_OnModuleSettingClosed(Module m) => OnModuleSettingClosed?.Invoke(m);
 }

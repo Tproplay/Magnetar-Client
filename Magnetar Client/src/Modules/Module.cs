@@ -55,10 +55,34 @@ public abstract class Module
     public List<KeyCode> BindKeys => KeyBind.BindKeys;
     public virtual bool HoldMode { get; set; }
     public virtual bool Active { get; set; }
+    private bool _showSettings;
+
     /// <summary>
     /// Used to determine whether the setting window of the module is opened.
     /// </summary>
-    public virtual bool ShowSettings { get; set; }
+    public virtual bool ShowSettings
+    {
+        get => _showSettings;
+        set
+        {
+            if (_showSettings != value)
+            {
+                _showSettings = value;
+                if (_showSettings)
+                {
+                    OnSettingOpened();
+                    OnSettingsOpened();
+                    Api.Actions.Invoke_OnModuleSettingOpened(this);
+                }
+                else
+                {
+                    OnSettingClosed();
+                    OnSettingsClosed();
+                    Api.Actions.Invoke_OnModuleSettingClosed(this);
+                }
+            }
+        }
+    }
 
     /// <summary>
     /// Used to store all the settings for the module.
@@ -90,14 +114,52 @@ public abstract class Module
     public virtual void OnDisable() { }
 
     /// <summary>
+    /// Runs once when the module's setting window is opened.
+    /// </summary>
+    public virtual void OnSettingOpened() { }
+
+    /// <summary>
+    /// Alias for <see cref="OnSettingOpened"/>.
+    /// </summary>
+    public virtual void OnSettingsOpened() { }
+
+    /// <summary>
+    /// Runs once when the module's setting window is closed.
+    /// </summary>
+    public virtual void OnSettingClosed() { }
+
+    /// <summary>
+    /// Alias for <see cref="OnSettingClosed"/>.
+    /// </summary>
+    public virtual void OnSettingsClosed() { }
+
+    /// <summary>
     /// Runs every frame regardless of whether the module is active or not.
     /// </summary>
-    public virtual void OnUpdate() { if (Active) OnUpdateActive(); }
+    public virtual void OnUpdate()
+    {
+        if (Active) OnUpdateActive();
+        if (ShowSettings && ClientConfig.InGUI)
+        {
+            OnSettingUpdate();
+            OnSettingsUpdate();
+        }
+    }
 
     /// <summary>
     /// Runs every frame only when the module is active. Will not run if OnUpdate is overridden without calling base.OnUpdate().
     /// </summary>
     public virtual void OnUpdateActive() { }
+
+    /// <summary>
+    /// Runs every frame while the module's setting window is opened. Will not run if OnUpdate is overridden without calling base.OnUpdate().
+    /// </summary>
+    public virtual void OnSettingUpdate() { }
+
+    /// <summary>
+    /// Alias for <see cref="OnSettingUpdate"/>.
+    /// </summary>
+    public virtual void OnSettingsUpdate() { }
 
     /// <summary>
     /// Runs every frame on UnityEngine.OnEarlyGUI

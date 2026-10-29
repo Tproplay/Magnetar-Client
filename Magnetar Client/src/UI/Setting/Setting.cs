@@ -37,6 +37,11 @@ public abstract class Setting
     public bool IsDisabled { get; set; }
 
     /// <summary>
+    /// Indicates whether this setting should be exported and saved to translation files.
+    /// </summary>
+    public virtual bool SaveTranslation { get; set; } = true;
+
+    /// <summary>
     /// Indicates whether this setting can be reverted back to its default value.
     /// </summary>
     public virtual bool CanReset => true;

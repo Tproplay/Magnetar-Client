@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Modules;
+using Magnetar_Client.Modules;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
@@ -179,8 +179,7 @@ internal static class SettingsWindowDrawer
             if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
             {
                 e.Use();
-                ModuleManager.CurrentWindow = ModuleManager.WindowType.Modules;
-                AnimationHandler.SwitchView(ModuleManager.Group, ModuleManager.CurrentWindow.ToString());
+                ModuleManager.CloseModuleSettings();
                 return;
             }
 

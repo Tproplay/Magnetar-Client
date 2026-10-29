@@ -114,7 +114,7 @@ public static class ModuleTranslationHandler
             {
                 foreach (var setting in mod.Settings)
                 {
-                    if (setting != null && !string.IsNullOrWhiteSpace(setting.Name) && !node.Settings.ContainsKey(setting.Name))
+                    if (setting != null && setting.SaveTranslation && !string.IsNullOrWhiteSpace(setting.Name) && !node.Settings.ContainsKey(setting.Name))
                     {
                         node.Settings[setting.Name] = setting.Name;
                     }

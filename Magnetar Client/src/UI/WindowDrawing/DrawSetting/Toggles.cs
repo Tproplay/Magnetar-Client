@@ -136,17 +136,20 @@ public static partial class DrawSetting
     /// <param name="width">The total available width for the control.</param>
     public static void HandleLabelSetting(LabelSetting lblSet, ref float y, float width)
     {
-        if (lblSet == null || string.IsNullOrEmpty(lblSet.Name)) return;
+        if (lblSet == null) return;
 
-        string displayText = Translate(lblSet.Name);
+        string rawText = lblSet.DisplayText;
+        if (string.IsNullOrEmpty(rawText)) return;
+
+        string textToDisplay = lblSet.AutoTranslate ? Translate(rawText) : rawText;
         float labelWidth = width - (ClientConfig.indent * 2f);
         float calculatedHeight = ThemeManager.SettingsDescriptionStyle.CalcHeight(
-            new GUIContent(displayText),
+            new GUIContent(textToDisplay),
             labelWidth
         );
 
         Rect labelRect = new(ClientConfig.indent, y, labelWidth, calculatedHeight);
-        GUI.Label(labelRect, displayText, ThemeManager.SettingsDescriptionStyle);
+        GUI.Label(labelRect, textToDisplay, ThemeManager.SettingsDescriptionStyle);
 
         y += calculatedHeight + ClientConfig.spacing;
     }

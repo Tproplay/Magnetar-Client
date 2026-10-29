@@ -61,7 +61,7 @@ public static partial class Translator
 
         foreach (var setting in settings)
         {
-            if (setting == null || string.IsNullOrWhiteSpace(setting.Name)) continue;
+            if (setting == null || string.IsNullOrWhiteSpace(setting.Name) || !setting.SaveTranslation) continue;
 
             onFoundName(setting.Name);
 

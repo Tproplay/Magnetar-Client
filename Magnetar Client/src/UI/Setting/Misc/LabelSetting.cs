@@ -27,15 +27,6 @@ public class LabelSetting : Setting
     }
 
     /// <summary>
-    /// Backwards compatibility alias for <see cref="DisplayText"/>.
-    /// </summary>
-    public string DispayText
-    {
-        get => DisplayText;
-        set => DisplayText = value;
-    }
-
-    /// <summary>
     /// Whether this label should automatically be translated via the global Translator during rendering.
     /// Set to <see langword="false"/> when manually handling translations or updating display text dynamically at runtime.
     /// </summary>

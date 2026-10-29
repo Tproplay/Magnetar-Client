@@ -54,17 +54,34 @@ public static partial class DrawSetting
 
         string translatedName = Translate(name);
         string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
+        bool isLogarithmic = isFloat ? ((FloatSetting)setting).IsLogarithmic : ((IntSetting)setting).IsLogarithmic;
         
         GUI.Label(new Rect(ClientConfig.indent, y, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth, ClientConfig.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
         float LogConvert(float v) => Mathf.Sign(v) * Mathf.Log10(Mathf.Abs(v) + 1.0f);
         float ExpConvert(float l) => Mathf.Sign(l) * (Mathf.Pow(10.0f, Mathf.Abs(l)) - 1.0f);
 
-        float logMin = LogConvert(sliderMin);
-        float logMax = LogConvert(sliderMax);
         float visualVal = Mathf.Clamp(val, sliderMin, sliderMax);
-        float logVal = LogConvert(visualVal);
-        float percentage = Mathf.Clamp01((logVal - logMin) / (logMax - logMin));
+        if (ReferenceEquals(activeNumericSetting, setting))
+        {
+            if (isFloat && ((FloatSetting)setting).DragValue.HasValue) visualVal = Mathf.Clamp(((FloatSetting)setting).DragValue.Value, sliderMin, sliderMax);
+            else if (!isFloat && ((IntSetting)setting).DragValue.HasValue) visualVal = Mathf.Clamp(((IntSetting)setting).DragValue.Value, sliderMin, sliderMax);
+        }
+
+        float percentage;
+        if (isLogarithmic)
+        {
+            float logMin = LogConvert(sliderMin);
+            float logMax = LogConvert(sliderMax);
+            float logRange = logMax - logMin;
+            float logVal = LogConvert(visualVal);
+            percentage = Mathf.Abs(logRange) > 0.00001f ? Mathf.Clamp01((logVal - logMin) / logRange) : 0f;
+        }
+        else
+        {
+            float range = sliderMax - sliderMin;
+            percentage = range > 0.0001f ? Mathf.Clamp01((visualVal - sliderMin) / range) : 0f;
+        }
 
         float inputW = SettingValues.NumericInputWidth;
         float sliderW = ClientConfig.SettingWidth - inputW - 10f;
@@ -99,15 +116,42 @@ public static partial class DrawSetting
         void ApplyFromMouseX(float mouseX)
         {
             float mousePct = Mathf.Clamp01((mouseX - sliderRect.x) / sliderRect.width);
-            float newLogVal = logMin + (mousePct * (logMax - logMin));
-            float newVal = ExpConvert(newLogVal);
+            float newVal;
+            if (isLogarithmic)
+            {
+                float logMin = LogConvert(sliderMin);
+                float logMax = LogConvert(sliderMax);
+                float logVal = Mathf.Lerp(logMin, logMax, mousePct);
+                newVal = Mathf.Clamp(ExpConvert(logVal), Mathf.Min(sliderMin, sliderMax), Mathf.Max(sliderMin, sliderMax));
+            }
+            else
+            {
+                newVal = Mathf.Lerp(sliderMin, sliderMax, mousePct);
+            }
 
-            if (isFloat) ((FloatSetting)setting).SetPending((float)System.Math.Round(Mathf.Clamp(newVal, sliderMin, sliderMax), decPlaces));
-            else ((IntSetting)setting).SetPending((int)System.Math.Max(intSliderMin, System.Math.Min((long)newVal, intSliderMax)));
+            if (isFloat)
+            {
+                var fs = (FloatSetting)setting;
+                fs.DragValue = newVal;
+                fs.SetPending((float)System.Math.Round(Mathf.Clamp(newVal, sliderMin, sliderMax), decPlaces));
+            }
+            else
+            {
+                var ints = (IntSetting)setting;
+                ints.DragValue = newVal;
+                ints.SetPending((int)System.Math.Max(intSliderMin, System.Math.Min((long)newVal, intSliderMax)));
+            }
         }
 
         bool inHitbox = sliderHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition);
         int sliderControlId = GUIUtility.GetControlID(name.GetHashCode(), FocusType.Passive);
+
+        if (e.type == EventType.MouseDown && e.button == 1 && inHitbox)
+        {
+            if (isFloat) ((FloatSetting)setting).IsLogarithmic = !((FloatSetting)setting).IsLogarithmic;
+            else ((IntSetting)setting).IsLogarithmic = !((IntSetting)setting).IsLogarithmic;
+            e.Use();
+        }
 
         if (e.type == EventType.MouseDown && e.button == 0 && inHitbox)
         {
@@ -128,8 +172,27 @@ public static partial class DrawSetting
                 ApplyFromMouseX(e.mousePosition.x);
                 e.Use();
             }
-            else if (e.type == EventType.MouseUp || (e.type == EventType.Ignore && e.rawType == EventType.MouseUp))
+            else if (e.type == EventType.MouseUp || (e.type == EventType.Ignore && e.rawType == EventType.MouseUp) || !Input.GetMouseButton(0))
             {
+                if (isFloat)
+                {
+                    var fs = (FloatSetting)setting;
+                    if (fs.DragValue.HasValue)
+                    {
+                        fs.SetPending((float)System.Math.Round(Mathf.Clamp(fs.DragValue.Value, sliderMin, sliderMax), decPlaces));
+                        fs.DragValue = null;
+                    }
+                }
+                else
+                {
+                    var ints = (IntSetting)setting;
+                    if (ints.DragValue.HasValue)
+                    {
+                        ints.SetPending((int)System.Math.Max(intSliderMin, System.Math.Min((long)ints.DragValue.Value, intSliderMax)));
+                        ints.DragValue = null;
+                    }
+                }
+
                 CommitSettingValue();
                 GUIUtility.hotControl = 0;
                 ActiveSliderId = -1;

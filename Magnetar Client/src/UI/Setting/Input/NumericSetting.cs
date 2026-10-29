@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
 using static Magnetar_Client.Utils.Translator;
 using System;
@@ -29,6 +29,27 @@ public class IntSetting : Setting
     /// The uncommitted pending value during slider dragging or active text box entry.
     /// </summary>
     public int? PendingValue;
+
+    /// <summary>
+    /// The uncommitted continuous float value while the slider is actively being dragged.
+    /// Allows smooth free slider movement before snapping to the nearest integer on release.
+    /// </summary>
+    public float? DragValue;
+
+    /// <summary>
+    /// Whether the slider scales logarithmically rather than uniformly (linearly).
+    /// Defaults to <c>true</c>.
+    /// </summary>
+    public bool IsLogarithmic { get; set; } = true;
+
+    /// <summary>
+    /// Alias for <see cref="IsLogarithmic"/>.
+    /// </summary>
+    public bool Logarithmic
+    {
+        get => IsLogarithmic;
+        set => IsLogarithmic = value;
+    }
 
     /// <summary>
     /// The visual lower bound of the slider track.
@@ -103,10 +124,22 @@ public class IntSetting : Setting
             Value = PendingValue.Value;
             PendingValue = null;
         }
+        DragValue = null;
+    }
+
+    /// <summary>
+    /// Sets the value directly without invoking events or checking <see cref="Setting.IsDisabled"/>.
+    /// </summary>
+    public void SetDirect(int val)
+    {
+        _value = val;
+        PendingValue = null;
+        DragValue = null;
     }
 
     /// <summary>
     /// Initializes a new instance of <see cref="IntSetting"/>.
+    /// Preserves binary compatibility with external addons.
     /// </summary>
     /// <param name="name">The display name of the setting.</param>
     /// <param name="min">The slider track lower bound.</param>
@@ -116,10 +149,27 @@ public class IntSetting : Setting
     /// <param name="trueMax">The absolute maximum value allowed via manual text entry.</param>
     /// <param name="instantUpdate">Whether changes are applied immediately while dragging.</param>
     public IntSetting(string name, int min, int max, int defaultValue, int trueMin = int.MinValue, int trueMax = int.MaxValue, bool instantUpdate = false)
+        : this(name, min, max, defaultValue, trueMin, trueMax, instantUpdate, true)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="IntSetting"/> with logarithmic scaling option.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="min">The slider track lower bound.</param>
+    /// <param name="max">The slider track upper bound.</param>
+    /// <param name="defaultValue">The initial and default integer value.</param>
+    /// <param name="trueMin">The absolute minimum value allowed via manual text entry.</param>
+    /// <param name="trueMax">The absolute maximum value allowed via manual text entry.</param>
+    /// <param name="instantUpdate">Whether changes are applied immediately while dragging.</param>
+    /// <param name="isLogarithmic">Whether the slider scales logarithmically.</param>
+    public IntSetting(string name, int min, int max, int defaultValue, int trueMin, int trueMax, bool instantUpdate, bool isLogarithmic)
     {
         Name = name;
         Min = min; Max = max; TrueMin = trueMin; TrueMax = trueMax;
         InstantUpdate = instantUpdate;
+        IsLogarithmic = isLogarithmic;
         _value = System.Math.Max(TrueMin, System.Math.Min(defaultValue, TrueMax));
         DefaultValue = _value;
     }
@@ -139,12 +189,29 @@ public class IntSetting : Setting
     }
 
     /// <summary>
+    /// Initializes a new instance of <see cref="IntSetting"/> with logarithmic scaling option.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="min">The slider track lower bound.</param>
+    /// <param name="max">The slider track upper bound.</param>
+    /// <param name="defaultValue">The initial and default integer value.</param>
+    /// <param name="isLogarithmic">Whether the slider scales logarithmically.</param>
+    public IntSetting(string name, int min, int max, int defaultValue, bool isLogarithmic)
+    {
+        Name = name;
+        Min = min; Max = max;
+        DefaultValue = defaultValue;
+        IsLogarithmic = isLogarithmic;
+    }
+
+    /// <summary>
     /// Restores the setting back to <see cref="DefaultValue"/> and clears pending edits.
     /// </summary>
     public override void Reset()
     {
         Value = DefaultValue;
         PendingValue = null;
+        DragValue = null;
     }
 
     /// <summary>
@@ -157,6 +224,9 @@ public class IntSetting : Setting
         DrawNumeric(this, ref y, width, false);
     }
 
+    internal static float LogConvert(float v) => Mathf.Sign(v) * Mathf.Log10(Mathf.Abs(v) + 1.0f);
+    internal static float ExpConvert(float l) => Mathf.Sign(l) * (Mathf.Pow(10.0f, Mathf.Abs(l)) - 1.0f);
+
     /// <summary>
     /// Internal drawing routine shared between <see cref="IntSetting"/> and <see cref="FloatSetting"/>.
     /// </summary>
@@ -164,6 +234,7 @@ public class IntSetting : Setting
     {
         float val, sliderMin, sliderMax, trueMin, trueMax;
         string name;
+        bool isLogarithmic;
 
         int decPlaces = 0, intTrueMin = 0, intTrueMax = 0, intSliderMin = 0, intSliderMax = 0;
 
@@ -172,6 +243,7 @@ public class IntSetting : Setting
             var s = (FloatSetting)setting;
             val = s.DisplayValue; sliderMin = s.Min; sliderMax = s.Max;
             trueMin = s.TrueMin; trueMax = s.TrueMax; name = s.Name; decPlaces = s.DecimalPlaces;
+            isLogarithmic = s.IsLogarithmic;
         }
         else
         {
@@ -179,9 +251,14 @@ public class IntSetting : Setting
             val = s.DisplayValue; sliderMin = s.Min; sliderMax = s.Max;
             trueMin = s.TrueMin; trueMax = s.TrueMax; name = s.Name;
             intSliderMin = s.Min; intSliderMax = s.Max; intTrueMin = s.TrueMin; intTrueMax = s.TrueMax;
+            isLogarithmic = s.IsLogarithmic;
         }
         string translatedName = Translate(name);
         string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
+
+        bool isDisabled = isFloat ? ((FloatSetting)setting).IsDisabled : ((IntSetting)setting).IsDisabled;
+        bool prevGUIEnabled = GUI.enabled;
+        if (isDisabled) GUI.enabled = false;
 
         float elemH = ClientConfig.elementHeight;
         float indent = ClientConfig.indent;
@@ -207,8 +284,45 @@ public class IntSetting : Setting
         Event e = Event.current;
 
         int sliderControlId = GUIUtility.GetControlID(name.GetHashCode(), FocusType.Passive);
+        bool isDraggingThis = ReferenceEquals(DrawSetting.activeNumericSetting, setting);
 
-        float percentage = Mathf.Clamp01((val - sliderMin) / (sliderMax - sliderMin));
+        // When dragging, use the continuous uncommitted DragValue for smooth thumb movement.
+        float visualVal = val;
+        if (isDraggingThis)
+        {
+            if (isFloat)
+            {
+                var fs = (FloatSetting)setting;
+                if (fs.DragValue.HasValue) visualVal = fs.DragValue.Value;
+            }
+            else
+            {
+                var ints = (IntSetting)setting;
+                if (ints.DragValue.HasValue) visualVal = ints.DragValue.Value;
+            }
+        }
+
+        float percentage;
+        if (isLogarithmic)
+        {
+            float logMin = LogConvert(sliderMin);
+            float logMax = LogConvert(sliderMax);
+            float logRange = logMax - logMin;
+            if (Mathf.Abs(logRange) > 0.00001f)
+            {
+                float logVal = LogConvert(visualVal);
+                percentage = Mathf.Clamp01((logVal - logMin) / logRange);
+            }
+            else
+            {
+                percentage = 0f;
+            }
+        }
+        else
+        {
+            float sliderRange = sliderMax - sliderMin;
+            percentage = sliderRange > 0.0001f ? Mathf.Clamp01((visualVal - sliderMin) / sliderRange) : 0f;
+        }
 
         float fillWidth = sliderRect.width * percentage;
         float thumbX = sliderRect.x + fillWidth - (thumbSize / 2f);
@@ -230,26 +344,58 @@ public class IntSetting : Setting
         void ApplyFromMouseX(float mouseX)
         {
             float mousePct = Mathf.Clamp01((mouseX - sliderRect.x) / sliderRect.width);
-            float newVal = Mathf.Lerp(sliderMin, sliderMax, mousePct);
-
-            if (isFloat)
+            float newVal;
+            if (isLogarithmic)
             {
-                float rounded = (float)Math.Round(newVal, decPlaces);
-                ((FloatSetting)setting).SetPending(Mathf.Clamp(rounded, sliderMin, sliderMax));
+                float logMin = LogConvert(sliderMin);
+                float logMax = LogConvert(sliderMax);
+                float logVal = Mathf.Lerp(logMin, logMax, mousePct);
+                newVal = Mathf.Clamp(ExpConvert(logVal), Mathf.Min(sliderMin, sliderMax), Mathf.Max(sliderMin, sliderMax));
             }
             else
             {
+                newVal = Mathf.Lerp(sliderMin, sliderMax, mousePct);
+            }
+
+            if (isFloat)
+            {
+                var fs = (FloatSetting)setting;
+                fs.DragValue = newVal;
+                float rounded = (float)Math.Round(newVal, decPlaces);
+                fs.SetPending(Mathf.Clamp(rounded, sliderMin, sliderMax));
+            }
+            else
+            {
+                var ints = (IntSetting)setting;
+                ints.DragValue = newVal;
                 int intVal = Mathf.RoundToInt(newVal);
-                ((IntSetting)setting).SetPending(Math.Clamp(intVal, intSliderMin, intSliderMax));
+                ints.SetPending(Math.Clamp(intVal, intSliderMin, intSliderMax));
             }
         }
 
         // Expanded grab zone for thumb + track
         Rect grabHitBox = new(sliderStartX - 8f, y - 2f, sliderW + 16f, elemH + 4f);
 
-        bool isDraggingThis = ReferenceEquals(DrawSetting.activeNumericSetting, setting);
+        // Right-click on slider to toggle between uniform and logarithmic mode
+        if (!isDisabled && e.type == EventType.MouseDown && e.button == 1)
+        {
+            if (grabHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition))
+            {
+                if (isFloat)
+                {
+                    var fs = (FloatSetting)setting;
+                    fs.IsLogarithmic = !fs.IsLogarithmic;
+                }
+                else
+                {
+                    var ints = (IntSetting)setting;
+                    ints.IsLogarithmic = !ints.IsLogarithmic;
+                }
+                e.Use();
+            }
+        }
 
-        if (e.type == EventType.MouseDown && e.button == 0)
+        if (!isDisabled && e.type == EventType.MouseDown && e.button == 0)
         {
             if (grabHitBox.Contains(e.mousePosition) || thumbRect.Contains(e.mousePosition))
             {
@@ -264,9 +410,9 @@ public class IntSetting : Setting
                 e.Use();
             }
         }
-        else if (isDraggingThis)
+        else if (!isDisabled && isDraggingThis)
         {
-            if (Input.GetMouseButton(0))
+            if (Input.GetMouseButton(0) && e.type != EventType.MouseUp && e.rawType != EventType.MouseUp)
             {
                 ApplyFromMouseX(e.mousePosition.x);
                 if (e.isMouse && e.type != EventType.Repaint && e.type != EventType.Layout)
@@ -276,11 +422,33 @@ public class IntSetting : Setting
             }
             else
             {
+                // Snap to nearest integer / rounded value and clear DragValue
+                if (isFloat)
+                {
+                    var fs = (FloatSetting)setting;
+                    if (fs.DragValue.HasValue)
+                    {
+                        float rounded = (float)Math.Round(fs.DragValue.Value, decPlaces);
+                        fs.SetPending(Mathf.Clamp(rounded, sliderMin, sliderMax));
+                        fs.DragValue = null;
+                    }
+                }
+                else
+                {
+                    var ints = (IntSetting)setting;
+                    if (ints.DragValue.HasValue)
+                    {
+                        int intVal = Mathf.RoundToInt(ints.DragValue.Value);
+                        ints.SetPending(Math.Clamp(intVal, intSliderMin, intSliderMax));
+                        ints.DragValue = null;
+                    }
+                }
+
                 CommitSettingValue();
                 GUIUtility.hotControl = 0;
                 DrawSetting.ActiveSliderId = -1;
                 DrawSetting.activeNumericSetting = null;
-                if (e.type == EventType.MouseUp)
+                if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
                 {
                     e.Use();
                 }
@@ -322,12 +490,20 @@ public class IntSetting : Setting
             }
         }
 
-        if (DrawResetButton(resetRect))
+        if (!isDisabled && DrawResetButton(resetRect))
         {
             if (isFloat) ((FloatSetting)setting).Reset();
             else ((IntSetting)setting).Reset();
+
+            if (isDraggingThis)
+            {
+                DrawSetting.activeNumericSetting = null;
+                DrawSetting.ActiveSliderId = -1;
+                GUIUtility.hotControl = 0;
+            }
         }
 
+        GUI.enabled = prevGUIEnabled;
         y += elemH + ClientConfig.spacing;
     }
 }
@@ -354,6 +530,27 @@ public class FloatSetting : Setting
     /// The uncommitted pending value during slider dragging or active text box entry.
     /// </summary>
     public float? PendingValue;
+
+    /// <summary>
+    /// The uncommitted continuous float value while the slider is actively being dragged.
+    /// Allows smooth free slider movement before snapping to the rounded value on release.
+    /// </summary>
+    public float? DragValue;
+
+    /// <summary>
+    /// Whether the slider scales logarithmically rather than uniformly (linearly).
+    /// Defaults to <c>true</c>.
+    /// </summary>
+    public bool IsLogarithmic { get; set; } = true;
+
+    /// <summary>
+    /// Alias for <see cref="IsLogarithmic"/>.
+    /// </summary>
+    public bool Logarithmic
+    {
+        get => IsLogarithmic;
+        set => IsLogarithmic = value;
+    }
 
     /// <summary>
     /// The visual lower bound of the slider track.
@@ -433,6 +630,17 @@ public class FloatSetting : Setting
             Value = PendingValue.Value;
             PendingValue = null;
         }
+        DragValue = null;
+    }
+
+    /// <summary>
+    /// Sets the value directly without invoking events or checking <see cref="Setting.IsDisabled"/>.
+    /// </summary>
+    public void SetDirect(float val)
+    {
+        _value = val;
+        PendingValue = null;
+        DragValue = null;
     }
 
     /// <summary>
@@ -447,11 +655,29 @@ public class FloatSetting : Setting
     /// <param name="trueMax">The absolute maximum value allowed via manual text entry.</param>
     /// <param name="instantUpdate">Whether changes are applied immediately while dragging.</param>
     public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces = 1, float trueMin = float.MinValue, float trueMax = float.MaxValue, bool instantUpdate = false)
+        : this(name, min, max, defaultValue, decimalPlaces, trueMin, trueMax, instantUpdate, true)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="FloatSetting"/> with logarithmic scaling option.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="min">The slider track lower bound.</param>
+    /// <param name="max">The slider track upper bound.</param>
+    /// <param name="defaultValue">The initial and default float value.</param>
+    /// <param name="decimalPlaces">The number of decimal places to format and round to.</param>
+    /// <param name="trueMin">The absolute minimum value allowed via manual text entry.</param>
+    /// <param name="trueMax">The absolute maximum value allowed via manual text entry.</param>
+    /// <param name="instantUpdate">Whether changes are applied immediately while dragging.</param>
+    /// <param name="isLogarithmic">Whether the slider scales logarithmically.</param>
+    public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces, float trueMin, float trueMax, bool instantUpdate, bool isLogarithmic)
     {
         Name = name;
         Min = min; Max = max; TrueMin = trueMin; TrueMax = trueMax;
         DecimalPlaces = decimalPlaces;
         InstantUpdate = instantUpdate;
+        IsLogarithmic = isLogarithmic;
         _value = Mathf.Clamp(defaultValue, TrueMin, TrueMax);
         DefaultValue = _value;
     }
@@ -473,12 +699,31 @@ public class FloatSetting : Setting
     }
 
     /// <summary>
+    /// Initializes a new instance of <see cref="FloatSetting"/> with logarithmic scaling option.
+    /// </summary>
+    /// <param name="name">The display name of the setting.</param>
+    /// <param name="min">The slider track lower bound.</param>
+    /// <param name="max">The slider track upper bound.</param>
+    /// <param name="defaultValue">The initial and default float value.</param>
+    /// <param name="decimalPlaces">The number of decimal places to format and round to.</param>
+    /// <param name="isLogarithmic">Whether the slider scales logarithmically.</param>
+    public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces, bool isLogarithmic)
+    {
+        Name = name;
+        Min = min; Max = max;
+        DefaultValue = defaultValue;
+        DecimalPlaces = decimalPlaces;
+        IsLogarithmic = isLogarithmic;
+    }
+
+    /// <summary>
     /// Restores the setting back to <see cref="DefaultValue"/> and clears pending edits.
     /// </summary>
     public override void Reset()
     {
         Value = DefaultValue;
         PendingValue = null;
+        DragValue = null;
     }
 
     /// <summary>

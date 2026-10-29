@@ -71,13 +71,11 @@ public abstract class Module
                 if (_showSettings)
                 {
                     OnSettingOpened();
-                    OnSettingsOpened();
                     Api.Actions.Invoke_OnModuleSettingOpened(this);
                 }
                 else
                 {
                     OnSettingClosed();
-                    OnSettingsClosed();
                     Api.Actions.Invoke_OnModuleSettingClosed(this);
                 }
             }
@@ -119,19 +117,9 @@ public abstract class Module
     public virtual void OnSettingOpened() { }
 
     /// <summary>
-    /// Alias for <see cref="OnSettingOpened"/>.
-    /// </summary>
-    public virtual void OnSettingsOpened() { }
-
-    /// <summary>
     /// Runs once when the module's setting window is closed.
     /// </summary>
     public virtual void OnSettingClosed() { }
-
-    /// <summary>
-    /// Alias for <see cref="OnSettingClosed"/>.
-    /// </summary>
-    public virtual void OnSettingsClosed() { }
 
     /// <summary>
     /// Runs every frame regardless of whether the module is active or not.
@@ -142,7 +130,6 @@ public abstract class Module
         if (ShowSettings && ClientConfig.InGUI)
         {
             OnSettingUpdate();
-            OnSettingsUpdate();
         }
     }
 
@@ -155,11 +142,6 @@ public abstract class Module
     /// Runs every frame while the module's setting window is opened. Will not run if OnUpdate is overridden without calling base.OnUpdate().
     /// </summary>
     public virtual void OnSettingUpdate() { }
-
-    /// <summary>
-    /// Alias for <see cref="OnSettingUpdate"/>.
-    /// </summary>
-    public virtual void OnSettingsUpdate() { }
 
     /// <summary>
     /// Runs every frame on UnityEngine.OnEarlyGUI
@@ -237,6 +219,21 @@ public abstract class Module
         if (!Input.GetKeyDown(triggerKey)) return false;
 
         for (int i = 0; i < keyCodes.Count - 1; i++)
+        {
+            if (!Input.GetKey(keyCodes[i]))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static bool GetKeyCombo(List<KeyCode> keyCodes, bool ignoreGUI = false)
+    {
+        if (!ignoreGUI && ClientConfig.InGUI) return false;
+        if (keyCodes == null || keyCodes.Count == 0) return false;
+
+        for (int i = 0; i < keyCodes.Count; i++)
         {
             if (!Input.GetKey(keyCodes[i]))
             {

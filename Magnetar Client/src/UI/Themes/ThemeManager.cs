@@ -84,6 +84,7 @@ public static class ThemeManager
     public static GUIStyle SectionHeaderStyle { get; private set; }
     public static GUIStyle SectionRemoveButtonStyle { get; private set; }
     public static GUIStyle SectionAddButtonStyle { get; private set; }
+    public static GUIStyle MultiSelectCountTextStyle { get; private set; }
     
     #endregion
 
@@ -344,6 +345,7 @@ public static class ThemeManager
         // 7. Typography
         SettingsDescriptionStyle.normal.textColor = ThemeData.ParseColor(theme.Typography?.Description, d.Typography.Description);
         SettingLabelStyle.normal.textColor = ThemeData.ParseColor(theme.Typography?.Label, d.Typography.Label);
+        MultiSelectCountTextStyle.normal.textColor = SettingLabelStyle.normal.textColor;
         SettingAuthorStyle.normal.textColor = ThemeData.ParseColor(theme.Typography?.Author, d.Typography.Author);
 
         Color baseText = ThemeData.ParseColor(theme.Typography?.Text, d.Typography.Text);
@@ -462,6 +464,7 @@ public static class ThemeManager
         SectionHeaderStyle = new GUIStyle { alignment = TextAnchor.MiddleLeft };
         SectionRemoveButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
         SectionAddButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
+        MultiSelectCountTextStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, wordWrap = false, clipping = TextClipping.Clip };
     }
 
     public static void Rescale()
@@ -524,6 +527,8 @@ public static class ThemeManager
 
         SettingLabelStyle.fontSize = S(SettingDescriptionFontSize);
         SetOffset(SettingLabelStyle.padding, S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingLR), S(SettingDescriptionPaddingTB), S(SettingDescriptionPaddingTB));
+
+        MultiSelectCountTextStyle.fontSize = Mathf.Max(1, Mathf.RoundToInt(S(SettingDescriptionFontSize) * 0.7f));
 
         SettingAuthorStyle.fontSize = S(AuthorFontSize);
         SetOffset(SettingAuthorStyle.padding, S(AuthorPaddingLeft), 0, 0, 0);

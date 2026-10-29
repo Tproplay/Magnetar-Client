@@ -1,4 +1,5 @@
-﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.Core;
+using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
 using static Magnetar_Client.Utils.Translator;
 using System;
@@ -67,6 +68,18 @@ public class MultiSelectSetting : Setting
     /// Whether the options inside the selection window should be sorted alphabetically by display name.
     /// </summary>
     public bool DisplayAlphabetically;
+
+    /// <summary>
+    /// Optional fixed width for the selected option / count text display area.
+    /// If greater than 0, the text will be horizontally centered inside this width.
+    /// </summary>
+    public float Width { get; set; } = 0f;
+
+    /// <summary>
+    /// Whether to display the selected count or option text next to the select button.
+    /// Defaults to <c>true</c>.
+    /// </summary>
+    public bool ShowCountText { get; set; } = true;
 
     /// <summary>
     /// Initializes an empty <see cref="MultiSelectSetting"/> with the specified display name.
@@ -231,16 +244,81 @@ public class MultiSelectSetting : Setting
     public bool IsSelected(int id) => SelectedValues.Contains(id);
 
     /// <summary>
+    /// Sets the selection directly to a single ID without firing <see cref="OnSelectionChanged"/> or checking <see cref="Setting.IsDisabled"/>.
+    /// </summary>
+    /// <param name="id">The option ID to select.</param>
+    public void SetDirect(int id)
+    {
+        SelectedValues.Clear();
+        SelectedValues.Add(id);
+    }
+
+    /// <summary>
+    /// Sets the selection directly to multiple IDs without firing <see cref="OnSelectionChanged"/> or checking <see cref="Setting.IsDisabled"/>.
+    /// </summary>
+    /// <param name="ids">Collection of option IDs to select.</param>
+    public void SetDirect(IEnumerable<int> ids)
+    {
+        SelectedValues.Clear();
+        if (ids != null)
+        {
+            foreach (var id in ids)
+                SelectedValues.Add(id);
+        }
+    }
+
+    /// <summary>
     /// Restores the selection set to match <see cref="DefaultSelectedValues"/>.
     /// </summary>
     public override void Reset()
     {
+        var old = new HashSet<int>(SelectedValues);
         SelectedValues.Clear();
         foreach (var v in DefaultSelectedValues) SelectedValues.Add(v);
+        foreach (var v in old)
+        {
+            if (!SelectedValues.Contains(v))
+                OnSelectionChanged?.Invoke(v, false);
+        }
+        foreach (var v in SelectedValues)
+        {
+            if (!old.Contains(v))
+                OnSelectionChanged?.Invoke(v, true);
+        }
+    }
+
+    private static GUIStyle _countTextStyle;
+
+    /// <summary>
+    /// Gets a centered count text style with font size reduced to 70% of the setting label size.
+    /// </summary>
+    public static GUIStyle MultiSelectCountTextStyle
+    {
+        get
+        {
+            if (ThemeManager.MultiSelectCountTextStyle != null)
+                return ThemeManager.MultiSelectCountTextStyle;
+
+            if (_countTextStyle == null)
+            {
+                _countTextStyle = new GUIStyle
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    wordWrap = false,
+                    clipping = TextClipping.Clip
+                };
+            }
+            if (ThemeManager.SettingLabelStyle != null)
+            {
+                _countTextStyle.fontSize = Mathf.Max(1, Mathf.RoundToInt(ThemeManager.SettingLabelStyle.fontSize * 0.7f));
+                _countTextStyle.normal.textColor = ThemeManager.SettingLabelStyle.normal.textColor;
+            }
+            return _countTextStyle;
+        }
     }
 
     /// <summary>
-    /// Renders the setting row in the window, showing the label, current count, select button, and reset button.
+    /// Renders the setting row in the window, showing the label, current count (if enabled), select button, and reset button.
     /// </summary>
     /// <param name="y">Reference to the vertical position accumulator.</param>
     /// <param name="width">Total available width for this settings row.</param>
@@ -253,42 +331,70 @@ public class MultiSelectSetting : Setting
         float resetBtnW = SettingValues.ResetButtonW;
         float selectBtnW = ClientConfig.selectButtonWidth;
 
-        string countText = '(' + Translate($"{SelectedValues.Count} selected") + ')';
-        float countTextW = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(countText)).x;
+        bool prevEnabled = GUI.enabled;
+        if (IsDisabled) GUI.enabled = false;
+
+        Color origColor = GUI.contentColor;
+        if (IsDisabled) GUI.contentColor = ThemeManager.TextDim;
+
+        string countText = null;
+        float textW = 0f;
+
+        if (ShowCountText)
+        {
+            if (MaxSelection == 1 && SelectedValues.Count == 1)
+            {
+                countText = '(' + GetDisplayName(System.Linq.Enumerable.First(SelectedValues)) + ')';
+            }
+            else
+            {
+                countText = '(' + Translate($"{SelectedValues.Count} selected") + ')';
+            }
+
+            textW = (Width > 0f) ? GUIManager.S(Width) : MultiSelectCountTextStyle.CalcSize(new GUIContent(countText)).x;
+        }
+
+        // Right-to-left layout: [Select Button] [gap] [Count Text (optional)] [gap] [Reset Button]
+        float resetStartX = width - indent - resetBtnW;
+        float countStartX = ShowCountText ? (resetStartX - gap - textW) : resetStartX;
+        float btnStartX = countStartX - gap - selectBtnW;
 
         // Label fills the remaining space on the left
-        float labelW = width - (indent * 2f) - selectBtnW - countTextW - (gap * 2f) - resetBtnW;
+        float labelW = Mathf.Max(0f, btnStartX - indent - gap);
         Rect labelRect = new(indent, y, labelW, elemH);
         GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
 
-        // Right-to-left layout: [Select Button] [gap] [Count Text] [gap] [Reset Button]
-        float resetStartX = width - indent - resetBtnW;
-        float countStartX = resetStartX - gap - countTextW;
-        float btnStartX = countStartX - gap - selectBtnW;
-
         Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
-        Rect countRect = new(countStartX, y, countTextW, elemH);
         Rect btnRect = new(btnStartX, y, selectBtnW, elemH);
 
         if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
-            OnWindowOpen?.Invoke();
-            DrawSetting.multiSelectSearchQuery = "";
-            DrawSetting.manualScrollY = 0f;
+            if (!IsDisabled)
+            {
+                OnWindowOpen?.Invoke();
+                DrawSetting.multiSelectSearchQuery = "";
+                DrawSetting.manualScrollY = 0f;
+            }
             e.Use();
         }
 
         GUI.Box(btnRect, Translate("Select"), ThemeManager.SettingOff);
 
-        Color orig = GUI.contentColor;
-        GUI.contentColor = ThemeManager.TextDim;
-        GUI.Label(countRect, countText, ThemeManager.SettingLabelStyle);
-        GUI.contentColor = orig;
+        if (ShowCountText && !string.IsNullOrEmpty(countText))
+        {
+            Rect countRect = new(countStartX, y, textW, elemH);
+            GUI.contentColor = ThemeManager.TextDim;
+            GUI.Label(countRect, countText, MultiSelectCountTextStyle);
+        }
 
         if (DrawResetButton(resetRect))
         {
-            Reset();
+            if (!IsDisabled)
+                Reset();
         }
+
+        GUI.contentColor = origColor;
+        GUI.enabled = prevEnabled;
 
         y += elemH + ClientConfig.spacing;
     }

@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.Themes;
 using static Magnetar_Client.Utils.Translator;
 using System;
 using UnityEngine;
@@ -63,6 +63,14 @@ public class BoolSetting : Setting
     public override void Reset() => Value = DefaultValue;
 
     /// <summary>
+    /// Sets the value directly without invoking events or checking <see cref="Setting.IsDisabled"/>.
+    /// </summary>
+    public void SetDirect(bool val)
+    {
+        _value = val;
+    }
+
+    /// <summary>
     /// Renders the toggle button, state label, and reset button in IMGUI layout.
     /// </summary>
     /// <param name="y">Reference to the vertical layout offset.</param>
@@ -70,6 +78,9 @@ public class BoolSetting : Setting
     public override void Draw(ref float y, float width)
     {
         Event e = Event.current;
+
+        bool prevGUIEnabled = GUI.enabled;
+        if (IsDisabled) GUI.enabled = false;
 
         float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
@@ -97,10 +108,12 @@ public class BoolSetting : Setting
             e.Use();
         }
 
-        if (DrawResetButton(resetRect))
+        if (!IsDisabled && DrawResetButton(resetRect))
         {
             Reset();
         }
+
+        GUI.enabled = prevGUIEnabled;
 
         y += ClientConfig.elementHeight + ClientConfig.spacing;
     }

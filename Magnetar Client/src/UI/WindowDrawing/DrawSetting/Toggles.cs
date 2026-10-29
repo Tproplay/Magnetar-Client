@@ -19,6 +19,9 @@ public static partial class DrawSetting
         string translatedName = Translate(boolSet.Name);
         float labelWidth = Mathf.Max(width * 0.45f, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth);
 
+        bool prevEnabled = GUI.enabled;
+        if (boolSet.IsDisabled) GUI.enabled = false;
+
         GUI.Label(new Rect(ClientConfig.indent, y, labelWidth, ClientConfig.elementHeight),
             translatedName, ThemeManager.SettingLabelStyle);
 
@@ -28,11 +31,13 @@ public static partial class DrawSetting
         GUI.Box(btnRect, boolSet.Value ? Translate("ON") : Translate("OFF"),
             boolSet.Value ? ThemeManager.SettingOn : ThemeManager.SettingOff);
 
-        if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+        if (!boolSet.IsDisabled && btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
             boolSet.Value = !boolSet.Value;
             e.Use();
         }
+
+        GUI.enabled = prevEnabled;
     }
 
     /// <summary>

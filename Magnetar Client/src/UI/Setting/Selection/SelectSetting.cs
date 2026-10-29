@@ -102,6 +102,14 @@ public class SelectSetting : Setting
     public override void Reset() => Value = DefaultValue;
 
     /// <summary>
+    /// Sets the value directly without invoking events or checking <see cref="Setting.IsDisabled"/>.
+    /// </summary>
+    public void SetDirect(int val)
+    {
+        _value = val;
+    }
+
+    /// <summary>
     /// Renders the select dropdown setting control within the GUI window.
     /// </summary>
     /// <param name="y">The vertical drawing coordinate reference.</param>
@@ -110,6 +118,9 @@ public class SelectSetting : Setting
     {
         Event e = Event.current;
         int controlId = GetHashCode();
+
+        bool prevGUIEnabled = GUI.enabled;
+        if (IsDisabled) GUI.enabled = false;
 
         float elemH = ClientConfig.elementHeight;
         float indent = ClientConfig.indent;
@@ -135,7 +146,7 @@ public class SelectSetting : Setting
             currentValName = (CustomNames != null && CustomNames.ContainsKey(Value)) ? CustomNames[Value] : Options[Value];
         }
 
-        if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+        if (!IsDisabled && btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
             DrawSetting.ActiveDropdownId = (DrawSetting.ActiveDropdownId == controlId) ? -1 : controlId;
             DrawSetting.dropdownScrollY = 0f;
@@ -206,10 +217,12 @@ public class SelectSetting : Setting
             };
         }
 
-        if (DrawResetButton(resetRect))
+        if (!IsDisabled && DrawResetButton(resetRect))
         {
             Reset();
         }
+
+        GUI.enabled = prevGUIEnabled;
 
         y += elemH + ClientConfig.spacing;
     }

@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +10,9 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
+using Il2CppGameLevel.RogueShooting;
+#elif BEPINEX || RELEASE_BEPINEX
+using GameLevel.RogueShooting;
 #endif
 
 namespace Magnetar_Client.Modules;
@@ -52,6 +55,9 @@ public class CustomKeybind : Module
     public BindSetting Fullscreen;
     public BindSetting SmallWindow;
 
+    public BindSetting AutoAim;
+    public BindSetting ToggleLucky;
+
 #if MELONLOADER || BEPINEX
     public BoolSetting DebugMode;
 #endif
@@ -68,6 +74,15 @@ public class CustomKeybind : Module
         CoffeeBean = new BindSetting("Coffee Bean", new List<KeyCode> { KeyCode.E });
 
         AddSettings(PickUpShovel,PickUpGlove,PickUpHammer,PickUpWheel,CoffeeBean);
+
+        EndCategory();
+
+        CreateCategory("Gods Evolved");
+
+        AutoAim = new BindSetting("Auto Aim", new List<KeyCode> { KeyCode.Tab });
+        ToggleLucky = new BindSetting("Toggle Lucky Display", new List<KeyCode> { KeyCode.LeftAlt });
+
+        AddSettings(AutoAim, ToggleLucky);
 
         EndCategory();
 
@@ -453,32 +468,100 @@ public class CustomKeybind : Module
 
     #endregion
 
+    #region ShootingManager
+
+    [HarmonyPatch(typeof(ShootingManager))]
+    public static class ShootingManagerKeyPatch
+    {
+        [HarmonyPatch(nameof(ShootingManager.Update))]
+        [HarmonyPrefix]
+        public static void UpdatePrefix()
+        {
+            if (instance == null || !instance.Active)
+                return;
+            InputPatch.ShootingManagerBlockKeys = true;
+        }
+
+        [HarmonyPatch(nameof(ShootingManager.Update))]
+        [HarmonyPostfix]
+        public static void UpdatePostfix()
+        {
+            InputPatch.ShootingManagerBlockKeys = false;
+        }
+    }
+
+    #endregion
+
     [HarmonyPatch(typeof(Input))]
     public static class InputPatch
     {
         public static bool GameAPPBlockKeys;
+        public static bool BoardBlockKeys;
+        public static bool ShootingManagerBlockKeys;
 
-        [HarmonyPatch(nameof(Input.GetKeyDown), new System.Type[] { typeof(KeyCode) })]
+        private static bool isResolvingKey;
+        private static bool isResolvingKeyDown;
+
+        [HarmonyPatch(nameof(Input.GetKey), new System.Type[] { typeof(KeyCode) })]
         [HarmonyPrefix]
-        public static bool GameAPPGetKeyDown(KeyCode key)
+        public static bool ShootingManagerGetKey(KeyCode key, ref bool __result)
         {
-            if (GameAPPBlockKeys && (key == KeyCode.F || key == KeyCode.G))
+            if (isResolvingKey) return true;
+
+            if (ShootingManagerBlockKeys && key == KeyCode.Tab)
             {
-                return false;
+                if (instance != null && instance.Active && instance.AutoAim != null)
+                {
+                    isResolvingKey = true;
+                    try
+                    {
+                        __result = GetKeyCombo(instance.AutoAim.BindKeys);
+                    }
+                    finally
+                    {
+                        isResolvingKey = false;
+                    }
+                    return false;
+                }
             }
             return true;
         }
 
-        public static bool BoardBlockKeys;
-
         [HarmonyPatch(nameof(Input.GetKeyDown), new System.Type[] { typeof(KeyCode) })]
         [HarmonyPrefix]
-        public static bool BoardGetKeyDown(KeyCode key)
+        public static bool InputGetKeyDown(KeyCode key, ref bool __result)
         {
-            if (BoardBlockKeys && (key == KeyCode.F1))
+            if (isResolvingKeyDown) return true;
+
+            if (ShootingManagerBlockKeys && key == KeyCode.LeftAlt)
             {
+                if (instance != null && instance.Active && instance.ToggleLucky != null)
+                {
+                    isResolvingKeyDown = true;
+                    try
+                    {
+                        __result = GetKeyComboDown(instance.ToggleLucky.BindKeys);
+                    }
+                    finally
+                    {
+                        isResolvingKeyDown = false;
+                    }
+                    return false;
+                }
+            }
+
+            if (GameAPPBlockKeys && (key == KeyCode.F || key == KeyCode.G))
+            {
+                __result = false;
                 return false;
             }
+
+            if (BoardBlockKeys && (key == KeyCode.F1))
+            {
+                __result = false;
+                return false;
+            }
+
             return true;
         }
     }

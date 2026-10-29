@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI;
+using Magnetar_Client.UI;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
 using UnityEngine;
@@ -116,48 +116,81 @@ ModuleManager
     public static void HandleMultiSelectSetting(MultiSelectSetting set, ref float y, float width)
     {
         Event e = Event.current;
-        GUI.Label(new Rect(ClientConfig.indent, y, width * 0.4f, ClientConfig.elementHeight), Translate(set.Name), ThemeManager.SettingLabelStyle);
 
-        string countLabel = '(' + Translate($"{set.SelectedValues.Count} selected") + ')';
-        float countTextWidth = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(countLabel)).x;
+        bool prevEnabled = GUI.enabled;
+        if (set.IsDisabled) GUI.enabled = false;
 
-        Rect btnRect = new(
-            width - ClientConfig.SettingWidth / 2f - ClientConfig.selectButtonWidth - countTextWidth / 2f,
-            y,
-            ClientConfig.selectButtonWidth,
-            ClientConfig.elementHeight
-        );
+        Color origColor = GUI.contentColor;
+        if (set.IsDisabled) GUI.contentColor = ThemeManager.TextDim;
 
-        if (btnRect.Contains(e.mousePosition))
+        string countLabel = null;
+        float textW = 0f;
+
+        if (set.ShowCountText)
+        {
+            if (set.MaxSelection == 1 && set.SelectedValues.Count == 1)
+            {
+                countLabel = '(' + set.GetDisplayName(System.Linq.Enumerable.First(set.SelectedValues)) + ')';
+            }
+            else
+            {
+                countLabel = '(' + Translate($"{set.SelectedValues.Count} selected") + ')';
+            }
+
+            textW = (set.Width > 0f) ? GUIManager.S(set.Width) : MultiSelectSetting.MultiSelectCountTextStyle.CalcSize(new GUIContent(countLabel)).x;
+        }
+
+        float elemH = ClientConfig.elementHeight;
+        float indent = ClientConfig.indent;
+        float gap = SettingValues.Gap;
+        float selectBtnW = ClientConfig.selectButtonWidth;
+
+        float countStartX = width - indent - textW;
+        float btnStartX = set.ShowCountText ? (countStartX - gap - selectBtnW) : (width - indent - selectBtnW);
+        float labelW = Mathf.Max(0f, btnStartX - indent - gap);
+
+        Rect labelRect = new(indent, y, labelW, elemH);
+        Rect btnRect = new(btnStartX, y, selectBtnW, elemH);
+
+        GUI.Label(labelRect, Translate(set.Name), ThemeManager.SettingLabelStyle);
+
+        if (btnRect.Contains(e.mousePosition) && !set.IsDisabled)
             GUI.backgroundColor = ThemeManager.AccentColor;
 
         if (e.type == EventType.MouseDown && e.button == 0 && btnRect.Contains(e.mousePosition))
         {
-            if (set.OnWindowOpen != null)
+            if (!set.IsDisabled)
             {
-                set.OnWindowOpen.Invoke();
-            }
-            else
-            {
-                ActiveMultiSelect = set;
-                ModuleManager.CurrentWindow = ModuleManager.WindowType.SelectionGUI;
-                AnimationHandler.SwitchView(ModuleManager.Group, ModuleManager.WindowType.SelectionGUI.ToString());
-            }
+                if (set.OnWindowOpen != null)
+                {
+                    set.OnWindowOpen.Invoke();
+                }
+                else
+                {
+                    ActiveMultiSelect = set;
+                    ModuleManager.CurrentWindow = ModuleManager.WindowType.SelectionGUI;
+                    AnimationHandler.SwitchView(ModuleManager.Group, ModuleManager.WindowType.SelectionGUI.ToString());
+                }
 
-            multiSelectSearchQuery = "";
-            manualScrollY = 0f;
+                multiSelectSearchQuery = "";
+                manualScrollY = 0f;
+            }
             e.Use();
         }
 
         GUI.Box(btnRect, Translate("Select"), ThemeManager.SettingOff);
         GUI.backgroundColor = Color.white;
 
-        Color originalColor = GUI.contentColor;
-        GUI.contentColor = ThemeManager.TextDim;
-        GUI.Label(new Rect(btnRect.x + ClientConfig.selectButtonWidth + GUIManager.S(5f), y, width * 0.4f, ClientConfig.elementHeight),
-            countLabel, ThemeManager.SettingLabelStyle);
-        GUI.contentColor = originalColor;
+        if (set.ShowCountText && !string.IsNullOrEmpty(countLabel))
+        {
+            Rect countRect = new(countStartX, y, textW, elemH);
+            GUI.contentColor = ThemeManager.TextDim;
+            GUI.Label(countRect, countLabel, MultiSelectSetting.MultiSelectCountTextStyle);
+        }
 
-        y += ClientConfig.elementHeight + ClientConfig.spacing;
+        GUI.contentColor = origColor;
+        GUI.enabled = prevEnabled;
+
+        y += elemH + ClientConfig.spacing;
     }
 }

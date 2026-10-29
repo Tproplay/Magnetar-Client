@@ -243,6 +243,24 @@ public abstract class Module
         return true;
     }
 
+    public static bool GetKeyComboUp(List<KeyCode> keyCodes, bool ignoreGUI = false)
+    {
+        if (!ignoreGUI && ClientConfig.InGUI) return false;
+        if (keyCodes == null || keyCodes.Count == 0) return false;
+
+        KeyCode triggerKey = keyCodes[keyCodes.Count - 1];
+        if (!Input.GetKeyUp(triggerKey)) return false;
+
+        for (int i = 0; i < keyCodes.Count - 1; i++)
+        {
+            if (!Input.GetKey(keyCodes[i]))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /// <summary>
     /// Contains default Banned HashSets for Plants and Zombies
     /// </summary>

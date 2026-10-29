@@ -45,6 +45,13 @@ public static class ProfileManager
 
         try
         {
+            // Legacy support to move files in UserData/Config dir
+            var legacyFiles = Directory.GetFiles(PathsManager.ConfigDir, SaveFilePrefix + "*.json");
+            foreach (var legacyFile in legacyFiles)
+            {
+                File.Move(legacyFile, Path.Combine(PathsManager.ProfilesDir, Path.GetFileName(legacyFile)), true);
+            }
+
             var files = Directory.GetFiles(PathsManager.ProfilesDir, SaveFilePrefix + "*.json");
             foreach (var file in files)
             {

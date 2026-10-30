@@ -364,28 +364,29 @@ public abstract class Module
     /// </summary>
     public Dictionary<string, string> SavedRegexTranslations { get; set; } = new();
 
-    /// <summary>
-    /// Saves the module's custom phrases and regex translations to disk.
-    /// </summary>
-    /// <param name="language">Optional target language (defaults to current language).</param>
-    public void SaveTranslations(string language = null) =>
-        Core.ModuleManager_.ModuleTranslationHandler.SaveModuleTranslations(this, language);
+    public void RegisterTranslation(string key, string defaultValue, bool instantSave = true)
+    {
+        SavedTranslationData[key] = defaultValue;
+        if (instantSave)
+        {
+            SaveTranslationData();
+        }
+    }
 
-    public void RegisterTranslation(string key, string defaultValue)
+    public void RegisterTranslation(string key, bool instantSave = true)
     {
         if (!SavedTranslationData.ContainsKey(key))
         {
-            SavedTranslationData[key] = defaultValue;
-            if (Utils.TranslationData.ModulesLinked)
+            SavedTranslationData[key] = key;
+            if (instantSave)
             {
-                SaveTranslations();
+                SaveTranslationData();
             }
         }
     }
 
     public void RegisterTranslations(Dictionary<string, string> translations)
     {
-        if (translations == null) return;
         bool added = false;
         foreach (var kvp in translations)
         {
@@ -395,18 +396,45 @@ public abstract class Module
                 added = true;
             }
         }
-        if (added && Utils.TranslationData.ModulesLinked)
+        if (added)
         {
-            SaveTranslations();
+            SaveTranslationData();
         }
+    }
+
+    public void RegisterTranslations(string[] strings)
+    {
+        foreach (var kvp in strings)
+        {
+            RegisterTranslation(kvp, kvp, false);
+        }
+        SaveTranslationData();
     }
 
     public void RegisterRegexTranslation(string pattern, string replacement)
     {
         SavedRegexTranslations[pattern] = replacement;
+        SaveTranslationData();
+    }
+
+    public void RegisterRegexTranslations(Dictionary<string,string> translations)
+    {
+        foreach (var kvp in translations)
+        {
+            SavedRegexTranslations[kvp.Key] = kvp.Value;
+        }
+        SaveTranslationData();
+    }
+
+    /// <summary>
+    /// Saves the module's custom phrases and regex translations to disk.
+    /// </summary>
+    /// <param name="language">Optional target language (defaults to current language).</param>
+    public void SaveTranslationData(string language = null)
+    {
         if (Utils.TranslationData.ModulesLinked)
         {
-            SaveTranslations();
+            Core.ModuleManager_.ModuleTranslationHandler.SaveModuleTranslations(this, language);
         }
     }
 

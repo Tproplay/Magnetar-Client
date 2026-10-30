@@ -109,6 +109,8 @@ public class CustomKeybind : Module
     {
         instance = this;
 
+        RegisterRegexTranslation("Seed Slot (\\d+)", "Seed Slot {1}");
+
         // In Game Tools
         CreateCategory("In Game");
 

@@ -35,6 +35,7 @@ public class CustomKeybind : Module
     public BindSetting PickUpShovel;
     public BindSetting PickUpGlove;
     public BindSetting PickUpHammer;
+    public BindSetting ZombieGlove;
     public BindSetting PickUpWheel;
     public BindSetting CoffeeBean;
     public BindSetting RotatePlant;
@@ -47,8 +48,6 @@ public class CustomKeybind : Module
     public BindSetting MoveLeft;
     public BindSetting MoveDown;
     public BindSetting MoveRight;
-    public BindSetting JumpAction;
-    public BindSetting ZombieGlove;
 
     // Rhythm Game
     public BindSetting Rhythm1;
@@ -91,7 +90,6 @@ public class CustomKeybind : Module
     // Game Features & Sound
     public BindSetting ShowBulletDamage;
     public BindSetting Ra2Sound;
-    public BindSetting DeveloperMode;
 
     // Misc
     public BindSetting SlowMode;
@@ -111,14 +109,14 @@ public class CustomKeybind : Module
     {
         instance = this;
 
-        // 1. In Game Tools
+        // In Game Tools
         CreateCategory("In Game");
 
         PickUpShovel = new BindSetting("Pick up Shovel", new List<KeyCode> { KeyCode.Alpha1 });
         PickUpGlove = new BindSetting("Pick up Glove", new List<KeyCode> { KeyCode.Alpha2 });
         PickUpHammer = new BindSetting("Pick up Hammer", new List<KeyCode> { KeyCode.Alpha4 });
         PickUpWheel = new BindSetting("Pick up Wheel Barrow", new List<KeyCode> { KeyCode.Alpha5 });
-        ZombieGlove = new BindSetting("Zen Garden Glove", new List<KeyCode> { KeyCode.V });
+        ZombieGlove = new BindSetting("Zombie Glove", new List<KeyCode> { KeyCode.V });
         CoffeeBean = new BindSetting("Coffee Bean", new List<KeyCode> { KeyCode.E });
         RotatePlant = new BindSetting("Rotate Plant (TD)", new List<KeyCode> { KeyCode.R });
         OpenBag = new BindSetting("Open Bag / Inventory", new List<KeyCode> { KeyCode.B });
@@ -128,42 +126,32 @@ public class CustomKeybind : Module
         AddSettings(PickUpShovel, PickUpGlove, PickUpHammer, PickUpWheel, ZombieGlove, CoffeeBean, RotatePlant, OpenBag, PauseGame, CancelMenu);
         EndCategory();
 
-        // 2. Movement & Controls
+        // Game Features & Sound
+        CreateCategory("Game Features", false);
+
+        ShowBulletDamage = new BindSetting("Show Bullet Damage", new List<KeyCode> { KeyCode.T });
+        Ra2Sound = new BindSetting("Toggle RA2 Sound", new List<KeyCode> { KeyCode.P });
+        SlowMode = new BindSetting("Toggle Slow Mode", new List<KeyCode> { KeyCode.Alpha3 });
+        ShowPlantHP = new BindSetting("Show Plant HP", new List<KeyCode> { KeyCode.Q });
+        ShowZombieHP = new BindSetting("Show Zombie HP", new List<KeyCode> { KeyCode.W });
+        ToggleUI = new BindSetting("Toggle UI", new List<KeyCode> { KeyCode.F1 });
+
+        AddSettings(ShowBulletDamage, Ra2Sound, SlowMode, ShowPlantHP, ShowZombieHP, ToggleUI);
+        EndCategory();
+        
+        // Movement & Controls
         CreateCategory("Movement & Controls");
 
         MoveUp = new BindSetting("Move Up", new List<KeyCode> { KeyCode.W });
         MoveLeft = new BindSetting("Move Left", new List<KeyCode> { KeyCode.A });
         MoveDown = new BindSetting("Move Down", new List<KeyCode> { KeyCode.S });
         MoveRight = new BindSetting("Move Right", new List<KeyCode> { KeyCode.D });
-        JumpAction = new BindSetting("Jump / Special Action", new List<KeyCode> { KeyCode.Space });
 
-        AddSettings(MoveUp, MoveLeft, MoveDown, MoveRight, JumpAction);
+        AddSettings(MoveUp, MoveLeft, MoveDown, MoveRight);
         EndCategory();
 
-        // 3. Rhythm Game
-        CreateCategory("Rhythm Game");
 
-        Rhythm1 = new BindSetting("Rhythm Track 1", new List<KeyCode> { KeyCode.S });
-        Rhythm2 = new BindSetting("Rhythm Track 2", new List<KeyCode> { KeyCode.D });
-        Rhythm3 = new BindSetting("Rhythm Track 3", new List<KeyCode> { KeyCode.J });
-        Rhythm4 = new BindSetting("Rhythm Track 4", new List<KeyCode> { KeyCode.K });
-        RhythmStepForward = new BindSetting("Editor Step Forward", new List<KeyCode> { KeyCode.Space });
-        RhythmStepBackward = new BindSetting("Editor Step Backward", new List<KeyCode> { KeyCode.RightArrow });
-        RhythmDeleteNote = new BindSetting("Editor Delete Note", new List<KeyCode> { KeyCode.Delete });
-
-        AddSettings(Rhythm1, Rhythm2, Rhythm3, Rhythm4, RhythmStepForward, RhythmStepBackward, RhythmDeleteNote);
-        EndCategory();
-
-        // 4. Gods Evolved
-        CreateCategory("Gods Evolved");
-
-        AutoAim = new BindSetting("Auto Aim", new List<KeyCode> { KeyCode.Tab });
-        ToggleLucky = new BindSetting("Toggle Lucky Display", new List<KeyCode> { KeyCode.LeftAlt });
-
-        AddSettings(AutoAim, ToggleLucky);
-        EndCategory();
-
-        // 5. Seed Slots
+        // Seed Slots
         CreateCategory("Seed Slot", false);
 
         SeedSlot = new List<BindSetting>(14);
@@ -174,8 +162,8 @@ public class CustomKeybind : Module
         SeedSlot.ForEach(set => AddSettings(set));
         EndCategory();
 
-        // 6. Choices options (MultipleChoiceMenu)
-        CreateCategory("Dialog & Choices", false);
+        // Choices options (MultipleChoiceMenu)
+        CreateCategory("Choices & Buff Selection", false);
 
         LabelSetting MultipleChoiceLabel = new("These keybinds are used for quickly picking buff choices.");
 
@@ -189,8 +177,31 @@ public class CustomKeybind : Module
         AddSettings(MultipleChoiceLabel, Choice1, Choice2, Choice3, Choice4, Choice5, ChoiceConfirm);
         EndCategory();
 
-        // 7. PvP & Minigames
-        CreateCategory("PvP & Minigames", false);
+        // Rhythm Game
+        CreateCategory("Rhythm Game");
+
+        Rhythm1 = new BindSetting("Rhythm Track 1", new List<KeyCode> { KeyCode.S });
+        Rhythm2 = new BindSetting("Rhythm Track 2", new List<KeyCode> { KeyCode.D });
+        Rhythm3 = new BindSetting("Rhythm Track 3", new List<KeyCode> { KeyCode.J });
+        Rhythm4 = new BindSetting("Rhythm Track 4", new List<KeyCode> { KeyCode.K });
+        RhythmStepForward = new BindSetting("Editor Step Forward", new List<KeyCode> { KeyCode.Space });
+        RhythmStepBackward = new BindSetting("Editor Step Backward", new List<KeyCode> { KeyCode.RightArrow });
+        RhythmDeleteNote = new BindSetting("Editor Delete Note", new List<KeyCode> { KeyCode.Delete });
+
+        AddSettings(Rhythm1, Rhythm2, Rhythm3, Rhythm4, RhythmStepForward, RhythmStepBackward, RhythmDeleteNote);
+        EndCategory();
+
+        // Gods Evolved
+        CreateCategory("Gods Evolved");
+
+        AutoAim = new BindSetting("Auto Aim", new List<KeyCode> { KeyCode.Tab });
+        ToggleLucky = new BindSetting("Toggle Lucky Display", new List<KeyCode> { KeyCode.LeftAlt });
+
+        AddSettings(AutoAim, ToggleLucky);
+        EndCategory();
+        
+        // PvP
+        CreateCategory("PvP", false);
 
         PvPSpeedUp = new BindSetting("PvP Speed Up", new List<KeyCode> { KeyCode.RightArrow });
         PvPSpeedDown = new BindSetting("PvP Speed Down", new List<KeyCode> { KeyCode.LeftArrow });
@@ -203,38 +214,18 @@ public class CustomKeybind : Module
         AddSettings(PvPSpeedUp, PvPSpeedDown, PvPP1Action, PvPP2Action, PvPSwitchCards1, PvPSwitchCards2, PvPConfirm);
         EndCategory();
 
-        // 8. Almanac & Data
+        // Almanac & Data
         CreateCategory("Almanac & Data", false);
 
-        AlmanacLookMix = new BindSetting("Almanac Look Mix", new List<KeyCode> { KeyCode.U });
+        AlmanacLookMix = new BindSetting("Look Mix (In Almanac)", new List<KeyCode> { KeyCode.U });
         CheckPlantAlmanac = new BindSetting("Check Plant Almanac", new List<KeyCode> { KeyCode.C });
         LookPlantData = new BindSetting("Look Plant Data", new List<KeyCode> { KeyCode.H });
 
         AddSettings(AlmanacLookMix, CheckPlantAlmanac, LookPlantData);
         EndCategory();
 
-        // 9. Game Features & Sound
-        CreateCategory("Game Features", false);
 
-        ShowBulletDamage = new BindSetting("Show Bullet Damage", new List<KeyCode> { KeyCode.T });
-        Ra2Sound = new BindSetting("Toggle RA2 Sound", new List<KeyCode> { KeyCode.P });
-        DeveloperMode = new BindSetting("Developer Mode", new List<KeyCode> { KeyCode.X });
-
-        AddSettings(ShowBulletDamage, Ra2Sound, DeveloperMode);
-        EndCategory();
-
-        // 10. Misc
-        CreateCategory("Misc");
-
-        SlowMode = new BindSetting("Toggle Slow Mode", new List<KeyCode> { KeyCode.Alpha3 });
-        ShowPlantHP = new BindSetting("Show Plant HP", new List<KeyCode> { KeyCode.Q });
-        ShowZombieHP = new BindSetting("Show Zombie HP", new List<KeyCode> { KeyCode.W });
-        ToggleUI = new BindSetting("Toggle UI", new List<KeyCode> { KeyCode.F1 });
-
-        AddSettings(SlowMode, ShowPlantHP, ShowZombieHP, ToggleUI);
-        EndCategory();
-
-        // 11. Application
+        // Application
         CreateCategory("Application");
 
         Fullscreen = new BindSetting("Fullscreen", new List<KeyCode> { KeyCode.F });
@@ -296,7 +287,6 @@ public class CustomKeybind : Module
                 if (Fullscreen?.BindKeys?.Count > 0) KeyCodeManager.FullScreen = Fullscreen.BindKeys[0];
                 if (SmallWindow?.BindKeys?.Count > 0) KeyCodeManager.NormalScreen = SmallWindow.BindKeys[0];
                 if (Ra2Sound?.BindKeys?.Count > 0) KeyCodeManager.Ra2Sound = Ra2Sound.BindKeys[0];
-                if (DeveloperMode?.BindKeys?.Count > 0) KeyCodeManager.DevalopMode = DeveloperMode.BindKeys[0];
                 if (ToggleUI?.BindKeys?.Count > 0) KeyCodeManager.HideUI = ToggleUI.BindKeys[0];
             }
             else
@@ -317,7 +307,6 @@ public class CustomKeybind : Module
                 KeyCodeManager.FullScreen = KeyCode.F;
                 KeyCodeManager.NormalScreen = KeyCode.G;
                 KeyCodeManager.Ra2Sound = KeyCode.P;
-                KeyCodeManager.DevalopMode = KeyCode.X;
                 KeyCodeManager.HideUI = KeyCode.F1;
             }
         }
@@ -367,11 +356,6 @@ public class CustomKeybind : Module
 
                 if (ShowBulletDamage?.BindKeys?.Count > 0 && GetKeyComboDown(ShowBulletDamage.BindKeys) && GameData.BoardInstance != null)
                     GameData.BoardInstance.showBulletDamage = !GameData.BoardInstance.showBulletDamage;
-
-                if (DeveloperMode?.BindKeys?.Count > 0 && GetKeyComboDown(DeveloperMode.BindKeys))
-                {
-                    GameAPP.developerMode = !GameAPP.developerMode;
-                }
 
                 if (ToggleUI?.BindKeys?.Count > 0 && GetKeyComboDown(ToggleUI.BindKeys))
                 {
@@ -929,13 +913,6 @@ public class CustomKeybind : Module
                 if (key == KeyCode.K && instance.Rhythm4 != null)
                 {
                     __result = GetKeyComboUp(instance.Rhythm4.BindKeys);
-                    return false;
-                }
-
-                // Player Movement / Space Release
-                if (key == KeyCode.Space && instance.JumpAction != null)
-                {
-                    __result = GetKeyComboUp(instance.JumpAction.BindKeys);
                     return false;
                 }
             }

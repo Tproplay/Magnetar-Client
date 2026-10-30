@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using UnityEngine;
 #if MELONLOADER || RELEASE_MELON
 using Il2CppRhythmGame;
@@ -8,7 +8,7 @@ using RhythmGame;
 
 namespace Magnetar_Client.Modules;
 
-public class AutoOsu: Module
+public class AutoOsu : Module
 {
     // Mod Info
     public override string Name { get; set; } = "Auto Osu";
@@ -19,10 +19,7 @@ public class AutoOsu: Module
 
     public override ModuleCategory Category { get; set; } = ModuleCategory.Level;
 
-
-
     // Mod Data
-
     public static AutoOsu instance;
 
     public AutoOsu()
@@ -34,7 +31,7 @@ public class AutoOsu: Module
     public override void OnUpdateActive()
     {
         RhythmGameManager __instance = RhythmGameManager.Instance;
-        if (__instance == null || __instance.tracks == null) return;
+        if (__instance == null || __instance.tracks == null || !__instance.isPlaying || __instance.isPaused) return;
 
         float currentTime = __instance.CurrentTime;
 
@@ -45,44 +42,66 @@ public class AutoOsu: Module
 
             for (int j = track.activeNotes.Count - 1; j >= 0; j--)
             {
-                var note = track.activeNotes[j];
-                if (note == null) continue;
-
-                float targetTime = note.targetTime;
-
-                // --- 1. NORMAL / SKILL NOTES ---
-                if (note.noteType == NoteType.Normal || note.noteType == NoteType.Skill)
+                try
                 {
-                    if (currentTime >= targetTime)
+                    var note = track.activeNotes[j];
+                    if (note == null || note.gameObject == null)
                     {
-                        try
+                        track.activeNotes.RemoveAt(j);
+                        continue;
+                    }
+
+                    float targetTime = note.targetTime;
+
+                    // --- 1. NORMAL / SKILL NOTES ---
+                    if (note.noteType == NoteType.Normal || note.noteType == NoteType.Skill)
+                    {
+                        if (note.hasAutoPlayed) continue;
+
+                        // Hit slightly early (within 50ms) to ensure frame drops never cause a miss
+                        if (currentTime >= targetTime - 0.05f)
                         {
-                            note.OnClick();
-                            __instance.IsHoldKeyPressed(i);
+                            if (note.IsClickable())
+                            {
+                                note.hasAutoPlayed = true;
+                                note.OnClick();
+                            }
                         }
-                        catch { }
+                    }
+                    // --- 2. HOLD NOTES ---
+                    else if (note.noteType == NoteType.Hold)
+                    {
+                        float endTime = targetTime + note.holdDuration;
+
+                        // Start hold
+                        if (currentTime >= targetTime - 0.05f && currentTime < endTime)
+                        {
+                            if (!note.isHolding)
+                            {
+                                if (note.IsClickable())
+                                {
+                                    note.OnClick();
+                                }
+                                note.OnHoldStart();
+                            }
+                        }
+                        // End hold
+                        else if (currentTime >= endTime)
+                        {
+                            if (note.isHolding)
+                            {
+                                try
+                                {
+                                    note.OnHoldComplete();
+                                }
+                                catch { }
+                            }
+                        }
                     }
                 }
-                // --- 2. HOLD NOTES ---
-                else if (note.noteType == NoteType.Hold)
+                catch
                 {
-                    float endTime = targetTime + note.holdDuration;
-
-                    if (currentTime >= targetTime && currentTime < endTime)
-                    {
-                        if (!note.isHolding)
-                        {
-                            note.OnHoldStart();
-                            __instance.IsHoldKeyPressed(i);
-                        }
-                    }
-                    else if (currentTime >= endTime)
-                    {
-                        if (note.isHolding)
-                        {
-                            note.OnHoldComplete();
-                        }
-                    }
+                    // Catch individual note errors to prevent one faulty note from halting the entire loop
                 }
             }
         }
@@ -95,7 +114,7 @@ public class AutoOsu: Module
         [HarmonyPrefix]
         public static void ForceShootPerfect(ref NoteJudgeSystem.JudgeResult result)
         {
-            if ( instance==null || !instance.Active) return;
+            if (instance == null || !instance.Active) return;
             result = NoteJudgeSystem.JudgeResult.Perfect;
         }
 
@@ -110,18 +129,59 @@ public class AutoOsu: Module
             }
         }
 
+        [HarmonyPatch(nameof(RhythmGameManager.IsHoldKeyPressed))]
+        [HarmonyPrefix]
+        public static bool ForceHoldKeyPressed(ref bool __result)
+        {
+            if (instance == null || !instance.Active) return true;
+            __result = true;
+            return false;
+        }
+
+        [HarmonyPatch(nameof(RhythmGameManager.OnHoldNoteFailed))]
+        [HarmonyPrefix]
+        public static bool PreventHoldNoteFailed()
+        {
+            if (instance == null || !instance.Active) return true;
+            return false;
+        }
+
         [HarmonyPatch(nameof(RhythmGameManager.OnNoteMissed))]
         [HarmonyPrefix]
         public static bool IgnoreMisses(RhythmGameManager __instance, FallingNote note)
         {
             if (instance == null || !instance.Active) return true;
 
-            __instance.Shoot(NoteJudgeSystem.JudgeResult.Perfect);
-
-            if (note != null && note.gameObject != null)
+            try
             {
-                Object.Destroy(note.gameObject);
+                if (__instance != null)
+                {
+                    __instance.Shoot(NoteJudgeSystem.JudgeResult.Perfect);
+
+                    if (note != null)
+                    {
+                        int trackIdx = note.trackIndex;
+                        if (__instance.tracks != null && trackIdx >= 0 && trackIdx < __instance.tracks.Count)
+                        {
+                            var track = __instance.tracks[trackIdx];
+                            if (track != null)
+                            {
+                                track.RemoveNote(note);
+                                if (track.activeNotes != null)
+                                {
+                                    track.activeNotes.Remove(note);
+                                }
+                            }
+                        }
+
+                        if (note.gameObject != null)
+                        {
+                            Object.Destroy(note.gameObject);
+                        }
+                    }
+                }
             }
+            catch { }
 
             return false; 
         }
@@ -136,7 +196,6 @@ public class AutoOsu: Module
         {
             if (instance == null || !instance.Active) return true;
             __result = NoteJudgeSystem.JudgeResult.Perfect;
-
             return false;
         }
     }
@@ -144,14 +203,42 @@ public class AutoOsu: Module
     [HarmonyPatch(typeof(FallingNote))]
     public static class FallingNotePatch
     {
-        [HarmonyPatch(nameof(FallingNote.hasMissed),(MethodType.Setter))]
-        public static void HasMissedPatch(ref bool __bool)
+        [HarmonyPatch(nameof(FallingNote.OnMiss))]
+        [HarmonyPrefix]
+        public static bool PreventFallingNoteMiss(FallingNote __instance)
         {
-            if (instance == null || !instance.Active) return;
-            __bool = false;
+            if (instance == null || !instance.Active) return true;
+
+            try
+            {
+                if (__instance != null && __instance.IsClickable())
+                {
+                    __instance.OnClick();
+                }
+            }
+            catch { }
+
+            return false;
         }
-
-
     }
 
+    [HarmonyPatch(typeof(ComboManager))]
+    public static class ComboManagerOverride
+    {
+        [HarmonyPatch(nameof(ComboManager.ResetCombo))]
+        [HarmonyPrefix]
+        public static bool PreventResetCombo()
+        {
+            if (instance == null || !instance.Active) return true;
+            return false;
+        }
+
+        [HarmonyPatch(nameof(ComboManager.AddCombo))]
+        [HarmonyPrefix]
+        public static void ForcePerfectCombo(ref NoteJudgeSystem.JudgeResult result)
+        {
+            if (instance == null || !instance.Active) return;
+            result = NoteJudgeSystem.JudgeResult.Perfect;
+        }
+    }
 }

@@ -353,31 +353,18 @@ public abstract class Module
 
     #region Custom Module Translations & Regex
 
+    #region Direct Translation
     /// <summary>
     /// Key-value pairs for module-specific phrases. Loaded from the module's 
     /// translation JSON and overwritten with translated values when a language loads.
     /// </summary>
     public Dictionary<string, string> SavedTranslationData { get; set; } = new(StringComparer.Ordinal);
 
-    /// <summary>
-    /// Custom regex replacement rules (RegexPattern -> ReplacementTemplate).
-    /// </summary>
-    public Dictionary<string, string> SavedRegexTranslations { get; set; } = new();
-
-    public void RegisterTranslation(string key, string defaultValue, bool instantSave = true)
+    public void RegisterTranslation(string key, string defaultValue, bool instantSave = true, bool overwrite = false)
     {
-        SavedTranslationData[key] = defaultValue;
-        if (instantSave)
+        if (!SavedTranslationData.ContainsKey(key) || overwrite)
         {
-            SaveTranslationData();
-        }
-    }
-
-    public void RegisterTranslation(string key, bool instantSave = true)
-    {
-        if (!SavedTranslationData.ContainsKey(key))
-        {
-            SavedTranslationData[key] = key;
+            SavedTranslationData[key] = defaultValue;
             if (instantSave)
             {
                 SaveTranslationData();
@@ -385,42 +372,62 @@ public abstract class Module
         }
     }
 
-    public void RegisterTranslations(Dictionary<string, string> translations)
+    public void RegisterTranslations(Dictionary<string, string> translations, bool instantSave = true, bool overwrite = false)
     {
-        bool added = false;
+        if (translations == null) return;
+        bool modified = false;
         foreach (var kvp in translations)
         {
-            if (!SavedTranslationData.ContainsKey(kvp.Key))
+            if (!SavedTranslationData.ContainsKey(kvp.Key) || overwrite)
             {
                 SavedTranslationData[kvp.Key] = kvp.Value;
-                added = true;
+                modified = true;
             }
         }
-        if (added)
+        if (modified && instantSave)
+        {
+            SaveTranslationData();
+        }
+    }
+    #endregion
+
+    #region Regex Translations
+    /// <summary>
+    /// Custom regex replacement rules (RegexPattern -> ReplacementTemplate).
+    /// </summary>
+    public Dictionary<string, string> SavedRegexTranslations { get; set; } = new();
+
+    public void RegisterRegexTranslation(string pattern, string replacement, bool instantSave = true, bool overwrite = false)
+    {
+        if (!SavedRegexTranslations.ContainsKey(pattern) || overwrite)
+        {
+            SavedRegexTranslations[pattern] = replacement;
+            if (instantSave)
+            {
+                SaveTranslationData();
+            }
+        }
+    }
+
+    public void RegisterRegexTranslations(Dictionary<string, string> translations, bool instantSave = true, bool overwrite = false)
+    {
+        if (translations == null) return;
+        bool modified = false;
+        foreach (var kvp in translations)
+        {
+            if (!SavedRegexTranslations.ContainsKey(kvp.Key) || overwrite)
+            {
+                SavedRegexTranslations[kvp.Key] = kvp.Value;
+                modified = true;
+            }
+        }
+        if (modified && instantSave)
         {
             SaveTranslationData();
         }
     }
 
-    public void RegisterTranslations(string[] strings)
-    {
-        RegisterTranslations(Translator.CreateDictionary(strings));
-    }
-
-    public void RegisterRegexTranslation(string pattern, string replacement)
-    {
-        SavedRegexTranslations[pattern] = replacement;
-        SaveTranslationData();
-    }
-
-    public void RegisterRegexTranslations(Dictionary<string,string> translations)
-    {
-        foreach (var kvp in translations)
-        {
-            SavedRegexTranslations[kvp.Key] = kvp.Value;
-        }
-        SaveTranslationData();
-    }
+    #endregion
 
     /// <summary>
     /// Saves the module's custom phrases and regex translations to disk.

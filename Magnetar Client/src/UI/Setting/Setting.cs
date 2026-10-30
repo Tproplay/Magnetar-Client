@@ -1,4 +1,5 @@
 using Magnetar_Client.UI.Themes;
+using Magnetar_Client.Utils;
 using UnityEngine;
 
 namespace Magnetar_Client.UI.Setting;
@@ -12,6 +13,19 @@ public abstract class Setting
     /// The display name or localization key for this setting.
     /// </summary>
     public string Name;
+
+    /// <summary>
+    /// Optional custom display name override. If set, this name is displayed directly in the UI instead of translating <see cref="Name"/>.
+    /// </summary>
+    public string CustomName { get; set; }
+
+    /// <summary>
+    /// Gets the resolved display text for rendering this setting's label.
+    /// Returns <see cref="CustomName"/> if specified; otherwise translates <see cref="Name"/>.
+    /// </summary>
+    public virtual string DisplayName => !string.IsNullOrEmpty(CustomName)
+        ? CustomName
+        : Translator.Translate(Name);
 
     /// <summary>
     /// Optional override for the serialization/persistence key name.

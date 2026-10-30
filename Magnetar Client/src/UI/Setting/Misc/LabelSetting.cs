@@ -22,7 +22,12 @@ public class LabelSetting : Setting
     /// </summary>
     public string DisplayText
     {
-        get => !string.IsNullOrEmpty(_displayText) ? _displayText : Name;
+        get
+        {
+            if (!string.IsNullOrEmpty(_displayText)) return _displayText;
+            if (!string.IsNullOrEmpty(CustomName)) return CustomName;
+            return Name;
+        }
         set => _displayText = value;
     }
 
@@ -87,7 +92,7 @@ public class LabelSetting : Setting
         string rawText = DisplayText;
         if (string.IsNullOrEmpty(rawText)) return;
 
-        string textToDisplay = AutoTranslate ? Translate(rawText) : rawText;
+        string textToDisplay = !string.IsNullOrEmpty(CustomName) ? CustomName : (AutoTranslate ? Translate(rawText) : rawText);
 
         float labelWidth = width - (ClientConfig.indent * 2f);
         float calculatedHeight = ThemeManager.SettingsDescriptionStyle.CalcHeight(

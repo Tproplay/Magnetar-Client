@@ -253,7 +253,7 @@ public class IntSetting : Setting
             intSliderMin = s.Min; intSliderMax = s.Max; intTrueMin = s.TrueMin; intTrueMax = s.TrueMax;
             isLogarithmic = s.IsLogarithmic;
         }
-        string translatedName = Translate(name);
+        string translatedName = (setting as Setting)?.DisplayName ?? Translate(name);
         string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
 
         bool isDisabled = isFloat ? ((FloatSetting)setting).IsDisabled : ((IntSetting)setting).IsDisabled;

@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
 using static Magnetar_Client.Utils.Translator;
 using System;
@@ -85,7 +85,7 @@ public class ListStringSetting : Setting
         // Label on the left
         float labelW = Mathf.Max(width * 0.35f, GUIManager.S(120f));
         Rect labelRect = new(indent, y, labelW, elemH);
-        GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(labelRect, DisplayName, ThemeManager.SettingLabelStyle);
 
         // Input fields right column area
         float rightBoxW = width - (indent * 2f) - labelW - gap;

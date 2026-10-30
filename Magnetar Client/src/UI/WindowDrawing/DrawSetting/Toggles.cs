@@ -16,7 +16,7 @@ public static partial class DrawSetting
     public static void HandleBoolSetting(BoolSetting boolSet, ref float y, float width)
     {
         Event e = Event.current;
-        string translatedName = Translate(boolSet.Name);
+        string translatedName = boolSet.DisplayName;
         float labelWidth = Mathf.Max(width * 0.45f, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth);
 
         bool prevEnabled = GUI.enabled;
@@ -51,7 +51,7 @@ public static partial class DrawSetting
         Event e = Event.current;
         bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
 
-        string translatedName = Translate(bSet.Name);
+        string translatedName = bSet.DisplayName;
         float labelWidth = Mathf.Max(width * 0.45f, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth);
 
         GUI.Label(new Rect(ClientConfig.indent, y, labelWidth, ClientConfig.elementHeight),
@@ -149,7 +149,7 @@ public static partial class DrawSetting
     public static void HandleButtonSetting(ButtonSetting btnSet, ref float y, float width)
     {
         Event e = Event.current;
-        string translatedName = Translate(btnSet.Name);
+        string translatedName = btnSet.DisplayName;
         GUI.Label(new Rect(ClientConfig.indent, y, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth, ClientConfig.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
         Rect btnRect = new(width - ClientConfig.indent - ClientConfig.SettingWidth, y, ClientConfig.SettingWidth, ClientConfig.elementHeight);
@@ -180,7 +180,7 @@ public static partial class DrawSetting
         string rawText = lblSet.DisplayText;
         if (string.IsNullOrEmpty(rawText)) return;
 
-        string textToDisplay = lblSet.AutoTranslate ? Translate(rawText) : rawText;
+        string textToDisplay = !string.IsNullOrEmpty(lblSet.CustomName) ? lblSet.CustomName : (lblSet.AutoTranslate ? Translate(rawText) : rawText);
         float labelWidth = width - (ClientConfig.indent * 2f);
         float calculatedHeight = ThemeManager.SettingsDescriptionStyle.CalcHeight(
             new GUIContent(textToDisplay),

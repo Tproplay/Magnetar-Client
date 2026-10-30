@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.Themes;
 using static Magnetar_Client.Utils.Translator;
 using System;
 using UnityEngine;
@@ -50,7 +50,7 @@ public class ButtonSetting : Setting
         float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
 
-        string localizedName = Translate(Name);
+        string localizedName = DisplayName;
         string localizedButtonText = Translate(ButtonText);
 
         // Label

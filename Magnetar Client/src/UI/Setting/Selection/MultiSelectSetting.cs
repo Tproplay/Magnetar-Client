@@ -362,7 +362,7 @@ public class MultiSelectSetting : Setting
         // Label fills the remaining space on the left
         float labelW = Mathf.Max(0f, btnStartX - indent - gap);
         Rect labelRect = new(indent, y, labelW, elemH);
-        GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(labelRect, DisplayName, ThemeManager.SettingLabelStyle);
 
         Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
         Rect btnRect = new(btnStartX, y, selectBtnW, elemH);

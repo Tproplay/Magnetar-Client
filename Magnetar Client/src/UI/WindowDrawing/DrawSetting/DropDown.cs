@@ -23,7 +23,7 @@ public static partial class DrawSetting
         Event e = Event.current;
         int controlId = selSet.GetHashCode();
 
-        string translatedName = Translate(selSet.Name);
+        string translatedName = selSet.DisplayName;
         GUI.Label(new Rect(ClientConfig.indent, y, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth, ClientConfig.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
         string currentValName = "Unknown";

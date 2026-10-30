@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
 using static Magnetar_Client.Utils.Translator;
 using System;
@@ -156,7 +156,7 @@ public class Vector2Setting : Setting
         float totalControlW = ClientConfig.SettingWidth;
 
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, labelW, elemH), DisplayName, ThemeManager.SettingLabelStyle);
 
         float itemW = (totalControlW - (gap * 3f) - (subLabelW * 2f)) / 2f;
         float resetStartX = width - indent - resetBtnW;
@@ -343,7 +343,7 @@ public class Vector2IntSetting : Setting
         float totalControlW = ClientConfig.SettingWidth;
 
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, labelW, elemH), DisplayName, ThemeManager.SettingLabelStyle);
 
         float itemW = (totalControlW - (gap * 3f) - (subLabelW * 2f)) / 2f;
         float resetStartX = width - indent - resetBtnW;
@@ -557,7 +557,7 @@ public class Vector3Setting : Setting
         float totalControlW = ClientConfig.SettingWidth * 1.15f;
 
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, labelW, elemH), DisplayName, ThemeManager.SettingLabelStyle);
 
         float itemW = (totalControlW - (gap * 5f) - (subLabelW * 3f)) / 3f;
         float resetStartX = width - indent - resetBtnW;
@@ -773,7 +773,7 @@ public class Vector3IntSetting : Setting
         float totalControlW = ClientConfig.SettingWidth * 1.15f;
 
         float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(new Rect(indent, y, labelW, elemH), DisplayName, ThemeManager.SettingLabelStyle);
 
         float itemW = (totalControlW - (gap * 5f) - (subLabelW * 3f)) / 3f;
         float resetStartX = width - indent - resetBtnW;

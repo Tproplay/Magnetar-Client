@@ -75,7 +75,7 @@ public static partial class DrawSetting
     public static void HandleStringSetting(StringSetting strSet, ref float y, float width)
     {
         float elemH = ClientConfig.elementHeight;
-        string translatedName = Translate(strSet.Name);
+        string translatedName = strSet.DisplayName;
 
         float controlW = Mathf.Min(ClientConfig.SettingWidth * 1.25f, width * 0.55f);
         float gap = GUIManager.S(8f);

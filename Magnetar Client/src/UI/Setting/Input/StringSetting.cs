@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
 using static Magnetar_Client.Utils.Translator;
 using System;
@@ -98,7 +98,7 @@ public class StringSetting : Setting
         Rect inputRect = new(inputStartX, y, controlW, elemH);
         Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
 
-        GUI.Label(labelRect, Translate(Name), ThemeManager.SettingLabelStyle);
+        GUI.Label(labelRect, DisplayName, ThemeManager.SettingLabelStyle);
         Value = DrawSetting.DrawManualTextField(inputRect, Value, "", AutocompleteVars);
 
         if (DrawResetButton(resetRect))

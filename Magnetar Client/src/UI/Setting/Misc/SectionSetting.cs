@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.Themes;
 using static Magnetar_Client.Utils.Translator;
 using System;
 using System.Collections;
@@ -380,7 +380,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
 
         // 1. Group Header
         string countSuffix = ShowCountInHeader ? $" ({Sections.Count})" : "";
-        string title = $"{Translate(Name)}{countSuffix}";
+        string title = $"{DisplayName}{countSuffix}";
         Rect titleRect = new(indent, y, width - (indent * 2f), elemH);
         GUI.Box(titleRect, title, ThemeManager.SectionGroupHeaderStyle);
         y += elemH + gap;

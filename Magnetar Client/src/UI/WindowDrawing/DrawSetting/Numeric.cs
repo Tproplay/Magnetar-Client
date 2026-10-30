@@ -52,7 +52,7 @@ public static partial class DrawSetting
             intTrueMax = s.TrueMax;
         }
 
-        string translatedName = Translate(name);
+        string translatedName = (setting as Magnetar_Client.UI.Setting.Setting)?.DisplayName ?? Translate(name);
         string formatString = isFloat ? ("0." + new string('0', decPlaces)) : "0";
         bool isLogarithmic = isFloat ? ((FloatSetting)setting).IsLogarithmic : ((IntSetting)setting).IsLogarithmic;
         

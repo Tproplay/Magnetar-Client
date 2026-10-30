@@ -100,7 +100,7 @@ public static partial class DrawSetting
         float titleHeight = GUIManager.S(25f);
 #endif
         Rect headerBgRect = new(0, 0, multiSelectWindowRect.width, titleHeight);
-        GUI.Box(headerBgRect, Translate("Select ") + Translate(activeMultiSelect.Name), ThemeManager.SettingsWndowStyle);
+        GUI.Box(headerBgRect, Translate("Select ") + activeMultiSelect.DisplayName, ThemeManager.SettingsWndowStyle);
 
         if (GUIManager.ShowMobileButtons)
         {

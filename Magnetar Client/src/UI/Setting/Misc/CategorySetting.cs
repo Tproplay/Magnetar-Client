@@ -62,7 +62,7 @@ public class CategorySetting : Setting
             width,
             ClientConfig.indent,
             ClientConfig.spacing,
-            Translate(Name),
+            DisplayName,
             true,
             IsExpanded
         );

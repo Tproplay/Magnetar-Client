@@ -169,7 +169,7 @@ public class CustomKeybind : Module
         SeedSlot = new List<BindSetting>(14);
         for (int i = 1; i <= 14; i++)
         {
-            SeedSlot.Add(new BindSetting($"Seed Slot {i}"));
+            SeedSlot.Add(new BindSetting($"Seed Slot {i}") { SaveTranslation = false });
         }
         SeedSlot.ForEach(set => AddSettings(set));
         EndCategory();
@@ -247,6 +247,17 @@ public class CustomKeybind : Module
         DebugMode = new BoolSetting("Debug Mode", false);
         AddSettings(DebugMode);
 #endif
+    }
+
+    public override void OnLanguageChanged()
+    {
+        if (SeedSlot != null)
+        {
+            foreach (var set in SeedSlot)
+            {
+                set.CustomName = Translate(set.Name);
+            }
+        }
     }
 
     // Module Lifecycle Callbacks from Module.cs

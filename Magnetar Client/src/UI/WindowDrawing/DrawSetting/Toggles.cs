@@ -66,19 +66,53 @@ public static partial class DrawSetting
 
         if (bindHover && isLeftClick)
         {
-            bSet.IsBinding = !bSet.IsBinding;
-            if (bSet.IsBinding)
+            if (!bSet.IsBinding)
             {
-                bSet.BindKeys.Clear();
+                bSet.StartBinding();
                 ActiveTextFieldId = -1;
                 FocusedControlId = -1;
+                GUIUtility.keyboardControl = 0;
+            }
+            else
+            {
+                bSet.StopBinding();
             }
             e.Use();
+        }
+
+        if (bSet.IsBinding)
+        {
+            // Direct Tab detection (fallback for when IMGUI event is consumed or not dispatched as isKey)
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                if (!bSet.BindKeys.Contains(KeyCode.Tab))
+                {
+                    bSet.BindKeys.Add(KeyCode.Tab);
+                }
+                if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Tab || e.character == '\t'))
+                {
+                    e.Use();
+                }
+            }
+
+            if (Input.GetKeyUp(KeyCode.Tab) && bSet.BindKeys.Count > 0)
+            {
+                bSet.StopBinding();
+                if (e.type == EventType.KeyUp && (e.keyCode == KeyCode.Tab || e.character == '\t'))
+                {
+                    e.Use();
+                }
+            }
         }
 
         if (bSet.IsBinding && e.isKey)
         {
             KeyCode key = e.keyCode;
+            if (key == KeyCode.None && e.character == '\t')
+            {
+                key = KeyCode.Tab;
+            }
+
             if (key != KeyCode.None)
             {
                 if (e.type == EventType.KeyDown)
@@ -86,7 +120,7 @@ public static partial class DrawSetting
                     if (key == KeyCode.Escape || key == ClientConfig.MenuOpenKey)
                     {
                         bSet.BindKeys.Clear();
-                        bSet.IsBinding = false;
+                        bSet.StopBinding();
                     }
                     else if (!bSet.BindKeys.Contains(key))
                     {
@@ -98,7 +132,7 @@ public static partial class DrawSetting
                 {
                     if (bSet.BindKeys.Count > 0)
                     {
-                        bSet.IsBinding = false;
+                        bSet.StopBinding();
                     }
                     e.Use();
                 }

@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Api;
+using Magnetar_Client.Api;
 using Magnetar_Client.UI.WindowDrawing;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 namespace Magnetar_Client.UI;
 
 /// <summary>
-/// Manages the Escape key event
+/// Manages GUI lifecycle and condition guards for Escape and Tab events.
 /// </summary>
 public static class SafeToCloseManager
 {
@@ -17,6 +17,11 @@ public static class SafeToCloseManager
 
     // Custom Escape handlers: return true if Escape was consumed (LIFO priority)
     private static readonly List<Func<bool>> _escapeInterceptors = new();
+
+    // Custom Tab condition guards: return false to block Tab cycling across GUI tabs
+    private static readonly List<Func<bool>> _tabGuards = new();
+
+    #region Escape Management
 
     /// <summary>
     /// Registers a condition guard. If the callback returns false, the GUI will not close on Escape.
@@ -160,4 +165,57 @@ public static class SafeToCloseManager
 
         return false;
     }
+
+    #endregion
+
+    #region Tab Management
+
+    /// <summary>
+    /// Registers a Tab condition guard. If the callback returns false, Tab cycling across GUI tabs is blocked.
+    /// </summary>
+    public static void RegisterTabGuard(Func<bool> guard)
+    {
+        if (guard != null && !_tabGuards.Contains(guard))
+        {
+            _tabGuards.Add(guard);
+        }
+    }
+
+    /// <summary>
+    /// Unregisters an active Tab condition guard.
+    /// </summary>
+    public static void UnregisterTabGuard(Func<bool> guard)
+    {
+        if (guard != null)
+        {
+            _tabGuards.Remove(guard);
+        }
+    }
+
+    /// <summary>
+    /// Evaluates all registered Tab condition guards.
+    /// Returns true only if every registered guard allows Tab cycling.
+    /// </summary>
+    public static bool CanSwitchTab()
+    {
+        for (int i = 0; i < _tabGuards.Count; i++)
+        {
+            try
+            {
+                if (!_tabGuards[i]())
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugLogger.Error($"[SafeToCloseManager] Error evaluating tab guard: {ex}");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    #endregion
 }

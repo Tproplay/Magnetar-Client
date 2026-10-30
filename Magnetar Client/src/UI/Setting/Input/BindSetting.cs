@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
 using static Magnetar_Client.Utils.Translator;
 using System;
@@ -14,6 +14,7 @@ namespace Magnetar_Client.UI.Setting;
 public class BindSetting : Setting
 {
     private List<KeyCode> _bindKeys = new();
+    private readonly Func<bool> _tabGuard;
 
     /// <summary>
     /// The default key combination restored when <see cref="Reset"/> is executed.
@@ -62,11 +63,31 @@ public class BindSetting : Setting
     public BindSetting(string name, List<KeyCode> defaultKeys = null)
     {
         Name = name;
+        _tabGuard = () => !IsBinding;
         if (defaultKeys != null)
         {
             DefaultKeys = new List<KeyCode>(defaultKeys);
             _bindKeys = new List<KeyCode>(defaultKeys);
         }
+    }
+
+    /// <summary>
+    /// Starts capturing keybind inputs and registers a tab guard to prevent GUI tab cycling.
+    /// </summary>
+    public void StartBinding()
+    {
+        IsBinding = true;
+        SafeToCloseManager.RegisterTabGuard(_tabGuard);
+        BindKeys.Clear();
+    }
+
+    /// <summary>
+    /// Stops capturing keybind inputs and unregisters the tab guard.
+    /// </summary>
+    public void StopBinding()
+    {
+        IsBinding = false;
+        SafeToCloseManager.UnregisterTabGuard(_tabGuard);
     }
 
     /// <summary>
@@ -85,7 +106,7 @@ public class BindSetting : Setting
     public override void Reset()
     {
         BindKeys = new List<KeyCode>(DefaultKeys);
-        IsBinding = false;
+        StopBinding();
     }
 
     /// <summary>
@@ -120,19 +141,53 @@ public class BindSetting : Setting
 
         if (bindRect.Contains(e.mousePosition) && isLeftClick)
         {
-            IsBinding = !IsBinding;
-            if (IsBinding)
+            if (!IsBinding)
             {
-                BindKeys.Clear();
+                StartBinding();
                 DrawSetting.ActiveTextFieldId = -1;
                 DrawSetting.FocusedControlId = -1;
+                GUIUtility.keyboardControl = 0;
+            }
+            else
+            {
+                StopBinding();
             }
             e.Use();
+        }
+
+        if (IsBinding)
+        {
+            // Direct Tab detection (fallback for when IMGUI event is consumed or not dispatched as isKey)
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                if (!BindKeys.Contains(KeyCode.Tab))
+                {
+                    BindKeys.Add(KeyCode.Tab);
+                }
+                if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Tab || e.character == '\t'))
+                {
+                    e.Use();
+                }
+            }
+
+            if (Input.GetKeyUp(KeyCode.Tab) && BindKeys.Count > 0)
+            {
+                StopBinding();
+                if (e.type == EventType.KeyUp && (e.keyCode == KeyCode.Tab || e.character == '\t'))
+                {
+                    e.Use();
+                }
+            }
         }
 
         if (IsBinding && e.isKey)
         {
             KeyCode key = e.keyCode;
+            if (key == KeyCode.None && e.character == '\t')
+            {
+                key = KeyCode.Tab;
+            }
+
             if (key != KeyCode.None)
             {
                 if (e.type == EventType.KeyDown)
@@ -140,7 +195,7 @@ public class BindSetting : Setting
                     if (key == KeyCode.Escape || key == ClientConfig.MenuOpenKey)
                     {
                         BindKeys.Clear();
-                        IsBinding = false;
+                        StopBinding();
                     }
                     else if (!BindKeys.Contains(key))
                     {
@@ -150,7 +205,7 @@ public class BindSetting : Setting
                 }
                 else if (e.type == EventType.KeyUp && BindKeys.Count > 0)
                 {
-                    IsBinding = false;
+                    StopBinding();
                     e.Use();
                 }
             }

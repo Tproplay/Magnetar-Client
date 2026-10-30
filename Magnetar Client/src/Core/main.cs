@@ -142,23 +142,26 @@ public class Main
             // Tab cycling (Tab for next, Shift+Tab for previous)
             if (Input.GetKeyDown(KeyCode.Tab))
             {
-                var tabList = TopBar.Order;
-                if (tabList.Count > 0)
+                if (SafeToCloseManager.CanSwitchTab())
                 {
-                    int index = tabList.IndexOf(ClientConfig.CurrentTab);
-                    bool reverse = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-
-                    int nextIndex;
-                    if (reverse)
+                    var tabList = TopBar.Order;
+                    if (tabList.Count > 0)
                     {
-                        nextIndex = (index <= 0) ? tabList.Count - 1 : index - 1;
-                    }
-                    else
-                    {
-                        nextIndex = (index == -1 || index >= tabList.Count - 1) ? 0 : index + 1;
-                    }
+                        int index = tabList.IndexOf(ClientConfig.CurrentTab);
+                        bool reverse = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
-                    TopBar.SwitchTab(tabList[nextIndex]);
+                        int nextIndex;
+                        if (reverse)
+                        {
+                            nextIndex = (index <= 0) ? tabList.Count - 1 : index - 1;
+                        }
+                        else
+                        {
+                            nextIndex = (index == -1 || index >= tabList.Count - 1) ? 0 : index + 1;
+                        }
+
+                        TopBar.SwitchTab(tabList[nextIndex]);
+                    }
                 }
             }
         }

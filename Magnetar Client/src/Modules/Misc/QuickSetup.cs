@@ -1,7 +1,8 @@
-﻿using Magnetar_Client.UI.Setting;
+using Magnetar_Client.UI.Setting;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,8 @@ using System.Text;
 using static Magnetar_Client.GameData;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 using static Magnetar_Client.Api.PathsManager;
+using UnityEngine;
+using Magnetar_Client.Utils;
 
 
 #if MELONLOADER || RELEASE_MELON
@@ -19,54 +22,123 @@ namespace Magnetar_Client.Modules;
 
 public class QuickSetup : Module
 {
+    #region Module Info
+
     public override string Name { get; set; } = "Quick setup";
     public override string Description { get; set; } = "Save/load a custom setup loadout.";
-    public override string SearchHints { get; set; } = "quicksetup loadout setupmanager savebuild loadbuild " +
+    public override string SearchHints { get; set; } =
+        "quicksetup loadout setupmanager savebuild loadbuild " +
         "setup presetmanager quickload quicksave plantsetup configuration buildmanager setuploader loadouts " +
         "quick-setup customsetup setupsaver presetload";
-
     public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
 
-    // Settings
+    #endregion
+
+    #region Settings
+
+    // Save category
     public StringSetting NameOfSave;
+    public ButtonSetting SaveCurrentSetup;
+    public ButtonSetting CopyCurrentCode;
+
+    // Load category
     public BoolSetting ClearBeforeLoad;
-    public MultiSelectSetting LoadSetup;
+    public MultiSelectSetting SelectedLoadSetup;
+    public ButtonSetting LoadSetup;
+    public ButtonSetting LoadFromClipBoard;
+    public ButtonSetting DeleteSelectedSetup;
+
+    #endregion
+
+    #region State
 
     public static QuickSetup instance;
 
     private Dictionary<string, string> _savedSetups = new(StringComparer.OrdinalIgnoreCase);
 
+    ICoroutineHandle _copyCoroutine;
+    ICoroutineHandle _pasteCoroutine;
+
+    #endregion
+
+    #region Constructor
+
     public QuickSetup()
     {
         instance = this;
 
-        CreateCategory("Save");
-        NameOfSave = new StringSetting("Name", "");
-        AddSettings(
-            NameOfSave,
-            new ButtonSetting("Save Current Setup", SaveCurrentSetup, "Save")
-        );
-        EndCategory();
-
-        CreateCategory("Load");
-        ClearBeforeLoad = new BoolSetting("Clear Lawn Before Load", true);
-        LoadSetup = new MultiSelectSetting("Setup")
+        RegisterTranslations(Translator.CreateDictionary(new string[]
         {
-            MaxSelection = 1
+            // Save
+            "Copy To Clipboard",
+            "Copied!",
+
+            // Load
+            "Load From Clipboard",
+            "Loaded!",
+        }));
+
+        CreateCategory("Save");
+
+        NameOfSave = new StringSetting("Name", "");
+        SaveCurrentSetup = new ButtonSetting("Save Current Setup", SaveCurrentSetupCallBack, "Save");
+        CopyCurrentCode = new ButtonSetting("Copy Current Setup Code", CopySetupCodeToClipBoard, "Copy To Clipboard")
+        {
+            SaveButtonTranslation = false
         };
 
         AddSettings(
-            ClearBeforeLoad,
-            LoadSetup,
-            new ButtonSetting("Load Selected Setup", LoadSelectedSetup, "Load"),
-            new ButtonSetting("Delete Selected Setup", DeleteSelectedSetup, "Delete")
+            NameOfSave,
+            SaveCurrentSetup,
+            CopyCurrentCode
         );
+
+        EndCategory();
+
+        CreateCategory("Load");
+
+        ClearBeforeLoad = new BoolSetting("Clear Lawn Before Load", true);
+        SelectedLoadSetup = new MultiSelectSetting("Setup") { MaxSelection = 1 };
+        LoadSetup = new ButtonSetting("Load Selected Setup", LoadSelectedSetupCallBack, "Load");
+        LoadFromClipBoard = new ButtonSetting("Load Setup From Clipboard", LoadSetupFromClipBoard, "Load From Clipboard")
+        {
+            SaveButtonTranslation = false
+        };
+        DeleteSelectedSetup = new ButtonSetting("Delete Selected Setup", DeleteSelectedSetupCallBack, "<color=red>Delete</color>");
+
+        AddSettings(
+            ClearBeforeLoad,
+            SelectedLoadSetup,
+            LoadSetup,
+            LoadFromClipBoard,
+            DeleteSelectedSetup
+        );
+
         EndCategory();
 
         LoadSetupsFromDisk();
     }
 
-    public void SaveCurrentSetup()
+    #endregion
+
+    #region Save
+
+    private void CopySetupCodeToClipBoard()
+    {
+        string saveName = string.IsNullOrEmpty(NameOfSave.Value.Trim()) ? "Untitled" : NameOfSave.Value.Trim();
+        string code = GenerateSetupCode();
+        GUIUtility.systemCopyBuffer = $"{saveName}::{code}";
+
+        _copyCoroutine?.Stop();
+        _copyCoroutine = CoroutineManager.Start(FlashButtonText(
+            CopyCurrentCode,
+            Translate("Copied!"),
+            Translate("Copy To Clipboard"),
+            1f,
+            () => _copyCoroutine = null));
+    }
+
+    public void SaveCurrentSetupCallBack()
     {
         if (PlantList == null || PlantList.Count == 0)
         {
@@ -76,9 +148,7 @@ public class QuickSetup : Module
 
         string saveName = NameOfSave.Value?.Trim();
         if (string.IsNullOrEmpty(saveName))
-        {
             saveName = $"Setup_{_savedSetups.Count + 1}";
-        }
 
         string code = GenerateSetupCode();
         if (string.IsNullOrEmpty(code))
@@ -95,7 +165,11 @@ public class QuickSetup : Module
         DebugLogger.Msg($"[QuickSetup] Saved '{saveName}' ({PlantList.Count} plants).");
     }
 
-    public void LoadSelectedSetup()
+    #endregion
+
+    #region Load
+
+    public void LoadSelectedSetupCallBack()
     {
         if (!Active)
         {
@@ -105,14 +179,14 @@ public class QuickSetup : Module
 
         if (BoardInstanceIsNull)
         {
-            DebugLogger.Warning("[QuickSetup] Board install is Null");
+            DebugLogger.Warning("[QuickSetup] Board instance is Null.");
             return;
         }
 
         string selectedName = GetSelectedSetupName();
         if (string.IsNullOrEmpty(selectedName))
         {
-            DebugLogger.Warning("No setup selected.");
+            DebugLogger.Warning("[QuickSetup] No setup selected.");
             return;
         }
 
@@ -122,17 +196,132 @@ public class QuickSetup : Module
             return;
         }
 
-        if (ClearBeforeLoad.Value && PlantList != null)
+        int placed = ApplySetupCode(code);
+        DebugLogger.Msg($"[QuickSetup] Loaded '{selectedName}' ({placed} plants placed).");
+    }
+
+    public void LoadSetupFromClipBoard()
+    {
+        if (!Active)
         {
-            // Snapshot to an array to prevent collection modification crashes during iteration
-            var currentPlants = PlantList.ToArray();
-            for (int i = 0; i < currentPlants.Length; i++)
-            {
-                currentPlants[i]?.Die();
-            }
+            DebugLogger.Warning("[QuickSetup] Module is disabled. Turn the module ON to load setups.");
+            return;
         }
 
-        int placedCount = 0;
+        if (BoardInstanceIsNull)
+        {
+            DebugLogger.Warning("[QuickSetup] Board instance is Null.");
+            return;
+        }
+
+        string clipboard = GUIUtility.systemCopyBuffer;
+        if (string.IsNullOrWhiteSpace(clipboard))
+        {
+            DebugLogger.Warning("[QuickSetup] Clipboard is empty.");
+            return;
+        }
+
+        // Expected format: "Name::code"  or just "code" (bare code without name prefix)
+        string code;
+        string pastedName;
+
+        int sep = clipboard.IndexOf("::", StringComparison.Ordinal);
+        if (sep >= 0)
+        {
+            pastedName = clipboard[..sep].Trim();
+            code = clipboard[(sep + 2)..].Trim();
+        }
+        else
+        {
+            pastedName = "Clipboard";
+            code = clipboard.Trim();
+        }
+
+        if (string.IsNullOrEmpty(code))
+        {
+            DebugLogger.Warning("[QuickSetup] Clipboard does not contain a valid setup code.");
+            return;
+        }
+
+        int placed = ApplySetupCode(code);
+        if (placed == 0)
+        {
+            DebugLogger.Warning("[QuickSetup] No plants could be decoded from the clipboard code.");
+            return;
+        }
+
+        DebugLogger.Msg($"[QuickSetup] Loaded '{pastedName}' from clipboard ({placed} plants placed).");
+
+        _pasteCoroutine?.Stop();
+        _pasteCoroutine = CoroutineManager.Start(FlashButtonText(
+            LoadFromClipBoard,
+            Translate("Loaded!"),
+            Translate("Load From Clipboard"),
+            1f,
+            () => _pasteCoroutine = null));
+    }
+
+    #endregion
+
+    #region Delete
+
+    public void DeleteSelectedSetupCallBack()
+    {
+        string selectedName = GetSelectedSetupName();
+        if (string.IsNullOrEmpty(selectedName))
+        {
+            DebugLogger.Warning("[QuickSetup] No setup selected to delete.");
+            return;
+        }
+
+        if (_savedSetups.Remove(selectedName))
+        {
+            SaveSetupsToDisk();
+            RefreshLoadOptions();
+            SelectedLoadSetup.SelectedValues.Clear();
+            DebugLogger.Msg($"[QuickSetup] Deleted '{selectedName}'.");
+        }
+    }
+
+    #endregion
+
+    #region Code Generation & Application
+
+    public static string GenerateSetupCode()
+    {
+        if (PlantList == null || PlantList.Count == 0) return string.Empty;
+
+        StringBuilder sb = new(PlantList.Count * 6);
+
+        for (int i = 0; i < PlantList.Count; i++)
+        {
+            var plant = PlantList[i];
+            if (plant == null) continue;
+
+            // Encoding: (plantType * 10000) + (col * 100) + row
+            long encoded = ((int)plant.thePlantType * 10000L) + (plant.thePlantColumn * 100) + plant.thePlantRow;
+
+            if (sb.Length > 0) sb.Append('-');
+            sb.Append(ToBase62(encoded));
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Decodes a setup code and spawns all plants. Optionally clears the lawn first.
+    /// </summary>
+    /// <returns>The number of plants successfully placed.</returns>
+    private int ApplySetupCode(string code)
+    {
+        if (ClearBeforeLoad.Value && PlantList != null)
+        {
+            var snapshot = PlantList.ToArray();
+            for (int i = 0; i < snapshot.Length; i++)
+                snapshot[i]?.Die();
+        }
+
+        int placed = 0;
         string[] tokens = code.Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
 
         for (int i = 0; i < tokens.Length; i++)
@@ -146,7 +335,7 @@ public class QuickSetup : Module
                 int plantType = (int)(val / 100);
 
                 SpawnPlant(col, row, plantType);
-                placedCount++;
+                placed++;
             }
             catch (Exception ex)
             {
@@ -154,52 +343,15 @@ public class QuickSetup : Module
             }
         }
 
-        DebugLogger.Msg($"[QuickSetup] Loaded '{selectedName}' ({placedCount} plants placed).");
-    }
-
-    public void DeleteSelectedSetup()
-    {
-        string selectedName = GetSelectedSetupName();
-        if (string.IsNullOrEmpty(selectedName))
-        {
-            DebugLogger.Warning("[QuickSetup] No setup selected to delete.");
-            return;
-        }
-
-        if (_savedSetups.Remove(selectedName))
-        {
-            SaveSetupsToDisk();
-            RefreshLoadOptions();
-            LoadSetup.SelectedValues.Clear();
-            DebugLogger.Msg($"[QuickSetup] Deleted '{selectedName}'.");
-        }
-    }
-
-    public static string GenerateSetupCode()
-    {
-        if (PlantList == null || PlantList.Count == 0) return string.Empty;
-
-        StringBuilder sb = new(PlantList.Count * 6);
-
-        for (int i = 0; i < PlantList.Count; i++)
-        {
-            var plant = PlantList[i];
-            if (plant == null) continue;
-
-            // Arithmetic encoding: (plantType * 10000) + (col * 100) + row
-            long code = ((int)plant.thePlantType * 10000L) + (plant.thePlantColumn * 100) + plant.thePlantRow;
-
-            if (sb.Length > 0) sb.Append('-');
-            sb.Append(ToBase62(code));
-        }
-
-        return sb.ToString();
+        return placed;
     }
 
     private static void SpawnPlant(int col, int row, int plantType)
-    {
-        CreatePlant.Instance.SetPlant(col, row, (PlantType)plantType);
-    }
+        => CreatePlant.Instance.SetPlant(col, row, (PlantType)plantType);
+
+    #endregion
+
+    #region Disk I/O
 
     private void LoadSetupsFromDisk()
     {
@@ -233,28 +385,43 @@ public class QuickSetup : Module
         }
     }
 
+    #endregion
+
+    #region UI Helpers
+
     private void RefreshLoadOptions()
     {
-        LoadSetup.Options.Clear();
+        SelectedLoadSetup.Options.Clear();
         int id = 0;
         foreach (var kvp in _savedSetups)
-        {
-            LoadSetup.AddOption(id++, kvp.Key);
-        }
+            SelectedLoadSetup.AddOption(id++, kvp.Key);
     }
 
     private string GetSelectedSetupName()
     {
-        if (LoadSetup.SelectedValues != null && LoadSetup.SelectedValues.Count > 0)
+        if (SelectedLoadSetup.SelectedValues?.Count > 0)
         {
-            int selectedId = LoadSetup.SelectedValues.First();
-            if (LoadSetup.Options.TryGetValue(selectedId, out string name))
-            {
+            int selectedId = SelectedLoadSetup.SelectedValues.First();
+            if (SelectedLoadSetup.Options.TryGetValue(selectedId, out string name))
                 return name;
-            }
         }
         return null;
     }
+
+    /// <summary>
+    /// Temporarily overrides a button's text, then restores it after <paramref name="duration"/> seconds.
+    /// </summary>
+    private static IEnumerator FlashButtonText(ButtonSetting button, string flash, string restore, float duration, Action onDone = null)
+    {
+        button.CustomButtonText = flash;
+        yield return new WaitForSeconds(duration);
+        button.CustomButtonText = restore;
+        onDone?.Invoke();
+    }
+
+    #endregion
+
+    #region Base62 Encoding
 
     public static string ToBase62(long value)
     {
@@ -294,4 +461,6 @@ public class QuickSetup : Module
 
         return result;
     }
+
+    #endregion
 }

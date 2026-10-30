@@ -155,7 +155,7 @@ public static partial class DrawSetting
         Rect btnRect = new(width - ClientConfig.indent - ClientConfig.SettingWidth, y, ClientConfig.SettingWidth, ClientConfig.elementHeight);
         bool isHovered = btnRect.Contains(e.mousePosition);
 
-        GUI.Box(btnRect, Translate(btnSet.ButtonText), ThemeManager.SettingOff);
+        GUI.Box(btnRect, btnSet.DisplayButtonText, ThemeManager.SettingOff);
 
         if (isHovered && e.type == EventType.MouseDown && e.button == 0)
         {

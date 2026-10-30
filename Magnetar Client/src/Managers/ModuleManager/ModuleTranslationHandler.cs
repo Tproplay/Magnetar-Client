@@ -112,13 +112,13 @@ public static class ModuleTranslationHandler
             node.Settings ??= new(StringComparer.Ordinal);
             if (mod.Settings != null)
             {
-                foreach (var setting in mod.Settings)
+                Translator.ExtractSettingNames(mod.Settings, name =>
                 {
-                    if (setting != null && setting.SaveTranslation && !string.IsNullOrWhiteSpace(setting.Name) && !node.Settings.ContainsKey(setting.Name))
+                    if (!node.Settings.ContainsKey(name))
                     {
-                        node.Settings[setting.Name] = setting.Name;
+                        node.Settings[name] = name;
                     }
-                }
+                });
             }
 
             if (mod.SavedTranslationData != null && mod.SavedTranslationData.Count > 0)

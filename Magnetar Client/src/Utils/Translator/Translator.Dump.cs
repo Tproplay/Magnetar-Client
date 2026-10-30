@@ -55,15 +55,23 @@ public static partial class Translator
         return Regex.Replace(name, $"[{invalidChars}]", "_");
     }
 
-    private static void ExtractSettingNames(IEnumerable<Setting> settings, Action<string> onFoundName)
+    internal static void ExtractSettingNames(IEnumerable<Setting> settings, Action<string> onFoundName, bool onlySavable = true)
     {
         if (settings == null) return;
 
         foreach (var setting in settings)
         {
-            if (setting == null || string.IsNullOrWhiteSpace(setting.Name) || !setting.SaveTranslation) continue;
+            if (setting == null) continue;
 
-            onFoundName(setting.Name);
+            if (!string.IsNullOrWhiteSpace(setting.Name) && (!onlySavable || setting.SaveTranslation))
+            {
+                onFoundName(setting.Name);
+            }
+
+            if (setting is ButtonSetting btn && !string.IsNullOrWhiteSpace(btn.ButtonText) && (!onlySavable || btn.SaveButtonTranslation))
+            {
+                onFoundName(btn.ButtonText);
+            }
 
             if (setting is SectionSetting sec)
             {
@@ -72,7 +80,7 @@ public static partial class Translator
                     foreach (var section in sec.Sections)
                     {
                         if (section.ChildSettings != null)
-                            ExtractSettingNames(section.ChildSettings, onFoundName);
+                            ExtractSettingNames(section.ChildSettings, onFoundName, onlySavable);
                     }
                 }
                 else if (sec.TemplateFactory != null)
@@ -80,7 +88,7 @@ public static partial class Translator
                     try
                     {
                         var sampleChildren = sec.TemplateFactory(0);
-                        ExtractSettingNames(sampleChildren, onFoundName);
+                        ExtractSettingNames(sampleChildren, onFoundName, onlySavable);
                     }
                     catch { }
                 }
@@ -106,7 +114,7 @@ public static partial class Translator
                 if (!string.IsNullOrEmpty(mod.SearchHints)) TranslationData.CachedBlacklist.Add(mod.SearchHints);
 
                 if (mod.Settings != null)
-                    ExtractSettingNames(mod.Settings, name => TranslationData.CachedBlacklist.Add(name));
+                    ExtractSettingNames(mod.Settings, name => TranslationData.CachedBlacklist.Add(name), onlySavable: false);
             }
         }
 

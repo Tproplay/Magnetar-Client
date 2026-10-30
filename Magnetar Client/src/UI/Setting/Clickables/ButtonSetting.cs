@@ -19,13 +19,18 @@ public class ButtonSetting : Setting
     public string ButtonText;
 
     /// <summary>
+    /// Indicates whether the button text should be exported and saved to translation files.
+    /// </summary>
+    public bool SaveButtonTranslation { get; set; } = true;
+
+    /// <summary>
     /// Optional custom button text display name override. If set, this name is 
     /// displayed directly in the UI instead of translating <see cref="ButtonText"/>.
     /// </summary>
     public string CustomButtonText { get; set; }
 
     /// <summary>
-    /// Gets the resolved display text for rendering this setting's label.
+    /// Gets the resolved display text for rendering this setting's button label.
     /// Returns <see cref="CustomButtonText"/> if specified; otherwise translates <see cref="ButtonText"/>.
     /// </summary>
     public virtual string DisplayButtonText => !string.IsNullOrEmpty(CustomButtonText)

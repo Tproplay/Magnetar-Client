@@ -430,12 +430,11 @@ public static partial class Translator
 
                     if (mod.Settings != null && node.Settings != null)
                     {
-                        foreach (var setting in mod.Settings)
+                        ExtractSettingNames(mod.Settings, name =>
                         {
-                            if (string.IsNullOrWhiteSpace(setting.Name) || !setting.SaveTranslation) continue;
-                            if (node.Settings.TryGetValue(setting.Name, out var setTrans))
-                                TranslationData.ExactTranslations[setting.Name] = setTrans;
-                        }
+                            if (node.Settings.TryGetValue(name, out var setTrans))
+                                TranslationData.ExactTranslations[name] = setTrans;
+                        });
                     }
                 }
 

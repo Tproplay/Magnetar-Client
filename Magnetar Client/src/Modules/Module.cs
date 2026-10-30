@@ -404,11 +404,7 @@ public abstract class Module
 
     public void RegisterTranslations(string[] strings)
     {
-        foreach (var kvp in strings)
-        {
-            RegisterTranslation(kvp, kvp, false);
-        }
-        SaveTranslationData();
+        RegisterTranslations(Translator.CreateDictionary(strings));
     }
 
     public void RegisterRegexTranslation(string pattern, string replacement)

@@ -1,7 +1,10 @@
 using Magnetar_Client.UI.Themes;
-using static Magnetar_Client.Utils.Translator;
+using Magnetar_Client.Utils;
 using System;
+using System.Security.AccessControl;
+using System.Xml.Linq;
 using UnityEngine;
+using static Magnetar_Client.Utils.Translator;
 
 namespace Magnetar_Client.UI.Setting;
 
@@ -14,6 +17,20 @@ public class ButtonSetting : Setting
     /// The text displayed inside the clickable button box.
     /// </summary>
     public string ButtonText;
+
+    /// <summary>
+    /// Optional custom button text display name override. If set, this name is 
+    /// displayed directly in the UI instead of translating <see cref="ButtonText"/>.
+    /// </summary>
+    public string CustomButtonText { get; set; }
+
+    /// <summary>
+    /// Gets the resolved display text for rendering this setting's label.
+    /// Returns <see cref="CustomButtonText"/> if specified; otherwise translates <see cref="ButtonText"/>.
+    /// </summary>
+    public virtual string DisplayButtonText => !string.IsNullOrEmpty(CustomButtonText)
+        ? CustomButtonText
+        : Translator.Translate(ButtonText);
 
     /// <summary>
     /// The action invoked when the button is clicked.
@@ -51,7 +68,7 @@ public class ButtonSetting : Setting
         float gap = SettingValues.Gap;
 
         string localizedName = DisplayName;
-        string localizedButtonText = Translate(ButtonText);
+        string localizedButtonText = DisplayButtonText;
 
         // Label
         float labelW = width - indent * 2 - ClientConfig.SettingWidth;

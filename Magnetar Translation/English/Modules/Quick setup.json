@@ -6,10 +6,19 @@
     "Save": "Save",
     "Name": "Name",
     "Save Current Setup": "Save Current Setup",
+    "Copy Current Setup Code": "Copy Current Setup Code",
     "Load": "Load",
     "Clear Lawn Before Load": "Clear Lawn Before Load",
     "Setup": "Setup",
     "Load Selected Setup": "Load Selected Setup",
-    "Delete Selected Setup": "Delete Selected Setup"
+    "Load Setup From Clipboard": "Load Setup From Clipboard",
+    "Delete Selected Setup": "Delete Selected Setup",
+    "<color=red>Delete</color>": "<color=red>Delete</color>"
+  },
+  "Translations": {
+    "Copy To Clipboard": "Copy To Clipboard",
+    "Copied!": "Copied!",
+    "Load From Clipboard": "Load From Clipboard",
+    "Loaded!": "Loaded!"
   }
 }

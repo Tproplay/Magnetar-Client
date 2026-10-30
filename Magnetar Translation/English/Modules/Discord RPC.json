@@ -7,13 +7,15 @@
     "Switch Speed (s)": "Switch Speed (s)",
     "In Game": "In Game",
     "Line 1": "Line 1",
-    "Line 2": "Line 2",
-    "Iteration Mode": "Iteration Mode"
+    "Iteration Mode": "Iteration Mode",
+    "Line 2": "Line 2"
   },
   "Translations": {
     "Browsing Magnetar's GUI": "Browsing Magnetar's GUI",
     "Looking at the Main Menu": "Looking at the Main Menu",
     "Checking out the almanac": "Checking out the almanac",
+    "Viewing plants in the almanac": "Viewing plants in the almanac",
+    "Viewing zombies in the almanac": "Viewing zombies in the almanac",
     "Started a level": "Started a level",
     "Picking Seeds": "Picking Seeds",
     "Roaming in the Garden": "Roaming in the Garden",

@@ -1,13 +1,11 @@
 name: Nightly Build
 
 on:
-  schedule:
-    # Runs automatically every day at midnight UTC (00:00 UTC)
-    - cron: '0 0 * * *'
   push:
     branches:
       - master
       - main
+      - devlop
   workflow_dispatch: # Allows manual trigger anytime from GitHub Actions UI
 
 concurrency:
@@ -45,11 +43,23 @@ jobs:
               $ver = "4.0.3"
           }
 
+          # Extract SupportedGameVersion (e.g., "4.0.5")
+          if ($content -match 'public const string SupportedGameVersion = "(?<gameVer>[^"]+)";') {
+              $gameVer = $Matches['gameVer']
+          } else {
+              $gameVer = "4.0.5"
+          }
+
           # Nightly build number is GitHub Actions run number (1, 2, 3...)
           $buildNum = "${{ github.run_number }}"
+          $buildDate = (Get-Date -Format "yyyy-MM-dd HH:mm UTC")
+          $shortSha = $env:GITHUB_SHA.Substring(0, 7)
 
           Write-Host "Version:      $ver"
+          Write-Host "Game Version: $gameVer"
           Write-Host "Build Number: $buildNum"
+          Write-Host "Build Date:   $buildDate"
+          Write-Host "Commit:       $shortSha"
 
           # Stamp internal BuildNumber constant in MagnetarInfo.cs before compilation
           $content = $content -replace 'public const int BuildNumber = \d+;', "public const int BuildNumber = $buildNum;"
@@ -57,7 +67,10 @@ jobs:
 
           # Export outputs
           echo "version=$ver" >> $env:GITHUB_OUTPUT
+          echo "game_version=$gameVer" >> $env:GITHUB_OUTPUT
           echo "build_number=$buildNum" >> $env:GITHUB_OUTPUT
+          echo "build_date=$buildDate" >> $env:GITHUB_OUTPUT
+          echo "short_sha=$shortSha" >> $env:GITHUB_OUTPUT
 
       - name: Restore NuGet dependencies
         run: dotnet restore "Magnetar Client/Magnetar Client.csproj"
@@ -101,18 +114,31 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: nightly
-          name: "Magnetar Client Nightly (Build ${{ steps.version.outputs.build_number }})"
+          name: "Nightly build ${{ steps.version.outputs.build_number }}"
           body: |
-            Automated nightly build for **Magnetar Client v${{ steps.version.outputs.version }}**.
-            - **Version**: `${{ steps.version.outputs.version }}`
-            - **Build Number**: `${{ steps.version.outputs.build_number }}`
-            - **Commit**: `${{ github.sha }}`
-            - **Branch**: `${{ github.ref_name }}`
+            Automatic build of the latest commit on `${{ github.ref_name }}`. It may be unstable. Stable versions are on the [releases page](https://github.com/Tproplay/Magnetar-Client/releases).
+
+            - Version: ${{ steps.version.outputs.version }} (build ${{ steps.version.outputs.build_number }})
+            - Loader: MelonLoader
+            - Game Version: ${{ steps.version.outputs.game_version }}
+            - Commit: [${{ steps.version.outputs.short_sha }}](https://github.com/Tproplay/Magnetar-Client/commit/${{ github.sha }})
+            - Built: ${{ steps.version.outputs.build_date }}
+
+            ## Install
+
+            Extract `MagnetarClient-MelonLoader.zip` into your game folder so you end up with `Mods/Magnetar Client.dll` and `Mods/Magnetar Data/`.
+
+            Or put `Launch_Game.bat` next to `PlantsVsZombiesRH.exe` and drop the zip beside it. The script extracts it into `Mods` and starts the game.
+
+            ## Bugs
+
+            [Open an issue](https://github.com/Tproplay/Magnetar-Client/issues/new?template=bug_report.yml) and include the build number above.
           prerelease: true
           make_latest: false
           files: |
             MagnetarClient-MelonLoader.zip
             nightly-build.txt
+            Launch_Game.bat
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -133,6 +159,7 @@ jobs:
           | Key | Value |
           | :--- | :--- |
           | **Version** | `${{ steps.version.outputs.version }}` |
+          | **Supported Game** | Plants vs Zombies Fusion `${{ steps.version.outputs.game_version }}` |
           | **Build Number** | `${{ steps.version.outputs.build_number }}` |
           | **Target** | MelonLoader (PC) |
           | **Configuration** | `Nightly_Melon` |

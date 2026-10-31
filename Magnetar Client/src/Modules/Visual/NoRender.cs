@@ -101,12 +101,14 @@ public class NoRender : Module
                     if (selected) ps.Clear();
                 }
                 if (dirty) SaveToJson();
-            }
+            },
+            Width = 90,
         };
 
         ParticleTypeSetting = new MultiSelectSetting("Particle Types", typeof(ParticleType))
         {
-            CustomNames = TranslateEnum(typeof(ParticleType))
+            CustomNames = TranslateEnum(typeof(ParticleType)),
+            Width = 90,
         };
 
         GameObjectsSetting = new MultiSelectSetting("Game Objects", typeof(BucketType))
@@ -121,7 +123,8 @@ public class NoRender : Module
                     foreach (var r in bucket.GetComponentsInChildren<Renderer>(true))
                         if (r != null) r.enabled = !selected;
                 }
-            }
+            },
+            Width = 90,
         };
 
         BulletSetting = new MultiSelectSetting("Bullets", typeof(BulletType))
@@ -136,7 +139,8 @@ public class NoRender : Module
                     foreach (var r in kv.Value)
                         if (r != null) r.enabled = !selected;
                 }
-            }
+            },
+            Width = 90,
         };
 
         EffectSetting = new MultiSelectSetting("Effects")
@@ -181,7 +185,8 @@ public class NoRender : Module
                         }
                     }
                 }
-            }
+            },
+            Width = 90,
         };
 
         OtherSetting = new MultiSelectSetting("Others")
@@ -212,7 +217,8 @@ public class NoRender : Module
                             if (sr != null) sr.enabled = !selected;
                     }
                 }
-            }
+            },
+            Width = 90,
         };
 
         AddSettings(ParticlesSetting, ParticleTypeSetting, GameObjectsSetting, BulletSetting, EffectSetting, OtherSetting);

@@ -1,0 +1,32 @@
+<?xml version='1.0'?>
+<Obfuscator>
+	<Var name="InPath" value="." />
+	<Var name="OutPath" value=".\Obfuscated" />
+
+	<!-- Core References Paths -->
+	<AssemblySearchPath path="." />
+	<AssemblySearchPath path="..\..\References" />
+	<AssemblySearchPath path="..\..\References\Melonloader" />
+	<AssemblySearchPath path="..\..\References\Melonloader\Il2Cpp" />
+	<AssemblySearchPath path="..\..\References\Bepinex" />
+	<AssemblySearchPath path="..\..\References\Bepinex\Il2Cpp" />
+
+	<!-- Prevent hard crashes on unresolved third-party engine types -->
+	<Var name="IgnoreMissingTypes" value="true" />
+
+	<!-- Obfuscar Settings -->
+	<Var name="KeepPublicApi" value="true" />
+	<Var name="HidePrivateApi" value="true" />
+	<Var name="RenameProperties" value="false" />
+	<Var name="RenameEvents" value="false" />
+	<Var name="RenameFields" value="false" />
+	<Var name="UseUnicodeNames" value="false" />
+	<Var name="HideStrings" value="true" />
+	<Var name="OptimizeMethods" value="false" />
+	<Var name="SuppressIldasm" value="true" />
+
+	<Module file="$(InPath)\Assist Bot.dll">
+		<SkipType name="MagnetarAIAddon.*" />
+		<SkipType name="*Patch*" />
+	</Module>
+</Obfuscator>

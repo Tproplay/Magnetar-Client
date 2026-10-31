@@ -1,0 +1,9 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="BepInEx" />
+    <BuildType Name="BEPINEX LOCAL" />
+    <BuildType Name="MELON LOCAL" />
+    <BuildType Name="MelonLoader" />
+  </Configurations>
+  <Project Path="Project/Assist Bot.csproj" />
+</Solution>

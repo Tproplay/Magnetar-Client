@@ -1,0 +1,200 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <RootNamespace>MagnetarAIAddon</RootNamespace>
+        <AssemblyName>Assist Bot</AssemblyName>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <Configurations>MelonLoader;BepInEx;MELON LOCAL;BEPINEX LOCAL</Configurations>
+    </PropertyGroup>
+
+	<PropertyGroup>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+	
+    <PropertyGroup>
+        <DefineConstants>$(Configuration.ToUpper())</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$(Configuration.Contains('MELON')) or $(Configuration.Contains('Melon'))">
+        <OutputPath>bin\Melonloader\$(Configuration)\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$(Configuration.Contains('BepInEx')) or $(Configuration.Contains('BEPINEX'))">
+        <OutputPath>bin\BepInEx\$(Configuration)\</OutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="References\**" />
+        <EmbeddedResource Remove="References\**" />
+        <None Remove="References\**" />
+    </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.ML" Version="3.0.1" />
+		<PackageReference Include="Microsoft.ML.CpuMath" Version="3.0.1" />
+		<PackageReference Include="Obfuscar" Version="2.2.50" GeneratePathProperty="true">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+    <ItemGroup>
+		<Reference Include="0Harmony">
+			<HintPath>References\Melonloader\0Harmony.dll</HintPath>
+		</Reference>
+		<Reference Include="Magnetar Client">
+		  <HintPath>References\Magnetar Client.dll</HintPath>
+		</Reference>
+		<Reference Include="PvZ_Fusion_Translator">
+		  <HintPath>References\PvZ_Fusion_Translator.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+    <!-- MelonLoader References -->
+    <ItemGroup Condition="$(Configuration.Contains('MELON')) or $(Configuration.Contains('Melon'))">
+        <Reference Include="MelonLoader">
+            <HintPath>References\Melonloader\MelonLoader.dll</HintPath>
+        </Reference>
+        <Reference Include="Il2CppInterop.Common">
+            <HintPath>References\Melonloader\Il2CppInterop.Common.dll</HintPath>
+        </Reference>
+        <Reference Include="Il2CppInterop.Runtime">
+            <HintPath>References\Melonloader\Il2CppInterop.Runtime.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>References\Melonloader\Il2Cpp\Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="Il2Cppmscorlib">
+            <HintPath>References\Melonloader\Il2Cpp\Il2Cppmscorlib.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine">
+            <HintPath>References\Melonloader\Il2Cpp\UnityEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>References\Melonloader\Il2Cpp\Unity.TextMeshPro.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.AnimationModule">
+            <HintPath>References\Melonloader\Il2Cpp\UnityEngine.AnimationModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.AssetBundleModule">
+            <HintPath>References\Melonloader\Il2Cpp\UnityEngine.AssetBundleModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>References\Melonloader\Il2Cpp\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+            <HintPath>References\Melonloader\Il2Cpp\UnityEngine.IMGUIModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule">
+            <HintPath>References\Melonloader\Il2Cpp\UnityEngine.InputLegacyModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.ParticleSystemModule">
+            <HintPath>References\Melonloader\Il2Cpp\UnityEngine.ParticleSystemModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.Physics2DModule">
+            <HintPath>References\Melonloader\Il2Cpp\UnityEngine.Physics2DModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule">
+            <HintPath>References\Melonloader\Il2Cpp\UnityEngine.TextRenderingModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>References\Melonloader\Il2Cpp\UnityEngine.UI.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+            <HintPath>References\Melonloader\Il2Cpp\UnityEngine.UIModule.dll</HintPath>
+        </Reference>
+        <Reference Include="Il2CppUniTask">
+            <HintPath>References\Melonloader\Il2Cpp\Il2CppUniTask.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.ImageConversionModule">
+            <HintPath>References\Melonloader\Il2Cpp\UnityEngine.ImageConversionModule.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <!-- BepInEx References -->
+    <ItemGroup Condition="$(Configuration.Contains('BepInEx')) or $(Configuration.Contains('BEPINEX'))">
+        <Reference Include="BepInEx.Core">
+            <HintPath>References\Bepinex\BepInEx.Core.dll</HintPath>
+        </Reference>
+        <Reference Include="BepInEx.Unity.IL2CPP">
+            <HintPath>References\Bepinex\BepInEx.Unity.IL2CPP.dll</HintPath>
+        </Reference>
+        <Reference Include="Il2CppInterop.Runtime">
+            <HintPath>References\Bepinex\Il2CppInterop.Runtime.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>References\Bepinex\Il2Cpp\Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="Il2Cppmscorlib">
+            <HintPath>References\Bepinex\Il2Cpp\Il2Cppmscorlib.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine">
+            <HintPath>References\Bepinex\Il2Cpp\UnityEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>References\Bepinex\Il2Cpp\Unity.TextMeshPro.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.AnimationModule">
+            <HintPath>References\Bepinex\Il2Cpp\UnityEngine.AnimationModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.AssetBundleModule">
+            <HintPath>References\Bepinex\Il2Cpp\UnityEngine.AssetBundleModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>References\Bepinex\Il2Cpp\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+            <HintPath>References\Bepinex\Il2Cpp\UnityEngine.IMGUIModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule">
+            <HintPath>References\Bepinex\Il2Cpp\UnityEngine.InputLegacyModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.ParticleSystemModule">
+            <HintPath>References\Bepinex\Il2Cpp\UnityEngine.ParticleSystemModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.Physics2DModule">
+            <HintPath>References\Bepinex\Il2Cpp\UnityEngine.Physics2DModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule">
+            <HintPath>References\Bepinex\Il2Cpp\UnityEngine.TextRenderingModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>References\Bepinex\Il2Cpp\UnityEngine.UI.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+            <HintPath>References\Bepinex\Il2Cpp\UnityEngine.UIModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UniTask">
+            <HintPath>References\Bepinex\Il2Cpp\UniTask.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.ImageConversionModule">
+            <HintPath>References\Bepinex\Il2Cpp\UnityEngine.ImageConversionModule.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+	<ItemGroup>
+		<None Update="obfuscar.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<Target Name="ObfuscateOutput" AfterTargets="Build" Condition="'$(Configuration)' == 'MelonLoader' Or '$(Configuration)' == 'BepInEx'">
+		<Message Text="[Obfuscar] Running protection on $(TargetFileName)..." Importance="high" />
+
+		<!-- Ensure obfuscar.xml exists in output -->
+		<Copy SourceFiles="$(ProjectDir)obfuscar.xml" DestinationFolder="$(TargetDir)" OverwriteReadOnlyFiles="true" />
+
+		<!-- Run Obfuscar executable directly -->
+		<Exec Command="&quot;$(Obfuscar)&quot; obfuscar.xml" WorkingDirectory="$(TargetDir)" StandardOutputImportance="High" StandardErrorImportance="High" />
+
+		<!-- Overwrite original DLL with protected DLL -->
+		<Copy SourceFiles="$(TargetDir)Obfuscated\$(TargetFileName)" DestinationFolder="$(TargetDir)" OverwriteReadOnlyFiles="true" />
+
+		<Message Text="[Obfuscar] Assembly successfully protected." Importance="high" />
+	</Target>
+
+</Project>

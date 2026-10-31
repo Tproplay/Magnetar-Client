@@ -367,3 +367,20 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# -----------------------------------------------------------------------
+# Addons / Assist Bot
+# -----------------------------------------------------------------------
+
+# Private secret file — NEVER commit this
+Addons/Assist Bot/Project/Src/Secrets.cs
+
+# Compiled output & intermediate build artifacts
+Addons/*/Project/bin/
+Addons/*/Project/obj/
+
+# Shipped reference DLLs (large binary blobs, restored locally)
+Addons/*/Project/References/
+
+# Collected ML session telemetry files
+Addons/*/Sessions/

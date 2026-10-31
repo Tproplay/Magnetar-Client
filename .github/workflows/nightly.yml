@@ -2,16 +2,21 @@ name: Nightly Build
 
 on:
   schedule:
-    # Runs every day at midnight UTC
+    # Runs automatically every day at midnight UTC (00:00 UTC)
     - cron: '0 0 * * *'
   push:
     branches:
+      - master
       - main
-  workflow_dispatch:  # Allows manual triggering from the Actions tab
+  workflow_dispatch: # Allows manual trigger anytime from GitHub Actions UI
+
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-melonloader:
-    name: Build (MelonLoader)
+    name: Build Nightly (MelonLoader)
     runs-on: windows-latest
 
     steps:
@@ -23,24 +28,90 @@ jobs:
         with:
           dotnet-version: '6.0.x'
 
-      - name: Restore NuGet packages
+      - name: Calculate & Stamp Nightly Version
+        id: version
+        shell: pwsh
+        run: |
+          $infoPath = "Magnetar Client/src/Config/MagnetarInfo.cs"
+          $content = Get-Content $infoPath -Raw
+
+          # Extract BaseVersion (e.g., "4.0.3")
+          if ($content -match 'public const string BaseVersion = "(?<base>[^"]+)";') {
+              $baseVer = $Matches['base']
+          } else {
+              $baseVer = "4.0.3"
+          }
+
+          # Nightly build number is GitHub Actions run number (1, 2, 3...)
+          $buildNum = "${{ github.run_number }}"
+          $nightlyVersion = "$baseVer.$buildNum"
+
+          Write-Host "Base Version:    $baseVer"
+          Write-Host "Build Number:    $buildNum"
+          Write-Host "Nightly Version: $nightlyVersion"
+
+          # Stamp NightlyBuild constant in MagnetarInfo.cs before compilation
+          $content = $content -replace 'public const string NightlyBuild = "[^"]*";', "public const string NightlyBuild = `"$buildNum`";"
+          Set-Content -Path $infoPath -Value $content
+
+          # Export outputs
+          echo "nightly_version=$nightlyVersion" >> $env:GITHUB_OUTPUT
+          echo "base_version=$baseVer" >> $env:GITHUB_OUTPUT
+          echo "build_number=$buildNum" >> $env:GITHUB_OUTPUT
+
+      - name: Restore NuGet dependencies
         run: dotnet restore "Magnetar Client/Magnetar Client.csproj"
 
-      - name: Build (Release_Melon)
+      - name: Compile Mod (Nightly_Melon)
         run: >
           dotnet build "Magnetar Client/Magnetar Client.csproj"
-          --configuration Release_Melon
+          --configuration Nightly_Melon
           --no-restore
           -p:GenerateAssemblyInfo=false
 
-      - name: Get build date
-        id: date
-        run: echo "date=$(Get-Date -Format 'yyyy-MM-dd')" >> $env:GITHUB_OUTPUT
+      - name: Assemble Release Package
+        shell: pwsh
+        run: |
+          $outMods = "nightly-staging/Mods"
+          $outData = "$outMods/Magnetar Data"
 
-      - name: Upload MelonLoader artifact
+          # Create directory structure
+          New-Item -ItemType Directory -Force -Path "$outData/Resources" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$outData/Themes"    | Out-Null
+
+          # Copy compiled mod DLL
+          Copy-Item "Magnetar Client/bin/Melonloader/Nightly_Melon/Magnetar Client.dll" $outMods -Force
+
+          # Copy Magnetar Data (resources, themes, data definitions)
+          # Note: Magnetar Translation is excluded intentionally
+          Copy-Item "Magnetar Data/Resources/*"     "$outData/Resources" -Recurse -Force
+          Copy-Item "Magnetar Data/Themes/*"        "$outData/Themes"    -Recurse -Force
+          Copy-Item "Magnetar Data/FxData.json"     $outData -Force
+          Copy-Item "Magnetar Data/TextureData.json" $outData -Force
+
+          Write-Host "Package assembled successfully in $outMods"
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MagnetarClient-nightly-${{ steps.date.outputs.date }}-MelonLoader
-          path: "Magnetar Client/bin/Melonloader/Release_Melon/Magnetar Client.dll"
+          name: MagnetarClient-v${{ steps.version.outputs.nightly_version }}-MelonLoader
+          path: nightly-staging/
           if-no-files-found: error
           retention-days: 14
+
+      - name: Add Job Summary
+        if: always()
+        shell: pwsh
+        run: |
+          $summary = @"
+          ## Nightly Build Summary
+          | Key | Value |
+          | :--- | :--- |
+          | **Version** | `${{ steps.version.outputs.nightly_version }}` |
+          | **Target** | MelonLoader (PC) |
+          | **Configuration** | `Nightly_Melon` |
+          | **Branch** | `${{ github.ref_name }}` |
+          | **Commit** | `${{ github.sha }}` |
+          | **Artifact** | `MagnetarClient-v${{ steps.version.outputs.nightly_version }}-MelonLoader` |
+          "@
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary

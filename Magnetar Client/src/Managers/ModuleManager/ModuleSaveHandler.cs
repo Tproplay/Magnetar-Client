@@ -3,6 +3,7 @@ using Magnetar_Client.Modules;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.Utils;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,6 +12,8 @@ namespace Magnetar_Client.Core.ModuleManager_;
 public class ModuleSaveHandler : ISaveHandler
 {
     public string SectionKey => "Modules";
+
+    public static Dictionary<string, ModuleSaveData> CachedModuleData { get; private set; } = new(StringComparer.OrdinalIgnoreCase);
 
     public object ExportData()
     {
@@ -23,7 +26,16 @@ public class ModuleSaveHandler : ISaveHandler
                 export.CategoryPositions[kvp.Key.ToString()] = kvp.Value;
         }
 
-        // 2. Export modules state, settings, and arbitrary SavedData
+        // 2. Preserve any previously cached module data
+        if (CachedModuleData != null)
+        {
+            foreach (var kvp in CachedModuleData)
+            {
+                export.Modules[kvp.Key] = kvp.Value;
+            }
+        }
+
+        // 3. Export currently registered modules state, settings, and arbitrary SavedData
         if (ModuleManager.Modules != null)
         {
             foreach (var mod in ModuleManager.Modules)
@@ -63,6 +75,7 @@ public class ModuleSaveHandler : ISaveHandler
                 }
 
                 export.Modules[mod.Name] = modData;
+                CachedModuleData[mod.Name] = modData;
             }
         }
 
@@ -92,25 +105,40 @@ public class ModuleSaveHandler : ISaveHandler
 
         // Restore individual module states
         JToken modToken = token["Modules"] ?? token;
-        if (modToken != null && ModuleManager.Modules != null)
+        if (modToken != null)
         {
             var modDict = modToken.ToObject<Dictionary<string, ModuleSaveData>>();
             if (modDict != null)
             {
-                foreach (var mod in ModuleManager.Modules)
+                CachedModuleData = new Dictionary<string, ModuleSaveData>(modDict, StringComparer.OrdinalIgnoreCase);
+
+                if (ModuleManager.Modules != null)
                 {
-                    if (mod == null || !mod.SaveData || string.IsNullOrEmpty(mod.Name)) continue;
-                    if (modDict.TryGetValue(mod.Name, out var data))
+                    foreach (var mod in ModuleManager.Modules)
                     {
-                        RestoreModuleSettings(mod, data);
+                        if (mod == null || !mod.SaveData || string.IsNullOrEmpty(mod.Name)) continue;
+                        if (CachedModuleData.TryGetValue(mod.Name, out var data))
+                        {
+                            RestoreModuleSettings(mod, data);
+                        }
                     }
                 }
             }
         }
     }
 
+    public static void RestoreIfCached(Modules.Module mod)
+    {
+        if (mod == null || !mod.SaveData || string.IsNullOrEmpty(mod.Name)) return;
+        if (CachedModuleData != null && CachedModuleData.TryGetValue(mod.Name, out var data))
+        {
+            RestoreModuleSettings(mod, data);
+        }
+    }
+
     public void ResetToDefault()
     {
+        CachedModuleData?.Clear();
         ModuleManager.ResetToDefault();
     }
 

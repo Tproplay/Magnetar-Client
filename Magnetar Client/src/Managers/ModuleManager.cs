@@ -167,6 +167,7 @@ public static class ModuleManager
 
             if (IsInitialized)
             {
+                ModuleSaveHandler.RestoreIfCached(instance);
                 Translator.InvalidateBlacklist();
                 Translator.LinkModuleTranslations();
                 SortModules();

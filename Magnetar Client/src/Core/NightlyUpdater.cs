@@ -13,23 +13,21 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 namespace Magnetar_Client.Core;
 
 /// <summary>
-/// Checks for a newer nightly build on GitHub Actions at startup and hot-swaps
+/// Checks for a newer nightly build on GitHub at startup and hot-swaps
 /// Magnetar Data files (Resources, Themes, FxData.json, TextureData.json).
-/// The DLL itself cannot be replaced while the game is running; a reminder is
-/// shown in the log instead.
+/// Also stages the new DLL as 'Magnetar Client.dll.update' for the launcher.
 /// </summary>
 internal static class NightlyUpdater
 {
     // ── Config ────────────────────────────────────────────────────────────────
 
-    /// <summary>GitHub repo in "owner/repo" format.</summary>
     private const string Repo = "Tproplay/Magnetar-Client";
+    private const string ReleaseTag = "nightly";
 
-    /// <summary>Name of the GitHub Actions workflow file.</summary>
-    private const string WorkflowFile = "nightly.yml";
-
-    /// <summary>Only branches with this name are considered nightly builds.</summary>
-    private const string NightlyBranch = "master";
+    // Direct public release asset URLs (no authentication required)
+    private const string BuildInfoUrl = $"https://github.com/{Repo}/releases/download/{ReleaseTag}/nightly-build.txt";
+    private const string ReleaseApiUrl = $"https://api.github.com/repos/{Repo}/releases/tags/{ReleaseTag}";
+    private const string DownloadUrl   = $"https://github.com/{Repo}/releases/download/{ReleaseTag}/MagnetarClient-MelonLoader.zip";
 
     // ── Entry Point ───────────────────────────────────────────────────────────
 
@@ -49,161 +47,121 @@ internal static class NightlyUpdater
         // Small delay so the rest of the client finishes loading first
         yield return new WaitForSecondsRealtime(3f);
 
-        DebugLogger.Msg($"[NightlyUpdater] Checking for nightly updates (current: v{MagnetarInfo.Version})...");
+        DebugLogger.Msg($"[NightlyUpdater] Checking for nightly updates (v{MagnetarInfo.Version}, build {MagnetarInfo.BuildNumber})...");
 
-        string runId = null;
-        string artifactId = null;
-        string artifactName = null;
+        int remoteBuild = -1;
+        bool checkDone = false;
+        Exception checkError = null;
 
-        // ── Step 1: find latest successful workflow run on master ─────────────
-        bool step1Done = false;
-        Exception step1Error = null;
-
-        var t1 = System.Threading.Tasks.Task.Run(async () =>
+        var tCheck = System.Threading.Tasks.Task.Run(async () =>
         {
             try
             {
                 using var client = MakeClient();
-                // GET /repos/{owner}/{repo}/actions/workflows/{workflow}/runs
-                string url = $"https://api.github.com/repos/{Repo}/actions/workflows/{WorkflowFile}/runs"
-                           + $"?branch={NightlyBranch}&status=success&per_page=1";
 
-                string json = await client.GetStringAsync(url);
+                // Method 1: Fetch static build number file (direct CDN download, zero rate limits)
+                try
+                {
+                    string text = await client.GetStringAsync(BuildInfoUrl);
+                    if (!string.IsNullOrWhiteSpace(text) && int.TryParse(text.Trim(), out int b))
+                    {
+                        remoteBuild = b;
+                        return;
+                    }
+                }
+                catch { }
 
-                runId = ExtractJsonValue(json, "\"id\":");
-                if (string.IsNullOrEmpty(runId))
-                    throw new Exception("No successful nightly run found.");
+                // Method 2: Public GitHub Release API fallback
+                try
+                {
+                    string json = await client.GetStringAsync(ReleaseApiUrl);
+                    var match = Regex.Match(json, @"Build:?\s*(\d+)", RegexOptions.IgnoreCase);
+                    if (match.Success && int.TryParse(match.Groups[1].Value, out int b))
+                    {
+                        remoteBuild = b;
+                        return;
+                    }
+                }
+                catch (Exception ex) { checkError = ex; }
             }
-            catch (Exception ex) { step1Error = ex; }
-            finally { step1Done = true; }
+            catch (Exception ex) { checkError = ex; }
+            finally { checkDone = true; }
         });
 
-        while (!step1Done)
+        while (!checkDone)
             yield return null;
 
-        if (step1Error != null)
+        if (remoteBuild <= 0)
         {
-            DebugLogger.Warning($"[NightlyUpdater] Could not fetch workflow runs: {step1Error.Message}");
+            if (checkError != null)
+                DebugLogger.Warning($"[NightlyUpdater] Could not check nightly build: {checkError.Message}");
             yield break;
         }
 
-        // ── Step 2: find the MelonLoader artifact in that run ─────────────────
-        bool step2Done = false;
-        Exception step2Error = null;
+        // Compare internal build numbers
+        if (remoteBuild <= MagnetarInfo.BuildNumber)
+        {
+            DebugLogger.Msg($"[NightlyUpdater] Up to date (Current build: {MagnetarInfo.BuildNumber}, Latest build: {remoteBuild}). No update needed.");
+            yield break;
+        }
 
-        var t2 = System.Threading.Tasks.Task.Run(async () =>
+        DebugLogger.Msg($"[NightlyUpdater] Newer nightly available: Build {remoteBuild} (current: Build {MagnetarInfo.BuildNumber}). Downloading...");
+
+        // Download zip
+        bool downloadDone = false;
+        Exception downloadError = null;
+        string tempZipPath = Path.Combine(Path.GetTempPath(), $"magnetar_nightly_b{remoteBuild}.zip");
+
+        var tDownload = System.Threading.Tasks.Task.Run(async () =>
         {
             try
             {
                 using var client = MakeClient();
-                string url = $"https://api.github.com/repos/{Repo}/actions/runs/{runId}/artifacts";
-                string json = await client.GetStringAsync(url);
-
-                // Find the first artifact whose name contains "MelonLoader"
-                int idx = json.IndexOf("MelonLoader", StringComparison.OrdinalIgnoreCase);
-                if (idx < 0) throw new Exception("No MelonLoader artifact found in run.");
-
-                // Walk back to the start of that artifact object to read its id and name
-                int objStart = json.LastIndexOf('{', idx);
-                string fragment = json.Substring(objStart, Math.Min(500, json.Length - objStart));
-
-                artifactId   = ExtractJsonValue(fragment, "\"id\":");
-                artifactName = ExtractJsonStringValue(fragment, "\"name\":");
-            }
-            catch (Exception ex) { step2Error = ex; }
-            finally { step2Done = true; }
-        });
-
-        while (!step2Done)
-            yield return null;
-
-        if (step2Error != null)
-        {
-            DebugLogger.Warning($"[NightlyUpdater] Could not fetch artifact list: {step2Error.Message}");
-            yield break;
-        }
-
-        // ── Step 3: compare artifact version with current version ─────────────
-        var match = Regex.Match(artifactName ?? string.Empty, @"\b\d+\.\d+\.\d+\.\d+\b");
-        if (match.Success && Version.TryParse(match.Value, out var remoteVer) && Version.TryParse(MagnetarInfo.Version, out var localVer))
-        {
-            if (remoteVer <= localVer)
-            {
-                DebugLogger.Msg($"[NightlyUpdater] Up to date (current: v{localVer}, latest: v{remoteVer}). No update needed.");
-                yield break;
-            }
-            DebugLogger.Msg($"[NightlyUpdater] Newer nightly build available: v{remoteVer} (current: v{localVer}). Downloading...");
-        }
-        else if (artifactName != null && artifactName.Contains(MagnetarInfo.Version))
-        {
-            DebugLogger.Msg($"[NightlyUpdater] Already on latest nightly build (v{MagnetarInfo.Version}). No update needed.");
-            yield break;
-        }
-        else
-        {
-            DebugLogger.Msg($"[NightlyUpdater] New nightly artifact found: {artifactName}. Downloading...");
-        }
-
-        // ── Step 4: download & extract the artifact zip ───────────────────────
-        bool step4Done = false;
-        Exception step4Error = null;
-        string tempZipPath = Path.Combine(Path.GetTempPath(), $"magnetar_nightly_{artifactId}.zip");
-
-        var t4 = System.Threading.Tasks.Task.Run(async () =>
-        {
-            try
-            {
-                using var client = MakeClient();
-                // GitHub redirects artifact downloads — HttpClient follows automatically
-                string url = $"https://api.github.com/repos/{Repo}/actions/artifacts/{artifactId}/zip";
-
-                byte[] data = await client.GetByteArrayAsync(url);
+                byte[] data = await client.GetByteArrayAsync(DownloadUrl);
                 await File.WriteAllBytesAsync(tempZipPath, data);
             }
-            catch (Exception ex) { step4Error = ex; }
-            finally { step4Done = true; }
+            catch (Exception ex) { downloadError = ex; }
+            finally { downloadDone = true; }
         });
 
-        while (!step4Done)
+        while (!downloadDone)
             yield return null;
 
-        if (step4Error != null)
+        if (downloadError != null)
         {
-            DebugLogger.Warning($"[NightlyUpdater] Download failed: {step4Error.Message}");
+            DebugLogger.Warning($"[NightlyUpdater] Download failed: {downloadError.Message}");
             yield break;
         }
 
-        // ── Step 5: extract — skip the DLL, update data files only ────────────
+        // Extract package
         try
         {
-            string modsDir  = PathsManager.ModsDir;
-            bool   dllFound = false;
+            string modsDir = PathsManager.ModsDir;
 
             using var zip = ZipFile.OpenRead(tempZipPath);
             foreach (var entry in zip.Entries)
             {
                 if (entry.FullName.EndsWith("/") || entry.FullName.EndsWith("\\"))
-                    continue; // skip directory entries
+                    continue;
 
                 string entryName = entry.FullName.Replace('\\', '/');
 
-                // ── DLL: cannot hot-replace — just note it ────────────────────
+                // DLL staged for next launch
                 if (entryName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
                 {
-                    dllFound = true;
-                    DebugLogger.Warning("[NightlyUpdater] DLL update is available but cannot be applied while the game is running. Please replace 'Magnetar Client.dll' manually after closing the game.");
+                    string updatePath = Path.Combine(modsDir, "Magnetar Client.dll.update");
+                    entry.ExtractToFile(updatePath, overwrite: true);
+                    DebugLogger.Msg("[NightlyUpdater] New DLL staged as 'Magnetar Client.dll.update'. It will be applied automatically on next launch.");
                     continue;
                 }
 
-                // ── Data files: extract relative to Mods directory ────────────
-                // The zip layout is: Mods/Magnetar Data/...
-                // Strip leading "Mods/" so it lands in modsDir correctly.
+                // Data files: strip leading "Mods/" if present
                 string relativePath = entryName;
                 if (relativePath.StartsWith("Mods/", StringComparison.OrdinalIgnoreCase))
                     relativePath = relativePath.Substring("Mods/".Length);
 
                 string destPath = Path.Combine(modsDir, relativePath.Replace('/', Path.DirectorySeparatorChar));
-                string destDir  = Path.GetDirectoryName(destPath);
+                string destDir = Path.GetDirectoryName(destPath);
 
                 if (!Directory.Exists(destDir))
                     Directory.CreateDirectory(destDir);
@@ -211,10 +169,7 @@ internal static class NightlyUpdater
                 entry.ExtractToFile(destPath, overwrite: true);
             }
 
-            DebugLogger.Msg($"[NightlyUpdater] Data files updated from nightly '{artifactName}'! Changes take effect on next launch.");
-
-            if (!dllFound)
-                DebugLogger.Warning("[NightlyUpdater] No DLL found in the artifact — only data files were updated.");
+            DebugLogger.Msg($"[NightlyUpdater] Data files updated to Build {remoteBuild}! Changes take effect on next launch.");
         }
         catch (Exception ex)
         {
@@ -222,60 +177,20 @@ internal static class NightlyUpdater
         }
         finally
         {
-            // Clean up temp zip
             try { File.Delete(tempZipPath); } catch { }
         }
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
     private static HttpClient MakeClient()
     {
-        var client = new HttpClient();
-        // GitHub API requires a User-Agent header
+        var handler = new HttpClientHandler { AllowAutoRedirect = true };
+        var client = new HttpClient(handler);
         client.DefaultRequestHeaders.UserAgent.Add(
             new ProductInfoHeaderValue("MagnetarClient", MagnetarInfo.Version));
         client.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-        client.Timeout = TimeSpan.FromSeconds(30);
+        client.Timeout = TimeSpan.FromSeconds(45);
         return client;
-    }
-
-    /// <summary>Extracts the first numeric value after a JSON key, e.g. "id": 123456</summary>
-    private static string ExtractJsonValue(string json, string key)
-    {
-        int keyIdx = json.IndexOf(key, StringComparison.Ordinal);
-        if (keyIdx < 0) return null;
-
-        int valueStart = keyIdx + key.Length;
-        // Skip whitespace
-        while (valueStart < json.Length && (char.IsDigit(json[valueStart]) == false && json[valueStart] != '-'))
-        {
-            if (valueStart >= json.Length) return null;
-            valueStart++;
-        }
-
-        int valueEnd = valueStart;
-        while (valueEnd < json.Length && (char.IsDigit(json[valueEnd]) || json[valueEnd] == '-'))
-            valueEnd++;
-
-        return valueEnd > valueStart ? json.Substring(valueStart, valueEnd - valueStart) : null;
-    }
-
-    /// <summary>Extracts the first quoted string value after a JSON key, e.g. "name": "foo"</summary>
-    private static string ExtractJsonStringValue(string json, string key)
-    {
-        int keyIdx = json.IndexOf(key, StringComparison.Ordinal);
-        if (keyIdx < 0) return null;
-
-        int quoteOpen = json.IndexOf('"', keyIdx + key.Length);
-        if (quoteOpen < 0) return null;
-
-        int valueStart = quoteOpen + 1;
-        int quoteClose = json.IndexOf('"', valueStart);
-        if (quoteClose < 0) return null;
-
-        return json.Substring(valueStart, quoteClose - valueStart);
     }
 }
 #endif

@@ -14,6 +14,9 @@ concurrency:
   group: nightly-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   build-melonloader:
     name: Build Nightly (MelonLoader)
@@ -28,35 +31,32 @@ jobs:
         with:
           dotnet-version: '6.0.x'
 
-      - name: Calculate & Stamp Nightly Version
+      - name: Calculate & Stamp Nightly Build Number
         id: version
         shell: pwsh
         run: |
           $infoPath = "Magnetar Client/src/Config/MagnetarInfo.cs"
           $content = Get-Content $infoPath -Raw
 
-          # Extract BaseVersion (e.g., "4.0.3")
-          if ($content -match 'public const string BaseVersion = "(?<base>[^"]+)";') {
-              $baseVer = $Matches['base']
+          # Extract Version (e.g., "4.0.3")
+          if ($content -match 'public const string Version = "(?<ver>[^"]+)";') {
+              $ver = $Matches['ver']
           } else {
-              $baseVer = "4.0.3"
+              $ver = "4.0.3"
           }
 
           # Nightly build number is GitHub Actions run number (1, 2, 3...)
           $buildNum = "${{ github.run_number }}"
-          $nightlyVersion = "$baseVer.$buildNum"
 
-          Write-Host "Base Version:    $baseVer"
-          Write-Host "Build Number:    $buildNum"
-          Write-Host "Nightly Version: $nightlyVersion"
+          Write-Host "Version:      $ver"
+          Write-Host "Build Number: $buildNum"
 
-          # Stamp NightlyBuild constant in MagnetarInfo.cs before compilation
-          $content = $content -replace 'public const string NightlyBuild = "[^"]*";', "public const string NightlyBuild = `"$buildNum`";"
+          # Stamp internal BuildNumber constant in MagnetarInfo.cs before compilation
+          $content = $content -replace 'public const int BuildNumber = \d+;', "public const int BuildNumber = $buildNum;"
           Set-Content -Path $infoPath -Value $content
 
           # Export outputs
-          echo "nightly_version=$nightlyVersion" >> $env:GITHUB_OUTPUT
-          echo "base_version=$baseVer" >> $env:GITHUB_OUTPUT
+          echo "version=$ver" >> $env:GITHUB_OUTPUT
           echo "build_number=$buildNum" >> $env:GITHUB_OUTPUT
 
       - name: Restore NuGet dependencies
@@ -91,10 +91,35 @@ jobs:
 
           Write-Host "Package assembled successfully in $outMods"
 
-      - name: Upload Artifact
+          # Compress to zip for public release asset download
+          Compress-Archive -Path "nightly-staging/Mods" -DestinationPath "MagnetarClient-MelonLoader.zip" -Force
+
+          # Create version text file for fast unauthenticated build checks
+          Set-Content -Path "nightly-build.txt" -Value "${{ steps.version.outputs.build_number }}"
+
+      - name: Publish Nightly Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: nightly
+          name: "Magnetar Client Nightly (Build ${{ steps.version.outputs.build_number }})"
+          body: |
+            Automated nightly build for **Magnetar Client v${{ steps.version.outputs.version }}**.
+            - **Version**: `${{ steps.version.outputs.version }}`
+            - **Build Number**: `${{ steps.version.outputs.build_number }}`
+            - **Commit**: `${{ github.sha }}`
+            - **Branch**: `${{ github.ref_name }}`
+          prerelease: true
+          make_latest: false
+          files: |
+            MagnetarClient-MelonLoader.zip
+            nightly-build.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Workflow Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MagnetarClient-v${{ steps.version.outputs.nightly_version }}-MelonLoader
+          name: MagnetarClient-v${{ steps.version.outputs.version }}-Build${{ steps.version.outputs.build_number }}-MelonLoader
           path: nightly-staging/
           if-no-files-found: error
           retention-days: 14
@@ -107,11 +132,12 @@ jobs:
           ## Nightly Build Summary
           | Key | Value |
           | :--- | :--- |
-          | **Version** | `${{ steps.version.outputs.nightly_version }}` |
+          | **Version** | `${{ steps.version.outputs.version }}` |
+          | **Build Number** | `${{ steps.version.outputs.build_number }}` |
           | **Target** | MelonLoader (PC) |
           | **Configuration** | `Nightly_Melon` |
           | **Branch** | `${{ github.ref_name }}` |
           | **Commit** | `${{ github.sha }}` |
-          | **Artifact** | `MagnetarClient-v${{ steps.version.outputs.nightly_version }}-MelonLoader` |
+          | **Release Tag** | `nightly` |
           "@
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary

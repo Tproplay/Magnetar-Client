@@ -72,11 +72,6 @@ The model outputs a `Probability` value (0–1). Each option's raw score is norm
 
 If no local model file is present, a simple quality-based heuristic is used as a fallback.
 
-## Requirements
-
-- **Magnetar Client** (MelonLoader or BepInEx build)
-
-
 ---
 
 ## Building from Source
@@ -116,7 +111,9 @@ The release configurations (`MelonLoader` / `BepInEx`) automatically run **Obfus
 
 ## Installation
 
-1. Build the addon using the appropriate configuration for your mod loader.
+> Ensure [Magnetar Client](https://github.com/Tproplay/Magnetar-Client/releases) is installed in your game first
+
+1. [Download the addon](https://github.com/Tproplay/Magnetar-Client/releases) using the appropriate configuration for your mod loader.
 2. Copy `Assist Bot.dll` to your Magnetar Client addons directory:
    - **MelonLoader**: `<GameRoot>/Mods/Magnetar Data/Addons/`
    - **BepInEx**: `<GameRoot>/BepInEx/plugins/Magnetar Data/Addons/`

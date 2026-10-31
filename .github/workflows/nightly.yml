@@ -1,0 +1,46 @@
+name: Nightly Build
+
+on:
+  schedule:
+    # Runs every day at midnight UTC
+    - cron: '0 0 * * *'
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual triggering from the Actions tab
+
+jobs:
+  build-melonloader:
+    name: Build (MelonLoader)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore NuGet packages
+        run: dotnet restore "Magnetar Client/Magnetar Client.csproj"
+
+      - name: Build (Release_Melon)
+        run: >
+          dotnet build "Magnetar Client/Magnetar Client.csproj"
+          --configuration Release_Melon
+          --no-restore
+          -p:GenerateAssemblyInfo=false
+
+      - name: Get build date
+        id: date
+        run: echo "date=$(Get-Date -Format 'yyyy-MM-dd')" >> $env:GITHUB_OUTPUT
+
+      - name: Upload MelonLoader artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MagnetarClient-nightly-${{ steps.date.outputs.date }}-MelonLoader
+          path: "Magnetar Client/bin/Melonloader/Release_Melon/Magnetar Client.dll"
+          if-no-files-found: error
+          retention-days: 14

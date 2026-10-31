@@ -9,7 +9,7 @@
 
 ## Overview
 
-Assist Bot hooks into the buff selection screen during *The Gods Evolved* (Rogue Shooting) runs and uses a trained **ML.NET binary classification model** to score each candidate buff based on your current game state. Scores are displayed as color-coded percentages directly on the option buttons — green for high-confidence picks, red for low ones.
+Assist Bot hooks into the buff selection screen during *The Gods Evolved* (Rogue Shooting) runs and uses a trained **`ML.NET` binary classification model** to score each candidate buff based on your current game state. Scores are displayed as color-coded percentages directly on the option buttons — green for high-confidence picks, red for low ones.
 
 The addon also silently collects anonymized gameplay telemetry (opt-in) and uploads it to a server after each run. This data is used to continuously retrain and improve the prediction model, which is then pushed back to all clients.
 
@@ -72,19 +72,10 @@ The model outputs a `Probability` value (0–1). Each option's raw score is norm
 
 If no local model file is present, a simple quality-based heuristic is used as a fallback.
 
-### Telemetry & Data Integrity
-To prevent fake data from poisoning the training set, every telemetry row written to disk is protected by a **rolling HMAC-SHA256 hash chain** (similar to a blockchain). Before upload, each row's hash is re-verified client-side. Any external modification to the CSV file is detected and the entire session is discarded rather than uploaded.
-
-Telemetry is **opt-in** via the `Send feedback` setting. Disabling it prevents any data from being recorded or uploaded.
-
----
-
 ## Requirements
 
 - **Magnetar Client** (MelonLoader or BepInEx build)
-- **Plants vs. Zombies Fusion** (Il2CPP build)
-- **.NET 6.0 SDK** (for building from source)
-- *(Optional)* **PvZ Fusion Translator** — enables localized buff names in the UI
+
 
 ---
 

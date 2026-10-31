@@ -40,9 +40,18 @@ body:
     attributes:
       label: "Magnetar Client Version"
       description: "Which version or release of Magnetar Client are you running?"
-      placeholder: "e.g., v1.0.4, commit hash, etc."
+      placeholder: "e.g., v4.0.3, Nightly Build 6, commit hash, etc."
     validations:
       required: true
+
+  - type: checkboxes
+    id: is_prerelease
+    attributes:
+      label: "Release Classification"
+      description: "Please indicate if this issue occurred on a development or pre-release build."
+      options:
+        - label: "This issue occurred on a Pre-release / Nightly build (not an official stable release)."
+          required: false
 
   - type: input
     id: pvz_fusion_version

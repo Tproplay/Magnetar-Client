@@ -8,6 +8,7 @@ on:
     branches:
       - master
       - main
+      - devlop
   workflow_dispatch: # Allows manual trigger anytime from GitHub Actions UI
 
 concurrency:
@@ -47,9 +48,13 @@ jobs:
 
           # Nightly build number is GitHub Actions run number (1, 2, 3...)
           $buildNum = "${{ github.run_number }}"
+          $buildDate = (Get-Date -Format "yyyy-MM-dd HH:mm UTC")
+          $shortSha = $env:GITHUB_SHA.Substring(0, 7)
 
           Write-Host "Version:      $ver"
           Write-Host "Build Number: $buildNum"
+          Write-Host "Build Date:   $buildDate"
+          Write-Host "Commit:       $shortSha"
 
           # Stamp internal BuildNumber constant in MagnetarInfo.cs before compilation
           $content = $content -replace 'public const int BuildNumber = \d+;', "public const int BuildNumber = $buildNum;"
@@ -58,6 +63,8 @@ jobs:
           # Export outputs
           echo "version=$ver" >> $env:GITHUB_OUTPUT
           echo "build_number=$buildNum" >> $env:GITHUB_OUTPUT
+          echo "build_date=$buildDate" >> $env:GITHUB_OUTPUT
+          echo "short_sha=$shortSha" >> $env:GITHUB_OUTPUT
 
       - name: Restore NuGet dependencies
         run: dotnet restore "Magnetar Client/Magnetar Client.csproj"
@@ -101,18 +108,31 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: nightly
-          name: "Magnetar Client Nightly (Build ${{ steps.version.outputs.build_number }})"
+          name: "Nightly build ${{ steps.version.outputs.build_number }}"
           body: |
-            Automated nightly build for **Magnetar Client v${{ steps.version.outputs.version }}**.
-            - **Version**: `${{ steps.version.outputs.version }}`
-            - **Build Number**: `${{ steps.version.outputs.build_number }}`
-            - **Commit**: `${{ github.sha }}`
-            - **Branch**: `${{ github.ref_name }}`
+            Automatic build of the latest commit on `${{ github.ref_name }}`. It may be unstable. Stable versions are on the [releases page](https://github.com/Tproplay/Magnetar-Client/releases).
+
+            - Version: ${{ steps.version.outputs.version }} (build ${{ steps.version.outputs.build_number }})
+            - Loader: MelonLoader
+            - Game: Plants vs Zombies Fusion 4.0.5
+            - Commit: [${{ steps.version.outputs.short_sha }}](https://github.com/Tproplay/Magnetar-Client/commit/${{ github.sha }})
+            - Built: ${{ steps.version.outputs.build_date }}
+
+            ## Install
+
+            Extract `MagnetarClient-MelonLoader.zip` into your game folder so you end up with `Mods/Magnetar Client.dll` and `Mods/Magnetar Data/`.
+
+            Or put `Launch_Game.bat` next to `PlantsVsZombiesRH.exe` and drop the zip beside it. The script extracts it into `Mods` and starts the game.
+
+            ## Bugs
+
+            [Open an issue](https://github.com/Tproplay/Magnetar-Client/issues/new?template=bug_report.yml) and include the build number above.
           prerelease: true
           make_latest: false
           files: |
             MagnetarClient-MelonLoader.zip
             nightly-build.txt
+            Launch_Game.bat
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

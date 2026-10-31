@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -157,6 +157,15 @@ public abstract class Module
     }
 
     /// <summary>
+    /// Adds a collection of settings to the module. Call this in the constructor of your module with all the settings you want to add.
+    /// </summary>
+    /// <param name="settings">The collection of settings to add.</param>
+    public void AddSettings(IEnumerable<Setting> settings)
+    {
+        Settings.AddRange(settings);
+    }
+
+    /// <summary>
     /// Runs when the mod's language is changed.
     /// </summary>
     public virtual void OnLanguageChanged() { }
@@ -200,6 +209,19 @@ public abstract class Module
     public void CreateCategory(string name, bool defaultExpanded = true)
     {
         AddSettings(new CategorySetting(name, defaultExpanded));
+    }
+
+    /// <summary>
+    /// Creates a new Category containing the specified settings and automatically ends it.
+    /// </summary>
+    /// <param name="name">The display name of the category.</param>
+    /// <param name="settings">The collection of settings to add to the category.</param>
+    /// <param name="defaultExpanded">Whether the category is expanded by default.</param>
+    public void CreateCategory(string name, IEnumerable<Setting> settings, bool defaultExpanded = true)
+    {
+        AddSettings(new CategorySetting(name, defaultExpanded));
+        AddSettings(settings.ToArray());
+        EndCategory();
     }
 
     /// <summary>

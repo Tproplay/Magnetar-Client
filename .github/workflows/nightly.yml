@@ -145,7 +145,7 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          $summary = @"
+          $summary = @'
           ## Nightly Build Summary
           | Key | Value |
           | :--- | :--- |
@@ -156,5 +156,5 @@ jobs:
           | **Branch** | `${{ github.ref_name }}` |
           | **Commit** | `${{ github.sha }}` |
           | **Release Tag** | `nightly` |
-          "@
+          '@
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary

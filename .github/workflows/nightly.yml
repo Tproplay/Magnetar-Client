@@ -43,20 +43,12 @@ jobs:
               $ver = "4.0.3"
           }
 
-          # Extract SupportedGameVersion (e.g., "4.0.5")
-          if ($content -match 'public const string SupportedGameVersion = "(?<gameVer>[^"]+)";') {
-              $gameVer = $Matches['gameVer']
-          } else {
-              $gameVer = "4.0.5"
-          }
-
           # Nightly build number is GitHub Actions run number (1, 2, 3...)
           $buildNum = "${{ github.run_number }}"
           $buildDate = (Get-Date -Format "yyyy-MM-dd HH:mm UTC")
           $shortSha = $env:GITHUB_SHA.Substring(0, 7)
 
           Write-Host "Version:      $ver"
-          Write-Host "Game Version: $gameVer"
           Write-Host "Build Number: $buildNum"
           Write-Host "Build Date:   $buildDate"
           Write-Host "Commit:       $shortSha"
@@ -67,7 +59,6 @@ jobs:
 
           # Export outputs
           echo "version=$ver" >> $env:GITHUB_OUTPUT
-          echo "game_version=$gameVer" >> $env:GITHUB_OUTPUT
           echo "build_number=$buildNum" >> $env:GITHUB_OUTPUT
           echo "build_date=$buildDate" >> $env:GITHUB_OUTPUT
           echo "short_sha=$shortSha" >> $env:GITHUB_OUTPUT
@@ -120,7 +111,7 @@ jobs:
 
             - Version: ${{ steps.version.outputs.version }} (build ${{ steps.version.outputs.build_number }})
             - Loader: MelonLoader
-            - Game Version: ${{ steps.version.outputs.game_version }}
+            - Game: Plants vs Zombies Fusion 4.0.5
             - Commit: [${{ steps.version.outputs.short_sha }}](https://github.com/Tproplay/Magnetar-Client/commit/${{ github.sha }})
             - Built: ${{ steps.version.outputs.build_date }}
 
@@ -159,7 +150,6 @@ jobs:
           | Key | Value |
           | :--- | :--- |
           | **Version** | `${{ steps.version.outputs.version }}` |
-          | **Supported Game** | Plants vs Zombies Fusion `${{ steps.version.outputs.game_version }}` |
           | **Build Number** | `${{ steps.version.outputs.build_number }}` |
           | **Target** | MelonLoader (PC) |
           | **Configuration** | `Nightly_Melon` |

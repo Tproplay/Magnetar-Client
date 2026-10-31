@@ -106,6 +106,11 @@ public class Main
         SaveLoad.Load();
         Translator.EnsureInitialized();
 
+#if NIGHTLY
+        // 5. Check for nightly data-file updates in the background
+        NightlyUpdater.CheckAsync();
+#endif
+
         Api.Actions.Invoke_OnLateInitializeCore();
 
         DebugLogger.Msg("Magnetar Client Loaded!");

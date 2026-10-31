@@ -3,6 +3,7 @@
     <BuildType Name="Android" />
     <BuildType Name="Bepinex" />
     <BuildType Name="Melonloader" />
+    <BuildType Name="Nightly_melon" />
     <BuildType Name="Release_bepinex" />
     <BuildType Name="Release_melon" />
   </Configurations>

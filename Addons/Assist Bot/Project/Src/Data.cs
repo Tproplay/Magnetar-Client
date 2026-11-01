@@ -6,16 +6,16 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-#if MELONLOADER || BEPINEX
+#if ONLINE
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 #endif
 
-#if MELONLOADER || MELON_LOCAL
+#if MELONLOADER
 using Il2Cpp;
-#elif BEPINEX || BEPINEX_LOCAL
+#elif BEPINEX
 
 #endif
 
@@ -129,7 +129,7 @@ public static class RunProgressionTracker
 
 public static class AIService
 {
-#if MELONLOADER || BEPINEX
+#if ONLINE
     public const string ServerUrl = "https://magnetar-client.onrender.com/aiaddon";
     private const string TelemetryEndpoint = $"{ServerUrl}/api/telemetry/session";
     private const string ModelDownloadEndpoint = $"{ServerUrl}/api/model/download";
@@ -167,7 +167,7 @@ public static class AIService
     {
         if (!Directory.Exists(BaseAddonDir)) Directory.CreateDirectory(BaseAddonDir);
 
-#if MELONLOADER || BEPINEX
+#if ONLINE
         if (!Directory.Exists(SessionsDir)) Directory.CreateDirectory(SessionsDir);
 #endif
 
@@ -198,7 +198,7 @@ public static class AIService
         }
     }
 
-#if MELONLOADER || BEPINEX
+#if ONLINE
     /// <summary>
     /// Downloads the latest model from the server and refreshes the engine.
     /// </summary>

@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Il2CppInterop.Runtime;
 using Magnetar_Client;
 using Magnetar_Client.Modules;
@@ -11,15 +11,15 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Events;
 
-#if MELONLOADER || BEPINEX
+#if ONLINE
 using System.IO;
 using System.Threading.Tasks;
 #endif
 
-#if MELONLOADER || MELON_LOCAL
+#if MELONLOADER
 using Il2Cpp;
 using Il2CppGameLevel.RogueShooting;
-#elif BEPINEX || BEPINEX_LOCAL
+#elif BEPINEX
 using GameLevel.RogueShooting;
 #endif
 
@@ -42,7 +42,7 @@ public class AssistBot : Module
     public static AssistBot instance;
 
     // Mod data
-#if MELONLOADER || BEPINEX
+#if ONLINE
     public BoolSetting SendFeedback;
     public BoolSetting UpdateOnStart;
 
@@ -59,7 +59,7 @@ public class AssistBot : Module
     {
         instance = this;
 
-#if MELONLOADER || BEPINEX
+#if ONLINE
         CreateCategory("General");
 
         SendFeedback = new BoolSetting("Send feedback", true);
@@ -83,7 +83,7 @@ public class AssistBot : Module
 
     // Mod logic
 
-#if MELONLOADER || BEPINEX
+#if ONLINE
     public override void OnUpdate()
     {
         if (!Active) return;
@@ -144,7 +144,7 @@ public class AssistBot : Module
     [HarmonyPatch(typeof(ShootingManager))]
     public static class ShootingMgrPatch
     {
-#if MELONLOADER || BEPINEX
+#if ONLINE
         [HarmonyPostfix]
         [HarmonyPatch(nameof(ShootingManager.Start))]
         public static void StartPostfix()
@@ -416,7 +416,7 @@ public class AssistBot : Module
                         {
                             CancelActiveAutoPick();
 
-#if MELONLOADER || BEPINEX
+#if ONLINE
                             if (instance.SendFeedback != null && instance.SendFeedback.Value)
                             {
                                 AIService.RecordSession(allRecords, capturedIndex);
@@ -514,7 +514,7 @@ public class AssistBot : Module
         }
     }
 
-#if MELONLOADER || BEPINEX
+#if ONLINE
     [HarmonyPatch(typeof(PauseMenu_Btn))]
     public static class PauseMenuPatch
     {

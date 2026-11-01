@@ -1,12 +1,12 @@
-﻿
+
 using System;
 using System.Reflection;
 using UnityEngine;
 
-#if MELONLOADER || MELON_LOCAL
+#if MELONLOADER
 using Il2CppTMPro;
 using MelonLoader;
-#elif BEPINEX || BEPINEX_LOCAL
+#elif BEPINEX
 using TMPro;
 #endif
 

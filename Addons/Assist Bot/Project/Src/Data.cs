@@ -7,7 +7,9 @@ using System.IO;
 using UnityEngine;
 
 #if ONLINE
+using System.Net;
 using System.Net.Http;
+using System.Net.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -140,7 +142,64 @@ public static class AIService
 
     private static string GetResolvedModSecret() => SecretsProvider.GetModSecret();
 
-    private static readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(90) };
+    private static readonly HttpClient _httpClient = CreateHttpClient();
+
+    private static HttpClient CreateHttpClient()
+    {
+        try
+        {
+            // Force TLS 1.2 and TLS 1.3 on Android/Unity runtimes
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
+
+            // Global ServicePointManager certificate verification fallback for Android Mono / IL2CPP
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, errors) =>
+            {
+                if (errors == SslPolicyErrors.None)
+                    return true;
+
+                if (sender is HttpWebRequest req && req.RequestUri != null &&
+                    req.RequestUri.Host.EndsWith("onrender.com", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                if (cert != null && cert.Subject.IndexOf("onrender.com", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+
+                return false;
+            };
+        }
+        catch { }
+
+        var handler = new HttpClientHandler
+        {
+            // Fix for Android & modded IL2CPP environments where system root CA certificates
+            // are not accessible to the .NET/Mono runtime, causing "SSL connection could not be established".
+            ServerCertificateCustomValidationCallback = (request, cert, chain, errors) =>
+            {
+                if (errors == SslPolicyErrors.None)
+                    return true;
+
+                // Validate request destination
+                if (request?.RequestUri != null &&
+                    request.RequestUri.Host.EndsWith("onrender.com", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                if (cert != null && cert.Subject.IndexOf("onrender.com", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+
+                return request == null;
+            }
+        };
+
+        return new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(90) };
+    }
 
     private static string SessionsDir => Path.Combine(BaseAddonDir, "Sessions");
 
@@ -246,7 +305,8 @@ public static class AIService
         }
         catch (Exception ex)
         {
-            Magnetar_Logger.DebugLogger.Warning($"[Assist Bot] Could not reach server for model sync: {ex.Message}");
+            string detail = ex.InnerException != null ? $"{ex.Message} ({ex.InnerException.Message})" : ex.Message;
+            Magnetar_Logger.DebugLogger.Warning($"[Assist Bot] Could not reach server for model sync: {detail}");
         }
     }
 
@@ -341,7 +401,8 @@ public static class AIService
         }
         catch (Exception ex)
         {
-            Magnetar_Logger.DebugLogger.Error($"[Assist Bot] Telemetry upload failed: {ex.Message}");
+            string detail = ex.InnerException != null ? $"{ex.Message} ({ex.InnerException.Message})" : ex.Message;
+            Magnetar_Logger.DebugLogger.Error($"[Assist Bot] Telemetry upload failed: {detail}");
             return false;
         }
     }

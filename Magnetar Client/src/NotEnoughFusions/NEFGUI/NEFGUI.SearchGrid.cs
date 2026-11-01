@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Core;
+using Magnetar_Client.Core;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using UnityEngine;
@@ -189,7 +189,7 @@ public static partial class NEFGUI
 #if ANDROID
                     if (!_hasTriggeredHold && e.button == 0)
                     {
-                        if (showUsagesView) UIAnimationHelper.TriggerSubWindowTransition();
+                        if (showUsagesView) AnimationHandler.SwitchView(NEFManager.AnimationGroup.Group, NEFManager.AnimationGroup.ViewTree);
                         showUsagesView = false;
                         NEFData.GeneratePyramid(entity);
                         e.Use();

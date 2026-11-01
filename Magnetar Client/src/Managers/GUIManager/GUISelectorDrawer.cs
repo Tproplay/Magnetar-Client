@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI;
+using Magnetar_Client.UI;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.WindowDrawing;
 using UnityEngine;
@@ -71,7 +71,7 @@ GUIManager.S(BaseSelectorHeight));
         DrawSetting.DrawMultiSelectWindow(multiSelectRect, settingToDraw, GUIManager.OnClose);
 
 #if ANDROID
-        float titleHeight = Config.S(25f) * 1.30f;
+        float titleHeight = GUIManager.S(25f) * 1.30f;
 #else
         float titleHeight = GUIManager.S(25f);
 #endif

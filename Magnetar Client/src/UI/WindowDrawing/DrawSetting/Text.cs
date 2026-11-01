@@ -117,7 +117,7 @@ public static partial class DrawSetting
         text ??= "";
 
 #if ANDROID
-        if (activeTextFieldId == controlId)
+        if (ActiveTextFieldId == controlId)
         {
             if (_activeMobileKeyboardId != controlId || _mobileKeyboard == null)
             {
@@ -134,7 +134,7 @@ public static partial class DrawSetting
                     _mobileKeyboard.status == TouchScreenKeyboard.Status.Canceled ||
                     !_mobileKeyboard.active)
                 {
-                    activeTextFieldId = -1;
+                    ActiveTextFieldId = -1;
                     _activeMobileKeyboardId = -1;
                     _mobileKeyboard = null;
                 }

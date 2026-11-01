@@ -41,7 +41,7 @@
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Android'">
 		<OutputPath>bin\Android\</OutputPath>
-		<DefineConstants>$(DefineConstants);RELEASE_BEPINEX</DefineConstants>
+		<DefineConstants>$(DefineConstants);BEPINEX;RELEASE_BEPINEX</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup>

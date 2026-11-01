@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
+using Magnetar_Client.Modules;
+using Magnetar_Client.UI;
 
 namespace Magnetar_Client.Core.ModuleManager_;
 
@@ -45,7 +47,7 @@ public static class MobileInputHandler
         if (_pressedModule != null && !_hasTriggeredLongPress)
         {
             float moveDist = Vector2.Distance(currentEvent.mousePosition, _pressStartScreenPos);
-            if (moveDist > Config.S(22f))
+            if (moveDist > GUIManager.S(22f))
             {
                 _pressedModule = null;
             }
@@ -65,7 +67,7 @@ public static class MobileInputHandler
                 if (!_hasTriggeredLongPress)
                 {
                     float moveDist = Vector2.Distance(currentEvent.mousePosition, _pressStartScreenPos);
-                    if (moveDist <= Config.S(22f) && VanillaMode.instance.IsAllowed(_pressedModule))
+                    if (moveDist <= GUIManager.S(22f) && VanillaMode.instance.IsAllowed(_pressedModule))
                     {
                         _pressedModule.Toggle();
                     }

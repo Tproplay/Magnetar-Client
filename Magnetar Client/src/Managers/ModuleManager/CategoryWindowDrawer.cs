@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Modules;
+using Magnetar_Client.Modules;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using System;
@@ -319,7 +319,7 @@ public static class CategoryWindowDrawer
         else if (e.type == EventType.MouseDrag && _touchStartY.ContainsKey(category))
         {
             float deltaY = _touchStartY[category] - e.mousePosition.y;
-            if (Mathf.Abs(deltaY) > Config.S(8f))
+            if (Mathf.Abs(deltaY) > GUIManager.S(8f))
             {
                 _isDragging[category] = true;
                 MobileInputHandler.Reset();

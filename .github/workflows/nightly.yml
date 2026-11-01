@@ -44,7 +44,7 @@ jobs:
           }
 
           # Extract supported game version (falls back if the constant is missing)
-          if ($content -match 'public const string GameVersion = "(?<gv>[^"]+)";') {
+          if ($content -match 'public const string SupportedGameVersion = "(?<gv>[^"]+)";') {
               $gameVer = $Matches['gv']
           } else {
               $gameVer = "4.0.5"

@@ -54,6 +54,14 @@ public class BindSetting : Setting
             }
         }
     }
+    /// <summary>
+    /// Alias for <see cref="BindKeys"/>
+    /// </summary>
+    public List<KeyCode> Value
+    {
+        get => BindKeys;
+        set => BindKeys = value;
+    }
 
     /// <summary>
     /// Initializes a new instance of <see cref="BindSetting"/> with a name and optional default key list.

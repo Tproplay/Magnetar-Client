@@ -43,6 +43,13 @@ jobs:
               $ver = "4.0.3"
           }
 
+          # Extract supported game version (falls back if the constant is missing)
+          if ($content -match 'public const string GameVersion = "(?<gv>[^"]+)";') {
+              $gameVer = $Matches['gv']
+          } else {
+              $gameVer = "4.0.5"
+          }
+
           # Nightly build number is GitHub Actions run number (1, 2, 3...)
           $buildNum = "${{ github.run_number }}"
           $buildDate = (Get-Date -Format "yyyy-MM-dd HH:mm UTC")
@@ -111,7 +118,7 @@ jobs:
 
             - Version: ${{ steps.version.outputs.version }} (build ${{ steps.version.outputs.build_number }})
             - Loader: MelonLoader
-            - Game: Plants vs Zombies Fusion 4.0.5
+            - Game: Plants vs Zombies Fusion ${{ steps.version.outputs.game_version }}
             - Commit: [${{ steps.version.outputs.short_sha }}](https://github.com/Tproplay/Magnetar-Client/commit/${{ github.sha }})
             - Built: ${{ steps.version.outputs.build_date }}
 

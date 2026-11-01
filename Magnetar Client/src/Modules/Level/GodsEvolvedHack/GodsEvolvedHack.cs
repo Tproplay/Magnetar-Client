@@ -97,8 +97,8 @@ public partial class GodsEvolvedHack : Module
         QualitySilverWeight = CreateWeightSetting("Silver Quality Weight", Quality.silver, 50).Setting;
         QualityGoldtWeight = CreateWeightSetting("Gold Quality Weight", Quality.gold, 50).Setting;
         QualityDiamondWeight = CreateWeightSetting("Diamond Quality Weight", Quality.diamond, 50).Setting;
+        QualityIridescentWeight = CreateWeightSetting("Titanium Quality Weight", Quality.iridescent, 0).Setting;
         QualityCurseWeight = CreateWeightSetting("Curse Quality Weight", Quality.curse, 0).Setting;
-        QualityIridescentWeight = CreateWeightSetting("Iridescent Quality Weight", Quality.iridescent, 0).Setting;
         QualityRandomWeight = CreateWeightSetting("Random Quality Weight", Quality.random, 0).Setting;
 
         AddSettings(
@@ -106,8 +106,8 @@ public partial class GodsEvolvedHack : Module
             QualitySilverWeight,
             QualityGoldtWeight,
             QualityDiamondWeight,
-            QualityCurseWeight,
             QualityIridescentWeight,
+            QualityCurseWeight,
             QualityRandomWeight
         );
         EndCategory();
@@ -157,7 +157,7 @@ public partial class GodsEvolvedHack : Module
         EndCategory();
 
         CreateCategory("Combat & Stats");
-        UncrashableSetting = CreateLiveBoolSetting("Uncrashable", false,
+        UncrashableSetting = CreateLiveBoolSetting("Uncrushable", false,
             m => m.uncrashable, (m, v) => m.uncrashable = v).Setting;
         ShieldHealthSetting = CreateLiveFloatSetting("Shield Health", 0, 100000, 0, 2, 0, float.MaxValue,
             m => m.shieldHealth, (m, v) => m.shieldHealth = v).Setting;
@@ -179,11 +179,11 @@ public partial class GodsEvolvedHack : Module
         luckyMultiplierLive = CreateLiveFloatSetting("Lucky Multiplier", 0, 10, 1, 2, 0, 1000,
             m => m.LuckyMultiplier, null);
         LuckyMultiplierSetting = luckyMultiplierLive.Setting;
-        MaxLuckySetting = CreateLiveFloatSetting("Max Lucky", 0, 100, 10, 2, 0, 10000,
+        MaxLuckySetting = CreateLiveFloatSetting("Max Luck Points", 0, 100, 10, 2, 0, 10000,
             m => m.maxLucky, (m, v) => m.maxLucky = v).Setting;
-        MinLuckySetting = CreateLiveFloatSetting("Min Lucky", -100, 100, -10, 2, -10000, 10000,
+        MinLuckySetting = CreateLiveFloatSetting("Min Luck Points", -100, 100, -10, 2, -10000, 10000,
             m => m.minLucky, (m, v) => m.minLucky = v).Setting;
-        LuckyShowSetting = CreateLiveBoolSetting("Lucky Show", false,
+        LuckyShowSetting = CreateLiveBoolSetting("Show Luck Point", false,
             m => m.luckyShow, (m, v) => m.luckyShow = v).Setting;
         PityThresholdSetting = CreateLiveFloatSetting("Pity Threshold", 0, 100, 10, 0, 0, 10000,
             m => m.pityThreshold, (m, v) => m.pityThreshold = (int)v).Setting;

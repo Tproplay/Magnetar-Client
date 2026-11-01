@@ -8,7 +8,7 @@ namespace Magnetar_Client.Core;
 
 public static class MobileMenuUI
 {
-    private static Rect _btnRect = new(40f, 200f, 250f, 250f);
+    private static Rect _btnRect = new(40f, 200f, 175f, 175f);
     private static Vector2 _dragStartMousePos;
     private static Vector2 _dragStartBtnPos;
     private static bool _isPointerDown;

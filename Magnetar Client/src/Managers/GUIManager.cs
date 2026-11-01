@@ -161,7 +161,11 @@ public static class GUIManager
 
         RefreshThemeOptions();
 
+#if ANDROID
+        if (ScaleSetting.Value <= 0.1f) ScaleSetting.Value = 1.5f;
+#else
         if (ScaleSetting.Value <= 0.1f) ScaleSetting.Value = 1.0f;
+#endif
         if (ElementScaleSetting.Value <= 0.1f) ElementScaleSetting.Value = 1.0f;
 
         ServiceRegistry.Register(new GUIManagerService());
@@ -199,7 +203,13 @@ public static class GUIManager
             ThemeManager.Theme = val;
             RefreshThemeOptions();
         }, ThemeData.InternalDefaultTheme.Name);
-        SaveLoad.RegisterEntry("GUIScale", () => ScaleSetting.Value, val => ScaleSetting.Value = val, 1.0f);
+        SaveLoad.RegisterEntry("GUIScale", () => ScaleSetting.Value, val => ScaleSetting.Value = val,
+#if ANDROID
+            1.5f
+#else
+            1.0f
+#endif
+            );
         SaveLoad.RegisterEntry("ElementScale", () => ElementScaleSetting.Value, val => ElementScaleSetting.Value = val, 1.0f);
         SaveLoad.RegisterEntry("ShowMainMenuCredits", () => ShowMainMenuCredits, val => ShowMainMenuCredits = val, true);
     }

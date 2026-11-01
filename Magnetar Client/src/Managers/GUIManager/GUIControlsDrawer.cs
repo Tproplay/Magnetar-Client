@@ -60,7 +60,7 @@ GUIManager.S(BaseHeight));
         float elemH = GUIManager.elementHeight;
 
 #if ANDROID
-        float headerHeight = Config.S(26f) * 1.30f;
+        float headerHeight = GUIManager.S(26f) * 1.30f;
 #else
         float headerHeight = GUIManager.S(26f);
 #endif

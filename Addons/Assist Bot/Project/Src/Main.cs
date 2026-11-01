@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -25,7 +25,7 @@ public class Main : IMagnetarAddon
 
     private static void OnLateInitializeCore()
     {
-#if MELONLOADER || BEPINEX
+#if ONLINE
         if (AssistBot.instance == null)
             return;
         

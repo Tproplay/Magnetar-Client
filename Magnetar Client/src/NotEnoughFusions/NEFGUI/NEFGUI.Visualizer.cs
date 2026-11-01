@@ -1,8 +1,9 @@
-﻿using Magnetar_Client.Core;
+using Magnetar_Client.Core;
 using Magnetar_Client.UI;
 using UnityEngine;
 using static Magnetar_Client.UI.WindowDrawing.MiscDrawing;
 using static Magnetar_Client.Utils.Translator;
+using static Magnetar_Client.NEF.Data.NEFRecipes;
 
 namespace Magnetar_Client.NEF;
 
@@ -29,7 +30,7 @@ public static partial class NEFGUI
             Vector2 currentScreenPos = GUIUtility.GUIToScreenPoint(e.mousePosition);
             float moveDist = Vector2.Distance(currentScreenPos, _holdStartScreenPos);
 
-            if (moveDist > Config.S(20f))
+            if (moveDist > GUIManager.S(20f))
             {
                 _heldEntity = null;
             }
@@ -37,7 +38,7 @@ public static partial class NEFGUI
             {
                 _hasTriggeredHold = true;
                 showUsagesView = true;
-                UIAnimationHelper.TriggerSubWindowTransition();
+                AnimationHandler.SwitchView(NEFManager.AnimationGroup.Group, NEFManager.AnimationGroup.ViewUsages);
                 NEFData.GenerateUsagesView(_heldEntity.Value);
                 _heldEntity = null;
                 e.Use();
@@ -106,8 +107,8 @@ public static partial class NEFGUI
 #if ANDROID
         if (Input.touchCount >= 2)
         {
-            Touch t0 = Input.GetTouch(0);
-            Touch t1 = Input.GetTouch(1);
+            UnityEngine.Touch t0 = Input.GetTouch(0);
+            UnityEngine.Touch t1 = Input.GetTouch(1);
 
             Vector2 p0 = new(t0.position.x, Screen.height - t0.position.y);
             Vector2 p1 = new(t1.position.x, Screen.height - t1.position.y);
@@ -133,7 +134,7 @@ public static partial class NEFGUI
 
                         Vector2 pinchCenter = (p0 + p1) * 0.5f;
                         float originX = pyramidBoxRect.x + (pyramidBoxRect.width / 2f);
-                        float originY = pyramidBoxRect.y + Config.S(60f);
+                        float originY = pyramidBoxRect.y + GUIManager.S(60f);
 
                         float focusX = (pinchCenter.x - originX - pyramidPan.x) / oldZoom;
                         float focusY = (pinchCenter.y - originY - pyramidPan.y) / oldZoom;

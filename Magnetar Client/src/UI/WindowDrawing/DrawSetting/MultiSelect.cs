@@ -95,7 +95,7 @@ public static partial class DrawSetting
         var options = activeMultiSelect.Options;
 
 #if ANDROID
-        float titleHeight = Config.S(25f) * 1.30f;
+        float titleHeight = GUIManager.S(25f) * 1.30f;
 #else
         float titleHeight = GUIManager.S(25f);
 #endif
@@ -344,7 +344,7 @@ public static partial class DrawSetting
 #if ANDROID
             if (_isMobileHolding && !_mobileShiftDragActive)
             {
-                if (Vector2.Distance(mousePos, _mobileHoldStartPos) > Config.S(12f))
+                if (Vector2.Distance(mousePos, _mobileHoldStartPos) > GUIManager.S(12f))
                 {
                     _isMobileHolding = false;
                 }
@@ -431,7 +431,7 @@ public static partial class DrawSetting
             {
                 if (e.type == EventType.MouseDrag && isMouseInsideList && !_isListSwiping)
                 {
-                    if (Vector2.Distance(mousePos, _listTouchStart) > Config.S(10f))
+                    if (Vector2.Distance(mousePos, _listTouchStart) > GUIManager.S(10f))
                     {
                         _isListSwiping = true;
                         _isMobileHolding = false;

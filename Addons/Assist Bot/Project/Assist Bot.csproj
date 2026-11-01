@@ -15,16 +15,24 @@
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 	
-    <PropertyGroup>
-        <DefineConstants>$(Configuration.ToUpper())</DefineConstants>
-    </PropertyGroup>
-
+    <!-- Loader Target Constants & Output Paths -->
     <PropertyGroup Condition="$(Configuration.Contains('MELON')) or $(Configuration.Contains('Melon'))">
         <OutputPath>bin\Melonloader\$(Configuration)\</OutputPath>
+        <DefineConstants>$(DefineConstants);MELONLOADER</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="$(Configuration.Contains('BepInEx')) or $(Configuration.Contains('BEPINEX'))">
         <OutputPath>bin\BepInEx\$(Configuration)\</OutputPath>
+        <DefineConstants>$(DefineConstants);BEPINEX</DefineConstants>
+    </PropertyGroup>
+
+    <!-- Mode Constants: Online vs Offline (Local) -->
+    <PropertyGroup Condition="$(Configuration.Contains('LOCAL')) or $(Configuration.Contains('Local'))">
+        <DefineConstants>$(DefineConstants);OFFLINE</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="!$(Configuration.Contains('LOCAL')) and !$(Configuration.Contains('Local'))">
+        <DefineConstants>$(DefineConstants);ONLINE</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>

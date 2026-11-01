@@ -136,7 +136,7 @@ internal static class SettingsWindowDrawer
         float windowWidth = _settingsPositions[mod].width;
 
 #if ANDROID
-        float headerHeight = Config.S(26f) * 1.30f;
+        float headerHeight = GUIManager.S(26f) * 1.30f;
 #else
         float headerHeight = GUIManager.S(26f);
 #endif

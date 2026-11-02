@@ -63,7 +63,6 @@ Game-Files/
 ├── MelonLoader/
 ├── Mods/                    <-- (Paste Mods file in here)
 │   ├── Magnetar Data/
-│   ├── Magnetar Translation/
 │   └── Magnetar Client.dll
 ├── PlantsVsZombiesRH_Data/
 ├── UserData/
@@ -94,7 +93,6 @@ After installing the files, your game directory structure should look like this:
     │   ├── core/
     │   └── plugins/                <-- (Paste plugins file in here)
     │       ├── Magnetar Data/
-    │       ├── Magnetar Translation/
     │       ├── DiscordRPC.dll
     │       ├── Magnetar Client.dll
     │       └── Newtonsoft.Json.dll

@@ -1,0 +1,121 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <RootNamespace>AudioAddon</RootNamespace>
+        <AssemblyName>AudioAddon</AssemblyName>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <Configurations>MelonLoader;BepInEx</Configurations>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <!-- Reference directory discovery:
+             1. Local References/ inside this project if present
+             2. Shared Addons References fallback
+             3. Shared Magnetar Client References fallback -->
+        <RefDir Condition="Exists('References\Melonloader\0Harmony.dll')">References</RefDir>
+        <RefDir Condition="'$(RefDir)' == '' and Exists('..\..\Assist Bot\Project\References\Melonloader\0Harmony.dll')">..\..\Assist Bot\Project\References</RefDir>
+        <RefDir Condition="'$(RefDir)' == ''">..\..\..\Magnetar Client\References</RefDir>
+    </PropertyGroup>
+
+    <!-- Loader Target Constants & Output Paths -->
+    <PropertyGroup Condition="$(Configuration.Contains('MELON')) or $(Configuration.Contains('Melon'))">
+        <OutputPath>bin\Melonloader\$(Configuration)\</OutputPath>
+        <DefineConstants>$(DefineConstants);MELONLOADER</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$(Configuration.Contains('BepInEx')) or $(Configuration.Contains('BEPINEX'))">
+        <OutputPath>bin\BepInEx\$(Configuration)\</OutputPath>
+        <DefineConstants>$(DefineConstants);BEPINEX</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="References\**" />
+        <EmbeddedResource Remove="References\**" />
+        <None Remove="References\**" />
+    </ItemGroup>
+
+    <!-- Shared Core References -->
+    <ItemGroup>
+        <Reference Include="0Harmony">
+            <HintPath Condition="Exists('$(RefDir)\Melonloader\0Harmony.dll')">$(RefDir)\Melonloader\0Harmony.dll</HintPath>
+            <HintPath Condition="!Exists('$(RefDir)\Melonloader\0Harmony.dll')">$(RefDir)\Bepinex\0Harmony.dll</HintPath>
+        </Reference>
+        <Reference Include="Magnetar Client">
+            <HintPath Condition="Exists('$(RefDir)\Magnetar Client.dll')">$(RefDir)\Magnetar Client.dll</HintPath>
+            <HintPath Condition="!Exists('$(RefDir)\Magnetar Client.dll')">..\..\Assist Bot\Project\References\Magnetar Client.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <!-- MelonLoader Engine References -->
+    <ItemGroup Condition="$(Configuration.Contains('MELON')) or $(Configuration.Contains('Melon'))">
+        <Reference Include="MelonLoader">
+            <HintPath>$(RefDir)\Melonloader\MelonLoader.dll</HintPath>
+        </Reference>
+        <Reference Include="Il2CppInterop.Common">
+            <HintPath>$(RefDir)\Melonloader\Il2CppInterop.Common.dll</HintPath>
+        </Reference>
+        <Reference Include="Il2CppInterop.Runtime">
+            <HintPath>$(RefDir)\Melonloader\Il2CppInterop.Runtime.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>$(RefDir)\Melonloader\Il2Cpp\Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="Il2Cppmscorlib">
+            <HintPath>$(RefDir)\Melonloader\Il2Cpp\Il2Cppmscorlib.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine">
+            <HintPath>$(RefDir)\Melonloader\Il2Cpp\UnityEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>$(RefDir)\Melonloader\Il2Cpp\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+            <HintPath>$(RefDir)\Melonloader\Il2Cpp\UnityEngine.IMGUIModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>$(RefDir)\Melonloader\Il2Cpp\UnityEngine.UI.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>$(RefDir)\Melonloader\Il2Cpp\Unity.TextMeshPro.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <!-- BepInEx Engine References -->
+    <ItemGroup Condition="$(Configuration.Contains('BepInEx')) or $(Configuration.Contains('BEPINEX'))">
+        <Reference Include="BepInEx.Core">
+            <HintPath>$(RefDir)\Bepinex\BepInEx.Core.dll</HintPath>
+        </Reference>
+        <Reference Include="BepInEx.Unity.IL2CPP">
+            <HintPath>$(RefDir)\Bepinex\BepInEx.Unity.IL2CPP.dll</HintPath>
+        </Reference>
+        <Reference Include="Il2CppInterop.Runtime">
+            <HintPath>$(RefDir)\Bepinex\Il2CppInterop.Runtime.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>$(RefDir)\Bepinex\Il2Cpp\Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="Il2Cppmscorlib">
+            <HintPath>$(RefDir)\Bepinex\Il2Cpp\Il2Cppmscorlib.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine">
+            <HintPath>$(RefDir)\Bepinex\Il2Cpp\UnityEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>$(RefDir)\Bepinex\Il2Cpp\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+            <HintPath>$(RefDir)\Bepinex\Il2Cpp\UnityEngine.IMGUIModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>$(RefDir)\Bepinex\Il2Cpp\UnityEngine.UI.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>$(RefDir)\Bepinex\Il2Cpp\Unity.TextMeshPro.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+</Project>

@@ -46,39 +46,14 @@ public class Main : IMagnetarAddon
 
     private void SafePatchAll()
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        Type[] types;
+        var patchInfo = HarmonyManager.HarmonyPatchAll(Assembly.GetExecutingAssembly(), Magnetar_Client.Core.Main.HarmonyInstance);
 
-        try
+        foreach (var failure in patchInfo.Failures)
         {
-            types = assembly.GetTypes();
-        }
-        catch (ReflectionTypeLoadException ex)
-        {
-            types = ex.Types.Where(t => t != null).ToArray();
+            MagnetarApi.LogWarning($"[Assist Bot] Failed to apply patch '{failure.ClassName}': {failure.Exception.Message}");
         }
 
-        int patchedClasses = 0;
-        foreach (var type in types)
-        {
-            if (type == null) continue;
-
-            try
-            {
-                var processor = Magnetar_Client.Core.Main.HarmonyInstance.CreateClassProcessor(type);
-                var patches = processor.Patch();
-                if (patches != null && patches.Count > 0)
-                {
-                    patchedClasses++;
-                }
-            }
-            catch (Exception ex)
-            {
-                MagnetarApi.LogWarning($"[Assist Bot] Failed to apply patch '{type.FullName}': {ex.Message}");
-            }
-        }
-
-        MagnetarApi.LogMsg($"[Assist Bot] Harmony initialized: {patchedClasses} classes successfully patched.");
+        MagnetarApi.LogMsg($"[Assist Bot] Harmony initialized: {patchInfo.SuccessCount} classes successfully patched.");
     }
 
     public void OnUnload() { }

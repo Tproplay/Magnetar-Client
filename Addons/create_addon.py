@@ -4,10 +4,10 @@ Magnetar Client Addon Project Generator
 Scaffolds production-ready Magnetar Client addon projects with dual
 MelonLoader & BepInEx support, safe Harmony patching, and reference management.
 
-Supported Templates:
-  1. General     - Full addon: Main (OnLoad patching) + Module + HUD element + Patch file
-  2. Module      - Feature addon: Main + Module (constructor patching) + Patch file
-  3. HUD Element - Display widget: Main + HUD element (constructor patching) + Patch file
+# Supported Templates:
+#   1. General     - Full addon: Main (with IMagnetarAddon & OnLoad patching) + Module + HUD + Patch
+#   2. Module      - Feature addon: Module (constructor patching) + Patch file (no IMagnetarAddon)
+#   3. HUD Element - Display widget: HUD (constructor patching) + Patch file (no IMagnetarAddon)
 """
 
 import argparse
@@ -257,38 +257,6 @@ public class Main : IMagnetarAddon
 }}
 """
 
-# Main.cs for Module & HUD Templates (Patching handled in Module / HUD constructor)
-MAIN_CS_DELEGATED_TEMPLATE = """using Magnetar_Client.Api;
-using Magnetar_Client.Utils;
-
-namespace {safe_name};
-
-/// <summary>
-/// Main addon lifecycle entrypoint discovered and loaded by Magnetar Client.
-/// </summary>
-public class Main : IMagnetarAddon
-{{
-    public static Main Instance {{ get; private set; }}
-
-    public string Name => "{display_name}";
-    public string Version => "1.0.0";
-    public string Author => "{author}";
-
-    public Main()
-    {{
-        Instance = this;
-    }}
-
-    public void OnLoad()
-    {{
-        Magnetar_Logger.DebugLogger.Msg($"[{{Name}}] Loaded");
-    }}
-
-    public void OnUnload()
-    {{
-    }}
-}}
-"""
 
 # Module with Harmony patching inside the constructor (for 'module' template)
 MODULE_CS_WITH_PATCHING_TEMPLATE = """using Magnetar_Client.Api;
@@ -656,8 +624,8 @@ def scaffold_addon(
     props_dir = project_dir / "Properties"
     refs_dir = project_dir / "References"
 
-    if addon_dir.exists():
-        raise FileExistsError(f"Directory already exists: {addon_dir}")
+    if addon_dir.exists() and any(addon_dir.iterdir()):
+        raise FileExistsError(f"Directory already exists and is not empty: {addon_dir}")
 
     print(f"\n[+] Scaffolding '{display_name}' ({safe_name}) [Template: {template}] in {addon_dir}...")
     src_dir.mkdir(parents=True, exist_ok=True)
@@ -691,10 +659,9 @@ def scaffold_addon(
     )
     print("  [+] Created Project/Properties/AssemblyInfo.cs")
 
-    # 4. Main.cs
-    main_cs_path = src_dir / "Main.cs"
+    # 4. Main.cs (Only included in 'general' template with IMagnetarAddon)
     if template == "general":
-        # General: Harmony patching initialized in OnLoad()
+        main_cs_path = src_dir / "Main.cs"
         main_cs_path.write_text(
             MAIN_CS_GENERAL_TEMPLATE.format(
                 display_name=display_name,
@@ -703,18 +670,7 @@ def scaffold_addon(
             ),
             encoding="utf-8",
         )
-        print("  [+] Created Project/Src/Main.cs (with OnLoad Harmony patching)")
-    else:
-        # Module / HUD: Harmony patching delegated to Module / HUD constructor
-        main_cs_path.write_text(
-            MAIN_CS_DELEGATED_TEMPLATE.format(
-                display_name=display_name,
-                safe_name=safe_name,
-                author=author,
-            ),
-            encoding="utf-8",
-        )
-        print("  [+] Created Project/Src/Main.cs")
+        print("  [+] Created Project/Src/Main.cs (with IMagnetarAddon & OnLoad Harmony patching)")
 
     # 5. Module File
     if template == "general":
@@ -827,9 +783,9 @@ def interactive_prompt() -> tuple[str, str, str, bool]:
     author = author_input if author_input else default_author
 
     print("\nSelect Template:")
-    print("  [1] General     (Main with OnLoad patching + Module + HUD + Patch file) [Default]")
-    print("  [2] Module      (Main + Module with constructor patching + Patch file)")
-    print("  [3] HUD Element (Main + HUD Element with constructor patching + Patch file)")
+    print("  [1] General     (Full addon: IMagnetarAddon + Module + HUD + Patch file) [Default]")
+    print("  [2] Module      (Module with constructor patching + Patch file, no IMagnetarAddon)")
+    print("  [3] HUD Element (HUD Element with constructor patching + Patch file, no IMagnetarAddon)")
     choice = input("Choose template [1-3, default: 1]: ").strip()
 
     template_map = {"1": "general", "2": "module", "3": "hud"}

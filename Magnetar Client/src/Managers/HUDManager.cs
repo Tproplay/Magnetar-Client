@@ -34,6 +34,7 @@ public static class HUDManager
     public static bool forceShow { get; set; }
     public static bool IsSelectingElements => AnimationHandler.GetViewAlpha(Animation.Group, Animation.ViewSelector) > 0.001f;
     public static bool showBackground;
+    public static bool useRgbFontColor;
 
     private const float BaseElementHeight = 25f;
     public static float elementHeight => GUIManager.S(BaseElementHeight);
@@ -292,6 +293,7 @@ public static class HUDManager
             {
                 Enabled = HUDManager.Enabled,
                 ShowBackground = HUDManager.showBackground,
+                UseRgbFontColor = HUDManager.useRgbFontColor,
                 SelectedElements = HUDRenderer.HudToggles?.SelectedValues?.ToList() ?? new List<int>()
             };
 
@@ -316,6 +318,9 @@ public static class HUDManager
             else if (token["HudEnabled"] != null) HUDManager.Enabled = token["HudEnabled"].Value<bool>();
 
             if (token["ShowBackground"] != null) HUDManager.showBackground = token["ShowBackground"].Value<bool>();
+
+            if (token["UseRgbFontColor"] != null) HUDManager.useRgbFontColor = token["UseRgbFontColor"].Value<bool>();
+            else if (token["RgbFontColor"] != null) HUDManager.useRgbFontColor = token["RgbFontColor"].Value<bool>();
 
             // 2. Selected Elements
             JToken selectedToken = token["SelectedElements"] ?? token["SelectedHudElements"];
@@ -348,6 +353,7 @@ public static class HUDManager
         {
             HUDManager.Enabled = true;
             HUDManager.showBackground = false;
+            HUDManager.useRgbFontColor = false;
         }
     }
 
@@ -355,6 +361,7 @@ public static class HUDManager
     {
         public bool Enabled = true;
         public bool ShowBackground;
+        public bool UseRgbFontColor;
         public List<int> SelectedElements = new();
         public Dictionary<string, SaveLoadData.SimpleRect> Positions = new();
     }

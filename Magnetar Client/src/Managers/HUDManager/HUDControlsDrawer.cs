@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI;
+using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using UnityEngine;
 using static Magnetar_Client.Utils.Translator;
@@ -13,8 +13,8 @@ public static class HUDControlsDrawer
     public static Rect WindowRect = new(
         (ClientConfig.NativeWidth - GUIManager.S(BaseWidth)) / 2f,
         (ClientConfig.NativeHeight - GUIManager.S(BaseHeight)) / 2f,
-GUIManager.S(BaseWidth),
-GUIManager.S(BaseHeight));
+        GUIManager.S(BaseWidth),
+        GUIManager.S(BaseHeight));
 
     private static GUI.WindowFunction _cachedControlsDelegate;
     private static GUI.WindowFunction ControlsDelegate => _cachedControlsDelegate ??=
@@ -126,6 +126,24 @@ GUIManager.S(BaseHeight));
         if (enabledHover && e.type == EventType.MouseDown && e.button == 0)
         {
             HUDManager.Enabled = !HUDManager.Enabled;
+            e.Use();
+        }
+
+        y += elemH + GUIManager.S(5f);
+
+        GUI.Label(new Rect(indent, y, width * 0.45f, elemH), Translate("RGB Font Color"), ThemeManager.SettingLabelStyle);
+        Rect rgbRect = new(width * 0.5f, y, width * 0.45f, elemH);
+        bool rgbHover = rgbRect.Contains(e.mousePosition);
+
+        prevBg = GUI.backgroundColor;
+        if (rgbHover) GUI.backgroundColor = new Color(1.25f, 1.25f, 1.25f, 1.0f);
+        GUI.Box(rgbRect, Translate(HUDManager.useRgbFontColor ? "ON" : "OFF"),
+            HUDManager.useRgbFontColor ? ThemeManager.SettingOn : ThemeManager.SettingOff);
+        GUI.backgroundColor = prevBg;
+
+        if (rgbHover && e.type == EventType.MouseDown && e.button == 0)
+        {
+            HUDManager.useRgbFontColor = !HUDManager.useRgbFontColor;
             e.Use();
         }
 

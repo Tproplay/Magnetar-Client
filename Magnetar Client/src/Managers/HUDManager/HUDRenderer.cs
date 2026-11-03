@@ -1,5 +1,7 @@
 using Magnetar_Client.HUDElements;
+using Magnetar_Client.UI;
 using Magnetar_Client.UI.Setting;
+using Magnetar_Client.UI.Themes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,6 +67,15 @@ public static class HUDRenderer
         }
 
         if (!isMasterVisible) return;
+
+        if (HUDManager.useRgbFontColor)
+        {
+            ThemeManager.HUDElementStyle.normal.textColor = GUIHelper.RainbowColor;
+        }
+        else
+        {
+            ThemeManager.HUDElementStyle.normal.textColor = ThemeManager.HUDElementTextColor.normal.textColor;
+        }
 
         for (int i = 0; i < Elements.Count; i++)
         {

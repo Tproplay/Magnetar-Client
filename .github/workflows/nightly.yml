@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history, needed to count commits for the build number
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -50,8 +52,23 @@ jobs:
               $gameVer = "4.0.5"
           }
 
-          # Nightly build number is GitHub Actions run number (1, 2, 3...)
-          $buildNum = "${{ github.run_number }}"
+          # Build number = commits since the current SupportedGameVersion was introduced.
+          # Walks the history of MagnetarInfo.cs and stops at the first commit with a
+          # different game version, so the number restarts at 1 whenever it changes.
+          $start = $null
+          foreach ($c in (git log --format=%H -- $infoPath)) {
+              $old = (git show "${c}:${infoPath}") | Out-String
+              if ($old -match 'SupportedGameVersion = "(?<gv>[^"]+)"' -and $Matches['gv'] -eq $gameVer) {
+                  $start = $c
+              } else {
+                  break
+              }
+          }
+          if ($start) {
+              $buildNum = [int](git rev-list --count "$start..HEAD") + 1
+          } else {
+              $buildNum = [int]"${{ github.run_number }}"
+          }
           $buildDate = (Get-Date -Format "yyyy-MM-dd HH:mm UTC")
           $shortSha = $env:GITHUB_SHA.Substring(0, 7)
 
@@ -109,6 +126,12 @@ jobs:
 
           # Create version text file for fast unauthenticated build checks
           Set-Content -Path "nightly-build.txt" -Value "${{ steps.version.outputs.build_number }}"
+
+      - name: Move nightly tag to this commit
+        shell: pwsh
+        run: |
+          git tag -f nightly
+          git push origin nightly --force
 
       - name: Publish Nightly Release
         uses: softprops/action-gh-release@v2

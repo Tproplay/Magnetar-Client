@@ -56,6 +56,7 @@ jobs:
           $shortSha = $env:GITHUB_SHA.Substring(0, 7)
 
           Write-Host "Version:      $ver"
+          Write-Host "Game Version: $gameVer"
           Write-Host "Build Number: $buildNum"
           Write-Host "Build Date:   $buildDate"
           Write-Host "Commit:       $shortSha"
@@ -66,6 +67,7 @@ jobs:
 
           # Export outputs
           echo "version=$ver" >> $env:GITHUB_OUTPUT
+          echo "game_version=$gameVer" >> $env:GITHUB_OUTPUT
           echo "build_number=$buildNum" >> $env:GITHUB_OUTPUT
           echo "build_date=$buildDate" >> $env:GITHUB_OUTPUT
           echo "short_sha=$shortSha" >> $env:GITHUB_OUTPUT

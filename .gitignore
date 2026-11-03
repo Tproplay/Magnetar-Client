@@ -8,6 +8,7 @@
 
 # Exception: Do NOT ignore the .gitignore file itself
 !.gitignore
+!.github
 
 # User-specific files
 *.rsuser

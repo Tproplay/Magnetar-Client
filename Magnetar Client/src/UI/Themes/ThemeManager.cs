@@ -75,6 +75,7 @@ public static class ThemeManager
     public static GUIStyle TextHighlightedStyle { get; private set; }
     public static GUIStyle DimBackgroundStyle { get; private set; }
     public static GUIStyle HUDElementStyle { get; private set; }
+    public static GUIStyle HUDElementTextColor { get; private set; }
     public static GUIStyle NEFLineStyle { get; private set; }
     public static GUIStyle NEFNodeStyle { get; private set; }
     public static GUIStyle SliderTrackOffStyle { get; private set; }
@@ -364,7 +365,8 @@ public static class ThemeManager
         Color sepTextColor = ThemeData.ParseColor(theme.Misc?.SeparatorText ?? theme.Typography?.Secondary, d.Typography.Secondary);
         SeparatorTextStyle.normal.textColor = sepTextColor;
         DimBackgroundStyle.normal.background = ThemeData.GetTex(ThemeData.ParseColor(theme.Misc?.DimBackground, d.Misc.DimBackground));
-        HUDElementStyle.normal.textColor = ThemeData.ParseColor(theme.HUD?.TextColor, d.HUD.TextColor);
+        HUDElementTextColor.normal.textColor = ThemeData.ParseColor(theme.HUD?.TextColor, d.HUD.TextColor);
+        HUDElementStyle.normal.textColor = HUDElementTextColor.normal.textColor;
 
         // 9. NEF
         NEFLineStyle.normal.background = ThemeData.GetTex(ThemeData.ParseColor(theme.NEF?.LineColor, d.NEF.LineColor));
@@ -451,6 +453,8 @@ public static class ThemeManager
         SeparatorStyle = new GUIStyle();
         SeparatorTextStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, wordWrap = false, richText = true, clipping = TextClipping.Overflow };
         HUDElementStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, wordWrap = false, richText = true };
+        HUDElementTextColor = new GUIStyle();
+        HUDElementTextColor.normal.textColor = HUDElementStyle.normal.textColor;
 
         NEFLineStyle = new GUIStyle();
         NEFNodeStyle = new GUIStyle { alignment = TextAnchor.LowerCenter };

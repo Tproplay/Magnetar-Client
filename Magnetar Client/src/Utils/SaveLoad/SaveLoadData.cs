@@ -173,6 +173,7 @@ public static class SaveLoadData
         if (setting is BindSetting bind) return bind.BindKeys;
         if (setting is SelectSetting sel) return sel.Value;
         if (setting is StringSetting str) return str.Value;
+        if (setting is ColorSetting col) return col.HexValue;
         if (setting is ListStringSetting list) return new List<string>(list.Values);
         if (setting is BoolSetting b) return b.Value;
         if (setting is FloatSetting f) return f.Value;
@@ -269,6 +270,7 @@ public static class SaveLoadData
             }
             else if (setting is SelectSetting sel) sel.Value = Convert.ToInt32(rawValue);
             else if (setting is StringSetting str) str.Value = rawValue?.ToString() ?? "";
+            else if (setting is ColorSetting col) col.HexValue = rawValue?.ToString() ?? "";
             else if (setting is ListStringSetting list)
             {
                 string jsonStr = JsonConvert.SerializeObject(rawValue);

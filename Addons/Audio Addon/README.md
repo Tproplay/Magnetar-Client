@@ -36,8 +36,8 @@ dotnet build "Project/AudioAddon.csproj" -c MelonLoader
 ```
 
 The output DLL will be placed in:
-* **BepInEx**: `Project/bin/BepInEx/BepInEx/AudioAddon.dll`
-* **MelonLoader**: `Project/bin/Melonloader/MelonLoader/AudioAddon.dll`
+* **BepInEx**: `Project/bin/BepInEx/AudioAddon.dll`
+* **MelonLoader**: `Project/bin/MelonLoader/AudioAddon.dll`
 
 ---
 

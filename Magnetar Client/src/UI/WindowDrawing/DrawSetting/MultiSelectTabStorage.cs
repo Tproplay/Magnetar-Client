@@ -11,7 +11,7 @@ public static class MultiSelectTabStorage
 {
     private class TabSelectorState
     {
-        public MultiSelectSetting ActiveSetting;
+        public BaseMultiSelectSetting ActiveSetting;
         public string SearchQuery = "";
         public float ScrollY;
         public float TargetScrollY;

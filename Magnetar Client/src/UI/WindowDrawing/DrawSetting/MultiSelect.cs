@@ -11,9 +11,9 @@ namespace Magnetar_Client.UI.WindowDrawing;
 public static partial class DrawSetting
 {
     /// <summary>
-    /// Gets or sets the <see cref="MultiSelectSetting"/> currently displayed in the multi-select modal dialog.
+    /// Gets or sets the <see cref="BaseMultiSelectSetting"/> currently displayed in the multi-select modal dialog.
     /// </summary>
-    public static MultiSelectSetting activeMultiSelect;
+    public static BaseMultiSelectSetting activeMultiSelect;
 
     /// <summary>
     /// Gets or sets the search filter query entered into the multi-select modal dialog.
@@ -45,8 +45,8 @@ public static partial class DrawSetting
     private static int lastHoveredIndex = -1;
     private static bool isShiftDragging;
     private static bool dragTargetState;
-    private static readonly HashSet<int> draggedItemsSession = new();
-    private static readonly List<(int Key, string DisplayName)> _cachedFilteredItems = new();
+    private static readonly HashSet<object> draggedItemsSession = new();
+    private static readonly List<(object Key, string DisplayName)> _cachedFilteredItems = new();
     private static object _cachedMultiSelectRef = null;
     private static string _cachedMultiSelectQuery = null;
     private static int _cachedOptionsCount = -1;
@@ -77,7 +77,7 @@ public static partial class DrawSetting
     /// <param name="multiSelectWindowRect">The bounding rectangle of the multi-select window.</param>
     /// <param name="activeMultiSelect">The multi-select setting being edited.</param>
     /// <param name="onClose">Optional callback invoked when the window is closed.</param>
-    public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, dynamic activeMultiSelect, Action onClose = null)
+    public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, BaseMultiSelectSetting activeMultiSelect, Action onClose = null)
     {
         if (activeMultiSelect == null) return;
 
@@ -91,8 +91,6 @@ public static partial class DrawSetting
         int sliderId = 1002;
         float ROW_HEIGHT = SettingValues.MultiSelectRowHeight;
         float rowStep = ROW_HEIGHT + GUIManager.S(2f);
-
-        var options = activeMultiSelect.Options;
 
 #if ANDROID
         float titleHeight = GUIManager.S(25f) * 1.30f;
@@ -150,25 +148,22 @@ public static partial class DrawSetting
         string cleanQuery = multiSelectSearchQuery?.Replace(" ", "") ?? "";
         bool needsRebuild = _cachedMultiSelectRef != activeMultiSelect
             || _cachedMultiSelectQuery != cleanQuery
-            || _cachedOptionsCount != options.Count;
+            || _cachedOptionsCount != activeMultiSelect.OptionsCount;
 
         if (needsRebuild)
         {
             _cachedMultiSelectRef = activeMultiSelect;
             _cachedMultiSelectQuery = cleanQuery;
-            _cachedOptionsCount = options.Count;
+            _cachedOptionsCount = activeMultiSelect.OptionsCount;
 
             _cachedFilteredItems.Clear();
             bool hasQuery = !string.IsNullOrEmpty(cleanQuery);
 
-            foreach (var kvp in options)
+            foreach (var opt in activeMultiSelect.GetRenderableOptions())
             {
-                int intVal = kvp.Key;
-                string internalName = kvp.Value;
-
-                if (activeMultiSelect.Blacklist != null && activeMultiSelect.Blacklist.Contains(intVal)) continue;
-                if (activeMultiSelect.NameBlacklist != null && activeMultiSelect.NameBlacklist.Contains(internalName)) continue;
-                string displayName = activeMultiSelect.GetDisplayName(intVal, internalName);
+                object itemKey = opt.Key;
+                string displayName = opt.DisplayName;
+                string internalName = opt.InternalName;
 
                 if (hasQuery)
                 {
@@ -180,7 +175,7 @@ public static partial class DrawSetting
                         continue;
                 }
 
-                _cachedFilteredItems.Add((intVal, displayName));
+                _cachedFilteredItems.Add((itemKey, displayName));
             }
 
             if (activeMultiSelect.DisplayAlphabetically)
@@ -192,7 +187,7 @@ public static partial class DrawSetting
         var filteredItems = _cachedFilteredItems;
 
         totalContentHeight = filteredItems.Count * rowStep;
-        int selectedCount = activeMultiSelect.SelectedValues.Count;
+        int selectedCount = activeMultiSelect.SelectedCount;
         bool allSelected = filteredItems.Count > 0 && selectedCount >= filteredItems.Count;
 
         if (activeMultiSelect.MaxSelection >= 0 && selectedCount >= activeMultiSelect.MaxSelection)
@@ -216,14 +211,14 @@ public static partial class DrawSetting
             {
                 if (allSelected)
                 {
-                    activeMultiSelect.Deselect(item.Key);
+                    activeMultiSelect.DeselectRaw(item.Key);
                 }
                 else
                 {
-                    if (activeMultiSelect.MaxSelection >= 0 && activeMultiSelect.SelectedValues.Count >= activeMultiSelect.MaxSelection)
+                    if (activeMultiSelect.MaxSelection >= 0 && activeMultiSelect.SelectedCount >= activeMultiSelect.MaxSelection)
                         break;
 
-                    activeMultiSelect.Select(item.Key);
+                    activeMultiSelect.SelectRaw(item.Key);
                 }
             }
             e.Use();
@@ -356,8 +351,8 @@ public static partial class DrawSetting
 
                     if (_mobileHoldItemIdx >= 0 && _mobileHoldItemIdx < filteredItems.Count)
                     {
-                        int itemKey = filteredItems[_mobileHoldItemIdx].Key;
-                        bool isCurrentlySelected = activeMultiSelect.IsSelected(itemKey);
+                        object itemKey = filteredItems[_mobileHoldItemIdx].Key;
+                        bool isCurrentlySelected = activeMultiSelect.IsSelectedRaw(itemKey);
 
                         isShiftDragging = true;
                         dragTargetState = !isCurrentlySelected;
@@ -365,7 +360,7 @@ public static partial class DrawSetting
                         lastHoveredIndex = _mobileHoldItemIdx;
 
                         if (dragTargetState) ToggleWithLimit(activeMultiSelect, itemKey);
-                        else activeMultiSelect.Deselect(itemKey);
+                        else activeMultiSelect.DeselectRaw(itemKey);
 
                         draggedItemsSession.Add(itemKey);
                     }
@@ -409,11 +404,11 @@ public static partial class DrawSetting
 
                             for (int i = start; i <= end; i++)
                             {
-                                int key = filteredItems[i].Key;
+                                object key = filteredItems[i].Key;
                                 if (draggedItemsSession.Add(key))
                                 {
                                     if (dragTargetState) ToggleWithLimit(activeMultiSelect, key);
-                                    else activeMultiSelect.Deselect(key);
+                                    else activeMultiSelect.DeselectRaw(key);
                                 }
                             }
                         }
@@ -472,17 +467,17 @@ public static partial class DrawSetting
                 {
                     if (_mobileHoldItemIdx >= 0 && _mobileHoldItemIdx < filteredItems.Count)
                     {
-                        int itemKey = filteredItems[_mobileHoldItemIdx].Key;
+                        object itemKey = filteredItems[_mobileHoldItemIdx].Key;
 
                         if (activeMultiSelect.MaxSelection == 1)
                         {
-                            activeMultiSelect.SelectedValues.Clear();
-                            activeMultiSelect.Select(itemKey);
+                            activeMultiSelect.ClearSelections();
+                            activeMultiSelect.SelectRaw(itemKey);
                         }
                         else
                         {
-                            if (activeMultiSelect.IsSelected(itemKey))
-                                activeMultiSelect.Deselect(itemKey);
+                            if (activeMultiSelect.IsSelectedRaw(itemKey))
+                                activeMultiSelect.DeselectRaw(itemKey);
                             else
                                 ToggleWithLimit(activeMultiSelect, itemKey);
                         }
@@ -520,8 +515,8 @@ public static partial class DrawSetting
 
                 if (isShiftHeld && activeMultiSelect.MaxSelection != 1 && _clickedItemIdx >= 0 && _clickedItemIdx < filteredItems.Count)
                 {
-                    int itemKey = filteredItems[_clickedItemIdx].Key;
-                    bool isCurrentlySelected = activeMultiSelect.IsSelected(itemKey);
+                    object itemKey = filteredItems[_clickedItemIdx].Key;
+                    bool isCurrentlySelected = activeMultiSelect.IsSelectedRaw(itemKey);
 
                     isShiftDragging = true;
                     dragTargetState = !isCurrentlySelected;
@@ -529,7 +524,7 @@ public static partial class DrawSetting
                     lastHoveredIndex = _clickedItemIdx;
 
                     if (dragTargetState) ToggleWithLimit(activeMultiSelect, itemKey);
-                    else activeMultiSelect.Deselect(itemKey);
+                    else activeMultiSelect.DeselectRaw(itemKey);
 
                     draggedItemsSession.Add(itemKey);
                     e.Use();
@@ -579,11 +574,11 @@ public static partial class DrawSetting
 
                             for (int i = start; i <= end; i++)
                             {
-                                int key = filteredItems[i].Key;
+                                object key = filteredItems[i].Key;
                                 if (draggedItemsSession.Add(key))
                                 {
                                     if (dragTargetState) ToggleWithLimit(activeMultiSelect, key);
-                                    else activeMultiSelect.Deselect(key);
+                                    else activeMultiSelect.DeselectRaw(key);
                                 }
                             }
                         }
@@ -603,17 +598,17 @@ public static partial class DrawSetting
             {
                 if (!isShiftDragging && !_isListSwiping && _clickedItemIdx >= 0 && _clickedItemIdx < filteredItems.Count)
                 {
-                    int itemKey = filteredItems[_clickedItemIdx].Key;
-                    bool isCurrentlySelected = activeMultiSelect.IsSelected(itemKey);
+                    object itemKey = filteredItems[_clickedItemIdx].Key;
+                    bool isCurrentlySelected = activeMultiSelect.IsSelectedRaw(itemKey);
 
                     if (activeMultiSelect.MaxSelection == 1)
                     {
-                        activeMultiSelect.SelectedValues.Clear();
-                        activeMultiSelect.Select(itemKey);
+                        activeMultiSelect.ClearSelections();
+                        activeMultiSelect.SelectRaw(itemKey);
                     }
                     else
                     {
-                        if (isCurrentlySelected) activeMultiSelect.Deselect(itemKey);
+                        if (isCurrentlySelected) activeMultiSelect.DeselectRaw(itemKey);
                         else ToggleWithLimit(activeMultiSelect, itemKey);
                     }
 
@@ -643,7 +638,7 @@ public static partial class DrawSetting
                 float drawY = (i * rowStep) - manualScrollY;
                 Rect rowRect = new(0, drawY, listWidth, ROW_HEIGHT);
 
-                bool isSelected = activeMultiSelect.IsSelected(item.Key);
+                bool isSelected = activeMultiSelect.IsSelectedRaw(item.Key);
                 GUI.Box(rowRect, item.DisplayName, isSelected ? ThemeManager.SettingOn : ThemeManager.SettingOff);
             }
         }
@@ -654,18 +649,18 @@ public static partial class DrawSetting
         GUI.Box(handleRect, "", shouldHighlight ? ThemeManager.SettingOn : ThemeManager.SettingOff);
     }
 
-    private static void ToggleWithLimit(dynamic activeMultiSelect, int val)
+    private static void ToggleWithLimit(BaseMultiSelectSetting activeMultiSelect, object val)
     {
         if (activeMultiSelect.MaxSelection == 1)
         {
-            activeMultiSelect.SelectedValues.Clear();
-            activeMultiSelect.Select(val);
+            activeMultiSelect.ClearSelections();
+            activeMultiSelect.SelectRaw(val);
             return;
         }
 
-        if (activeMultiSelect.MaxSelection == -1 || activeMultiSelect.SelectedValues.Count < activeMultiSelect.MaxSelection)
+        if (activeMultiSelect.MaxSelection == -1 || activeMultiSelect.SelectedCount < activeMultiSelect.MaxSelection)
         {
-            activeMultiSelect.Select(val);
+            activeMultiSelect.SelectRaw(val);
         }
     }
 }

@@ -23,7 +23,7 @@ public static partial class DrawSetting
     public static void ResetInputBind()
     {
         FocusedControlId = -1;
-        ActiveDropdownId = -1;
+        ResetDropdownState();
         ActiveSliderId = -1;
         ActiveTextFieldId = -1;
     }

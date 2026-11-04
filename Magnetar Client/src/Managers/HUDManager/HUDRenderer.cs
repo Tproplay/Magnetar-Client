@@ -22,9 +22,9 @@ public static class HUDRenderer
             return Elements.ToArray();
         }
     }
-    public static MultiSelectSetting HudToggles = new("Active Elements")
+    public static StringMultiSelectSetting HudToggles = new("Active Elements")
     {
-        CustomNames = new Dictionary<int, string>(),
+        CustomNames = new Dictionary<string, string>(),
         DisplayAlphabetically = true,
     };
     private static bool isMasterVisible;
@@ -52,8 +52,8 @@ public static class HUDRenderer
         {
             Elements.Add(instance);
         }
-        HudToggles.AddOption(instance.WindowId, instance.Name);
-        HudToggles.CustomNames[instance.WindowId] = instance.Name;
+        HudToggles.AddOption(instance.Name, instance.Name);
+        HudToggles.CustomNames[instance.Name] = instance.Name;
         currentWindowId++;
     }
 
@@ -82,7 +82,7 @@ public static class HUDRenderer
             var element = Elements[i];
             if (element == null) continue;
 
-            bool isElementEnabled = HudToggles != null && HudToggles.IsSelected(element.WindowId);
+            bool isElementEnabled = HudToggles != null && HudToggles.IsSelected(element.Name);
 
             if (isElementEnabled)
             {
@@ -107,7 +107,7 @@ public static class HUDRenderer
             var element = Elements[i];
             if (element == null) continue;
 
-            bool isElementEnabled = isMasterVisible && HudToggles.IsSelected(element.WindowId);
+            bool isElementEnabled = isMasterVisible && HudToggles.IsSelected(element.Name);
             element.HandleLifecycle(isElementEnabled);
         }
     }

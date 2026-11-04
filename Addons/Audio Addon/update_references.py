@@ -28,6 +28,7 @@ REFERENCE_FILES = [
     "Magnetar Client.dll",
     "Magnetar Client.xml",
     # BepInEx
+    "Bepinex/SherkeyXD.BepInEx-Sounds-Loader.dll",
     "Bepinex/0Harmony.dll",
     "Bepinex/BepInEx.Core.dll",
     "Bepinex/BepInEx.Unity.IL2CPP.dll",
@@ -50,6 +51,7 @@ REFERENCE_FILES = [
     "Bepinex/Il2Cpp/UnityEngine.UIModule.dll",
     "Bepinex/Il2Cpp/UnityEngine.dll",
     # MelonLoader
+    "Melonloader/AudioImportLib.dll",
     "Melonloader/0Harmony.dll",
     "Melonloader/Il2CppInterop.Common.dll",
     "Melonloader/Il2CppInterop.Runtime.dll",

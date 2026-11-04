@@ -1,6 +1,6 @@
-# Magnetar Client — Addon Template
+# Magnetar Client — Addon Template & Development Guide
 
-> A clean, production-ready quick-start template for creating new addons for **Magnetar Client** with dual **MelonLoader** and **BepInEx** support.
+> A production-ready quick-start template and development guide for creating addons for **Magnetar Client** with dual **MelonLoader** and **BepInEx** support.
 
 ---
 
@@ -14,89 +14,123 @@ Addon Template/
     ├── Addon Template.csproj         # SDK project file with dual loader support
     ├── Properties/
     │   └── AssemblyInfo.cs           # Assembly metadata & attributes
+    ├── References/                   # Pre-populated BepInEx, MelonLoader, & Client DLLs
     └── Src/
         ├── Main.cs                   # IMagnetarAddon entrypoint & Harmony initialization
         ├── SampleModule.cs           # Example Module with settings & lifecycle hooks
         ├── SampleHudElement.cs       # Example on-screen HUD window element
-        └── SamplePatch.cs            # Example Harmony hook with safety guards
+        └── SamplePatch.cs            # Example Harmony hook template
 ```
 
 ---
 
-## Core Components
+## Addon Types & Lifecycle
 
-### 1. The Entrypoint (`Src/Main.cs`)
-Every addon implements [`IMagnetarAddon`](../Magnetar%20Client/src/Api/IMagnetarAddon.cs). When Magnetar Client starts, it scans the `Addons/` directory, discovers all `IMagnetarAddon` implementations, and invokes their lifecycle events:
-* **`OnLoad()`**: Runs right after your assembly is loaded. Use this to subscribe to client actions (e.g., `Actions.OnInitializeHarmony`, `Actions.OnLateInitializeCore`).
-* **`SafePatchAll()`**: Uses Magnetar Client's built-in `HarmonyManager.HarmonyPatchAll` to apply all patches in the assembly, isolating errors and logging diagnostics without crashing the client.
-* **`OnUnload()`**: Clean up resources, event handlers, and active coroutines.
+Magnetar Client dynamically loads **all `.dll` assemblies** placed inside the game's `Addons/` folder. It discovers components via reflection:
 
-### 2. Modules & Settings (`Src/SampleModule.cs`)
-Subclasses of `Module` are automatically detected and registered into the Magnetar in-game menu:
-* **Settings**: Use built-in types like `BoolSetting`, `FloatSetting`, `IntSetting`, `StringSetting`, `EnumSetting`, and `KeyBind`.
-* **Grouping**: Use `CreateCategory("Name")`, `AddSettings(...)`, and `EndCategory()` to organize options into clean collapsible sections.
-* **Lifecycle**: Implement `OnUpdate()` for per-frame logic, `OnGUI()` for IMGUI overlays, and `OnEnable()` / `OnDisable()` for state transitions.
+### 1. General Addons (`IMagnetarAddon`)
+* **Discovery**: Discovered during `AddonManager.InitAddons()`.
+* **Purpose**: Used for addons that need explicit initialization lifecycle hooks (`OnLoad()`, `OnUnload()`), action subscriptions (`Actions.OnInitializeHarmony`, `Actions.OnLateInitializeCore`), or custom service registration.
+* **Harmony Patching**: Typically initializes assembly-wide patches during `OnLoad()` using `HarmonyManager.HarmonyPatchAll()`.
 
-### 3. HUD Elements (`Src/SampleHudElement.cs`)
-Subclasses of `HudElement` are automatically discovered and registered into the client's HUD Manager:
-* **Window Configuration**: Provide a default name and `NewRect(width, height)`.
-* **Rendering**: Implement `DrawContent(width, height)` with IMGUI labels/buttons.
-* **Updates**: Set `UpdateInterval` (seconds) and implement `OnUpdateActive()` to update dynamic text and auto-resize with `AdjustWidthToText()`.
+### 2. Standalone Modules (`Module`)
+* **Discovery**: Discovered during `AddonManager.InitModules()`.
+* **No `IMagnetarAddon` Required**: If your addon only provides feature modules, it does **not** need `IMagnetarAddon` or `Main.cs`. Magnetar Client instantiates all `Module` subclasses automatically.
+* **Harmony Patching**: In standalone module addons, safe Harmony patching can be initialized directly inside the module's constructor.
+* **Settings & UI**: Provides built-in setting types (`BoolSetting`, `FloatSetting`, `IntSetting`, `StringSetting`, `EnumSetting`, `KeyBind`) and category grouping (`CreateCategory()`, `AddSettings()`, `EndCategory()`).
+* **Lifecycle**: Implement `OnUpdateActive()` for frame logic, `OnEnable()` / `OnDisable()` for state transitions.
 
-### 4. Harmony Patches (`Src/SamplePatch.cs`)
-Hook into game methods safely:
-* Always check if your module is active: `if (!SampleModule.Instance.Active) return;`
-* Always perform null-checks on `__instance`.
-* Wrap non-trivial logic in `try/catch` and log via `Magnetar_Logger.DebugLogger` or `MagnetarApi.LogWarning`.
+### 3. Standalone HUD Elements (`HudElement`)
+* **Discovery**: Discovered during `AddonManager.InitHUDElements()`.
+* **No `IMagnetarAddon` Required**: Standalone HUD widgets do not require `IMagnetarAddon` or `Main.cs`.
+* **Harmony Patching**: Can be initialized directly inside the HUD element constructor.
+* **Rendering & Auto-Sizing**: Override `DrawContent(width, height)` with IMGUI controls, set `UpdateInterval`, and implement `OnUpdateActive()` to update dynamic text with `AdjustWidthToText()`.
 
----
-
-## Quick-Start Checklist: Creating a New Addon
-
-1. **Copy the folder**:
-   Duplicate `Addons/Addon Template/` and rename it to your addon's name (e.g. `Addons/MyAwesomeAddon/`).
-
-2. **Rename project & solution files**:
-   - `Addon Template.slnx` $\rightarrow$ `MyAwesomeAddon.slnx`
-   - `Project/Addon Template.csproj` $\rightarrow$ `Project/MyAwesomeAddon.csproj`
-   - Update the project path inside `MyAwesomeAddon.slnx`.
-
-3. **Update `Project/MyAwesomeAddon.csproj`**:
-   - `<RootNamespace>MyAwesomeAddon</RootNamespace>`
-   - `<AssemblyName>MyAwesomeAddon</AssemblyName>`
-
-4. **Update `Project/Properties/AssemblyInfo.cs`**:
-   - Set `AssemblyTitle`, `AssemblyProduct`, and `AssemblyDescription`.
-
-5. **Update `Project/Src/Main.cs`**:
-   - Set `Name`, `Version`, and `Author`.
+### 4. Harmony Patches (`[HarmonyPatch]`)
+* Classes decorated with `[HarmonyPatch]` provide prefix/postfix hooks into the game's methods.
+* Applied safely via `HarmonyManager.HarmonyPatchAll(assembly, harmonyInstance)`, which isolates failing patches without crashing the client.
 
 ---
 
-## Build Targets
+## Generating New Addons (`create_addon.py`)
 
-The project includes 2 preconfigured build profiles:
+Rather than manually copying and renaming project files, use the generator script located in the `Addons/` directory:
+
+### Interactive Mode
+```bash
+python Addons/create_addon.py
+```
+This prompts for:
+* **Addon Name**: (e.g. `Audio Addon` $\rightarrow$ creates `AudioAddon.slnx`, `AudioAddon.csproj`, etc.)
+* **Author Name**: (auto-detected from git or system username)
+* **Template Flavor**:
+  * `[1] General` — Full addon: `Main.cs` (with `IMagnetarAddon` & `OnLoad` patching) + `Module` + `HUD` + `Patch`
+  * `[2] Module` — Standalone feature: `Module` (with constructor patching) + `Patch` *(no `IMagnetarAddon`)*
+  * `[3] HUD Element` — Standalone display widget: `HUD` (with constructor patching) + `Patch` *(no `IMagnetarAddon`)*
+* **Reference Source**: Copy from local `Addon Template` (instant) or download from GitHub.
+
+### CLI One-Liners
+```bash
+# General addon (full lifecycle, module, HUD, and patch)
+python Addons/create_addon.py "Radar ESP" --template general
+
+# Module-only addon (no IMagnetarAddon, patching in module constructor)
+python Addons/create_addon.py "Audio Addon" --template module
+
+# HUD-only addon (no IMagnetarAddon, patching in HUD constructor)
+python Addons/create_addon.py "FPS Counter" --template hud
+
+# Download references directly from GitHub
+python Addons/create_addon.py "Speed Hack" --template module --github
+```
+
+---
+
+## Reference Management & Updater (`update_references.py`)
+
+Each addon project includes local references under `Project/References/` so it compiles completely out-of-the-box.
+
+Every generated addon also includes `update_references.py` at its root:
+
+```bash
+# Sync all 45 reference DLLs from local Addon Template
+python update_references.py
+
+# Force download latest references directly from GitHub (Tproplay/Magnetar-Client)
+python update_references.py --github
+
+# Download from a specific GitHub branch
+python update_references.py --github --branch devlop
+```
+
+---
+
+## Build Configurations
+
+The project includes two preconfigured build configurations:
 
 | Configuration | Mod Loader | Output Directory |
 |---|---|---|
-| `MelonLoader` | MelonLoader (IL2CPP) | `bin\Melonloader\MelonLoader\` |
-| `BepInEx` | BepInEx (IL2CPP) | `bin\BepInEx\BepInEx\` |
+| `MelonLoader` | MelonLoader (IL2CPP) | `Project/bin/Melonloader/MelonLoader/<Name>.dll` |
+| `BepInEx` | BepInEx (IL2CPP) | `Project/bin/BepInEx/BepInEx/<Name>.dll` |
 
-### CLI Build Commands
+### Building from Visual Studio / IDE
+Open the `<Name>.slnx` solution file in **Visual Studio 2022** or **JetBrains Rider**, select `MelonLoader` or `BepInEx` from the configuration dropdown, and build.
 
+### Building via CLI
 ```bash
 # Build BepInEx target
-dotnet build "Project/MyAwesomeAddon.csproj" -c BepInEx
+dotnet build "Project/Addon Template.csproj" -c BepInEx
 
 # Build MelonLoader target
-dotnet build "Project/MyAwesomeAddon.csproj" -c MelonLoader
+dotnet build "Project/Addon Template.csproj" -c MelonLoader
 ```
 
 ---
 
 ## Preprocessor Symbols
 
-When writing platform-specific code (e.g. `Il2Cpp` namespaces for MelonLoader vs vanilla namespaces for BepInEx):
+When writing loader-specific code (e.g. `Il2Cpp` namespaces for MelonLoader vs standard namespaces for BepInEx):
 
 ```csharp
 #if MELONLOADER
@@ -109,9 +143,10 @@ using TMPro;
 
 ---
 
-## Installation & Testing
+## Installation & In-Game Testing
 
 Copy the compiled `.dll` from the output directory into your game's Magnetar addons folder:
+
 * **MelonLoader**: `<GameRoot>/Mods/Magnetar Data/Addons/`
 * **BepInEx**: `<GameRoot>/BepInEx/plugins/Magnetar Data/Addons/`
 

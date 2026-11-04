@@ -16,13 +16,13 @@ public static class GUISelectorDrawer
 GUIManager.S(BaseSelectorWidth),
 GUIManager.S(BaseSelectorHeight));
 
-    public static MultiSelectSetting ActiveSetting { get; set; }
+    public static BaseMultiSelectSetting ActiveSetting { get; set; }
 
     private static GUI.WindowFunction _cachedSelector;
     private static GUI.WindowFunction SelectorDelegate => _cachedSelector ??=
         Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<GUI.WindowFunction>(DrawSelectorModal);
 
-    public static void Open(MultiSelectSetting setting)
+    public static void Open(BaseMultiSelectSetting setting)
     {
         ActiveSetting = setting;
         DrawSetting.activeMultiSelect = setting;
@@ -67,7 +67,7 @@ GUIManager.S(BaseSelectorHeight));
         Event e = Event.current;
         Rect multiSelectRect = new(0, 0, SelectorRect.width, SelectorRect.height);
 
-        MultiSelectSetting settingToDraw = ActiveSetting ?? DrawSetting.activeMultiSelect;
+        BaseMultiSelectSetting settingToDraw = ActiveSetting ?? DrawSetting.activeMultiSelect;
         DrawSetting.DrawMultiSelectWindow(multiSelectRect, settingToDraw, GUIManager.OnClose);
 
 #if ANDROID

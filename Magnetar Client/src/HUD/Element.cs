@@ -258,7 +258,7 @@ public abstract class HudElement
             {
                 var other = HUDRenderer.Elements[i];
                 if (other == null || other.WindowId == this.WindowId) continue;
-                if (HUDRenderer.HudToggles != null && !HUDRenderer.HudToggles.IsSelected(other.WindowId)) continue;
+                if (HUDRenderer.HudToggles != null && !HUDRenderer.HudToggles.IsSelected(other.Name)) continue;
 
                 Rect otherR = other.Bounds;
 

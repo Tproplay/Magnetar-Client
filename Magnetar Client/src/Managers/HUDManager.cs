@@ -187,7 +187,7 @@ public static class HUDManager
 
         if (HUDRenderer.HudToggles?.Options == null) return;
 
-        HUDRenderer.HudToggles.CustomNames ??= new Dictionary<int, string>();
+        HUDRenderer.HudToggles.CustomNames ??= new Dictionary<string, string>();
 
         foreach (var element in HUDRenderer.Elements)
         {
@@ -195,8 +195,8 @@ public static class HUDManager
 
             string translated = Translate(element.Name);
 
-            HUDRenderer.HudToggles.Options[element.WindowId] = translated;
-            HUDRenderer.HudToggles.CustomNames[element.WindowId] = translated;
+            HUDRenderer.HudToggles.Options[element.Name] = translated;
+            HUDRenderer.HudToggles.CustomNames[element.Name] = translated;
         }
     }
 
@@ -294,7 +294,7 @@ public static class HUDManager
                 Enabled = HUDManager.Enabled,
                 ShowBackground = HUDManager.showBackground,
                 UseRgbFontColor = HUDManager.useRgbFontColor,
-                SelectedElements = HUDRenderer.HudToggles?.SelectedValues?.ToList() ?? new List<int>()
+                SelectedElements = HUDRenderer.HudToggles?.SelectedValues?.ToList() ?? new List<string>()
             };
 
             if (HUDRenderer.Elements != null)
@@ -326,9 +326,27 @@ public static class HUDManager
             JToken selectedToken = token["SelectedElements"] ?? token["SelectedHudElements"];
             if (selectedToken != null && HUDRenderer.HudToggles != null)
             {
-                var elements = selectedToken.ToObject<List<int>>();
-                if (elements != null)
-                    HUDRenderer.HudToggles.SelectedValues = new HashSet<int>(elements);
+                var selectedSet = new HashSet<string>();
+                if (selectedToken is JArray array)
+                {
+                    foreach (var item in array)
+                    {
+                        if (item.Type == JTokenType.String)
+                        {
+                            var strVal = item.Value<string>();
+                            if (!string.IsNullOrEmpty(strVal))
+                                selectedSet.Add(strVal);
+                        }
+                        else if (item.Type == JTokenType.Integer)
+                        {
+                            int winId = item.Value<int>();
+                            var el = HUDRenderer.Elements?.FirstOrDefault(e => e.WindowId == winId);
+                            if (el != null && !string.IsNullOrEmpty(el.Name))
+                                selectedSet.Add(el.Name);
+                        }
+                    }
+                }
+                HUDRenderer.HudToggles.SelectedValues = selectedSet;
             }
 
             // 3. Positions
@@ -362,7 +380,7 @@ public static class HUDManager
         public bool Enabled = true;
         public bool ShowBackground;
         public bool UseRgbFontColor;
-        public List<int> SelectedElements = new();
+        public List<string> SelectedElements = new();
         public Dictionary<string, SaveLoadData.SimpleRect> Positions = new();
     }
 

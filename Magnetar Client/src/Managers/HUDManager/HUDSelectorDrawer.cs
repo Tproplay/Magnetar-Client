@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI;
+using Magnetar_Client.UI;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.WindowDrawing;
 using UnityEngine;
@@ -19,7 +19,7 @@ GUIManager.S(BaseSelectorHeight));
     /// <summary>
     /// Explicitly bound to HudToggles so external multi-select cleans never wipe it to null.
     /// </summary>
-    public static MultiSelectSetting ActiveSetting => HUDRenderer.HudToggles;
+    public static StringMultiSelectSetting ActiveSetting => HUDRenderer.HudToggles;
 
     private static GUI.WindowFunction _cachedSelectorDelegate;
     private static GUI.WindowFunction SelectorDelegate => _cachedSelectorDelegate ??=

@@ -130,7 +130,7 @@ public static class SaveLoadData
     public class MultiSelectSaveData
     {
         public string Mode { get; set; } = "Selected";
-        public List<int> Values { get; set; } = new();
+        public List<object> Values { get; set; } = new();
     }
 
     #endregion
@@ -142,34 +142,7 @@ public static class SaveLoadData
         if (setting == null) return null;
 
         if (setting is CategorySetting cat) return cat.IsExpanded;
-        if (setting is MultiSelectSetting ms)
-        {
-            var validOptions = ms.Options.Keys
-                .Where(k => (ms.Blacklist == null || !ms.Blacklist.Contains(k)) &&
-                            (ms.NameBlacklist == null || !ms.NameBlacklist.Contains(ms.Options[k])))
-                .ToList();
-
-            int totalCount = validOptions.Count;
-            int selectedCount = ms.SelectedValues.Count;
-
-            if (totalCount > 0 && selectedCount >= (totalCount / 2))
-            {
-                var unselected = validOptions.Where(k => !ms.SelectedValues.Contains(k)).ToList();
-                return new MultiSelectSaveData
-                {
-                    Mode = "Deselected",
-                    Values = unselected
-                };
-            }
-            else
-            {
-                return new MultiSelectSaveData
-                {
-                    Mode = "Selected",
-                    Values = ms.SelectedValues.ToList()
-                };
-            }
-        }
+        if (setting is BaseMultiSelectSetting ms) return ms.ExportSaveData();
         if (setting is BindSetting bind) return bind.BindKeys;
         if (setting is SelectSetting sel) return sel.Value;
         if (setting is StringSetting str) return str.Value;
@@ -223,46 +196,7 @@ public static class SaveLoadData
         try
         {
             if (setting is CategorySetting cat) cat.IsExpanded = Convert.ToBoolean(rawValue);
-            else if (setting is MultiSelectSetting ms)
-            {
-                string jsonStr = JsonConvert.SerializeObject(rawValue);
-                var proxy = JsonConvert.DeserializeObject<MultiSelectSaveData>(jsonStr);
-
-                if (proxy != null)
-                {
-                    ms.SelectedValues.Clear();
-
-                    var validOptions = ms.Options.Keys
-                        .Where(k => (ms.Blacklist == null || !ms.Blacklist.Contains(k)) &&
-                                    (ms.NameBlacklist == null || !ms.NameBlacklist.Contains(ms.Options[k])))
-                        .ToList();
-
-                    if (string.Equals(proxy.Mode, "Deselected", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var excluded = new HashSet<int>(proxy.Values ?? new List<int>());
-                        foreach (var opt in validOptions)
-                        {
-                            if (!excluded.Contains(opt))
-                            {
-                                ms.SelectedValues.Add(opt);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (proxy.Values != null)
-                        {
-                            foreach (var val in proxy.Values)
-                            {
-                                if (ms.Blacklist == null || !ms.Blacklist.Contains(val))
-                                {
-                                    ms.SelectedValues.Add(val);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            else if (setting is BaseMultiSelectSetting ms) ms.ImportSaveData(rawValue);
             else if (setting is BindSetting bind)
             {
                 string jsonStr = JsonConvert.SerializeObject(rawValue);
@@ -301,6 +235,10 @@ public static class SaveLoadData
                     for (int s = 0; s < secData.Count; s++)
                     {
                         var childList = sec.TemplateFactory(s);
+                        if (sec.HasDefaultSnapshots)
+                        {
+                            sec.ApplyDefaultValues(s, childList);
+                        }
                         foreach (var child in childList)
                         {
                             if (child == null || string.IsNullOrEmpty(child.Name)) continue;
@@ -345,8 +283,12 @@ public static class SaveLoadData
                                 RestoreSettingValue(child, childVal);
                             }
                         }
-                        sec.Sections.Add(new SectionInstance($"Section #{s + 1}", childList));
+                        string title = sec.GetDefaultTitle(s)
+                            ?? (sec.TitleFormatter != null ? sec.TitleFormatter(s) : $"Section #{s + 1}");
+                        sec.Sections.Add(new SectionInstance(title, childList));
                     }
+                    sec.RefreshTitles();
+                    sec.OnSectionsChanged?.Invoke();
                 }
             }
         }

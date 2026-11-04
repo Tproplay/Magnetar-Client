@@ -10,7 +10,7 @@ namespace Magnetar_Client.Core.ModuleManager_;
 public static class MultiSelectWindowDrawer
 {
     public static Rect WindowRect;
-    public static MultiSelectSetting ActiveMultiSelect { get; set; }
+    public static BaseMultiSelectSetting ActiveMultiSelect { get; set; }
 
     private static GUI.WindowFunction _cachedMultiSelectDelegate;
     private static GUI.WindowFunction MultiSelectDelegate => _cachedMultiSelectDelegate ??=
@@ -113,7 +113,7 @@ ModuleManager
         }
     }
 
-    public static void HandleMultiSelectSetting(MultiSelectSetting set, ref float y, float width)
+    public static void HandleMultiSelectSetting(BaseMultiSelectSetting set, ref float y, float width)
     {
         Event e = Event.current;
 
@@ -128,13 +128,13 @@ ModuleManager
 
         if (set.ShowCountText)
         {
-            if (set.MaxSelection == 1 && set.SelectedValues.Count == 1)
+            if (set.MaxSelection == 1 && set.SelectedCount == 1)
             {
-                countLabel = '(' + set.GetDisplayName(System.Linq.Enumerable.First(set.SelectedValues)) + ')';
+                countLabel = '(' + set.GetPrimarySelectedDisplayName() + ')';
             }
             else
             {
-                countLabel = '(' + Translate($"{set.SelectedValues.Count} selected") + ')';
+                countLabel = '(' + Translate($"{set.SelectedCount} selected") + ')';
             }
 
             textW = (set.Width > 0f) ? GUIManager.S(set.Width) : MultiSelectSetting.MultiSelectCountTextStyle.CalcSize(new GUIContent(countLabel)).x;

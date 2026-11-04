@@ -1,3 +1,4 @@
+using Magnetar_Client.Core;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
 using static Magnetar_Client.Utils.Translator;
@@ -148,9 +149,19 @@ public class SelectSetting : Setting
 
         if (!IsDisabled && btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
         {
-            DrawSetting.ActiveDropdownId = (DrawSetting.ActiveDropdownId == controlId) ? -1 : controlId;
-            DrawSetting.dropdownScrollY = 0f;
-            DrawSetting.FocusedControlId = -1;
+            if (DrawSetting.ActiveDropdownId == controlId)
+            {
+                DrawSetting.ResetDropdownState();
+            }
+            else
+            {
+                DrawSetting.ActiveDropdownId = controlId;
+                DrawSetting.dropdownScrollY = 0f;
+                DrawSetting.dropdownScrollVelocity = 0f;
+                DrawSetting.dropdownIsSwiping = false;
+                DrawSetting.dropdownCandidateIndex = -1;
+                DrawSetting.FocusedControlId = -1;
+            }
             e.Use();
         }
 
@@ -163,37 +174,116 @@ public class SelectSetting : Setting
             int maxVisibleRows = SettingValues.DropdownMaxVisibleRows;
             int itemCount = Options.Count;
             float dropHeight = Mathf.Min(itemCount * rowHeight, maxVisibleRows * rowHeight);
+            float maxScroll = Mathf.Max(0f, (itemCount * rowHeight) - dropHeight);
 
             Rect dropRect = new(btnRect.x, btnRect.y + btnRect.height, btnRect.width, dropHeight);
+            DrawSetting.ActiveDropdownWindowRect = new Rect(dropRect.x, dropRect.y + DrawSetting.CurrentWindowGroupOffsetY, dropRect.width, dropRect.height);
 
-            if (dropRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
+            // Momentum / Inertia decay
+            if (!DrawSetting.dropdownIsSwiping && Mathf.Abs(DrawSetting.dropdownScrollVelocity) > 0.5f)
             {
-                DrawSetting.dropdownScrollY = Mathf.Clamp(DrawSetting.dropdownScrollY + e.delta.y * SettingValues.DropdownScrollSensitivity,
-                    0, Mathf.Max(0, (itemCount * rowHeight) - dropHeight));
-                e.Use();
-            }
+                float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
+                DrawSetting.dropdownScrollY = Mathf.Clamp(DrawSetting.dropdownScrollY + (DrawSetting.dropdownScrollVelocity * dt), 0f, maxScroll);
+                DrawSetting.dropdownScrollVelocity = Mathf.Lerp(DrawSetting.dropdownScrollVelocity, 0f, 1f - Mathf.Exp(-4.5f * dt));
 
-            if (dropRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
-            {
-                float localY = e.mousePosition.y - dropRect.y + DrawSetting.dropdownScrollY;
-                int clickedIndex = (int)(localY / rowHeight);
-                int idx = 0;
-                foreach (var kvp in Options)
+                if (DrawSetting.dropdownScrollY <= 0f || DrawSetting.dropdownScrollY >= maxScroll || Mathf.Abs(DrawSetting.dropdownScrollVelocity) < 1f)
                 {
-                    if (idx == clickedIndex)
-                    {
-                        Value = kvp.Key;
-                        DrawSetting.ActiveDropdownId = -1;
-                        e.Use();
-                        break;
-                    }
-                    idx++;
+                    DrawSetting.dropdownScrollVelocity = 0f;
                 }
             }
 
+            // Mouse ScrollWheel
+            if (dropRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
+            {
+                DrawSetting.dropdownScrollVelocity = 0f;
+                DrawSetting.dropdownScrollY = Mathf.Clamp(DrawSetting.dropdownScrollY + e.delta.y * SettingValues.DropdownScrollSensitivity, 0f, maxScroll);
+                e.Use();
+            }
+
+            // MouseDown / TouchDown inside dropdown
+            if (dropRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+            {
+                DrawSetting.dropdownTouchStart = e.mousePosition;
+                DrawSetting.dropdownTouchStartScroll = DrawSetting.dropdownScrollY;
+                DrawSetting.dropdownIsSwiping = false;
+                DrawSetting.dropdownScrollVelocity = 0f;
+                DrawSetting.dropdownLastTouchY = e.mousePosition.y;
+                DrawSetting.dropdownLastTouchTime = Time.realtimeSinceStartup;
+
+                float localY = e.mousePosition.y - dropRect.y + DrawSetting.dropdownScrollY;
+                DrawSetting.dropdownCandidateIndex = (int)(localY / rowHeight);
+                e.Use();
+            }
+
+            // Drag / Swipe movement
+            if (DrawSetting.dropdownCandidateIndex != -1 || DrawSetting.dropdownIsSwiping)
+            {
+                if ((e.type == EventType.MouseDrag || Input.GetMouseButton(0)) && !DrawSetting.dropdownIsSwiping)
+                {
+                    if (Vector2.Distance(e.mousePosition, DrawSetting.dropdownTouchStart) > GUIManager.S(6f))
+                    {
+                        DrawSetting.dropdownIsSwiping = true;
+                        DrawSetting.dropdownCandidateIndex = -1;
+                    }
+                }
+
+                if (DrawSetting.dropdownIsSwiping && (e.type == EventType.MouseDrag || e.type == EventType.MouseMove || Input.GetMouseButton(0)))
+                {
+                    float deltaY = DrawSetting.dropdownTouchStart.y - e.mousePosition.y;
+                    DrawSetting.dropdownScrollY = Mathf.Clamp(DrawSetting.dropdownTouchStartScroll + deltaY, 0f, maxScroll);
+
+                    float dt = Time.realtimeSinceStartup - DrawSetting.dropdownLastTouchTime;
+                    if (dt > 0.001f)
+                    {
+                        float rawVel = (DrawSetting.dropdownLastTouchY - e.mousePosition.y) / dt;
+                        DrawSetting.dropdownScrollVelocity = Mathf.Lerp(DrawSetting.dropdownScrollVelocity, rawVel, 0.4f);
+                        DrawSetting.dropdownLastTouchY = e.mousePosition.y;
+                        DrawSetting.dropdownLastTouchTime = Time.realtimeSinceStartup;
+                    }
+
+                    if (e.type == EventType.MouseDrag) e.Use();
+                }
+            }
+
+            // MouseUp / TouchUp
+            if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
+            {
+                if (!DrawSetting.dropdownIsSwiping && DrawSetting.dropdownCandidateIndex >= 0)
+                {
+                    if (dropRect.Contains(e.mousePosition))
+                    {
+                        int idx = 0;
+                        foreach (var kvp in Options)
+                        {
+                            if (idx == DrawSetting.dropdownCandidateIndex)
+                            {
+                                Value = kvp.Key;
+                                DrawSetting.ResetDropdownState();
+                                break;
+                            }
+                            idx++;
+                        }
+                    }
+                    DrawSetting.dropdownCandidateIndex = -1;
+                    e.Use();
+                }
+                else if (DrawSetting.dropdownIsSwiping)
+                {
+                    DrawSetting.dropdownIsSwiping = false;
+                    DrawSetting.dropdownCandidateIndex = -1;
+                    float timeSinceSample = Time.realtimeSinceStartup - DrawSetting.dropdownLastTouchTime;
+                    if (timeSinceSample > 0.08f)
+                    {
+                        DrawSetting.dropdownScrollVelocity = 0f;
+                    }
+                    e.Use();
+                }
+            }
+
+            // Click outside closes dropdown
             if (e.type == EventType.MouseDown && !btnRect.Contains(e.mousePosition) && !dropRect.Contains(e.mousePosition))
             {
-                DrawSetting.ActiveDropdownId = -1;
+                DrawSetting.ResetDropdownState();
             }
 
             float scrollY = DrawSetting.dropdownScrollY;
@@ -214,6 +304,16 @@ public class SelectSetting : Setting
                     i++;
                 }
                 GUI.EndGroup();
+
+                if (maxScroll > 0)
+                {
+                    float scrollbarW = GUIManager.S(3f);
+                    float scrollPct = scrollY / maxScroll;
+                    float handleHeight = Mathf.Max(GUIManager.S(12f), dropHeight * (dropHeight / (itemCount * rowHeight)));
+                    float handleY = dropRect.y + (scrollPct * (dropHeight - handleHeight));
+                    Rect scrollbarRect = new(dropRect.x + dropRect.width - scrollbarW - GUIManager.S(1f), handleY, scrollbarW, handleHeight);
+                    GUI.Box(scrollbarRect, "", ThemeManager.SettingOn);
+                }
             };
         }
 

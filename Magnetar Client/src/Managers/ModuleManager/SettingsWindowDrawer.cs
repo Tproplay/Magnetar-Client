@@ -53,6 +53,7 @@ internal static class SettingsWindowDrawer
         else
         {
             _lastActiveModule = null;
+            if (DrawSetting.ActiveDropdownId != -1) DrawSetting.ResetDropdownState();
             return;
         }
 
@@ -218,6 +219,7 @@ internal static class SettingsWindowDrawer
         currentScroll = Mathf.Clamp(currentScroll, 0f, maxScroll);
         _settingsScrollPositions[mod] = new Vector2(0, currentScroll);
 
+        DrawSetting.CurrentWindowGroupOffsetY = headerHeight;
         GUI.BeginGroup(outRect);
         float actualHeightDrawn = DrawSettingsBody(mod, -currentScroll, contentWidth);
 
@@ -264,6 +266,17 @@ internal static class SettingsWindowDrawer
         // 1. Mouse ScrollWheel
         if (outRect.Contains(e.mousePosition) && e.type == EventType.ScrollWheel)
         {
+            if (DrawSetting.ActiveDropdownId != -1 && DrawSetting.ActiveDropdownWindowRect.Contains(e.mousePosition))
+            {
+                // Mouse is over active dropdown: yield scroll to the dropdown!
+                return currentScroll;
+            }
+
+            if (DrawSetting.ActiveDropdownId != -1)
+            {
+                DrawSetting.ResetDropdownState();
+            }
+
             currentScroll = Mathf.Clamp(currentScroll + e.delta.y * ModuleManager.ScrollSensitivity, 0f, maxScroll);
             e.Use();
             return currentScroll;
@@ -402,7 +415,7 @@ internal static class SettingsWindowDrawer
 
             if (skipSettings) continue;
 
-            if (setting is MultiSelectSetting multiSet)
+            if (setting is BaseMultiSelectSetting multiSet)
             {
                 BindMultiSelectRouting(multiSet);
             }
@@ -413,7 +426,7 @@ internal static class SettingsWindowDrawer
                     if (sectionInstance?.ChildSettings == null) continue;
                     foreach (var child in sectionInstance.ChildSettings)
                     {
-                        if (child is MultiSelectSetting nestedMulti)
+                        if (child is BaseMultiSelectSetting nestedMulti)
                         {
                             BindMultiSelectRouting(nestedMulti);
                         }
@@ -490,7 +503,7 @@ internal static class SettingsWindowDrawer
         return y - startY;
     }
 
-    private static void BindMultiSelectRouting(MultiSelectSetting multiSet)
+    private static void BindMultiSelectRouting(BaseMultiSelectSetting multiSet)
     {
         multiSet.OnWindowOpen = () =>
         {

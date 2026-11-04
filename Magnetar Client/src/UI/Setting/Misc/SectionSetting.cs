@@ -1,4 +1,5 @@
 using Magnetar_Client.UI.Themes;
+using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Translator;
 using System;
 using System.Collections;
@@ -234,24 +235,199 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
         }
     }
 
+    private class SectionDefaultSnapshot
+    {
+        public string Title;
+        public bool IsExpanded = true;
+        public object Tag;
+        public List<(string Name, string SaveKey, object Value)> SettingValues = new();
+    }
+
+    private List<SectionDefaultSnapshot> _defaultSnapshots;
+
     /// <summary>
-    /// Clears and repopulates the section list back to <see cref="DefaultSectionCount"/> instances using <see cref="TemplateFactory"/>.
+    /// Gets whether custom default section templates have been captured via <see cref="SetAsDefault"/>.
+    /// </summary>
+    public bool HasDefaultSnapshots => _defaultSnapshots != null;
+
+    /// <summary>
+    /// Captures the current sections, their titles, expanded states, and child setting values as the default baseline.
+    /// When <see cref="Reset"/> is triggered, the setting reverts back to these captured templates.
+    /// </summary>
+    public void SetAsDefault()
+    {
+        DefaultSectionCount = Sections.Count;
+        _defaultSnapshots = new List<SectionDefaultSnapshot>();
+
+        for (int i = 0; i < Sections.Count; i++)
+        {
+            var sec = Sections[i];
+            if (sec == null) continue;
+
+            var snapshot = new SectionDefaultSnapshot
+            {
+                Title = sec.Title,
+                IsExpanded = sec.IsExpanded,
+                Tag = sec.Tag,
+                SettingValues = new List<(string Name, string SaveKey, object Value)>()
+            };
+
+            if (sec.ChildSettings != null)
+            {
+                for (int c = 0; c < sec.ChildSettings.Count; c++)
+                {
+                    var child = sec.ChildSettings[c];
+                    if (child == null) continue;
+
+                    SyncChildDefaultValue(child);
+                    object val = SaveLoadData.SerializeSettingValue(child);
+                    snapshot.SettingValues.Add((child.Name, child.SaveKey, val));
+                }
+            }
+
+            _defaultSnapshots.Add(snapshot);
+        }
+    }
+
+    /// <summary>
+    /// Alias for <see cref="SetAsDefault"/> to save the current sections as the default template state.
+    /// </summary>
+    public void SaveAsDefault() => SetAsDefault();
+
+    /// <summary>
+    /// Gets the default title for the section at the specified index, or <see langword="null"/> if no default is stored.
+    /// </summary>
+    /// <param name="index">The 0-based section index.</param>
+    /// <returns>The captured default title, or <see langword="null"/>.</returns>
+    public string GetDefaultTitle(int index)
+    {
+        if (_defaultSnapshots != null && index >= 0 && index < _defaultSnapshots.Count)
+        {
+            return _defaultSnapshots[index].Title;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Applies captured default snapshot values to the provided child settings list for the specified section index.
+    /// </summary>
+    /// <param name="index">The 0-based section index.</param>
+    /// <param name="childList">The list of child settings to populate.</param>
+    public void ApplyDefaultValues(int index, List<Setting> childList)
+    {
+        if (_defaultSnapshots == null || index < 0 || index >= _defaultSnapshots.Count || childList == null)
+            return;
+
+        var snapshot = _defaultSnapshots[index];
+        if (snapshot.SettingValues == null) return;
+
+        for (int c = 0; c < childList.Count; c++)
+        {
+            var child = childList[c];
+            if (child == null) continue;
+
+            bool restored = false;
+            if (c < snapshot.SettingValues.Count)
+            {
+                var snapItem = snapshot.SettingValues[c];
+                if (snapItem.SaveKey == child.SaveKey || snapItem.Name == child.Name)
+                {
+                    SaveLoadData.RestoreSettingValue(child, snapItem.Value);
+                    SyncChildDefaultValue(child);
+                    restored = true;
+                }
+            }
+
+            if (!restored)
+            {
+                for (int s = 0; s < snapshot.SettingValues.Count; s++)
+                {
+                    var snapItem = snapshot.SettingValues[s];
+                    if (snapItem.SaveKey == child.SaveKey || snapItem.Name == child.Name)
+                    {
+                        SaveLoadData.RestoreSettingValue(child, snapItem.Value);
+                        SyncChildDefaultValue(child);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private static void SyncChildDefaultValue(Setting setting)
+    {
+        if (setting == null) return;
+        if (setting is BoolSetting b) b.DefaultValue = b.Value;
+        else if (setting is FloatSetting f) f.DefaultValue = f.Value;
+        else if (setting is IntSetting i) i.DefaultValue = i.Value;
+        else if (setting is StringSetting s) s.DefaultValue = s.Value;
+        else if (setting is SelectSetting sel) sel.DefaultValue = sel.Value;
+        else if (setting is ColorSetting col) col.DefaultValue = col.Value;
+        else if (setting is BaseMultiSelectSetting ms) ms.SetCurrentAsDefault();
+        else if (setting is BindSetting bind)
+        {
+            bind.DefaultKeys.Clear();
+            if (bind.BindKeys != null) bind.DefaultKeys.AddRange(bind.BindKeys);
+        }
+        else if (setting is ListStringSetting list)
+        {
+            list.DefaultValues = new List<string>(list.Values);
+        }
+        else if (setting is Vector2Setting v2) v2.DefaultValue = v2.Value;
+        else if (setting is Vector2IntSetting v2i) v2i.DefaultValue = v2i.Value;
+        else if (setting is Vector3Setting v3) v3.DefaultValue = v3.Value;
+        else if (setting is Vector3IntSetting v3i) v3i.DefaultValue = v3i.Value;
+        else if (setting is SectionSetting nestedSec) nestedSec.SetAsDefault();
+    }
+
+    /// <summary>
+    /// Clears and repopulates the section list back to default instances.
+    /// If <see cref="SetAsDefault"/> was invoked, restores the captured section templates and values;
+    /// otherwise creates <see cref="DefaultSectionCount"/> fresh instances using <see cref="TemplateFactory"/>.
     /// </summary>
     public override void Reset()
     {
         Sections.Clear();
-        if (TemplateFactory != null)
+
+        if (HasDefaultSnapshots)
         {
-            for (int i = 0; i < DefaultSectionCount; i++)
+            if (TemplateFactory != null)
             {
-                string title = TitleFormatter != null ? TitleFormatter(i) : $"Section #{i + 1}";
-                var instance = new SectionInstance(title, TemplateFactory(i))
+                for (int i = 0; i < _defaultSnapshots.Count; i++)
                 {
-                    IsExpanded = DefaultExpanded
-                };
-                Sections.Add(instance);
+                    var snapshot = _defaultSnapshots[i];
+                    string title = !string.IsNullOrEmpty(snapshot.Title)
+                        ? snapshot.Title
+                        : (TitleFormatter != null ? TitleFormatter(i) : $"Section #{i + 1}");
+
+                    var childList = TemplateFactory(i) ?? new List<Setting>();
+                    ApplyDefaultValues(i, childList);
+
+                    var instance = new SectionInstance(title, childList)
+                    {
+                        IsExpanded = snapshot.IsExpanded,
+                        Tag = snapshot.Tag
+                    };
+                    Sections.Add(instance);
+                }
             }
         }
+        else
+        {
+            if (TemplateFactory != null)
+            {
+                for (int i = 0; i < DefaultSectionCount; i++)
+                {
+                    string title = TitleFormatter != null ? TitleFormatter(i) : $"Section #{i + 1}";
+                    var instance = new SectionInstance(title, TemplateFactory(i))
+                    {
+                        IsExpanded = DefaultExpanded
+                    };
+                    Sections.Add(instance);
+                }
+            }
+        }
+
         OnSectionsChanged?.Invoke();
     }
 

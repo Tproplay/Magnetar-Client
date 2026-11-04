@@ -23,12 +23,12 @@
 
     <!-- Loader Target Constants & Output Paths -->
     <PropertyGroup Condition="$(Configuration.Contains('MELON')) or $(Configuration.Contains('Melon'))">
-        <OutputPath>bin\Melonloader\$(Configuration)\</OutputPath>
+        <OutputPath>bin\Melonloader\</OutputPath>
         <DefineConstants>$(DefineConstants);MELONLOADER</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="$(Configuration.Contains('BepInEx')) or $(Configuration.Contains('BEPINEX'))">
-        <OutputPath>bin\BepInEx\$(Configuration)\</OutputPath>
+        <OutputPath>bin\BepInEx\</OutputPath>
         <DefineConstants>$(DefineConstants);BEPINEX</DefineConstants>
     </PropertyGroup>
 
@@ -52,6 +52,9 @@
 
     <!-- MelonLoader Engine References -->
     <ItemGroup Condition="$(Configuration.Contains('MELON')) or $(Configuration.Contains('Melon'))">
+        <Reference Include="AudioImportLib">
+            <HintPath>$(RefDir)\Melonloader\AudioImportLib.dll</HintPath>
+        </Reference>
         <Reference Include="MelonLoader">
             <HintPath>$(RefDir)\Melonloader\MelonLoader.dll</HintPath>
         </Reference>
@@ -66,6 +69,12 @@
         </Reference>
         <Reference Include="Il2Cppmscorlib">
             <HintPath>$(RefDir)\Melonloader\Il2Cpp\Il2Cppmscorlib.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.AudioModule">
+            <HintPath>$(RefDir)\Melonloader\Il2Cpp\UnityEngine.AudioModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.AssetBundleModule">
+            <HintPath>$(RefDir)\Melonloader\Il2Cpp\UnityEngine.AssetBundleModule.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine">
             <HintPath>$(RefDir)\Melonloader\Il2Cpp\UnityEngine.dll</HintPath>
@@ -86,6 +95,9 @@
 
     <!-- BepInEx Engine References -->
     <ItemGroup Condition="$(Configuration.Contains('BepInEx')) or $(Configuration.Contains('BEPINEX'))">
+        <Reference Include="SherkeyXD.BepInEx-Sounds-Loader">
+            <HintPath>$(RefDir)\Bepinex\SherkeyXD.BepInEx-Sounds-Loader.dll</HintPath>
+        </Reference>
         <Reference Include="BepInEx.Core">
             <HintPath>$(RefDir)\Bepinex\BepInEx.Core.dll</HintPath>
         </Reference>
@@ -100,6 +112,12 @@
         </Reference>
         <Reference Include="Il2Cppmscorlib">
             <HintPath>$(RefDir)\Bepinex\Il2Cpp\Il2Cppmscorlib.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.AudioModule">
+            <HintPath>$(RefDir)\Bepinex\Il2Cpp\UnityEngine.AudioModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.AssetBundleModule">
+            <HintPath>$(RefDir)\Bepinex\Il2Cpp\UnityEngine.AssetBundleModule.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine">
             <HintPath>$(RefDir)\Bepinex\Il2Cpp\UnityEngine.dll</HintPath>

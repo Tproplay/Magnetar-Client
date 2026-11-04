@@ -1,17 +1,21 @@
 using Magnetar_Client.Core;
 using Magnetar_Client.UI.Themes;
 using Magnetar_Client.UI.WindowDrawing;
+using Magnetar_Client.Utils;
 using static Magnetar_Client.Utils.Translator;
+using static Magnetar_Client.Utils.Magnetar_Logger;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Magnetar_Client.UI.Setting;
 
 /// <summary>
-/// A setting for having multiple options selectable from a list
+/// Abstract base class defining common state, rendering, and lifecycle behavior for all multi-select settings.
 /// </summary>
-public class MultiSelectSetting : Setting
+public abstract class BaseMultiSelectSetting : Setting
 {
     /// <summary>
     /// The maximum number of items that can be selected simultaneously. Set to -1 for unlimited selection.
@@ -19,50 +23,14 @@ public class MultiSelectSetting : Setting
     public int MaxSelection = -1;
 
     /// <summary>
-    /// The map of all available options, where the key is the option's integer ID and the value is its internal name.
-    /// </summary>
-    public Dictionary<int, string> Options { get; set; } = new();
-
-    /// <summary>
-    /// The collection of currently selected option IDs.
-    /// </summary>
-    public HashSet<int> SelectedValues = new();
-
-    /// <summary>
-    /// The fallback set of option IDs restored when <see cref="Reset"/> is executed.
-    /// </summary>
-    public HashSet<int> DefaultSelectedValues = new();
-
-    /// <summary>
-    /// Option IDs explicitly forbidden from being selected or rendered in selection views.
-    /// </summary>
-    public HashSet<int> Blacklist = new();
-
-    /// <summary>
     /// Option internal names explicitly forbidden from being selected or rendered in selection views.
     /// </summary>
     public HashSet<string> NameBlacklist = new();
 
     /// <summary>
-    /// The underlying Enum type if this setting was constructed from an Enum.
-    /// </summary>
-    public Type EnumType { get; private set; }
-
-    /// <summary>
-    /// Callback triggered when an option's selection state changes.
-    /// First parameter is the option ID; second parameter is <c>true</c> if selected, <c>false</c> if deselected.
-    /// </summary>
-    public Action<int, bool> OnSelectionChanged { get; set; }
-
-    /// <summary>
     /// Action invoked when the selection view is opened.
     /// </summary>
     public Action OnWindowOpen { get; set; }
-
-    /// <summary>
-    /// Optional dictionary providing localized or custom formatted display names overriding default names.
-    /// </summary>
-    public Dictionary<int, string> CustomNames;
 
     /// <summary>
     /// Whether the options inside the selection window should be sorted alphabetically by display name.
@@ -82,210 +50,84 @@ public class MultiSelectSetting : Setting
     public bool ShowCountText { get; set; } = true;
 
     /// <summary>
-    /// Initializes an empty <see cref="MultiSelectSetting"/> with the specified display name.
+    /// Gets the number of currently selected options.
     /// </summary>
-    /// <param name="name">The display name of the setting.</param>
-    public MultiSelectSetting(string name)
-    {
-        Name = name;
-    }
+    public abstract int SelectedCount { get; }
 
     /// <summary>
-    /// Initializes a new <see cref="MultiSelectSetting"/> populated with the integer values and names of an enum.
+    /// Gets the total number of configured options.
     /// </summary>
-    /// <param name="name">The display name of the setting.</param>
-    /// <param name="enumType">The enum type whose entries define the selectable options.</param>
-    public MultiSelectSetting(string name, System.Type enumType)
-    {
-        Name = name;
-        EnumType = enumType;
-
-        if (enumType != null && enumType.IsEnum)
-        {
-            foreach (var val in Enum.GetValues(enumType))
-                Options[Convert.ToInt32(val)] = val.ToString();
-        }
-    }
+    public abstract int OptionsCount { get; }
 
     /// <summary>
-    /// Initializes a new <see cref="MultiSelectSetting"/> populated from an existing dictionary of options.
+    /// Resolves the display label of the first selected option, or empty string if none are selected.
     /// </summary>
-    /// <param name="name">The display name of the setting.</param>
-    /// <param name="options">Dictionary mapping integer IDs to option display labels.</param>
-    public MultiSelectSetting(string name, Dictionary<int, string> options)
-    {
-        Name = name;
-        if (options != null)
-        {
-            foreach (var kvp in options)
-            {
-                Options[kvp.Key] = kvp.Value;
-            }
-        }
-    }
+    public abstract string GetPrimarySelectedDisplayName();
 
     /// <summary>
-    /// Initializes a new <see cref="MultiSelectSetting"/> from a list of option strings.
-    /// Each item's list index is used as its option ID.
+    /// Resolves the display label for the given option key, falling back to internal name or string representation.
     /// </summary>
-    /// <param name="name">The display name of the setting.</param>
-    /// <param name="options">List of option labels.</param>
-    public MultiSelectSetting(string name, List<string> options)
-    {
-        Name = name;
-        if (options != null)
-        {
-            for (int i = 0; i < options.Count; i++)
-            {
-                Options[i] = options[i];
-            }
-        }
-    }
+    public abstract string ResolveDisplayName(object key, string fallback = null);
 
     /// <summary>
-    /// Initializes a new <see cref="MultiSelectSetting"/> from an array of option strings.
-    /// Each item's array index is used as its option ID.
+    /// Checks whether an option is blacklisted either by key or internal name.
     /// </summary>
-    /// <param name="name">The display name of the setting.</param>
-    /// <param name="options">Array of option labels.</param>
-    public MultiSelectSetting(string name, string[] options)
-    {
-        Name = name;
-        if (options != null)
-        {
-            for (int i = 0; i < options.Length; i++)
-            {
-                Options[i] = options[i];
-            }
-        }
-    }
+    public abstract bool IsBlacklisted(object key, string internalName);
 
     /// <summary>
-    /// Resolves the user-facing display name for a given option ID. Checks <see cref="CustomNames"/> first,
-    /// then <see cref="Options"/>, and finally falls back to <paramref name="fallbackName"/> or the ID string.
+    /// Yields all renderable options as tuples of (key, display label, internal name) filtering out blacklisted entries.
     /// </summary>
-    /// <param name="id">The option ID to look up.</param>
-    /// <param name="fallbackName">Fallback text to use if no key match is found.</param>
-    /// <returns>The resolved display string.</returns>
-    public string GetDisplayName(int id, string fallbackName = null)
-    {
-        if (CustomNames != null && CustomNames.TryGetValue(id, out string customName))
-        {
-            return customName;
-        }
-
-        if (Options.TryGetValue(id, out string baseName))
-        {
-            return baseName;
-        }
-
-        return fallbackName ?? id.ToString();
-    }
+    public abstract IEnumerable<(object Key, string DisplayName, string InternalName)> GetRenderableOptions();
 
     /// <summary>
-    /// Adds or updates an option in the available options dictionary.
+    /// Checks whether the option corresponding to the specified key is currently selected.
     /// </summary>
-    /// <param name="id">The unique identifier of the option.</param>
-    /// <param name="displayName">The label shown for the option.</param>
-    public void AddOption(int id, string displayName) => Options[id] = displayName;
+    public abstract bool IsSelectedRaw(object key);
 
     /// <summary>
-    /// Removes an option from both available options and current selections.
+    /// Toggles the selection status of the specified option key.
     /// </summary>
-    /// <param name="id">The option ID to remove.</param>
-    public void RemoveOption(int id)
-    {
-        if (IsDisabled) return;
-        if (Options.Remove(id) && SelectedValues.Remove(id))
-            OnSelectionChanged?.Invoke(id, false);
-    }
+    public abstract void ToggleRaw(object key);
 
     /// <summary>
-    /// Toggles the selection status of the given option ID.
+    /// Selects the option corresponding to the specified key.
     /// </summary>
-    /// <param name="id">The option ID to toggle.</param>
-    public void Toggle(int id)
-    {
-        if (IsDisabled) return;
-        if (IsSelected(id)) Deselect(id);
-        else Select(id);
-    }
+    public abstract void SelectRaw(object key);
 
     /// <summary>
-    /// Selects an option if not already selected, not blacklisted, and within the <see cref="MaxSelection"/> bound.
+    /// Deselects the option corresponding to the specified key.
     /// </summary>
-    /// <param name="id">The option ID to select.</param>
-    public void Select(int id)
-    {
-        if (IsDisabled || SelectedValues.Contains(id) || Blacklist.Contains(id)) return;
-        if (MaxSelection == -1 || SelectedValues.Count < MaxSelection)
-        {
-            SelectedValues.Add(id);
-            OnSelectionChanged?.Invoke(id, true);
-        }
-    }
+    public abstract void DeselectRaw(object key);
 
     /// <summary>
-    /// Deselects the given option ID if it is currently selected.
+    /// Clears all currently selected options.
     /// </summary>
-    /// <param name="id">The option ID to deselect.</param>
-    public void Deselect(int id)
-    {
-        if (IsDisabled) return;
-        if (SelectedValues.Remove(id))
-            OnSelectionChanged?.Invoke(id, false);
-    }
+    public abstract void ClearSelections();
 
     /// <summary>
-    /// Checks whether an option ID is currently selected.
+    /// Selects all available valid options, optionally caching the state as default.
     /// </summary>
-    /// <param name="id">The option ID to check.</param>
-    /// <returns><c>true</c> if selected; otherwise, <c>false</c>.</returns>
-    public bool IsSelected(int id) => SelectedValues.Contains(id);
+    public abstract void SelectAll(bool setDefault = true);
 
     /// <summary>
-    /// Sets the selection directly to a single ID without firing <see cref="OnSelectionChanged"/> or checking <see cref="Setting.IsDisabled"/>.
+    /// Deselects all options.
     /// </summary>
-    /// <param name="id">The option ID to select.</param>
-    public void SetDirect(int id)
-    {
-        SelectedValues.Clear();
-        SelectedValues.Add(id);
-    }
+    public abstract void DeselectAll();
 
     /// <summary>
-    /// Sets the selection directly to multiple IDs without firing <see cref="OnSelectionChanged"/> or checking <see cref="Setting.IsDisabled"/>.
+    /// Captures the current selections as the default state for future resets.
     /// </summary>
-    /// <param name="ids">Collection of option IDs to select.</param>
-    public void SetDirect(IEnumerable<int> ids)
-    {
-        SelectedValues.Clear();
-        if (ids != null)
-        {
-            foreach (var id in ids)
-                SelectedValues.Add(id);
-        }
-    }
+    public abstract void SetCurrentAsDefault();
 
     /// <summary>
-    /// Restores the selection set to match <see cref="DefaultSelectedValues"/>.
+    /// Exports the selection state into a persistent DTO for serialization.
     /// </summary>
-    public override void Reset()
-    {
-        var old = new HashSet<int>(SelectedValues);
-        SelectedValues.Clear();
-        foreach (var v in DefaultSelectedValues) SelectedValues.Add(v);
-        foreach (var v in old)
-        {
-            if (!SelectedValues.Contains(v))
-                OnSelectionChanged?.Invoke(v, false);
-        }
-        foreach (var v in SelectedValues)
-        {
-            if (!old.Contains(v))
-                OnSelectionChanged?.Invoke(v, true);
-        }
-    }
+    public abstract object ExportSaveData();
+
+    /// <summary>
+    /// Restores the selection state from a deserialized JSON DTO or raw value.
+    /// </summary>
+    public abstract void ImportSaveData(object rawValue);
 
     private static GUIStyle _countTextStyle;
 
@@ -320,8 +162,6 @@ public class MultiSelectSetting : Setting
     /// <summary>
     /// Renders the setting row in the window, showing the label, current count (if enabled), select button, and reset button.
     /// </summary>
-    /// <param name="y">Reference to the vertical position accumulator.</param>
-    /// <param name="width">Total available width for this settings row.</param>
     public override void Draw(ref float y, float width)
     {
         Event e = Event.current;
@@ -342,13 +182,13 @@ public class MultiSelectSetting : Setting
 
         if (ShowCountText)
         {
-            if (MaxSelection == 1 && SelectedValues.Count == 1)
+            if (MaxSelection == 1 && SelectedCount == 1)
             {
-                countText = '(' + GetDisplayName(System.Linq.Enumerable.First(SelectedValues)) + ')';
+                countText = '(' + GetPrimarySelectedDisplayName() + ')';
             }
             else
             {
-                countText = '(' + Translate($"{SelectedValues.Count} selected") + ')';
+                countText = '(' + Translate($"{SelectedCount} selected") + ')';
             }
 
             textW = (Width > 0f) ? GUIManager.S(Width) : MultiSelectCountTextStyle.CalcSize(new GUIContent(countText)).x;
@@ -372,6 +212,7 @@ public class MultiSelectSetting : Setting
             if (!IsDisabled)
             {
                 OnWindowOpen?.Invoke();
+                DrawSetting.activeMultiSelect = this;
                 DrawSetting.multiSelectSearchQuery = "";
                 DrawSetting.manualScrollY = 0f;
             }
@@ -398,12 +239,184 @@ public class MultiSelectSetting : Setting
 
         y += elemH + ClientConfig.spacing;
     }
+}
+
+/// <summary>
+/// A generic multi-select setting supporting arbitrary option key types <typeparamref name="T"/>
+/// (e.g. <see cref="string"/>, <see cref="int"/>, or custom identifier types).
+/// </summary>
+public class MultiSelectSetting<T> : BaseMultiSelectSetting
+{
+    /// <summary>
+    /// The map of all available options, where the key is the option identifier and the value is its internal name.
+    /// </summary>
+    public Dictionary<T, string> Options { get; set; } = new();
 
     /// <summary>
-    /// Selects all valid options (excluding blacklists) and optionally caches them as the default state.
+    /// The collection of currently selected option keys.
     /// </summary>
-    /// <param name="setDefault">If <c>true</c>, updates <see cref="DefaultSelectedValues"/> to match the current selection.</param>
-    public void SelectAll(bool setDefault = true)
+    public HashSet<T> SelectedValues = new();
+
+    /// <summary>
+    /// The fallback set of option keys restored when <see cref="Reset"/> is executed.
+    /// </summary>
+    public HashSet<T> DefaultSelectedValues = new();
+
+    /// <summary>
+    /// Option keys explicitly forbidden from being selected or rendered in selection views.
+    /// </summary>
+    public HashSet<T> Blacklist = new();
+
+    /// <summary>
+    /// Callback triggered when an option's selection state changes.
+    /// First parameter is the option key; second parameter is <c>true</c> if selected, <c>false</c> if deselected.
+    /// </summary>
+    public Action<T, bool> OnSelectionChanged { get; set; }
+
+    /// <summary>
+    /// Optional dictionary providing localized or custom formatted display names overriding default names.
+    /// </summary>
+    public Dictionary<T, string> CustomNames;
+
+    public override int SelectedCount => SelectedValues.Count;
+    public override int OptionsCount => Options.Count;
+
+    public MultiSelectSetting(string name)
+    {
+        Name = name;
+    }
+
+    public MultiSelectSetting(string name, Dictionary<T, string> options)
+    {
+        Name = name;
+        if (options != null)
+        {
+            foreach (var kvp in options)
+            {
+                Options[kvp.Key] = kvp.Value;
+            }
+        }
+    }
+
+    public MultiSelectSetting(string name, IEnumerable<T> items, Func<T, string> nameSelector = null)
+    {
+        Name = name;
+        if (items != null)
+        {
+            foreach (var item in items)
+            {
+                if (item != null)
+                {
+                    Options[item] = nameSelector != null ? nameSelector(item) : item.ToString();
+                }
+            }
+        }
+    }
+
+    public MultiSelectSetting(string name, T[] items) : this(name, (IEnumerable<T>)items)
+    {
+    }
+
+    public string GetDisplayName(T id, string fallbackName = null)
+    {
+        if (CustomNames != null && CustomNames.TryGetValue(id, out string customName))
+        {
+            return customName;
+        }
+
+        if (Options.TryGetValue(id, out string baseName))
+        {
+            return baseName;
+        }
+
+        return fallbackName ?? id?.ToString() ?? "";
+    }
+
+    public override string ResolveDisplayName(object key, string fallback = null)
+    {
+        if (TryConvertKey(key, out T typedKey))
+        {
+            return GetDisplayName(typedKey, fallback);
+        }
+        return fallback ?? key?.ToString() ?? "";
+    }
+
+    public override string GetPrimarySelectedDisplayName()
+    {
+        if (SelectedValues.Count == 0) return string.Empty;
+        var first = System.Linq.Enumerable.First(SelectedValues);
+        return GetDisplayName(first);
+    }
+
+    public void AddOption(T id, string displayName) => Options[id] = displayName;
+
+    public void RemoveOption(T id)
+    {
+        if (IsDisabled) return;
+        if (Options.Remove(id) && SelectedValues.Remove(id))
+            OnSelectionChanged?.Invoke(id, false);
+    }
+
+    public void Toggle(T id)
+    {
+        if (IsDisabled) return;
+        if (IsSelected(id)) Deselect(id);
+        else Select(id);
+    }
+
+    public void Select(T id)
+    {
+        if (IsDisabled || SelectedValues.Contains(id) || (Blacklist != null && Blacklist.Contains(id))) return;
+        if (MaxSelection == -1 || SelectedValues.Count < MaxSelection)
+        {
+            SelectedValues.Add(id);
+            OnSelectionChanged?.Invoke(id, true);
+        }
+    }
+
+    public void Deselect(T id)
+    {
+        if (IsDisabled) return;
+        if (SelectedValues.Remove(id))
+            OnSelectionChanged?.Invoke(id, false);
+    }
+
+    public bool IsSelected(T id) => SelectedValues.Contains(id);
+
+    public void SetDirect(T id)
+    {
+        SelectedValues.Clear();
+        SelectedValues.Add(id);
+    }
+
+    public void SetDirect(IEnumerable<T> ids)
+    {
+        SelectedValues.Clear();
+        if (ids != null)
+        {
+            foreach (var id in ids)
+                SelectedValues.Add(id);
+        }
+    }
+
+    public override void Reset()
+    {
+        var old = new HashSet<T>(SelectedValues);
+        SelectedValues.Clear();
+        foreach (var v in DefaultSelectedValues) SelectedValues.Add(v);
+        foreach (var v in old)
+        {
+            if (!SelectedValues.Contains(v))
+                OnSelectionChanged?.Invoke(v, false);
+        }
+        foreach (var v in SelectedValues)
+        {
+            if (!old.Contains(v))
+                OnSelectionChanged?.Invoke(v, true);
+        }
+    }
+
+    public override void SelectAll(bool setDefault = true)
     {
         SelectedValues.Clear();
         foreach (var key in Options.Keys)
@@ -423,11 +436,258 @@ public class MultiSelectSetting : Setting
         }
     }
 
-    /// <summary>
-    /// Saves the current selection state into <see cref="DefaultSelectedValues"/> for subsequent reset operations.
-    /// </summary>
-    public void SetCurrentAsDefault()
+    public override void DeselectAll()
     {
-        DefaultSelectedValues = new HashSet<int>(SelectedValues);
+        if (IsDisabled) return;
+        var old = new List<T>(SelectedValues);
+        SelectedValues.Clear();
+        for (int i = 0; i < old.Count; i++)
+        {
+            OnSelectionChanged?.Invoke(old[i], false);
+        }
+    }
+
+    public override void SetCurrentAsDefault()
+    {
+        DefaultSelectedValues = new HashSet<T>(SelectedValues);
+    }
+
+    public override bool IsSelectedRaw(object key)
+    {
+        if (TryConvertKey(key, out T typedKey)) return IsSelected(typedKey);
+        return false;
+    }
+
+    public override void ToggleRaw(object key)
+    {
+        if (TryConvertKey(key, out T typedKey)) Toggle(typedKey);
+    }
+
+    public override void SelectRaw(object key)
+    {
+        if (TryConvertKey(key, out T typedKey)) Select(typedKey);
+    }
+
+    public override void DeselectRaw(object key)
+    {
+        if (TryConvertKey(key, out T typedKey)) Deselect(typedKey);
+    }
+
+    public override void ClearSelections()
+    {
+        SelectedValues.Clear();
+    }
+
+    public override bool IsBlacklisted(object key, string internalName)
+    {
+        if (TryConvertKey(key, out T typedKey) && Blacklist != null && Blacklist.Contains(typedKey))
+            return true;
+        if (!string.IsNullOrEmpty(internalName) && NameBlacklist != null && NameBlacklist.Contains(internalName))
+            return true;
+        return false;
+    }
+
+    public override IEnumerable<(object Key, string DisplayName, string InternalName)> GetRenderableOptions()
+    {
+        foreach (var kvp in Options)
+        {
+            if (Blacklist != null && Blacklist.Contains(kvp.Key)) continue;
+            if (NameBlacklist != null && NameBlacklist.Contains(kvp.Value)) continue;
+            string displayName = GetDisplayName(kvp.Key, kvp.Value);
+            yield return (kvp.Key, displayName, kvp.Value);
+        }
+    }
+
+    public override object ExportSaveData()
+    {
+        var validOptions = Options.Keys
+            .Where(k => (Blacklist == null || !Blacklist.Contains(k)) &&
+                        (NameBlacklist == null || !NameBlacklist.Contains(Options[k])))
+            .ToList();
+
+        int totalCount = validOptions.Count;
+        int selectedCount = SelectedValues.Count;
+
+        if (totalCount > 0 && selectedCount >= (totalCount / 2))
+        {
+            var unselected = validOptions.Where(k => !SelectedValues.Contains(k)).Select(k => (object)k).ToList();
+            return new SaveLoadData.MultiSelectSaveData
+            {
+                Mode = "Deselected",
+                Values = unselected
+            };
+        }
+        else
+        {
+            return new SaveLoadData.MultiSelectSaveData
+            {
+                Mode = "Selected",
+                Values = SelectedValues.Select(k => (object)k).ToList()
+            };
+        }
+    }
+
+    public override void ImportSaveData(object rawValue)
+    {
+        try
+        {
+            string jsonStr = JsonConvert.SerializeObject(rawValue);
+            var proxy = JsonConvert.DeserializeObject<SaveLoadData.MultiSelectSaveData>(jsonStr);
+
+            if (proxy != null)
+            {
+                SelectedValues.Clear();
+
+                var validOptions = Options.Keys
+                    .Where(k => (Blacklist == null || !Blacklist.Contains(k)) &&
+                                (NameBlacklist == null || !NameBlacklist.Contains(Options[k])))
+                    .ToList();
+
+                var convertedValues = new HashSet<T>();
+                if (proxy.Values != null)
+                {
+                    foreach (var obj in proxy.Values)
+                    {
+                        if (TryConvertKey(obj, out T converted))
+                        {
+                            convertedValues.Add(converted);
+                        }
+                    }
+                }
+
+                if (string.Equals(proxy.Mode, "Deselected", StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (var opt in validOptions)
+                    {
+                        if (!convertedValues.Contains(opt))
+                        {
+                            SelectedValues.Add(opt);
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var val in convertedValues)
+                    {
+                        if (Blacklist == null || !Blacklist.Contains(val))
+                        {
+                            SelectedValues.Add(val);
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            AutoSaveLogger.Error($"Error importing multi-select setting '{Name}': {ex.Message}");
+        }
+    }
+
+    protected static bool TryConvertKey(object key, out T result)
+    {
+        if (key is T direct)
+        {
+            result = direct;
+            return true;
+        }
+        if (key == null)
+        {
+            result = default;
+            return false;
+        }
+        try
+        {
+            if (typeof(T) == typeof(int))
+            {
+                result = (T)(object)Convert.ToInt32(key);
+                return true;
+            }
+            if (typeof(T) == typeof(string))
+            {
+                result = (T)(object)key.ToString();
+                return true;
+            }
+            result = (T)Convert.ChangeType(key, typeof(T));
+            return true;
+        }
+        catch
+        {
+            result = default;
+            return false;
+        }
+    }
+}
+
+/// <summary>
+/// A specialized <see cref="MultiSelectSetting{T}"/> keyed by <see cref="string"/>, designed for dynamic collections
+/// (e.g. file paths, external audio lists, mod names) where integer indices shift when options are modified externally.
+/// </summary>
+public class StringMultiSelectSetting : MultiSelectSetting<string>
+{
+    public StringMultiSelectSetting(string name) : base(name)
+    {
+    }
+
+    public StringMultiSelectSetting(string name, Dictionary<string, string> options) : base(name, options)
+    {
+    }
+
+    public StringMultiSelectSetting(string name, IEnumerable<string> options) : base(name, options)
+    {
+    }
+
+    public StringMultiSelectSetting(string name, string[] options) : base(name, options)
+    {
+    }
+}
+
+/// <summary>
+/// An integer-keyed multi-select setting primarily used for Enums and index-based collections.
+/// </summary>
+public class MultiSelectSetting : MultiSelectSetting<int>
+{
+    /// <summary>
+    /// The underlying Enum type if this setting was constructed from an Enum.
+    /// </summary>
+    public Type EnumType { get; private set; }
+
+    public MultiSelectSetting(string name) : base(name)
+    {
+    }
+
+    public MultiSelectSetting(string name, Type enumType) : base(name)
+    {
+        EnumType = enumType;
+        if (enumType != null && enumType.IsEnum)
+        {
+            foreach (var val in Enum.GetValues(enumType))
+                Options[Convert.ToInt32(val)] = val.ToString();
+        }
+    }
+
+    public MultiSelectSetting(string name, Dictionary<int, string> options) : base(name, options)
+    {
+    }
+
+    public MultiSelectSetting(string name, List<string> options) : base(name)
+    {
+        if (options != null)
+        {
+            for (int i = 0; i < options.Count; i++)
+            {
+                Options[i] = options[i];
+            }
+        }
+    }
+
+    public MultiSelectSetting(string name, string[] options) : base(name)
+    {
+        if (options != null)
+        {
+            for (int i = 0; i < options.Length; i++)
+            {
+                Options[i] = options[i];
+            }
+        }
     }
 }

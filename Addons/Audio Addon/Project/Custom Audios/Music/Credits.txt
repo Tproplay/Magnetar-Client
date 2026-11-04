@@ -1,0 +1,38 @@
+================================================================================
+                           MAGNETAR CLIENT - AUDIO ADDON
+                                 SOUNDTRACK CREDITS
+================================================================================
+
+[Menu & Ambience]
+- MainMenu     : "Starry Ceiling" by Rollerlhite
+                 URL: https://www.youtube.com/watch?v=aBj1MfvnHPE
+- Garden       : "GarZen Flora" by Rollerlhite
+                 URL: https://www.youtube.com/watch?v=aBj1MfvnHPE
+- SelectCard   : "Choose Your Seeds" by Laura Shigihara (Original Soundtrack)
+                 URL: https://www.youtube.com/playlist?list=PLBO2h-GzDvIbpXmK3uTNi6Fe_SE5sTFLY
+
+[Adventure Stages (Music & Dynamic Drums)]
+- Day          : "Lumi-Lawn" by Xabdi
+- Day_drum     : "Lumi-Lawn (Drum Layer)" by Xabdi
+- Night        : "Undead of the Night" by Xabdi
+- Night_drum   : "Undead of the Night (Drum Layer)" by Xabdi
+- Pool         : "GhOuL pOoL" by Xabdi
+- Pool_drum    : "GhOuL pOoL (Drum Layer)" by Xabdi
+- Fog          : "Mortemlights" by Xabdi
+- Fog_drum     : "Mortemlights (Drum Layer)" by Xabdi
+- Roof         : "Praize the Hills" by Xabdi
+- Roof_drum    : "Praize the Hills (Drum Layer)" by Xabdi
+- Roof_pre     : "Praize the Hills (Intro)" by Xabdi
+                 Playlist: https://youtube.com/playlist?list=PLuKXe1tVSw8Sh4K5qrUn65gbRaVNTeqjs&si=heuMbZmlYoAGUf6M
+
+[Mini-games & Boss Battles]
+- Loon         : "Brainless Wit" (Loonboon Remix) by Xabdi
+- Boss         : "Steamroller" by Xabdi
+- Boss2        : "Boss2" by Xabdi
+                 Playlist: https://youtube.com/playlist?list=PLuKXe1tVSw8Sh4K5qrUn65gbRaVNTeqjs&si=heuMbZmlYoAGUf6M
+- UltimateBattle: "Ultimate Battle" by Laura Shigihara (Original Soundtrack)
+- IZ           : "Brainiac Maniac / I, Zombie" by Laura Shigihara (Original Soundtrack)
+                 Playlist: https://www.youtube.com/playlist?list=PLBO2h-GzDvIbpXmK3uTNi6Fe_SE5sTFLY
+
+================================================================================
+All music rights belong to their respective creators (Rollerlhite, Xabdi, and Laura Shigihara).

@@ -1,9 +1,14 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using HarmonyLib;
 using Magnetar_Client;
 using Magnetar_Client.Api;
+using Magnetar_Client.Core;
 using Magnetar_Client.Modules;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.Utils;
@@ -39,6 +44,7 @@ public class CustomMusic : Module
     private readonly Dictionary<int, string> _optionsDict = new();
 
     private ICoroutineHandle _activeLoadHandle;
+    private static bool _isDownloading = false;
 
     public static string AudioDir => GetAudioDir();
 
@@ -51,6 +57,168 @@ public class CustomMusic : Module
 
         // Dynamically categorize and create settings for all in-game music tracks
         BuildDynamicTrackSettings();
+
+        // If official default AssetBundle was not found, download it in background
+        CheckAndDownloadMissingDefaultBundle();
+    }
+
+    private void CheckAndDownloadMissingDefaultBundle()
+    {
+        bool hasDefaultBundle = AudioClipLoader.MusicBundledTracks.Values.Any(t => t.IsDefaultSoundtrack);
+        if (hasDefaultBundle) return;
+
+        string targetBundleName = MagnetarInfo.Platform == MagnetarInfo.PlatformType.Android ? "musicAB_android" : "musicAB_windows";
+        string targetPath = Path.Combine(AudioDir, targetBundleName);
+
+        if (File.Exists(targetPath) && AudioClipLoader.IsAssetBundle(targetPath))
+        {
+            AudioClipLoader.ScanAndLoadMusicBundles(AudioDir);
+            RefreshTrackSettingsAfterBundleLoaded();
+            return;
+        }
+
+        CoroutineManager.Start(DownloadDefaultBundleRoutine(targetBundleName, targetPath));
+    }
+
+    private IEnumerator DownloadDefaultBundleRoutine(string targetBundleName, string targetPath)
+    {
+        if (_isDownloading) yield break;
+        _isDownloading = true;
+
+        MagnetarApi.LogMsg($"[Audio Addon] Default soundtrack '{targetBundleName}' not found in Custom Audios/Music/. Downloading in background...");
+
+        string[] candidateUrls = new[]
+        {
+            $"https://raw.githubusercontent.com/Tproplay/Magnetar-Client/master/Addons/Audio%20Addon/Project/Custom%20Audios/{targetBundleName}",
+            $"https://raw.githubusercontent.com/Tproplay/Magnetar-Client/devlop/Addons/Audio%20Addon/Project/Custom%20Audios/{targetBundleName}",
+            $"https://github.com/Tproplay/Magnetar-Client/raw/master/Addons/Audio%20Addon/Project/Custom%20Audios/{targetBundleName}"
+        };
+
+        bool downloadDone = false;
+        Exception downloadError = null;
+        string tempPath = targetPath + ".download.tmp";
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                using var handler = new HttpClientHandler { AllowAutoRedirect = true };
+                using var client = new HttpClient(handler)
+                {
+                    Timeout = TimeSpan.FromMinutes(10)
+                };
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Magnetar-AudioAddon");
+
+                HttpResponseMessage response = null;
+                foreach (var url in candidateUrls)
+                {
+                    try
+                    {
+                        var req = new HttpRequestMessage(HttpMethod.Get, url);
+                        var resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
+                        if (resp.IsSuccessStatusCode)
+                        {
+                            response = resp;
+                            break;
+                        }
+                    }
+                    catch { }
+                }
+
+                if (response == null)
+                {
+                    throw new Exception("Unable to reach GitHub raw download servers.");
+                }
+
+                string dir = Path.GetDirectoryName(targetPath);
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                using (var stream = await response.Content.ReadAsStreamAsync())
+                using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, 65536, true))
+                {
+                    await stream.CopyToAsync(fs);
+                }
+
+                if (!AudioClipLoader.IsAssetBundle(tempPath))
+                {
+                    try { File.Delete(tempPath); } catch { }
+                    throw new Exception("Downloaded file is corrupt or not a valid Unity AssetBundle.");
+                }
+
+                if (File.Exists(targetPath))
+                {
+                    File.Delete(targetPath);
+                }
+                File.Move(tempPath, targetPath);
+            }
+            catch (Exception ex)
+            {
+                downloadError = ex;
+                try { if (File.Exists(tempPath)) File.Delete(tempPath); } catch { }
+            }
+            finally
+            {
+                downloadDone = true;
+            }
+        });
+
+        while (!downloadDone)
+        {
+            yield return null;
+        }
+
+        _isDownloading = false;
+
+        if (downloadError != null)
+        {
+            MagnetarApi.LogWarning($"[Audio Addon] Could not download '{targetBundleName}': {downloadError.Message}");
+            yield break;
+        }
+
+        MagnetarApi.LogMsg($"[Audio Addon] Successfully downloaded '{targetBundleName}' ({new FileInfo(targetPath).Length / 1048576f:F1} MB). Loading soundtrack...");
+
+        AudioClipLoader.ScanAndLoadMusicBundles(AudioDir);
+        RefreshTrackSettingsAfterBundleLoaded();
+    }
+
+    public void RefreshTrackSettingsAfterBundleLoaded()
+    {
+        ScanAudioFiles();
+
+        foreach (var value in Enum.GetValues(typeof(MusicType)))
+        {
+            var track = (MusicType)value;
+            string trackName = track.ToString();
+
+            if (TrackSettings.TryGetValue(track, out var setting))
+            {
+                setting.Options = new Dictionary<int, string>(_optionsDict);
+
+                // If setting was at vanilla default, preselect the newly downloaded bundle track
+                if (setting.Value == 0)
+                {
+                    for (int i = 0; i < _audioFiles.Count; i++)
+                    {
+                        string item = _audioFiles[i];
+                        if (AudioClipLoader.MusicBundledTracks.TryGetValue(item, out var bTrack) &&
+                            bTrack.IsDefaultSoundtrack &&
+                            bTrack.CleanName.Equals(trackName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            setting.Value = i + 1;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (Active)
+        {
+            ApplyCurrentTrackOverride();
+        }
     }
 
     private static string GetAudioDir()

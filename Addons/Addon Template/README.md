@@ -111,8 +111,8 @@ The project includes two preconfigured build configurations:
 
 | Configuration | Mod Loader | Output Directory |
 |---|---|---|
-| `MelonLoader` | MelonLoader (IL2CPP) | `Project/bin/Melonloader/MelonLoader/<Name>.dll` |
-| `BepInEx` | BepInEx (IL2CPP) | `Project/bin/BepInEx/BepInEx/<Name>.dll` |
+| `MelonLoader` | MelonLoader (IL2CPP) | `Project/bin/MelonLoader/<Name>.dll` |
+| `BepInEx` | BepInEx (IL2CPP) | `Project/bin/BepInEx/<Name>.dll` |
 
 ### Building from Visual Studio / IDE
 Open the `<Name>.slnx` solution file in **Visual Studio 2022** or **JetBrains Rider**, select `MelonLoader` or `BepInEx` from the configuration dropdown, and build.

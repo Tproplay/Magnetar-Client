@@ -71,41 +71,34 @@ CSPROJ_TEMPLATE = """<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <RootNamespace>{safe_name}</RootNamespace>
         <AssemblyName>{safe_name}</AssemblyName>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <Configurations>MelonLoader;BepInEx</Configurations>
+        <RefDir>$(MSBuildThisFileDirectory)..\\..\\..\\References</RefDir>
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+        <GenerateDependencyFile>false</GenerateDependencyFile>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <!-- Reference directory discovery:
-             1. Local References/ inside this project if present
-             2. Shared Addons References fallback
-             3. Shared Magnetar Client References fallback -->
-        <RefDir Condition="Exists('References\\Melonloader\\0Harmony.dll')">References</RefDir>
-        <RefDir Condition="'$(RefDir)' == '' and Exists('..\\..\\Assist Bot\\Project\\References\\Melonloader\\0Harmony.dll')">..\\..\\Assist Bot\\Project\\References</RefDir>
-        <RefDir Condition="'$(RefDir)' == ''">..\\..\\..\\Magnetar Client\\References</RefDir>
-    </PropertyGroup>
+    <ItemDefinitionGroup>
+        <Reference>
+            <Private>false</Private>
+        </Reference>
+    </ItemDefinitionGroup>
 
     <!-- Loader Target Constants & Output Paths -->
     <PropertyGroup Condition="$(Configuration.Contains('MELON')) or $(Configuration.Contains('Melon'))">
-        <OutputPath>bin\\Melonloader\\$(Configuration)\\</OutputPath>
+        <OutputPath>bin\\$(Configuration)\\</OutputPath>
         <DefineConstants>$(DefineConstants);MELONLOADER</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="$(Configuration.Contains('BepInEx')) or $(Configuration.Contains('BEPINEX'))">
-        <OutputPath>bin\\BepInEx\\$(Configuration)\\</OutputPath>
+        <OutputPath>bin\\$(Configuration)\\</OutputPath>
         <DefineConstants>$(DefineConstants);BEPINEX</DefineConstants>
     </PropertyGroup>
-
-    <ItemGroup>
-        <Compile Remove="References\\**" />
-        <EmbeddedResource Remove="References\\**" />
-        <None Remove="References\\**" />
-    </ItemGroup>
 
     <!-- Shared Core References -->
     <ItemGroup>
@@ -114,8 +107,7 @@ CSPROJ_TEMPLATE = """<Project Sdk="Microsoft.NET.Sdk">
             <HintPath Condition="!Exists('$(RefDir)\\Melonloader\\0Harmony.dll')">$(RefDir)\\Bepinex\\0Harmony.dll</HintPath>
         </Reference>
         <Reference Include="Magnetar Client">
-            <HintPath Condition="Exists('$(RefDir)\\Magnetar Client.dll')">$(RefDir)\\Magnetar Client.dll</HintPath>
-            <HintPath Condition="!Exists('$(RefDir)\\Magnetar Client.dll')">..\\..\\Assist Bot\\Project\\References\\Magnetar Client.dll</HintPath>
+            <HintPath>$(RefDir)\\Magnetar Client.dll</HintPath>
         </Reference>
     </ItemGroup>
 
@@ -581,7 +573,7 @@ dotnet build "Project/{safe_name}.csproj" -c MelonLoader
 
 The output DLL will be placed in:
 * **BepInEx**: `Project/bin/BepInEx/BepInEx/{safe_name}.dll`
-* **MelonLoader**: `Project/bin/Melonloader/MelonLoader/{safe_name}.dll`
+* **MelonLoader**: `Project/bin/MelonLoader/{safe_name}.dll`
 
 ---
 

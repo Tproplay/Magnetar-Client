@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
@@ -77,7 +77,7 @@ public class RePickPlants : Module
             }
         };
 
-        AllowUltimateCards = new BoolSetting("Allow Odyssey plant cards (Ensure Odyssey Plant is enabled before entering the level)", false);
+        AllowUltimateCards = new BoolSetting("Allow Odyssey plant cards", false);
         AllowUltimateCards.OnValueChanged = (val) =>
         {
             if (!Active || SeedLibrary.Instance == null) return;
@@ -85,6 +85,7 @@ public class RePickPlants : Module
             {
                 if (!CheckActiveUIButton("UltimateCards"))
                 {
+                    EnsureTravelPlantsAllowed();
                     SeedLibrary.Instance.SetUltimateCards();
                     ultimateCardsEnabledbyMod = true;
                 }
@@ -106,6 +107,17 @@ public class RePickPlants : Module
         DebugMode = new BoolSetting("Debug Mode", false);
         AddSettings(DebugMode);
 #endif
+    }
+
+    public static void EnsureTravelPlantsAllowed()
+    {
+        if (Board.Instance != null)
+        {
+            var tag = Board.Instance.boardTag;
+            tag.enableAllTravelPlant = true;
+            tag.enableTravelPlant = true;
+            Board.Instance.boardTag = tag;
+        }
     }
 
     // --- Mod Logic ---
@@ -239,6 +251,7 @@ public class RePickPlants : Module
 
             if (AllowUltimateCards.Value && !CheckActiveUIButton("UltimateCards"))
             {
+                EnsureTravelPlantsAllowed();
                 SeedLibrary.Instance.SetUltimateCards();
                 ultimateCardsEnabledbyMod = true;
             }
@@ -273,9 +286,16 @@ public class RePickPlants : Module
     {
         [HarmonyPatch(nameof(Board.Awake))]
         [HarmonyPostfix]
-        public static void AwakePostfix()
+        public static void AwakePostfix(Board __instance)
         {
-            if (instance != null) instance.ResetState();
+            if (instance != null)
+            {
+                instance.ResetState();
+                if (instance.Active && instance.AllowUltimateCards.Value)
+                {
+                    EnsureTravelPlantsAllowed();
+                }
+            }
         }
 
         [HarmonyPatch(nameof(Board.Die))]
@@ -302,10 +322,26 @@ public class RePickPlants : Module
             }
             if (instance.AllowUltimateCards.Value && !CheckActiveUIButton("UltimateCards")) 
             { 
+                EnsureTravelPlantsAllowed();
                 __instance.SetUltimateCards();
                 instance.ultimateCardsEnabledbyMod = true;
             }
         }
+    }
 
+    [HarmonyPatch(typeof(CreatePlant))]
+    public static class CreatePlantPatch
+    {
+        [HarmonyPatch(nameof(CreatePlant.LimTravel))]
+        [HarmonyPrefix]
+        public static bool LimTravelPrefix(ref bool __result)
+        {
+            if (instance != null && instance.Active && instance.AllowUltimateCards.Value)
+            {
+                __result = false;
+                return false;
+            }
+            return true;
+        }
     }
 }

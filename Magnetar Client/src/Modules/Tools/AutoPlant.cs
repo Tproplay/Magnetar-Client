@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,6 +75,8 @@ public class AutoPlant : Module
 
         AddSettings(RenderGhost, GhostOpacity, MultiPlant, UseExtraPlant, PlantingOrderSetting);
         EndCategory();
+
+        GameData.Actions.OnBoardDestroyed += () => Instance?.ClearGhostPlants();
     }
 
     public override void OnLanguageChanged()
@@ -635,14 +637,5 @@ public class AutoPlant : Module
         }
     }
 
-    [HarmonyPatch(typeof(Board))]
-    public static class AutoPlantBoardCleanupPatch
-    {
-        [HarmonyPatch(nameof(Board.OnDestroy))]
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            Instance?.ClearGhostPlants();
-        }
-    }
+
 }

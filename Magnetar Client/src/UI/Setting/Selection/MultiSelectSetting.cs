@@ -160,6 +160,14 @@ public abstract class BaseMultiSelectSetting : Setting
     }
 
     /// <summary>
+    /// Indicates whether this multi-select window/dialog is currently active and focused.
+    /// </summary>
+    public override bool IsFocused =>
+        ReferenceEquals(DrawSetting.activeMultiSelect, this)
+        || ReferenceEquals(Magnetar_Client.Core.ModuleManager_.MultiSelectWindowDrawer.ActiveMultiSelect, this)
+        || base.IsFocused;
+
+    /// <summary>
     /// Renders the setting row in the window, showing the label, current count (if enabled), select button, and reset button.
     /// </summary>
     public override void Draw(ref float y, float width)
@@ -172,11 +180,18 @@ public abstract class BaseMultiSelectSetting : Setting
         float selectBtnW = ClientConfig.selectButtonWidth;
 
         bool prevEnabled = GUI.enabled;
-        if (IsDisabled) GUI.enabled = false;
-
         Color origColor = GUI.contentColor;
-        if (IsDisabled) GUI.contentColor = ThemeManager.TextDim;
-
+        if (IsDisabled)
+        {
+            if (ReferenceEquals(DrawSetting.activeMultiSelect, this))
+            {
+                DrawSetting.activeMultiSelect = null;
+            }
+            GUI.enabled = false;
+            GUI.contentColor = ThemeManager.TextDim;
+        }
+        try
+        {
         string countText = null;
         float textW = 0f;
 
@@ -228,14 +243,16 @@ public abstract class BaseMultiSelectSetting : Setting
             GUI.Label(countRect, countText, MultiSelectCountTextStyle);
         }
 
-        if (DrawResetButton(resetRect))
+        if (!IsDisabled && DrawResetButton(resetRect))
         {
-            if (!IsDisabled)
-                Reset();
+            Reset();
         }
-
-        GUI.contentColor = origColor;
-        GUI.enabled = prevEnabled;
+        }
+        finally
+        {
+            GUI.contentColor = origColor;
+            GUI.enabled = prevEnabled;
+        }
 
         y += elemH + ClientConfig.spacing;
     }
@@ -401,6 +418,7 @@ public class MultiSelectSetting<T> : BaseMultiSelectSetting
 
     public override void Reset()
     {
+        if (IsDisabled) return;
         var old = new HashSet<T>(SelectedValues);
         SelectedValues.Clear();
         foreach (var v in DefaultSelectedValues) SelectedValues.Add(v);

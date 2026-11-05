@@ -147,7 +147,7 @@ public class DiscordRPC : Module
         EndCategory();
 
         // Legacy Compatibility
-        Actions.OnLateInitializeCore += UpdateLegacyStrings;
+        Magnetar_Client.Api.Actions.OnLateInitializeCore += UpdateLegacyStrings;
     }
 
     private static readonly Dictionary<string, string> legacyAutoComplete = new(System.StringComparer.OrdinalIgnoreCase)

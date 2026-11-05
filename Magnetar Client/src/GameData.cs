@@ -646,4 +646,80 @@ public static class GameData
     }
 
     #endregion
+
+    #region Actions
+
+    public static class Actions
+    {
+        public static event Action<Board> OnBoardInstantiated;
+        public static event Action<Board> OnBoardDestroy;
+        public static event Action OnBoardDestroyed;
+        public static event Action<Board> OnBoardDie;
+        public static event Action OnBoardDied;
+
+        [HarmonyPatch(typeof(Board))]
+        static class BoardPatch
+        {
+            [HarmonyPatch(nameof(Board.Start))]
+            [HarmonyPostfix]
+            static void StartPostfix(Board __instance)
+            {
+                OnBoardInstantiated?.Invoke(__instance);
+            }
+            [HarmonyPatch(nameof(Board.OnDestroy))]
+            [HarmonyPrefix]
+            static void DestroyPrefix(Board __instance)
+            {
+                OnBoardDestroy?.Invoke(__instance);
+            }
+            [HarmonyPatch(nameof(Board.OnDestroy))]
+            [HarmonyPostfix]
+            static void DestroyPostfix()
+            {
+                OnBoardDestroyed?.Invoke();
+            }
+            [HarmonyPatch(nameof(Board.Die))]
+            [HarmonyPrefix]
+            static void DiePrefix(Board __instance)
+            {
+                OnBoardDie?.Invoke(__instance);
+            }
+            [HarmonyPatch(nameof(Board.Die))]
+            [HarmonyPostfix]
+            static void DiePostfix()
+            {
+                OnBoardDied?.Invoke();
+            }
+        }
+        public static event Action<InGameUI> OnInGameUIInstantiated;
+        public static event Action<InGameUI> OnInGameUIDestroy;
+        public static event Action OnInGameUIDestroyed;
+
+        [HarmonyPatch(typeof(InGameUI))]
+        static class InGameUIPatch
+        {
+            [HarmonyPatch(nameof(InGameUI.Start))]
+            [HarmonyPostfix]
+            static void StartPostfix(InGameUI __instance)
+            {
+                OnInGameUIInstantiated?.Invoke(__instance);
+            }
+            [HarmonyPatch("OnDestroy")]
+            [HarmonyPrefix]
+            static void DiePrefix(InGameUI __instance)
+            {
+                OnInGameUIDestroy?.Invoke(__instance);
+            }
+            [HarmonyPatch("OnDestroy")]
+            [HarmonyPostfix]
+            static void DiePostfix()
+            {
+                OnInGameUIDestroyed?.Invoke();
+            }
+        }
+
+        
+    }
+
+    #endregion
 }

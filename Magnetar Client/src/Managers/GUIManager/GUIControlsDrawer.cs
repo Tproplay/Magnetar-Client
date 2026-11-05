@@ -117,10 +117,23 @@ GUIManager.S(BaseHeight));
             float thumbY = sliderRect.y + (trackH / 2f) - (thumbSize / 2f);
             Rect thumbRect = new(thumbX, thumbY, thumbSize, thumbSize);
 
-            GUI.Box(sliderRect, "", ThemeManager.SliderTrackOffStyle);
-            if (fillWidth > 0f)
+            // Segmented track to avoid overlapping track on/off or drawing track underneath the thumb (which causes double alpha-blend / opaque artifacts)
+            float overlapTolerance = GUIManager.S(1f);
+
+            // Active track (left of thumb)
+            float activeEndX = Mathf.Clamp(thumbX + overlapTolerance, sliderRect.x, sliderRect.x + sliderRect.width);
+            float activeWidth = activeEndX - sliderRect.x;
+            if (activeWidth > 0f)
             {
-                GUI.Box(new Rect(sliderRect.x, sliderRect.y, fillWidth, sliderRect.height), "", ThemeManager.SliderTrackOnStyle);
+                GUI.Box(new Rect(sliderRect.x, sliderRect.y, activeWidth, sliderRect.height), "", ThemeManager.SliderTrackOnStyle);
+            }
+
+            // Inactive track (right of thumb)
+            float inactiveStartX = Mathf.Clamp(thumbX + thumbSize - overlapTolerance, sliderRect.x, sliderRect.x + sliderRect.width);
+            float inactiveWidth = (sliderRect.x + sliderRect.width) - inactiveStartX;
+            if (inactiveWidth > 0f)
+            {
+                GUI.Box(new Rect(inactiveStartX, sliderRect.y, inactiveWidth, sliderRect.height), "", ThemeManager.SliderTrackOffStyle);
             }
             GUI.Box(thumbRect, "", ThemeManager.SliderThumbStyle);
 
@@ -143,6 +156,7 @@ GUIManager.S(BaseHeight));
                 DrawSetting.activeNumericSetting = setting;
                 DrawSetting.FocusedControlId = -1;
                 DrawSetting.ActiveTextFieldId = -1;
+                DrawSetting.ActiveTextSetting = null;
 
                 ApplyMouseValue(e.mousePosition.x);
                 e.Use();
@@ -173,15 +187,20 @@ GUIManager.S(BaseHeight));
             {
                 DrawSetting.CurrentInputBuffer = setting.DisplayValue.ToString(formatString);
                 DrawSetting.lastFocusedNumericControlId = controlId;
+                DrawSetting.ActiveTextSetting = setting;
             }
             else if (!isFocused && DrawSetting.lastFocusedNumericControlId == controlId)
             {
                 setting.Commit();
                 DrawSetting.lastFocusedNumericControlId = -1;
+                if (ReferenceEquals(DrawSetting.ActiveTextSetting, setting))
+                {
+                    DrawSetting.ActiveTextSetting = null;
+                }
             }
 
             string displayStr = isFocused ? DrawSetting.CurrentInputBuffer : setting.DisplayValue.ToString(formatString);
-            string newText = DrawSetting.DrawManualTextField(inputRect, displayStr, "0");
+            string newText = DrawSetting.DrawManualTextField(inputRect, displayStr, "0", null, setting);
 
             if (isFocused)
             {

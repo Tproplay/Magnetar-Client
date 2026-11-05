@@ -84,6 +84,7 @@ public class BindSetting : Setting
     /// </summary>
     public void StartBinding()
     {
+        if (IsDisabled) return;
         IsBinding = true;
         SafeToCloseManager.RegisterTabGuard(_tabGuard);
         BindKeys.Clear();
@@ -113,9 +114,15 @@ public class BindSetting : Setting
     /// </summary>
     public override void Reset()
     {
+        if (IsDisabled) return;
         BindKeys = new List<KeyCode>(DefaultKeys);
         StopBinding();
     }
+
+    /// <summary>
+    /// Indicates whether this keybind setting is currently listening for keypresses.
+    /// </summary>
+    public override bool IsFocused => IsBinding || base.IsFocused;
 
     /// <summary>
     /// Renders the keybind button, handles key capture listening, and draws the reset button in IMGUI layout.
@@ -124,106 +131,120 @@ public class BindSetting : Setting
     /// <param name="width">The total available layout width.</param>
     public override void Draw(ref float y, float width)
     {
-        Event e = Event.current;
-        bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
-
-        float indent = ClientConfig.indent;
-        float gap = SettingValues.Gap;
-        float resetBtnW = SettingValues.ResetButtonW;
-        float settingW = ClientConfig.SettingWidth;
-
-        // Label: occupies remaining width on the left
-        float labelW = width - (indent * 2f) - settingW - gap - resetBtnW;
-        Rect labelRect = new(indent, y, labelW, ClientConfig.elementHeight);
-        GUI.Label(labelRect, DisplayName, ThemeManager.SettingLabelStyle);
-
-        // Right-aligned elements: [Control Button] [gap] [Reset Button]
-        float resetStartX = width - indent - resetBtnW;
-        float bindStartX = resetStartX - gap - settingW;
-
-        Rect bindRect = new(bindStartX, y, settingW, ClientConfig.elementHeight);
-        Rect resetRect = new(resetStartX, y, resetBtnW, ClientConfig.elementHeight);
-
-        string bindText = IsBinding ? "[...]" : GetBindString();
-        GUI.Box(bindRect, bindText, IsBinding ? ThemeManager.SettingOn : ThemeManager.SettingOff);
-
-        if (bindRect.Contains(e.mousePosition) && isLeftClick)
+        bool prevGUIEnabled = GUI.enabled;
+        if (IsDisabled)
         {
-            if (!IsBinding)
-            {
-                StartBinding();
-                DrawSetting.ActiveTextFieldId = -1;
-                DrawSetting.FocusedControlId = -1;
-                GUIUtility.keyboardControl = 0;
-            }
-            else
-            {
-                StopBinding();
-            }
-            e.Use();
+            if (IsBinding) StopBinding();
+            GUI.enabled = false;
         }
-
-        if (IsBinding)
+        try
         {
-            // Direct Tab detection (fallback for when IMGUI event is consumed or not dispatched as isKey)
-            if (Input.GetKeyDown(KeyCode.Tab))
-            {
-                if (!BindKeys.Contains(KeyCode.Tab))
-                {
-                    BindKeys.Add(KeyCode.Tab);
-                }
-                if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Tab || e.character == '\t'))
-                {
-                    e.Use();
-                }
-            }
+            Event e = Event.current;
+            bool isLeftClick = e.type == EventType.MouseDown && e.button == 0;
 
-            if (Input.GetKeyUp(KeyCode.Tab) && BindKeys.Count > 0)
-            {
-                StopBinding();
-                if (e.type == EventType.KeyUp && (e.keyCode == KeyCode.Tab || e.character == '\t'))
-                {
-                    e.Use();
-                }
-            }
-        }
+            float indent = ClientConfig.indent;
+            float gap = SettingValues.Gap;
+            float resetBtnW = SettingValues.ResetButtonW;
+            float settingW = ClientConfig.SettingWidth;
 
-        if (IsBinding && e.isKey)
-        {
-            KeyCode key = e.keyCode;
-            if (key == KeyCode.None && e.character == '\t')
-            {
-                key = KeyCode.Tab;
-            }
+            // Label: occupies remaining width on the left
+            float labelW = width - (indent * 2f) - settingW - gap - resetBtnW;
+            Rect labelRect = new(indent, y, labelW, ClientConfig.elementHeight);
+            GUI.Label(labelRect, DisplayName, ThemeManager.SettingLabelStyle);
 
-            if (key != KeyCode.None)
+            // Right-aligned elements: [Control Button] [gap] [Reset Button]
+            float resetStartX = width - indent - resetBtnW;
+            float bindStartX = resetStartX - gap - settingW;
+
+            Rect bindRect = new(bindStartX, y, settingW, ClientConfig.elementHeight);
+            Rect resetRect = new(resetStartX, y, resetBtnW, ClientConfig.elementHeight);
+
+            string bindText = IsBinding ? "[...]" : GetBindString();
+            GUI.Box(bindRect, bindText, IsBinding ? ThemeManager.SettingOn : ThemeManager.SettingOff);
+
+            if (!IsDisabled && bindRect.Contains(e.mousePosition) && isLeftClick)
             {
-                if (e.type == EventType.KeyDown)
+                if (!IsBinding)
                 {
-                    if (key == KeyCode.Escape || key == ClientConfig.MenuOpenKey)
-                    {
-                        BindKeys.Clear();
-                        StopBinding();
-                    }
-                    else if (!BindKeys.Contains(key))
-                    {
-                        BindKeys.Add(key);
-                    }
-                    e.Use();
+                    StartBinding();
+                    DrawSetting.ActiveTextFieldId = -1;
+                    DrawSetting.ActiveTextSetting = null;
+                    DrawSetting.FocusedControlId = -1;
+                    GUIUtility.keyboardControl = 0;
                 }
-                else if (e.type == EventType.KeyUp && BindKeys.Count > 0)
+                else
                 {
                     StopBinding();
-                    e.Use();
+                }
+                e.Use();
+            }
+
+            if (IsBinding)
+            {
+                // Direct Tab detection (fallback for when IMGUI event is consumed or not dispatched as isKey)
+                if (Input.GetKeyDown(KeyCode.Tab))
+                {
+                    if (!BindKeys.Contains(KeyCode.Tab))
+                    {
+                        BindKeys.Add(KeyCode.Tab);
+                    }
+                    if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Tab || e.character == '\t'))
+                    {
+                        e.Use();
+                    }
+                }
+
+                if (Input.GetKeyUp(KeyCode.Tab) && BindKeys.Count > 0)
+                {
+                    StopBinding();
+                    if (e.type == EventType.KeyUp && (e.keyCode == KeyCode.Tab || e.character == '\t'))
+                    {
+                        e.Use();
+                    }
                 }
             }
-        }
 
-        if (DrawResetButton(resetRect))
+            if (IsBinding && e.isKey)
+            {
+                KeyCode key = e.keyCode;
+                if (key == KeyCode.None && e.character == '\t')
+                {
+                    key = KeyCode.Tab;
+                }
+
+                if (key != KeyCode.None)
+                {
+                    if (e.type == EventType.KeyDown)
+                    {
+                        if (key == KeyCode.Escape || key == ClientConfig.MenuOpenKey)
+                        {
+                            BindKeys.Clear();
+                            StopBinding();
+                        }
+                        else if (!BindKeys.Contains(key))
+                        {
+                            BindKeys.Add(key);
+                        }
+                        e.Use();
+                    }
+                    else if (e.type == EventType.KeyUp && BindKeys.Count > 0)
+                    {
+                        StopBinding();
+                        e.Use();
+                    }
+                }
+            }
+
+            if (!IsDisabled && DrawResetButton(resetRect))
+            {
+                Reset();
+            }
+
+            y += ClientConfig.elementHeight + ClientConfig.spacing;
+        }
+        finally
         {
-            Reset();
+            GUI.enabled = prevGUIEnabled;
         }
-
-        y += ClientConfig.elementHeight + ClientConfig.spacing;
     }
 }

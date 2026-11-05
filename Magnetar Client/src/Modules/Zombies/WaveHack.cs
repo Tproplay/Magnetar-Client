@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using Magnetar_Client.UI.Setting;
 using HarmonyLib;
@@ -69,6 +69,11 @@ public class WaveHack : Module
         AddSettings(TotalClearance);
         EndCategory();
 
+        GameData.Actions.OnBoardInstantiated += (board) =>
+        {
+            if (!Active_WaveCooldownSetting.Value) 
+                WaveCooldownSetting.Value = board.config.waveInterval;
+        };
     }
 
     public static float last_val;
@@ -139,17 +144,6 @@ public class WaveHack : Module
 
     }
 
-    [HarmonyPatch(typeof(Board))]
-    public static class BoardPatch
-    {
-        [HarmonyPatch(nameof(Board.Start))]
-        [HarmonyPostfix]
-        public static void StartPostfix(Board __instance)
-        {
-            if (instance == null) return;
-            if (!instance.Active_WaveCooldownSetting.Value) 
-                instance.WaveCooldownSetting.Value = __instance.config.waveInterval;
-        }
-    }
+
 
 }

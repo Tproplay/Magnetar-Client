@@ -67,31 +67,40 @@ public class ButtonSetting : Setting
     /// <param name="width">The total available layout width.</param>
     public override void Draw(ref float y, float width)
     {
-        Event e = Event.current;
-
-        float indent = ClientConfig.indent;
-        float gap = SettingValues.Gap;
-
-        string localizedName = DisplayName;
-        string localizedButtonText = DisplayButtonText;
-
-        // Label
-        float labelW = width - indent * 2 - ClientConfig.SettingWidth;
-        Rect labelRect = new(indent, y, labelW, ClientConfig.elementHeight);
-        GUI.Label(labelRect, localizedName, ThemeManager.SettingLabelStyle);
-
-        // Button
-        float btnW = ClientConfig.SettingWidth;
-        float btnStartX = width - indent - btnW - gap - SettingValues.ResetButtonW;
-        Rect btnRect = new(btnStartX, y, ClientConfig.SettingWidth, ClientConfig.elementHeight);
-        GUI.Box(btnRect, localizedButtonText, ThemeManager.ButtonSettingStyle);
-
-        if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+        bool prevGUIEnabled = GUI.enabled;
+        if (IsDisabled) GUI.enabled = false;
+        try
         {
-            if (!IsDisabled) OnClick?.Invoke();
-            e.Use();
-        }
+            Event e = Event.current;
 
-        y += ClientConfig.elementHeight + ClientConfig.spacing;
+            float indent = ClientConfig.indent;
+            float gap = SettingValues.Gap;
+
+            string localizedName = DisplayName;
+            string localizedButtonText = DisplayButtonText;
+
+            // Label
+            float labelW = width - indent * 2 - ClientConfig.SettingWidth;
+            Rect labelRect = new(indent, y, labelW, ClientConfig.elementHeight);
+            GUI.Label(labelRect, localizedName, ThemeManager.SettingLabelStyle);
+
+            // Button
+            float btnW = ClientConfig.SettingWidth;
+            float btnStartX = width - indent - btnW - gap - SettingValues.ResetButtonW;
+            Rect btnRect = new(btnStartX, y, ClientConfig.SettingWidth, ClientConfig.elementHeight);
+            GUI.Box(btnRect, localizedButtonText, ThemeManager.ButtonSettingStyle);
+
+            if (btnRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+            {
+                if (!IsDisabled) OnClick?.Invoke();
+                e.Use();
+            }
+
+            y += ClientConfig.elementHeight + ClientConfig.spacing;
+        }
+        finally
+        {
+            GUI.enabled = prevGUIEnabled;
+        }
     }
 }

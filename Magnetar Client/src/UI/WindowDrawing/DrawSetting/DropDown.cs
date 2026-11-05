@@ -73,10 +73,10 @@ public static partial class DrawSetting
     /// <summary>
     /// Renders a dropdown selection setting control and handles user interaction.
     /// </summary>
-    /// <param name="selSet">The <see cref="SelectSetting"/> to draw and handle.</param>
+    /// <param name="selSet">The <see cref="BaseSelectSetting"/> to draw and handle.</param>
     /// <param name="y">The vertical drawing coordinate reference.</param>
     /// <param name="width">The total available width for the control.</param>
-    public static void HandleSelectSetting(SelectSetting selSet, ref float y, float width)
+    public static void HandleSelectSetting(BaseSelectSetting selSet, ref float y, float width)
     {
         Event e = Event.current;
         int controlId = selSet.GetHashCode();
@@ -84,15 +84,7 @@ public static partial class DrawSetting
         string translatedName = selSet.DisplayName;
         GUI.Label(new Rect(ClientConfig.indent, y, width - ClientConfig.indent * 2 - ClientConfig.SettingWidth, ClientConfig.elementHeight), translatedName, ThemeManager.SettingLabelStyle);
 
-        string currentValName = "Unknown";
-        if (selSet.Options.ContainsKey(selSet.Value))
-        {
-            currentValName = selSet.Options[selSet.Value];
-            if (selSet.CustomNames != null && selSet.CustomNames.ContainsKey(selSet.Value))
-            {
-                currentValName = selSet.CustomNames[selSet.Value];
-            }
-        }
+        string currentValName = selSet.CurrentValueDisplayName;
 
         Rect btnRect = new(width - ClientConfig.indent - ClientConfig.SettingWidth, y, ClientConfig.SettingWidth, ClientConfig.elementHeight);
         bool isHovered = btnRect.Contains(e.mousePosition);
@@ -122,7 +114,7 @@ public static partial class DrawSetting
         {
             float rowHeight = SettingValues.DropdownRowHeight;
             int maxVisibleRows = SettingValues.DropdownMaxVisibleRows;
-            int itemCount = selSet.Options.Count;
+            int itemCount = selSet.OptionsCount;
             float dropHeight = Mathf.Min(itemCount * rowHeight, maxVisibleRows * rowHeight);
             float maxScroll = Mathf.Max(0f, (itemCount * rowHeight) - dropHeight);
 
@@ -203,11 +195,11 @@ public static partial class DrawSetting
                     if (dropRect.Contains(e.mousePosition))
                     {
                         int i = 0;
-                        foreach (var kvp in selSet.Options)
+                        foreach (var opt in selSet.GetRenderableOptions())
                         {
                             if (i == dropdownCandidateIndex)
                             {
-                                selSet.Value = kvp.Key;
+                                selSet.SetValueRaw(opt.Key);
                                 ResetDropdownState();
                                 break;
                             }
@@ -244,24 +236,17 @@ public static partial class DrawSetting
                 GUI.BeginGroup(dropRect);
 
                 int i = 0;
-                foreach (var kvp in selSet.Options)
+                foreach (var opt in selSet.GetRenderableOptions())
                 {
                     float drawY = (i * rowHeight) - _dropdownScrollY;
 
                     if (drawY + rowHeight > 0 && drawY < dropHeight)
                     {
                         Rect rowRect = new(0, drawY, dropRect.width, rowHeight);
-                        string displayName = kvp.Value;
-
-                        if (selSet.CustomNames != null && selSet.CustomNames.ContainsKey(kvp.Key))
-                        {
-                            displayName = selSet.CustomNames[kvp.Key];
-                        }
-
-                        bool isSelected = (selSet.Value == kvp.Key);
+                        bool isSelected = selSet.IsSelectedRaw(opt.Key);
                         GUIStyle style = isSelected ? ThemeManager.SettingOn : ThemeManager.SettingOff;
 
-                        GUI.Box(rowRect, displayName, style);
+                        GUI.Box(rowRect, opt.DisplayName, style);
                     }
                     i++;
                 }
@@ -280,4 +265,10 @@ public static partial class DrawSetting
             };
         }
     }
+
+    /// <summary>
+    /// Overload for backwards compatibility with <see cref="SelectSetting"/>.
+    /// </summary>
+    public static void HandleSelectSetting(SelectSetting selSet, ref float y, float width) =>
+        HandleSelectSetting((BaseSelectSetting)selSet, ref y, width);
 }

@@ -1,15 +1,15 @@
 <?xml version='1.0'?>
 <Obfuscator>
 	<Var name="InPath" value="." />
-	<Var name="OutPath" value=".\Obfuscated" />
+	<Var name="OutPath" value=".\melonloader" />
 
 	<!-- Core References Paths -->
 	<AssemblySearchPath path="." />
-	<AssemblySearchPath path="..\..\References" />
-	<AssemblySearchPath path="..\..\References\Melonloader" />
-	<AssemblySearchPath path="..\..\References\Melonloader\Il2Cpp" />
-	<AssemblySearchPath path="..\..\References\Bepinex" />
-	<AssemblySearchPath path="..\..\References\Bepinex\Il2Cpp" />
+	<AssemblySearchPath path="..\..\..\..\..\References" />
+	<AssemblySearchPath path="..\..\..\..\..\References\Melonloader" />
+	<AssemblySearchPath path="..\..\..\..\..\References\Melonloader\Il2Cpp" />
+	<AssemblySearchPath path="..\..\..\..\..\References\Bepinex" />
+	<AssemblySearchPath path="..\..\..\..\..\References\Bepinex\Il2Cpp" />
 
 	<!-- Prevent hard crashes on unresolved third-party engine types -->
 	<Var name="IgnoreMissingTypes" value="true" />

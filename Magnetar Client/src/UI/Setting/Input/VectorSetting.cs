@@ -127,6 +127,7 @@ public class Vector2Setting : Setting
     /// </summary>
     public override void Reset()
     {
+        if (IsDisabled) return;
         Value = DefaultValue;
         _bufX = _value.x.ToString("0.##");
         _bufY = _value.y.ToString("0.##");
@@ -148,61 +149,70 @@ public class Vector2Setting : Setting
     /// </summary>
     public override void Draw(ref float y, float width)
     {
-        float elemH = ClientConfig.elementHeight;
-        float indent = ClientConfig.indent;
-        float gap = SettingValues.Gap;
-        float resetBtnW = SettingValues.ResetButtonW;
-        float subLabelW = GUIManager.S(16f);
-        float totalControlW = ClientConfig.SettingWidth;
-
-        float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), DisplayName, ThemeManager.SettingLabelStyle);
-
-        float itemW = (totalControlW - (gap * 3f) - (subLabelW * 2f)) / 2f;
-        float resetStartX = width - indent - resetBtnW;
-        float currX = resetStartX - gap - totalControlW;
-
-        // X component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", ThemeManager.TextStyle);
-        currX += subLabelW + gap;
-        Rect xRect = new(currX, y, itemW, elemH);
-
-        if (DrawSetting.ActiveTextFieldId != xRect.GetHashCode())
+        bool prevGUIEnabled = GUI.enabled;
+        if (IsDisabled) GUI.enabled = false;
+        try
         {
-            _bufX = Value.x.ToString("0.##");
+            float elemH = ClientConfig.elementHeight;
+            float indent = ClientConfig.indent;
+            float gap = SettingValues.Gap;
+            float resetBtnW = SettingValues.ResetButtonW;
+            float subLabelW = GUIManager.S(16f);
+            float totalControlW = ClientConfig.SettingWidth;
+
+            float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
+            GUI.Label(new Rect(indent, y, labelW, elemH), DisplayName, ThemeManager.SettingLabelStyle);
+
+            float itemW = (totalControlW - (gap * 3f) - (subLabelW * 2f)) / 2f;
+            float resetStartX = width - indent - resetBtnW;
+            float currX = resetStartX - gap - totalControlW;
+
+            // X component
+            GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", ThemeManager.TextStyle);
+            currX += subLabelW + gap;
+            Rect xRect = new(currX, y, itemW, elemH);
+
+            if (DrawSetting.ActiveTextFieldId != xRect.GetHashCode())
+            {
+                _bufX = Value.x.ToString("0.##");
+            }
+            _bufX = DrawSetting.DrawManualTextField(xRect, _bufX, "0", null, this);
+            currX += itemW + gap;
+
+            // Y component
+            GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", ThemeManager.TextStyle);
+            currX += subLabelW + gap;
+            Rect yRect = new(currX, y, itemW, elemH);
+
+            if (DrawSetting.ActiveTextFieldId != yRect.GetHashCode())
+            {
+                _bufY = Value.y.ToString("0.##");
+            }
+            _bufY = DrawSetting.DrawManualTextField(yRect, _bufY, "0", null, this);
+
+            float rawX = TryParseFloat(_bufX, out float valX) ? valX : Value.x;
+            float rawY = TryParseFloat(_bufY, out float valY) ? valY : Value.y;
+            Vector2 parsed = Clamp(new Vector2(rawX, rawY));
+
+            if (!IsDisabled && (!Mathf.Approximately(Value.x, parsed.x) || !Mathf.Approximately(Value.y, parsed.y)))
+            {
+                _value = parsed;
+                OnValueChanged?.Invoke(_value);
+            }
+
+            // Reset Button
+            Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
+            if (!IsDisabled && DrawResetButton(resetRect))
+            {
+                Reset();
+            }
+
+            y += elemH + ClientConfig.spacing;
         }
-        _bufX = DrawSetting.DrawManualTextField(xRect, _bufX, "0");
-        currX += itemW + gap;
-
-        // Y component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", ThemeManager.TextStyle);
-        currX += subLabelW + gap;
-        Rect yRect = new(currX, y, itemW, elemH);
-
-        if (DrawSetting.ActiveTextFieldId != yRect.GetHashCode())
+        finally
         {
-            _bufY = Value.y.ToString("0.##");
+            GUI.enabled = prevGUIEnabled;
         }
-        _bufY = DrawSetting.DrawManualTextField(yRect, _bufY, "0");
-
-        float rawX = TryParseFloat(_bufX, out float valX) ? valX : Value.x;
-        float rawY = TryParseFloat(_bufY, out float valY) ? valY : Value.y;
-        Vector2 parsed = Clamp(new Vector2(rawX, rawY));
-
-        if (!Mathf.Approximately(Value.x, parsed.x) || !Mathf.Approximately(Value.y, parsed.y))
-        {
-            _value = parsed;
-            OnValueChanged?.Invoke(_value);
-        }
-
-        // Reset Button
-        Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
-        if (DrawResetButton(resetRect))
-        {
-            Reset();
-        }
-
-        y += elemH + ClientConfig.spacing;
     }
 }
 
@@ -325,6 +335,7 @@ public class Vector2IntSetting : Setting
     /// </summary>
     public override void Reset()
     {
+        if (IsDisabled) return;
         Value = DefaultValue;
         _bufX = _value.x.ToString();
         _bufY = _value.y.ToString();
@@ -335,61 +346,70 @@ public class Vector2IntSetting : Setting
     /// </summary>
     public override void Draw(ref float y, float width)
     {
-        float elemH = ClientConfig.elementHeight;
-        float indent = ClientConfig.indent;
-        float gap = SettingValues.Gap;
-        float resetBtnW = SettingValues.ResetButtonW;
-        float subLabelW = GUIManager.S(16f);
-        float totalControlW = ClientConfig.SettingWidth;
-
-        float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), DisplayName, ThemeManager.SettingLabelStyle);
-
-        float itemW = (totalControlW - (gap * 3f) - (subLabelW * 2f)) / 2f;
-        float resetStartX = width - indent - resetBtnW;
-        float currX = resetStartX - gap - totalControlW;
-
-        // X component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", ThemeManager.TextStyle);
-        currX += subLabelW + gap;
-        Rect xRect = new(currX, y, itemW, elemH);
-
-        if (DrawSetting.ActiveTextFieldId != xRect.GetHashCode())
+        bool prevGUIEnabled = GUI.enabled;
+        if (IsDisabled) GUI.enabled = false;
+        try
         {
-            _bufX = Value.x.ToString();
+            float elemH = ClientConfig.elementHeight;
+            float indent = ClientConfig.indent;
+            float gap = SettingValues.Gap;
+            float resetBtnW = SettingValues.ResetButtonW;
+            float subLabelW = GUIManager.S(16f);
+            float totalControlW = ClientConfig.SettingWidth;
+
+            float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
+            GUI.Label(new Rect(indent, y, labelW, elemH), DisplayName, ThemeManager.SettingLabelStyle);
+
+            float itemW = (totalControlW - (gap * 3f) - (subLabelW * 2f)) / 2f;
+            float resetStartX = width - indent - resetBtnW;
+            float currX = resetStartX - gap - totalControlW;
+
+            // X component
+            GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", ThemeManager.TextStyle);
+            currX += subLabelW + gap;
+            Rect xRect = new(currX, y, itemW, elemH);
+
+            if (DrawSetting.ActiveTextFieldId != xRect.GetHashCode())
+            {
+                _bufX = Value.x.ToString();
+            }
+            _bufX = DrawSetting.DrawManualTextField(xRect, _bufX, "0", null, this);
+            currX += itemW + gap;
+
+            // Y component
+            GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", ThemeManager.TextStyle);
+            currX += subLabelW + gap;
+            Rect yRect = new(currX, y, itemW, elemH);
+
+            if (DrawSetting.ActiveTextFieldId != yRect.GetHashCode())
+            {
+                _bufY = Value.y.ToString();
+            }
+            _bufY = DrawSetting.DrawManualTextField(yRect, _bufY, "0", null, this);
+
+            int rawX = int.TryParse(_bufX, out int valX) ? valX : Value.x;
+            int rawY = int.TryParse(_bufY, out int valY) ? valY : Value.y;
+            Vector2Int parsed = Clamp(new Vector2Int(rawX, rawY));
+
+            if (!IsDisabled && (Value.x != parsed.x || Value.y != parsed.y))
+            {
+                _value = parsed;
+                OnValueChanged?.Invoke(_value);
+            }
+
+            // Reset Button
+            Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
+            if (!IsDisabled && DrawResetButton(resetRect))
+            {
+                Reset();
+            }
+
+            y += elemH + ClientConfig.spacing;
         }
-        _bufX = DrawSetting.DrawManualTextField(xRect, _bufX, "0");
-        currX += itemW + gap;
-
-        // Y component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", ThemeManager.TextStyle);
-        currX += subLabelW + gap;
-        Rect yRect = new(currX, y, itemW, elemH);
-
-        if (DrawSetting.ActiveTextFieldId != yRect.GetHashCode())
+        finally
         {
-            _bufY = Value.y.ToString();
+            GUI.enabled = prevGUIEnabled;
         }
-        _bufY = DrawSetting.DrawManualTextField(yRect, _bufY, "0");
-
-        int rawX = int.TryParse(_bufX, out int valX) ? valX : Value.x;
-        int rawY = int.TryParse(_bufY, out int valY) ? valY : Value.y;
-        Vector2Int parsed = Clamp(new Vector2Int(rawX, rawY));
-
-        if (Value.x != parsed.x || Value.y != parsed.y)
-        {
-            _value = parsed;
-            OnValueChanged?.Invoke(_value);
-        }
-
-        // Reset Button
-        Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
-        if (DrawResetButton(resetRect))
-        {
-            Reset();
-        }
-
-        y += elemH + ClientConfig.spacing;
     }
 }
 
@@ -527,6 +547,7 @@ public class Vector3Setting : Setting
     /// </summary>
     public override void Reset()
     {
+        if (IsDisabled) return;
         Value = DefaultValue;
         _bufX = _value.x.ToString("0.##");
         _bufY = _value.y.ToString("0.##");
@@ -549,74 +570,83 @@ public class Vector3Setting : Setting
     /// </summary>
     public override void Draw(ref float y, float width)
     {
-        float elemH = ClientConfig.elementHeight;
-        float indent = ClientConfig.indent;
-        float gap = SettingValues.Gap;
-        float resetBtnW = SettingValues.ResetButtonW;
-        float subLabelW = GUIManager.S(14f);
-        float totalControlW = ClientConfig.SettingWidth * 1.15f;
-
-        float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), DisplayName, ThemeManager.SettingLabelStyle);
-
-        float itemW = (totalControlW - (gap * 5f) - (subLabelW * 3f)) / 3f;
-        float resetStartX = width - indent - resetBtnW;
-        float currX = resetStartX - gap - totalControlW;
-
-        // X component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", ThemeManager.TextStyle);
-        currX += subLabelW + gap;
-        Rect xRect = new(currX, y, itemW, elemH);
-
-        if (DrawSetting.ActiveTextFieldId != xRect.GetHashCode())
+        bool prevGUIEnabled = GUI.enabled;
+        if (IsDisabled) GUI.enabled = false;
+        try
         {
-            _bufX = Value.x.ToString("0.##");
+            float elemH = ClientConfig.elementHeight;
+            float indent = ClientConfig.indent;
+            float gap = SettingValues.Gap;
+            float resetBtnW = SettingValues.ResetButtonW;
+            float subLabelW = GUIManager.S(14f);
+            float totalControlW = ClientConfig.SettingWidth * 1.15f;
+
+            float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
+            GUI.Label(new Rect(indent, y, labelW, elemH), DisplayName, ThemeManager.SettingLabelStyle);
+
+            float itemW = (totalControlW - (gap * 5f) - (subLabelW * 3f)) / 3f;
+            float resetStartX = width - indent - resetBtnW;
+            float currX = resetStartX - gap - totalControlW;
+
+            // X component
+            GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", ThemeManager.TextStyle);
+            currX += subLabelW + gap;
+            Rect xRect = new(currX, y, itemW, elemH);
+
+            if (DrawSetting.ActiveTextFieldId != xRect.GetHashCode())
+            {
+                _bufX = Value.x.ToString("0.##");
+            }
+            _bufX = DrawSetting.DrawManualTextField(xRect, _bufX, "0", null, this);
+            currX += itemW + gap;
+
+            // Y component
+            GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", ThemeManager.TextStyle);
+            currX += subLabelW + gap;
+            Rect yRect = new(currX, y, itemW, elemH);
+
+            if (DrawSetting.ActiveTextFieldId != yRect.GetHashCode())
+            {
+                _bufY = Value.y.ToString("0.##");
+            }
+            _bufY = DrawSetting.DrawManualTextField(yRect, _bufY, "0", null, this);
+            currX += itemW + gap;
+
+            // Z component
+            GUI.Label(new Rect(currX, y, subLabelW, elemH), "Z", ThemeManager.TextStyle);
+            currX += subLabelW + gap;
+            Rect zRect = new(currX, y, itemW, elemH);
+
+            if (DrawSetting.ActiveTextFieldId != zRect.GetHashCode())
+            {
+                _bufZ = Value.z.ToString("0.##");
+            }
+            _bufZ = DrawSetting.DrawManualTextField(zRect, _bufZ, "0", null, this);
+
+            float rawX = TryParseFloat(_bufX, out float valX) ? valX : Value.x;
+            float rawY = TryParseFloat(_bufY, out float valY) ? valY : Value.y;
+            float rawZ = TryParseFloat(_bufZ, out float valZ) ? valZ : Value.z;
+            Vector3 parsed = Clamp(new Vector3(rawX, rawY, rawZ));
+
+            if (!IsDisabled && (!Mathf.Approximately(Value.x, parsed.x) || !Mathf.Approximately(Value.y, parsed.y) || !Mathf.Approximately(Value.z, parsed.z)))
+            {
+                _value = parsed;
+                OnValueChanged?.Invoke(_value);
+            }
+
+            // Reset Button
+            Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
+            if (!IsDisabled && DrawResetButton(resetRect))
+            {
+                Reset();
+            }
+
+            y += elemH + ClientConfig.spacing;
         }
-        _bufX = DrawSetting.DrawManualTextField(xRect, _bufX, "0");
-        currX += itemW + gap;
-
-        // Y component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", ThemeManager.TextStyle);
-        currX += subLabelW + gap;
-        Rect yRect = new(currX, y, itemW, elemH);
-
-        if (DrawSetting.ActiveTextFieldId != yRect.GetHashCode())
+        finally
         {
-            _bufY = Value.y.ToString("0.##");
+            GUI.enabled = prevGUIEnabled;
         }
-        _bufY = DrawSetting.DrawManualTextField(yRect, _bufY, "0");
-        currX += itemW + gap;
-
-        // Z component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Z", ThemeManager.TextStyle);
-        currX += subLabelW + gap;
-        Rect zRect = new(currX, y, itemW, elemH);
-
-        if (DrawSetting.ActiveTextFieldId != zRect.GetHashCode())
-        {
-            _bufZ = Value.z.ToString("0.##");
-        }
-        _bufZ = DrawSetting.DrawManualTextField(zRect, _bufZ, "0");
-
-        float rawX = TryParseFloat(_bufX, out float valX) ? valX : Value.x;
-        float rawY = TryParseFloat(_bufY, out float valY) ? valY : Value.y;
-        float rawZ = TryParseFloat(_bufZ, out float valZ) ? valZ : Value.z;
-        Vector3 parsed = Clamp(new Vector3(rawX, rawY, rawZ));
-
-        if (!Mathf.Approximately(Value.x, parsed.x) || !Mathf.Approximately(Value.y, parsed.y) || !Mathf.Approximately(Value.z, parsed.z))
-        {
-            _value = parsed;
-            OnValueChanged?.Invoke(_value);
-        }
-
-        // Reset Button
-        Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
-        if (DrawResetButton(resetRect))
-        {
-            Reset();
-        }
-
-        y += elemH + ClientConfig.spacing;
     }
 }
 
@@ -754,6 +784,7 @@ public class Vector3IntSetting : Setting
     /// </summary>
     public override void Reset()
     {
+        if (IsDisabled) return;
         Value = DefaultValue;
         _bufX = _value.x.ToString();
         _bufY = _value.y.ToString();
@@ -765,73 +796,82 @@ public class Vector3IntSetting : Setting
     /// </summary>
     public override void Draw(ref float y, float width)
     {
-        float elemH = ClientConfig.elementHeight;
-        float indent = ClientConfig.indent;
-        float gap = SettingValues.Gap;
-        float resetBtnW = SettingValues.ResetButtonW;
-        float subLabelW = GUIManager.S(14f);
-        float totalControlW = ClientConfig.SettingWidth * 1.15f;
-
-        float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
-        GUI.Label(new Rect(indent, y, labelW, elemH), DisplayName, ThemeManager.SettingLabelStyle);
-
-        float itemW = (totalControlW - (gap * 5f) - (subLabelW * 3f)) / 3f;
-        float resetStartX = width - indent - resetBtnW;
-        float currX = resetStartX - gap - totalControlW;
-
-        // X component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", ThemeManager.TextStyle);
-        currX += subLabelW + gap;
-        Rect xRect = new(currX, y, itemW, elemH);
-
-        if (DrawSetting.ActiveTextFieldId != xRect.GetHashCode())
+        bool prevGUIEnabled = GUI.enabled;
+        if (IsDisabled) GUI.enabled = false;
+        try
         {
-            _bufX = Value.x.ToString();
+            float elemH = ClientConfig.elementHeight;
+            float indent = ClientConfig.indent;
+            float gap = SettingValues.Gap;
+            float resetBtnW = SettingValues.ResetButtonW;
+            float subLabelW = GUIManager.S(14f);
+            float totalControlW = ClientConfig.SettingWidth * 1.15f;
+
+            float labelW = width - (indent * 2f) - totalControlW - gap - resetBtnW;
+            GUI.Label(new Rect(indent, y, labelW, elemH), DisplayName, ThemeManager.SettingLabelStyle);
+
+            float itemW = (totalControlW - (gap * 5f) - (subLabelW * 3f)) / 3f;
+            float resetStartX = width - indent - resetBtnW;
+            float currX = resetStartX - gap - totalControlW;
+
+            // X component
+            GUI.Label(new Rect(currX, y, subLabelW, elemH), "X", ThemeManager.TextStyle);
+            currX += subLabelW + gap;
+            Rect xRect = new(currX, y, itemW, elemH);
+
+            if (DrawSetting.ActiveTextFieldId != xRect.GetHashCode())
+            {
+                _bufX = Value.x.ToString();
+            }
+            _bufX = DrawSetting.DrawManualTextField(xRect, _bufX, "0", null, this);
+            currX += itemW + gap;
+
+            // Y component
+            GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", ThemeManager.TextStyle);
+            currX += subLabelW + gap;
+            Rect yRect = new(currX, y, itemW, elemH);
+
+            if (DrawSetting.ActiveTextFieldId != yRect.GetHashCode())
+            {
+                _bufY = Value.y.ToString();
+            }
+            _bufY = DrawSetting.DrawManualTextField(yRect, _bufY, "0", null, this);
+            currX += itemW + gap;
+
+            // Z component
+            GUI.Label(new Rect(currX, y, subLabelW, elemH), "Z", ThemeManager.TextStyle);
+            currX += subLabelW + gap;
+            Rect zRect = new(currX, y, itemW, elemH);
+
+            if (DrawSetting.ActiveTextFieldId != zRect.GetHashCode())
+            {
+                _bufZ = Value.z.ToString();
+            }
+            _bufZ = DrawSetting.DrawManualTextField(zRect, _bufZ, "0", null, this);
+
+            int rawX = int.TryParse(_bufX, out int valX) ? valX : Value.x;
+            int rawY = int.TryParse(_bufY, out int valY) ? valY : Value.y;
+            int rawZ = int.TryParse(_bufZ, out int valZ) ? valZ : Value.z;
+            Vector3Int parsed = Clamp(new Vector3Int(rawX, rawY, rawZ));
+
+            if (!IsDisabled && (Value.x != parsed.x || Value.y != parsed.y || Value.z != parsed.z))
+            {
+                _value = parsed;
+                OnValueChanged?.Invoke(_value);
+            }
+
+            // Reset Button
+            Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
+            if (!IsDisabled && DrawResetButton(resetRect))
+            {
+                Reset();
+            }
+
+            y += elemH + ClientConfig.spacing;
         }
-        _bufX = DrawSetting.DrawManualTextField(xRect, _bufX, "0");
-        currX += itemW + gap;
-
-        // Y component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Y", ThemeManager.TextStyle);
-        currX += subLabelW + gap;
-        Rect yRect = new(currX, y, itemW, elemH);
-
-        if (DrawSetting.ActiveTextFieldId != yRect.GetHashCode())
+        finally
         {
-            _bufY = Value.y.ToString();
+            GUI.enabled = prevGUIEnabled;
         }
-        _bufY = DrawSetting.DrawManualTextField(yRect, _bufY, "0");
-        currX += itemW + gap;
-
-        // Z component
-        GUI.Label(new Rect(currX, y, subLabelW, elemH), "Z", ThemeManager.TextStyle);
-        currX += subLabelW + gap;
-        Rect zRect = new(currX, y, itemW, elemH);
-
-        if (DrawSetting.ActiveTextFieldId != zRect.GetHashCode())
-        {
-            _bufZ = Value.z.ToString();
-        }
-        _bufZ = DrawSetting.DrawManualTextField(zRect, _bufZ, "0");
-
-        int rawX = int.TryParse(_bufX, out int valX) ? valX : Value.x;
-        int rawY = int.TryParse(_bufY, out int valY) ? valY : Value.y;
-        int rawZ = int.TryParse(_bufZ, out int valZ) ? valZ : Value.z;
-        Vector3Int parsed = Clamp(new Vector3Int(rawX, rawY, rawZ));
-
-        if (Value.x != parsed.x || Value.y != parsed.y || Value.z != parsed.z)
-        {
-            _value = parsed;
-            OnValueChanged?.Invoke(_value);
-        }
-
-        // Reset Button
-        Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
-        if (DrawResetButton(resetRect))
-        {
-            Reset();
-        }
-
-        y += elemH + ClientConfig.spacing;
     }
 }

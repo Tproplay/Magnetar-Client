@@ -209,6 +209,7 @@ public class IntSetting : Setting
     /// </summary>
     public override void Reset()
     {
+        if (IsDisabled) return;
         Value = DefaultValue;
         PendingValue = null;
         DragValue = null;
@@ -219,6 +220,13 @@ public class IntSetting : Setting
     /// </summary>
     /// <param name="y">Reference to the vertical layout offset.</param>
     /// <param name="width">The total available layout width.</param>
+    /// <summary>
+    /// Indicates whether this numeric setting's slider is being dragged or its input field is focused.
+    /// </summary>
+    public override bool IsFocused =>
+        (ReferenceEquals(DrawSetting.activeNumericSetting, this) && DrawSetting.ActiveSliderId != -1)
+        || base.IsFocused;
+
     public override void Draw(ref float y, float width)
     {
         DrawNumeric(this, ref y, width, false);
@@ -259,8 +267,11 @@ public class IntSetting : Setting
         bool isDisabled = isFloat ? ((FloatSetting)setting).IsDisabled : ((IntSetting)setting).IsDisabled;
         bool prevGUIEnabled = GUI.enabled;
         if (isDisabled) GUI.enabled = false;
-
         float elemH = ClientConfig.elementHeight;
+
+        try
+        {
+
         float indent = ClientConfig.indent;
         float gap = SettingValues.Gap;
         float resetBtnW = SettingValues.ResetButtonW;
@@ -329,10 +340,26 @@ public class IntSetting : Setting
         float thumbY = sliderRect.y + (trackH / 2f) - (thumbSize / 2f);
         Rect thumbRect = new(thumbX, thumbY, thumbSize, thumbSize);
 
-        // Draw track & thumb
-        GUI.Box(sliderRect, "", ThemeManager.SliderTrackOffStyle);
-        if (fillWidth > 0f)
-            GUI.Box(new Rect(sliderRect.x, sliderRect.y, fillWidth, sliderRect.height), "", ThemeManager.SliderTrackOnStyle);
+        // Segmented track to avoid overlapping track on/off or drawing track underneath the thumb (which causes double alpha-blend / opaque artifacts)
+        float overlapTolerance = GUIManager.S(1f);
+
+        // Active track (left of thumb)
+        float activeEndX = Mathf.Clamp(thumbX + overlapTolerance, sliderRect.x, sliderRect.x + sliderRect.width);
+        float activeWidth = activeEndX - sliderRect.x;
+        if (activeWidth > 0f)
+        {
+            GUI.Box(new Rect(sliderRect.x, sliderRect.y, activeWidth, sliderRect.height), "", ThemeManager.SliderTrackOnStyle);
+        }
+
+        // Inactive track (right of thumb)
+        float inactiveStartX = Mathf.Clamp(thumbX + thumbSize - overlapTolerance, sliderRect.x, sliderRect.x + sliderRect.width);
+        float inactiveWidth = (sliderRect.x + sliderRect.width) - inactiveStartX;
+        if (inactiveWidth > 0f)
+        {
+            GUI.Box(new Rect(inactiveStartX, sliderRect.y, inactiveWidth, sliderRect.height), "", ThemeManager.SliderTrackOffStyle);
+        }
+
+        // Thumb
         GUI.Box(thumbRect, "", ThemeManager.SliderThumbStyle);
 
         void CommitSettingValue()
@@ -405,6 +432,7 @@ public class IntSetting : Setting
                 DrawSetting.activeNumericSetting = setting;
                 DrawSetting.FocusedControlId = -1;
                 DrawSetting.ActiveTextFieldId = -1;
+                DrawSetting.ActiveTextSetting = null;
 
                 ApplyFromMouseX(e.mousePosition.x);
                 e.Use();
@@ -462,15 +490,20 @@ public class IntSetting : Setting
         {
             DrawSetting.CurrentInputBuffer = val.ToString(formatString);
             DrawSetting.lastFocusedNumericControlId = controlId;
+            DrawSetting.ActiveTextSetting = (Setting)setting;
         }
         else if (!isFocused && DrawSetting.lastFocusedNumericControlId == controlId)
         {
             CommitSettingValue();
             DrawSetting.lastFocusedNumericControlId = -1;
+            if (ReferenceEquals(DrawSetting.ActiveTextSetting, setting))
+            {
+                DrawSetting.ActiveTextSetting = null;
+            }
         }
 
         string displayValue = isFocused ? DrawSetting.CurrentInputBuffer : val.ToString(formatString);
-        string newText = DrawSetting.DrawManualTextField(inputRect, displayValue, "0");
+        string newText = DrawSetting.DrawManualTextField(inputRect, displayValue, "0", null, (Setting)setting);
 
         if (isFocused)
         {
@@ -485,6 +518,7 @@ public class IntSetting : Setting
             {
                 CommitSettingValue();
                 DrawSetting.ActiveTextFieldId = -1;
+                DrawSetting.ActiveTextSetting = null;
                 GUIUtility.keyboardControl = 0;
                 e.Use();
             }
@@ -502,8 +536,11 @@ public class IntSetting : Setting
                 GUIUtility.hotControl = 0;
             }
         }
-
-        GUI.enabled = prevGUIEnabled;
+        }
+        finally
+        {
+            GUI.enabled = prevGUIEnabled;
+        }
         y += elemH + ClientConfig.spacing;
     }
 }
@@ -721,6 +758,7 @@ public class FloatSetting : Setting
     /// </summary>
     public override void Reset()
     {
+        if (IsDisabled) return;
         Value = DefaultValue;
         PendingValue = null;
         DragValue = null;
@@ -731,6 +769,13 @@ public class FloatSetting : Setting
     /// </summary>
     /// <param name="y">Reference to the vertical layout offset.</param>
     /// <param name="width">The total available layout width.</param>
+    /// <summary>
+    /// Indicates whether this numeric setting's slider is being dragged or its input field is focused.
+    /// </summary>
+    public override bool IsFocused =>
+        (ReferenceEquals(DrawSetting.activeNumericSetting, this) && DrawSetting.ActiveSliderId != -1)
+        || base.IsFocused;
+
     public override void Draw(ref float y, float width)
     {
         IntSetting.DrawNumeric(this, ref y, width, true);

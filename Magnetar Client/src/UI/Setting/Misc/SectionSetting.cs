@@ -4,6 +4,7 @@ using static Magnetar_Client.Utils.Translator;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Magnetar_Client.Core;
 
@@ -34,6 +35,11 @@ public class SectionInstance
     /// Optional user data or metadata attached to this section instance.
     /// </summary>
     public object Tag { get; set; }
+
+    /// <summary>
+    /// Indicates whether any child setting within this section instance is currently focused.
+    /// </summary>
+    public bool IsFocused => ChildSettings != null && ChildSettings.Any(c => c != null && c.IsFocused);
 
     /// <summary>
     /// Initializes a new instance of <see cref="SectionInstance"/> with a title and an optional list of child settings.
@@ -134,6 +140,13 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
     /// The collection of currently instantiated section groups.
     /// </summary>
     public List<SectionInstance> Sections = new();
+
+    /// <summary>
+    /// Indicates whether any child setting within this section container is currently focused.
+    /// </summary>
+    public override bool IsFocused =>
+        base.IsFocused
+        || (Sections != null && Sections.Any(s => s != null && s.IsFocused));
 
     /// <summary>
     /// The maximum number of allowed sections. Set to -1 for unlimited additions.
@@ -361,7 +374,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
         else if (setting is FloatSetting f) f.DefaultValue = f.Value;
         else if (setting is IntSetting i) i.DefaultValue = i.Value;
         else if (setting is StringSetting s) s.DefaultValue = s.Value;
-        else if (setting is SelectSetting sel) sel.DefaultValue = sel.Value;
+        else if (setting is BaseSelectSetting bsel) bsel.SetCurrentAsDefault();
         else if (setting is ColorSetting col) col.DefaultValue = col.Value;
         else if (setting is BaseMultiSelectSetting ms) ms.SetCurrentAsDefault();
         else if (setting is BindSetting bind)
@@ -387,6 +400,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
     /// </summary>
     public override void Reset()
     {
+        if (IsDisabled) return;
         Sections.Clear();
 
         if (HasDefaultSnapshots)
@@ -462,7 +476,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
     /// <returns><see langword="true"/> if added; <see langword="false"/> if rejected by <see cref="MaxSections"/>.</returns>
     public bool AddSection(SectionInstance section)
     {
-        if (section == null) return false;
+        if (IsDisabled || section == null) return false;
         if (MaxSections != -1 && Sections.Count >= MaxSections) return false;
 
         Sections.Add(section);
@@ -479,7 +493,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
     /// <returns><see langword="true"/> if successfully removed; otherwise, <see langword="false"/>.</returns>
     public bool RemoveSection(int index)
     {
-        if (!AllowRemove) return false;
+        if (IsDisabled || !AllowRemove) return false;
         if (MinSections != -1 && Sections.Count <= MinSections) return false;
 
         if (index >= 0 && index < Sections.Count)
@@ -500,6 +514,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
     /// </summary>
     public void ClearSections()
     {
+        if (IsDisabled) return;
         while (Sections.Count > Math.Max(0, MinSections))
         {
             Sections.RemoveAt(Sections.Count - 1);
@@ -514,6 +529,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
     /// <param name="targetCount">The desired number of active sections.</param>
     public void SetSectionCount(int targetCount)
     {
+        if (IsDisabled) return;
         if (MaxSections != -1) targetCount = Math.Min(targetCount, MaxSections);
         if (MinSections != -1) targetCount = Math.Max(targetCount, MinSections);
 
@@ -548,21 +564,25 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
     /// <param name="width">The total width allocated for rendering.</param>
     public override void Draw(ref float y, float width)
     {
-        Event e = Event.current;
-        float elemH = ClientConfig.elementHeight;
-        float indent = ClientConfig.indent;
-        float gap = SettingValues.Gap;
-        float actionBtnW = SettingValues.ResetButtonW;
+        bool prevGUIEnabled = GUI.enabled;
+        if (IsDisabled) GUI.enabled = false;
+        try
+        {
+            Event e = Event.current;
+            float elemH = ClientConfig.elementHeight;
+            float indent = ClientConfig.indent;
+            float gap = SettingValues.Gap;
+            float actionBtnW = SettingValues.ResetButtonW;
 
-        // 1. Group Header
-        string countSuffix = ShowCountInHeader ? $" ({Sections.Count})" : "";
-        string title = $"{DisplayName}{countSuffix}";
-        Rect titleRect = new(indent, y, width - (indent * 2f), elemH);
-        GUI.Box(titleRect, title, ThemeManager.SectionGroupHeaderStyle);
-        y += elemH + gap;
+            // 1. Group Header
+            string countSuffix = ShowCountInHeader ? $" ({Sections.Count})" : "";
+            string title = $"{DisplayName}{countSuffix}";
+            Rect titleRect = new(indent, y, width - (indent * 2f), elemH);
+            GUI.Box(titleRect, title, ThemeManager.SectionGroupHeaderStyle);
+            y += elemH + gap;
 
-        int removeIdx = -1;
-        bool canRemoveAny = AllowRemove && (MinSections == -1 || Sections.Count > MinSections);
+            int removeIdx = -1;
+            bool canRemoveAny = !IsDisabled && AllowRemove && (MinSections == -1 || Sections.Count > MinSections);
 
         // 2. Render each section instance
         for (int i = 0; i < Sections.Count; i++)
@@ -617,7 +637,18 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
             {
                 for (int c = 0; c < section.ChildSettings.Count; c++)
                 {
-                    section.ChildSettings[c].Draw(ref y, width);
+                    var child = section.ChildSettings[c];
+                    if (child == null) continue;
+                    bool childWasDisabled = child.IsDisabled;
+                    if (IsDisabled) child.IsDisabled = true;
+                    try
+                    {
+                        child.Draw(ref y, width);
+                    }
+                    finally
+                    {
+                        if (IsDisabled) child.IsDisabled = childWasDisabled;
+                    }
                 }
             }
 
@@ -632,7 +663,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
         // 3. Add Section & Reset Button Row
         if (AllowAdd || ShowResetButton)
         {
-            bool canAdd = AllowAdd && (MaxSections == -1 || Sections.Count < MaxSections);
+            bool canAdd = !IsDisabled && AllowAdd && (MaxSections == -1 || Sections.Count < MaxSections);
             float resetStartX = width - indent - actionBtnW;
 
             Rect addBtnRect;
@@ -658,13 +689,13 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
                 string buttonText = canAdd ? Translate(AddButtonText) : Translate("Max Sections Reached");
                 GUI.Box(addBtnRect, buttonText, addStyle);
             }
-        if (canAdd && e.type == EventType.MouseDown && e.button == 0 && addBtnRect.Contains(e.mousePosition))
-        {
-            e.Use();
-            AddSection();
-        }
+            if (canAdd && e.type == EventType.MouseDown && e.button == 0 && addBtnRect.Contains(e.mousePosition))
+            {
+                e.Use();
+                AddSection();
+            }
 
-            if (ShowResetButton && DrawResetButton(resetRect))
+            if (!IsDisabled && ShowResetButton && DrawResetButton(resetRect))
             {
                 Reset();
             }
@@ -674,6 +705,11 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
         else
         {
             y += ClientConfig.spacing;
+        }
+        }
+        finally
+        {
+            GUI.enabled = prevGUIEnabled;
         }
     }
 

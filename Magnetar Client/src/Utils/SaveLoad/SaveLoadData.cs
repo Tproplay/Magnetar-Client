@@ -144,7 +144,7 @@ public static class SaveLoadData
         if (setting is CategorySetting cat) return cat.IsExpanded;
         if (setting is BaseMultiSelectSetting ms) return ms.ExportSaveData();
         if (setting is BindSetting bind) return bind.BindKeys;
-        if (setting is SelectSetting sel) return sel.Value;
+        if (setting is BaseSelectSetting bsel) return bsel.ExportSaveData();
         if (setting is StringSetting str) return str.Value;
         if (setting is ColorSetting col) return col.HexValue;
         if (setting is ListStringSetting list) return new List<string>(list.Values);
@@ -202,7 +202,7 @@ public static class SaveLoadData
                 string jsonStr = JsonConvert.SerializeObject(rawValue);
                 bind.BindKeys = JsonConvert.DeserializeObject<List<KeyCode>>(jsonStr) ?? new List<KeyCode>();
             }
-            else if (setting is SelectSetting sel) sel.Value = Convert.ToInt32(rawValue);
+            else if (setting is BaseSelectSetting bsel) bsel.ImportSaveData(rawValue);
             else if (setting is StringSetting str) str.Value = rawValue?.ToString() ?? "";
             else if (setting is ColorSetting col) col.HexValue = rawValue?.ToString() ?? "";
             else if (setting is ListStringSetting list)

@@ -10,20 +10,25 @@
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <Configurations>MelonLoader;BepInEx;MELON LOCAL;BEPINEX LOCAL</Configurations>
         <RefDir>$(MSBuildThisFileDirectory)..\..\..\References</RefDir>
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+        <GenerateDependencyFile>false</GenerateDependencyFile>
     </PropertyGroup>
 
-	<PropertyGroup>
-		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	</PropertyGroup>
-	
-    <!-- Loader Target Constants & Output Paths -->
+    <ItemDefinitionGroup>
+        <Reference>
+            <Private>false</Private>
+        </Reference>
+    </ItemDefinitionGroup>
+
+<!-- Loader Target Constants & Output Paths -->
     <PropertyGroup Condition="$(Configuration.Contains('MELON')) or $(Configuration.Contains('Melon'))">
-        <OutputPath>bin\Melonloader\$(Configuration)\</OutputPath>
+        <OutputPath>bin\$(Configuration)\</OutputPath>
         <DefineConstants>$(DefineConstants);MELONLOADER</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="$(Configuration.Contains('BepInEx')) or $(Configuration.Contains('BEPINEX'))">
-        <OutputPath>bin\BepInEx\$(Configuration)\</OutputPath>
+        <OutputPath>bin\$(Configuration)\</OutputPath>
         <DefineConstants>$(DefineConstants);BEPINEX</DefineConstants>
     </PropertyGroup>
 
@@ -201,7 +206,7 @@
 		<Exec Command="&quot;$(Obfuscar)&quot; obfuscar.xml" WorkingDirectory="$(TargetDir)" StandardOutputImportance="High" StandardErrorImportance="High" />
 
 		<!-- Overwrite original DLL with protected DLL -->
-		<Copy SourceFiles="$(TargetDir)Obfuscated\$(TargetFileName)" DestinationFolder="$(TargetDir)" OverwriteReadOnlyFiles="true" />
+		<Copy SourceFiles="$(TargetDir)melonloader\$(TargetFileName)" DestinationFolder="$(TargetDir)" OverwriteReadOnlyFiles="true" />
 
 		<Message Text="[Obfuscar] Assembly successfully protected." Importance="high" />
 	</Target>

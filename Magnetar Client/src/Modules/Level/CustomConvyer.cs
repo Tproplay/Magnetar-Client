@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -60,6 +60,24 @@ public class CustomConveyor : Module
         AddSettings(ForceShowConveyer, ConveyorPlantsSetting);
 
         EndCategory();
+
+        GameData.Actions.OnBoardInstantiated += (_) =>
+        {
+            if (Active && ForceShowConveyer.Value)
+            {
+                EnableConveyer(true);
+            }
+        };
+
+        GameData.Actions.OnBoardDestroyed += () =>
+        {
+            wasSeedBankenable = false;
+        };
+
+        GameData.Actions.OnBoardDied += () =>
+        {
+            wasSeedBankenable = false;
+        };
     }
 
     public override void OnLanguageChanged()
@@ -151,27 +169,5 @@ public class CustomConveyor : Module
         }
     }
 
-    [HarmonyPatch(typeof(Board))]
-    public static class BoardPatch
-    {
-        [HarmonyPatch(nameof(Board.Start))]
-        [HarmonyPostfix]
-        public static void StartPostfix()
-        {
-            if (instance == null || !instance.Active) return;
 
-            if (instance.ForceShowConveyer.Value)
-            {
-                instance.EnableConveyer(true);
-            }
-        }
-
-        [HarmonyPatch(nameof(Board.Die))]
-        [HarmonyPostfix]
-        public static void DiePostfix()
-        {
-            if (instance == null) return;
-            instance.wasSeedBankenable = false;
-        }
-    }
 }

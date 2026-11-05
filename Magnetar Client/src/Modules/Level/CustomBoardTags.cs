@@ -1,4 +1,4 @@
-﻿
+
 using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using System.Reflection;
@@ -94,6 +94,23 @@ public class CustomBoardTags : Module
         AddSettings(BoardTagSetting);
         EndCategory();
 
+        GameData.Actions.OnBoardInstantiated += (board) =>
+        {
+            OriginalTags = board.boardTag;
+            BoardTagSetting.IsDisabled = false;
+        };
+
+        GameData.Actions.OnBoardDestroyed += () =>
+        {
+            OriginalTags = null;
+            BoardTagSetting.IsDisabled = true;
+        };
+
+        GameData.Actions.OnBoardDied += () =>
+        {
+            OriginalTags = null;
+            BoardTagSetting.IsDisabled = true;
+        };
     }
 
 
@@ -108,31 +125,10 @@ public class CustomBoardTags : Module
         object boxedTag = boardTag;
 
         BoardTagFields[tag].SetValue(boxedTag, enable);
-        GameData.
-                BoardInstance.boardTag = (Board.BoardTag)boxedTag;
+        GameData.BoardInstance.boardTag = (Board.BoardTag)boxedTag;
     }
 
 
-    [HarmonyPatch(typeof(Board))]
-    public static class BoardPatch
-    {
-        [HarmonyPatch(nameof(Board.Start))]
-        [HarmonyPostfix]
-        public static void StartPostfix(Board __instance)
-        {
-            if (instance == null) return;
-            instance.OriginalTags = __instance.boardTag;
-            instance.BoardTagSetting.IsDisabled = false;
-        }
 
-        [HarmonyPatch(nameof(Board.Die))]
-        [HarmonyPostfix]
-        public static void DiePostfix()
-        {
-            if (instance == null) return;
-            instance.OriginalTags = null;
-            instance.BoardTagSetting.IsDisabled = true;
-        }
-    }
 
 }

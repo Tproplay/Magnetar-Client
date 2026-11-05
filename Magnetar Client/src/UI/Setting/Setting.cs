@@ -1,4 +1,5 @@
 using Magnetar_Client.UI.Themes;
+using Magnetar_Client.UI.WindowDrawing;
 using Magnetar_Client.Utils;
 using UnityEngine;
 
@@ -51,6 +52,12 @@ public abstract class Setting
     public bool IsDisabled { get; set; }
 
     /// <summary>
+    /// Indicates whether this setting or any of its interactive child controls (e.g. text field, slider, dropdown, keybind listener) is currently focused or being actively manipulated.
+    /// </summary>
+    public virtual bool IsFocused =>
+        DrawSetting.ActiveTextFieldId != -1 && ReferenceEquals(DrawSetting.ActiveTextSetting, this);
+
+    /// <summary>
     /// Indicates whether this setting should be exported and saved to translation files.
     /// </summary>
     public virtual bool SaveTranslation { get; set; } = true;
@@ -89,7 +96,7 @@ public abstract class Setting
 
         GUI.Box(rect, ResetSymbol, ThemeManager.ResetButtonStyle);
 
-        if (isHovered && e.type == EventType.MouseDown && e.button == 0)
+        if (GUI.enabled && isHovered && e.type == EventType.MouseDown && e.button == 0)
         {
             e.Use();
             return true;

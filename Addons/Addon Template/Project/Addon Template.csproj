@@ -2,7 +2,6 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <RootNamespace>AddonTemplate</RootNamespace>
         <AssemblyName>Addon Template</AssemblyName>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -11,18 +10,31 @@
         <Configurations>MelonLoader;BepInEx</Configurations>
     </PropertyGroup>
 
+
+    <PropertyGroup>
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+        <GenerateDependencyFile>false</GenerateDependencyFile>
+    </PropertyGroup>
+
+    <ItemDefinitionGroup>
+        <Reference>
+            <Private>false</Private>
+        </Reference>
+    </ItemDefinitionGroup>
+
     <PropertyGroup>
         <RefDir>$(MSBuildThisFileDirectory)..\..\..\References</RefDir>
     </PropertyGroup>
 
     <!-- Loader Target Constants & Output Paths -->
     <PropertyGroup Condition="$(Configuration.Contains('MELON')) or $(Configuration.Contains('Melon'))">
-        <OutputPath>bin\Melonloader\$(Configuration)\</OutputPath>
+        <OutputPath>bin\$(Configuration)\</OutputPath>
         <DefineConstants>$(DefineConstants);MELONLOADER</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="$(Configuration.Contains('BepInEx')) or $(Configuration.Contains('BEPINEX'))">
-        <OutputPath>bin\BepInEx\$(Configuration)\</OutputPath>
+        <OutputPath>bin\$(Configuration)\</OutputPath>
         <DefineConstants>$(DefineConstants);BEPINEX</DefineConstants>
     </PropertyGroup>
 

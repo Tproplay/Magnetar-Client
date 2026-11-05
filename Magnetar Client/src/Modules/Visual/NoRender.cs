@@ -230,6 +230,8 @@ public class NoRender : Module
 
         AddSettings(ScreenShakeSetting);
         EndCategory();
+
+        GameData.Actions.OnBoardDestroyed += () => BulletPatch.RendererCache.Clear();
     }
 
     public override void OnLanguageChanged()
@@ -419,13 +421,7 @@ public class NoRender : Module
             }
         }
 
-        [HarmonyPatch(typeof(Board))]
-        public static class BoardCacheClearPatch
-        {
-            [HarmonyPatch(nameof(Board.OnDestroy))]
-            [HarmonyPostfix]
-            public static void OnDestroyPostfix() => RendererCache.Clear();
-        }
+
     }
 
     [HarmonyPatch(typeof(IceExplodeControl))]

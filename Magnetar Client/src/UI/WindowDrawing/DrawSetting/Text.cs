@@ -74,18 +74,27 @@ public static partial class DrawSetting
     /// <param name="width">The total available width for the control.</param>
     public static void HandleStringSetting(StringSetting strSet, ref float y, float width)
     {
-        float elemH = ClientConfig.elementHeight;
-        string translatedName = strSet.DisplayName;
+        bool prevGUIEnabled = GUI.enabled;
+        if (strSet != null && strSet.IsDisabled) GUI.enabled = false;
+        try
+        {
+            float elemH = ClientConfig.elementHeight;
+            string translatedName = strSet.DisplayName;
 
-        float controlW = Mathf.Min(ClientConfig.SettingWidth * 1.25f, width * 0.55f);
-        float gap = GUIManager.S(8f);
-        float labelW = Mathf.Max(width * 0.38f, width - (ClientConfig.indent * 2f) - controlW - gap);
+            float controlW = Mathf.Min(ClientConfig.SettingWidth * 1.25f, width * 0.55f);
+            float gap = GUIManager.S(8f);
+            float labelW = Mathf.Max(width * 0.38f, width - (ClientConfig.indent * 2f) - controlW - gap);
 
-        Rect labelRect = new(ClientConfig.indent, y, labelW, elemH);
-        Rect inputRect = new(width - ClientConfig.indent - controlW, y, controlW, elemH);
+            Rect labelRect = new(ClientConfig.indent, y, labelW, elemH);
+            Rect inputRect = new(width - ClientConfig.indent - controlW, y, controlW, elemH);
 
-        GUI.Label(labelRect, translatedName, ThemeManager.SettingLabelStyle);
-        strSet.Value = DrawManualTextField(inputRect, strSet.Value, "", strSet.AutocompleteVars);
+            GUI.Label(labelRect, translatedName, ThemeManager.SettingLabelStyle);
+            strSet.Value = DrawManualTextField(inputRect, strSet.Value, "", strSet.AutocompleteVars, strSet);
+        }
+        finally
+        {
+            GUI.enabled = prevGUIEnabled;
+        }
     }
 
     /// <summary>
@@ -109,12 +118,46 @@ public static partial class DrawSetting
     /// <param name="text">The current text content of the field.</param>
     /// <param name="defaultText">The placeholder text displayed when the field is empty and unfocused.</param>
     /// <param name="autocompleteVars">Optional list of variable names for bracket autocomplete.</param>
+    /// <param name="ownerSetting">The optional parent setting that owns this text field, used for tracking focused setting state.</param>
     /// <returns>The updated text string after processing user input.</returns>
-    public static string DrawManualTextField(Rect rect, string text, string defaultText = "", List<string> autocompleteVars = null)
+    public static string DrawManualTextField(Rect rect, string text, string defaultText = "", List<string> autocompleteVars = null, Magnetar_Client.UI.Setting.Setting ownerSetting = null)
     {
         Event e = Event.current;
         int controlId = rect.GetHashCode();
         text ??= "";
+
+        if (!GUI.enabled || (ownerSetting != null && ownerSetting.IsDisabled))
+        {
+            if (ActiveTextFieldId == controlId)
+            {
+                ActiveTextFieldId = -1;
+                if (ReferenceEquals(ActiveTextSetting, ownerSetting))
+                {
+                    ActiveTextSetting = null;
+                }
+#if ANDROID
+                if (_mobileKeyboard != null)
+                {
+                    _mobileKeyboard.active = false;
+                    _mobileKeyboard = null;
+                    _activeMobileKeyboardId = -1;
+                }
+#endif
+            }
+
+            GUI.Box(rect, "", ThemeManager.SettingOff);
+            GUI.BeginGroup(rect);
+            if (string.IsNullOrEmpty(text))
+            {
+                GUI.Label(new Rect(5, 0, rect.width, rect.height), defaultText, PlaceholderStyle);
+            }
+            else
+            {
+                GUI.Label(new Rect(5, 0, 2000, rect.height), FormatBracketRichText(text), ThemeManager.TextRichStyle);
+            }
+            GUI.EndGroup();
+            return text;
+        }
 
 #if ANDROID
         if (ActiveTextFieldId == controlId)
@@ -135,6 +178,10 @@ public static partial class DrawSetting
                     !_mobileKeyboard.active)
                 {
                     ActiveTextFieldId = -1;
+                    if (ReferenceEquals(ActiveTextSetting, ownerSetting))
+                    {
+                        ActiveTextSetting = null;
+                    }
                     _activeMobileKeyboardId = -1;
                     _mobileKeyboard = null;
                 }
@@ -157,6 +204,10 @@ public static partial class DrawSetting
 
         if (ActiveTextFieldId == controlId)
         {
+            if (ownerSetting != null)
+            {
+                ActiveTextSetting = ownerSetting;
+            }
             cursorIndex = Mathf.Clamp(cursorIndex, 0, text.Length);
             selectIndex = Mathf.Clamp(selectIndex, 0, text.Length);
         }
@@ -332,10 +383,15 @@ public static partial class DrawSetting
                 if (ActiveTextFieldId != controlId)
                 {
                     ActiveTextFieldId = controlId;
+                    ActiveTextSetting = ownerSetting;
 #if ANDROID
                     _mobileKeyboard = TouchScreenKeyboard.Open(text, TouchScreenKeyboardType.Default);
                     _activeMobileKeyboardId = controlId;
 #endif
+                }
+                else if (ownerSetting != null)
+                {
+                    ActiveTextSetting = ownerSetting;
                 }
 
                 int clickIdx = GetIndexFromMouse(e.mousePosition.x - rect.x);
@@ -405,6 +461,10 @@ public static partial class DrawSetting
             else if (ActiveTextFieldId == controlId && !clickingDropdown)
             {
                 ActiveTextFieldId = -1;
+                if (ReferenceEquals(ActiveTextSetting, ownerSetting))
+                {
+                    ActiveTextSetting = null;
+                }
 #if ANDROID
                 if (_mobileKeyboard != null)
                 {
@@ -588,11 +648,19 @@ public static partial class DrawSetting
                 else if (k == KeyCode.Return)
                 {
                     ActiveTextFieldId = -1;
+                    if (ReferenceEquals(ActiveTextSetting, ownerSetting))
+                    {
+                        ActiveTextSetting = null;
+                    }
                     e.Use();
                 }
                 else if (k == KeyCode.Escape)
                 {
                     ActiveTextFieldId = -1;
+                    if (ReferenceEquals(ActiveTextSetting, ownerSetting))
+                    {
+                        ActiveTextSetting = null;
+                    }
                     LastEscapeTime = Time.unscaledTime;
                     LastEscapeFrame = Time.frameCount;
                     e.Use();
@@ -684,6 +752,7 @@ public static partial class DrawSetting
                         string chosen = filteredVars[autocompleteSelectedIndex];
                         ApplyAutocomplete(chosen);
                         ActiveTextFieldId = controlId;
+                        ActiveTextSetting = ownerSetting;
 
 #if ANDROID
                         if (_mobileKeyboard != null)

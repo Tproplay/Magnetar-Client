@@ -112,6 +112,7 @@ public class ColorSetting : Setting
     /// </summary>
     public override void Reset()
     {
+        if (IsDisabled) return;
         Value = DefaultValue;
         _textBuffer = ColorToHex(DefaultValue, SupportAlpha);
     }
@@ -148,38 +149,42 @@ public class ColorSetting : Setting
 
         bool prevEnabled = GUI.enabled;
         if (IsDisabled) GUI.enabled = false;
-
-        // 1. Draw Label
-        GUI.Label(labelRect, DisplayName, ThemeManager.SettingLabelStyle);
-
-        // 2. Draw Color Swatch Box (left of text field)
-        GUI.Box(swatchRect, "", ThemeManager.SettingOff);
-        Rect innerSwatch = new(swatchRect.x + 2f, swatchRect.y + 2f, swatchRect.width - 4f, swatchRect.height - 4f);
-        GUI.DrawTexture(innerSwatch, ThemeData.GetTex(_value));
-
-        // 3. Draw Hex Text Field
-        if (DrawSetting.ActiveTextFieldId != inputRect.GetHashCode())
+        try
         {
-            _textBuffer = ColorToHex(_value, SupportAlpha);
-        }
+            // 1. Draw Label
+            GUI.Label(labelRect, DisplayName, ThemeManager.SettingLabelStyle);
 
-        string newText = DrawSetting.DrawManualTextField(inputRect, _textBuffer ?? "", "");
-        if (newText != _textBuffer)
-        {
-            _textBuffer = FilterHexInput(newText);
-            if (TryParseColor(_textBuffer, out Color parsed))
+            // 2. Draw Color Swatch Box (left of text field)
+            GUI.Box(swatchRect, "", ThemeManager.SettingOff);
+            Rect innerSwatch = new(swatchRect.x + 2f, swatchRect.y + 2f, swatchRect.width - 4f, swatchRect.height - 4f);
+            GUI.DrawTexture(innerSwatch, ThemeData.GetTex(_value));
+
+            // 3. Draw Hex Text Field
+            if (DrawSetting.ActiveTextFieldId != inputRect.GetHashCode())
             {
-                Value = parsed;
+                _textBuffer = ColorToHex(_value, SupportAlpha);
+            }
+
+            string newText = DrawSetting.DrawManualTextField(inputRect, _textBuffer ?? "", "", null, this);
+            if (newText != _textBuffer)
+            {
+                _textBuffer = FilterHexInput(newText);
+                if (TryParseColor(_textBuffer, out Color parsed))
+                {
+                    Value = parsed;
+                }
+            }
+
+            // 4. Draw Reset Button
+            if (!IsDisabled && DrawResetButton(resetRect))
+            {
+                Reset();
             }
         }
-
-        // 4. Draw Reset Button
-        if (DrawResetButton(resetRect))
+        finally
         {
-            Reset();
+            GUI.enabled = prevEnabled;
         }
-
-        GUI.enabled = prevEnabled;
 
         y += elemH + ClientConfig.spacing;
     }

@@ -97,12 +97,26 @@ public static partial class DrawSetting
         float thumbY = sliderRect.y + (trackH / 2f) - (thumbSize / 2f);
         Rect thumbRect = new(thumbX, thumbY, thumbSize, thumbSize);
 
-        GUI.Box(sliderRect, "", ThemeManager.SliderTrackOffStyle);
-        if (fillWidth > 0f)
+        // Segmented track to avoid overlapping track on/off or drawing track underneath the thumb (which causes double alpha-blend / opaque artifacts)
+        float overlapTolerance = GUIManager.S(1f);
+
+        // Active track (left of thumb)
+        float activeEndX = Mathf.Clamp(thumbX + overlapTolerance, sliderRect.x, sliderRect.x + sliderRect.width);
+        float activeWidth = activeEndX - sliderRect.x;
+        if (activeWidth > 0f)
         {
-            GUI.Box(new Rect(sliderRect.x, sliderRect.y, fillWidth, sliderRect.height), "", ThemeManager.SliderTrackOnStyle);
+            GUI.Box(new Rect(sliderRect.x, sliderRect.y, activeWidth, sliderRect.height), "", ThemeManager.SliderTrackOnStyle);
         }
 
+        // Inactive track (right of thumb)
+        float inactiveStartX = Mathf.Clamp(thumbX + thumbSize - overlapTolerance, sliderRect.x, sliderRect.x + sliderRect.width);
+        float inactiveWidth = (sliderRect.x + sliderRect.width) - inactiveStartX;
+        if (inactiveWidth > 0f)
+        {
+            GUI.Box(new Rect(inactiveStartX, sliderRect.y, inactiveWidth, sliderRect.height), "", ThemeManager.SliderTrackOffStyle);
+        }
+
+        // Thumb
         GUI.Box(thumbRect, "", ThemeManager.SliderThumbStyle);
 
         Event e = Event.current;
@@ -160,6 +174,7 @@ public static partial class DrawSetting
             activeNumericSetting = setting;
             FocusedControlId = -1;
             ActiveTextFieldId = -1;
+            ActiveTextSetting = null;
 
             ApplyFromMouseX(e.mousePosition.x);
             e.Use();
@@ -208,15 +223,20 @@ public static partial class DrawSetting
         {
             CurrentInputBuffer = val.ToString(formatString);
             lastFocusedNumericControlId = controlId;
+            ActiveTextSetting = setting as Magnetar_Client.UI.Setting.Setting;
         }
         else if (!isFocused && lastFocusedNumericControlId == controlId)
         {
             CommitSettingValue();
             lastFocusedNumericControlId = -1;
+            if (ReferenceEquals(ActiveTextSetting, setting))
+            {
+                ActiveTextSetting = null;
+            }
         }
 
         string displayValue = isFocused ? CurrentInputBuffer : val.ToString(formatString);
-        string newText = DrawManualTextField(inputRect, displayValue, "0");
+        string newText = DrawManualTextField(inputRect, displayValue, "0", null, setting as Magnetar_Client.UI.Setting.Setting);
 
         if (isFocused)
         {

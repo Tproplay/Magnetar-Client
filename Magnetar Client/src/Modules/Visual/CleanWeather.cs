@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Magnetar_Client.UI.Setting;
 using HarmonyLib;
 #if MELONLOADER || RELEASE_MELON
@@ -36,6 +36,8 @@ public class CleanWeather : Module
         AddSettings(ClearFog,ClearSnowFall);
 
         EndCategory();
+
+        GameData.Actions.OnBoardInstantiated += (_) => { if (Active) OnEnable(); };
     }
 
     // Mod Logic
@@ -102,15 +104,5 @@ public class CleanWeather : Module
     }
 
 
-    [HarmonyPatch(typeof(Board))]
-    public static class BoardPatch
-    {
-        [HarmonyPatch(nameof(Board.Start))]
-        [HarmonyPostfix]
-        public static void Start()
-        {
-            if (instance == null || !instance.Active) return;
-            instance.OnEnable();
-        }
-    }
+
 }

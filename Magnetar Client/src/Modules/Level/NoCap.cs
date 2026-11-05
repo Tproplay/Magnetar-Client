@@ -1,4 +1,4 @@
-﻿
+
 using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 
@@ -50,6 +50,25 @@ public class NoCap : Module
         AddSettings(MoneyLimit);
 
         EndCategory();
+
+        GameData.Actions.OnBoardInstantiated += (board) =>
+        {
+            originalSunLimit = board.maxSun;
+            originalMoneyLimit = board.maxMoney;
+            if (Active) OnEnable();
+        };
+
+        GameData.Actions.OnBoardDestroyed += () =>
+        {
+            originalSunLimit = -1;
+            originalMoneyLimit = -1;
+        };
+
+        GameData.Actions.OnBoardDied += () =>
+        {
+            originalSunLimit = -1;
+            originalMoneyLimit = -1;
+        };
     }
 
     // Mod Logic
@@ -89,29 +108,6 @@ public class NoCap : Module
         GameData.BoardInstance.maxMoney = value;
     }
 
-    [HarmonyPatch(typeof(Board))]
-    public static class BoardPatch
-    {
-        [HarmonyPatch(nameof(Board.Start))]
-        [HarmonyPostfix]
-        public static void StartPostfix(Board __instance)
-        {
-            if (instance == null) return;
-            instance.originalSunLimit = __instance.maxSun;
-            instance.originalMoneyLimit = __instance.maxMoney;
 
-            if (instance.Active) instance.OnEnable();
-        }
-
-        [HarmonyPatch(nameof(Board.Die))]
-        [HarmonyPostfix]
-        public static void DiePostfix()
-        {
-            if (instance == null) return;
-
-            instance.originalSunLimit = -1;
-            instance.originalMoneyLimit = -1;
-        }
-    }
 
 }

@@ -1,3 +1,4 @@
+using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
 using UnityEngine;
 
@@ -26,6 +27,8 @@ public static partial class DrawSetting
         ResetDropdownState();
         ActiveSliderId = -1;
         ActiveTextFieldId = -1;
+        activeNumericSetting = null;
+        ActiveTextSetting = null;
     }
 
     /// <summary>
@@ -47,6 +50,11 @@ public static partial class DrawSetting
     /// Gets or sets the control identifier of the text field currently receiving input.
     /// </summary>
     public static int ActiveTextFieldId { get; set; } = -1;
+
+    /// <summary>
+    /// Gets or sets the setting whose text field is currently receiving input.
+    /// </summary>
+    public static Magnetar_Client.UI.Setting.Setting ActiveTextSetting { get; set; }
 
     /// <summary>
     /// Gets or sets the control identifier of the currently open dropdown menu.

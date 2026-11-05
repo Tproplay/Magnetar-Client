@@ -2,7 +2,6 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <RootNamespace>AudioAddon</RootNamespace>
         <AssemblyName>AudioAddon</AssemblyName>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -11,18 +10,31 @@
         <Configurations>MelonLoader;BepInEx</Configurations>
     </PropertyGroup>
 
+
+    <PropertyGroup>
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+        <GenerateDependencyFile>false</GenerateDependencyFile>
+    </PropertyGroup>
+
+    <ItemDefinitionGroup>
+        <Reference>
+            <Private>false</Private>
+        </Reference>
+    </ItemDefinitionGroup>
+
     <PropertyGroup>
         <RefDir>$(MSBuildThisFileDirectory)..\..\..\References</RefDir>
     </PropertyGroup>
 
     <!-- Loader Target Constants & Output Paths -->
     <PropertyGroup Condition="$(Configuration.Contains('MELON')) or $(Configuration.Contains('Melon'))">
-        <OutputPath>bin\Melonloader\</OutputPath>
+        <OutputPath>bin\$(Configuration)\</OutputPath>
         <DefineConstants>$(DefineConstants);MELONLOADER</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="$(Configuration.Contains('BepInEx')) or $(Configuration.Contains('BEPINEX'))">
-        <OutputPath>bin\BepInEx\</OutputPath>
+        <OutputPath>bin\$(Configuration)\</OutputPath>
         <DefineConstants>$(DefineConstants);BEPINEX</DefineConstants>
     </PropertyGroup>
 
@@ -41,6 +53,7 @@
     <ItemGroup Condition="$(Configuration.Contains('MELON')) or $(Configuration.Contains('Melon'))">
         <Reference Include="AudioImportLib">
             <HintPath>$(RefDir)\Melonloader\AudioImportLib.dll</HintPath>
+            <Private>true</Private>
         </Reference>
         <Reference Include="MelonLoader">
             <HintPath>$(RefDir)\Melonloader\MelonLoader.dll</HintPath>
@@ -84,6 +97,7 @@
     <ItemGroup Condition="$(Configuration.Contains('BepInEx')) or $(Configuration.Contains('BEPINEX'))">
         <Reference Include="SherkeyXD.BepInEx-Sounds-Loader">
             <HintPath>$(RefDir)\Bepinex\SherkeyXD.BepInEx-Sounds-Loader.dll</HintPath>
+            <Private>true</Private>
         </Reference>
         <Reference Include="BepInEx.Core">
             <HintPath>$(RefDir)\Bepinex\BepInEx.Core.dll</HintPath>

@@ -41,6 +41,8 @@ public class SmallerZombies : Module
         AddSettings(sizeMultiplier, selectedZombies);
 
         EndCategory();
+
+        GameData.Actions.OnBoardDestroyed += () => originaltheZombieScale.Clear();
     }
 
     public override void OnLanguageChanged()
@@ -117,11 +119,5 @@ public class SmallerZombies : Module
         }
     }
 
-    [HarmonyPatch(typeof(Board))]
-    public static class BoardCleanupPatch
-    {
-        [HarmonyPatch(nameof(Board.OnDestroy))]
-        [HarmonyPostfix]
-        public static void OnDestroyPostfix() => originaltheZombieScale.Clear();
-    }
+
 }

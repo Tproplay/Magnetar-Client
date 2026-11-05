@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Magnetar_Client.UI.Setting;
 
 using HarmonyLib;
@@ -75,6 +75,8 @@ public class SunHack : Module
         DisableAutoSun = new BoolSetting("Force disable auto sun", false);
         AddSettings(Active_AutoSunCD, AutoSunCD, AllowSunDropAnywhere);
         EndCategory();
+
+        GameData.Actions.OnBoardInstantiated += (_) => { wasAutoSun = true; };
     }
 
     // Mod Logic
@@ -199,16 +201,7 @@ public class SunHack : Module
         CreateItem.Instance.SetCoin(col, -1, 0, 1);
     }
 
-    [HarmonyPatch(typeof(Board))]
-    public static class BoardPatch
-    {
-        [HarmonyPatch(nameof(Board.Start))]
-        [HarmonyPostfix]
-        public static void StartPostfix()
-        {
-            wasAutoSun = true;
-        }
-    }
+
 }
 
 public class MoneyHack : Module

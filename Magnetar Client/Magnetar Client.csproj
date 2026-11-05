@@ -30,12 +30,12 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="$(Configuration.Contains('melon')) or $(Configuration.Contains('Melon'))">
-		<OutputPath>bin\Melonloader\$(Configuration)\</OutputPath>
+		<OutputPath>bin\$(Configuration)\</OutputPath>
 		<DefineConstants>$(DefineConstants);MELONLOADER;RELEASE_MELON</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="$(Configuration.Contains('Bepinex')) or $(Configuration.Contains('bepinex'))">
-		<OutputPath>bin\Bepinex\$(Configuration)\</OutputPath>
+		<OutputPath>bin\$(Configuration)\</OutputPath>
 		<DefineConstants>$(DefineConstants);BEPINEX;RELEASE_BEPINEX</DefineConstants>
 	</PropertyGroup>
 
@@ -47,6 +47,18 @@
 	<PropertyGroup>
 		<NoWarn>$(NoWarn);MSB3270;CS1591;CS1572</NoWarn>
 	</PropertyGroup>
+
+	<PropertyGroup>
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<GenerateDependencyFile>false</GenerateDependencyFile>
+	</PropertyGroup>
+
+	<ItemDefinitionGroup>
+		<Reference>
+			<Private>false</Private>
+		</Reference>
+	</ItemDefinitionGroup>
 
 	<PropertyGroup>
 		<RefDir>$(MSBuildThisFileDirectory)..\References</RefDir>

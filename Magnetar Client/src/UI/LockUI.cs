@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Magnetar_Client.Api;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -53,7 +54,6 @@ public static class LockUI
     }
     static bool _blockCanvas = false;
 
-
     static void LockCanvas(Canvas canvas, bool locked)
     {
         if (canvas == null) return;
@@ -74,4 +74,34 @@ public static class LockUI
         }
     }
 
+    static bool _lockCursor;
+    public static bool LockCursorTextureToDefault 
+    { 
+        get => _lockCursor; 
+        set
+        {
+            _lockCursor = value;
+            if (_lockCursor)
+            {
+                CursorChange.SetDefaultCursor();
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(CursorChange))]
+    static class CursorChangePatch
+    {
+        [HarmonyPatch(nameof(CursorChange.SetClickCursor))]
+        [HarmonyPrefix]
+        static bool SetClickCursorPrefix()
+        {
+            return !LockCursorTextureToDefault;
+        }
+    }
+
+    static LockUI()
+    {
+        Actions.OnMenuOpen += () => LockCursorTextureToDefault = true;
+        Actions.OnMenuClosed += () => LockCursorTextureToDefault = false;
+    }
 }

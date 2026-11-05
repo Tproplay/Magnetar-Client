@@ -53,6 +53,24 @@ public class StringSetting : Setting
     }
 
     /// <summary>
+    /// Alias for <see cref="Value"/>
+    /// </summary>
+    public string Text
+    {
+        get => Value;
+        set => Value = value;
+    }
+
+    /// <summary>
+    /// Sets the value directly without invoking events or checking <see cref="Setting.IsDisabled"/>.
+    /// </summary>
+    /// <param name="val">The new string value to set.</param>
+    public void SetDirect(string val)
+    {
+        _value = val;
+    }
+
+    /// <summary>
     /// Initializes a new instance of <see cref="StringSetting"/> with a display name, initial value, and optional autocomplete variables.
     /// </summary>
     /// <param name="name">The display name of the setting.</param>
@@ -71,6 +89,7 @@ public class StringSetting : Setting
     /// </summary>
     public override void Reset()
     {
+        if (IsDisabled) return;
         Value = DefaultValue;
     }
 
@@ -81,31 +100,40 @@ public class StringSetting : Setting
     /// <param name="width">The total available layout width.</param>
     public override void Draw(ref float y, float width)
     {
-        float elemH = ClientConfig.elementHeight;
-        float indent = ClientConfig.indent;
-        float gap = SettingValues.Gap;
-        float resetBtnW = SettingValues.ResetButtonW;
-        float controlW = Mathf.Min(ClientConfig.SettingWidth * 1.25f, width * 0.52f);
-
-        // Label on the left occupies remaining width
-        float labelW = width - (indent * 2f) - controlW - gap - resetBtnW;
-        Rect labelRect = new(indent, y, labelW, elemH);
-
-        // Right-to-left layout: [Control] [gap] [Reset]
-        float resetStartX = width - indent - resetBtnW;
-        float inputStartX = resetStartX - gap - controlW;
-
-        Rect inputRect = new(inputStartX, y, controlW, elemH);
-        Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
-
-        GUI.Label(labelRect, DisplayName, ThemeManager.SettingLabelStyle);
-        Value = DrawSetting.DrawManualTextField(inputRect, Value, "", AutocompleteVars);
-
-        if (DrawResetButton(resetRect))
+        bool prevGUIEnabled = GUI.enabled;
+        if (IsDisabled) GUI.enabled = false;
+        try
         {
-            Reset();
-        }
+            float elemH = ClientConfig.elementHeight;
+            float indent = ClientConfig.indent;
+            float gap = SettingValues.Gap;
+            float resetBtnW = SettingValues.ResetButtonW;
+            float controlW = Mathf.Min(ClientConfig.SettingWidth * 1.25f, width * 0.52f);
 
-        y += elemH + ClientConfig.spacing;
+            // Label on the left occupies remaining width
+            float labelW = width - (indent * 2f) - controlW - gap - resetBtnW;
+            Rect labelRect = new(indent, y, labelW, elemH);
+
+            // Right-to-left layout: [Control] [gap] [Reset]
+            float resetStartX = width - indent - resetBtnW;
+            float inputStartX = resetStartX - gap - controlW;
+
+            Rect inputRect = new(inputStartX, y, controlW, elemH);
+            Rect resetRect = new(resetStartX, y, resetBtnW, elemH);
+
+            GUI.Label(labelRect, DisplayName, ThemeManager.SettingLabelStyle);
+            Value = DrawSetting.DrawManualTextField(inputRect, Value, "", AutocompleteVars, this);
+
+            if (!IsDisabled && DrawResetButton(resetRect))
+            {
+                Reset();
+            }
+
+            y += elemH + ClientConfig.spacing;
+        }
+        finally
+        {
+            GUI.enabled = prevGUIEnabled;
+        }
     }
 }

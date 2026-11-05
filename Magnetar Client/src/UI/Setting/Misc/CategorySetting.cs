@@ -1,3 +1,4 @@
+using UnityEngine;
 using Magnetar_Client.UI.WindowDrawing;
 using static Magnetar_Client.Utils.Translator;
 
@@ -47,6 +48,7 @@ public class CategorySetting : Setting
     /// </summary>
     public override void Reset()
     {
+        if (IsDisabled) return;
         IsExpanded = DefaultExpanded;
     }
 
@@ -57,15 +59,24 @@ public class CategorySetting : Setting
     /// <param name="width">The total available layout width.</param>
     public override void Draw(ref float y, float width)
     {
-        IsExpanded = MiscDrawing.Seperator(
-            ref y,
-            width,
-            ClientConfig.indent,
-            ClientConfig.spacing,
-            DisplayName,
-            true,
-            IsExpanded
-        );
+        bool prevGUIEnabled = GUI.enabled;
+        if (IsDisabled) GUI.enabled = false;
+        try
+        {
+            IsExpanded = MiscDrawing.Seperator(
+                ref y,
+                width,
+                ClientConfig.indent,
+                ClientConfig.spacing,
+                DisplayName,
+                !IsDisabled,
+                IsExpanded
+            );
+        }
+        finally
+        {
+            GUI.enabled = prevGUIEnabled;
+        }
     }
 }
 

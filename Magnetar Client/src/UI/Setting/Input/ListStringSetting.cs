@@ -63,6 +63,7 @@ public class ListStringSetting : Setting
     /// </summary>
     public override void Reset()
     {
+        if (IsDisabled) return;
         Values = new List<string>(DefaultValues);
         OnValueChanged?.Invoke(Values);
     }
@@ -100,7 +101,7 @@ public class ListStringSetting : Setting
             Rect rowRect = new(startX, y, rowFieldW, elemH);
             Rect delRect = new(startX + rowFieldW + gap, y, actionBtnW, elemH);
 
-            Values[i] = DrawSetting.DrawManualTextField(rowRect, Values[i] ?? "", "", AutocompleteVars);
+            Values[i] = DrawSetting.DrawManualTextField(rowRect, Values[i] ?? "", "", AutocompleteVars, this);
 
             GUI.Box(delRect, "—", ThemeManager.ListRemoveButtonStyle);
             if (delRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)

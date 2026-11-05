@@ -101,7 +101,16 @@ public class LabelSetting : Setting
         );
 
         Rect labelRect = new(ClientConfig.indent, y, labelWidth, calculatedHeight);
-        GUI.Label(labelRect, textToDisplay, ThemeManager.SettingsDescriptionStyle);
+        bool prevGUIEnabled = GUI.enabled;
+        if (IsDisabled) GUI.enabled = false;
+        try
+        {
+            GUI.Label(labelRect, textToDisplay, ThemeManager.SettingsDescriptionStyle);
+        }
+        finally
+        {
+            GUI.enabled = prevGUIEnabled;
+        }
 
         y += calculatedHeight + ClientConfig.spacing;
     }

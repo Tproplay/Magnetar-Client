@@ -51,6 +51,7 @@ public class BuffZombies : Module
         AddSettings(ZombieSelectedSetting, HpMultiplierSettig);
         EndCategory();
 
+        GameData.Actions.OnBoardDestroyed += () => originalHpData.Clear();
     }
 
     public override void OnLanguageChanged()
@@ -161,11 +162,5 @@ public class BuffZombies : Module
         }
     }
 
-    [HarmonyPatch(typeof(Board))]
-    public static class BoardCleanupPatch
-    {
-        [HarmonyPatch(nameof(Board.OnDestroy))]
-        [HarmonyPostfix]
-        public static void OnDestroyPostfix() => originalHpData.Clear();
-    }
+
 }

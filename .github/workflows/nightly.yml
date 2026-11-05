@@ -110,7 +110,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path "$outData/Themes"    | Out-Null
 
           # Copy compiled mod DLL
-          Copy-Item "Magnetar Client/bin/Melonloader/Nightly_Melon/Magnetar Client.dll" $outMods -Force
+          Copy-Item "Magnetar Client/bin/Nightly_Melon/Magnetar Client.dll" $outMods -Force
 
           # Copy Magnetar Data (resources, themes, data definitions)
           # Note: Magnetar Translation is excluded intentionally

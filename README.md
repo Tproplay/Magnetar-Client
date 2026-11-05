@@ -12,24 +12,25 @@
 
 **Magnetar Client** is a feature-rich mod for *Plants Vs. Zombies Fusion* designed to elevate your gameplay experience. It offers comprehensive quality-of-life (QoL) improvements, advanced game modifications, and a fully customizable UI display—all meticulously optimized to maintain peak performance.
 
-## Features
+## ✨ Features
 
-* #### Quality-of-Life features such as:
-  * Mute sounds, hide/change projectiles and metal objects
-  * Better health display
-  * Alter projectile sizes
-  * Most of these are used to remove annoyances with the game while not changing the game itself.
-               
-* You can customize HUD elements and the user interface freely.
-* Very little performance impact.
-* Integration with NEF (Not Enough Fusions) to view all available fusion recipes.
-* #### Cheats such as: 
-  * Changing sun, money, points, lawnmowers, rerolls, odyssey modifiers, seed packets.
-  * Change almost any cooldown (glove, seed packet, hammer, wheelbarrow).
-  * Change plant speed and projectiles, homing bullets. Force giftbox rng.
-  * Alter zombie hp, speed and waves. Clamp zombies.
-  * Kill/hypnotize all zombies, clear lawn, save setup for later use, illegal placements.
+* #### Quality-of-Life features:
+  * Mute specific sounds, hide or customize projectile appearances and metal objects.
+  * Enhanced health bars and combat indicators.
+  * Adjust projectile and zombie scaling to remove visual clutter without compromising mechanics.
+                
+* **Customizable HUD & UI**: Drag, dock, recolor, and scale elements freely.
+* **Peak Performance**: Highly optimized Il2Cpp hooks ensuring zero frame drops.
+* **Recipe Guide**: Seamless integration with NEF (Not Enough Fusions) to view every available fusion recipe in-game.
+* #### Sandbox & Cheats: 
+  * Modify sun, coins, points, lawnmowers, rerolls, and odyssey modifiers.
+  * Fine-tune cooldowns (glove, seed packets, hammer, wheelbarrow).
+  * Adjust plant shooting speed, homing projectiles, and force giftbox RNG.
+  * Modify zombie HP, speeds, waves, and clamp limits.
+  * Hypnotize, eliminate all zombies, clear the lawn, save custom layouts, and enable illegal placements.
+
 ---
+
 ## 🎮 Controls
 
 | Action | Keybind |
@@ -40,101 +41,44 @@
 
 ---
 
-## Installation Guide
+## 🧩 Addons
 
-Choose your preferred mod loader below and follow the respective instructions.
+Magnetar Client features an extensible addon framework. The following official addons are available:
 
-### 🍉 MelonLoader
+### 1. 🤖 [Assist Bot](Addons/Assist%20Bot/README.md)
+An intelligent assistant for **The Gods Evolved** (Rogue Shooting) mode powered by a trained **ML.NET binary classification model**.
+* **Real-time Buff Scoring**: Calculates win-probability scores for candidate buffs based on plant composition, active difficulty, wave count, and quality.
+* **Auto-Pick**: Automatically selects the top-scoring buff with a configurable delay.
+* **Online & Offline Variants**: Choose between live cloud model synchronization or fully offline pre-packaged neural models.
 
-> **Note:** Ensure you have [MelonLoader](https://melonwiki.xyz/) installed before proceeding.
+### 2. 🌱 [Simple Spawner](https://github.com/Tproplay/Simple-Spawner)
+A standalone utility mod project developed at [**github.com/Tproplay/Simple-Spawner**](https://github.com/Tproplay/Simple-Spawner):
+* Spawn any plant or zombie directly onto the lawn with custom coordinates.
+* Manipulate wave spawns, test fusion interactions, and design custom challenges.
+* Included out-of-the-box in PC **FULL** release packages for convenience.
 
-1. **Download** the [latest MelonLoader release](https://github.com/Tproplay/Magnetar-Client/releases) `.zip` file.
-2. **Extract** the downloaded archive to a convenient location.
-3. **Copy** the contents of the `Mods` folder into `[Your Game Folder]\Mods`.
-4. **Copy** the contents of the `UserLibs` folder into `[Your Game Folder]\UserLibs`.
-5. **Launch** your game to activate the client!
-> **Optional:** Remove the `Blooms_QOL.dll` if you are installing on Multi-lang version, as it might conflict with it.
-
-**Folder Structure**
-After installing the files, your game directory structure should look like this:
-
-```text
-Game-Files/
-├── MelonLoader/
-├── Mods/                    <-- (Paste Mods file in here)
-│   ├── Magnetar Data/
-│   ├── Magnetar Translation/
-│   └── Magnetar Client.dll
-├── PlantsVsZombiesRH_Data/
-├── UserData/
-├── UserLibs/                <-- (Paste UserLibs file in here)
-│   └── DiscordRPC.dll
-├── baselib.dll
-├── GameAssembly.dll
-├── PlantsVsZombiesRH.exe    <-- (Your game executable)
-├── UnityCrashHandler64.exe
-├── UnityPlayer.dll
-└── version.dll
-```
-
-### BepInEx
-
-> **Note:** Ensure you have [BepInEx](https://docs.bepinex.dev/articles/user_guide/installation/index.html) installed before proceeding.
-
-1. **Download** the [latest Bepinex release](https://github.com/Tproplay/Magnetar-Client/releases) `.zip` file.
-2. **Extract** the downloaded archive to a convenient location.
-3. **Copy** the contents of the `BepInEx\plugins` folder into `[Your Game Folder]\BepInEx\plugins`.
-4. **Launch** your game to activate the client!
-
-### 📂 Folder Structure
-After installing the files, your game directory structure should look like this:
-
-    Game-Files/
-    ├── BepInEx/
-    │   ├── core/
-    │   └── plugins/                <-- (Paste plugins file in here)
-    │       ├── Magnetar Data/
-    │       ├── Magnetar Translation/
-    │       ├── DiscordRPC.dll
-    │       ├── Magnetar Client.dll
-    │       └── Newtonsoft.Json.dll
-    ├── dotnet/
-    ├── PlantsVsZombiesRH_Data/
-    ├── .doorstop_version
-    ├── baselib.dll
-    ├── changelog.txt
-    ├── doorstop_config.ini
-    ├── GameAssembly.dll
-    ├── PlantsVsZombiesRH.exe       <-- (Your game executable)
-    ├── UnityCrashHandler64.exe
-    ├── UnityPlayer.dll
-    └── winhttp.dll
-
+### 3. 🎵 [Audio Addon](Addons/Audio%20Addon/README.md)
+Dynamic in-game soundtrack and SFX loader:
+* Replaces default game music with custom tracks and themed audio bundles.
+* Automatically streams and downloads necessary audio assets at runtime.
 
 ---
 
-### 📱 Android (PVZRH Launcher)
+## 📥 Installation
 
-1. **Download & Install** the [latest PVZRH Android Launcher](https://github.com/ModPVZRH/PVZRH.Android.Launcher/releases). 
-2. **Open the launcher** once to generate its system folders, then close it.
-3. **Download** the [latest Android release](https://github.com/Tproplay/Magnetar-Client/releases) `.zip` file.
-6. **Open** the PVZRH Launcher again.
-7. **Navigate** to the **Modpacks** tab (the 2nd icon at the bottom of the screen).
-8. **Tap** the **Curled Page icon** in the top-right corner.
-9. **Select** the `MagnetarClient-version-Android.zip` file to import it.
+Magnetar Client is distributed in multiple ready-to-use packages:
+
+* **FULL Release Packages (`-FULL.zip`)**: Recommended for most players. Includes **Magnetar Client**, **Simple Spawner**, **Assist Bot (Online)**, and **Audio Addon** pre-configured and ready to play.
+* **Base Client Packages**: Clean install containing only Magnetar Client and core dependencies.
+* **Addons Package (`-Addons.zip`)**: Standalone archive containing all Assist Bot variants (Online & Offline) and Audio Addon.
+
+👉 **For complete step-by-step setup instructions on MelonLoader, BepInEx, and Android (PVZRH Launcher), see the [Installation Guide](docs/INSTALLATION.md).**
 
 ---
 
 ## ❓ Frequently Asked Questions
 
->**Q: My plants are invincible even though I have God Mode Plants turned off, or they are stacking without Plant Anywhere enabled. How do I fix this?** <br>
-**A:** Ensure you are using the correct version of the mod. Game versions must exactly match the mod versions (e.g., 3.6.x mod versions are only compatible with game versions 3.6.x).
-
----
-
-## Addons
-
-> [**Simple Spawner**](https://github.com/Tproplay/Simple-Spawner)
+For answers to common questions, supported game versions, manual audio downloads, and troubleshooting, please see the **[FAQ Guide](docs/FAQ.md)**.
 
 ---
 
@@ -142,18 +86,19 @@ After installing the files, your game directory structure should look like this:
 
 * 👑 **Tproplay** — Main Developer
 * 🇻🇳 **Kyzerin9999** — Playtester & Vietnamese Translator
-* 🇪🇸 **UŁTRA_Badlander 400** - Spanish Translator
+* 🇪🇸 **UŁTRA_Badlander 400** — Spanish Translator
 * 🧪 **Qwwwww** — Playtester
 * 🧪 **Gosu** — Playtester
 * 🧪 **D2013I** — Playtester
 * 🧪 **gaotmaster** — Playtester
 * 🦇 **The Dark Knight** — Playtester
-* 🧪 **Lêthāl_₵Ø₦QɄɆⱤɆⱤ** - Playtester
-* 🧪 **Arch Chomp ( Sin of Chomping )** - Playtester
+* 🧪 **Lêthāl_₵Ø₦QɄɆⱤɆⱤ** — Playtester
+* 🧪 **Arch Chomp ( Sin of Chomping )** — Playtester
+
 ---
 
 ## 🙏 Special Thanks
 
 * **Infinite75** & **CareFreeSong**: For their incredible work on [PVZRHTools](https://github.com/CarefreeSongs712/PVZRHTools/).
 * **Blooms Community**: Join the discussion on their [Discord Server](https://discord.gg/DPAC5ZVJ8T).
-* **HayashiUme** & **LibraHp**: For their [android Bepinex launcher](https://github.com/ModPVZRH/PVZRH.Android.Launcher).
+* **HayashiUme** & **LibraHp**: For their [Android BepInEx launcher](https://github.com/ModPVZRH/PVZRH.Android.Launcher).

@@ -385,3 +385,6 @@ Addons/*/Project/References/
 
 # Collected ML session telemetry files
 Addons/*/Sessions/
+
+# Packed Builds artifacts
+Builds/

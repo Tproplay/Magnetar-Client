@@ -1,16 +1,9 @@
-﻿using HarmonyLib;
-
-using Magnetar_Client.UI.Setting;
+﻿using Magnetar_Client.UI.Setting;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
-using Il2CppGameLevel.RogueShooting;
 #elif BEPINEX || RELEASE_BEPINEX
 using GameLevel.RogueShooting;
 #endif
-using System;
-using System.Collections.Generic;
-using UnityEngine;
-using static Magnetar_Client.Utils.Magnetar_Logger;
 
 namespace Magnetar_Client.Modules;
 

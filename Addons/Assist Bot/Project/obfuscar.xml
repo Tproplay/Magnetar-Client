@@ -26,7 +26,8 @@
 	<Var name="SuppressIldasm" value="true" />
 
 	<Module file="$(InPath)\Assist Bot.dll">
-		<SkipType name="MagnetarAIAddon.*" />
 		<SkipType name="*Patch*" />
+		<SkipType name="MagnetarAIAddon.BuffDecisionData" />
+		<SkipType name="MagnetarAIAddon.BuffScorePrediction" />
 	</Module>
 </Obfuscator>

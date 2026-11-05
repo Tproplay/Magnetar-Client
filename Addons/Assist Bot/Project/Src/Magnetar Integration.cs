@@ -78,7 +78,7 @@ public class AssistBot : Module
         AddSettings(SuggestBuffs, AutoPickBestBuff, AutoPickTimer);
         EndCategory();
 
-        AIService.Init();
+        System.Threading.Tasks.Task.Run(AIService.Init);
     }
 
     // Mod logic

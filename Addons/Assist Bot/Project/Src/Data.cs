@@ -215,6 +215,7 @@ public static class AIService
     private static readonly MLContext _mlContext = new(seed: 42);
     private static PredictionEngine<BuffDecisionData, BuffScorePrediction> _predEngine;
     private static ITransformer _trainedModel;
+    private static readonly object _modelLock = new();
 
     private static string BaseAddonDir => Path.Combine(Magnetar_Client.Api.PathsManager.AddonsDir, "ML");
     private static string ModelPath => Path.Combine(BaseAddonDir, "buff_model.zip");
@@ -240,15 +241,20 @@ public static class AIService
     {
         try
         {
-            if (File.Exists(ModelPath))
+            lock (_modelLock)
             {
-                _trainedModel = _mlContext.Model.Load(ModelPath, out _);
-                _predEngine = _mlContext.Model.CreatePredictionEngine<BuffDecisionData, BuffScorePrediction>(_trainedModel);
-                Magnetar_Logger.DebugLogger.Msg("[Assist Bot] Local model loaded into inference engine.");
-            }
-            else
-            {
-                Magnetar_Logger.DebugLogger.Warning("[Assist Bot] Local model not found.");
+                if (File.Exists(ModelPath))
+                {
+                    var model = _mlContext.Model.Load(ModelPath, out _);
+                    var engine = _mlContext.Model.CreatePredictionEngine<BuffDecisionData, BuffScorePrediction>(model);
+                    _trainedModel = model;
+                    _predEngine = engine;
+                    Magnetar_Logger.DebugLogger.Msg("[Assist Bot] Local model loaded into inference engine.");
+                }
+                else
+                {
+                    Magnetar_Logger.DebugLogger.Warning("[Assist Bot] Local model not found.");
+                }
             }
         }
         catch (Exception ex)
@@ -538,7 +544,13 @@ public static class AIService
 
         try
         {
-            var pred = _predEngine.Predict(input);
+            BuffScorePrediction pred;
+            lock (_modelLock)
+            {
+                if (_predEngine == null)
+                    return Mathf.Clamp01((input.Quality + 1.0f) * 0.2f);
+                pred = _predEngine.Predict(input);
+            }
             return Mathf.Max(0f, pred.Probability);
         }
         catch (Exception ex)

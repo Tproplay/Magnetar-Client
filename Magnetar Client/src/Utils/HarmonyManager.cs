@@ -83,6 +83,7 @@ public static class HarmonyManager
         foreach (var type in types)
         {
             if (type == null) continue;
+            if (!IsHarmonyPatchClass(type)) continue;
             evaluatedCount++;
 
             try
@@ -111,6 +112,30 @@ public static class HarmonyManager
             exceptions,
             failures
         );
+    }
+
+    private static bool IsHarmonyPatchClass(Type type)
+    {
+        if (!type.IsClass) return false;
+
+        try
+        {
+            if (type.IsDefined(typeof(HarmonyLib.HarmonyAttribute), false))
+                return true;
+
+            MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            for (int i = 0; i < methods.Length; i++)
+            {
+                if (methods[i].IsDefined(typeof(HarmonyLib.HarmonyAttribute), false))
+                    return true;
+            }
+        }
+        catch
+        {
+            return true;
+        }
+
+        return false;
     }
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

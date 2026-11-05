@@ -46,14 +46,14 @@ public class CustomSfx : Module
 
         SfxOverride = new SectionSetting("SFX Overrides", (index) =>
         {
-            var audios = GetSfxFiles();
+            var audios = GetSfxOptions();
             var enabledSetting = new BoolSetting("Enabled", true);
             var soundSetting = new MultiSelectSetting("Sound", typeof(SoundType))
             {
                 MaxSelection = 1,
                 CustomNames = TranslateEnum(typeof(SoundType))
             };
-            var replacementSetting = new MultiSelectSetting<string>("Replacement", audios, Path.GetFileName)
+            var replacementSetting = new MultiSelectSetting<string>("Replacement", audios, GetSfxOptionDisplayName)
             {
                 MaxSelection = 1
             };
@@ -98,15 +98,42 @@ public class CustomSfx : Module
         return dir;
     }
 
-    public static List<string> GetSfxFiles()
+    /// <summary>
+    /// Discovers all available SFX replacement options, including bundled AssetBundle tracks and loose files.
+    /// </summary>
+    public static List<string> GetSfxOptions()
     {
         string dir = SfxDir;
         if (!Directory.Exists(dir)) return new List<string>();
 
+        // 1. Scan and load all AssetBundles in Custom Audios/Sfx/
+        AudioClipLoader.ScanAndLoadSfxBundles(dir);
+
+        var options = new List<string>();
+
+        // 2. Add bundled SFX options
+        foreach (var kvp in AudioClipLoader.SfxBundledTracks)
+        {
+            options.Add(kvp.Key);
+        }
+
+        // 3. Add loose audio files (.mp3, .ogg, .wav)
         var supportedExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".mp3", ".ogg", ".wav" };
-        return Directory.GetFiles(dir)
+        var files = Directory.GetFiles(dir)
             .Where(f => supportedExts.Contains(Path.GetExtension(f)))
             .ToList();
+        options.AddRange(files);
+
+        return options;
+    }
+
+    public static string GetSfxOptionDisplayName(string optionKey)
+    {
+        if (AudioClipLoader.SfxBundledTracks.TryGetValue(optionKey, out var bundled))
+        {
+            return bundled.DisplayName;
+        }
+        return Path.GetFileName(optionKey);
     }
 
     private void UpdateSectionTitles()
@@ -124,7 +151,7 @@ public class CustomSfx : Module
                 : "None";
 
             string repName = (repSet != null && repSet.SelectedValues.Count > 0)
-                ? Path.GetFileName(repSet.SelectedValues.First())
+                ? GetSfxOptionDisplayName(repSet.SelectedValues.First())
                 : "None";
 
             section.Title = (soundName != "None" && repName != "None")
@@ -218,9 +245,14 @@ public class CustomSfx : Module
             SoundType soundType = (SoundType)soundSet.SelectedValues.First();
             string selectedPath = repSet.SelectedValues.First();
 
-            if (!File.Exists(selectedPath))
+            // If it's a loose relative file path on disk, resolve it to SfxDir
+            if (!AudioClipLoader.SfxBundledTracks.ContainsKey(selectedPath) && !File.Exists(selectedPath))
             {
-                selectedPath = Path.Combine(SfxDir, selectedPath);
+                string fullPath = Path.Combine(SfxDir, selectedPath);
+                if (File.Exists(fullPath))
+                {
+                    selectedPath = fullPath;
+                }
             }
 
             filesToPreload.Add(selectedPath);

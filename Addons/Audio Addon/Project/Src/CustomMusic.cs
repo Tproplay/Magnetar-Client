@@ -72,18 +72,18 @@ public class CustomMusic : Module
         string dir = AudioDir;
         if (!Directory.Exists(dir)) return;
 
-        // 1. Check for streaming AssetBundle in Custom Audios/MusicAB
-        AudioClipLoader.EnsureMusicBundleLoaded();
+        // 1. Scan and load all AssetBundles in Custom Audios/Music/
+        AudioClipLoader.ScanAndLoadMusicBundles(dir);
 
         int optionIndex = 1;
 
         // 2. Discover Bundled tracks (streams from disk with ~0 RAM)
-        if (AudioClipLoader.BundleAssetMap.Count > 0)
+        if (AudioClipLoader.MusicBundledTracks.Count > 0)
         {
-            foreach (var kvp in AudioClipLoader.BundleAssetMap)
+            foreach (var kvp in AudioClipLoader.MusicBundledTracks)
             {
-                _audioFiles.Add(kvp.Key); // Key is clean asset name e.g. "MainMenu", "Day"
-                _optionsDict[optionIndex] = $"[Bundled] {kvp.Key}";
+                _audioFiles.Add(kvp.Key);
+                _optionsDict[optionIndex] = kvp.Value.DisplayName;
                 optionIndex++;
             }
         }
@@ -99,7 +99,7 @@ public class CustomMusic : Module
             {
                 _audioFiles.Add(file);
                 string fileName = Path.GetFileName(file);
-                _optionsDict[optionIndex] = AudioClipLoader.BundleAssetMap.Count > 0 ? $"[Custom] {fileName}" : fileName;
+                _optionsDict[optionIndex] = AudioClipLoader.MusicBundledTracks.Count > 0 ? $"[Custom] {fileName}" : fileName;
                 optionIndex++;
             }
         }
@@ -122,24 +122,48 @@ public class CustomMusic : Module
             string trackName = track.ToString();
 
             // Find default match:
-            // First check if loose custom file matches trackName, then check bundled tracks
             int defaultIndex = 0;
+
+            // 1. If musicAB_android or musicAB_windows is present, apply its track as the default setting
             for (int i = 0; i < _audioFiles.Count; i++)
             {
                 string item = _audioFiles[i];
-                if (File.Exists(item) && Path.GetFileNameWithoutExtension(item).Equals(trackName, StringComparison.OrdinalIgnoreCase))
+                if (AudioClipLoader.MusicBundledTracks.TryGetValue(item, out var bTrack) &&
+                    bTrack.IsDefaultSoundtrack &&
+                    bTrack.CleanName.Equals(trackName, StringComparison.OrdinalIgnoreCase))
                 {
                     defaultIndex = i + 1;
                     break;
                 }
             }
 
+            // 2. Fallback: Loose custom file matching trackName
             if (defaultIndex == 0)
             {
                 for (int i = 0; i < _audioFiles.Count; i++)
                 {
                     string item = _audioFiles[i];
-                    if (AudioClipLoader.BundleAssetMap.ContainsKey(item) && item.Equals(trackName, StringComparison.OrdinalIgnoreCase))
+                    if (File.Exists(item) && Path.GetFileNameWithoutExtension(item).Equals(trackName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        defaultIndex = i + 1;
+                        break;
+                    }
+                }
+            }
+
+            // 3. Fallback: Any other bundled track matching trackName
+            if (defaultIndex == 0)
+            {
+                for (int i = 0; i < _audioFiles.Count; i++)
+                {
+                    string item = _audioFiles[i];
+                    if (AudioClipLoader.MusicBundledTracks.TryGetValue(item, out var bTrack) &&
+                        bTrack.CleanName.Equals(trackName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        defaultIndex = i + 1;
+                        break;
+                    }
+                    else if (AudioClipLoader.BundleAssetMap.ContainsKey(item) && item.Equals(trackName, StringComparison.OrdinalIgnoreCase))
                     {
                         defaultIndex = i + 1;
                         break;

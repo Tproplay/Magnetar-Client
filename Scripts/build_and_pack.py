@@ -166,11 +166,24 @@ def add_magnetar_data(zf: zipfile.ZipFile, prefix: str, target_platform: str):
 
 
 def get_assist_bot_ml_dlls(bin_dir: Path) -> list[Path]:
-    """Get all Microsoft.ML*.dll and System.Numerics.Tensors.dll from Assist Bot bin directory."""
-    dlls = list(bin_dir.glob("Microsoft.ML*.dll"))
-    tensors = bin_dir / "System.Numerics.Tensors.dll"
-    if tensors.exists() and tensors not in dlls:
-        dlls.append(tensors)
+    """Get the exact 8 ML and Tensor assemblies required by Assist Bot."""
+    required_names = [
+        "Microsoft.ML.Core.dll",
+        "Microsoft.ML.CpuMath.dll",
+        "Microsoft.ML.Data.dll",
+        "Microsoft.ML.DataView.dll",
+        "Microsoft.ML.dll",
+        "Microsoft.ML.StandardTrainers.dll",
+        "Microsoft.ML.Transforms.dll",
+        "System.Numerics.Tensors.dll",
+    ]
+    dlls = []
+    for name in required_names:
+        p = bin_dir / name
+        if p.exists():
+            dlls.append(p)
+        else:
+            log_err(f"Warning: Expected Assist Bot dependency '{name}' not found in {bin_dir}")
     return dlls
 
 

@@ -64,39 +64,49 @@ public class CustomMusic : Module
 
     private void CheckAndDownloadMissingDefaultBundle()
     {
+        string creditsPath = Path.Combine(PathsManager.AddonsDir, "Custom Audios", "Credits.txt");
         bool hasDefaultBundle = AudioClipLoader.MusicBundledTracks.Values.Any(t => t.IsDefaultSoundtrack);
-        if (hasDefaultBundle) return;
-
         string targetBundleName = MagnetarInfo.Platform == MagnetarInfo.PlatformType.Android ? "musicAB_android" : "musicAB_windows";
         string targetPath = Path.Combine(AudioDir, targetBundleName);
 
-        if (File.Exists(targetPath) && AudioClipLoader.IsAssetBundle(targetPath))
+        bool bundleExists = hasDefaultBundle || (File.Exists(targetPath) && AudioClipLoader.IsAssetBundle(targetPath));
+        bool creditsExist = File.Exists(creditsPath);
+
+        if (bundleExists && creditsExist) return;
+
+        if (File.Exists(targetPath) && AudioClipLoader.IsAssetBundle(targetPath) && !hasDefaultBundle)
         {
             AudioClipLoader.ScanAndLoadMusicBundles(AudioDir);
             RefreshTrackSettingsAfterBundleLoaded();
-            return;
         }
 
-        CoroutineManager.Start(DownloadDefaultBundleRoutine(targetBundleName, targetPath));
+        CoroutineManager.Start(DownloadMissingFilesRoutine(targetBundleName, targetPath, !bundleExists, creditsPath, !creditsExist));
     }
 
-    private IEnumerator DownloadDefaultBundleRoutine(string targetBundleName, string targetPath)
+    private IEnumerator DownloadMissingFilesRoutine(
+        string targetBundleName,
+        string targetPath,
+        bool needBundleDownload,
+        string creditsPath,
+        bool needCreditsDownload)
     {
         if (_isDownloading) yield break;
         _isDownloading = true;
 
-        MagnetarApi.LogMsg($"[Audio Addon] Default soundtrack '{targetBundleName}' not found in Custom Audios/Music/. Downloading in background...");
-
-        string[] candidateUrls = new[]
+        if (needBundleDownload)
         {
-            $"https://raw.githubusercontent.com/Tproplay/Magnetar-Client/master/Addons/Audio%20Addon/Project/Custom%20Audios/{targetBundleName}",
-            $"https://raw.githubusercontent.com/Tproplay/Magnetar-Client/devlop/Addons/Audio%20Addon/Project/Custom%20Audios/{targetBundleName}",
-            $"https://github.com/Tproplay/Magnetar-Client/raw/master/Addons/Audio%20Addon/Project/Custom%20Audios/{targetBundleName}"
-        };
+            MagnetarApi.LogMsg($"[Audio Addon] Default soundtrack '{targetBundleName}' not found in Custom Audios/Music/. Downloading in background...");
+        }
+        if (needCreditsDownload)
+        {
+            MagnetarApi.LogMsg("[Audio Addon] Credits.txt not found in Custom Audios/. Downloading in background...");
+        }
 
         bool downloadDone = false;
-        Exception downloadError = null;
-        string tempPath = targetPath + ".download.tmp";
+        Exception bundleError = null;
+        Exception creditsError = null;
+        string tempBundlePath = targetPath + ".download.tmp";
+        string tempCreditsPath = creditsPath + ".download.tmp";
 
         _ = Task.Run(async () =>
         {
@@ -109,55 +119,129 @@ public class CustomMusic : Module
                 };
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Magnetar-AudioAddon");
 
-                HttpResponseMessage response = null;
-                foreach (var url in candidateUrls)
+                // 1. Download Credits.txt if needed
+                if (needCreditsDownload)
                 {
                     try
                     {
-                        var req = new HttpRequestMessage(HttpMethod.Get, url);
-                        var resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
-                        if (resp.IsSuccessStatusCode)
+                        string[] creditsUrls = new[]
                         {
-                            response = resp;
-                            break;
+                            "https://raw.githubusercontent.com/Tproplay/Magnetar-Client/master/Addons/Audio%20Addon/Project/Custom%20Audios/Credits.txt",
+                            "https://raw.githubusercontent.com/Tproplay/Magnetar-Client/devlop/Addons/Audio%20Addon/Project/Custom%20Audios/Credits.txt",
+                            "https://github.com/Tproplay/Magnetar-Client/raw/master/Addons/Audio%20Addon/Project/Custom%20Audios/Credits.txt"
+                        };
+
+                        HttpResponseMessage creditsResp = null;
+                        foreach (var url in creditsUrls)
+                        {
+                            try
+                            {
+                                var req = new HttpRequestMessage(HttpMethod.Get, url);
+                                var resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
+                                if (resp.IsSuccessStatusCode)
+                                {
+                                    creditsResp = resp;
+                                    break;
+                                }
+                            }
+                            catch { }
+                        }
+
+                        if (creditsResp != null)
+                        {
+                            string creditsDir = Path.GetDirectoryName(creditsPath);
+                            if (!string.IsNullOrEmpty(creditsDir) && !Directory.Exists(creditsDir))
+                            {
+                                Directory.CreateDirectory(creditsDir);
+                            }
+
+                            using (var stream = await creditsResp.Content.ReadAsStreamAsync())
+                            using (var fs = new FileStream(tempCreditsPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true))
+                            {
+                                await stream.CopyToAsync(fs);
+                            }
+
+                            if (File.Exists(creditsPath))
+                            {
+                                File.Delete(creditsPath);
+                            }
+                            File.Move(tempCreditsPath, creditsPath);
+                        }
+                        else
+                        {
+                            creditsError = new Exception("Unable to reach GitHub raw download servers for Credits.txt.");
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        creditsError = ex;
+                        try { if (File.Exists(tempCreditsPath)) File.Delete(tempCreditsPath); } catch { }
+                    }
                 }
 
-                if (response == null)
+                // 2. Download AssetBundle if needed
+                if (needBundleDownload)
                 {
-                    throw new Exception("Unable to reach GitHub raw download servers.");
-                }
+                    try
+                    {
+                        string[] bundleUrls = new[]
+                        {
+                            $"https://raw.githubusercontent.com/Tproplay/Magnetar-Client/master/Addons/Audio%20Addon/Project/Custom%20Audios/{targetBundleName}",
+                            $"https://raw.githubusercontent.com/Tproplay/Magnetar-Client/devlop/Addons/Audio%20Addon/Project/Custom%20Audios/{targetBundleName}",
+                            $"https://github.com/Tproplay/Magnetar-Client/raw/master/Addons/Audio%20Addon/Project/Custom%20Audios/{targetBundleName}"
+                        };
 
-                string dir = Path.GetDirectoryName(targetPath);
-                if (!Directory.Exists(dir))
-                {
-                    Directory.CreateDirectory(dir);
-                }
+                        HttpResponseMessage bundleResp = null;
+                        foreach (var url in bundleUrls)
+                        {
+                            try
+                            {
+                                var req = new HttpRequestMessage(HttpMethod.Get, url);
+                                var resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
+                                if (resp.IsSuccessStatusCode)
+                                {
+                                    bundleResp = resp;
+                                    break;
+                                }
+                            }
+                            catch { }
+                        }
 
-                using (var stream = await response.Content.ReadAsStreamAsync())
-                using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, 65536, true))
-                {
-                    await stream.CopyToAsync(fs);
-                }
+                        if (bundleResp == null)
+                        {
+                            throw new Exception("Unable to reach GitHub raw download servers for AssetBundle.");
+                        }
 
-                if (!AudioClipLoader.IsAssetBundle(tempPath))
-                {
-                    try { File.Delete(tempPath); } catch { }
-                    throw new Exception("Downloaded file is corrupt or not a valid Unity AssetBundle.");
-                }
+                        string bundleDir = Path.GetDirectoryName(targetPath);
+                        if (!string.IsNullOrEmpty(bundleDir) && !Directory.Exists(bundleDir))
+                        {
+                            Directory.CreateDirectory(bundleDir);
+                        }
 
-                if (File.Exists(targetPath))
-                {
-                    File.Delete(targetPath);
+                        using (var stream = await bundleResp.Content.ReadAsStreamAsync())
+                        using (var fs = new FileStream(tempBundlePath, FileMode.Create, FileAccess.Write, FileShare.None, 65536, true))
+                        {
+                            await stream.CopyToAsync(fs);
+                        }
+
+                        if (!AudioClipLoader.IsAssetBundle(tempBundlePath))
+                        {
+                            try { File.Delete(tempBundlePath); } catch { }
+                            throw new Exception("Downloaded file is corrupt or not a valid Unity AssetBundle.");
+                        }
+
+                        if (File.Exists(targetPath))
+                        {
+                            File.Delete(targetPath);
+                        }
+                        File.Move(tempBundlePath, targetPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        bundleError = ex;
+                        try { if (File.Exists(tempBundlePath)) File.Delete(tempBundlePath); } catch { }
+                    }
                 }
-                File.Move(tempPath, targetPath);
-            }
-            catch (Exception ex)
-            {
-                downloadError = ex;
-                try { if (File.Exists(tempPath)) File.Delete(tempPath); } catch { }
             }
             finally
             {
@@ -172,16 +256,30 @@ public class CustomMusic : Module
 
         _isDownloading = false;
 
-        if (downloadError != null)
+        if (needCreditsDownload)
         {
-            MagnetarApi.LogWarning($"[Audio Addon] Could not download '{targetBundleName}': {downloadError.Message}");
-            yield break;
+            if (creditsError != null)
+            {
+                MagnetarApi.LogWarning($"[Audio Addon] Could not download Credits.txt: {creditsError.Message}");
+            }
+            else
+            {
+                MagnetarApi.LogMsg("[Audio Addon] Successfully downloaded Credits.txt.");
+            }
         }
 
-        MagnetarApi.LogMsg($"[Audio Addon] Successfully downloaded '{targetBundleName}' ({new FileInfo(targetPath).Length / 1048576f:F1} MB). Loading soundtrack...");
+        if (needBundleDownload)
+        {
+            if (bundleError != null)
+            {
+                MagnetarApi.LogWarning($"[Audio Addon] Could not download '{targetBundleName}': {bundleError.Message}");
+                yield break;
+            }
 
-        AudioClipLoader.ScanAndLoadMusicBundles(AudioDir);
-        RefreshTrackSettingsAfterBundleLoaded();
+            MagnetarApi.LogMsg($"[Audio Addon] Successfully downloaded '{targetBundleName}' ({new FileInfo(targetPath).Length / 1048576f:F1} MB). Loading soundtrack...");
+            AudioClipLoader.ScanAndLoadMusicBundles(AudioDir);
+            RefreshTrackSettingsAfterBundleLoaded();
+        }
     }
 
     public void RefreshTrackSettingsAfterBundleLoaded()

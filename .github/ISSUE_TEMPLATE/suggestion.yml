@@ -3,6 +3,8 @@ description: "Propose a new feature, QoL improvement, or expansion for Magnetar 
 title: "[Suggestion]: "
 labels:
   - "enhancement"
+assignees:
+  - Tproplay
 body:
   - type: textarea
     id: description

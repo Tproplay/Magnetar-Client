@@ -3,6 +3,8 @@ description: "Report a bug, crash, or unexpected behavior in Magnetar Client."
 title: "[Bug]: "
 labels:
   - "bug"
+assignees:
+  - Tproplay
 body:
   - type: textarea
     id: description

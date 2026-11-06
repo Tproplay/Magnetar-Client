@@ -42,7 +42,7 @@ DRIVE_PARENT_FOLDER_ID = "1SkBpqiq6wF5U7H7EdmwF9ZCK-3TI2P0P"
 GITHUB_REPO = "Tproplay/Magnetar-Client"
 
 # Changelog source (user edits this before running)
-CHANGELOG_FILE = ROOT_DIR / "Changelog.md"
+CHANGELOG_FILE = ROOT_DIR / "docs" / "nightly_changelog.md"
 
 # ---------------------------------------------------------------------------
 # Helpers

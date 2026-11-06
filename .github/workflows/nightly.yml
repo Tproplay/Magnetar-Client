@@ -114,10 +114,10 @@ jobs:
 
           # Copy Magnetar Data (resources, themes, data definitions)
           # Note: Magnetar Translation is excluded intentionally
-          Copy-Item "Magnetar Data/Resources/*"     "$outData/Resources" -Recurse -Force
-          Copy-Item "Magnetar Data/Themes/*"        "$outData/Themes"    -Recurse -Force
-          Copy-Item "Magnetar Data/FxData.json"     $outData -Force
-          Copy-Item "Magnetar Data/TextureData.json" $outData -Force
+          Copy-Item "Magnetar Client/Magnetar Data/Resources/*"     "$outData/Resources" -Recurse -Force
+          Copy-Item "Magnetar Client/Magnetar Data/Themes/*"        "$outData/Themes"    -Recurse -Force
+          Copy-Item "Magnetar Client/Magnetar Data/FxData.json"     $outData -Force
+          Copy-Item "Magnetar Client/Magnetar Data/TextureData.json" $outData -Force
 
           Write-Host "Package assembled successfully in $outMods"
 
@@ -146,6 +146,7 @@ jobs:
             - Game Version: ${{ steps.version.outputs.game_version }}
             - Commit: [${{ steps.version.outputs.short_sha }}](https://github.com/Tproplay/Magnetar-Client/commit/${{ github.sha }})
             - Built: ${{ steps.version.outputs.build_date }}
+            - [Nightly Changelog](https://github.com/Tproplay/Magnetar-Client/blob/${{ github.ref_name }}/docs/nightly_changelog.md)
 
             ## Install
 
@@ -161,7 +162,7 @@ jobs:
           files: |
             MagnetarClient-MelonLoader.zip
             nightly-build.txt
-            Launch_Game.bat
+            Scripts/Bats/Launch_Game.bat
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

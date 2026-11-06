@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-cd /d "%~dp0"
+cd /d "%~dp0..\.."
 
 set "PYTHON_EXE="
 
@@ -23,12 +23,22 @@ if "%PYTHON_EXE%"=="" (
     exit /b 1
 )
 
-"%PYTHON_EXE%" "%~dp0Scripts\build_and_pack.py" %*
+echo.
+echo ============================================================
+echo   Magnetar Client Release Pipeline
+echo   Make sure you have:
+echo     1. Run Build_All.bat first
+echo     2. Filled in docs\nightly_changelog.md
+echo     3. Authenticated: gh auth login
+echo ============================================================
+echo.
+
+"%PYTHON_EXE%" "%~dp0..\release.py" %*
 set "EXIT_CODE=%errorlevel%"
 
 if %EXIT_CODE% neq 0 (
     echo.
-    echo [ERROR] Build and packaging script failed with exit code %EXIT_CODE%.
+    echo [ERROR] Release script failed with exit code %EXIT_CODE%.
 )
 
 if /i not "%~1"=="nopause" (

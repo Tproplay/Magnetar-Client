@@ -145,7 +145,9 @@ def add_magnetar_data(zf: zipfile.ZipFile, prefix: str, target_platform: str):
     Add Magnetar Data files to archive under prefix.
     target_platform: 'pc' (for MelonLoader & BepInEx) or 'android'.
     """
-    source_dir = ROOT_DIR / "Magnetar Data"
+    source_dir = ROOT_DIR / "Magnetar Client" / "Magnetar Data"
+    if not source_dir.exists():
+        source_dir = ROOT_DIR / "Magnetar Data"
     if not source_dir.exists():
         raise FileNotFoundError(f"Source Magnetar Data not found at {source_dir}")
 

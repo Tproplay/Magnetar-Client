@@ -1,0 +1,6 @@
+<Project>
+	<PropertyGroup>
+		<!-- Suppress NuGet vulnerability audit unreachable warning -->
+		<NoWarn>$(NoWarn);NU1900</NoWarn>
+	</PropertyGroup>
+</Project>

@@ -1,7 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-
-cd /d "%~dp0"
+pushd "%~dp0"
 
 set "PYTHON_EXE="
 
@@ -18,31 +17,20 @@ if %errorlevel% equ 0 set "PYTHON_EXE=python"& goto :found
 :found
 if "%PYTHON_EXE%"=="" (
     echo [ERROR] Python 3 was not found on your system.
-    echo Please install Python 3 or add it to your PATH.
     pause
     exit /b 1
 )
 
-echo.
-echo ============================================================
-echo   Magnetar Client Release Pipeline
-echo   Make sure you have:
-echo     1. Run Build_All.bat first
-echo     2. Filled in Changelog.md
-echo     3. Authenticated: gh auth login
-echo ============================================================
-echo.
+set "BASE_REF=..\..\References"
 
-"%PYTHON_EXE%" "%~dp0Scripts\release.py" %*
-set "EXIT_CODE=%errorlevel%"
+"%PYTHON_EXE%" "%~dp0update_dll.py" "C:\Users\Tproplay\Games\Pvz\Fusion RH\Melonloader 4.1\MelonLoader\Il2CppAssemblies" "%BASE_REF%\Melonloader\Il2Cpp"
 
-if %EXIT_CODE% neq 0 (
-    echo.
-    echo [ERROR] Release script failed with exit code %EXIT_CODE%.
-)
+"%PYTHON_EXE%" "%~dp0update_dll.py" "C:\Users\Tproplay\Games\Pvz\Fusion RH\Melonloader 4.1\MelonLoader\net6" "%BASE_REF%\Melonloader"
 
-if /i not "%~1"=="nopause" (
-    pause
-)
+"%PYTHON_EXE%" "%~dp0update_dll.py" "C:\Users\Tproplay\Games\Pvz\Fusion RH\BepInEx 4.1\BepInEx\core" "%BASE_REF%\Bepinex"
 
-exit /b %EXIT_CODE%
+"%PYTHON_EXE%" "%~dp0update_dll.py" "C:\Users\Tproplay\Games\Pvz\Fusion RH\BepInEx 4.1\BepInEx\interop" "%BASE_REF%\Bepinex\Il2Cpp"
+
+echo All updates completed.
+popd
+pause

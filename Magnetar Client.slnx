@@ -51,6 +51,8 @@
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="docs/nightly_changelog.md" />
   </Folder>
   <Project Path="Magnetar Client/Magnetar Client.csproj" Id="432ac7a5-ce0b-4cbb-87e8-1bdc6887c091">
     <BuildType Solution="Android|*" Project="Android" />

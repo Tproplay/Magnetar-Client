@@ -4,6 +4,7 @@
 
 - Added seperate `Fertilizer` in `No Render` module
 - Added a new `Advanced Difficulty` Addon
+- Added model cache in `Assist Bot`
 
 ## Bugfixes
 

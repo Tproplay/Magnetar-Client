@@ -219,6 +219,40 @@ public static class AIService
 
     private static string BaseAddonDir => Path.Combine(Magnetar_Client.Api.PathsManager.AddonsDir, "ML");
     private static string ModelPath => Path.Combine(BaseAddonDir, "buff_model.zip");
+    private static string ModelMetaPath => Path.Combine(BaseAddonDir, "buff_model.meta.json");
+
+    private static string GetLocalModelName()
+    {
+        try
+        {
+            if (File.Exists(ModelMetaPath))
+            {
+                string json = File.ReadAllText(ModelMetaPath);
+                using var doc = System.Text.Json.JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("modelName", out var prop))
+                {
+                    return prop.GetString() ?? string.Empty;
+                }
+            }
+        }
+        catch { }
+        return string.Empty;
+    }
+
+    private static void SaveLocalModelMetadata(string modelName, string builtUtc)
+    {
+        try
+        {
+            string safeName = (modelName ?? "").Replace("\"", "\\\"");
+            string safeTime = (builtUtc ?? "").Replace("\"", "\\\"");
+            string json = $"{{\"modelName\":\"{safeName}\",\"builtUtc\":\"{safeTime}\"}}";
+            File.WriteAllText(ModelMetaPath, json);
+        }
+        catch (Exception ex)
+        {
+            Magnetar_Logger.DebugLogger.Warning($"[Assist Bot] Failed to write model metadata: {ex.Message}");
+        }
+    }
 
     /// <summary>
     /// Creates base directories and loads the local model.
@@ -265,14 +299,36 @@ public static class AIService
 
 #if ONLINE
     /// <summary>
-    /// Downloads the latest model from the server and refreshes the engine.
+    /// Downloads the latest model from the server if updated and refreshes the engine.
     /// </summary>
     public static async Task SyncModelWithServerAsync()
     {
         try
         {
             Magnetar_Logger.DebugLogger.Msg("[Assist Bot] Checking server for updated buff model...");
-            var response = await _httpClient.GetAsync(ModelDownloadEndpoint);
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, ModelDownloadEndpoint);
+
+            // If we have a local model and known metadata, attach conditional headers
+            if (File.Exists(ModelPath))
+            {
+                string localModelName = GetLocalModelName();
+                if (!string.IsNullOrEmpty(localModelName))
+                {
+                    request.Headers.IfNoneMatch.Add(new System.Net.Http.Headers.EntityTagHeaderValue($"\"{localModelName}\""));
+                    request.Headers.TryAddWithoutValidation("X-Current-Model", localModelName);
+                }
+            }
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotModified)
+            {
+                string currentName = GetLocalModelName();
+                Magnetar_Logger.DebugLogger.Msg($"[Assist Bot] Model is already up-to-date ({currentName}). Using local model.");
+                if (_trainedModel == null) LoadModel();
+                return;
+            }
 
             if (response.IsSuccessStatusCode)
             {
@@ -291,6 +347,8 @@ public static class AIService
                     builtTime = System.Linq.Enumerable.FirstOrDefault(timeValues) ?? builtTime;
                 }
 
+                SaveLocalModelMetadata(modelName, builtTime);
+
                 double sizeKb = modelBytes.Length / 1024.0;
 
                 Magnetar_Logger.DebugLogger.Msg(
@@ -301,8 +359,6 @@ public static class AIService
                 );
 
                 LoadModel();
-
-                
             }
             else
             {

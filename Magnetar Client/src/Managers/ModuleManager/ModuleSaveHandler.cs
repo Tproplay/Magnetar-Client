@@ -44,7 +44,7 @@ public class ModuleSaveHandler : ISaveHandler
 
                 var modData = new ModuleSaveData
                 {
-                    Active = mod.Active,
+                    Active = mod.Active || (VanillaMode.instance != null && VanillaMode.instance.Active && VanillaMode.instance.IsModuleSuppressed(mod.Name)),
                     HoldMode = mod.HoldMode,
                     KeyBinds = mod.BindKeys != null ? new List<KeyCode>(mod.BindKeys) : new List<KeyCode>(),
                     SavedData = mod.SavedData != null ? new Dictionary<string, object>(mod.SavedData) : new()
@@ -209,7 +209,14 @@ public class ModuleSaveHandler : ISaveHandler
 
         if (mod.Active != modData.Active)
         {
-            mod.Toggle();
+            if (modData.Active && VanillaMode.instance != null && VanillaMode.instance.Active && !VanillaMode.instance.IsAllowed(mod))
+            {
+                VanillaMode.instance.RegisterDisabledModule(mod.Name);
+            }
+            else
+            {
+                mod.Toggle();
+            }
         }
     }
 }

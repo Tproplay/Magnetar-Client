@@ -23,6 +23,7 @@ ASSETS_DIR = BUILDS_DIR / "Assets"
 MAGNETAR_PROJ = ROOT_DIR / "Magnetar Client" / "Magnetar Client.csproj"
 ASSIST_BOT_PROJ = ROOT_DIR / "Addons" / "Assist Bot" / "Project" / "Assist Bot.csproj"
 AUDIO_ADDON_PROJ = ROOT_DIR / "Addons" / "Audio Addon" / "Project" / "AudioAddon.csproj"
+SIMPLE_SPAWNER_PROJ = ROOT_DIR.parent / "SimpleSpawner" / "SimpleSpawner.csproj"
 
 MODEL_URL = "https://magnetar-client.onrender.com/aiaddon/api/model/download"
 MODEL_CACHE_DIR = BUILDS_DIR / ".cache"
@@ -83,6 +84,14 @@ def build_all_projects(skip_build: bool = False):
         log(f"Building Audio Addon [{cfg}]...")
         run_command(["dotnet", "build", str(AUDIO_ADDON_PROJ), "-c", cfg, "--nologo", "-v:q"])
 
+    if SIMPLE_SPAWNER_PROJ.exists():
+        log("==========================================")
+        log("Building Simple Spawner Configurations")
+        log("==========================================")
+        for cfg in ["Melonloader", "Bepinex"]:
+            log(f"Building Simple Spawner [{cfg}]...")
+            run_command(["dotnet", "build", str(SIMPLE_SPAWNER_PROJ), "-c", cfg, "--nologo", "-v:q"])
+
 
 def ensure_buff_model() -> Path:
     """Download buff_model.zip or retrieve from cache / existing staging."""
@@ -113,13 +122,22 @@ def get_simple_spawner_dll(loader: str) -> Path:
     """Return SimpleSpawner dll path for Melonloader or Bepinex."""
     loader_lower = loader.lower()
     if "melon" in loader_lower:
-        primary = SIMPLE_SPAWNER_DEFAULT_DIR / "Melonloader" / "SimpleSpawner.dll"
+        candidates = [
+            SIMPLE_SPAWNER_DEFAULT_DIR / "Melonloader" / "SimpleSpawner.Melonloader.dll",
+            SIMPLE_SPAWNER_DEFAULT_DIR / "Melonloader" / "SimpleSpawner.melonloader.dll",
+            SIMPLE_SPAWNER_DEFAULT_DIR / "Melonloader" / "SimpleSpawner.dll",
+        ]
     else:
-        primary = SIMPLE_SPAWNER_DEFAULT_DIR / "Bepinex" / "SimpleSpawner.dll"
+        candidates = [
+            SIMPLE_SPAWNER_DEFAULT_DIR / "Bepinex" / "SimpleSpawner.Bepinex.dll",
+            SIMPLE_SPAWNER_DEFAULT_DIR / "Bepinex" / "SimpleSpawner.bepinex.dll",
+            SIMPLE_SPAWNER_DEFAULT_DIR / "Bepinex" / "SimpleSpawner.dll",
+        ]
 
-    if primary.exists():
-        return primary
-    raise FileNotFoundError(f"SimpleSpawner DLL for {loader} not found at {primary}")
+    for c in candidates:
+        if c.exists():
+            return c
+    raise FileNotFoundError(f"SimpleSpawner DLL for {loader} not found. Checked: {[str(c) for c in candidates]}")
 
 
 def add_magnetar_data(zf: zipfile.ZipFile, prefix: str, target_platform: str):
@@ -214,7 +232,7 @@ def package_melonloader(version: str):
         if install_txt.exists():
             zf.write(install_txt, "How to install.txt")
         zf.write(bin_melon / "Magnetar Client.dll", "Mods/Magnetar Client.dll")
-        zf.write(spawner_dll, "Mods/SimpleSpawner.dll")
+        zf.write(spawner_dll, f"Mods/{spawner_dll.name}")
         add_magnetar_data(zf, prefix="Mods", target_platform="pc")
         # Addons
         zf.write(assist_bot_bin / "Assist Bot.dll", "Mods/Magnetar Data/Addons/Assist Bot.dll")
@@ -261,7 +279,7 @@ def package_bepinex(version: str):
             zf.write(install_txt, "How to install.txt")
         zf.write(bin_bep / "Magnetar Client.dll", "BepInEx/plugins/Magnetar Client.dll")
         zf.write(bin_bep / "DiscordRPC.dll", "BepInEx/plugins/DiscordRPC.dll")
-        zf.write(spawner_dll, "BepInEx/plugins/SimpleSpawner.dll")
+        zf.write(spawner_dll, f"BepInEx/plugins/{spawner_dll.name}")
         add_magnetar_data(zf, prefix="BepInEx/plugins", target_platform="pc")
         # Addons
         zf.write(assist_bot_bin / "Assist Bot.dll", "BepInEx/plugins/Magnetar Data/Addons/Assist Bot.dll")

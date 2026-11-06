@@ -24,10 +24,11 @@ public class LevelSetup : Module
     public static LevelSetup instance;
 
     // General
-    string _originalLevelName;
+    public BoolSetting OverrideOnEnter = new("Override On Enter", false);
     public StringSetting LevelName = new("Custom Level Name", "");
 
-    public ButtonSetting SetLevelName;
+    private string _lastSyncedLevelName = "";
+    private bool _userModified = false;
 
     // Extra
     public ButtonSetting SetGraves;
@@ -40,14 +41,41 @@ public class LevelSetup : Module
 
         CreateCategory("General");
 
-        SetLevelName = new("Set Level Name", () => 
+        LevelName.OnValueChanged += (newVal) =>
         {
-            ApplyCustomLevelName(LevelName.Value);
-        });
+            _userModified = !string.Equals(newVal, _lastSyncedLevelName);
+            if (Active)
+            {
+                ApplyCustomLevelName(newVal);
+            }
+        };
 
-        GameData.Actions.OnInGameUIInstantiated += (inGameUI) => { LevelName.Value = GameData.GetLevelName(); };
+        GameData.Actions.OnInGameUIInstantiated += (inGameUI) =>
+        {
+            string currentGameLevel = GameData.GetLevelName();
 
-        AddSettings(LevelName, SetLevelName);
+            if (Active && OverrideOnEnter.Value && !string.IsNullOrWhiteSpace(LevelName.Value))
+            {
+                // Capture authentic game name as reset baseline before overriding
+                if (!string.IsNullOrWhiteSpace(currentGameLevel) && currentGameLevel != "Unknown")
+                {
+                    _lastSyncedLevelName = currentGameLevel;
+                    LevelName.DefaultValue = currentGameLevel;
+                }
+                _userModified = true;
+                ApplyCustomLevelName(LevelName.Value);
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(currentGameLevel) && currentGameLevel != "Unknown")
+                {
+                    SyncFromGame(currentGameLevel);
+                    _userModified = false;
+                }
+            }
+        };
+
+        AddSettings(OverrideOnEnter, LevelName);
         EndCategory();
 
         CreateCategory("Extra");
@@ -60,6 +88,46 @@ public class LevelSetup : Module
         EndCategory();
 
         OnDisable();
+    }
+
+    private void SyncFromGame(string name)
+    {
+        _lastSyncedLevelName = name;
+        LevelName.SetDirect(name);
+    }
+
+    public override void OnSettingOpened()
+    {
+        if (!GameData.BoardInstanceIsNull && !_userModified)
+        {
+            string currentGameLevel = GameData.GetLevelName();
+            if (!string.IsNullOrWhiteSpace(currentGameLevel) && currentGameLevel != "Unknown" && currentGameLevel != LevelName.Value)
+            {
+                SyncFromGame(currentGameLevel);
+            }
+        }
+    }
+
+    public override void OnSettingUpdate()
+    {
+        if (GameData.BoardInstanceIsNull) return;
+
+        if (LevelName.IsFocused)
+        {
+            _userModified = !string.Equals(LevelName.Value, _lastSyncedLevelName);
+            if (Active)
+            {
+                ApplyCustomLevelName(LevelName.Value);
+            }
+        }
+        else if (!_userModified)
+        {
+            string currentGameLevel = GameData.GetLevelName();
+            if (!string.IsNullOrWhiteSpace(currentGameLevel) && currentGameLevel != "Unknown" && currentGameLevel != LevelName.Value)
+            {
+                SyncFromGame(currentGameLevel);
+            }
+        }
     }
 
     public void ApplyCustomLevelName(string name)
@@ -121,6 +189,11 @@ public class LevelSetup : Module
                 }
             }
         }
+
+        if (!string.IsNullOrEmpty(GameAPP.theIZLevelName))
+        {
+            GameAPP.theIZLevelName = name;
+        }
     }
 
     public void SetGravesNow()
@@ -153,18 +226,35 @@ public class LevelSetup : Module
 
     public override void OnDisable()
     {
+        OverrideOnEnter.IsDisabled = true;
         LevelName.IsDisabled = true;
-        SetLevelName.IsDisabled = true;
         SetGraves.IsDisabled = true;
         SetFreezedPlants.IsDisabled = true;
         SpawnGraveZombies.IsDisabled = true;
     }
+
     public override void OnEnable()
     {
+        OverrideOnEnter.IsDisabled = false;
         LevelName.IsDisabled = false;
-        SetLevelName.IsDisabled = false;
         SetGraves.IsDisabled = false;
         SetFreezedPlants.IsDisabled = false;
         SpawnGraveZombies.IsDisabled = false;
+
+        if (!GameData.BoardInstanceIsNull)
+        {
+            if (_userModified && !string.IsNullOrWhiteSpace(LevelName.Value))
+            {
+                ApplyCustomLevelName(LevelName.Value);
+            }
+            else
+            {
+                string currentGameLevel = GameData.GetLevelName();
+                if (!string.IsNullOrWhiteSpace(currentGameLevel) && currentGameLevel != "Unknown")
+                {
+                    SyncFromGame(currentGameLevel);
+                }
+            }
+        }
     }
 }

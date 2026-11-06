@@ -1,12 +1,12 @@
-﻿#if false
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Magnetar_Client;
 using Magnetar_Client.Api;
-using Magnetar_Client.Game;
+using Magnetar_Client.Modules;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.Utils;
 using Newtonsoft.Json;
@@ -17,7 +17,7 @@ using static Magnetar_Client.Utils.Magnetar_Logger;
 using Il2Cpp;
 #endif
 
-namespace Magnetar_Client.Modules;
+namespace VideoPlayer;
 
 public class VideoPlayer : Module
 {
@@ -28,7 +28,9 @@ public class VideoPlayer : Module
         "videorenderer plantdisplay videoplayer lawnplayer screenplay videoplayer mod plantscreen videoprojection" +
         " videoplayerscreen videoonlawn lawnmovie plantmovie playermod visualvideo videoprojector plantframe" +
         " animateplants videoplayback bad apple";
-    public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
+    public override string Author { get; set; } = "Tproplay";
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Addon;
+    public override bool EnableInVanillaMode { get; set; } = true;
 
     public static VideoPlayer instance;
 
@@ -166,7 +168,6 @@ public class VideoPlayer : Module
 
     private List<Setting> CreateColorSectionTemplate(int index)
     {
-
         var plantSetting = new MultiSelectSetting("Plant", typeof(PlantType))
         {
             MaxSelection = 1,
@@ -214,7 +215,7 @@ public class VideoPlayer : Module
         // Make sure nothing from a previous run (or an unfinished load) is still alive
         Teardown();
 
-        if (AppData.BoardInstanceIsNull)
+        if (GameData.BoardInstanceIsNull)
         {
             DebugLogger.Warning("[Video Player] No Board Instance Found!");
             Active = false;
@@ -407,7 +408,7 @@ public class VideoPlayer : Module
             return;
         }
 
-        if (AppData.BoardInstanceIsNull)
+        if (GameData.BoardInstanceIsNull)
         {
             Fail("Board went away while the video was loading.");
             return;
@@ -504,7 +505,7 @@ public class VideoPlayer : Module
     {
         if (loadState == LoadState.Idle) return;
 
-        if (AppData.BoardInstanceIsNull)
+        if (GameData.BoardInstanceIsNull)
         {
             DebugLogger.Warning("[Video Player] Board Not Found, stopping playback.");
             OnDisable();
@@ -651,4 +652,3 @@ public class VideoPlayer : Module
         spawnIndex = 0;
     }
 }
-#endif

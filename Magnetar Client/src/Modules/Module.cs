@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -89,7 +89,9 @@ public abstract class Module
 
     public void Toggle()
     {
+        bool prev = Active;
         Active = !Active;
+        if (Active == prev) return;
         if (Active)
         {
             OnEnable();

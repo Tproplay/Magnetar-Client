@@ -54,7 +54,7 @@ When downloading releases from [Releases](https://github.com/Tproplay/Magnetar-C
 │   │   └── Themes/
 │   ├── AudioImportLib.dll       <-- (Included in FULL pack)
 │   ├── Magnetar Client.dll
-│   └── SimpleSpawner.dll        <-- (Included in FULL pack)
+│   └── SimpleSpawner.Melonloader.dll <-- (Included in FULL pack)
 ├── UserLibs/
 │   ├── DiscordRPC.dll
 │   ├── Newtonsoft.Json.dll
@@ -100,7 +100,7 @@ When downloading releases from [Releases](https://github.com/Tproplay/Magnetar-C
 │       │   └── Themes/
 │       ├── DiscordRPC.dll
 │       ├── Magnetar Client.dll
-│       └── SimpleSpawner.dll        <-- (Included in FULL pack)
+│       └── SimpleSpawner.Bepinex.dll <-- (Included in FULL pack)
 ├── Mods/
 │   └── SherkeyXD.BepInEx-Sounds-Loader.dll <-- (Included in FULL pack)
 ├── PlantsVsZombiesRH.exe
@@ -171,8 +171,8 @@ Located inside `Audio Addon/` in `MagnetarClient-{version}-Addons.zip`:
 
 A standalone plant and zombie spawner, wave modifier, and custom testing companion developed at [**https://github.com/Tproplay/Simple-Spawner**](https://github.com/Tproplay/Simple-Spawner).
 
-* **MelonLoader:** Place `SimpleSpawner.dll` into `[Game Folder]/Mods/`.
-* **BepInEx:** Place `SimpleSpawner.dll` into `[Game Folder]/BepInEx/plugins/`.
+* **MelonLoader:** Place `SimpleSpawner.Melonloader.dll` into `[Game Folder]/Mods/`.
+* **BepInEx:** Place `SimpleSpawner.Bepinex.dll` into `[Game Folder]/BepInEx/plugins/`.
 
 *(Note: Simple Spawner is already included out-of-the-box in the PC `FULL` releases for convenience).*
 

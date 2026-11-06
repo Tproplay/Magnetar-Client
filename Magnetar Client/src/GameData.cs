@@ -279,18 +279,40 @@ public static class GameData
     /// </summary>
     public static string GetLevelName()
     {
+        // Text extraction from IngameUI
         var ui = InGameUI.Instance;
-
-        if (ui == null) return "Unknown";
-
-        var tmpro = ui.LevelName1 != null ? ui.LevelName1 : (ui.LevelName2 != null ? ui.LevelName2 : ui.LevelName3);
-
-        if (tmpro != null)
+        if (ui != null)
         {
-            var textComponent = tmpro.GetComponent<TextMeshProUGUI>();
+            if (ui.LevelName2 != null && !string.IsNullOrWhiteSpace(ui.LevelName2.text))
+                return ui.LevelName2.text.Trim();
 
-            return textComponent.GetParsedText();
+            if (ui.levelNameText != null)
+            {
+                foreach (var t in ui.levelNameText)
+                {
+                    if (t != null && !string.IsNullOrWhiteSpace(t.text))
+                        return t.text.Trim();
+                }
+            }
+
+            if (ui.LevelName1 != null && !string.IsNullOrWhiteSpace(ui.LevelName1.text))
+                return ui.LevelName1.text.Trim();
+            if (ui.LevelName3 != null && !string.IsNullOrWhiteSpace(ui.LevelName3.text))
+                return ui.LevelName3.text.Trim();
         }
+
+        // I Zombie
+        if (IZBottomMenu.Instance != null && IZBottomMenu.Instance.levelName != null)
+        {
+            foreach (var t in IZBottomMenu.Instance.levelName)
+            {
+                if (t != null && !string.IsNullOrWhiteSpace(t.text))
+                    return t.text.Trim();
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(GameAPP.theIZLevelName))
+            return GameAPP.theIZLevelName.Trim();
 
         return "Unknown";
     }

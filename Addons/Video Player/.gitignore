@@ -1,0 +1,7 @@
+# Build output & intermediate files
+Project/bin/
+Project/obj/
+.vs/
+
+# Local references (if added)
+Project/References/

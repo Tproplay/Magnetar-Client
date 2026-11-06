@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+using HarmonyLib;
+using Magnetar_Client.Modules;
 using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,23 +11,22 @@ using Il2CppTMPro;
 using TMPro;
 #endif
 
-namespace Magnetar_Client.Modules;
+namespace AdvancedDifficulty;
 
-
-public class CustomDifficulty : Module
+public class AdvancedDifficulties : Module
 {
     // Mod Info
-    public override string Name { get; set; } = "Custom Difficulty";
+    public override string Name { get; set; } = "Advanced Difficulties";
     public override string Description { get; set; } = "Allows you to modify difficulty settings.";
-    public override string SearchHints { get; set; } = "customdifficulty difficultymodifier difficultysettings scaledifficulty" +
+    public override string SearchHints { get; set; } = "advanceddifficulties advanceddifficuties advanceddifficulty customdifficulty difficultymodifier difficultysettings scaledifficulty" +
         " difficultyeditor game difficultyconfig difficultychanger hardmod easymod difficultybalancer customdifficultycustomizer" +
         " diffeditor difficultyoverride adjustmentmod challengedifficulty difficultyselector diffmanager customchallenge";
 
-    public override ModuleCategory Category { get; set; } = ModuleCategory.Misc;
+    public override ModuleCategory Category { get; set; } = ModuleCategory.Addon;
 
     // Mod Data
 
-    public static CustomDifficulty instance;
+    public static AdvancedDifficulties instance;
     public static int MaxDifficulty = 5;
     public BoolSetting AllowSkinDifficultychange;
     public IntSetting MaxDifficultySetting;
@@ -34,7 +34,7 @@ public class CustomDifficulty : Module
     public LabelSetting AdvancedLabel;
     public SectionSetting CustomDifficultySection;
 
-    public CustomDifficulty()
+    public AdvancedDifficulties()
     {
         instance = this;
 
@@ -102,7 +102,7 @@ public class CustomDifficulty : Module
     public bool TryGetDifficultyName(int difficulty, out string name)
     {
         name = null;
-        for (int i = CustomDifficultySection.Sections.Count -1; i>=0; i--)
+        for (int i = CustomDifficultySection.Sections.Count - 1; i >= 0; i--)
         {
             var section = CustomDifficultySection.Sections[i];
 
@@ -137,7 +137,7 @@ public class CustomDifficulty : Module
             if (sectionDifficulty == difficulty)
             {
                 var value = section.Find<FloatSetting>("Zombie Insta-kill Threshold %").Value;
-                threshold = value/100f;
+                threshold = value / 100f;
                 ignoreArmor = section.Find<BoolSetting>("Insta-kill ignore armor").Value;
                 return true;
             }
@@ -191,7 +191,6 @@ public class CustomDifficulty : Module
 
             if (sectionDifficulty == difficulty)
             {
-
                 config.conveyInterval = section.Find<FloatSetting>("Convyer Interval").Value;
                 config.firstWaveArrivedTimer = section.Find<FloatSetting>("First Wave Arrival Time").Value;
                 config.zombieSpeedMultiplier = section.Find<FloatSetting>("Zombie Speed Multiplier").Value;
@@ -409,7 +408,6 @@ public class CustomDifficulty : Module
                 }
             }
 
-
             if (canBeCharred)
             {
                 if (Board.Instance != null && Board.Instance.damageReporter != null)
@@ -442,7 +440,7 @@ public class CustomDifficulty : Module
             else if (GameAPP.config.difficulty == 5) baseDmg = (long)(__result / 0.4f);
             else baseDmg = __result;
 
-            __result = (long)(baseDmg * (1-instance.GetDamageReduction(GameAPP.config.difficulty)));
+            __result = (long)(baseDmg * (1 - instance.GetDamageReduction(GameAPP.config.difficulty)));
         }
     }
 
@@ -468,7 +466,6 @@ public class CustomDifficulty : Module
             {
                 text.text = text.text.Split("：")[0] + $"：{GameAPP.config.difficulty}";
             }
-
         }
     }
 
@@ -479,11 +476,10 @@ public class CustomDifficulty : Module
         [HarmonyPrefix]
         public static void SetZombieHealthPrefix(Zombie zombie, ref float ratio)
         {
-            if (instance==null || !instance.Active) return;
+            if (instance == null || !instance.Active) return;
 
             ratio /= 1.5f;
             ratio *= instance.GetTravelHealthMultiplier(GameAPP.config.difficulty);
-
         }
     }
 
@@ -498,14 +494,13 @@ public class CustomDifficulty : Module
             if (instance == null || !instance.Active) return;
 
             __state = GameAPP.config.difficulty;
-
         }
 
         [HarmonyPatch(nameof(Board.SetUniqueLevel))]
         [HarmonyPostfix]
         public static void SetUniqueLevelPostfix(Board __instance, int __state)
         {
-            if (instance==null || !instance.Active) return;
+            if (instance == null || !instance.Active) return;
 
             if (GameAPP.theBoardType == LevelType.SkinLevel)
             {
@@ -526,7 +521,6 @@ public class CustomDifficulty : Module
             if (config.zombieSpeedMultiplier > 0) __instance.config.zombieSpeedMultiplier *= config.zombieSpeedMultiplier;
             if (config.waveInterval > 0) __instance.config.waveInterval = config.waveInterval;
             if (config.zombieCountMultiplier > 0) __instance.config.zombieCountMultiplier = config.zombieCountMultiplier;
-
         }
     }
 }

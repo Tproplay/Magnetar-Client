@@ -7,10 +7,57 @@
     <BuildType Name="Release_bepinex" />
     <BuildType Name="Release_melon" />
   </Configurations>
+  <Folder Name="/Addons/">
+    <Project Path="Addons/Addon Template/Project/Addon Template.csproj">
+      <BuildType Solution="Android|*" Project="BepInEx" />
+      <BuildType Solution="Bepinex|*" Project="BepInEx" />
+      <BuildType Solution="Melonloader|*" Project="MelonLoader" />
+      <BuildType Solution="Nightly_melon|*" Project="MelonLoader" />
+      <BuildType Solution="Release_bepinex|*" Project="BepInEx" />
+      <BuildType Solution="Release_melon|*" Project="MelonLoader" />
+    </Project>
+    <Project Path="Addons/Advanced Difficulty/Project/AdvancedDifficulty.csproj">
+      <BuildType Solution="Android|*" Project="BepInEx" />
+      <BuildType Solution="Bepinex|*" Project="BepInEx" />
+      <BuildType Solution="Melonloader|*" Project="MelonLoader" />
+      <BuildType Solution="Nightly_melon|*" Project="MelonLoader" />
+      <BuildType Solution="Release_bepinex|*" Project="BepInEx" />
+      <BuildType Solution="Release_melon|*" Project="MelonLoader" />
+    </Project>
+    <Project Path="Addons/Assist Bot/Project/Assist Bot.csproj">
+      <BuildType Solution="Android|*" Project="BepInEx" />
+      <BuildType Solution="Bepinex|*" Project="BepInEx" />
+      <BuildType Solution="Melonloader|*" Project="MelonLoader" />
+      <BuildType Solution="Nightly_melon|*" Project="MelonLoader" />
+      <BuildType Solution="Release_bepinex|*" Project="BepInEx" />
+      <BuildType Solution="Release_melon|*" Project="MelonLoader" />
+    </Project>
+    <Project Path="Addons/Audio Addon/Project/AudioAddon.csproj">
+      <BuildType Solution="Android|*" Project="BepInEx" />
+      <BuildType Solution="Bepinex|*" Project="BepInEx" />
+      <BuildType Solution="Melonloader|*" Project="MelonLoader" />
+      <BuildType Solution="Nightly_melon|*" Project="MelonLoader" />
+      <BuildType Solution="Release_bepinex|*" Project="BepInEx" />
+      <BuildType Solution="Release_melon|*" Project="MelonLoader" />
+    </Project>
+    <Project Path="Addons/Video Player/Project/VideoPlayer.csproj">
+      <BuildType Solution="Android|*" Project="BepInEx" />
+      <BuildType Solution="Bepinex|*" Project="BepInEx" />
+      <BuildType Solution="Melonloader|*" Project="MelonLoader" />
+      <BuildType Solution="Nightly_melon|*" Project="MelonLoader" />
+      <BuildType Solution="Release_bepinex|*" Project="BepInEx" />
+      <BuildType Solution="Release_melon|*" Project="MelonLoader" />
+    </Project>
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
   </Folder>
   <Project Path="Magnetar Client/Magnetar Client.csproj" Id="432ac7a5-ce0b-4cbb-87e8-1bdc6887c091">
+    <BuildType Solution="Android|*" Project="Android" />
+    <BuildType Solution="Bepinex|*" Project="Bepinex" />
     <BuildType Solution="Melonloader|*" Project="melonloader" />
+    <BuildType Solution="Nightly_melon|*" Project="Nightly_Melon" />
+    <BuildType Solution="Release_bepinex|*" Project="Release_bepinex" />
+    <BuildType Solution="Release_melon|*" Project="Release_Melon" />
   </Project>
 </Solution>

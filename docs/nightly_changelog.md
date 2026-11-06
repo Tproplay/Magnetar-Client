@@ -3,6 +3,7 @@
 ## Changelogs
 
 - Added seperate `Fertilizer` in `No Render` module
+- Added a new `Advanced Difficulty` Addon
 
 ## Bugfixes
 

@@ -1,4 +1,4 @@
-**Supported Game version:** `4.0.5`
+**Supported Game version:** `4.1`
 
 ## Changelogs
 

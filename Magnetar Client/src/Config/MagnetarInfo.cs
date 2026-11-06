@@ -11,7 +11,7 @@ public static class MagnetarInfo
     public const PlatformType Platform =
 #if ANDROID
         PlatformType.Android;
-#elif MELONLOADER || RELEASE_MELON
+#elif MELONLOADER || RELEASE_MELON || NIGHTLY_MELON
         PlatformType.Melonloader;
 #elif RELEASE_BEPINEX || BEPINEX
         PlatformType.BepInEx;

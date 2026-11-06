@@ -43,24 +43,15 @@
 
 ## 🧩 Addons
 
-Magnetar Client features an extensible addon framework. The following official addons are available:
+Magnetar Client features an extensible addon framework with the following official addons:
 
-### 1. 🤖 [Assist Bot](Addons/Assist%20Bot/README.md)
-An intelligent assistant for **The Gods Evolved** (Rogue Shooting) mode powered by a trained **ML.NET binary classification model**.
-* **Real-time Buff Scoring**: Calculates win-probability scores for candidate buffs based on plant composition, active difficulty, wave count, and quality.
-* **Auto-Pick**: Automatically selects the top-scoring buff with a configurable delay.
-* **Online & Offline Variants**: Choose between live cloud model synchronization or fully offline pre-packaged neural models.
+| Addon | Description |
+| :--- | :--- |
+| 🤖 **[Assist Bot](Addons/Assist%20Bot/README.md)** | ML-powered buff advisor and auto-picker for *The Gods Evolved* mode |
+| 🎵 **[Audio Addon](Addons/Audio%20Addon/README.md)** | Dynamic in-game soundtrack and SFX replacement with auto-downloaded audio bundles |
+| 🌱 **[Simple Spawner](https://github.com/Tproplay/Simple-Spawner)** | Standalone plant/zombie spawner and wave control utility |
 
-### 2. 🌱 [Simple Spawner](https://github.com/Tproplay/Simple-Spawner)
-A standalone utility mod project developed at [**github.com/Tproplay/Simple-Spawner**](https://github.com/Tproplay/Simple-Spawner):
-* Spawn any plant or zombie directly onto the lawn with custom coordinates.
-* Manipulate wave spawns, test fusion interactions, and design custom challenges.
-* Included out-of-the-box in PC **FULL** release packages for convenience.
-
-### 3. 🎵 [Audio Addon](Addons/Audio%20Addon/README.md)
-Dynamic in-game soundtrack and SFX loader:
-* Replaces default game music with custom tracks and themed audio bundles.
-* Automatically streams and downloads necessary audio assets at runtime.
+👉 **For full addon details, variants, settings, and installation instructions, see the [Addons Guide](docs/ADDONS.md).**
 
 ---
 

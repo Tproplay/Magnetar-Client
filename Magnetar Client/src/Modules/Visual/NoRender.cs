@@ -52,7 +52,7 @@ public class NoRender : Module
         var strings = new string[]
         {
             "Ice shroom effect", "Doom shroom effect", "Jalapeno fire line", "Doom shroom smoke cloud", "Falling Sun",
-            "Falling Coin",
+            "Falling Coin", "Fertilizer",
         };
 
         RegisterTranslations(Translator.CreateDictionary(strings));
@@ -119,7 +119,7 @@ public class NoRender : Module
                 if (!Active || GameData.BoardInstanceIsNull) return;
                 foreach (var bucket in GameObject.FindObjectsOfType<Bucket>())
                 {
-                    if (bucket == null || (int)bucket.theBucketType != bucketTypeId) continue;
+                    if (bucket == null || bucket is Fertilize || (int)bucket.theBucketType != bucketTypeId) continue;
                     foreach (var r in bucket.GetComponentsInChildren<Renderer>(true))
                         if (r != null) r.enabled = !selected;
                 }
@@ -195,6 +195,7 @@ public class NoRender : Module
             {
                 { 0, "Falling Sun" },
                 { 1, "Falling Coin" },
+                { 2, "Fertilizer" },
             },
             OnSelectionChanged = (otherId, selected) =>
             {
@@ -215,6 +216,15 @@ public class NoRender : Module
                         if (coin == null) continue;
                         foreach (var sr in coin.GetComponentsInChildren<SpriteRenderer>())
                             if (sr != null) sr.enabled = !selected;
+                    }
+                }
+                else if (otherId == 2)
+                {
+                    foreach (var fert in GameObject.FindObjectsOfType<Fertilize>())
+                    {
+                        if (fert == null) continue;
+                        foreach (var r in fert.GetComponentsInChildren<Renderer>(true))
+                            if (r != null) r.enabled = !selected;
                     }
                 }
             },
@@ -240,6 +250,9 @@ public class NoRender : Module
         BulletSetting.CustomNames = TranslateEnum(typeof(BulletType));
 
         EffectSetting.CustomNames = EffectSetting.Options
+            .ToDictionary(kvp => kvp.Key, kvp => Translate(kvp.Value));
+
+        OtherSetting.CustomNames = OtherSetting.Options
             .ToDictionary(kvp => kvp.Key, kvp => Translate(kvp.Value));
     }
 
@@ -349,10 +362,26 @@ public class NoRender : Module
 
         foreach (var bucket in Buckets)
         {
+            if (bucket is Fertilize) continue;
             if (GameObjectsSetting.IsSelected((int)bucket.theBucketType))
             {
                 var renderers = bucket.GetComponentsInChildren<Renderer>(true);
                 foreach (var renderer in renderers)
+                {
+                    if (renderer != null)
+                    {
+                        renderer.enabled = false;
+                    }
+                }
+            }
+        }
+
+        if (OtherSetting.IsSelected(2))
+        {
+            foreach (var fert in GameObject.FindObjectsOfType<Fertilize>())
+            {
+                if (fert == null) continue;
+                foreach (var renderer in fert.GetComponentsInChildren<Renderer>(true))
                 {
                     if (renderer != null)
                     {
@@ -381,7 +410,7 @@ public class NoRender : Module
         [HarmonyPostfix]
         public static void StartPatch(Bucket __instance)
         {
-            if (instance == null || !instance.Active ||
+            if (instance == null || !instance.Active || __instance is Fertilize ||
                 !instance.GameObjectsSetting.IsSelected((int)__instance.theBucketType)) return;
 
             var renderers = __instance.GetComponentsInChildren<Renderer>();
@@ -392,6 +421,26 @@ public class NoRender : Module
             }
         }
 
+    }
+
+    [HarmonyPatch(typeof(Fertilize))]
+    public static class FertilizePatch
+    {
+        [HarmonyPatch(nameof(Fertilize.Start))]
+        [HarmonyPostfix]
+        public static void StartPostfix(Fertilize __instance)
+        {
+            if (instance == null || !instance.Active || __instance == null || !instance.OtherSetting.IsSelected(2)) return;
+
+            var renderers = __instance.GetComponentsInChildren<Renderer>(true);
+            foreach (var renderer in renderers)
+            {
+                if (renderer != null)
+                {
+                    renderer.enabled = false;
+                }
+            }
+        }
     }
 
     [HarmonyPatch(typeof(Bullet))]

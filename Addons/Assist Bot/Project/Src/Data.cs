@@ -340,11 +340,41 @@ public static class AIService
                 {
                     modelName = System.Linq.Enumerable.FirstOrDefault(nameValues) ?? modelName;
                 }
+                else if (response.RequestMessage?.RequestUri != null)
+                {
+                    string uriStr = response.RequestMessage.RequestUri.ToString();
+                    int dlIdx = uriStr.IndexOf("/releases/download/", StringComparison.OrdinalIgnoreCase);
+                    if (dlIdx >= 0)
+                    {
+                        string afterDl = uriStr[(dlIdx + "/releases/download/".Length)..];
+                        int nextSlash = afterDl.IndexOf('/');
+                        if (nextSlash > 0) modelName = afterDl[..nextSlash];
+                    }
+                    else if ((dlIdx = uriStr.IndexOf("/download/", StringComparison.OrdinalIgnoreCase)) >= 0)
+                    {
+                        string afterDl = uriStr[(dlIdx + "/download/".Length)..];
+                        int nextSlash = afterDl.IndexOf('/');
+                        if (nextSlash > 0) modelName = afterDl[..nextSlash];
+                    }
+                }
+
+                if (modelName == "buff_model.zip" && response.Headers.ETag != null)
+                {
+                    modelName = response.Headers.ETag.Tag?.Trim('\"') ?? modelName;
+                }
 
                 string builtTime = "Unknown";
                 if (response.Headers.TryGetValues("X-Model-Built-Utc", out var timeValues))
                 {
                     builtTime = System.Linq.Enumerable.FirstOrDefault(timeValues) ?? builtTime;
+                }
+                else if (response.Content.Headers.LastModified.HasValue)
+                {
+                    builtTime = response.Content.Headers.LastModified.Value.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+                }
+                else
+                {
+                    builtTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
                 }
 
                 SaveLocalModelMetadata(modelName, builtTime);

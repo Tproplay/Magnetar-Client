@@ -360,6 +360,23 @@ public static class PathsManager
     /// </remarks>
     public static string MagnetarLogoPath => Path.Combine(ResouceDataDir, "Magnetar_logo.png");
 
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / Mods / Magnetar Data / Resources / Sprites
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / plugins / Magnetar Data / Resources / Sprites
+    /// </remarks>
+    public static string ResourceSpriteDir => GetResourceSpriteDir();
+
+    private static string GetResourceSpriteDir()
+    {
+        var path = Path.Combine(ResouceDataDir, "Sprites");
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+        return path;
+    }
+
     #endregion
 
 }

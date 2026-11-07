@@ -34,39 +34,53 @@ jobs:
       - name: Calculate & Stamp Nightly Build Number
         id: version
         shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $infoPath = "Magnetar Client/src/Config/MagnetarInfo.cs"
           $content = Get-Content $infoPath -Raw
 
-          # Extract Version (e.g., "4.0.3")
+          # Extract Version (e.g., "4.1.0")
           if ($content -match 'public const string Version = "(?<ver>[^"]+)";') {
               $ver = $Matches['ver']
           } else {
-              $ver = "4.0.3"
+              $ver = "4.1.0"
           }
 
           # Extract supported game version (falls back if the constant is missing)
           if ($content -match 'public const string SupportedGameVersion = "(?<gv>[^"]+)";') {
               $gameVer = $Matches['gv']
           } else {
-              $gameVer = "4.0.5"
+              $gameVer = "4.1"
           }
 
-          # Build number = commits since the current SupportedGameVersion was introduced.
-          # Walks the history of MagnetarInfo.cs and stops at the first commit with a
-          # different game version, so the number restarts at 1 whenever it changes.
-          $start = $null
-          foreach ($c in (git log --format=%H -- $infoPath)) {
-              $old = (git show "${c}:${infoPath}") | Out-String
-              if ($old -match 'SupportedGameVersion = "(?<gv>[^"]+)"' -and $Matches['gv'] -eq $gameVer) {
-                  $start = $c
-              } else {
-                  break
+          # Fetch previous nightly build number and supported game version from the existing release
+          $prevBuild = $null
+          $prevGameVer = $null
+          try {
+              $releaseJson = gh release view nightly --repo ${{ github.repository }} --json name,body 2>$null | ConvertFrom-Json
+              if ($releaseJson) {
+                  if ($releaseJson.name -match 'Nightly build (?<bn>\d+)') {
+                      $prevBuild = [int]$Matches['bn']
+                  }
+                  if ($releaseJson.body -match 'Game Version:\s*(?<gv>[^\r\n]+)') {
+                      $prevGameVer = $Matches['gv'].Trim()
+                  }
               }
+          } catch {
+              Write-Host "No prior nightly release found or error querying release."
           }
-          if ($start) {
-              $buildNum = [int](git rev-list --count "$start..HEAD") + 1
+
+          # Determine build number:
+          # If the supported game version changed, reset counter to 1.
+          # Otherwise, increment strictly by 1 from the previous nightly release.
+          if ($prevGameVer -and $prevGameVer -ne $gameVer) {
+              Write-Host "SupportedGameVersion changed ($prevGameVer -> $gameVer). Resetting build number to 1."
+              $buildNum = 1
+          } elseif ($prevBuild -ne $null -and $prevBuild -gt 0) {
+              $buildNum = $prevBuild + 1
           } else {
+              # Fallback if no prior release was found
               $buildNum = [int]"${{ github.run_number }}"
           }
           $buildDate = (Get-Date -Format "yyyy-MM-dd HH:mm UTC")

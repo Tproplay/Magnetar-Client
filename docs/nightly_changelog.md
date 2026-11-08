@@ -8,6 +8,7 @@
 - A temporary module to access new Adventure Realm Mode
 - added show active modules hud element
 - Performance optimization in HUD display
+- Added Outline in Hud Elements
 
 ## Bugfixes
 

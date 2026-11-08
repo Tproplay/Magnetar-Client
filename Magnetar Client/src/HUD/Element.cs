@@ -337,6 +337,8 @@ public abstract class HudElement
         Draw(rect, text);
     }
 
+    Color _outline = new(0, 0, 0, 0.1f);
+
     /// <summary>
     /// Core text drawing method for HUD elements. Applies the current theme and RGB color logic.
     /// </summary>
@@ -354,7 +356,7 @@ public abstract class HudElement
                 ? GUIHelper.RainbowColor
                 : ThemeManager.HUDElementTextColor.normal.textColor;
 
-            GUI.Label(rect, text, style);
+            GUIHelper.DrawBoxWithOutlinedText(rect, text, style, style.normal.textColor, _outline);
         }
     }
 

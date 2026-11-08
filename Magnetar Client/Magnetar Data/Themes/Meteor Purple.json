@@ -170,7 +170,8 @@
     "node background": "#8B0FFFFF"
   },
   "HUD": {
-    "text color": "#FFFFFFFF"
+    "text color": "#FFFFFFFF",
+    "background color": "#11141B66"
   },
   "Misc": {
     "dim background": "#1a1a1a5c",

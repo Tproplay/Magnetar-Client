@@ -16,7 +16,7 @@ public class UpTime : HudElement
 
         TimeSpan upTime = DateTime.Now - currentProcess.StartTime;
 
-        string displayText = $"<color=white>{upTime.ToString(@"hh\:mm\:ss")}</color>";
+        string displayText = $"{upTime.ToString(@"hh\:mm\:ss")}";
 
         AdjustWidthToText(displayText, 10f);
 

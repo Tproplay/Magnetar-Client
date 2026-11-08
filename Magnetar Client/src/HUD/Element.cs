@@ -151,7 +151,7 @@ public abstract class HudElement
         }
 
         // --- 2. RENDER THE ELEMENT ---
-        GUIStyle windowStyle = (HUDManager.forceShow || HUDManager.showBackground) ? ThemeManager.CategoryModuleOffStyle : GUIStyle.none;
+        GUIStyle windowStyle = (HUDManager.forceShow || HUDManager.showBackground) ? BackgroundStyle : GUIStyle.none;
 
         if (HUDManager.forceShow)
         {
@@ -314,6 +314,11 @@ public abstract class HudElement
 
         DrawContent(width, height);
     }
+    /// <summary>
+    /// Style used to render the element's background box. Defaults to ThemeManager.HUDElementBackgroundStyle.
+    /// </summary>
+    protected virtual GUIStyle BackgroundStyle => ThemeManager.HUDElementBackgroundStyle;
+
     /// <summary>
     /// Default text alignment for this HUD element. Defaults to MiddleCenter.
     /// </summary>

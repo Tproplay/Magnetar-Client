@@ -76,6 +76,7 @@ public static class ThemeManager
     public static GUIStyle DimBackgroundStyle { get; private set; }
     public static GUIStyle HUDElementStyle { get; private set; }
     public static GUIStyle HUDElementTextColor { get; private set; }
+    public static GUIStyle HUDElementBackgroundStyle { get; private set; }
     public static GUIStyle NEFLineStyle { get; private set; }
     public static GUIStyle NEFNodeStyle { get; private set; }
     public static GUIStyle SliderTrackOffStyle { get; private set; }
@@ -367,6 +368,10 @@ public static class ThemeManager
         DimBackgroundStyle.normal.background = ThemeData.GetTex(ThemeData.ParseColor(theme.Misc?.DimBackground, d.Misc.DimBackground));
         HUDElementTextColor.normal.textColor = ThemeData.ParseColor(theme.HUD?.TextColor, d.HUD.TextColor);
         HUDElementStyle.normal.textColor = HUDElementTextColor.normal.textColor;
+        Color hudBgColor = ThemeData.ParseColor(
+            theme.HUD?.BackgroundColor ?? theme.CategoryModuleOff?.BackgroundColor?.Normal,
+            d.HUD?.BackgroundColor ?? d.CategoryModuleOff.BackgroundColor.Normal);
+        HUDElementBackgroundStyle.normal.background = ThemeData.GetTex(hudBgColor);
 
         // 9. NEF
         NEFLineStyle.normal.background = ThemeData.GetTex(ThemeData.ParseColor(theme.NEF?.LineColor, d.NEF.LineColor));
@@ -455,6 +460,7 @@ public static class ThemeManager
         HUDElementStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, wordWrap = false, richText = true };
         HUDElementTextColor = new GUIStyle();
         HUDElementTextColor.normal.textColor = HUDElementStyle.normal.textColor;
+        HUDElementBackgroundStyle = new GUIStyle();
 
         NEFLineStyle = new GUIStyle();
         NEFNodeStyle = new GUIStyle { alignment = TextAnchor.LowerCenter };

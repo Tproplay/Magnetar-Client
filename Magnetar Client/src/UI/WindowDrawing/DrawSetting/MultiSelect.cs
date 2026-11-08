@@ -263,7 +263,7 @@ public static partial class DrawSetting
                 targetScrollY = Mathf.Clamp(_scrollbarDragStartScrollY + scrollDelta, 0f, maxScrollDist);
                 manualScrollY = targetScrollY;
                 _scrollVelocity = 0f;
-                lastSliderUpdateTime = Time.time;
+                lastSliderUpdateTime = Time.unscaledTime;
                 e.Use();
             }
             else if (e.type == EventType.MouseUp || (e.type == EventType.Ignore && e.rawType == EventType.MouseUp))
@@ -292,7 +292,7 @@ public static partial class DrawSetting
                 _scrollbarDragStartScrollY = targetScrollY;
             }
 
-            lastSliderUpdateTime = Time.time;
+            lastSliderUpdateTime = Time.unscaledTime;
             e.Use();
         }
 
@@ -300,7 +300,7 @@ public static partial class DrawSetting
         {
             _scrollVelocity = 0f;
             targetScrollY = Mathf.Clamp(targetScrollY + (e.delta.y * GUIManager.S(40f)), 0f, maxScrollDist);
-            lastSliderUpdateTime = Time.time;
+            lastSliderUpdateTime = Time.unscaledTime;
             e.Use();
         }
 
@@ -313,20 +313,7 @@ public static partial class DrawSetting
             }
         }
 
-        if (e.type == EventType.MouseUp || (e.type == EventType.Ignore && e.rawType == EventType.MouseUp))
-        {
-            _isListSwiping = false;
-            if (isShiftDragging)
-            {
-                isShiftDragging = false;
-                draggedItemsSession.Clear();
-                lastHoveredIndex = -1;
-            }
-#if ANDROID
-            _mobileShiftDragActive = false;
-            _isMobileHolding = false;
-#endif
-        }
+
 
         float listWidth = availWidth - scrollbarWidth - GUIManager.S(6f);
         Rect listGroupRect = new(padX, contentStartY, listWidth, viewHeight);
@@ -363,6 +350,7 @@ public static partial class DrawSetting
                         else activeMultiSelect.DeselectRaw(itemKey);
 
                         draggedItemsSession.Add(itemKey);
+                        _mobileHoldItemIdx = -1;
                     }
                 }
             }
@@ -527,6 +515,7 @@ public static partial class DrawSetting
                     else activeMultiSelect.DeselectRaw(itemKey);
 
                     draggedItemsSession.Add(itemKey);
+                    _clickedItemIdx = -1;
                     e.Use();
                 }
             }
@@ -596,7 +585,15 @@ public static partial class DrawSetting
 
             if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
             {
-                if (!isShiftDragging && !_isListSwiping && _clickedItemIdx >= 0 && _clickedItemIdx < filteredItems.Count)
+                if (isShiftDragging)
+                {
+                    isShiftDragging = false;
+                    draggedItemsSession.Clear();
+                    lastHoveredIndex = -1;
+                    _clickedItemIdx = -1;
+                    e.Use();
+                }
+                else if (!_isListSwiping && _clickedItemIdx >= 0 && _clickedItemIdx < filteredItems.Count)
                 {
                     object itemKey = filteredItems[_clickedItemIdx].Key;
                     bool isCurrentlySelected = activeMultiSelect.IsSelectedRaw(itemKey);
@@ -644,8 +641,24 @@ public static partial class DrawSetting
         }
         GUI.EndGroup();
 
+        if (e.type == EventType.MouseUp || (e.type == EventType.Ignore && e.rawType == EventType.MouseUp))
+        {
+            _isListSwiping = false;
+            _clickedItemIdx = -1;
+            if (isShiftDragging)
+            {
+                isShiftDragging = false;
+                draggedItemsSession.Clear();
+                lastHoveredIndex = -1;
+            }
+#if ANDROID
+            _mobileShiftDragActive = false;
+            _isMobileHolding = false;
+#endif
+        }
+
         GUI.Box(new Rect(scrollX + (scrollbarWidth / 2f) - 1f, trackStartY, 2, trackHeight), "", ThemeManager.SeparatorStyle);
-        bool shouldHighlight = (ActiveSliderId == sliderId) || (Time.time - lastSliderUpdateTime < 1.0f);
+        bool shouldHighlight = (ActiveSliderId == sliderId) || (Time.unscaledTime - lastSliderUpdateTime < 1.0f);
         GUI.Box(handleRect, "", shouldHighlight ? ThemeManager.SettingOn : ThemeManager.SettingOff);
     }
 

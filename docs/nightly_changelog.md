@@ -9,7 +9,11 @@
 - added show active modules hud element
 - Performance optimization in HUD display
 - Added Outline in Hud Elements
+- Added more HUD Elements: Active Bullets, Closest Zombie Threat, Sun Production Rate, Plant Capacity, Total Fusions, Freeze Timer, Lawn Mowers Remaining.
+- Added Seperate Color for HUD Element Background
 
 ## Bugfixes
 
-- fixed xyz
+- When Time scale is 0, the rgb text pauses transition
+- Vanilla Mode didn't reenabled the modules after a game restart
+- Multiselect Setting Shift drag caused the first option to get toggled twice

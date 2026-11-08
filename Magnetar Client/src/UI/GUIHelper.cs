@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace Magnetar_Client.UI;
@@ -75,7 +75,7 @@ public static class GUIHelper
 
     private static void UpdateRainbowColor()
     {
-        float hue = (Time.time * ClientConfig.RainbowSpeed) % 1.0f;
+        float hue = (Time.unscaledTime * ClientConfig.RainbowSpeed) % 1.0f;
 
         RainbowColor = Color.HSVToRGB(hue, 1.0f, 1.0f);
     }

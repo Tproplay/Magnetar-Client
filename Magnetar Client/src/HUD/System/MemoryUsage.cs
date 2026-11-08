@@ -217,7 +217,7 @@ public class CPUUsageElement : HudElement
     private void UpdateDisplay()
     {
         string color = cpuUsage > 80 ? "red" : (cpuUsage > 40 ? "yellow" : "lime");
-        displayText = string.Format(_format, color, Mathf.Clamp(cpuUsage, 0, 100));
+        displayText = string.Format(_format, color, Mathf.Clamp(cpuUsage, 0, 100).ToString("F1"));
         AdjustWidthToText(displayText, 10f);
     }
 }
@@ -280,7 +280,7 @@ public class VramUsageElement : HudElement
     private void UpdateDisplay()
     {
         float displayVram = Mathf.Min(lastVramMb, totalVram);
-        displayText = string.Format(_format, displayVram, totalVram);
+        displayText = string.Format(_format, Mathf.RoundToInt(displayVram), totalVram);
         AdjustWidthToText(displayText, 10f);
     }
 }

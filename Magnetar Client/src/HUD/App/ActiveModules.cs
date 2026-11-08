@@ -121,7 +121,7 @@ public class ActiveModules : HudElement
             _savedRightEdge = Bounds.x + Bounds.width;
         }
 
-        float padding = 12f * GUIManager.ElementScaleSetting.Value;
+        float padding = 10f * GUIManager.ElementScaleSetting.Value;
         float itemHeight = GetItemHeight();
         float spacing = 2f * GUIManager.ElementScaleSetting.Value;
 

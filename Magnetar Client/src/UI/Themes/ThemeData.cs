@@ -111,6 +111,9 @@ public class HudTheme
 {
     [JsonProperty("text color")]
     public string TextColor { get; set; }
+
+    [JsonProperty("background color", NullValueHandling = NullValueHandling.Ignore)]
+    public string BackgroundColor { get; set; }
 }
 
 [Serializable]
@@ -336,7 +339,8 @@ public static class ThemeData
         },
         HUD = new HudTheme
         {
-            TextColor = "#FFFFFFFF"
+            TextColor = "#FFFFFFFF",
+            BackgroundColor = "#1C1C1C66"
         },
         Misc = new MiscTheme
         {
@@ -444,7 +448,8 @@ public static class ThemeData
         },
         HUD = new HudTheme
         {
-            TextColor = "#FFFFFFFF"
+            TextColor = "#FFFFFFFF",
+            BackgroundColor = "#11141B66"
         },
         Misc = new MiscTheme
         {

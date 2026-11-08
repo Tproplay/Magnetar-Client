@@ -161,7 +161,7 @@ public class FrameTimeElement : HudElement
     private void UpdateDisplay()
     {
         string colorName = currentFrameTime < 1 / 55f ? "lime" : (currentFrameTime < 1 / 30f ? "yellow" : "red");
-        displayText = string.Format(_format, colorName, currentFrameTime * 1000f);
+        displayText = string.Format(_format, colorName, Mathf.RoundToInt(currentFrameTime * 1000f));
         AdjustWidthToText(displayText, 10f);
     }
 }

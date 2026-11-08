@@ -1,5 +1,4 @@
 using UnityEngine;
-using static Magnetar_Client.UI.Themes.ThemeManager;
 
 namespace Magnetar_Client.HUDElements;
 
@@ -10,22 +9,41 @@ public class CurrentTime : HudElement
     {
         RegisterRegexTranslation(@"^<color=white>(.*)</color>$", "<color=white>{1}</color>");
     }
-    string displayText;
+
+    private string _format = "<color=white>{0}</color>";
+    private string displayText;
+
     protected override void DrawContent(float width, float height)
-    { 
+    {
         Draw(displayText, width, height);
+    }
+
+    public override void OnEnable()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _format = GetFormat(@"^<color=white>(.*)</color>$", "<color=white>{0}</color>");
     }
 
     public override void OnUpdateActive()
     {
-        displayText = Translate($"<color=white>{SystemClock.now.ToString("HH:mm:ss")}</color>");
-
-        AdjustWidthToText(displayText, HUDElementStyle, 10);
+        UpdateDisplay();
     }
-    public override void OnEnable()
+
+    private void UpdateDisplay()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        displayText = string.Format(_format, SystemClock.now.ToString("HH:mm:ss"));
+        AdjustWidthToText(displayText, 10f);
     }
 }
 #endif

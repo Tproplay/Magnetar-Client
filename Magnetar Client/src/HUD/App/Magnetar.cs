@@ -1,6 +1,5 @@
 using Magnetar_Client.Core;
 using UnityEngine;
-using static Magnetar_Client.UI.Themes.ThemeManager;
 
 namespace Magnetar_Client.HUDElements;
 
@@ -20,20 +19,26 @@ public class MagnetarVersion : HudElement
 
     public override void OnEnable()
     {
-        displayText = Translate($"Magnetar Client v{MagnetarInfo.Version}");
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateDisplay();
     }
 
     public override void OnLanguageChanged()
     {
-        OnEnable();
+        UpdateDisplay();
+    }
+
+    private void UpdateDisplay()
+    {
+        string format = GetFormat(@"^Magnetar Client v(.*)$", "Magnetar Client v{0}");
+        displayText = string.Format(format, MagnetarInfo.Version);
+        AdjustWidthToText(displayText, 10f);
     }
 }
 
-
 public class VanillaMode : HudElement
 {
-    public static VanillaMode instance {  get; private set; }
+    public static VanillaMode instance { get; private set; }
+
     public VanillaMode() : base("Using Vanilla Mode", HudElement.NewRect(90))
     {
         RegisterTranslation("Active", "Active");
@@ -41,6 +46,10 @@ public class VanillaMode : HudElement
         RegisterTranslation("Vanilla Mode: <color=yellow>Na</color>", "Vanilla Mode: <color=yellow>Na</color>");
         RegisterRegexTranslation(@"Vanilla Mode: <color={color}>(.*)</color>", "Vanilla Mode: <color={color}>{1}</color>");
     }
+
+    private string _activeText = "Active";
+    private string _inactiveText = "Inactive";
+    private string _format = "Vanilla Mode: <color={0}>{1}</color>";
     private string displayText = "Vanilla Mode: <color=yellow>Na</color>";
 
     public bool VanillaModeEnabled;
@@ -53,30 +62,29 @@ public class VanillaMode : HudElement
     public override void OnEnable()
     {
         instance = this;
+        UpdateTranslations();
         UpdateText();
     }
 
     public override void OnLanguageChanged()
     {
+        UpdateTranslations();
         UpdateText();
+    }
+
+    private void UpdateTranslations()
+    {
+        _activeText = Translate("Active");
+        _inactiveText = Translate("Inactive");
+        _format = GetFormat(@"Vanilla Mode: <color={color}>(.*)</color>", "Vanilla Mode: <color={0}>{1}</color>");
     }
 
     public void UpdateText()
     {
-        string color, text;
+        string color = VanillaModeEnabled ? "green" : "red";
+        string text = VanillaModeEnabled ? _activeText : _inactiveText;
 
-        if (VanillaModeEnabled) 
-        { 
-            color = "green";
-            text = "Active";
-        }
-        else 
-        { 
-            color = "red";
-            text = "Inactive";
-        }
-
-        displayText = Translate($"Vanilla Mode: <color={color}>{Translate(text)}</color>");
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        displayText = string.Format(_format, color, text);
+        AdjustWidthToText(displayText, 10f);
     }
 }

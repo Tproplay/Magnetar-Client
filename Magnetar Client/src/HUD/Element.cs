@@ -361,7 +361,7 @@ public abstract class HudElement
     /// <summary>
     /// Auto-adjusts the Bounds to match this text using the default HUD element style.
     /// </summary>
-    protected void AdjustWidthToText(string text, float padding = 8f)
+    protected void AdjustWidthToText(string text, float padding = 10f)
     {
         AdjustWidthToText(text, ThemeManager.HUDElementStyle, padding);
     }
@@ -477,14 +477,46 @@ public abstract class HudElement
     }
 
     /// <summary>
-    /// Called when the client's language changes. By default re-triggers OnUpdateActive() if active.
+    /// Called when the client's language changes to reload and cache localized strings.
     /// </summary>
-    public virtual void OnLanguageChanged()
+    public virtual void OnLanguageChanged() { }
+
+    /// <summary>
+    /// Resolves and caches a translated format template for use with string.Format ({0}, {1}, ...).
+    /// Converts regex capture placeholders ({1}, {2}, etc.) to string.Format index placeholders ({0}, {1}, etc.).
+    /// </summary>
+    /// <param name="pattern">The regex pattern registered for this element.</param>
+    /// <param name="defaultFormat">Fallback format string if no translation template is found.</param>
+    /// <returns>A string formatted for standard string.Format.</returns>
+    public string GetFormat(string pattern, string defaultFormat)
     {
-        if (_isCurrentlyEnabled)
+        if (SavedRegexTranslations != null && SavedRegexTranslations.TryGetValue(pattern, out string replacement) && !string.IsNullOrEmpty(replacement))
         {
-            OnUpdateActive();
+            return ConvertRegexPlaceholdersToFormat(replacement);
         }
+
+        return defaultFormat;
+    }
+
+    private static string ConvertRegexPlaceholdersToFormat(string template)
+    {
+        if (string.IsNullOrEmpty(template)) return template;
+
+        bool hasNamedColor = template.Contains("{colorName}") || template.Contains("{color}");
+        if (hasNamedColor)
+        {
+            template = template.Replace("{colorName}", "{0}").Replace("{color}", "{0}");
+            return template;
+        }
+
+        return System.Text.RegularExpressions.Regex.Replace(template, @"\{(\d+)\}", m =>
+        {
+            if (int.TryParse(m.Groups[1].Value, out int idx) && idx > 0)
+            {
+                return "{" + (idx - 1) + "}";
+            }
+            return m.Value;
+        });
     }
 
     /// <summary>

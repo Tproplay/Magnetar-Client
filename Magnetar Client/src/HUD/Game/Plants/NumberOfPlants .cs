@@ -1,7 +1,5 @@
 using UnityEngine;
-
 using static Magnetar_Client.GameData;
-using static Magnetar_Client.UI.Themes.ThemeManager;
 
 namespace Magnetar_Client.HUDElements;
 
@@ -14,20 +12,45 @@ public class NumberOfPlants : HudElement
         RegisterRegexTranslation(@"^Total Plants: (.*)$", "Total Plants: {1}");
     }
 
-    string displayText = "Total Plants: NA";
+    private string _naText = "Total Plants: NA";
+    private string _format = "Total Plants: {0}";
+    private string displayText = "Total Plants: NA";
+
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
     }
 
-    public override void OnUpdateActive()
-    {
-        displayText = Translate($"Total Plants: {PlantList.Count}");
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
-    }
     public override void OnEnable()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("Total Plants: NA");
+        _format = GetFormat(@"^Total Plants: (.*)$", "Total Plants: {0}");
+    }
+
+    public override void OnUpdateActive()
+    {
+        UpdateDisplay();
+    }
+
+    private void UpdateDisplay()
+    {
+        if (PlantList != null)
+            displayText = string.Format(_format, PlantList.Count);
+        else
+            displayText = _naText;
+
+        AdjustWidthToText(displayText, 10f);
     }
 }

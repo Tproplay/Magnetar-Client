@@ -1,4 +1,3 @@
-using static Magnetar_Client.UI.Themes.ThemeManager;
 using UnityEngine;
 
 namespace Magnetar_Client.HUDElements;
@@ -12,30 +11,49 @@ public class CurrentWave : HudElement
         RegisterRegexTranslation(@"^Wave: (\d+)/(\d+)$", "Wave: {1}/{2}");
     }
 
-    string displayText = "Wave: NA";
+    private string _naText = "Wave: NA";
+    private string _format = "Wave: {0}/{1}";
+    private string displayText = "Wave: NA";
+
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
     }
 
+    public override void OnEnable()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("Wave: NA");
+        _format = GetFormat(@"^Wave: (\d+)/(\d+)$", "Wave: {0}/{1}");
+    }
+
     public override void OnUpdateActive()
+    {
+        UpdateDisplay();
+    }
+
+    private void UpdateDisplay()
     {
         if (!GameData.BoardInstanceIsNull)
         {
-            displayText = Translate($"Wave: {GameData.BoardInstance.theWave}/{GameData.BoardInstance.theMaxWave}");
+            displayText = string.Format(_format, GameData.BoardInstance.theWave, GameData.BoardInstance.theMaxWave);
         }
         else
         {
-            displayText = Translate("Wave: NA");
+            displayText = _naText;
         }
 
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        AdjustWidthToText(displayText, 10f);
     }
-
-    public override void OnEnable()
-    {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
-    }
-
 }

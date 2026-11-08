@@ -1,8 +1,6 @@
 using System;
 using UnityEngine;
 
-using static Magnetar_Client.UI.Themes.ThemeManager;
-
 namespace Magnetar_Client.HUDElements;
 
 public class TimeInLevel : HudElement
@@ -13,30 +11,49 @@ public class TimeInLevel : HudElement
         RegisterRegexTranslation(@"^Playing For: (.*)$", "Playing For: {1}");
     }
 
-    DateTime StartTime = DateTime.Now;
-    bool saved;
+    private DateTime StartTime = DateTime.Now;
+    private bool saved;
+    private string _format = "Playing For: {0}";
+    private string displayText = "Playing For: 00:00:00";
+
     public override void OnUpdate()
     {
         base.OnUpdate();
-        if (GameData.BoardInstanceIsNull) { saved= false; return; }
+        if (GameData.BoardInstanceIsNull) { saved = false; return; }
 
         if (!saved) { StartTime = DateTime.Now; saved = true; }
     }
 
-    string displayText = $"Playing For: {(DateTime.Now-DateTime.Now):hh\\:mm\\:ss}";
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
     }
 
-    public override void OnUpdateActive()
-    {
-        displayText = Translate($"Playing For: {(DateTime.Now - StartTime):hh\\:mm\\:ss}");
-        AdjustWidthToText(displayText, HUDElementStyle, 10);
-    }
     public override void OnEnable()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _format = GetFormat(@"^Playing For: (.*)$", "Playing For: {0}");
+    }
+
+    public override void OnUpdateActive()
+    {
+        UpdateDisplay();
+    }
+
+    private void UpdateDisplay()
+    {
+        displayText = string.Format(_format, (DateTime.Now - StartTime).ToString(@"hh\:mm\:ss"));
+        AdjustWidthToText(displayText, 10f);
     }
 }

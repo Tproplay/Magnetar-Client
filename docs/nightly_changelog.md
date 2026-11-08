@@ -7,6 +7,7 @@
 - Added model cache in `Assist Bot`
 - A temporary module to access new Adventure Realm Mode
 - added show active modules hud element
+- Performance optimization in HUD display
 
 ## Bugfixes
 

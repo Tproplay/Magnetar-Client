@@ -1,7 +1,6 @@
-using static Magnetar_Client.UI.Themes.ThemeManager;
-using static Magnetar_Client.GameData;
 using UnityEngine;
 using HarmonyLib;
+using static Magnetar_Client.GameData;
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -12,34 +11,56 @@ namespace Magnetar_Client.HUDElements;
 public class NumberOfHypnotizedZombiesSpawned : HudElement
 {
     public NumberOfHypnotizedZombiesSpawned() : base("Hypnotized Zombies Spawned", HudElement.NewRect(100))
-    { 
+    {
         UpdateInterval = 0.2f;
         GameData.OnZombieSpawned += (zombie) => Hypno_Zombies_Spawned += zombie.isMindControlled ? 1 : 0;
         RegisterTranslation("Hypno Zombies Spawned: NA", "Hypno Zombies Spawned: NA");
         RegisterRegexTranslation(@"^Hypno Zombies Spawned: (.*)$", "Hypno Zombies Spawned: {1}");
     }
 
-    string displayText = "Hypno Zombies Spawned: NA";
+    public static int Hypno_Zombies_Spawned;
+
+    private string _naText = "Hypno Zombies Spawned: NA";
+    private string _format = "Hypno Zombies Spawned: {0}";
+    private string displayText = "Hypno Zombies Spawned: NA";
+
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
     }
 
-    public override void OnUpdateActive()
-    {
-        if (GameData.BoardInstanceIsNull) return;
-
-        displayText = Translate($"Hypno Zombies Spawned: {Hypno_Zombies_Spawned}");
-
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
-    }
     public override void OnEnable()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateTranslations();
+        UpdateDisplay();
     }
 
-    public static int Hypno_Zombies_Spawned;
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("Hypno Zombies Spawned: NA");
+        _format = GetFormat(@"^Hypno Zombies Spawned: (.*)$", "Hypno Zombies Spawned: {0}");
+    }
+
+    public override void OnUpdateActive()
+    {
+        UpdateDisplay();
+    }
+
+    private void UpdateDisplay()
+    {
+        if (!BoardInstanceIsNull)
+            displayText = string.Format(_format, Hypno_Zombies_Spawned);
+        else
+            displayText = _naText;
+
+        AdjustWidthToText(displayText, 10f);
+    }
 
     [HarmonyPatch(typeof(Zombie))]
     private static class ZombieStatsPatch
@@ -58,7 +79,7 @@ public class NumberOfHypnotizedZombiesSpawned : HudElement
     {
         [HarmonyPatch(nameof(Board.Awake))]
         [HarmonyPostfix]
-        static void AwakePostFix(Board __instance)
+        static void AwakePostFix()
         {
             Hypno_Zombies_Spawned = 0;
         }

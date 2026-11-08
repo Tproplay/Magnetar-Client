@@ -1,6 +1,5 @@
-using static Magnetar_Client.UI.Themes.ThemeManager;
-using static Magnetar_Client.GameData;
 using UnityEngine;
+using static Magnetar_Client.GameData;
 
 namespace Magnetar_Client.HUDElements;
 
@@ -13,24 +12,45 @@ public class NumberOfZombiesKilled : HudElement
         RegisterRegexTranslation(@"^Zombies Killed: (.*)$", "Zombies Killed: {1}");
     }
 
-    string displayText = "Zombies Killed: NA";
+    private string _naText = "Zombies Killed: NA";
+    private string _format = "Zombies Killed: {0}";
+    private string displayText = "Zombies Killed: NA";
 
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
     }
 
-    public override void OnUpdateActive()
-    {
-        if (BoardInstanceIsNull) return;
-
-        displayText = Translate($"Zombies Killed: {GameData.BoardInstance.boardStatistics.zombiesKilled}");
-
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
-    }
     public override void OnEnable()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("Zombies Killed: NA");
+        _format = GetFormat(@"^Zombies Killed: (.*)$", "Zombies Killed: {0}");
+    }
+
+    public override void OnUpdateActive()
+    {
+        UpdateDisplay();
+    }
+
+    private void UpdateDisplay()
+    {
+        if (!BoardInstanceIsNull)
+            displayText = string.Format(_format, GameData.BoardInstance.boardStatistics.zombiesKilled);
+        else
+            displayText = _naText;
+
+        AdjustWidthToText(displayText, 10f);
     }
 }

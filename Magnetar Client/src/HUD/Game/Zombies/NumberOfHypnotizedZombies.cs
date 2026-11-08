@@ -1,7 +1,6 @@
-using static Magnetar_Client.UI.Themes.ThemeManager;
-using static Magnetar_Client.GameData;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
+using static Magnetar_Client.GameData;
 
 namespace Magnetar_Client.HUDElements;
 
@@ -14,23 +13,45 @@ public class NumberOfHypnotizedZombies : HudElement
         RegisterRegexTranslation(@"^Hypno Zombies On Lawn: (.*)$", "Hypno Zombies On Lawn: {1}");
     }
 
-    string displayText = "Hypno Zombies On Lawn: NA";
+    private string _naText = "Hypno Zombies On Lawn: NA";
+    private string _format = "Hypno Zombies On Lawn: {0}";
+    private string displayText = "Hypno Zombies On Lawn: NA";
+
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
     }
 
-    public override void OnUpdateActive()
-    {
-        if (BoardInstanceIsNull) return;
-
-        displayText = Translate($"Hypno Zombies On Lawn: {ZombieList.Count(z => z.isMindControlled)}");
-
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
-    }
     public override void OnEnable()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("Hypno Zombies On Lawn: NA");
+        _format = GetFormat(@"^Hypno Zombies On Lawn: (.*)$", "Hypno Zombies On Lawn: {0}");
+    }
+
+    public override void OnUpdateActive()
+    {
+        UpdateDisplay();
+    }
+
+    private void UpdateDisplay()
+    {
+        if (!BoardInstanceIsNull && ZombieList != null)
+            displayText = string.Format(_format, ZombieList.Count(z => z != null && z.isMindControlled));
+        else
+            displayText = _naText;
+
+        AdjustWidthToText(displayText, 10f);
     }
 }

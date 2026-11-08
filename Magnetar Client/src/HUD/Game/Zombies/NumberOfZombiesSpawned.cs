@@ -1,4 +1,3 @@
-using static Magnetar_Client.UI.Themes.ThemeManager;
 using UnityEngine;
 
 namespace Magnetar_Client.HUDElements;
@@ -12,24 +11,50 @@ public class NumberOfZombiesSpawned : HudElement
         RegisterRegexTranslation(@"^Zombies Spawned: (.*)$", "Zombies Spawned: {1}");
     }
 
-    string displayText = "Zombies Spawned: NA";
+    private string _naText = "Zombies Spawned: NA";
+    private string _format = "Zombies Spawned: {0}";
+    private string displayText = "Zombies Spawned: NA";
 
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
     }
 
-    public override void OnUpdateActive()
-    {
-        if (GameData.BoardInstanceIsNull) return;
-
-        displayText = Translate($"Zombies Spawned: {GameData.BoardInstance.boardStatistics.zombiesKilled + GameData.ZombieList.Count}");
-
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
-    }
     public override void OnEnable()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("Zombies Spawned: NA");
+        _format = GetFormat(@"^Zombies Spawned: (.*)$", "Zombies Spawned: {0}");
+    }
+
+    public override void OnUpdateActive()
+    {
+        UpdateDisplay();
+    }
+
+    private void UpdateDisplay()
+    {
+        if (!GameData.BoardInstanceIsNull && GameData.ZombieList != null)
+        {
+            int total = GameData.BoardInstance.boardStatistics.zombiesKilled + GameData.ZombieList.Count;
+            displayText = string.Format(_format, total);
+        }
+        else
+        {
+            displayText = _naText;
+        }
+
+        AdjustWidthToText(displayText, 10f);
     }
 }

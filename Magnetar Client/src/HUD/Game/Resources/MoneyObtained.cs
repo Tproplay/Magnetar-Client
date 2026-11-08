@@ -1,6 +1,4 @@
 using UnityEngine;
-
-using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
 
 namespace Magnetar_Client.HUDElements;
@@ -14,11 +12,32 @@ public class MoneyObtained : HudElement
         RegisterRegexTranslation(@"^Money Obtained: (.*)$", "Money Obtained: {1}");
     }
 
-    int value;
-    string displayText = "Money Obtained: NA";
+    private int value;
+    private string _naText = "Money Obtained: NA";
+    private string _format = "Money Obtained: {0}";
+    private string displayText = "Money Obtained: NA";
+
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
+    }
+
+    public override void OnEnable()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("Money Obtained: NA");
+        _format = GetFormat(@"^Money Obtained: (.*)$", "Money Obtained: {0}");
     }
 
     public override void OnUpdateActive()
@@ -28,13 +47,16 @@ public class MoneyObtained : HudElement
             value = GameData.BoardInstance.boardStatistics.moneyEarned;
         }
 
-        displayText = Translate($"Money Obtained: {FormatInternational(value)}");
-
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateDisplay();
     }
-    public override void OnEnable()
+
+    private void UpdateDisplay()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        if (!GameData.BoardInstanceIsNull)
+            displayText = string.Format(_format, FormatInternational(value));
+        else
+            displayText = _naText;
+
+        AdjustWidthToText(displayText, 10f);
     }
 }

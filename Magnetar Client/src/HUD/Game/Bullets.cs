@@ -1,6 +1,5 @@
 using UnityEngine;
 using HarmonyLib;
-using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
 
 #if MELONLOADER || RELEASE_MELON
@@ -18,23 +17,42 @@ public class NumberOfBulletsSpawned : HudElement
         RegisterRegexTranslation(@"^Bullets Spawned: (.*)$", "Bullets Spawned: {1}");
     }
 
-    static int TotalNumberOfBulletsSpawned;
+    private static int TotalNumberOfBulletsSpawned;
 
-    string displayText = "Bullets Spawned: NA";
+    private string _format = "Bullets Spawned: {0}";
+    private string displayText = "Bullets Spawned: NA";
+
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
     }
 
-    public override void OnUpdateActive()
-    {
-        displayText = Translate($"Bullets Spawned: {FormatInternational(TotalNumberOfBulletsSpawned)}");
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
-    }
     public override void OnEnable()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _format = GetFormat(@"^Bullets Spawned: (.*)$", "Bullets Spawned: {0}");
+    }
+
+    public override void OnUpdateActive()
+    {
+        UpdateDisplay();
+    }
+
+    private void UpdateDisplay()
+    {
+        displayText = string.Format(_format, FormatInternational(TotalNumberOfBulletsSpawned));
+        AdjustWidthToText(displayText, 10f);
     }
 
     [HarmonyPatch(typeof(Bullet))]
@@ -49,6 +67,7 @@ public class NumberOfBulletsSpawned : HudElement
             TotalNumberOfBulletsSpawned++;
         }
     }
+
     [HarmonyPatch(typeof(Board))]
     public class BoardPatch
     {

@@ -1,6 +1,4 @@
 using UnityEngine;
-
-using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
 
 namespace Magnetar_Client.HUDElements;
@@ -14,11 +12,32 @@ public class MoneySpent : HudElement
         RegisterRegexTranslation(@"^Money Spent: (.*)$", "Money Spent: {1}");
     }
 
-    int value;
-    string displayText = "Money Spent: NA";
+    private int value;
+    private string _naText = "Money Spent: NA";
+    private string _format = "Money Spent: {0}";
+    private string displayText = "Money Spent: NA";
+
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
+    }
+
+    public override void OnEnable()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("Money Spent: NA");
+        _format = GetFormat(@"^Money Spent: (.*)$", "Money Spent: {0}");
     }
 
     public override void OnUpdateActive()
@@ -28,13 +47,16 @@ public class MoneySpent : HudElement
             value = GameData.BoardInstance.boardStatistics.moneyConsumed;
         }
 
-        displayText = Translate($"Money Spent: {FormatInternational(value)}");
-
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateDisplay();
     }
-    public override void OnEnable()
+
+    private void UpdateDisplay()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        if (!GameData.BoardInstanceIsNull)
+            displayText = string.Format(_format, FormatInternational(value));
+        else
+            displayText = _naText;
+
+        AdjustWidthToText(displayText, 10f);
     }
 }

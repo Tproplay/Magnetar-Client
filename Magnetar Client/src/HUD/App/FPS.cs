@@ -1,5 +1,4 @@
 using UnityEngine;
-using static Magnetar_Client.UI.Themes.ThemeManager;
 
 namespace Magnetar_Client.HUDElements;
 
@@ -12,12 +11,32 @@ public class FpsElement : HudElement
         RegisterRegexTranslation(@"FPS: <color={colorName}>(\d+)</color>", "FPS: <color={colorName}>{1}</color>");
     }
 
-    float fps;
-    string displayText = "FPS: <color=yellow>Na</color>";
+    private float fps;
+    private string _format = "FPS: <color={0}>{1}</color>";
+    private string _naText = "FPS: <color=yellow>Na</color>";
+    private string displayText = "FPS: <color=yellow>Na</color>";
 
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
+    }
+
+    public override void OnEnable()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("FPS: <color=yellow>Na</color>");
+        _format = GetFormat(@"FPS: <color={colorName}>(\d+)</color>", "FPS: <color={0}>{1}</color>");
     }
 
     public override void OnUpdateActive()
@@ -26,16 +45,22 @@ public class FpsElement : HudElement
         {
             fps = 1.0f / Time.smoothDeltaTime;
         }
-        string colorName = fps > 55 ? "lime" : (fps > 30 ? "yellow" : "red");
-
-        displayText = Translate($"FPS: <color={colorName}>{(int)fps}</color>");
-
-        AdjustWidthToText(displayText, HUDElementStyle, 10);
+        UpdateDisplay();
     }
-    public override void OnEnable()
+
+    private void UpdateDisplay()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        if (fps <= 0 && Time.timeScale == 0)
+        {
+            displayText = _naText;
+        }
+        else
+        {
+            string colorName = fps > 55 ? "lime" : (fps > 30 ? "yellow" : "red");
+            displayText = string.Format(_format, colorName, (int)fps);
+        }
+
+        AdjustWidthToText(displayText, 10f);
     }
 }
 
@@ -48,27 +73,45 @@ public class RealFpsElement : HudElement
         RegisterRegexTranslation(@"FPS (Real): <color={colorName}>(\d+)</color>", "FPS (Real): <color={colorName}>{1}</color>");
     }
 
-    float fps;
-    string displayText = "FPS (Real): <color=yellow>Na</color>";
+    private float fps;
+    private string _format = "FPS (Real): <color={0}>{1}</color>";
+    private string _naText = "FPS (Real): <color=yellow>Na</color>";
+    private string displayText = "FPS (Real): <color=yellow>Na</color>";
 
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
     }
 
+    public override void OnEnable()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("FPS (Real): <color=yellow>Na</color>");
+        _format = GetFormat(@"FPS (Real): <color={colorName}>(\d+)</color>", "FPS (Real): <color={0}>{1}</color>");
+    }
+
     public override void OnUpdateActive()
     {
         fps = 1.0f / Time.unscaledDeltaTime;
-        string colorName = fps > 55 ? "lime" : (fps > 30 ? "yellow" : "red");
-
-        displayText = Translate($"FPS (Real): <color={colorName}>{(int)fps}</color>");
-
-        AdjustWidthToText(displayText, HUDElementStyle, 10);
+        UpdateDisplay();
     }
-    public override void OnEnable()
+
+    private void UpdateDisplay()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10);
+        string colorName = fps > 55 ? "lime" : (fps > 30 ? "yellow" : "red");
+        displayText = string.Format(_format, colorName, (int)fps);
+        AdjustWidthToText(displayText, 10f);
     }
 }
 
@@ -81,30 +124,44 @@ public class FrameTimeElement : HudElement
         RegisterRegexTranslation(@"FrameTime: <color={colorName}>(\d+)</color>ms", "FrameTime: <color={colorName}>{1}</color>ms");
     }
 
-    float currentFrameTime;
-    string displayText = "FrameTime: <color=yellow>Na</color>";
+    private float currentFrameTime;
+    private string _format = "FrameTime: <color={0}>{1:f0}</color>ms";
+    private string _naText = "FrameTime: <color=yellow>Na</color>";
+    private string displayText = "FrameTime: <color=yellow>Na</color>";
 
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
     }
 
+    public override void OnEnable()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("FrameTime: <color=yellow>Na</color>");
+        _format = GetFormat(@"FrameTime: <color={colorName}>(\d+)</color>ms", "FrameTime: <color={0}>{1:f0}</color>ms");
+    }
 
     public override void OnUpdateActive()
     {
         currentFrameTime = Time.smoothDeltaTime;
-
-        string colorName = currentFrameTime < 1 / 55f ? "lime" : (currentFrameTime < 1 / 30f ? "yellow" : "red");
-
-        displayText = Translate($"FrameTime: <color={colorName}>{currentFrameTime * 1000:f0}</color>ms");
-
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
-        
+        UpdateDisplay();
     }
-    public override void OnEnable()
+
+    private void UpdateDisplay()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        string colorName = currentFrameTime < 1 / 55f ? "lime" : (currentFrameTime < 1 / 30f ? "yellow" : "red");
+        displayText = string.Format(_format, colorName, currentFrameTime * 1000f);
+        AdjustWidthToText(displayText, 10f);
     }
 }
-

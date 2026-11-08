@@ -1,7 +1,5 @@
 using UnityEngine;
 
-using static Magnetar_Client.UI.Themes.ThemeManager;
-
 namespace Magnetar_Client.HUDElements;
 
 public class TimeScale : HudElement
@@ -12,20 +10,41 @@ public class TimeScale : HudElement
         RegisterTranslation("TimeScale: 0", "TimeScale: 0");
         RegisterRegexTranslation(@"^TimeScale: (.*)$", "TimeScale: {1}");
     }
-    string format = "0.##";
-    string displayText = "TimeScale: 0";
+
+    private const string NumberFormat = "0.##";
+    private string _format = "TimeScale: {0}";
+    private string displayText = "TimeScale: 1";
+
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
     }
-    public override void OnUpdateActive()
-    {
-        displayText = Translate($"TimeScale: {(UnityEngine.Time.timeScale).ToString(format)}");
-        AdjustWidthToText(displayText, HUDElementStyle, 10);
-    }
+
     public override void OnEnable()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _format = GetFormat(@"^TimeScale: (.*)$", "TimeScale: {0}");
+    }
+
+    public override void OnUpdateActive()
+    {
+        UpdateDisplay();
+    }
+
+    private void UpdateDisplay()
+    {
+        displayText = string.Format(_format, Time.timeScale.ToString(NumberFormat));
+        AdjustWidthToText(displayText, 10f);
     }
 }

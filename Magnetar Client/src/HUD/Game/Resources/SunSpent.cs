@@ -1,6 +1,4 @@
 using UnityEngine;
-
-using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
 
 namespace Magnetar_Client.HUDElements;
@@ -14,12 +12,32 @@ public class SunSpent : HudElement
         RegisterRegexTranslation(@"^Sun Spent: (.*)$", "Sun Spent: {1}");
     }
 
-    int value;
-    string displayText = "Sun Spent: NA";
+    private int value;
+    private string _naText = "Sun Spent: NA";
+    private string _format = "Sun Spent: {0}";
+    private string displayText = "Sun Spent: NA";
 
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
+    }
+
+    public override void OnEnable()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("Sun Spent: NA");
+        _format = GetFormat(@"^Sun Spent: (.*)$", "Sun Spent: {0}");
     }
 
     public override void OnUpdateActive()
@@ -28,13 +46,17 @@ public class SunSpent : HudElement
         {
             value = GameData.BoardInstance.boardStatistics.sunConsumed;
         }
-        displayText = Translate($"Sun Spent: {FormatInternational(value)}");
 
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateDisplay();
     }
-    public override void OnEnable()
+
+    private void UpdateDisplay()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        if (!GameData.BoardInstanceIsNull)
+            displayText = string.Format(_format, FormatInternational(value));
+        else
+            displayText = _naText;
+
+        AdjustWidthToText(displayText, 10f);
     }
 }

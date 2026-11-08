@@ -1,6 +1,5 @@
-using static Magnetar_Client.UI.Themes.ThemeManager;
-using static Magnetar_Client.Utils.Maths;
 using UnityEngine;
+using static Magnetar_Client.Utils.Maths;
 
 namespace Magnetar_Client.HUDElements;
 
@@ -13,32 +12,52 @@ public class ZombieWaveHealth : HudElement
         RegisterRegexTranslation(@"^Wave Health: (.*)/(.*)$", "Wave Health: {1}/{2}");
     }
 
-    string displayText = "Wave Health: NA";
-    
+    private string _naText = "Wave Health: NA";
+    private string _format = "Wave Health: {0}/{1}";
+    private string displayText = "Wave Health: NA";
+
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
     }
 
+    public override void OnEnable()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("Wave Health: NA");
+        _format = GetFormat(@"^Wave Health: (.*)/(.*)$", "Wave Health: {0}/{1}");
+    }
+
     public override void OnUpdateActive()
+    {
+        UpdateDisplay();
+    }
+
+    private void UpdateDisplay()
     {
         if (!GameData.BoardInstanceIsNull)
         {
-            displayText = Translate(
-                $"Wave Health: {FormatInternational(GameData.BoardInstance.zombieCurrentWaveHealth)}/" +
-                $"{FormatInternational(GameData.BoardInstance.zombieSpawnHealth)}");
+            displayText = string.Format(
+                _format,
+                FormatInternational(GameData.BoardInstance.zombieCurrentWaveHealth),
+                FormatInternational(GameData.BoardInstance.zombieSpawnHealth));
         }
         else
         {
-            displayText = Translate("Wave Health: NA");
+            displayText = _naText;
         }
-        
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
-    }
-    public override void OnEnable()
-    {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
-    }
 
+        AdjustWidthToText(displayText, 10f);
+    }
 }

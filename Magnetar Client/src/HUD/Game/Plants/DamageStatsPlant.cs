@@ -1,5 +1,4 @@
 using UnityEngine;
-using static Magnetar_Client.UI.Themes.ThemeManager;
 using static Magnetar_Client.Utils.Maths;
 
 namespace Magnetar_Client.HUDElements;
@@ -13,11 +12,32 @@ public class DamageStatsPlant : HudElement
         RegisterRegexTranslation(@"^Plant Damage: (.*)$", "Plant Damage: {1}");
     }
 
-    float value;
-    string displayText = "Plant Damage: NA";
+    private float value;
+    private string _naText = "Plant Damage: NA";
+    private string _format = "Plant Damage: {0}";
+    private string displayText = "Plant Damage: NA";
+
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
+    }
+
+    public override void OnEnable()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("Plant Damage: NA");
+        _format = GetFormat(@"^Plant Damage: (.*)$", "Plant Damage: {0}");
     }
 
     public override void OnUpdateActive()
@@ -27,13 +47,16 @@ public class DamageStatsPlant : HudElement
             value = GameData.BoardInstance.boardStatistics.totalZombieDamage;
         }
 
-        displayText = Translate($"Plant Damage: {FormatInternational((long)value)}");
-
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateDisplay();
     }
-    public override void OnEnable()
+
+    private void UpdateDisplay()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        if (!GameData.BoardInstanceIsNull)
+            displayText = string.Format(_format, FormatInternational((long)value));
+        else
+            displayText = _naText;
+
+        AdjustWidthToText(displayText, 10f);
     }
 }

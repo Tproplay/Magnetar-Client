@@ -1,7 +1,5 @@
 using UnityEngine;
-
 using static Magnetar_Client.GameData;
-using static Magnetar_Client.UI.Themes.ThemeManager;
 
 namespace Magnetar_Client.HUDElements;
 
@@ -14,11 +12,32 @@ public class NumberOfPlantsSpawned : HudElement
         RegisterRegexTranslation(@"^Plants Placed: (.*)$", "Plants Placed: {1}");
     }
 
-    int value;
-    string displayText = "Plants Placed: NA";
+    private int value;
+    private string _naText = "Plants Placed: NA";
+    private string _format = "Plants Placed: {0}";
+    private string displayText = "Plants Placed: NA";
+
     protected override void DrawContent(float width, float height)
     {
         Draw(displayText, width, height);
+    }
+
+    public override void OnEnable()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    public override void OnLanguageChanged()
+    {
+        UpdateTranslations();
+        UpdateDisplay();
+    }
+
+    private void UpdateTranslations()
+    {
+        _naText = Translate("Plants Placed: NA");
+        _format = GetFormat(@"^Plants Placed: (.*)$", "Plants Placed: {0}");
     }
 
     public override void OnUpdateActive()
@@ -28,12 +47,16 @@ public class NumberOfPlantsSpawned : HudElement
             value = BoardInstance.boardStatistics.plantsPlanted;
         }
 
-        displayText = Translate($"Plants Placed: {value}");
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        UpdateDisplay();
     }
-    public override void OnEnable()
+
+    private void UpdateDisplay()
     {
-        displayText = Translate(displayText);
-        AdjustWidthToText(displayText, HUDElementStyle, 10f);
+        if (!BoardInstanceIsNull)
+            displayText = string.Format(_format, value);
+        else
+            displayText = _naText;
+
+        AdjustWidthToText(displayText, 10f);
     }
 }

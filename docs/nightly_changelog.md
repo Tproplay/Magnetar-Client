@@ -17,3 +17,4 @@
 - When Time scale is 0, the rgb text pauses transition
 - Vanilla Mode didn't reenabled the modules after a game restart
 - Multiselect Setting Shift drag caused the first option to get toggled twice
+- CPU and GPU Names weren't affected by rbg rainbow color

@@ -75,12 +75,92 @@ public static class AudioClipLoader
     }
 
     /// <summary>
-    /// Scans for and loads all AssetBundles located strictly in Custom Audios/Music/.
+    /// Scans for and loads all AssetBundles located strictly in Custom Audios/Music/ (synchronous).
     /// </summary>
     public static void ScanAndLoadMusicBundles(string musicDir)
     {
         if (!Directory.Exists(musicDir)) return;
         ScanMusicDirectory(musicDir);
+    }
+
+    /// <summary>
+    /// Asynchronously scans for and loads all AssetBundles located strictly in Custom Audios/Music/ across frames.
+    /// </summary>
+    public static IEnumerator ScanAndLoadMusicBundlesRoutine(string dir, Action onComplete = null)
+    {
+        if (!Directory.Exists(dir))
+        {
+            onComplete?.Invoke();
+            yield break;
+        }
+
+        var files = Directory.GetFiles(dir, "*", SearchOption.AllDirectories);
+        foreach (var file in files)
+        {
+            if (!IsAssetBundle(file)) continue;
+
+            string bundleFileName = Path.GetFileName(file);
+            string bundleBaseName = Path.GetFileNameWithoutExtension(file);
+            bool isDefaultSoundtrack = string.Equals(bundleFileName, "musicAB_windows", StringComparison.OrdinalIgnoreCase) ||
+                                       string.Equals(bundleFileName, "musicAB_android", StringComparison.OrdinalIgnoreCase) ||
+                                       string.Equals(bundleBaseName, "musicAB_windows", StringComparison.OrdinalIgnoreCase) ||
+                                       string.Equals(bundleBaseName, "musicAB_android", StringComparison.OrdinalIgnoreCase);
+
+            AssetBundle bundle = null;
+            if (_loadedBundles.TryGetValue(file, out var existingBundle) && existingBundle != null)
+            {
+                bundle = existingBundle;
+            }
+            else
+            {
+                AssetBundleCreateRequest createReq = null;
+                try
+                {
+                    createReq = AssetBundle.LoadFromFileAsync(file);
+                }
+                catch (Exception ex)
+                {
+                    MagnetarApi.LogError($"[Audio Addon] Failed to initiate async load for music AssetBundle '{file}': {ex.Message}");
+                    continue;
+                }
+
+                if (createReq != null)
+                {
+                    while (!createReq.isDone)
+                    {
+                        yield return null;
+                    }
+
+                    try
+                    {
+                        bundle = createReq.assetBundle;
+                        if (bundle != null)
+                        {
+                            _loadedBundles[file] = bundle;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MagnetarApi.LogError($"[Audio Addon] Failed to get loaded music AssetBundle '{file}': {ex.Message}");
+                        continue;
+                    }
+                }
+            }
+
+            if (bundle != null)
+            {
+                RegisterMusicBundleAssets(bundle, file, bundleFileName, isDefaultSoundtrack);
+            }
+
+            yield return null;
+        }
+
+        onComplete?.Invoke();
+    }
+
+    public static ICoroutineHandle ScanAndLoadMusicBundlesAsync(string dir, Action onComplete = null)
+    {
+        return CoroutineManager.Start(ScanAndLoadMusicBundlesRoutine(dir, onComplete));
     }
 
     private static void ScanMusicDirectory(string dir)
@@ -116,47 +196,52 @@ public static class AudioClipLoader
 
             if (bundle != null)
             {
-                var assetNames = bundle.GetAllAssetNames();
-                foreach (var asset in assetNames)
-                {
-                    string cleanName = Path.GetFileNameWithoutExtension(asset);
-
-                    // Match canonical PascalCase from MusicType enum if applicable
-                    foreach (var val in Enum.GetValues(typeof(MusicType)))
-                    {
-                        string enumName = val.ToString();
-                        if (cleanName.Equals(enumName, StringComparison.OrdinalIgnoreCase))
-                        {
-                            cleanName = enumName;
-                            break;
-                        }
-                    }
-
-                    string key = cleanName;
-                    // If track already exists from another bundle, disambiguate key
-                    if (MusicBundledTracks.ContainsKey(key))
-                    {
-                        key = $"{cleanName} ({bundleFileName})";
-                    }
-
-                    var track = new BundledTrack
-                    {
-                        Bundle = bundle,
-                        BundleFilePath = file,
-                        BundleFileName = bundleFileName,
-                        AssetName = asset,
-                        CleanName = cleanName,
-                        DisplayName = isDefaultSoundtrack ? $"[Bundled] {cleanName}" : $"[Bundled: {bundleFileName}] {cleanName}",
-                        IsDefaultSoundtrack = isDefaultSoundtrack
-                    };
-
-                    MusicBundledTracks[key] = track;
-                    BundleAssetMap[cleanName] = asset;
-                }
-
-                MagnetarApi.LogMsg($"[Audio Addon] Loaded music AssetBundle '{bundleFileName}' with {assetNames.Length} track(s).");
+                RegisterMusicBundleAssets(bundle, file, bundleFileName, isDefaultSoundtrack);
             }
         }
+    }
+
+    private static void RegisterMusicBundleAssets(AssetBundle bundle, string file, string bundleFileName, bool isDefaultSoundtrack)
+    {
+        var assetNames = bundle.GetAllAssetNames();
+        foreach (var asset in assetNames)
+        {
+            string cleanName = Path.GetFileNameWithoutExtension(asset);
+
+            // Match canonical PascalCase from MusicType enum if applicable
+            foreach (var val in Enum.GetValues(typeof(MusicType)))
+            {
+                string enumName = val.ToString();
+                if (cleanName.Equals(enumName, StringComparison.OrdinalIgnoreCase))
+                {
+                    cleanName = enumName;
+                    break;
+                }
+            }
+
+            string key = cleanName;
+            // If track already exists from another bundle, disambiguate key
+            if (MusicBundledTracks.ContainsKey(key))
+            {
+                key = $"{cleanName} ({bundleFileName})";
+            }
+
+            var track = new BundledTrack
+            {
+                Bundle = bundle,
+                BundleFilePath = file,
+                BundleFileName = bundleFileName,
+                AssetName = asset,
+                CleanName = cleanName,
+                DisplayName = isDefaultSoundtrack ? $"[Bundled] {cleanName}" : $"[Bundled: {bundleFileName}] {cleanName}",
+                IsDefaultSoundtrack = isDefaultSoundtrack
+            };
+
+            MusicBundledTracks[key] = track;
+            BundleAssetMap[cleanName] = asset;
+        }
+
+        MagnetarApi.LogMsg($"[Audio Addon] Loaded music AssetBundle '{bundleFileName}' with {assetNames.Length} track(s).");
     }
 
     /// <summary>

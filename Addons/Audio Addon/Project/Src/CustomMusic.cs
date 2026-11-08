@@ -45,6 +45,9 @@ public class CustomMusic : Module
 
     private ICoroutineHandle _activeLoadHandle;
     private static bool _isDownloading = false;
+    private static bool _isInitializingBundles = false;
+    private static bool _hasLocalBundles = false;
+    private static MusicType? _pendingPlayTrack = null;
 
     public static string AudioDir => GetAudioDir();
 
@@ -52,35 +55,75 @@ public class CustomMusic : Module
     {
         Instance = this;
 
-        // Discover custom music files (both AssetBundle streaming tracks and loose files)
-        ScanAudioFiles();
+        _hasLocalBundles = HasLocalBundles();
+        _isInitializingBundles = _hasLocalBundles;
 
-        // Dynamically categorize and create settings for all in-game music tracks
+        // 1. Initial lightweight scan (loose custom files only - completes in < 1ms, zero startup freeze)
+        ScanAudioFiles(scanBundlesSynchronously: false);
+
+        // 2. Dynamically categorize and create settings for all in-game music tracks
         BuildDynamicTrackSettings();
 
-        // If official default AssetBundle was not found, download it in background
-        CheckAndDownloadMissingDefaultBundle();
+        // 3. Asynchronously load AssetBundles in background and check for missing downloads
+        CoroutineManager.Start(InitializeBundlesRoutine());
     }
 
-    private void CheckAndDownloadMissingDefaultBundle()
+    private static bool HasLocalBundles()
     {
-        string creditsPath = Path.Combine(PathsManager.AddonsDir, "Custom Audios", "Credits.txt");
-        bool hasDefaultBundle = AudioClipLoader.MusicBundledTracks.Values.Any(t => t.IsDefaultSoundtrack);
-        string targetBundleName = MagnetarInfo.Platform == MagnetarInfo.PlatformType.Android ? "musicAB_android" : "musicAB_windows";
-        string targetPath = Path.Combine(AudioDir, targetBundleName);
-
-        bool bundleExists = hasDefaultBundle || (File.Exists(targetPath) && AudioClipLoader.IsAssetBundle(targetPath));
-        bool creditsExist = File.Exists(creditsPath);
-
-        if (bundleExists && creditsExist) return;
-
-        if (File.Exists(targetPath) && AudioClipLoader.IsAssetBundle(targetPath) && !hasDefaultBundle)
+        try
         {
-            AudioClipLoader.ScanAndLoadMusicBundles(AudioDir);
-            RefreshTrackSettingsAfterBundleLoaded();
+            string dir = AudioDir;
+            if (!Directory.Exists(dir)) return false;
+            var files = Directory.GetFiles(dir, "*", SearchOption.AllDirectories);
+            foreach (var f in files)
+            {
+                if (AudioClipLoader.IsAssetBundle(f)) return true;
+            }
         }
+        catch { }
+        return false;
+    }
 
-        CoroutineManager.Start(DownloadMissingFilesRoutine(targetBundleName, targetPath, !bundleExists, creditsPath, !creditsExist));
+    private IEnumerator InitializeBundlesRoutine()
+    {
+        _isInitializingBundles = _hasLocalBundles;
+        try
+        {
+            string creditsPath = Path.Combine(PathsManager.AddonsDir, "Custom Audios", "Credits.txt");
+            string targetBundleName = MagnetarInfo.Platform == MagnetarInfo.PlatformType.Android ? "musicAB_android" : "musicAB_windows";
+            string targetPath = Path.Combine(AudioDir, targetBundleName);
+
+            // 1. Asynchronously load all existing AssetBundles in Custom Audios/Music/ across frames
+            yield return AudioClipLoader.ScanAndLoadMusicBundlesRoutine(AudioDir);
+
+            bool hasDefaultBundle = AudioClipLoader.MusicBundledTracks.Values.Any(t => t.IsDefaultSoundtrack);
+            bool bundleExists = hasDefaultBundle || (File.Exists(targetPath) && AudioClipLoader.IsAssetBundle(targetPath));
+            bool creditsExist = File.Exists(creditsPath);
+
+            // Refresh settings with loaded bundle tracks
+            if (AudioClipLoader.MusicBundledTracks.Count > 0)
+            {
+                RefreshTrackSettingsAfterBundleLoaded();
+            }
+
+            // 2. If default bundle or credits are missing, download in background
+            if (!bundleExists || !creditsExist)
+            {
+                yield return DownloadMissingFilesRoutine(targetBundleName, targetPath, !bundleExists, creditsPath, !creditsExist);
+            }
+        }
+        finally
+        {
+            _isInitializingBundles = false;
+
+            if (_pendingPlayTrack.HasValue && Active)
+            {
+                var trackToPlay = _pendingPlayTrack.Value;
+                _pendingPlayTrack = null;
+                CurrentPlayingTrack = trackToPlay;
+                ApplyCurrentTrackOverride();
+            }
+        }
     }
 
     private IEnumerator DownloadMissingFilesRoutine(
@@ -277,14 +320,14 @@ public class CustomMusic : Module
             }
 
             MagnetarApi.LogMsg($"[Audio Addon] Successfully downloaded '{targetBundleName}' ({new FileInfo(targetPath).Length / 1048576f:F1} MB). Loading soundtrack...");
-            AudioClipLoader.ScanAndLoadMusicBundles(AudioDir);
+            yield return AudioClipLoader.ScanAndLoadMusicBundlesRoutine(AudioDir);
             RefreshTrackSettingsAfterBundleLoaded();
         }
     }
 
     public void RefreshTrackSettingsAfterBundleLoaded()
     {
-        ScanAudioFiles();
+        ScanAudioFiles(scanBundlesSynchronously: false);
 
         foreach (var value in Enum.GetValues(typeof(MusicType)))
         {
@@ -315,6 +358,11 @@ public class CustomMusic : Module
 
         if (Active)
         {
+            if (_pendingPlayTrack.HasValue)
+            {
+                CurrentPlayingTrack = _pendingPlayTrack.Value;
+                _pendingPlayTrack = null;
+            }
             ApplyCurrentTrackOverride();
         }
     }
@@ -329,7 +377,7 @@ public class CustomMusic : Module
         return dir;
     }
 
-    private void ScanAudioFiles()
+    private void ScanAudioFiles(bool scanBundlesSynchronously = false)
     {
         _audioFiles.Clear();
         _optionsDict.Clear();
@@ -338,8 +386,11 @@ public class CustomMusic : Module
         string dir = AudioDir;
         if (!Directory.Exists(dir)) return;
 
-        // 1. Scan and load all AssetBundles in Custom Audios/Music/
-        AudioClipLoader.ScanAndLoadMusicBundles(dir);
+        // 1. Scan and load all AssetBundles in Custom Audios/Music/ only if explicitly requested
+        if (scanBundlesSynchronously)
+        {
+            AudioClipLoader.ScanAndLoadMusicBundles(dir);
+        }
 
         int optionIndex = 1;
 
@@ -695,28 +746,41 @@ public class CustomMusic : Module
         var track = CurrentPlayingTrack;
         EvictUnusedTracks(track);
 
-        if (TrackSettings.TryGetValue(track, out var setting) && setting.Value > 0)
+        if (!TrackSettings.TryGetValue(track, out var setting) || setting.Value <= 0)
         {
-            int idx = setting.Value - 1;
-            if (idx >= 0 && idx < _audioFiles.Count)
+            var vanilla = GetVanillaMusic(track);
+            if (vanilla != null)
             {
-                string sourceKey = _audioFiles[idx];
-                var cached = AudioClipLoader.GetCachedClip(sourceKey);
-                if (cached != null)
+                soundMgr.musics[track] = vanilla;
+                if (GameAPP.music != null && (CurrentPlayingTrack == track || GameAPP.music.clip == null || !GameAPP.music.isPlaying))
                 {
-                    OnTrackClipLoaded(track, cached);
+                    GameAPP.music.clip = vanilla;
+                    GameAPP.music.time = 0f;
+                    GameAPP.music.Play();
                 }
-                else
+            }
+            return;
+        }
+
+        int idx = setting.Value - 1;
+        if (idx >= 0 && idx < _audioFiles.Count)
+        {
+            string sourceKey = _audioFiles[idx];
+            var cached = AudioClipLoader.GetCachedClip(sourceKey);
+            if (cached != null)
+            {
+                OnTrackClipLoaded(track, cached);
+            }
+            else
+            {
+                _activeLoadHandle?.Stop();
+                _activeLoadHandle = AudioClipLoader.LoadAudioClipAsync(sourceKey, (clip) =>
                 {
-                    _activeLoadHandle?.Stop();
-                    _activeLoadHandle = AudioClipLoader.LoadAudioClipAsync(sourceKey, (clip) =>
+                    if (clip != null && Active)
                     {
-                        if (clip != null && Active)
-                        {
-                            OnTrackClipLoaded(track, clip);
-                        }
-                    });
-                }
+                        OnTrackClipLoaded(track, clip);
+                    }
+                });
             }
         }
     }
@@ -874,31 +938,66 @@ public class CustomMusic : Module
     {
         [HarmonyPatch(nameof(GameAPP.PlayMusic), new Type[] { typeof(MusicType) })]
         [HarmonyPrefix]
-        public static void PlayMusicPrefix(MusicType id)
+        public static bool PlayMusicPrefix(MusicType id)
         {
             try
             {
                 CurrentPlayingTrack = id;
 
-                if (Instance == null || !Instance.Active) return;
+                if (Instance == null || !Instance.Active) return true;
 
-                // Evict unused tracks and load current track override
+                // 1. If local bundles are currently initializing asynchronously in background, defer playback
+                if (_isInitializingBundles && _hasLocalBundles)
+                {
+                    _pendingPlayTrack = id;
+                    if (GameAPP.music != null && GameAPP.music.isPlaying)
+                    {
+                        GameAPP.music.Stop();
+                    }
+                    if (GameAPP.musicDrum != null && GameAPP.musicDrum.isPlaying)
+                    {
+                        GameAPP.musicDrum.Stop();
+                    }
+                    return false; // Suppress vanilla music playback during startup!
+                }
+
+                // 2. Evict unused tracks to keep RAM low
                 Instance.EvictUnusedTracks(id);
 
-                if (Instance.TrackSettings.TryGetValue(id, out var setting) && setting.Value > 0)
+                // 3. Inspect setting for this track
+                if (Instance.TrackSettings.TryGetValue(id, out var setting))
                 {
+                    // User explicitly chose Vanilla for this track
+                    if (setting.Value == 0) return true;
+
                     int fileIdx = setting.Value - 1;
                     if (fileIdx >= 0 && fileIdx < Instance._audioFiles.Count)
                     {
                         string sourceKey = Instance._audioFiles[fileIdx];
                         var cached = AudioClipLoader.GetCachedClip(sourceKey);
-                        if (cached != null && GameAPP.soundManager?.musics != null)
+                        if (cached != null)
                         {
-                            GameAPP.soundManager.musics[id] = cached;
+                            if (GameAPP.soundManager?.musics != null)
+                            {
+                                GameAPP.soundManager.musics[id] = cached;
+                            }
+                            if (GameAPP.music != null)
+                            {
+                                GameAPP.music.clip = cached;
+                                GameAPP.music.time = 0f;
+                                GameAPP.music.Play();
+                            }
+                            return false; // Handled directly with custom clip
                         }
-                        else if (!AudioClipLoader.IsLoaded(sourceKey))
+                        else
                         {
-                            // Load asynchronously in background so track transition never freezes
+                            // Clip needs loading; suppress vanilla playback in the meantime
+                            _pendingPlayTrack = id;
+                            if (GameAPP.music != null && GameAPP.music.isPlaying)
+                            {
+                                GameAPP.music.Stop();
+                            }
+
                             AudioClipLoader.LoadAudioClipAsync(sourceKey, (clip) =>
                             {
                                 if (clip != null && Instance != null && Instance.Active)
@@ -906,11 +1005,17 @@ public class CustomMusic : Module
                                     Instance.OnTrackClipLoaded(id, clip);
                                 }
                             });
+                            return false; // Suppress vanilla playback while loading clip
                         }
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                MagnetarApi.LogError($"[Audio Addon] Failed in PlayMusicPrefix: {ex.Message}");
+            }
+
+            return true;
         }
     }
 }

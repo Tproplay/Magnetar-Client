@@ -49,7 +49,8 @@ public class TimeScale : Module
                     TargetSpeed = x;
                     Time.timeScale = x;
                 }
-            }
+            },
+            IsDisabled = true
         };
         AddSettings(TimeScaleSetting);
 
@@ -77,8 +78,14 @@ public class TimeScale : Module
         EndCategory();
     }
 
+    public override void OnEnable()
+    {
+        TimeScaleSetting.IsDisabled = false;
+    }
+
     public override void OnDisable()
     {
+        TimeScaleSetting.IsDisabled = true;
         if (!IsGamePaused()) Time.timeScale = 1f;
     }
 

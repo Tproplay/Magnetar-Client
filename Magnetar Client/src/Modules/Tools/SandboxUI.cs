@@ -12,8 +12,8 @@ public class SandboxUI : Module
 {
     // Mod Info
     public override string Name { get; set; } = "Sandbox UI";
-    public override string Description { get; set; } = "Replaces the current in-game level UI with the IZE / EVE UI" +
-        " (with zombie seed bank, select zombie button, and bottom EVE toolbar). Restores the normal UI when disabled.";
+    public override string Description { get; set; } = "Replaces the current in-game level UI with I Zombie UI. " +
+        "Restores the normal UI when disabled.";
     public override string SearchHints { get; set; } = "sandboxui izeui eveui zombieseeds selectzombie evetoolbar levelui " +
         "uireplacer sandboxmode editorui customui uimod interfacechanger zombieseedbank sandboxinterface izeinterface " +
         "eveinterface uioverride levelinterface uimanager custominterface"; 

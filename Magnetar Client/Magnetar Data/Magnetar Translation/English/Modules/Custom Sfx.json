@@ -1,0 +1,12 @@
+{
+  "Name": "Custom Sfx",
+  "Description": "Allows you to change game's sound effects.",
+  "Search Hints": "customsfx sfxchanger soundeffectchanger audiosfx customsoundeffects sfxmod soundchanger sfxpack audioinjector soundsfxchanger sfxplayer noiseselector customaudio soundsfxmod sfxmanager soundpack audioaddon effectschanger sfxsubstitute soundreplacer",
+  "settings": {
+    "General": "General",
+    "SFX Overrides": "SFX Overrides",
+    "Enabled": "Enabled",
+    "Sound": "Sound",
+    "Replacement": "Replacement"
+  }
+}

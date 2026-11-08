@@ -1,4 +1,9 @@
 {
+  "Active Modules": {
+    "Name": "Active Modules",
+    "Active Modules": "Active Modules",
+    "Active Modules (Empty)": "Active Modules (Empty)"
+  },
   "FPS Counter": {
     "Name": "FPS Counter",
     "FPS: <color=yellow>Na</color>": "FPS: <color=yellow>Na</color>",
@@ -32,6 +37,11 @@
   "Up Time": {
     "Name": "Up Time"
   },
+  "Active Bullets": {
+    "Name": "Active Bullets",
+    "Active Bullets: NA": "Active Bullets: NA",
+    "^Active Bullets: (.*)$": "Active Bullets: {1}"
+  },
   "Active Star drop Cooldown": {
     "Name": "Active Star drop Cooldown",
     "Active Star drop: NA": "Active Star drop: NA",
@@ -41,6 +51,17 @@
     "Name": "Current Wave",
     "Wave: NA": "Wave: NA",
     "^Wave: (\\d+)/(\\d+)$": "Wave: {1}/{2}"
+  },
+  "Freeze Timer": {
+    "Name": "Freeze Timer",
+    "Freeze: NA": "Freeze: NA",
+    "Freeze: 0.0s": "Freeze: 0.0s",
+    "^Freeze: (.*)s$": "Freeze: {1}s"
+  },
+  "Lawn Mowers Remaining": {
+    "Name": "Lawn Mowers Remaining",
+    "Mowers: NA": "Mowers: NA",
+    "^Mowers: (.*)/(.*)$": "Mowers: {1}/{2}"
   },
   "Passive Star drop Cooldown": {
     "Name": "Passive Star drop Cooldown",
@@ -91,6 +112,17 @@
     "Plants Placed: NA": "Plants Placed: NA",
     "^Plants Placed: (.*)$": "Plants Placed: {1}"
   },
+  "Plant Capacity": {
+    "Name": "Plant Capacity",
+    "Plant Cap: NA": "Plant Cap: NA",
+    "^Plant Cap: (.*)/(.*)$": "Plant Cap: {1}/{2}",
+    "^Plant Cap: (.*)/∞$": "Plant Cap: {1}/∞"
+  },
+  "Total Fusions Performed": {
+    "Name": "Total Fusions Performed",
+    "Fusions: NA": "Fusions: NA",
+    "^Fusions: (.*)$": "Fusions: {1}"
+  },
   "Auto drop/fall sun timer": {
     "Name": "Auto drop/fall sun timer",
     "Auto Sun: NA": "Auto Sun: NA",
@@ -112,10 +144,21 @@
     "Sun Obtained: NA": "Sun Obtained: NA",
     "^Sun Obtained: (.*)$": "Sun Obtained: {1}"
   },
+  "Sun Production Rate": {
+    "Name": "Sun Production Rate",
+    "Sun Rate: NA": "Sun Rate: NA",
+    "^Sun Rate: \\+(.*)/min$": "Sun Rate: +{1}/min"
+  },
   "Total Sun Spent": {
     "Name": "Total Sun Spent",
     "Sun Spent: NA": "Sun Spent: NA",
     "^Sun Spent: (.*)$": "Sun Spent: {1}"
+  },
+  "Closest Zombie Threat": {
+    "Name": "Closest Zombie Threat",
+    "Threat: NA": "Threat: NA",
+    "Threat: Safe": "Threat: Safe",
+    "^Threat: (.*) tiles \\(Row (.*)\\)$": "Threat: {1} tiles (Row {2})"
   },
   "Hypnotized Zombies On Lawn": {
     "Name": "Hypnotized Zombies On Lawn",
@@ -183,15 +226,12 @@
     "^VRAM: (.*) / (.*) MB$": "VRAM: {1} / {2} MB"
   },
   "GPU Name": {
-    "Name": "GPU Name",
-    "^<color=cyan>(.*)</color>$": "<color=cyan>{1}</color>"
+    "Name": "GPU Name"
   },
   "CPU Name": {
-    "Name": "CPU Name",
-    "^<color=cyan>(.*)</color>$": "<color=cyan>{1}</color>"
+    "Name": "CPU Name"
   },
   "Current Time": {
-    "Name": "Current Time",
-    "^<color=white>(.*)</color>$": "<color=white>{1}</color>"
+    "Name": "Current Time"
   }
 }

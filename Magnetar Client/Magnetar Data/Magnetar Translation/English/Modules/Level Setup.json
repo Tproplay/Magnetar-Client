@@ -4,10 +4,12 @@
   "Search Hints": "levelsetup boardsetup setupfunctions triggerboardsetup setupmanager levelinit boardinit initializetrigger levelinitializer manualsetup setupcustomizer boardconfigurator levelsync setupoverride boardhandler initializegame levelconfig startuplevel setupdebug boardreset levelreset levelbuilder initboard boardloader customsetup runsetup",
   "settings": {
     "General": "General",
+    "Override On Enter": "Override On Enter",
+    "Custom Level Name": "Custom Level Name",
+    "Extra": "Extra",
     "Set Graves": "Set Graves",
     "Click": "Click",
     "Set Freezed Plants": "Set Freezed Plants",
-    "Extra": "Extra",
     "Spawn Grave Zombies": "Spawn Grave Zombies"
   }
 }

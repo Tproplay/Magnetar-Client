@@ -1,0 +1,9 @@
+{
+  "Name": "Sandbox UI",
+  "Description": "Replaces the current in-game level UI with I Zombie UI. Restores the normal UI when disabled.",
+  "Search Hints": "sandboxui izeui eveui zombieseeds selectzombie evetoolbar levelui uireplacer sandboxmode editorui customui uimod interfacechanger zombieseedbank sandboxinterface izeinterface eveinterface uioverride levelinterface uimanager custominterface",
+  "settings": {
+    "General": "General",
+    "Set Board isIZ flag (Enables zombie placement)": "Set Board isIZ flag (Enables zombie placement)"
+  }
+}

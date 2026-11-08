@@ -68,7 +68,10 @@ public class SandboxUI : Module
 
     public override void OnDisable()
     {
-        RevertCustomUI();
+        if (customUIApplied)
+        {
+            RevertCustomUI();
+        }
     }
 
     public override void OnUpdateActive()
@@ -81,6 +84,12 @@ public class SandboxUI : Module
                 DestroySpawnedUI();
                 ResetState();
             }
+            return;
+        }
+
+        // Do not touch native I-Zombie levels
+        if (!customUIApplied && (Board.Instance.boardTag.isIZ || InGameUI_IZ.Instance != null))
+        {
             return;
         }
 
@@ -105,14 +114,23 @@ public class SandboxUI : Module
     {
         if (Board.Instance == null) return;
 
+        // If already in a native I-Zombie level, do not override or touch anything
+        if (!customUIApplied && (Board.Instance.boardTag.isIZ || InGameUI_IZ.Instance != null))
+        {
+            return;
+        }
+
+        // Ensure default InGameUI exists before attempting replacement
+        if (InGameUI.Instance == null || InGameUI.Instance.gameObject == null)
+        {
+            return;
+        }
+
         // Clean up any existing instances first
         DestroySpawnedUI();
 
         // 1. Hide the original InGameUI
-        if (InGameUI.Instance != null && InGameUI.Instance.gameObject != null)
-        {
-            InGameUI.Instance.gameObject.SetActive(false);
-        }
+        InGameUI.Instance.gameObject.SetActive(false);
 
         // 2. Set Board Tag for IZE mode if needed
         if (EnableIZTag.Value)
@@ -186,30 +204,17 @@ public class SandboxUI : Module
             spawnedSubUI = null;
         }
 
-        // Clean up any lingering or orphaned instances
-        var lingeringMain = UnityEngine.Object.FindObjectsOfType<InGameUI_IZ>();
-        foreach (var ui in lingeringMain)
-        {
-            if (ui != null && ui.gameObject != null)
-            {
-                UnityEngine.Object.Destroy(ui.gameObject);
-            }
-        }
-
-        var lingeringSub = UnityEngine.Object.FindObjectsOfType<IZBottomMenu>();
-        foreach (var ui in lingeringSub)
-        {
-            if (ui != null && ui.gameObject != null)
-            {
-                UnityEngine.Object.Destroy(ui.gameObject);
-            }
-        }
-
         customUIApplied = false;
     }
 
     public void RevertCustomUI()
     {
+        if (!customUIApplied)
+        {
+            ResetState();
+            return;
+        }
+
         // 1. Destroy spawned custom menus
         DestroySpawnedUI();
 

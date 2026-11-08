@@ -230,6 +230,7 @@ public abstract class BaseMultiSelectSetting : Setting
                 DrawSetting.activeMultiSelect = this;
                 DrawSetting.multiSelectSearchQuery = "";
                 DrawSetting.manualScrollY = 0f;
+                DrawSetting.targetScrollY = 0f;
             }
             e.Use();
         }

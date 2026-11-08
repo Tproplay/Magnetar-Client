@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 #if MELONLOADER || RELEASE_MELON
@@ -20,7 +20,7 @@ public class BanPlant : Module
 
     // Mod Data
     public static BanPlant instance;
-    public MultiSelectSetting selectedPlants;
+    public EntitySelectSetting selectedPlants;
 
     // Fast O(1) Cache for active card instances
     public static readonly HashSet<CardUI> ActiveCards = new();
@@ -31,7 +31,7 @@ public class BanPlant : Module
 
         CreateCategory("General");
 
-        selectedPlants = new MultiSelectSetting("Entities", typeof(PlantType))
+        selectedPlants = new EntitySelectSetting("Entities", EntitySelectSetting.Plant)
         {
             CustomNames = TranslateEnum(typeof(PlantType)),
             Blacklist = Banned.PlantTypeBanned,

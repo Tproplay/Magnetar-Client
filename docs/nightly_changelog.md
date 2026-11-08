@@ -11,6 +11,8 @@
 - Added Outline in Hud Elements
 - Added more HUD Elements: Active Bullets, Closest Zombie Threat, Sun Production Rate, Plant Capacity, Total Fusions, Freeze Timer, Lawn Mowers Remaining.
 - Added Seperate Color for HUD Element Background
+- Added a Entity Select Setting
+- New Module: `Right Click Menu`
 
 ## Bugfixes
 
@@ -18,3 +20,4 @@
 - Vanilla Mode didn't reenabled the modules after a game restart
 - Multiselect Setting Shift drag caused the first option to get toggled twice
 - CPU and GPU Names weren't affected by rbg rainbow color
+- Opening a MultiSelect or EntitySelect setting after scrolling another to the bottom caused the list to appear empty until scrolled

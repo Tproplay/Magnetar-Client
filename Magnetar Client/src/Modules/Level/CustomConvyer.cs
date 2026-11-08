@@ -34,7 +34,7 @@ public class CustomConveyor : Module
 
     public static CustomConveyor instance;
 
-    public MultiSelectSetting ConveyorPlantsSetting;
+    public EntitySelectSetting ConveyorPlantsSetting;
     public BoolSetting ForceShowConveyer;
 
     private bool wasSeedBankenable;
@@ -51,7 +51,7 @@ public class CustomConveyor : Module
             OnValueChanged = ForceShowConveyerCall,
         };
 
-        ConveyorPlantsSetting = new MultiSelectSetting("Allowed Plants", typeof(PlantType))
+        ConveyorPlantsSetting = new EntitySelectSetting("Allowed Plants", EntitySelectSetting.Plant)
         {
             CustomNames = TranslateEnum(typeof(PlantType)),
             Blacklist = Banned.PlantTypeBanned,

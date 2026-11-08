@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.UI.Setting;
+using Magnetar_Client.UI.Setting;
 using System.Linq;
 using HarmonyLib;
 
@@ -26,7 +26,7 @@ public class ChangeBullet : Module
 
     public static ChangeBullet instance;
 
-    public MultiSelectSetting selectBulletsSetting;
+    public EntitySelectSetting selectBulletsSetting;
 
 
     public ChangeBullet()
@@ -35,7 +35,7 @@ public class ChangeBullet : Module
 
         CreateCategory("General");
 
-        selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
+        selectBulletsSetting = new EntitySelectSetting("Allowed bullets", EntitySelectSetting.Bullet)
         {
             CustomNames = TranslateEnum(typeof(BulletType)),
         };

@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using System.Linq;
 #if MELONLOADER || RELEASE_MELON
@@ -24,10 +24,10 @@ public class GiftBoxHack : Module
     public static GiftBoxHack instance;
 
     public BoolSetting ModifyNormalGiftbox;
-    public MultiSelectSetting NormalGiftboxAllowedPlants;
+    public EntitySelectSetting NormalGiftboxAllowedPlants;
 
     public BoolSetting ModifySnowGiftbox;
-    public MultiSelectSetting SnowGiftboxAllowedPlants;
+    public EntitySelectSetting SnowGiftboxAllowedPlants;
 
     //public BoolSetting ModifyZombieGiftbox;
     //public MultiSelectSetting ZombieGiftboxAllowedZombies;
@@ -38,7 +38,7 @@ public class GiftBoxHack : Module
         CreateCategory("Giftbox");
 
         ModifyNormalGiftbox = new BoolSetting("Modify Normal Giftbox",false);
-        NormalGiftboxAllowedPlants = new MultiSelectSetting("Allowed Plants", typeof(PlantType))
+        NormalGiftboxAllowedPlants = new EntitySelectSetting("Allowed Plants", EntitySelectSetting.Plant)
         {
             CustomNames = TranslateEnum(typeof(PlantType)),
             Blacklist = Banned.PlantTypeBanned,
@@ -50,7 +50,7 @@ public class GiftBoxHack : Module
         CreateCategory("Snow Giftbox");
 
         ModifySnowGiftbox = new BoolSetting("Modify Snow Giftbox", false);
-        SnowGiftboxAllowedPlants = new MultiSelectSetting("Allowed Plants", typeof(PlantType))
+        SnowGiftboxAllowedPlants = new EntitySelectSetting("Allowed Plants", EntitySelectSetting.Plant)
         {
             CustomNames = TranslateEnum(typeof(PlantType)),
             Blacklist = Banned.PlantTypeBanned,
@@ -62,7 +62,7 @@ public class GiftBoxHack : Module
         //CreateCategory("Zombie Giftbox");
 
         //ModifyZombieGiftbox = new BoolSetting("Modify Zombie Giftbox", false);
-        //ZombieGiftboxAllowedZombies = new MultiSelectSetting("Allowed Zombies", typeof(ZombieType));
+        //ZombieGiftboxAllowedZombies = new EntitySelectSetting("Allowed Zombies", EntitySelectSetting.Zombie);
 
         //AddSettings(ModifyZombieGiftbox, ZombieGiftboxAllowedZombies);
         //EndCategory();

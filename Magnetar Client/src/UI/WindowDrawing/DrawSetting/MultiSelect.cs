@@ -46,6 +46,7 @@ public static partial class DrawSetting
     private static bool isShiftDragging;
     private static bool dragTargetState;
     private static readonly HashSet<object> draggedItemsSession = new();
+    private static BaseMultiSelectSetting _lastActiveMultiSelect = null;
     private static readonly List<(object Key, string DisplayName)> _cachedFilteredItems = new();
     private static object _cachedMultiSelectRef = null;
     private static string _cachedMultiSelectQuery = null;
@@ -80,6 +81,21 @@ public static partial class DrawSetting
     public static void DrawMultiSelectWindow(Rect multiSelectWindowRect, BaseMultiSelectSetting activeMultiSelect, Action onClose = null)
     {
         if (activeMultiSelect == null) return;
+
+        if (_lastActiveMultiSelect != activeMultiSelect)
+        {
+            _lastActiveMultiSelect = activeMultiSelect;
+            manualScrollY = 0f;
+            targetScrollY = 0f;
+            _scrollVelocity = 0f;
+            multiSelectSearchQuery = "";
+        }
+
+        if (activeMultiSelect is EntitySelectSetting entitySelect)
+        {
+            DrawEntitySelectWindow(multiSelectWindowRect, entitySelect, onClose);
+            return;
+        }
 
         float maxAllowedHeight = ClientConfig.NativeHeight * 0.8f;
         if (multiSelectWindowRect.height > maxAllowedHeight)
@@ -227,6 +243,12 @@ public static partial class DrawSetting
         float contentStartY = searchY + searchHeight + spacing;
         float viewHeight = multiSelectWindowRect.height - contentStartY - GUIManager.S(8f);
         float maxScrollDist = Mathf.Max(0f, totalContentHeight - viewHeight);
+        targetScrollY = Mathf.Clamp(targetScrollY, 0f, maxScrollDist);
+        manualScrollY = Mathf.Clamp(manualScrollY, 0f, maxScrollDist);
+        if (maxScrollDist <= 0f)
+        {
+            _scrollVelocity = 0f;
+        }
 
         // Apply Inertia & Momentum Cooldown
         if (!_isListSwiping && ActiveSliderId != sliderId && Mathf.Abs(_scrollVelocity) > 0.5f)

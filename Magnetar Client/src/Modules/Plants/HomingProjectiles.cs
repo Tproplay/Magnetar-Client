@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -22,7 +22,7 @@ public class HomingProjectiles : Module
     // Mod Data
 
     public static HomingProjectiles instance;
-    public MultiSelectSetting selectedBulletsSetting;
+    public EntitySelectSetting selectedBulletsSetting;
 
     public HomingProjectiles()
     {
@@ -30,7 +30,7 @@ public class HomingProjectiles : Module
 
         CreateCategory("General");
 
-        selectedBulletsSetting = new MultiSelectSetting("Projectiles", typeof(BulletType))
+        selectedBulletsSetting = new EntitySelectSetting("Projectiles", EntitySelectSetting.Bullet)
         {
             CustomNames = TranslateEnum(typeof(BulletType)),
         };

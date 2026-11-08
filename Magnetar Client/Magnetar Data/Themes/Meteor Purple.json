@@ -106,6 +106,30 @@
       "active": "#8B0FFFFF"
     }
   },
+  "EntitySelectOff": {
+    "text": {
+      "normal": "#8B949EFF",
+      "hover": "#FFFFFFFF",
+      "active": "#FFFFFFFF"
+    },
+    "background color": {
+      "normal": "#02010271",
+      "hover": "#0000009d",
+      "active": "#0000009d"
+    }
+  },
+  "EntitySelectOn": {
+    "text": {
+      "normal": "#000000FF",
+      "hover": "#000000FF",
+      "active": "#000000FF"
+    },
+    "background color": {
+      "normal": "#8B0FFFFF",
+      "hover": "#992cff",
+      "active": "#8B0FFFFF"
+    }
+  },
   "ButtonSetting": {
     "text": {
       "normal": "#FFFFFFFF",

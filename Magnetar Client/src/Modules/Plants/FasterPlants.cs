@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 
@@ -26,7 +26,7 @@ public class FasterPlants : Module
     // Mod Data
     public static FasterPlants instance;
 
-    public MultiSelectSetting PlantsSelectedSetting;
+    public EntitySelectSetting PlantsSelectedSetting;
     public FloatSetting AttackIntervalMultiplierSetting;
     public FloatSetting AnimationSpeedMultiplierSetting;
     public FloatSetting ProduceSpeedMultiplierSetting;
@@ -40,7 +40,7 @@ public class FasterPlants : Module
 
         CreateCategory("General");
 
-        PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
+        PlantsSelectedSetting = new EntitySelectSetting("Entities", EntitySelectSetting.Plant)
         {
             Blacklist = Banned.PlantTypeBanned,
             CustomNames = TranslateEnum(typeof(PlantType))
@@ -63,7 +63,7 @@ public class FasterPlants : Module
         IndividualPlantsSectionSetting = new SectionSetting("Individual Plant",
             (index) => new List<Setting>
             {
-                new MultiSelectSetting("Entities", typeof(PlantType))
+                new EntitySelectSetting("Entities", EntitySelectSetting.Plant)
                 {
                     Blacklist = Banned.PlantTypeBanned,
                     CustomNames = TranslateEnum(typeof(PlantType))

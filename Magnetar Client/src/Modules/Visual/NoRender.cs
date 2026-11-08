@@ -34,7 +34,7 @@ public class NoRender : Module
     public MultiSelectSetting ParticlesSetting;
     public MultiSelectSetting ParticleTypeSetting;
     public MultiSelectSetting GameObjectsSetting;
-    public MultiSelectSetting BulletSetting;
+    public EntitySelectSetting BulletSetting;
     public MultiSelectSetting EffectSetting;
     public MultiSelectSetting OtherSetting;
 
@@ -127,7 +127,7 @@ public class NoRender : Module
             Width = 90,
         };
 
-        BulletSetting = new MultiSelectSetting("Bullets", typeof(BulletType))
+        BulletSetting = new EntitySelectSetting("Bullets", EntitySelectSetting.Bullet)
         {
             CustomNames = TranslateEnum(typeof(BulletType)),
             OnSelectionChanged = (bulletTypeId, selected) =>

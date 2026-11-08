@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 
 
@@ -25,7 +25,7 @@ public class KeepShooting : Module
 
     public static KeepShooting instance;
 
-    public MultiSelectSetting PlantsSelectedSetting;
+    public EntitySelectSetting PlantsSelectedSetting;
 
     public KeepShooting()
     {
@@ -33,7 +33,7 @@ public class KeepShooting : Module
 
         CreateCategory("General");
 
-        PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
+        PlantsSelectedSetting = new EntitySelectSetting("Entities", EntitySelectSetting.Plant)
         {
             Blacklist = Banned.PlantTypeBanned,
             CustomNames = TranslateEnum(typeof(PlantType))

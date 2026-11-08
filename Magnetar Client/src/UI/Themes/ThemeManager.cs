@@ -40,6 +40,8 @@ public static class ThemeManager
     public static Color NefNodeColor => ThemeData.NefNodeColor;
     public static Color SettingOnColor => ThemeData.SettingOnColor;
     public static Color SettingOffColor => ThemeData.SettingOffColor;
+    public static Color EntitySelectOnColor => ThemeData.EntitySelectOnColor;
+    public static Color EntitySelectOffColor => ThemeData.EntitySelectOffColor;
     public static Color SeparatorColor => ThemeData.SeparatorColor;
     public static Color RichTextColor => ThemeData.RichTextColor;
 
@@ -63,6 +65,8 @@ public static class ThemeManager
     public static GUIStyle SettingAuthorStyle { get; private set; }
     public static GUIStyle SettingOff { get; private set; }
     public static GUIStyle SettingOn { get; private set; }
+    public static GUIStyle EntitySelectOff { get; private set; }
+    public static GUIStyle EntitySelectOn { get; private set; }
     public static GUIStyle SettingLabelStyle { get; private set; }
     public static GUIStyle ButtonSettingStyle { get; private set; }
     public static GUIStyle ResetButtonStyle { get; private set; }
@@ -331,6 +335,8 @@ public static class ThemeManager
         // 4. Setting Toggles
         ApplyElement(SettingOff, theme.SettingOff, d.SettingOff);
         ApplyElement(SettingOn, theme.SettingOn, d.SettingOn);
+        ApplyElement(EntitySelectOff, theme.EntitySelectOff, d.EntitySelectOff ?? d.SettingOff);
+        ApplyElement(EntitySelectOn, theme.EntitySelectOn, d.EntitySelectOn ?? d.SettingOn);
 
         // 5. Action Buttons
         ApplyElement(ButtonSettingStyle, theme.ButtonSetting, d.ButtonSetting);
@@ -409,6 +415,8 @@ public static class ThemeManager
         ThemeData.NefNodeColor = ThemeData.ParseColor(theme.NEF?.NodeBackground, d.NEF.NodeBackground);
         ThemeData.SettingOnColor = catModOnBg.normal;
         ThemeData.SettingOffColor = catModOffBg.normal;
+        ThemeData.EntitySelectOnColor = ThemeData.ParseColor(theme.EntitySelectOn?.BackgroundColor?.Normal, d.EntitySelectOn?.BackgroundColor?.Normal ?? d.SettingOn.BackgroundColor.Normal);
+        ThemeData.EntitySelectOffColor = ThemeData.ParseColor(theme.EntitySelectOff?.BackgroundColor?.Normal, d.EntitySelectOff?.BackgroundColor?.Normal ?? d.SettingOff.BackgroundColor.Normal);
         ThemeData.SeparatorColor = ThemeData.ParseColor(theme.Misc?.Separator, d.Misc.Separator);
         ThemeData.RichTextColor = ThemeData.ParseColor(theme.Typography?.RichText, d.Typography.RichText);
 
@@ -441,6 +449,8 @@ public static class ThemeManager
         SettingsWndowStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
         SettingOff = new GUIStyle { alignment = TextAnchor.MiddleLeft };
         SettingOn = new GUIStyle { alignment = TextAnchor.MiddleLeft };
+        EntitySelectOff = new GUIStyle { alignment = TextAnchor.LowerCenter, wordWrap = false, clipping = TextClipping.Clip };
+        EntitySelectOn = new GUIStyle { alignment = TextAnchor.LowerCenter, wordWrap = false, clipping = TextClipping.Clip };
 
         ButtonSettingStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter };
         ResetButtonStyle = new GUIStyle { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
@@ -554,6 +564,10 @@ public static class ThemeManager
         HUDElementStyle.fontSize = Mathf.Max(1, Mathf.RoundToInt(HUDElementFontSize * elementScale));
 
         SetOffset(NEFNodeStyle.padding, S(NEFNodePaddingLR), S(NEFNodePaddingLR), S(NEFNodePaddingTop), S(NEFNodePaddingBottom));
+        EntitySelectOff.fontSize = S(10);
+        SetOffset(EntitySelectOff.padding, S(NEFNodePaddingLR), S(NEFNodePaddingLR), S(NEFNodePaddingTop), S(6));
+        EntitySelectOn.fontSize = S(10);
+        SetOffset(EntitySelectOn.padding, S(NEFNodePaddingLR), S(NEFNodePaddingLR), S(NEFNodePaddingTop), S(6));
 
         // Section Settings
         SectionGroupHeaderStyle.fontSize = S(SettingDescriptionFontSize);

@@ -26,7 +26,7 @@ public class BuffZombies : Module
 
     public static BuffZombies instance;
 
-    public MultiSelectSetting ZombieSelectedSetting;
+    public EntitySelectSetting ZombieSelectedSetting;
 
     public FloatSetting HpMultiplierSettig;
 
@@ -37,7 +37,7 @@ public class BuffZombies : Module
 
         CreateCategory("General");
 
-        ZombieSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
+        ZombieSelectedSetting = new EntitySelectSetting("Entities", EntitySelectSetting.Zombie)
         {
             CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,

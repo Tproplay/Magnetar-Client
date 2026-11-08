@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Magnetar_Client.UI.Setting;
 
 using static Magnetar_Client.GameData;
@@ -27,7 +27,7 @@ public class HypnotizeZombies : Module
 
     public static HypnotizeZombies instance;
 
-    public MultiSelectSetting ZombiesSelectedSetting;
+    public EntitySelectSetting ZombiesSelectedSetting;
 
     public readonly bool TurnOffAfterUse = true;
     public BoolSetting AutoTurnOff;
@@ -40,7 +40,7 @@ public class HypnotizeZombies : Module
 
         CreateCategory("General");
 
-        ZombiesSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
+        ZombiesSelectedSetting = new EntitySelectSetting("Entities", EntitySelectSetting.Zombie)
         {
             CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,

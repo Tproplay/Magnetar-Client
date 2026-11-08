@@ -200,6 +200,12 @@ public class ThemeDefinition
     [JsonProperty("ButtonSetting", NullValueHandling = NullValueHandling.Ignore)]
     public ElementStyleTheme ButtonSetting { get; set; }
 
+    [JsonProperty("EntitySelectOff", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme EntitySelectOff { get; set; }
+
+    [JsonProperty("EntitySelectOn", NullValueHandling = NullValueHandling.Ignore)]
+    public ElementStyleTheme EntitySelectOn { get; set; }
+
     [JsonProperty("ResetButton", NullValueHandling = NullValueHandling.Ignore)]
     public ElementStyleTheme ResetButton { get; set; }
 
@@ -245,6 +251,8 @@ public static class ThemeData
     public static Color NefNodeColor { get; set; }
     public static Color SettingOnColor { get; set; }
     public static Color SettingOffColor { get; set; }
+    public static Color EntitySelectOnColor { get; set; }
+    public static Color EntitySelectOffColor { get; set; }
     public static Color SeparatorColor { get; set; }
     public static Color RichTextColor { get; set; }
 
@@ -283,6 +291,14 @@ public static class ThemeData
             new ColorState("#242424DC", "#333333FF", "#1C1C1CFF")
         ),
         SettingOn = new ElementStyleTheme(
+            new ColorState("#000000FF", "#000000FF", "#000000FF"),
+            new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
+        ),
+        EntitySelectOff = new ElementStyleTheme(
+            new ColorState("#AEAEAEFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#242424DC", "#333333FF", "#1C1C1CFF")
+        ),
+        EntitySelectOn = new ElementStyleTheme(
             new ColorState("#000000FF", "#000000FF", "#000000FF"),
             new ColorState("#FF3D3DFF", "#F03333FF", "#F03333FF")
         ),
@@ -392,6 +408,14 @@ public static class ThemeData
             new ColorState("#02010271", "#0000009d", "#0000009d")
         ),
         SettingOn = new ElementStyleTheme(
+            new ColorState("#000000FF", "#000000FF", "#000000FF"),
+            new ColorState("#8B0FFFFF", "#992cff", "#8B0FFFFF")
+        ),
+        EntitySelectOff = new ElementStyleTheme(
+            new ColorState("#8B949EFF", "#FFFFFFFF", "#FFFFFFFF"),
+            new ColorState("#02010271", "#0000009d", "#0000009d")
+        ),
+        EntitySelectOn = new ElementStyleTheme(
             new ColorState("#000000FF", "#000000FF", "#000000FF"),
             new ColorState("#8B0FFFFF", "#992cff", "#8B0FFFFF")
         ),

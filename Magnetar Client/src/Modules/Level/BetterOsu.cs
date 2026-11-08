@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 
 using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
@@ -40,7 +40,7 @@ public class BetterOsu : Module
     public IntSetting BulletsDamageIncreaseSetting;
     public BoolSetting RandomBulletSetting;
 
-    public MultiSelectSetting selectBulletsSetting;
+    public EntitySelectSetting selectBulletsSetting;
 
 #if MELONLOADER || BEPINEX
     BoolSetting DebugMode;
@@ -65,12 +65,12 @@ public class BetterOsu : Module
 
         RandomBulletSetting = new BoolSetting("Random Bullets", false);
 
-        selectBulletsSetting = new MultiSelectSetting("Allowed bullets", typeof(BulletType))
+        selectBulletsSetting = new EntitySelectSetting("Allowed bullets", EntitySelectSetting.Bullet)
         {
             CustomNames = TranslateEnum(typeof(BulletType))
         };
 
-        selectBulletsSetting.Options.Keys.ToList().ForEach(selectBulletsSetting.Select);
+        selectBulletsSetting.SelectAll(setDefault: true);
 
 #if MELONLOADER || BEPINEX
         DebugMode = new BoolSetting("DebugMode", false);

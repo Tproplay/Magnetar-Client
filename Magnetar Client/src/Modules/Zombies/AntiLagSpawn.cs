@@ -1,4 +1,4 @@
-﻿#if MELONLOADER || RELEASE_MELON
+#if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
 using UnityEngine;
@@ -32,7 +32,7 @@ public class AntiLagSpawns : Module
     public static int lastFrameCount;
     public static int spawnsThisFrame;
 
-    public MultiSelectSetting UnaffectedZombies;
+    public EntitySelectSetting UnaffectedZombies;
 
     public AntiLagSpawns()
     {
@@ -43,7 +43,7 @@ public class AntiLagSpawns : Module
         FrameDelaySetting = new IntSetting("Frames Between Spawns", 1, 10, 1);
         AddSettings(FrameDelaySetting);
 
-        UnaffectedZombies = new MultiSelectSetting("Unaffected Entities", typeof(ZombieType))
+        UnaffectedZombies = new EntitySelectSetting("Unaffected Entities", EntitySelectSetting.Zombie)
         {
             CustomNames = TranslateEnum(typeof(ZombieType)),
             SelectedValues = new HashSet<int>

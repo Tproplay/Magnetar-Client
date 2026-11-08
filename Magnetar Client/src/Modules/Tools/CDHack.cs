@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
 
@@ -294,8 +294,8 @@ public class CustomCDCards : Module
 
     public FloatSetting CustomCDSetting;
 
-    public MultiSelectSetting selectedSeeds;
-    public MultiSelectSetting selectedSeeds_dup;
+    public EntitySelectSetting selectedSeeds;
+    public EntitySelectSetting selectedSeeds_dup;
 
     public CustomCDCards()
     {
@@ -303,7 +303,7 @@ public class CustomCDCards : Module
 
         CreateCategory("General");
 
-        selectedSeeds = new MultiSelectSetting("Cards", typeof(PlantType))
+        selectedSeeds = new EntitySelectSetting("Cards", EntitySelectSetting.Plant)
         {
             Blacklist = Banned.PlantTypeBanned,
             CustomNames = TranslateEnum(typeof(PlantType))
@@ -311,7 +311,7 @@ public class CustomCDCards : Module
 
         selectedSeeds.SelectAll();
 
-        selectedSeeds_dup = new MultiSelectSetting("Duplicate Cards", typeof(PlantType))
+        selectedSeeds_dup = new EntitySelectSetting("Duplicate Cards", EntitySelectSetting.Plant)
         {
             Blacklist = Banned.PlantTypeBanned,
             CustomNames = TranslateEnum(typeof(PlantType)),

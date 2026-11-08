@@ -1,4 +1,4 @@
-﻿using Il2CppSystem.IO;
+using Il2CppSystem.IO;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,6 +23,7 @@ public static partial class ResourceManager
     internal static void Init()
     {
         ServiceRegistry.Register(new ResourceManagerService());
+        GameData.Actions.OnBoardInstantiated += (_) => WarmUpAllEntityTextures();
     }
 
     /// <summary>
@@ -168,6 +169,7 @@ public static partial class ResourceManager
         public void OnWarmUp()
         {
             InitFont();
+            WarmUpAllEntityTextures();
         }
     }
 }

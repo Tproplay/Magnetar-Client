@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 
 using static Magnetar_Client.GameData;
@@ -36,8 +36,8 @@ public class BetterHealthDisplay : Module
     public BoolSetting ShowMaxHealth;
     public BoolSetting AutoEnable_ShowHp_Plant;
     public BoolSetting AutoEnable_ShowHp_Zombie;
-    public MultiSelectSetting SelectedPlants;
-    public MultiSelectSetting SelectedZombies;
+    public EntitySelectSetting SelectedPlants;
+    public EntitySelectSetting SelectedZombies;
     public BoolSetting SumHpSetting;
 
     public BoolSetting ShowControlledPlant;
@@ -65,7 +65,7 @@ public class BetterHealthDisplay : Module
             OnValueChanged = UpdateTexts
         };
 
-        SelectedPlants = new MultiSelectSetting("Whitelist Plants", typeof(PlantType))
+        SelectedPlants = new EntitySelectSetting("Whitelist Plants", EntitySelectSetting.Plant)
         {
             CustomNames = TranslateEnum(typeof(PlantType)),
             Blacklist = Banned.PlantTypeBanned,
@@ -78,7 +78,7 @@ public class BetterHealthDisplay : Module
 
         CreateCategory("Zombies");
 
-        SelectedZombies = new MultiSelectSetting("Whitelist Zombies", typeof(ZombieType))
+        SelectedZombies = new EntitySelectSetting("Whitelist Zombies", EntitySelectSetting.Zombie)
         {
             CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,

@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ public class SmallerProjectiles : Module
     public static SmallerProjectiles instance;
 
     // Mod Data
-    public MultiSelectSetting BulletTypeSetting;
+    public EntitySelectSetting BulletTypeSetting;
     public FloatSetting ScaleSetting;
 
     public SmallerProjectiles()
@@ -35,7 +35,7 @@ public class SmallerProjectiles : Module
 
         CreateCategory("General");
 
-        BulletTypeSetting = new MultiSelectSetting("Bullet Types", typeof(BulletType))
+        BulletTypeSetting = new EntitySelectSetting("Bullet Types", EntitySelectSetting.Bullet)
         {
             CustomNames = TranslateEnum(typeof(BulletType)),
         };

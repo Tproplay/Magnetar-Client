@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ public class Volley : Module
 
     public static Volley instance;
     public IntSetting BulletMultiplier;
-    public MultiSelectSetting selectedBulletsSetting;
+    public EntitySelectSetting selectedBulletsSetting;
 
     public BoolSetting AlsoAffectZombies;
 
@@ -41,7 +41,7 @@ public class Volley : Module
         BulletMultiplier = new IntSetting("Bullet multiplier", 1, 10, 2, 1);
         AlsoAffectZombies = new BoolSetting("Affect Zombie projectiles", false);
 
-        selectedBulletsSetting = new MultiSelectSetting("Projectiles", typeof(BulletType))
+        selectedBulletsSetting = new EntitySelectSetting("Projectiles", EntitySelectSetting.Bullet)
         {
             CustomNames = TranslateEnum(typeof(BulletType)),
         };

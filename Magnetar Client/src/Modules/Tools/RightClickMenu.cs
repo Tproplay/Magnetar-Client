@@ -12,8 +12,11 @@ namespace Magnetar_Client.Modules;
 public class RightClickMenu : Module
 {
     public override string Name { get; set; } = "Right Click Menu";
-    public override string Description { get; set; } = "Enables the in-game right-click context menu on plants for quick buffs, actions, and utilities.";
-    public override string SearchHints { get; set; } = "rightclick right click menu rightclickmenu contextmenu plantmenu devmenu rightmenu core.rightmenu";
+    public override string Description { get; set; } = "Enables the in-game right-click context menu on plants for quick buffs," +
+        " actions, and utilities.";
+    public override string SearchHints { get; set; } = "rightclickmenu contextmenu plantmenu rightclickoptions plantactions quickbuffs" +
+        " plantutilities interactionmenu rightclickaction contextualmenu plantmanager actionmenu mousemenu contextactions quickmenu" +
+        " plantoptions utilitymenu rightclicktools interactivemenu plantconfig"; 
     public override ModuleCategory Category { get; set; } = ModuleCategory.Tools;
 
     public static RightClickMenu instance;

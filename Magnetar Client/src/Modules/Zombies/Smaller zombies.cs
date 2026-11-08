@@ -21,7 +21,7 @@ public class SmallerZombies : Module
     public static SmallerZombies instance;
 
     public FloatSetting sizeMultiplier;
-    public MultiSelectSetting selectedZombies;
+    public EntitySelectSetting selectedZombies;
 
     public SmallerZombies()
     {
@@ -31,7 +31,7 @@ public class SmallerZombies : Module
 
         sizeMultiplier = new FloatSetting("Scale multiplier", 0.5f, 2f, 0.75f, 3, 0f);
 
-        selectedZombies = new MultiSelectSetting("Entities", typeof(ZombieType))
+        selectedZombies = new EntitySelectSetting("Entities", EntitySelectSetting.Zombie)
         {
             CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,

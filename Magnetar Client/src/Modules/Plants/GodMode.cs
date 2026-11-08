@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 
 
@@ -21,7 +21,7 @@ public class GodMode : Module
 
     public static GodMode instance;
 
-    public MultiSelectSetting PlantsSelectedSetting;
+    public EntitySelectSetting PlantsSelectedSetting;
 
     public BoolSetting ImmuneToDamage;
     public BoolSetting ImmuneToVehicle;
@@ -34,7 +34,7 @@ public class GodMode : Module
 
         CreateCategory("General");
 
-        PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
+        PlantsSelectedSetting = new EntitySelectSetting("Entities", EntitySelectSetting.Plant)
         {
             Blacklist = Banned.PlantTypeBanned,
             CustomNames = TranslateEnum(typeof(PlantType))

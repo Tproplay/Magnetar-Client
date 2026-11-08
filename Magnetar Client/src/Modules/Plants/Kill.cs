@@ -1,4 +1,4 @@
-﻿#if MELONLOADER || RELEASE_MELON
+#if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 
 #elif BEPINEX || RELEASE_BEPINEX
@@ -27,7 +27,7 @@ public class KillPlants : Module
 
     public static KillPlants instance;
 
-    public MultiSelectSetting PlantsSelectedSetting;
+    public EntitySelectSetting PlantsSelectedSetting;
 
     public bool TurnOffAfterUse = true;
     public BoolSetting AutoTurnOff;
@@ -40,7 +40,7 @@ public class KillPlants : Module
 
         CreateCategory("General");
 
-        PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
+        PlantsSelectedSetting = new EntitySelectSetting("Entities", EntitySelectSetting.Plant)
         {
             Blacklist = Banned.PlantTypeBanned,
             CustomNames = TranslateEnum(typeof(PlantType))

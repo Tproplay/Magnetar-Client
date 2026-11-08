@@ -11,6 +11,7 @@ public static class MultiSelectWindowDrawer
 {
     public static Rect WindowRect;
     public static BaseMultiSelectSetting ActiveMultiSelect { get; set; }
+    private static BaseMultiSelectSetting _lastActiveMultiSelect;
 
     private static GUI.WindowFunction _cachedMultiSelectDelegate;
     private static GUI.WindowFunction MultiSelectDelegate => _cachedMultiSelectDelegate ??=
@@ -34,8 +35,37 @@ ModuleManager
 
         if (currentAlpha <= 0.001f) return;
 
-        float targetW = Mathf.Min(ModuleManager.MultiSelectWindowWidth, ClientConfig.NativeWidth * 0.95f);
-        float targetH = Mathf.Min(ModuleManager.MultiSelectWindowHeight, ClientConfig.NativeHeight * 0.8f);
+        if (_lastActiveMultiSelect != ActiveMultiSelect)
+        {
+            _lastActiveMultiSelect = ActiveMultiSelect;
+            manualScrollY = 0f;
+            targetScrollY = 0f;
+            multiSelectSearchQuery = "";
+            ModuleManager.resetWindowPos = true;
+        }
+
+        bool isEntitySelect = ActiveMultiSelect is EntitySelectSetting;
+        float targetW;
+        float targetH;
+
+        if (isEntitySelect)
+        {
+#if ANDROID
+            float margin = GUIManager.S(20f);
+#else
+            float margin = GUIManager.S(50f);
+#endif
+            float blockUnit = GUIManager.S(160f) + GUIManager.S(8f);
+            float baseW = Mathf.Min(ClientConfig.NativeWidth - (margin * 2f), ClientConfig.NativeWidth * 0.94f);
+            float baseH = Mathf.Min(ClientConfig.NativeHeight - (margin * 2f), ClientConfig.NativeHeight * 0.90f);
+            targetW = Mathf.Max(GUIManager.S(360f), baseW - (blockUnit * 2f));
+            targetH = Mathf.Max(GUIManager.S(260f), baseH - (blockUnit * 0.5f));
+        }
+        else
+        {
+            targetW = Mathf.Min(ModuleManager.MultiSelectWindowWidth, ClientConfig.NativeWidth * 0.95f);
+            targetH = Mathf.Min(ModuleManager.MultiSelectWindowHeight, ClientConfig.NativeHeight * 0.8f);
+        }
 
         if (ModuleManager.resetWindowPos)
         {
@@ -168,12 +198,14 @@ ModuleManager
                 else
                 {
                     ActiveMultiSelect = set;
+                    ModuleManager.resetWindowPos = true;
                     ModuleManager.CurrentWindow = ModuleManager.WindowType.SelectionGUI;
                     AnimationHandler.SwitchView(ModuleManager.Group, ModuleManager.WindowType.SelectionGUI.ToString());
                 }
 
                 multiSelectSearchQuery = "";
                 manualScrollY = 0f;
+                targetScrollY = 0f;
             }
             e.Use();
         }

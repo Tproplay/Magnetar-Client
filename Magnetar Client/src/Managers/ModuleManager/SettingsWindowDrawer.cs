@@ -508,6 +508,10 @@ internal static class SettingsWindowDrawer
         multiSet.OnWindowOpen = () =>
         {
             MultiSelectWindowDrawer.ActiveMultiSelect = multiSet;
+            DrawSetting.manualScrollY = 0f;
+            DrawSetting.targetScrollY = 0f;
+            DrawSetting.multiSelectSearchQuery = "";
+            ModuleManager.resetWindowPos = true;
             ModuleManager.CurrentWindow = ModuleManager.WindowType.SelectionGUI;
             AnimationHandler.SwitchView(ModuleManager.Group, ModuleManager.CurrentWindow.ToString());
         };

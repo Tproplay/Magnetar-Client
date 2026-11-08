@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using System;
 using System.Collections.Generic;
@@ -27,7 +27,7 @@ public class FasterZombies : Module
 
     public static FasterZombies instance;
 
-    public MultiSelectSetting ZombieSelectedSetting;
+    public EntitySelectSetting ZombieSelectedSetting;
     public FloatSetting theSpeedSetting;
     public override bool Active { get; set; }
 
@@ -39,7 +39,7 @@ public class FasterZombies : Module
 
         CreateCategory("General");
 
-        ZombieSelectedSetting = new MultiSelectSetting("Entities", typeof(ZombieType))
+        ZombieSelectedSetting = new EntitySelectSetting("Entities", EntitySelectSetting.Zombie)
         {
             CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Magnetar_Client.UI.Setting;
 using UnityEngine;
 
@@ -24,7 +24,7 @@ public class SmallerPlants : Module
     public static SmallerPlants instance;
 
     public FloatSetting plantSize;
-    public MultiSelectSetting PlantsSelectedSetting;
+    public EntitySelectSetting PlantsSelectedSetting;
 
     public LabelSetting AdvancedLabel;
     public SectionSetting IndividualPlantsSectionSetting;
@@ -37,7 +37,7 @@ public class SmallerPlants : Module
 
         plantSize = new FloatSetting("Scale multiplier", 0.5f, 2f, 0.75f, 3, 0f);
 
-        PlantsSelectedSetting = new MultiSelectSetting("Entities", typeof(PlantType))
+        PlantsSelectedSetting = new EntitySelectSetting("Entities", EntitySelectSetting.Plant)
         {
             Blacklist = Banned.PlantTypeBanned,
             CustomNames = TranslateEnum(typeof(PlantType))
@@ -55,7 +55,7 @@ public class SmallerPlants : Module
         IndividualPlantsSectionSetting = new SectionSetting("Individual Plant",
             (index) => new List<Setting>
             {
-                new MultiSelectSetting("Entities", typeof(PlantType))
+                new EntitySelectSetting("Entities", EntitySelectSetting.Plant)
                 {
                     Blacklist = Banned.PlantTypeBanned,
                     CustomNames = TranslateEnum(typeof(PlantType))

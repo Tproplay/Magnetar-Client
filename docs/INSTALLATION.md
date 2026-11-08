@@ -100,9 +100,8 @@ When downloading releases from [Releases](https://github.com/Tproplay/Magnetar-C
 │       │   └── Themes/
 │       ├── DiscordRPC.dll
 │       ├── Magnetar Client.dll
+│       ├── SherkeyXD.BepInEx-Sounds-Loader.dll <-- (Included in FULL pack)
 │       └── SimpleSpawner.Bepinex.dll <-- (Included in FULL pack)
-├── Mods/
-│   └── SherkeyXD.BepInEx-Sounds-Loader.dll <-- (Included in FULL pack)
 ├── PlantsVsZombiesRH.exe
 └── winhttp.dll
 ```
@@ -162,7 +161,7 @@ Located inside `Audio Addon/` in `MagnetarClient-{version}-Addons.zip`:
   2. Copy `Addons/AudioAddon.dll` into `Mods/Magnetar Data/Addons/AudioAddon.dll`.
 
 * **For BepInEx (`Audio Addon/BepInEx/`):**
-  1. Copy `Mods/SherkeyXD.BepInEx-Sounds-Loader.dll` into your game's `Mods/` folder.
+  1. Copy `plugins/SherkeyXD.BepInEx-Sounds-Loader.dll` into your game's `BepInEx/plugins/` folder.
   2. Copy `Addons/AudioAddon.dll` into `BepInEx/plugins/Magnetar Data/Addons/AudioAddon.dll`.
 
 ---

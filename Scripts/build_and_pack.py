@@ -288,7 +288,7 @@ def package_bepinex(version: str):
 
         audio_bep_bin = ROOT_DIR / "Addons" / "Audio Addon" / "Project" / "bin" / "BepInEx"
         zf.write(audio_bep_bin / "AudioAddon.dll", "BepInEx/plugins/Magnetar Data/Addons/AudioAddon.dll")
-        zf.write(audio_bep_bin / "SherkeyXD.BepInEx-Sounds-Loader.dll", "Mods/SherkeyXD.BepInEx-Sounds-Loader.dll")
+        zf.write(audio_bep_bin / "SherkeyXD.BepInEx-Sounds-Loader.dll", "BepInEx/plugins/SherkeyXD.BepInEx-Sounds-Loader.dll")
 
         if (bin_bep / "Newtonsoft.Json.dll").exists():
             zf.write(bin_bep / "Newtonsoft.Json.dll", "BepInEx/core/Newtonsoft.Json.dll")
@@ -335,7 +335,7 @@ def package_android(version: str):
 
         audio_bep_bin = ROOT_DIR / "Addons" / "Audio Addon" / "Project" / "bin" / "BepInEx"
         zf.write(audio_bep_bin / "AudioAddon.dll", "plugins/Magnetar Data/Addons/AudioAddon.dll")
-        zf.write(audio_bep_bin / "SherkeyXD.BepInEx-Sounds-Loader.dll", "Mods/SherkeyXD.BepInEx-Sounds-Loader.dll")
+        zf.write(audio_bep_bin / "SherkeyXD.BepInEx-Sounds-Loader.dll", "plugins/SherkeyXD.BepInEx-Sounds-Loader.dll")
 
         if (bin_android / "Newtonsoft.Json.dll").exists():
             zf.write(bin_android / "Newtonsoft.Json.dll", "core/Newtonsoft.Json.dll")
@@ -411,7 +411,7 @@ def package_addons(version: str, model_path: Path):
         # Audio Addon BepInEx
         audio_bep_bin = audio_addon_root / "BepInEx"
         zf.write(audio_bep_bin / "AudioAddon.dll", "Audio Addon/BepInEx/Addons/AudioAddon.dll")
-        zf.write(audio_bep_bin / "SherkeyXD.BepInEx-Sounds-Loader.dll", "Audio Addon/BepInEx/Mods/SherkeyXD.BepInEx-Sounds-Loader.dll")
+        zf.write(audio_bep_bin / "SherkeyXD.BepInEx-Sounds-Loader.dll", "Audio Addon/BepInEx/plugins/SherkeyXD.BepInEx-Sounds-Loader.dll")
 
     log(f"Created: {addons_zip.name}")
 

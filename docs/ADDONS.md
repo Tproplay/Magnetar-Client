@@ -135,7 +135,7 @@ Audio Addon is included in all **FULL** release packages. For manual installatio
 2. Copy `Addons/AudioAddon.dll` → `[Game Folder]/Mods/Magnetar Data/Addons/`
 
 **BepInEx (`Audio Addon/BepInEx/`):**
-1. Copy `Mods/SherkeyXD.BepInEx-Sounds-Loader.dll` → `[Game Folder]/Mods/`
+1. Copy `plugins/SherkeyXD.BepInEx-Sounds-Loader.dll` → `[Game Folder]/BepInEx/plugins/`
 2. Copy `Addons/AudioAddon.dll` → `[Game Folder]/BepInEx/plugins/Magnetar Data/Addons/`
 
 > **Audio files not downloading?** See [FAQ — Manual Audio Download](FAQ.md#2-audio-addon-is-showing-an-error-or-fails-to-download-the-soundtrack-automatically-where-can-i-download-audio-files-manually).
@@ -195,9 +195,8 @@ After installing a **FULL** package the addon files land here:
 │       │   └── Addons/
 │       │       ├── Assist Bot.dll
 │       │       └── AudioAddon.dll
+│       ├── SherkeyXD.BepInEx-Sounds-Loader.dll
 │       └── SimpleSpawner.Bepinex.dll
-└── Mods/
-    └── SherkeyXD.BepInEx-Sounds-Loader.dll
 ```
 
 ---

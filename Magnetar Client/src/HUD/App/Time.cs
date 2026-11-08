@@ -21,7 +21,7 @@ public class UpTime : HudElement
 
         AdjustWidthToText(displayText, HUDElementStyle, 10f);
 
-        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        Draw(displayText, width, height);
     }
 }
 #endif

@@ -68,15 +68,6 @@ public static class HUDRenderer
 
         if (!isMasterVisible) return;
 
-        if (HUDManager.useRgbFontColor)
-        {
-            ThemeManager.HUDElementStyle.normal.textColor = GUIHelper.RainbowColor;
-        }
-        else
-        {
-            ThemeManager.HUDElementStyle.normal.textColor = ThemeManager.HUDElementTextColor.normal.textColor;
-        }
-
         for (int i = 0; i < Elements.Count; i++)
         {
             var element = Elements[i];

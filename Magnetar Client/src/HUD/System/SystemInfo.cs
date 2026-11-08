@@ -16,7 +16,7 @@ public class GpuNameElement : HudElement
 
     protected override void DrawContent(float width, float height)
     {
-        GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
+        Draw(displayText, width, height);
     }
 
     public override void OnEnable()
@@ -43,7 +43,7 @@ public class CPUElement : HudElement
 
     protected override void DrawContent(float width, float height)
     {
-        GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
+        Draw(displayText, width, height);
     }
 
     public override void OnEnable()

@@ -21,8 +21,8 @@ public class ActiveModules : HudElement
 
     private readonly List<ActiveItem> _items = new();
     private float _savedRightEdge;
-    private GUIStyle _leftStyle;
-    private GUIStyle _rightStyle;
+
+    protected override TextAnchor TextAlignment => IsRightAligned ? TextAnchor.MiddleRight : TextAnchor.MiddleLeft;
 
     public ActiveModules() : base("Active Modules", HudElement.NewRect(160, 24))
     {
@@ -170,43 +170,10 @@ public class ActiveModules : HudElement
         Bounds.height = targetHeight;
     }
 
-    private GUIStyle GetStyle(bool isRight)
-    {
-        var baseStyle = ThemeManager.HUDElementStyle ?? GUI.skin.label;
-
-        if (_leftStyle == null)
-        {
-            _leftStyle = new GUIStyle
-            {
-                alignment = TextAnchor.MiddleLeft,
-                wordWrap = false
-            };
-        }
-
-        if (_rightStyle == null)
-        {
-            _rightStyle = new GUIStyle
-            {
-                alignment = TextAnchor.MiddleRight,
-                wordWrap = false
-            };
-        }
-
-        GUIStyle target = isRight ? _rightStyle : _leftStyle;
-        target.font = baseStyle.font;
-        target.fontSize = baseStyle.fontSize;
-        target.normal.textColor = baseStyle.normal.textColor;
-        target.richText = baseStyle.richText;
-
-        return target;
-    }
-
     protected override void DrawContent(float width, float height)
     {
         if (width <= 0f || height <= 0f) return;
 
-        bool isRight = IsRightAligned;
-        var style = GetStyle(isRight);
         float itemHeight = GetItemHeight();
         float spacing = 2f * GUIManager.ElementScaleSetting.Value;
         float padding = 6f * GUIManager.ElementScaleSetting.Value;
@@ -217,7 +184,7 @@ public class ActiveModules : HudElement
             {
                 string placeholder = Translate("Active Modules");
                 Rect placeholderRect = new(padding, 2f * GUIManager.ElementScaleSetting.Value, width - (padding * 2f), itemHeight);
-                GUI.Label(placeholderRect, placeholder, style);
+                Draw(placeholderRect, placeholder);
             }
             return;
         }
@@ -226,7 +193,7 @@ public class ActiveModules : HudElement
         for (int i = 0; i < _items.Count; i++)
         {
             Rect labelRect = new(padding, y, width - (padding * 2f), itemHeight);
-            GUI.Label(labelRect, _items[i].DisplayName, style);
+            Draw(labelRect, _items[i].DisplayName);
             y += itemHeight + spacing;
         }
     }

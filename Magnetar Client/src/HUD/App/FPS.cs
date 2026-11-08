@@ -17,7 +17,7 @@ public class FpsElement : HudElement
 
     protected override void DrawContent(float width, float height)
     {
-        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        Draw(displayText, width, height);
     }
 
     public override void OnUpdateActive()
@@ -53,7 +53,7 @@ public class RealFpsElement : HudElement
 
     protected override void DrawContent(float width, float height)
     {
-        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        Draw(displayText, width, height);
     }
 
     public override void OnUpdateActive()
@@ -86,7 +86,7 @@ public class FrameTimeElement : HudElement
 
     protected override void DrawContent(float width, float height)
     {
-        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        Draw(displayText, width, height);
     }
 
 

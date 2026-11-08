@@ -24,7 +24,7 @@ public class RAMElement : HudElement
     string displayText = "RAM: <color=yellow>Na</color>";
     protected override void DrawContent(float width, float height)
     {
-        GUI.Label(new Rect(5, 5, width - 5, height - 5), displayText, HUDElementStyle);
+        Draw(displayText, width, height);
     }
 
     public override void OnUpdateActive()
@@ -90,7 +90,7 @@ public class SystemRAMElement : HudElement
     string displayText = "RAM: <color=yellow>Na</color>";
     protected override void DrawContent(float width, float height)
     {
-        GUI.Label(new Rect(5, 5, width - 5, height - 5), displayText, HUDElementStyle);
+        Draw(displayText, width, height);
     }
 
     public override void OnUpdateActive()
@@ -137,7 +137,7 @@ public class CPUUsageElement : HudElement
 
     protected override void DrawContent(float width, float height)
     {
-        GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
+        Draw(displayText, width, height);
     }
 
     public override void OnUpdateActive()
@@ -187,7 +187,7 @@ public class VramUsageElement : HudElement
     string displayText = "VRAM: <color=yellow>Na</color>";
     protected override void DrawContent(float width, float height)
     {
-        GUI.Label(new Rect(5, 5, width - 10, height - 10), displayText, HUDElementStyle);
+        Draw(displayText, width, height);
     }
 
     public override void OnUpdateActive()

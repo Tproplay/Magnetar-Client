@@ -17,7 +17,7 @@ public class WaveTimer : HudElement
     string displayText = "Next Wave arrival: NA";
     protected override void DrawContent(float width, float height)
     {
-        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        Draw(displayText, width, height);
     }
     public override void OnUpdateActive()
     {

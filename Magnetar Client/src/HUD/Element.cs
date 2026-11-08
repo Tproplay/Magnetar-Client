@@ -1,4 +1,5 @@
 using Magnetar_Client.Core;
+using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using UnityEngine;
 using Magnetar_Client.Core.HUDManager_;
@@ -314,9 +315,56 @@ public abstract class HudElement
         DrawContent(width, height);
     }
     /// <summary>
+    /// Default text alignment for this HUD element. Defaults to MiddleCenter.
+    /// </summary>
+    protected virtual TextAnchor TextAlignment => TextAnchor.MiddleCenter;
+
+    /// <summary>
     /// Add the label to be displayed here.
     /// </summary>
     protected abstract void DrawContent(float width, float height);
+
+    /// <summary>
+    /// Renders standard HUD element text within the element's container using default padding.
+    /// </summary>
+    /// <param name="text">The text to display.</param>
+    /// <param name="width">Container width.</param>
+    /// <param name="height">Container height.</param>
+    protected void Draw(string text, float width, float height)
+    {
+        if (string.IsNullOrEmpty(text)) return;
+        Rect rect = new(5, 4, width - 10, height - 8);
+        Draw(rect, text);
+    }
+
+    /// <summary>
+    /// Core text drawing method for HUD elements. Applies the current theme and RGB color logic.
+    /// </summary>
+    /// <param name="rect">Bounding rectangle inside the container.</param>
+    /// <param name="text">The text to display.</param>
+    protected void Draw(Rect rect, string text)
+    {
+        if (string.IsNullOrEmpty(text)) return;
+
+        var style = ThemeManager.HUDElementStyle;
+        if (style != null)
+        {
+            style.alignment = TextAlignment;
+            style.normal.textColor = HUDManager.useRgbFontColor
+                ? GUIHelper.RainbowColor
+                : ThemeManager.HUDElementTextColor.normal.textColor;
+
+            GUI.Label(rect, text, style);
+        }
+    }
+
+    /// <summary>
+    /// Auto-adjusts the Bounds to match this text using the default HUD element style.
+    /// </summary>
+    protected void AdjustWidthToText(string text, float padding = 8f)
+    {
+        AdjustWidthToText(text, ThemeManager.HUDElementStyle, padding);
+    }
 
     /// <summary>
     /// Auto-adjusts the Bounds to match this text.

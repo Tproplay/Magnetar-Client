@@ -21,7 +21,7 @@ public class TotalZombieHealth : HudElement
     string displayText = "Total Zombies Health: NA";
     protected override void DrawContent(float width, float height)
     {
-        GUI.Label(new Rect(5, 4, width - 10, height - 10), displayText, HUDElementStyle);
+        Draw(displayText, width, height);
     }
 
     double GetZombieHealth()

@@ -64,12 +64,12 @@ public class IntSetting : Setting
     /// <summary>
     /// The absolute lower clamping bound allowed when typing directly into the text field.
     /// </summary>
-    public int TrueMin;
+    public int TrueMin = int.MinValue;
 
     /// <summary>
     /// The absolute upper clamping bound allowed when typing directly into the text field.
     /// </summary>
-    public int TrueMax;
+    public int TrueMax = int.MaxValue;
 
     /// <summary>
     /// Event invoked immediately before <see cref="Value"/> changes.
@@ -182,9 +182,10 @@ public class IntSetting : Setting
     /// <param name="max">The slider track upper bound.</param>
     /// <param name="defaultValue">The initial and default integer value.</param>
     public IntSetting(string name, int min, int max, int defaultValue)
+        : this(name, min, max, defaultValue, int.MinValue, int.MaxValue, false, true)
     {
         Name = name;
-        Min = min; Max = max; 
+
         DefaultValue = defaultValue;
     }
 
@@ -197,6 +198,7 @@ public class IntSetting : Setting
     /// <param name="defaultValue">The initial and default integer value.</param>
     /// <param name="isLogarithmic">Whether the slider scales logarithmically.</param>
     public IntSetting(string name, int min, int max, int defaultValue, bool isLogarithmic)
+        : this(name, min, max, defaultValue, int.MinValue, int.MaxValue, false, isLogarithmic)
     {
         Name = name;
         Min = min; Max = max;
@@ -250,15 +252,21 @@ public class IntSetting : Setting
         {
             var s = (FloatSetting)setting;
             val = s.DisplayValue; sliderMin = s.Min; sliderMax = s.Max;
-            trueMin = s.TrueMin; trueMax = s.TrueMax; name = s.Name; decPlaces = s.DecimalPlaces;
+            trueMin = (s.TrueMin == 0f && s.TrueMax == 0f) ? float.MinValue : s.TrueMin;
+            trueMax = (s.TrueMin == 0f && s.TrueMax == 0f) ? float.MaxValue : s.TrueMax;
+            if (trueMax < trueMin) trueMax = float.MaxValue;
+            name = s.Name; decPlaces = s.DecimalPlaces;
             isLogarithmic = s.IsLogarithmic;
         }
         else
         {
             var s = (IntSetting)setting;
             val = s.DisplayValue; sliderMin = s.Min; sliderMax = s.Max;
-            trueMin = s.TrueMin; trueMax = s.TrueMax; name = s.Name;
-            intSliderMin = s.Min; intSliderMax = s.Max; intTrueMin = s.TrueMin; intTrueMax = s.TrueMax;
+            intTrueMin = (s.TrueMin == 0 && s.TrueMax == 0) ? int.MinValue : s.TrueMin;
+            intTrueMax = (s.TrueMin == 0 && s.TrueMax == 0) ? int.MaxValue : s.TrueMax;
+            if (intTrueMax < intTrueMin) intTrueMax = int.MaxValue;
+            trueMin = intTrueMin; trueMax = intTrueMax; name = s.Name;
+            intSliderMin = s.Min; intSliderMax = s.Max;
             isLogarithmic = s.IsLogarithmic;
         }
         string translatedName = (setting as Setting)?.DisplayName ?? Translate(name);
@@ -508,7 +516,12 @@ public class IntSetting : Setting
         if (isFocused)
         {
             DrawSetting.CurrentInputBuffer = newText;
-            if (double.TryParse(DrawSetting.CurrentInputBuffer, out double parsed))
+            if (!isFloat && long.TryParse(DrawSetting.CurrentInputBuffer, out long parsedLong))
+            {
+                long clamped = Math.Max((long)intTrueMin, Math.Min(parsedLong, (long)intTrueMax));
+                ((IntSetting)setting).SetPending((int)clamped);
+            }
+            else if (double.TryParse(DrawSetting.CurrentInputBuffer, out double parsed))
             {
                 if (isFloat) ((FloatSetting)setting).SetPending((float)Math.Round(Mathf.Clamp((float)parsed, trueMin, trueMax), decPlaces));
                 else ((IntSetting)setting).SetPending((int)Math.Max(intTrueMin, Math.Min((long)parsed, intTrueMax)));
@@ -602,12 +615,12 @@ public class FloatSetting : Setting
     /// <summary>
     /// The absolute lower clamping bound allowed when typing directly into the text field.
     /// </summary>
-    public float TrueMin;
+    public float TrueMin = float.MinValue;
 
     /// <summary>
     /// The absolute upper clamping bound allowed when typing directly into the text field.
     /// </summary>
-    public float TrueMax;
+    public float TrueMax = float.MaxValue;
 
     /// <summary>
     /// The number of decimal digits displayed and rounded to.
@@ -728,6 +741,7 @@ public class FloatSetting : Setting
     /// <param name="defaultValue">The initial and default float value.</param>
     /// <param name="decimalPlaces">The number of decimal places to format and round to.</param>
     public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces = 1)
+        : this(name, min, max, defaultValue, decimalPlaces, float.MinValue, float.MaxValue, false, true)
     {
         Name=name; 
         Min = min; Max=max; 
@@ -745,6 +759,7 @@ public class FloatSetting : Setting
     /// <param name="decimalPlaces">The number of decimal places to format and round to.</param>
     /// <param name="isLogarithmic">Whether the slider scales logarithmically.</param>
     public FloatSetting(string name, float min, float max, float defaultValue, int decimalPlaces, bool isLogarithmic)
+        : this(name, min, max, defaultValue, decimalPlaces, float.MinValue, float.MaxValue, false, isLogarithmic)
     {
         Name = name;
         Min = min; Max = max;

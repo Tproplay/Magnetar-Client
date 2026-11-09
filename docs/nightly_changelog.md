@@ -21,3 +21,4 @@
 - Multiselect Setting Shift drag caused the first option to get toggled twice
 - CPU and GPU Names weren't affected by rbg rainbow color
 - Opening a MultiSelect or EntitySelect setting after scrolling another to the bottom caused the list to appear empty until scrolled
+- Values typed into IntSetting text fields always resetting to 0 due to uninitialized manual entry bounds

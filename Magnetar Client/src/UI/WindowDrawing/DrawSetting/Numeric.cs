@@ -30,8 +30,8 @@ public static partial class DrawSetting
             val = s.DisplayValue;
             sliderMin = s.Min;
             sliderMax = s.Max;
-            trueMin = s.TrueMin;
-            trueMax = s.TrueMax;
+            trueMin = (s.TrueMin == 0f && s.TrueMax == 0f) ? float.MinValue : s.TrueMin;
+            trueMax = (s.TrueMin == 0f && s.TrueMax == 0f) ? float.MaxValue : s.TrueMax; if (trueMax < trueMin) trueMax = float.MaxValue;
             name = s.Name;
             decPlaces = s.DecimalPlaces;
         }
@@ -41,15 +41,15 @@ public static partial class DrawSetting
             val = s.DisplayValue;
             sliderMin = s.Min;
             sliderMax = s.Max;
-            trueMin = s.TrueMin;
-            trueMax = s.TrueMax;
+            trueMin = (s.TrueMin == 0f && s.TrueMax == 0f) ? float.MinValue : s.TrueMin;
+            trueMax = (s.TrueMin == 0f && s.TrueMax == 0f) ? float.MaxValue : s.TrueMax; if (trueMax < trueMin) trueMax = float.MaxValue;
             name = s.Name;
             
 
             intSliderMin = s.Min;
             intSliderMax = s.Max;
-            intTrueMin = s.TrueMin;
-            intTrueMax = s.TrueMax;
+            intTrueMin = (s.TrueMin == 0 && s.TrueMax == 0) ? int.MinValue : s.TrueMin; trueMin = intTrueMin;
+            intTrueMax = (s.TrueMin == 0 && s.TrueMax == 0) ? int.MaxValue : s.TrueMax; if (intTrueMax < intTrueMin) intTrueMax = int.MaxValue; trueMax = intTrueMax;
         }
 
         string translatedName = (setting as Magnetar_Client.UI.Setting.Setting)?.DisplayName ?? Translate(name);
@@ -241,7 +241,12 @@ public static partial class DrawSetting
         if (isFocused)
         {
             CurrentInputBuffer = newText;
-            if (double.TryParse(CurrentInputBuffer, out double parsed))
+            if (!isFloat && long.TryParse(CurrentInputBuffer, out long parsedLong))
+            {
+                long clamped = System.Math.Max((long)intTrueMin, System.Math.Min(parsedLong, (long)intTrueMax));
+                ((IntSetting)setting).SetPending((int)clamped);
+            }
+            else if (double.TryParse(CurrentInputBuffer, out double parsed))
             {
                 if (isFloat)
                 {

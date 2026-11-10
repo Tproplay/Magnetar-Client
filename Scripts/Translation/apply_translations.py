@@ -3,6 +3,15 @@ import json
 import argparse
 import shutil
 
+
+def resolve_base_dir() -> str:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    candidate = os.path.normpath(os.path.join(script_dir, "..", "..", "Magnetar Client", "Magnetar Data", "Magnetar Translation"))
+    if os.path.isdir(os.path.join(candidate, "English")):
+        return candidate
+    return script_dir
+
+
 def merge_dicts(main_data, temp_data):
     for key, val in temp_data.items():
         if key in main_data:
@@ -13,13 +22,15 @@ def merge_dicts(main_data, temp_data):
         else:
             main_data[key] = val
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("lang_folder")
     args = parser.parse_args()
 
+    base_dir = resolve_base_dir()
+    lang_dir = os.path.join(base_dir, args.lang_folder)
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    lang_dir = os.path.join(script_dir, args.lang_folder)
     base_temp_dir = os.path.join(script_dir, "temp_untranslated")
     temp_dir = os.path.join(base_temp_dir, args.lang_folder)
 
@@ -31,6 +42,8 @@ def main():
         return
 
     print(f"--- Applying translations to '{args.lang_folder}' ---")
+    print(f"Source: {temp_dir}")
+    print(f"Target: {lang_dir}")
 
     for root, dirs, files in os.walk(temp_dir):
         for file in files:
@@ -68,6 +81,7 @@ def main():
     
     if os.path.exists(base_temp_dir) and not os.listdir(base_temp_dir):
         os.rmdir(base_temp_dir)
+
 
 if __name__ == "__main__":
     main()

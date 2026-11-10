@@ -1,10 +1,13 @@
 {
-  "Name": "Smaller Plants",
-  "Description": "Changes the size of selected plants.",
-  "Search Hints": "smallerplants miniplants tinyplants plantscale plantresize plantscaler minatureplants scaleplants compactplants microplants plantsize plantshrinker shrinkplants resizeplants miniplantmod plantzoom scaledplants tinyplantmod microplantmod sizechanger",
-  "settings": {
-    "General": "General",
-    "Scale multiplier": "Scale multiplier",
-    "Entities": "Entities"
-  }
+    "Name": "Thu Nhỏ Cây",
+    "Description": "Thay đổi kích thước và thu nhỏ các cây trồng đã chọn.",
+    "Search Hints": "thu nhỏ cây kích thước cây làm nhỏ cây cây mini thu phóng cây",
+    "settings": {
+        "General": "Cài Đặt Chung",
+        "Scale multiplier": "Hệ Số Thu Phóng",
+        "Entities": "Các Thực Thể",
+        "Advanced": "Nâng Cao",
+        "Modifications done here are preferred over Global modifications": "Cài đặt tại đây sẽ được ưu tiên hơn cài đặt toàn cục",
+        "Individual Plant": "Từng Cây Riêng Biệt"
+    }
 }

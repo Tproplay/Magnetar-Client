@@ -1,5 +1,5 @@
 ﻿#if MELONLOADER || RELEASE_MELON
-using Magnetar_Client.Core;
+using Magnetar_Client;
 using MelonLoader;
 
 [assembly: MelonInfo(typeof(Magnetar_Client.Core.MelonLoaderEntry), MagnetarInfo.ModName, MagnetarInfo.Version, MagnetarInfo.Developer)]

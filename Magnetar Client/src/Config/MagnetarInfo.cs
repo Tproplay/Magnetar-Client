@@ -1,4 +1,4 @@
-namespace Magnetar_Client.Core;
+namespace Magnetar_Client;
 
 public static class MagnetarInfo
 {
@@ -8,13 +8,13 @@ public static class MagnetarInfo
 #if NIGHTLY
     public const int BuildNumber = 1;
 #endif
-    public const PlatformType Platform =
+    public static PlatformType Platform =>
 #if ANDROID
-        PlatformType.Android;
+            PlatformType.Android;
 #elif MELONLOADER || RELEASE_MELON || NIGHTLY_MELON
-        PlatformType.Melonloader;
+            PlatformType.Melonloader;
 #elif RELEASE_BEPINEX || BEPINEX
-        PlatformType.BepInEx;
+            PlatformType.BepInEx;
 #endif
     public const string Developer = "Tproplay";
     public const string HarmonyId = "com.tproplay.magnetar";

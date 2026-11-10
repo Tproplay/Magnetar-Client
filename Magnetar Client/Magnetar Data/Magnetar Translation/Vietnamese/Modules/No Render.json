@@ -1,16 +1,28 @@
 {
-  "Name": "Ẩn Hiển Thị Đồ Họa",
-  "Description": "Giờ đây bạn có thể nhìn thấy bãi cỏ trống trải của mình.",
-  "Search Hints": "ẩn đồ họa ẩn sân cỏ cây tàng hình zombie tàng hình ẩn hiển thị tắt đồ họa sân cỏ trống ẩn texture ẩn hình ảnh tắt render ẩn cây ẩn zombie nhìn nền đất",
-  "settings": {
-    "General": "Cài Đặt Chung",
-    "Particles": "Hiệu Ứng Hạt (Hạt Đạn/Khói/Nổ)",
-    "Particle Types": "Các loại hạt hiệu ứng",
-    "Game Objects": "Các Đối Tượng Trong Game",
-    "Bullets": "Các Viên Đạn",
-    "Effects": "Hiệu ứng",
-    "Others": "Others",
-    "Extra": "Tính năng thêm",
-    "Disable Screen Shake effect": "Vô hiệu hóa hiệu ứng rung màn hình"
-  }
+    "Name": "Ẩn Hiển Thị Đồ Họa",
+    "Description": "Giờ đây bạn có thể nhìn thấy bãi cỏ trống trải của mình.",
+    "Search Hints": "ẩn đồ họa ẩn sân cỏ cây tàng hình zombie tàng hình ẩn hiển thị tắt đồ họa sân cỏ trống ẩn texture ẩn hình ảnh tắt render ẩn cây ẩn zombie nhìn nền đất",
+    "settings": {
+        "General": "Cài Đặt Chung",
+        "Particles": "Hiệu Ứng Hạt (Hạt Đạn/Khói/Nổ)",
+        "Particle Types": "Các loại hạt hiệu ứng",
+        "Game Objects": "Các Đối Tượng Trong Game",
+        "Bullets": "Các Viên Đạn",
+        "Effects": "Hiệu ứng",
+        "Others": "Khác",
+        "Extra": "Tính năng thêm",
+        "Disable Screen Shake effect": "Vô hiệu hóa hiệu ứng rung màn hình"
+    },
+    "Translations": {
+        "Ice shroom effect": "Hiệu ứng Nấm Băng",
+        "Doom shroom effect": "Hiệu ứng Nấm Hủy Diệt",
+        "Jalapeno fire line": "Đường lửa Trái Ớt",
+        "Doom shroom smoke cloud": "Đám mây khói Nấm Hủy Diệt",
+        "Falling Sun": "Mặt Trời Rơi",
+        "Falling Coin": "Tiền Xu Rơi",
+        "Fertilizer": "Phân Bón",
+        "Rain": "Mưa",
+        "Mist": "Sương Mù",
+        "Spider Net": "Mạng Nhện"
+    }
 }

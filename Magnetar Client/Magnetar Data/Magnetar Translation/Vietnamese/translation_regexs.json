@@ -1,5 +1,4 @@
 {
-  "(\\d+) selected": "đã chọn {0}",
-  "Seed Slot (\\d+)": "Khe hạt giống {0}",
-  "Section #(\\d+)": "Section #{1}"
+    "(\\d+) selected": "đã chọn {0}",
+    "Section #(\\d+)": "Phần #{1}"
 }

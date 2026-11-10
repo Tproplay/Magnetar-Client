@@ -140,6 +140,13 @@ public static class NEFRecipes
                 );
         }
 
+        recipies.Add(new()
+        {
+            Result = RecipeEntity.Plant(PlantType.UltimateFurnace),
+            ParentA = RecipeEntity.Plant(PlantType.SuperFurnace),
+            ParentB = RecipeEntity.Plant(PlantType.ThronsAloes),
+        });
+
         return recipies;
 
     }

@@ -51,5 +51,12 @@
   "Show Main Menu Credits": "Show Main Menu Credits",
   "Add": "Add",
   "Misc": "Misc",
-  "RGB Font Color": "RGB Font Color"
+  "RGB Font Color": "RGB Font Color",
+  "Clear All": "Clear All",
+  "Exit Layout": "Exit Layout",
+  "| Tap: Recipe | Hold: Usages": "| Tap: Recipe | Hold: Usages",
+  "This entity is not used as an ingredient in any fusion.": "This entity is not used as an ingredient in any fusion.",
+  "Loading data...": "Loading data...",
+  "Max Sections Reached": "Max Sections Reached",
+  "found": "found"
 }

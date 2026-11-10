@@ -1,122 +1,237 @@
 {
-  "FPS Counter": {
-    "Name": "Bộ Đếm Khung Hình (FPS)"
-  },
-  "Real FPS Counter": {
-    "Name": "Bộ Đếm FPS Thực Tế"
-  },
-  "Frame Time": {
-    "Name": "Thời Gian Khung Hình (Frame Time)"
-  },
-  "Game Name and Version": {
-    "Name": "Tên và Phiên Bản Trò Chơi"
-  },
-  "Magnetar Name and Version": {
-    "Name": "Tên và Phiên Bản Của Magnetar"
-  },
-  "Up Time": {
-    "Name": "Thời Gian Hoạt Động"
-  },
-  "Number of Bullets Spawned": {
-    "Name": "Số Lượng Đạn Đã Tạo Ra"
-  },
-  "Total Damage by Plants": {
-    "Name": "Tổng Sát Thương Bởi Cây Trồng"
-  },
-  "Average Damage by Plants": {
-    "Name": "Sát Thương Trung Bình Bởi Cây Trồng"
-  },
-  "Total Plants": {
-    "Name": "Tổng Số Cây Trên Sân"
-  },
-  "Plants Placed": {
-    "Name": "Số Cây Đã Trồng"
-  },
-  "Plant Deaths": {
-    "Name": "Số Cây Đã Chết / Bị Phá Hủy"
-  },
-  "Total Sun Obtained": {
-    "Name": "Tổng Lượng Mặt Trời Thu Được"
-  },
-  "Total Sun Spent": {
-    "Name": "Tổng Lượng Mặt Trời Đã Tiêu Thụ"
-  },
-  "Total Money Obtained": {
-    "Name": "Tổng Số Tiền Thu Được"
-  },
-  "Total Money Spent": {
-    "Name": "Tổng Số Tiền Đã Chi Tiêu"
-  },
-  "Auto drop/fall sun timer": {
-    "Name": "Bộ Đếm Thời Gian Tự Rơi Mặt Trời"
-  },
-  "Time In Current Level": {
-    "Name": "Thời Gian Ở Màn Chơi Hiện Tại"
-  },
-  "Next wave arrival time": {
-    "Name": "Thời Gian Xuất Hiện Đợt Tấn Công Kế Tiếp"
-  },
-  "Active Star drop Cooldown": {
-    "Name": "Thời Gian Hồi Chiêu Kích Hoạt Rơi Sao"
-  },
-  "Passive Star drop Cooldown": {
-    "Name": "Thời Gian Hồi Chiêu Nội Tại Rơi Sao"
-  },
-  "Game Speed": {
-    "Name": "Tốc Độ Trò Chơi"
-  },
-  "Zombies On Lawn": {
-    "Name": "Số Zombie Trên Bãi Cỏ"
-  },
-  "Hypnotized Zombies On Lawn": {
-    "Name": "Số Zombie Bị Thôi Miên Trên Bãi Cỏ"
-  },
-  "Zombies Spawned": {
-    "Name": "Số Zombie Đã Xuất Hiện"
-  },
-  "Hypnotized Zombies Spawned": {
-    "Name": "Số Zombie Bị Thôi Miên Đã Xuất Hiện"
-  },
-  "Zombies Killed": {
-    "Name": "Số Zombie Đã Bị Tiêu Diệt"
-  },
-  "Hypnotized Zombies Killed": {
-    "Name": "Số Zombie Bị Thôi Miên Đã Chết"
-  },
-  "Current Zombie Wave Health": {
-    "Name": "Tổng Máu Của Đợt Zombie Hiện Tại"
-  },
-  "Total Zombies Health": {
-    "Name": "Tổng Lượng Máu Của Toàn Bộ Zombie"
-  },
-  "Hypnotized Zombies Health": {
-    "Name": "Tổng Máu Của Zombie Bị Thôi Miên"
-  },
-  "Current Wave": {
-    "Name": "Đợt Tấn Công Hiện Tại"
-  },
-  "RAM Usage": {
-    "Name": "Dung Lượng RAM Đang Dùng (Game)"
-  },
-  "System RAM Usage": {
-    "Name": "Dung Lượng RAM Hệ Thống"
-  },
-  "CPU Usage": {
-    "Name": "Mức Sử Dụng CPU"
-  },
-  "VRAM Usage": {
-    "Name": "Mức Sử Dụng VRAM (Bộ Nhớ Đồ Họa)"
-  },
-  "GPU Name": {
-    "Name": "Tên Card Đồ Họa (GPU)"
-  },
-  "CPU Name": {
-    "Name": "Tên Bộ Vi Xử Lý (CPU)"
-  },
-  "Current Time": {
-    "Name": "Thời Gian Hiện Tại"
-  },
-  "Using Vanilla Mode": {
-    "Name": "Sử Dụng Chế Độ Thường"
-  }
+    "FPS Counter": {
+        "Name": "Bộ Đếm Khung Hình",
+        "FPS: <color=yellow>Na</color>": "FPS: <color=yellow>K/R</color>",
+        "FPS: <color={colorName}>(\\d+)</color>": "FPS: <color={colorName}>{1}</color>"
+    },
+    "Real FPS Counter": {
+        "Name": "Bộ Đếm FPS Thực Tế",
+        "FPS (Real): <color=yellow>Na</color>": "FPS (Thực): <color=yellow>K/R</color>",
+        "FPS (Real): <color={colorName}>(\\d+)</color>": "FPS (Thực): <color={colorName}>{1}</color>"
+    },
+    "Frame Time": {
+        "Name": "Thời Gian Khung Hình",
+        "FrameTime: <color=yellow>Na</color>": "Thời Gian Khung: <color=yellow>K/R</color>",
+        "FrameTime: <color={colorName}>(\\d+)</color>ms": "Thời Gian Khung: <color={colorName}>{1}</color>ms"
+    },
+    "Game Name and Version": {
+        "Name": "Tên và Phiên Bản Trò Chơi",
+        "^Plants Vs\\. Zombies Fusion v(.*)$": "Plants Vs. Zombies Fusion v{1}"
+    },
+    "Magnetar Name and Version": {
+        "Name": "Tên và Phiên Bản Của Magnetar",
+        "^Magnetar Client v(.*)$": "Magnetar Client v{1}"
+    },
+    "Up Time": {
+        "Name": "Thời Gian Hoạt Động"
+    },
+    "Number of Bullets Spawned": {
+        "Name": "Số Lượng Đạn Đã Tạo Ra",
+        "Bullets Spawned: NA": "Đạn Đã Tạo: K/R",
+        "^Bullets Spawned: (.*)$": "Đạn Đã Tạo: {1}"
+    },
+    "Total Damage by Plants": {
+        "Name": "Tổng Sát Thương Bởi Cây Trồng",
+        "Plant Damage: NA": "Sát Thương Cây: K/R",
+        "^Plant Damage: (.*)$": "Sát Thương Cây: {1}"
+    },
+    "Average Damage by Plants": {
+        "Name": "Sát Thương Trung Bình Bởi Cây Trồng",
+        "Plant DPS: 0": "DPS Cây: 0",
+        "^Plant DPS: (.*)$": "DPS Cây: {1}"
+    },
+    "Total Plants": {
+        "Name": "Tổng Số Cây Trên Sân",
+        "Total Plants: NA": "Tổng Số Cây: K/R",
+        "^Total Plants: (.*)$": "Tổng Số Cây: {1}"
+    },
+    "Plants Placed": {
+        "Name": "Số Cây Đã Trồng",
+        "Plants Placed: NA": "Cây Đã Trồng: K/R",
+        "^Plants Placed: (.*)$": "Cây Đã Trồng: {1}"
+    },
+    "Plant Deaths": {
+        "Name": "Số Cây Đã Chết / Bị Phá Hủy",
+        "Plant Death: NA": "Cây Bị Phá Hủy: K/R",
+        "^Plant Death: (.*)$": "Cây Bị Phá Hủy: {1}"
+    },
+    "Total Sun Obtained": {
+        "Name": "Tổng Lượng Mặt Trời Thu Được",
+        "Sun Obtained: NA": "Mặt Trời Thu Được: K/R",
+        "^Sun Obtained: (.*)$": "Mặt Trời Thu Được: {1}"
+    },
+    "Total Sun Spent": {
+        "Name": "Tổng Lượng Mặt Trời Đã Tiêu Thụ",
+        "Sun Spent: NA": "Mặt Trời Đã Dùng: K/R",
+        "^Sun Spent: (.*)$": "Mặt Trời Đã Dùng: {1}"
+    },
+    "Total Money Obtained": {
+        "Name": "Tổng Số Tiền Thu Được",
+        "Money Obtained: NA": "Tiền Thu Được: K/R",
+        "^Money Obtained: (.*)$": "Tiền Thu Được: {1}"
+    },
+    "Total Money Spent": {
+        "Name": "Tổng Số Tiền Đã Chi Tiêu",
+        "Money Spent: NA": "Tiền Đã Dùng: K/R",
+        "^Money Spent: (.*)$": "Tiền Đã Dùng: {1}"
+    },
+    "Auto drop/fall sun timer": {
+        "Name": "Bộ Đếm Thời Gian Tự Rơi Mặt Trời",
+        "Auto Sun: NA": "Mặt Trời Tự Rơi: K/R",
+        "Auto Sun: 0s": "Mặt Trời Tự Rơi: 0s",
+        "^Auto Sun: (.*)$": "Mặt Trời Tự Rơi: {1}"
+    },
+    "Time In Current Level": {
+        "Name": "Thời Gian Ở Màn Chơi Hiện Tại",
+        "^Playing For: (.*)$": "Thời Gian Màn: {1}"
+    },
+    "Next wave arrival time": {
+        "Name": "Thời Gian Xuất Hiện Đợt Tấn Công Kế Tiếp",
+        "Next Wave arrival: NA": "Đợt Tiếp Theo: K/R",
+        "^Next Wave arrival: (.*)$": "Đợt Tiếp Theo: {1}"
+    },
+    "Active Star drop Cooldown": {
+        "Name": "Thời Gian Hồi Chiêu Kích Hoạt Rơi Sao",
+        "Active Star drop: NA": "Sao Rơi Chủ Động: K/R",
+        "^Active Star drop: (.*)$": "Sao Rơi Chủ Động: {1}"
+    },
+    "Passive Star drop Cooldown": {
+        "Name": "Thời Gian Hồi Chiêu Nội Tại Rơi Sao",
+        "Passive Star drop: NA": "Sao Rơi Bị Động: K/R",
+        "^Passive Star drop: (.*)$": "Sao Rơi Bị Động: {1}"
+    },
+    "Game Speed": {
+        "Name": "Tốc Độ Trò Chơi",
+        "TimeScale: 0": "Tốc Độ Game: 0",
+        "^TimeScale: (.*)$": "Tốc Độ Game: {1}"
+    },
+    "Zombies On Lawn": {
+        "Name": "Số Zombie Trên Bãi Cỏ",
+        "Zombies On Lawn: NA": "Zombie Trên Sân: K/R",
+        "^Zombies On Lawn: (.*)$": "Zombie Trên Sân: {1}"
+    },
+    "Hypnotized Zombies On Lawn": {
+        "Name": "Số Zombie Bị Thôi Miên Trên Bãi Cỏ",
+        "Hypno Zombies On Lawn: NA": "Zombie Thôi Miên: K/R",
+        "^Hypno Zombies On Lawn: (.*)$": "Zombie Thôi Miên: {1}"
+    },
+    "Zombies Spawned": {
+        "Name": "Số Zombie Đã Xuất Hiện",
+        "Zombies Spawned: NA": "Zombie Đã Xuất Hiện: K/R",
+        "^Zombies Spawned: (.*)$": "Zombie Đã Xuất Hiện: {1}"
+    },
+    "Hypnotized Zombies Spawned": {
+        "Name": "Số Zombie Bị Thôi Miên Đã Xuất Hiện",
+        "Hypno Zombies Spawned: NA": "Zombie Thôi Miên Đã Tạo: K/R",
+        "^Hypno Zombies Spawned: (.*)$": "Zombie Thôi Miên Đã Tạo: {1}"
+    },
+    "Zombies Killed": {
+        "Name": "Số Zombie Đã Bị Tiêu Diệt",
+        "Zombies Killed: NA": "Zombie Đã Diệt: K/R",
+        "^Zombies Killed: (.*)$": "Zombie Đã Diệt: {1}"
+    },
+    "Hypnotized Zombies Killed": {
+        "Name": "Số Zombie Bị Thôi Miên Đã Chết",
+        "Hypno Zombies Killed: NA": "Zombie Thôi Miên Đã Chết: K/R",
+        "^Hypno Zombies Killed: (.*)$": "Zombie Thôi Miên Đã Chết: {1}"
+    },
+    "Current Zombie Wave Health": {
+        "Name": "Tổng Máu Của Đợt Zombie Hiện Tại",
+        "Wave Health: NA": "Máu Đợt Zombie: K/R",
+        "^Wave Health: (.*)/(.*)$": "Máu Đợt Zombie: {1}/{2}"
+    },
+    "Total Zombies Health": {
+        "Name": "Tổng Lượng Máu Của Toàn Bộ Zombie",
+        "Total Zombies Health: NA": "Tổng Máu Zombie: K/R",
+        "^Total Zombies Health: (.*)$": "Tổng Máu Zombie: {1}"
+    },
+    "Hypnotized Zombies Health": {
+        "Name": "Tổng Máu Của Zombie Bị Thôi Miên",
+        "Hypno Zombies Health: NA": "Máu Zombie Thôi Miên: K/R",
+        "^Hypno Zombies Health: (.*)$": "Máu Zombie Thôi Miên: {1}"
+    },
+    "Current Wave": {
+        "Name": "Đợt Tấn Công Hiện Tại",
+        "Wave: NA": "Đợt: K/R",
+        "^Wave: (\\d+)/(\\d+)$": "Đợt: {1}/{2}"
+    },
+    "RAM Usage": {
+        "Name": "Dung Lượng RAM",
+        "RAM: <color=yellow>Na</color>": "RAM: <color=yellow>K/R</color>",
+        "RAM: <color={color}>(\\d+(?:\\.\\d+)?) MB</color>": "RAM: <color={color}>{1} MB</color>"
+    },
+    "System RAM Usage": {
+        "Name": "Dung Lượng RAM Hệ Thống",
+        "RAM: <color=yellow>Na</color>": "RAM Hệ Thống: <color=yellow>K/R</color>",
+        "RAM: <color=white>(\\d+)% of (.*)GB</color>": "RAM Hệ Thống: <color=white>{1}% trên {2}GB</color>"
+    },
+    "CPU Usage": {
+        "Name": "Mức Sử Dụng CPU",
+        "CPU: <color=yellow>Na</color>": "CPU: <color=yellow>K/R</color>",
+        "CPU: <color={color}>(\\d+(?:\\.\\d+)?)%</color>": "CPU: <color={color}>{1}%</color>"
+    },
+    "VRAM Usage": {
+        "Name": "Mức Sử Dụng VRAM (Bộ Nhớ Đồ Họa)",
+        "VRAM: <color=yellow>Na</color>": "VRAM: <color=yellow>K/R</color>",
+        "^VRAM: (.*) / (.*) MB$": "VRAM: {1} / {2} MB"
+    },
+    "GPU Name": {
+        "Name": "Tên Card Đồ Họa"
+    },
+    "CPU Name": {
+        "Name": "Tên Bộ Vi Xử Lý"
+    },
+    "Current Time": {
+        "Name": "Thời Gian Hiện Tại"
+    },
+    "Using Vanilla Mode": {
+        "Name": "Sử Dụng Chế Độ Thường",
+        "Active": "Đang Bật",
+        "Inactive": "Đang Tắt",
+        "Vanilla Mode: <color=yellow>Na</color>": "Chế Độ Gốc: <color=yellow>K/R</color>",
+        "Vanilla Mode: <color={color}>(.*)</color>": "Chế Độ Gốc: <color={color}>{1}</color>"
+    },
+    "Active Modules": {
+        "Name": "Các Module Đang Hoạt Động",
+        "Active Modules": "Module Đang Bật",
+        "Active Modules (Empty)": "Không có Module nào bật"
+    },
+    "Active Bullets": {
+        "Name": "Số Lượng Đạn Trên Sân",
+        "Active Bullets: NA": "Đạn Trên Sân: K/R",
+        "^Active Bullets: (.*)$": "Đạn Trên Sân: {1}"
+    },
+    "Freeze Timer": {
+        "Name": "Thời Gian Đóng Băng",
+        "Freeze: NA": "Đóng Băng: K/R",
+        "Freeze: 0.0s": "Đóng Băng: 0.0s",
+        "^Freeze: (.*)s$": "Đóng Băng: {1}s"
+    },
+    "Lawn Mowers Remaining": {
+        "Name": "Máy Cắt Cỏ Còn Lại",
+        "Mowers: NA": "Máy Cắt Cỏ: K/R",
+        "^Mowers: (.*)/(.*)$": "Máy Cắt Cỏ: {1}/{2}"
+    },
+    "Plant Capacity": {
+        "Name": "Sức Chứa Cây Trồng",
+        "Plant Cap: NA": "Giới Hạn Cây: K/R",
+        "^Plant Cap: (.*)/(.*)$": "Giới Hạn Cây: {1}/{2}",
+        "^Plant Cap: (.*)/∞$": "Giới Hạn Cây: {1}/∞"
+    },
+    "Total Fusions Performed": {
+        "Name": "Tổng Lần Hợp Nhất Đã Làm",
+        "Fusions: NA": "Hợp Nhất: K/R",
+        "^Fusions: (.*)$": "Hợp Nhất: {1}"
+    },
+    "Sun Production Rate": {
+        "Name": "Tốc Độ Sản Xuất Mặt Trời",
+        "Sun Rate: NA": "Tốc Độ MT: K/R",
+        "^Sun Rate: \\+(.*)/min$": "Tốc Độ MT: +{1}/phút"
+    },
+    "Closest Zombie Threat": {
+        "Name": "Zombie Gần Nhất",
+        "Threat: NA": "Đe Dọa: K/R",
+        "Threat: Safe": "Đe Dọa: An Toàn",
+        "^Threat: (.*) tiles \\(Row (.*)\\)$": "Nguy Hiểm: {1} ô (Hàng {2})"
+    }
 }

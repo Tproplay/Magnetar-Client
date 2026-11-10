@@ -1,5 +1,5 @@
 {
-    "-1": "Nothing",
+    "-1": "Không Có",
     "0": "Zombie thường",
     "1": "Zombie Cầm Cờ",
     "2": "Zombie Đội Cọc Giao Thông",
@@ -235,5 +235,8 @@
     "335": "Xe Cẩu Đinh Ba Hạng Nặng",
     "336": "Thây ma voi a",
     "337": "Thây ma voi b",
-    "338": "Thây ma voi c"
+    "338": "Thây ma voi c",
+    "134": "Cầu Thủ Bóng Bầu Dục Cao Cưỡi Cá Heo",
+    "135": "Zombie Cây Ăn Thịt Tối Thượng",
+    "339": "Trùm Cầu Thủ Chết Đuối Tối Thượng"
 }

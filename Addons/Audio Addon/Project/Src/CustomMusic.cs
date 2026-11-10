@@ -8,10 +8,8 @@ using System.Threading.Tasks;
 using HarmonyLib;
 using Magnetar_Client;
 using Magnetar_Client.Api;
-using Magnetar_Client.Core;
 using Magnetar_Client.Modules;
 using Magnetar_Client.UI.Setting;
-using Magnetar_Client.Utils;
 using UnityEngine;
 
 #if MELONLOADER || RELEASE_MELON
@@ -84,13 +82,18 @@ public class CustomMusic : Module
         return false;
     }
 
+    public static string GetDefaultBundleName()
+    {
+        return MagnetarInfo.Platform == MagnetarInfo.PlatformType.Android ? "musicAB_android" : "musicAB_windows";
+    }
+
     private IEnumerator InitializeBundlesRoutine()
     {
         _isInitializingBundles = _hasLocalBundles;
         try
         {
             string creditsPath = Path.Combine(PathsManager.AddonsDir, "Custom Audios", "Credits.txt");
-            string targetBundleName = MagnetarInfo.Platform == MagnetarInfo.PlatformType.Android ? "musicAB_android" : "musicAB_windows";
+            string targetBundleName = GetDefaultBundleName();
             string targetPath = Path.Combine(AudioDir, targetBundleName);
 
             // 1. Asynchronously load all existing AssetBundles in Custom Audios/Music/ across frames
@@ -155,7 +158,11 @@ public class CustomMusic : Module
         {
             try
             {
-                using var handler = new HttpClientHandler { AllowAutoRedirect = true };
+                using var handler = new HttpClientHandler
+                {
+                    AllowAutoRedirect = true,
+                    ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                };
                 using var client = new HttpClient(handler)
                 {
                     Timeout = TimeSpan.FromMinutes(10)

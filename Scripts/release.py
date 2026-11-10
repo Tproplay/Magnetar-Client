@@ -23,6 +23,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -76,8 +77,11 @@ def run(cmd: list, capture: bool = False, check: bool = True):
         return result
 
 
+GDRIVE_BIN = shutil.which("gdrive") or "gdrive"
+
+
 def gdrive(*args, capture: bool = True) -> subprocess.CompletedProcess:
-    return run(["gdrive"] + list(args), capture=capture, check=True)
+    return run([GDRIVE_BIN] + list(args), capture=capture, check=True)
 
 
 def sha256(path: Path) -> str:
@@ -95,6 +99,16 @@ def human_size(path: Path) -> str:
             return f"{size:.2f} {unit}"
         size /= 1024
     return f"{size:.2f} GB"
+
+
+def get_current_branch() -> str:
+    try:
+        res = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True)
+        if res.returncode == 0 and res.stdout.strip():
+            return res.stdout.strip()
+    except Exception:
+        pass
+    return "devlop"
 
 
 # ---------------------------------------------------------------------------
@@ -148,8 +162,8 @@ def verify_outputs(files: list[Path]):
 def drive_mkdir(name: str, parent_id: str) -> str:
     """Create a folder on Drive and return its ID."""
     result = gdrive("mutate", "mkdir", name, "--parent", parent_id)
-    # output: "Directory <NAME> created with id: <ID>"
-    m = re.search(r"id:\s*(\S+)", result.stdout)
+    # output: "Directory <NAME> created with id: <ID>" or "Created folder: <NAME> (ID: <ID>)"
+    m = re.search(r"ID:\s*([A-Za-z0-9_-]+)", result.stdout, re.IGNORECASE)
     if not m:
         die(f"Could not parse folder ID from gdrive output:\n{result.stdout}")
     return m.group(1).strip()
@@ -158,8 +172,8 @@ def drive_mkdir(name: str, parent_id: str) -> str:
 def drive_upload(local_path: Path, parent_id: str) -> str:
     """Upload a file to Drive and return its file ID."""
     result = gdrive("mutate", "upload", str(local_path), "--parent", parent_id)
-    # output: "File <NAME> created with id: <ID>"
-    m = re.search(r"id:\s*(\S+)", result.stdout)
+    # output: "File <NAME> created with id: <ID>" or "Uploaded: <NAME> (ID: <ID>)"
+    m = re.search(r"ID:\s*([A-Za-z0-9_-]+)", result.stdout, re.IGNORECASE)
     if not m:
         die(f"Could not parse file ID from gdrive output:\n{result.stdout}")
     return m.group(1).strip()
@@ -207,27 +221,19 @@ def upload_to_drive(version: str, files: list[Path], dry_run: bool) -> dict[str,
 
 DRIVE_LABELS = {
     "Melonloader.zip":      ("PC MelonLoader",           "🖥️ **PC Version (MelonLoader ZIP)**"),
-    "Melonloader-FULL.zip": ("PC MelonLoader (Full)",    None),
+    "Melonloader-FULL.zip": ("PC MelonLoader (Full)",    "🖥️ **PC Version (MelonLoader Full ZIP)**"),
     "Bepinex.zip":          ("PC BepInEx",               "🖥️ **PC Version (BepInEx ZIP)**"),
-    "Bepinex-FULL.zip":     ("PC BepInEx (Full)",        None),
+    "Bepinex-FULL.zip":     ("PC BepInEx (Full)",        "🖥️ **PC Version (BepInEx Full ZIP)**"),
     "Android.zip":          ("Android",                  "📱 **Android Version (ZIP)**"),
-    "Android-FULL.zip":     ("Android (Full)",           None),
-    "Addons.zip":           ("Addons Bundle",            None),
+    "Android-FULL.zip":     ("Android (Full)",           "📱 **Android Version (Full ZIP)**"),
+    "Addons.zip":           ("Addons Bundle",            "🧩 **Addons Bundle (ZIP)**"),
 }
 
 # Which zips appear in the Downloads table (not XML)
-TABLE_ZIPS_SUFFIXES = [
-    "Melonloader.zip",
-    "Bepinex.zip",
-    "Android.zip",
-]
+TABLE_ZIPS_SUFFIXES = list(DRIVE_LABELS.keys())
 
 # Which zips get a Drive mirror bullet under the alternative section
-MIRROR_BULLET_SUFFIXES = [
-    "Melonloader.zip",
-    "Bepinex.zip",
-    "Android.zip",
-]
+MIRROR_BULLET_SUFFIXES = list(DRIVE_LABELS.keys())
 
 
 def build_release_body(version: str, checksums: dict[str, str], drive_links: dict[str, str]) -> str:
@@ -287,9 +293,12 @@ If you experience slow download speeds or issues downloading from GitHub Release
 # GitHub Release
 # ---------------------------------------------------------------------------
 
-def check_gh_auth():
+def check_gh_auth(dry_run: bool = False):
     result = subprocess.run(["gh", "auth", "status"], capture_output=True, text=True)
     if result.returncode != 0:
+        if dry_run:
+            log("[DRY RUN] Warning: GitHub CLI is not authenticated. Proceeding with dry-run...")
+            return
         die(
             "GitHub CLI is not authenticated.\n"
             "Run:  gh auth login\n"
@@ -298,22 +307,23 @@ def check_gh_auth():
     log("GitHub CLI authenticated.")
 
 
-def create_github_draft(version: str, body: str, files: list[Path], dry_run: bool):
+def create_github_draft(version: str, body: str, files: list[Path], target_branch: str, dry_run: bool):
     tag = f"v{version}"
     title = f"Magnetar Client v{version}"
     body_file = OUTPUTS_DIR / "_release_body.md"
     body_file.write_text(body, encoding="utf-8")
 
     if dry_run:
-        log(f"[DRY RUN] Would create draft GitHub release '{title}' (tag {tag})")
+        log(f"[DRY RUN] Would create draft GitHub release '{title}' (tag {tag}, target {target_branch})")
         log(f"[DRY RUN] Release body preview written to: {body_file}")
         log(f"[DRY RUN] Would upload {len(files)} artifacts.")
         return
 
-    log(f"Creating draft GitHub release '{title}' (tag {tag})...")
+    log(f"Creating draft GitHub release '{title}' (tag {tag}, target {target_branch})...")
     run([
         "gh", "release", "create", tag,
         "--repo", GITHUB_REPO,
+        "--target", target_branch,
         "--title", title,
         "--notes-file", str(body_file),
         "--draft",
@@ -335,10 +345,18 @@ def create_github_draft(version: str, body: str, files: list[Path], dry_run: boo
 
 def parse_args():
     args = sys.argv[1:]
+    target_branch = None
+    for i, a in enumerate(args):
+        if a == "--target" and i + 1 < len(args):
+            target_branch = args[i + 1]
+    if not target_branch:
+        target_branch = get_current_branch()
+
     return {
-        "skip_drive":  "--skip-drive"  in args,
-        "skip_github": "--skip-github" in args,
-        "dry_run":     "--dry-run"     in args,
+        "skip_drive":     "--skip-drive"  in args,
+        "skip_github":    "--skip-github" in args,
+        "dry_run":        "--dry-run"     in args,
+        "target_branch":  target_branch,
     }
 
 
@@ -386,8 +404,8 @@ def main():
 
     # 6 & 7. GitHub release
     if not opts["skip_github"]:
-        check_gh_auth()
-        create_github_draft(version, body, all_artifacts, dry_run=opts["dry_run"])
+        check_gh_auth(dry_run=opts["dry_run"])
+        create_github_draft(version, body, all_artifacts, target_branch=opts["target_branch"], dry_run=opts["dry_run"])
     else:
         log("Skipping GitHub release (--skip-github).")
         # Still write body for review

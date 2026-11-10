@@ -1,0 +1,11 @@
+{
+    "Name": "Giao Diện Sandbox",
+    "Description": "Mở rộng giao diện thử nghiệm Sandbox trong game.",
+    "Search Hints": "giao diện sandbox menu thử nghiệm phòng thí nghiệm sandbox ui",
+    "settings": {
+        "General": "Cài Đặt Chung",
+        "Set Board isIZ flag (Enables zombie placement)": "Bật cờ isIZ cho bàn cờ (Cho phép thả zombie)",
+        "Scale": "Tỷ Lệ Thu Phóng",
+        "Close UI On Entity Click": "Tự Đóng Menu Khi Chọn Thực Thể"
+    }
+}

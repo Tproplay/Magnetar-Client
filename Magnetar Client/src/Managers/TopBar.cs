@@ -1,4 +1,4 @@
-﻿using Magnetar_Client.Api;
+using Magnetar_Client.Api;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.Themes;
 using static Magnetar_Client.Utils.Translator;
@@ -17,6 +17,7 @@ public static class TopBar
     private static readonly Dictionary<TabType, float> BaseWidth = new();
     private static float[] baseOffsets = Array.Empty<float>();
     private static float[] scaledOffsets = Array.Empty<float>();
+    private static bool _hasCalculatedWithStyle = false;
 
     private const float BaseHeight = 30f;
 
@@ -37,10 +38,35 @@ public static class TopBar
         Order.Clear();
         BaseWidth.Clear();
 
+        GUIStyle styleOff = ThemeManager.TopBarStyle;
+        GUIStyle styleOn = ThemeManager.TopBarActiveStyle;
+
+        if (styleOff != null || styleOn != null)
+        {
+            _hasCalculatedWithStyle = true;
+        }
+
+        float scale = GUIManager.ScaleSetting?.Value ?? 1f;
+        if (scale <= 0f) scale = 1f;
+
         foreach (TabType tab in TabType.AllTabs)
         {
             string translated = Translate(tab.Name);
-            float btnWidth = Mathf.Max(translated.Length * 13f, 50f);
+            float btnWidth;
+
+            if (styleOff != null || styleOn != null)
+            {
+                GUIContent content = new(translated);
+                float wOff = styleOff != null ? styleOff.CalcSize(content).x : 0f;
+                float wOn = styleOn != null ? styleOn.CalcSize(content).x : 0f;
+                float measuredScaled = Mathf.Max(wOff, wOn);
+                measuredScaled = Mathf.Max(measuredScaled, GUIManager.S(50f));
+                btnWidth = Mathf.Ceil(measuredScaled) / scale;
+            }
+            else
+            {
+                btnWidth = Mathf.Max(translated.Length * 13f, 50f);
+            }
 
             Order.Add(tab);
             BaseWidth[tab] = btnWidth;
@@ -64,9 +90,32 @@ public static class TopBar
         {
             scaledOffsets = new float[count + 1];
         }
-        for (int i = 0; i <= count; i++)
+
+        GUIStyle styleOff = ThemeManager.TopBarStyle;
+        GUIStyle styleOn = ThemeManager.TopBarActiveStyle;
+
+        if (styleOff != null || styleOn != null)
         {
-            scaledOffsets[i] = Mathf.Round(GUIManager.S(baseOffsets[i]));
+            float running = 0f;
+            for (int i = 0; i < count; i++)
+            {
+                scaledOffsets[i] = Mathf.Round(running);
+                string translated = Translate(Order[i].Name);
+                GUIContent content = new(translated);
+                float wOff = styleOff != null ? styleOff.CalcSize(content).x : 0f;
+                float wOn = styleOn != null ? styleOn.CalcSize(content).x : 0f;
+                float measuredScaled = Mathf.Max(wOff, wOn);
+                measuredScaled = Mathf.Max(measuredScaled, GUIManager.S(50f));
+                running += Mathf.Ceil(measuredScaled);
+            }
+            scaledOffsets[count] = Mathf.Round(running);
+        }
+        else
+        {
+            for (int i = 0; i <= count; i++)
+            {
+                scaledOffsets[i] = Mathf.Round(GUIManager.S(baseOffsets[i]));
+            }
         }
     }
 
@@ -90,7 +139,11 @@ public static class TopBar
         int count = Order.Count;
         if (count == 0) return;
 
-        if (scaledOffsets.Length != count + 1)
+        if (!_hasCalculatedWithStyle && (ThemeManager.TopBarStyle != null || ThemeManager.TopBarActiveStyle != null))
+        {
+            RebuildOffsets();
+        }
+        else if (scaledOffsets.Length != count + 1)
         {
             RebuildScaledOffsets();
         }
@@ -140,7 +193,7 @@ public static class TopBar
         GUI.EndGroup();
     }
 
-    private class TopBarService : ILanguageAware, IScaleAware
+    private class TopBarService : ILanguageAware, IScaleAware, IThemeAware
     {
         public string Name => "TopBar";
         public int Priority => ServicePriority.Highest;
@@ -162,7 +215,12 @@ public static class TopBar
 
         public void OnGUIScaleChanged(float newScale)
         {
-            TopBar.RebuildScaledOffsets();
+            TopBar.RebuildOffsets();
+        }
+
+        public void OnThemeChanged()
+        {
+            TopBar.RebuildOffsets();
         }
     }
 }

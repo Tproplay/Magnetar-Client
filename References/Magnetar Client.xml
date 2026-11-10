@@ -563,6 +563,16 @@
             Game Folder / BepInEx / plugins / Magnetar Data / Resources / Magnetar_logo.png
             </remarks>
         </member>
+        <member name="P:Magnetar_Client.Api.PathsManager.ResourceSpriteDir">
+            <summary>
+            Melonloader:
+            Game Folder / Mods / Magnetar Data / Resources / Sprites
+            </summary>
+            <remarks>
+            BepInEx:
+            Game Folder / BepInEx / plugins / Magnetar Data / Resources / Sprites
+            </remarks>
+        </member>
         <member name="T:Magnetar_Client.Api.ServiceRegistry">
             <summary>
             Managers Services for different actions.
@@ -656,6 +666,16 @@
             center point fixed. Used for draggable windows so they grow/shrink
             around wherever the user last dragged them when GUIScale changes,
             instead of always resetting to a default position.
+            </summary>
+        </member>
+        <member name="T:Magnetar_Client.PreferenceManager">
+            <summary>
+            Allows adding prefrences entries supported by both mod loaders.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.PreferenceManager.CreateEntry``1(System.String,System.String,``0,System.String,System.String)">
+            <summary>
+            API to create new preference entries at runtime.
             </summary>
         </member>
         <member name="T:Magnetar_Client.Core.Main">
@@ -779,16 +799,6 @@
         <member name="M:Magnetar_Client.Core.TabType.Register(System.String,System.Action,System.Action,System.Action)">
             <summary>
             Registers a new custom tab.
-            </summary>
-        </member>
-        <member name="T:Magnetar_Client.PreferenceManager">
-            <summary>
-            Allows adding prefrences entries supported by both mod loaders.
-            </summary>
-        </member>
-        <member name="M:Magnetar_Client.PreferenceManager.CreateEntry``1(System.String,System.String,``0,System.String,System.String)">
-            <summary>
-            API to create new preference entries at runtime.
             </summary>
         </member>
         <member name="T:Magnetar_Client.GameData">
@@ -996,6 +1006,12 @@
             Checks if the player is in a level and has paused the game
             </summary>
         </member>
+        <member name="T:Magnetar_Client.HUDElements.ActiveModules">
+            <summary>
+            HUD Element that displays the list of currently active modules in waterfall order
+            (longest width to shortest), auto-aligning to the left or right depending on screen placement.
+            </summary>
+        </member>
         <member name="T:Magnetar_Client.HUDElements.HudElement">
             <summary>
             Base Class for all HudElements.
@@ -1054,9 +1070,39 @@
             </summary>
             <remarks>Make sure to call base.OnUpdate() otherwise this method won't be triggered.</remarks>
         </member>
+        <member name="P:Magnetar_Client.HUDElements.HudElement.BackgroundStyle">
+            <summary>
+            Style used to render the element's background box. Defaults to ThemeManager.HUDElementBackgroundStyle.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.HUDElements.HudElement.TextAlignment">
+            <summary>
+            Default text alignment for this HUD element. Defaults to MiddleCenter.
+            </summary>
+        </member>
         <member name="M:Magnetar_Client.HUDElements.HudElement.DrawContent(System.Single,System.Single)">
             <summary>
             Add the label to be displayed here.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.HUDElements.HudElement.Draw(System.String,System.Single,System.Single)">
+            <summary>
+            Renders standard HUD element text within the element's container using default padding.
+            </summary>
+            <param name="text">The text to display.</param>
+            <param name="width">Container width.</param>
+            <param name="height">Container height.</param>
+        </member>
+        <member name="M:Magnetar_Client.HUDElements.HudElement.Draw(UnityEngine.Rect,System.String)">
+            <summary>
+            Core text drawing method for HUD elements. Applies the current theme and RGB color logic.
+            </summary>
+            <param name="rect">Bounding rectangle inside the container.</param>
+            <param name="text">The text to display.</param>
+        </member>
+        <member name="M:Magnetar_Client.HUDElements.HudElement.AdjustWidthToText(System.String,System.Single)">
+            <summary>
+            Auto-adjusts the Bounds to match this text using the default HUD element style.
             </summary>
         </member>
         <member name="M:Magnetar_Client.HUDElements.HudElement.AdjustWidthToText(System.String,UnityEngine.GUIStyle,System.Single)">
@@ -1102,8 +1148,17 @@
         </member>
         <member name="M:Magnetar_Client.HUDElements.HudElement.OnLanguageChanged">
             <summary>
-            Called when the client's language changes. By default re-triggers OnUpdateActive() if active.
+            Called when the client's language changes to reload and cache localized strings.
             </summary>
+        </member>
+        <member name="M:Magnetar_Client.HUDElements.HudElement.GetFormat(System.String,System.String)">
+            <summary>
+            Resolves and caches a translated format template for use with string.Format ({0}, {1}, ...).
+            Converts regex capture placeholders ({1}, {2}, etc.) to string.Format index placeholders ({0}, {1}, etc.).
+            </summary>
+            <param name="pattern">The regex pattern registered for this element.</param>
+            <param name="defaultFormat">Fallback format string if no translation template is found.</param>
+            <returns>A string formatted for standard string.Format.</returns>
         </member>
         <member name="M:Magnetar_Client.HUDElements.HudElement.Translate(System.String)">
             <summary>
@@ -1126,6 +1181,21 @@
         <member name="M:Magnetar_Client.Modules.QuickSetup.FlashButtonText(Magnetar_Client.UI.Setting.ButtonSetting,System.String,System.String,System.Single,System.Action)">
             <summary>
             Temporarily overrides a button's text, then restores it after <paramref name="duration"/> seconds.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.Modules.VanillaMode.GetSuppressedModuleNames">
+            <summary>
+            Gets the list of module names suppressed by Vanilla Mode.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.Modules.VanillaMode.IsModuleSuppressed(System.String)">
+            <summary>
+            Checks whether a module with the specified name is currently suppressed by Vanilla Mode.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.Modules.VanillaMode.RegisterDisabledModule(System.String)">
+            <summary>
+            Registers a module name as suppressed by Vanilla Mode.
             </summary>
         </member>
         <member name="T:Magnetar_Client.Modules.Module">
@@ -1453,6 +1523,33 @@
             Gets the texture of zombie from <see cref="P:Il2Cpp.ResourcesManager.zombieSprites"/>
             </summary>
         </member>
+        <member name="M:Magnetar_Client.UI.ResourceManager.GetBulletTexture(System.Int32)">
+            <summary>
+            Gets the texture of bullet from <see cref="P:Il2Cpp.ResourcesManager.bulletPrefabs"/>
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.ResourceManager.GetBulletTexture(Il2Cpp.BulletType)">
+            <summary>
+            Gets the texture of bullet from <see cref="P:Il2Cpp.ResourcesManager.bulletPrefabs"/>
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.ResourceManager.ExtractBestBulletSprite(UnityEngine.GameObject)">
+            <summary>
+            Extracts the most prominent visual Sprite from a bullet prefab hierarchy,
+            intelligently skipping shadow objects, particle emitters, and sub-components.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.ResourceManager.EntitiesWarmedUp">
+            <summary>
+            Gets whether entity textures have been pre-warmed.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.ResourceManager.WarmUpAllEntityTextures">
+            <summary>
+            Warms up and pre-caches all Plant, Zombie, and Bullet textures ahead of time.
+            If invoked during an OnGUI pass, draws them offscreen to warm up the IMGUI render pipeline.
+            </summary>
+        </member>
         <member name="T:Magnetar_Client.UI.SafeToCloseManager">
             <summary>
             Manages GUI lifecycle and condition guards for Escape and Tab events.
@@ -1620,6 +1717,11 @@
         <member name="M:Magnetar_Client.UI.Setting.BindSetting.Reset">
             <summary>
             Restores the keybinds to <see cref="P:Magnetar_Client.UI.Setting.BindSetting.DefaultKeys"/> and cancels active listening.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.BindSetting.IsFocused">
+            <summary>
+            Indicates whether this keybind setting is currently listening for keypresses.
             </summary>
         </member>
         <member name="M:Magnetar_Client.UI.Setting.BindSetting.Draw(System.Single@,System.Single)">
@@ -1953,12 +2055,15 @@
             Restores the setting back to <see cref="F:Magnetar_Client.UI.Setting.IntSetting.DefaultValue"/> and clears pending edits.
             </summary>
         </member>
-        <member name="M:Magnetar_Client.UI.Setting.IntSetting.Draw(System.Single@,System.Single)">
+        <member name="P:Magnetar_Client.UI.Setting.IntSetting.IsFocused">
             <summary>
             Renders the setting row containing the label, slider track, numeric input field, and reset button.
             </summary>
             <param name="y">Reference to the vertical layout offset.</param>
             <param name="width">The total available layout width.</param>
+            <summary>
+            Indicates whether this numeric setting's slider is being dragged or its input field is focused.
+            </summary>
         </member>
         <member name="M:Magnetar_Client.UI.Setting.IntSetting.DrawNumeric(System.Object,System.Single@,System.Single,System.Boolean)">
             <summary>
@@ -2117,12 +2222,15 @@
             Restores the setting back to <see cref="F:Magnetar_Client.UI.Setting.FloatSetting.DefaultValue"/> and clears pending edits.
             </summary>
         </member>
-        <member name="M:Magnetar_Client.UI.Setting.FloatSetting.Draw(System.Single@,System.Single)">
+        <member name="P:Magnetar_Client.UI.Setting.FloatSetting.IsFocused">
             <summary>
             Renders the setting row containing the label, slider track, numeric input field, and reset button.
             </summary>
             <param name="y">Reference to the vertical layout offset.</param>
             <param name="width">The total available layout width.</param>
+            <summary>
+            Indicates whether this numeric setting's slider is being dragged or its input field is focused.
+            </summary>
         </member>
         <member name="T:Magnetar_Client.UI.Setting.StringSetting">
             <summary>
@@ -2153,6 +2261,17 @@
             <summary>
             Gets or sets the text string value.
             </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.StringSetting.Text">
+            <summary>
+            Alias for <see cref="P:Magnetar_Client.UI.Setting.StringSetting.Value"/>
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.StringSetting.SetDirect(System.String)">
+            <summary>
+            Sets the value directly without invoking events or checking <see cref="P:Magnetar_Client.UI.Setting.Setting.IsDisabled"/>.
+            </summary>
+            <param name="val">The new string value to set.</param>
         </member>
         <member name="M:Magnetar_Client.UI.Setting.StringSetting.#ctor(System.String,System.String,System.Collections.Generic.List{System.String})">
             <summary>
@@ -2661,6 +2780,11 @@
             Optional user data or metadata attached to this section instance.
             </summary>
         </member>
+        <member name="P:Magnetar_Client.UI.Setting.SectionInstance.IsFocused">
+            <summary>
+            Indicates whether any child setting within this section instance is currently focused.
+            </summary>
+        </member>
         <member name="M:Magnetar_Client.UI.Setting.SectionInstance.#ctor(System.String,System.Collections.Generic.List{Magnetar_Client.UI.Setting.Setting})">
             <summary>
             Initializes a new instance of <see cref="T:Magnetar_Client.UI.Setting.SectionInstance"/> with a title and an optional list of child settings.
@@ -2727,6 +2851,11 @@
         <member name="F:Magnetar_Client.UI.Setting.SectionSetting.Sections">
             <summary>
             The collection of currently instantiated section groups.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.SectionSetting.IsFocused">
+            <summary>
+            Indicates whether any child setting within this section container is currently focused.
             </summary>
         </member>
         <member name="P:Magnetar_Client.UI.Setting.SectionSetting.MaxSections">
@@ -2902,6 +3031,77 @@
             Returns an enumerator that iterates through the active <see cref="T:Magnetar_Client.UI.Setting.SectionInstance"/> list.
             </summary>
         </member>
+        <member name="T:Magnetar_Client.UI.Setting.EntitySelectSetting">
+            <summary>
+            A multi-select setting specialized for in-game entities (Plants, Zombies, Bullets, or Custom)
+            featuring a textured block-grid GUI pattern.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.EntitySelectSetting.EntityType">
+            <summary>
+            Gets the entity type (Plant, Zombie, Bullet, or Custom) configured for this setting, or <c>null</c> if custom-configured.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.EntitySelectSetting.TextureProvider">
+            <summary>
+            Gets or sets a custom texture provider function mapping an entity ID to its preview <see cref="T:UnityEngine.Texture2D"/>.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.EntitySelectSetting.#ctor(System.String,System.Func{System.Int32,UnityEngine.Texture2D},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Initializes a new instance of <see cref="T:Magnetar_Client.UI.Setting.EntitySelectSetting"/> with a custom texture provider and no preset <see cref="P:Magnetar_Client.UI.Setting.EntitySelectSetting.EntityType"/>.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.EntitySelectSetting.#ctor(System.String,System.Type,System.Func{System.Int32,UnityEngine.Texture2D},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Initializes a new instance of <see cref="T:Magnetar_Client.UI.Setting.EntitySelectSetting"/> with an enum type, custom texture provider, and no preset <see cref="P:Magnetar_Client.UI.Setting.EntitySelectSetting.EntityType"/>.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.EntitySelectSetting.#ctor(System.String,System.Collections.Generic.Dictionary{System.Int32,System.String},System.Func{System.Int32,UnityEngine.Texture2D},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Initializes a new instance of <see cref="T:Magnetar_Client.UI.Setting.EntitySelectSetting"/> with explicit options, custom texture provider, and no preset <see cref="P:Magnetar_Client.UI.Setting.EntitySelectSetting.EntityType"/>.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.EntitySelectSetting.#ctor(System.String,System.Collections.Generic.Dictionary{System.Int32,UnityEngine.Texture2D},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Initializes a new instance of <see cref="T:Magnetar_Client.UI.Setting.EntitySelectSetting"/> with a dictionary of textures mapping ID to <see cref="T:UnityEngine.Texture2D"/>, and no preset <see cref="P:Magnetar_Client.UI.Setting.EntitySelectSetting.EntityType"/>.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.EntitySelectSetting.#ctor(System.String,System.Collections.Generic.Dictionary{System.Int32,System.String},System.Collections.Generic.Dictionary{System.Int32,UnityEngine.Texture2D},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Initializes a new instance of <see cref="T:Magnetar_Client.UI.Setting.EntitySelectSetting"/> with options and a dictionary of textures, and no preset <see cref="P:Magnetar_Client.UI.Setting.EntitySelectSetting.EntityType"/>.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.EntitySelectSetting.GetTexture(System.Int32)">
+            <summary>
+            Gets the preview texture for the specified entity ID.
+            </summary>
+        </member>
+        <member name="T:Magnetar_Client.UI.Setting.EntityType">
+            <summary>
+            Specifies the type of in-game entities supported by <see cref="T:Magnetar_Client.UI.Setting.EntitySelectSetting"/>.
+            </summary>
+        </member>
+        <member name="F:Magnetar_Client.UI.Setting.EntityType.Plant">
+            <summary>
+            Plant entities backed by game <c>PlantType</c>.
+            </summary>
+        </member>
+        <member name="F:Magnetar_Client.UI.Setting.EntityType.Zombie">
+            <summary>
+            Zombie entities backed by game <c>ZombieType</c>.
+            </summary>
+        </member>
+        <member name="F:Magnetar_Client.UI.Setting.EntityType.Bullet">
+            <summary>
+            Bullet entities backed by game <c>BulletType</c>.
+            </summary>
+        </member>
+        <member name="F:Magnetar_Client.UI.Setting.EntityType.Custom">
+            <summary>
+            Custom entity type with user-provided options and textures.
+            </summary>
+        </member>
         <member name="T:Magnetar_Client.UI.Setting.BaseMultiSelectSetting">
             <summary>
             Abstract base class defining common state, rendering, and lifecycle behavior for all multi-select settings.
@@ -3024,6 +3224,11 @@
             Gets a centered count text style with font size reduced to 70% of the setting label size.
             </summary>
         </member>
+        <member name="P:Magnetar_Client.UI.Setting.BaseMultiSelectSetting.IsFocused">
+            <summary>
+            Indicates whether this multi-select window/dialog is currently active and focused.
+            </summary>
+        </member>
         <member name="M:Magnetar_Client.UI.Setting.BaseMultiSelectSetting.Draw(System.Single@,System.Single)">
             <summary>
             Renders the setting row in the window, showing the label, current count (if enabled), select button, and reset button.
@@ -3082,19 +3287,139 @@
             The underlying Enum type if this setting was constructed from an Enum.
             </summary>
         </member>
+        <member name="T:Magnetar_Client.UI.Setting.BaseSelectSetting">
+            <summary>
+            Abstract base class defining common state, rendering, and lifecycle behavior for all single-choice select dropdown settings.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.BaseSelectSetting.ValueRaw">
+            <summary>
+            Gets or sets the untyped selected option key.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.BaseSelectSetting.CurrentValueDisplayName">
+            <summary>
+            Gets the display name of the currently selected option.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.BaseSelectSetting.OptionsCount">
+            <summary>
+            Gets the total number of options available in this setting.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.BaseSelectSetting.IsSelectedRaw(System.Object)">
+            <summary>
+            Checks whether the option corresponding to the specified key is currently selected.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.BaseSelectSetting.SetValueRaw(System.Object)">
+            <summary>
+            Sets the selected option to the key represented by the given raw object.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.BaseSelectSetting.SetDirectRaw(System.Object)">
+            <summary>
+            Sets the value directly without invoking change events or checking <see cref="P:Magnetar_Client.UI.Setting.Setting.IsDisabled"/>.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.BaseSelectSetting.SetCurrentAsDefault">
+            <summary>
+            Updates the default value to match the current selection.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.BaseSelectSetting.ExportSaveData">
+            <summary>
+            Exports the current value in a format suitable for JSON serialization.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.BaseSelectSetting.ImportSaveData(System.Object)">
+            <summary>
+            Restores the selected value from a deserialized JSON object.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.BaseSelectSetting.GetRenderableOptions">
+            <summary>
+            Returns the sequence of renderable key-display pairs for the dropdown options list.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.BaseSelectSetting.IsFocused">
+            <summary>
+            Indicates whether this dropdown menu is currently open and focused.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.BaseSelectSetting.Draw(System.Single@,System.Single)">
+            <summary>
+            Renders the select dropdown setting control within the GUI window.
+            </summary>
+            <param name="y">The vertical drawing coordinate reference.</param>
+            <param name="width">The total available width for the control.</param>
+        </member>
+        <member name="T:Magnetar_Client.UI.Setting.SelectSetting`1">
+            <summary>
+            Generic dropdown selection setting supporting strongly-typed keys.
+            </summary>
+            <typeparam name="T">The type of the option key.</typeparam>
+        </member>
+        <member name="F:Magnetar_Client.UI.Setting.SelectSetting`1.DefaultValue">
+            <summary>
+            The default selected option value restored when <see cref="M:Magnetar_Client.UI.Setting.SelectSetting`1.Reset"/> is executed.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.SelectSetting`1.Options">
+            <summary>
+            Dictionary of available options mapping typed keys to their default display names.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.SelectSetting`1.CustomNames">
+            <summary>
+            Optional dictionary mapping typed keys to custom display name overrides.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.SelectSetting`1.OnSelectionChanged">
+            <summary>
+            Event invoked when the selected option value changes.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.SelectSetting`1.Value">
+            <summary>
+            Gets or sets the currently selected option value.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.SelectSetting`1.AddOption(`0,System.String)">
+            <summary>
+            Adds or updates an available option with the specified ID and display name.
+            </summary>
+            <param name="id">The key identifying the option.</param>
+            <param name="displayName">The display text shown for the option.</param>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.SelectSetting`1.Reset">
+            <summary>
+            Restores the selected value back to <see cref="F:Magnetar_Client.UI.Setting.SelectSetting`1.DefaultValue"/>.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.SelectSetting`1.SetDirect(`0)">
+            <summary>
+            Sets the value directly without invoking events or checking <see cref="P:Magnetar_Client.UI.Setting.Setting.IsDisabled"/>.
+            </summary>
+        </member>
+        <member name="T:Magnetar_Client.UI.Setting.StringSelectSetting">
+            <summary>
+            A specialized <see cref="T:Magnetar_Client.UI.Setting.SelectSetting`1"/> keyed by <see cref="T:System.String"/>, designed for dynamic string collections and external lists.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.StringSelectSetting.AddOption(System.String)">
+            <summary>
+            Adds or updates an available option with identical key and display text.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.StringSelectSetting.SetOptions(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Clears and repopulates all available options from a string collection.
+            </summary>
+        </member>
         <member name="T:Magnetar_Client.UI.Setting.SelectSetting">
             <summary>
-            A setting representing a single-choice dropdown selection from a collection of options or an enum.
-            </summary>
-        </member>
-        <member name="F:Magnetar_Client.UI.Setting.SelectSetting.DefaultValue">
-            <summary>
-            The default selected option value restored when <see cref="M:Magnetar_Client.UI.Setting.SelectSetting.Reset"/> is executed.
-            </summary>
-        </member>
-        <member name="P:Magnetar_Client.UI.Setting.SelectSetting.Options">
-            <summary>
-            Dictionary of available options mapping integer keys to their default display names.
+            A setting representing a single-choice dropdown selection from a collection of options or an enum (keyed by int).
             </summary>
         </member>
         <member name="P:Magnetar_Client.UI.Setting.SelectSetting.EnumType">
@@ -3102,60 +3427,30 @@
             The enum type used to populate options, or <see langword="null"/> if not created from an enum.
             </summary>
         </member>
-        <member name="P:Magnetar_Client.UI.Setting.SelectSetting.CustomNames">
-            <summary>
-            Optional dictionary mapping integer keys to custom display name overrides.
-            </summary>
-        </member>
-        <member name="P:Magnetar_Client.UI.Setting.SelectSetting.OnSelectionChanged">
-            <summary>
-            Event invoked when the selected option value changes.
-            </summary>
-        </member>
-        <member name="P:Magnetar_Client.UI.Setting.SelectSetting.Value">
-            <summary>
-            Gets or sets the currently selected option value.
-            </summary>
-        </member>
         <member name="M:Magnetar_Client.UI.Setting.SelectSetting.#ctor(System.String,System.Int32)">
             <summary>
             Initializes a new instance of <see cref="T:Magnetar_Client.UI.Setting.SelectSetting"/> with a display name and default value.
             </summary>
-            <param name="name">The display name of the setting.</param>
-            <param name="defaultValue">The initial and default integer value.</param>
-            <param name="customSaveKey">Optional custom key for persistence.</param>
+        </member>
+        <member name="M:Magnetar_Client.UI.Setting.SelectSetting.#ctor(System.String,System.Collections.Generic.Dictionary{System.Int32,System.String},System.Int32)">
+            <summary>
+            Initializes a new instance of <see cref="T:Magnetar_Client.UI.Setting.SelectSetting"/> with a display name, dictionary of options, and default value.
+            </summary>
         </member>
         <member name="M:Magnetar_Client.UI.Setting.SelectSetting.#ctor(System.String,System.Type,System.Int32)">
             <summary>
             Initializes a new instance of <see cref="T:Magnetar_Client.UI.Setting.SelectSetting"/> populated from the values of an enum type.
             </summary>
-            <param name="name">The display name of the setting.</param>
-            <param name="enumType">The enumeration type used to populate options.</param>
-            <param name="defaultValue">The initial and default integer value.</param>
         </member>
-        <member name="M:Magnetar_Client.UI.Setting.SelectSetting.AddOption(System.Int32,System.String)">
+        <member name="M:Magnetar_Client.UI.Setting.SelectSetting.#ctor(System.String,System.Collections.Generic.List{System.String},System.Int32)">
             <summary>
-            Adds or updates an available option with the specified ID and display name.
-            </summary>
-            <param name="id">The integer key identifying the option.</param>
-            <param name="displayName">The display text shown for the option.</param>
-        </member>
-        <member name="M:Magnetar_Client.UI.Setting.SelectSetting.Reset">
-            <summary>
-            Restores the selected value back to <see cref="F:Magnetar_Client.UI.Setting.SelectSetting.DefaultValue"/>.
+            Initializes a new instance of <see cref="T:Magnetar_Client.UI.Setting.SelectSetting"/> populated with sequentially-indexed strings.
             </summary>
         </member>
-        <member name="M:Magnetar_Client.UI.Setting.SelectSetting.SetDirect(System.Int32)">
+        <member name="M:Magnetar_Client.UI.Setting.SelectSetting.#ctor(System.String,System.String[],System.Int32)">
             <summary>
-            Sets the value directly without invoking events or checking <see cref="P:Magnetar_Client.UI.Setting.Setting.IsDisabled"/>.
+            Initializes a new instance of <see cref="T:Magnetar_Client.UI.Setting.SelectSetting"/> populated with sequentially-indexed strings.
             </summary>
-        </member>
-        <member name="M:Magnetar_Client.UI.Setting.SelectSetting.Draw(System.Single@,System.Single)">
-            <summary>
-            Renders the select dropdown setting control within the GUI window.
-            </summary>
-            <param name="y">The vertical drawing coordinate reference.</param>
-            <param name="width">The total available width for the control.</param>
         </member>
         <member name="T:Magnetar_Client.UI.Setting.Setting">
             <summary>
@@ -3197,6 +3492,11 @@
         <member name="P:Magnetar_Client.UI.Setting.Setting.IsDisabled">
             <summary>
             Gets or sets whether this setting is disabled, suppressing modifications and user interactions.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.Setting.Setting.IsFocused">
+            <summary>
+            Indicates whether this setting or any of its interactive child controls (e.g. text field, slider, dropdown, keybind listener) is currently focused or being actively manipulated.
             </summary>
         </member>
         <member name="P:Magnetar_Client.UI.Setting.Setting.SaveTranslation">
@@ -3276,6 +3576,11 @@
         <member name="P:Magnetar_Client.UI.WindowDrawing.DrawSetting.ActiveTextFieldId">
             <summary>
             Gets or sets the control identifier of the text field currently receiving input.
+            </summary>
+        </member>
+        <member name="P:Magnetar_Client.UI.WindowDrawing.DrawSetting.ActiveTextSetting">
+            <summary>
+            Gets or sets the setting whose text field is currently receiving input.
             </summary>
         </member>
         <member name="P:Magnetar_Client.UI.WindowDrawing.DrawSetting.ActiveDropdownId">
@@ -3363,13 +3668,23 @@
             Resets all dropdown interaction and scroll tracking states.
             </summary>
         </member>
-        <member name="M:Magnetar_Client.UI.WindowDrawing.DrawSetting.HandleSelectSetting(Magnetar_Client.UI.Setting.SelectSetting,System.Single@,System.Single)">
+        <member name="M:Magnetar_Client.UI.WindowDrawing.DrawSetting.HandleSelectSetting(Magnetar_Client.UI.Setting.BaseSelectSetting,System.Single@,System.Single)">
             <summary>
             Renders a dropdown selection setting control and handles user interaction.
             </summary>
-            <param name="selSet">The <see cref="T:Magnetar_Client.UI.Setting.SelectSetting"/> to draw and handle.</param>
+            <param name="selSet">The <see cref="T:Magnetar_Client.UI.Setting.BaseSelectSetting"/> to draw and handle.</param>
             <param name="y">The vertical drawing coordinate reference.</param>
             <param name="width">The total available width for the control.</param>
+        </member>
+        <member name="M:Magnetar_Client.UI.WindowDrawing.DrawSetting.HandleSelectSetting(Magnetar_Client.UI.Setting.SelectSetting,System.Single@,System.Single)">
+            <summary>
+            Overload for backwards compatibility with <see cref="T:Magnetar_Client.UI.Setting.SelectSetting"/>.
+            </summary>
+        </member>
+        <member name="M:Magnetar_Client.UI.WindowDrawing.DrawSetting.DrawEntitySelectWindow(UnityEngine.Rect,Magnetar_Client.UI.Setting.EntitySelectSetting,System.Action)">
+            <summary>
+            Renders the entity-select modal window dialog with a NEF-style textured block pattern grid.
+            </summary>
         </member>
         <member name="F:Magnetar_Client.UI.WindowDrawing.DrawSetting.activeMultiSelect">
             <summary>
@@ -3471,7 +3786,7 @@
             <param name="input">The raw text string to format.</param>
             <returns>The formatted string with rich text color tags around bracket tokens.</returns>
         </member>
-        <member name="M:Magnetar_Client.UI.WindowDrawing.DrawSetting.DrawManualTextField(UnityEngine.Rect,System.String,System.String,System.Collections.Generic.List{System.String})">
+        <member name="M:Magnetar_Client.UI.WindowDrawing.DrawSetting.DrawManualTextField(UnityEngine.Rect,System.String,System.String,System.Collections.Generic.List{System.String},Magnetar_Client.UI.Setting.Setting)">
             <summary>
             Draws and handles an interactive manual text field supporting text editing, selection, undo/redo, and optional autocomplete.
             </summary>
@@ -3479,6 +3794,7 @@
             <param name="text">The current text content of the field.</param>
             <param name="defaultText">The placeholder text displayed when the field is empty and unfocused.</param>
             <param name="autocompleteVars">Optional list of variable names for bracket autocomplete.</param>
+            <param name="ownerSetting">The optional parent setting that owns this text field, used for tracking focused setting state.</param>
             <returns>The updated text string after processing user input.</returns>
         </member>
         <member name="M:Magnetar_Client.UI.WindowDrawing.DrawSetting.HandleBoolSetting(Magnetar_Client.UI.Setting.BoolSetting,System.Single@,System.Single)">

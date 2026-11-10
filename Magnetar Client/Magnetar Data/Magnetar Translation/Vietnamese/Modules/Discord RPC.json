@@ -1,23 +1,45 @@
 {
-  "Name": "Trạng Thái Discord (RPC)",
-  "Description": "Hiện thị cập nhật trạng thái chơi game liên tục trên Discord.",
-  "Search Hints": "trạng thái discord hiển thị discord kết nối discord hoạt động discord liên kết discord hiển thị đang chơi game kết nối rpc discord",
-  "settings": {
-    "General": "Cài đặt chung",
-    "Switch Speed (s)": "Tốc Độ Chuyển Đổi (giây)",
-    "In Game": "Trong trận đấu",
-    "Line 1 Message 1": "Dòng 1 Tin nhắn 1",
-    "Line 1 Message 2": "Dòng 1 Tin nhắn 2",
-    "Line 1 Message 3": "Dòng 1 Tin nhắn 3",
-    "Line 1 Message 4": "Dòng 1 Tin nhắn 4",
-    "Line 1 Message 5": "Dòng 1 Tin nhắn 5",
-    "Line 1 Message 6": "Dòng 1 Tin nhắn 6",
-    "Line 2 Message 1": "Dòng 2 Tin nhắn 1",
-    "Line 2 Message 2": "Dòng 2 Tin nhắn 2",
-    "Line 2 Message 3": "Dòng 2 Tin nhắn 3",
-    "Line 2 Message 4": "Dòng 2 Tin nhắn 4",
-    "Line 2 Message 5": "Dòng 2 Tin nhắn 5",
-    "Line 2 Message 6": "Dòng 2 Tin nhắn 6",
-    "Iteration Mode": "Chế độ lặp"
-  }
+    "Name": "Discord Rich Presence (RPC)",
+    "Description": "Hiển thị trạng thái hoạt động trong game của bạn lên hồ sơ Discord.",
+    "Search Hints": "discord rpc trạng thái discord hiện game trên discord kết nối discord",
+    "settings": {
+        "General": "Cài Đặt Chung",
+        "Switch Speed (s)": "Tốc Độ Chuyển Đổi (giây)",
+        "In Game": "Trong trận đấu",
+        "Iteration Mode": "Chế độ lặp",
+        "Line 1": "Dòng 1",
+        "Line 2": "Dòng 2",
+        "State (Line 1)": "Trạng Thái (Dòng 1)",
+        "Details (Line 2)": "Chi Tiết (Dòng 2)",
+        "Small Image Tooltip": "Chú Thích Ảnh Nhỏ",
+        "Buttons": "Các Nút Bấm",
+        "Button 1": "Nút 1",
+        "Label 1": "Nhãn Nút 1",
+        "Url 1": "Đường Dẫn URL 1",
+        "Button 2": "Nút 2",
+        "Label 2": "Nhãn Nút 2",
+        "Url 2": "Đường Dẫn URL 2",
+        "Preview": "Xem Trước",
+        "Restart RPC": "Khởi Động Lại RPC",
+        "Click": "Nhấp Vào Đây"
+    },
+    "Translations": {
+        "Browsing Magnetar's GUI": "Đang duyệt menu Magnetar",
+        "Looking at the Main Menu": "Đang ở Menu chính",
+        "Checking out the almanac": "Đang xem Sách tra cứu",
+        "Viewing plants in the almanac": "Đang xem cây trong Sách tra cứu",
+        "Viewing zombies in the almanac": "Đang xem zombie trong Sách tra cứu",
+        "Started a level": "Bắt đầu màn chơi",
+        "Picking Seeds": "Đang chọn hạt giống",
+        "Roaming in the Garden": "Đang dạo quanh Vườn Zen",
+        "Growing Seeds": "Đang chăm sóc hạt giống",
+        "Waterning plants": "Đang tưới nước cho cây",
+        "Sequential": "Tuần tự",
+        "Random": "Ngẫu nhiên",
+        "Made By Tproplay": "Được tạo bởi Tproplay"
+    },
+    "RegexTranslations": {
+        "^Playing:\\s*(.*)$": "Đang chơi: {1}",
+        "^Pvz Fusion v(.*)$": "Pvz Fusion v{1}"
+    }
 }

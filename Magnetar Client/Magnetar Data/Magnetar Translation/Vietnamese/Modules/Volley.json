@@ -1,12 +1,12 @@
 {
-  "Name": "Volley",
-  "Description": "Makes Plants fire multiple rounds of bullets.",
-  "Search Hints": "homingbullets homingrounds trackingbullets targetingsystem trackingrounds smartbullets seekerbullets seekershells seekerprojectiles bullettracking homingmod homingplugin homingattack hommingbullets hommingrounds hominbullets homingbulits homingbullits targetbullets targettingbullets autobullets guidedbullets guidedrounds missilebullets curvebullets magneticbullets stickybullets lockonbullets lockonrounds precisionbullets",
-  "settings": {
-    "General": "General",
-    "Bullet multiplier": "Bullet multiplier",
-    "Projectiles": "Projectiles",
-    "Bullet Spawn": "Bullet Spawn",
-    "Vertical Spread (unit)": "Vertical Spread (unit)"
-  }
+    "Name": "Bắn Nhiều Đợt Đạn (Volley)",
+    "Description": "Làm cho cây trồng bắn ra nhiều loạt đạn liên tiếp trong mỗi lần tấn công.",
+    "Search Hints": "bắn chùm đạn liên thanh nhiều đạn bắn đợt tăng số lượng đạn volley",
+    "settings": {
+        "General": "Cài Đặt Chung",
+        "Bullet multiplier": "Hệ Số Nhân Đạn",
+        "Projectiles": "Các Loại Đạn",
+        "Bullet Spawn": "Tạo Đạn",
+        "Vertical Spread (unit)": "Độ Tỏa Theo Chiều Dọc"
+    }
 }

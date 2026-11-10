@@ -1,15 +1,28 @@
 {
-  "Name": "Thiết lập nhanh",
-  "Description": "Lưu/tải bộ thiết lập tùy chỉnh.",
-  "Search Hints": "thietlapnhanh bo-thiet-lap quanlythietlap luubuild taibuild thietlap caidatsan quickload quicksave thietlapcayphongthu cauhinh quanlybuild caitdat caidatnhanh customsetup luuthietlap",
-  "settings": {
-    "Save": "Lưu",
-    "Name": "Tên",
-    "Save Current Setup": "Lưu thiết lập hiện tại",
-    "Load": "Tải",
-    "Clear Lawn Before Load": "Dọn sạch sân trước khi tải",
-    "Setup": "Thiết lập",
-    "Load Selected Setup": "Tải thiết lập đã chọn",
-    "Delete Selected Setup": "Xóa thiết lập đã chọn"
-  }
+    "Name": "Thiết lập nhanh",
+    "Description": "Lưu/tải bộ thiết lập tùy chỉnh.",
+    "Search Hints": "thietlapnhanh bo-thiet-lap quanlythietlap luubuild taibuild thietlap caidatsan quickload quicksave thietlapcayphongthu cauhinh quanlybuild caitdat caidatnhanh customsetup luuthietlap",
+    "settings": {
+        "Save": "Lưu",
+        "Name": "Tên",
+        "Save Current Setup": "Lưu thiết lập hiện tại",
+        "Load": "Tải",
+        "Clear Lawn Before Load": "Dọn sạch sân trước khi tải",
+        "Setup": "Thiết lập",
+        "Load Selected Setup": "Tải thiết lập đã chọn",
+        "Delete Selected Setup": "Xóa thiết lập đã chọn",
+        "Copy Current Setup Code": "Sao Chép Mã Đội Hình Hiện Tại",
+        "Load Setup From Clipboard": "Tải Đội Hình Từ Khay Nhớ Tạm",
+        "<color=red>Delete</color>": "<color=red>Xóa</color>"
+    },
+    "Translations": {
+        "Copy To Clipboard": "Sao Chép Vào Khay Nhớ Tạm",
+        "Copied!": "Đã Sao Chép!",
+        "Load From Clipboard": "Tải Từ Khay Nhớ Tạm",
+        "Loaded!": "Đã Tải!",
+        "Click": "Nhấp Vào Đây",
+        "Delete": "Xóa",
+        "Back to Tree": "Quay Lại Cây Trí Tuệ",
+        "Fusions requiring": "Các công thức hợp nhất cần:"
+    }
 }

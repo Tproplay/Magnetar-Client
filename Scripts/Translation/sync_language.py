@@ -2,6 +2,15 @@ import os
 import json
 import argparse
 
+
+def resolve_base_dir() -> str:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    candidate = os.path.normpath(os.path.join(script_dir, "..", "..", "Magnetar Client", "Magnetar Data", "Magnetar Translation"))
+    if os.path.isdir(os.path.join(candidate, "English")):
+        return candidate
+    return script_dir
+
+
 def sync_dicts(eng_data, lang_data, path=""):
     log_messages = []
     
@@ -31,15 +40,17 @@ def main():
     parser.add_argument("lang_folder")
     args = parser.parse_args()
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    eng_dir = os.path.join(script_dir, "English")
-    lang_dir = os.path.join(script_dir, args.lang_folder)
+    base_dir = resolve_base_dir()
+    eng_dir = os.path.join(base_dir, "English")
+    lang_dir = os.path.join(base_dir, args.lang_folder)
 
     if not os.path.exists(eng_dir):
         print(f"Error: 'English' folder not found at {eng_dir}")
         return
 
     print(f"--- Synchronizing '{args.lang_folder}' with 'English' ---")
+    print(f"Source: {eng_dir}")
+    print(f"Target: {lang_dir}")
 
     for root, dirs, files in os.walk(eng_dir):
         for file in files:

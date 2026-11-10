@@ -1,10 +1,10 @@
 {
-  "Name": "Smaller Zombies",
-  "Description": "Changes the size of selected zombies.\nNote: Changing size also affects zombie's speed.",
-  "Search Hints": "",
-  "settings": {
-    "General": "General",
-    "Scale multiplier": "Scale multiplier",
-    "Entities": "Entities"
-  }
+    "Name": "Thu Nhỏ Zombie (Smaller Zombies)",
+    "Description": "Thay đổi kích thước của zombie đã chọn.\nLưu ý: Thay đổi kích thước cũng sẽ ảnh hưởng đến tốc độ di chuyển của zombie.",
+    "Search Hints": "",
+    "settings": {
+        "General": "Cài Đặt Chung",
+        "Scale multiplier": "Hệ Số Thu Phóng",
+        "Entities": "Các Thực Thể"
+    }
 }

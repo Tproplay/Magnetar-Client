@@ -1,0 +1,18 @@
+{
+    "Name": "Hiệu Ứng Âm Thanh Tùy Chỉnh (Custom SFX)",
+    "Description": "Thay đổi hoặc tùy chỉnh các hiệu ứng âm thanh (SFX) trong game.",
+    "Search Hints": "âm thanh tùy chỉnh sfx đổi tiếng hiệu ứng âm thanh đổi âm thanh",
+    "settings": {
+        "General": "Cài Đặt Chung",
+        "SFX Overrides": "Ghi Đè Âm Thanh (SFX)",
+        "Enabled": "Đã Bật",
+        "Sound": "Âm Thanh",
+        "Replacement": "Âm Thanh Thay Thế",
+        "Audio File (Ogg, MP3, WAV)": "Tệp Âm Thanh (Ogg, MP3, WAV)",
+        "Select Audio": "Chọn Tệp Âm Thanh",
+        "Select": "Chọn",
+        "Pitch": "Cao Độ (Pitch)",
+        "Volume Multiplier": "Hệ Số Âm Lượng",
+        "Sound Types": "Loại Âm Thanh"
+    }
+}

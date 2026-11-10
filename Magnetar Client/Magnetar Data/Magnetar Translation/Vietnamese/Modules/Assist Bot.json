@@ -1,0 +1,14 @@
+{
+    "Name": "Robot Trợ Lý (Assist Bot)",
+    "Description": "Sử dụng Machine Learning để gợi ý chiến thuật và lựa chọn tốt nhất cho ván game của bạn.",
+    "Search Hints": "bot trợ lý tự chơi bot tự động gợi ý chiến thuật ai tự chơi trợ lý thông minh",
+    "settings": {
+        "General": "Cài Đặt Chung",
+        "Send feedback": "Gửi Phản Hồi",
+        "Update on start": "Tự Cập Nhật Khi Khởi Động",
+        "The Gods Evolved": "Chế Độ Thần Tiến Hóa",
+        "Suggest buffs": "Gợi Ý Buff",
+        "Auto pick best buff": "Tự Động Chọn Buff Tốt Nhất",
+        "Auto pick delay": "Độ Trễ Tự Chọn Buff"
+    }
+}

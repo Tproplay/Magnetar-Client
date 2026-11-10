@@ -1,0 +1,19 @@
+{
+    "Name": "Triệu Hồi Thiên Thạch (Spawn Meteor)",
+    "Description": "Thả thiên thạch rơi xuống sân cỏ.",
+    "Search Hints": "triệu hồi thiên thạch mưa thiên thạch sao băng rơi thiên thạch tàn phá",
+    "settings": {
+        "General": "Cài Đặt Chung",
+        "Preferences": "Tùy Chọn",
+        "Meteor Type": "Loại Thiên Thạch",
+        "Keybind": "Phím Tắt",
+        "Count of Meteors": "Số Lượng Thiên Thạch",
+        "Delay between each meteor": "Độ Trễ Giữa Mỗi Lần Rơi"
+    },
+    "Translations": {
+        "Passive Meteorite": "Thiên Thạch Bị Động",
+        "Active Meteorite": "Thiên Thạch Chủ Động",
+        "Ultimate Meteorite": "Thiên Thạch Tối Thượng",
+        "Ultimate Meteorite (skin)": "Thiên Thạch Tối Thượng (Trang Phục)"
+    }
+}

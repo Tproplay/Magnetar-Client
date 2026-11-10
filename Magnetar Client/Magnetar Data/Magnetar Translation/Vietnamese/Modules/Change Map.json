@@ -1,10 +1,11 @@
 {
-  "Name": "Change Map",
-  "Description": "Allows you to change the background of the level.\nThis only changes the background map and won't change lanes.",
-  "Search Hints": "changemap mapchanger levelbackground backgroundchanger mapselector levelmap backgroundswitcher mapswap custommap backgroundmod mapmod stagechanger leveltheme backgroundpicker mapoverride stagetheme levelchanger mapeditor environmentchanger backgroundmanager",
-  "settings": {
-    "General": "General",
-    "Map": "Map",
-    "Change Map Now": "Change Map Now"
-  }
+    "Name": "Đổi Bản Đồ (Change Map)",
+    "Description": "Cho phép thay đổi hình nền của màn chơi hiện tại.\nChỉ thay đổi đồ họa bản đồ, không làm thay đổi số hàng/làn.",
+    "Search Hints": "đổi bản đồ đổi màn chơi đổi hình nền tùy chỉnh map đổi cảnh",
+    "settings": {
+        "General": "Cài Đặt Chung",
+        "Map": "Bản Đồ",
+        "Change Map Now": "Đổi Bản Đồ Ngay",
+        "Click": "Nhấp Vào Đây"
+    }
 }

@@ -1,0 +1,22 @@
+{
+    "Name": "Cài Đặt Màn Chơi (Level Setup)",
+    "Description": "Tùy chỉnh thông số cấu hình của màn chơi.",
+    "Search Hints": "cài đặt màn chơi tùy chỉnh level cấu hình ván chơi chỉnh wave level setup",
+    "settings": {
+        "General": "Cài Đặt Chung",
+        "Override On Enter": "Ghi Đè Khi Bắt Đầu Màn Chơi",
+        "Custom Level Name": "Tên Màn Chơi Tùy Chỉnh",
+        "Extra": "Mở Rộng",
+        "Set Graves": "Đặt Số Bia Mộ",
+        "Click": "Nhấp Vào Đây",
+        "Set Freezed Plants": "Đặt Số Cây Bị Đóng Băng",
+        "Spawn Grave Zombies": "Tạo Zombie Từ Bia Mộ",
+        "Set Sun": "Đặt Lượng Mặt Trời",
+        "Set Waves": "Đặt Số Đợt (Waves)",
+        "Set Current Wave": "Đặt Đợt Hiện Tại",
+        "Set Flags": "Đặt Số Cờ (Flags)",
+        "Set Zombie Health Multiplier": "Đặt Hệ Số Nhân Máu Zombie",
+        "Set Initial Zombie Spawn Delay": "Độ Trễ Xuất Hiện Zombie Ban Đầu",
+        "Skip to next wave": "Chuyển Sang Đợt Kế Tiếp"
+    }
+}

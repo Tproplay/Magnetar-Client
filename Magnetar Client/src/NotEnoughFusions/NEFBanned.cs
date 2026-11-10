@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
 #endif
@@ -35,7 +35,8 @@ public static class NEFBanned
 
         // Zombies
         (int)PlantType.Legion, (int)PlantType.SnowBird,
-        (int)PlantType.ZombieEndoFlame, 
+        (int)PlantType.ZombieEndoFlame,
+        (int)PlantType.PresentZombie, 
 
     };
 

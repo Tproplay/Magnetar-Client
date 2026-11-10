@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -20,6 +20,7 @@ public static class NEFData
     public static HashSet<int> BannedPlants = new();
     public static HashSet<int> SearchHiddenPlants = new();
     public static Dictionary<int, string> CustomNames = new();
+    public static Dictionary<int, string> ZombieNames = new();
     public static List<CustomRecipe> AddedRecipes = new();
 
     public static int NextCustomPlantId = 30000;
@@ -68,6 +69,15 @@ public static class NEFData
         foreach (var Entry in TranslateEnum(typeof(PlantType)))
         {
             CustomNames[Entry.Key] = Entry.Value;
+        }
+
+        foreach (ZombieType zt in Enum.GetValues(typeof(ZombieType)))
+        {
+            if (!ZombieNames.ContainsKey((int)zt)) ZombieNames[(int)zt] = zt.ToString();
+        }
+        foreach (var entry in TranslateEnum(typeof(ZombieType)))
+        {
+            ZombieNames[entry.Key] = entry.Value;
         }
         
     }
@@ -168,7 +178,7 @@ public static class NEFData
         // 2. Translate ZombieType enums scoped to the NEF domain (if used in recipes/usages)
         foreach (var entry in TranslateEnum(typeof(ZombieType)))
         {
-            CustomNames[entry.Key] = entry.Value;
+            ZombieNames[entry.Key] = entry.Value;
         }
 
         // 3. Refresh active tree layouts and search results with new localized strings
@@ -196,16 +206,14 @@ public static class NEFData
 
     public static string GetEntityName(RecipeEntity ent)
     {
-        if (CustomNames.TryGetValue(ent.Id, out string customName)) return customName;
         if (ent.IsZombie)
         {
+            if (ZombieNames.TryGetValue(ent.Id, out string zombieName)) return zombieName;
             return ((ZombieType)ent.Id).ToString();
         }
-        else
-        {
-            return ((PlantType)ent.Id).ToString();
-        }
 
+        if (CustomNames.TryGetValue(ent.Id, out string customName)) return customName;
+        return ((PlantType)ent.Id).ToString();
     }
 
     public static void PerformSearch()

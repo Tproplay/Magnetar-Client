@@ -152,50 +152,16 @@ public static class AIService
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
 
             // Global ServicePointManager certificate verification fallback for Android Mono / IL2CPP
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, errors) =>
-            {
-                if (errors == SslPolicyErrors.None)
-                    return true;
-
-                if (sender is HttpWebRequest req && req.RequestUri != null &&
-                    req.RequestUri.Host.EndsWith("onrender.com", StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-
-                if (cert != null && cert.Subject.IndexOf("onrender.com", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    return true;
-                }
-
-                return false;
-            };
+            ServicePointManager.ServerCertificateValidationCallback = (sender, cert, chain, errors) => true;
         }
         catch { }
 
         var handler = new HttpClientHandler
         {
+            AllowAutoRedirect = true,
             // Fix for Android & modded IL2CPP environments where system root CA certificates
             // are not accessible to the .NET/Mono runtime, causing "SSL connection could not be established".
-            ServerCertificateCustomValidationCallback = (request, cert, chain, errors) =>
-            {
-                if (errors == SslPolicyErrors.None)
-                    return true;
-
-                // Validate request destination
-                if (request?.RequestUri != null &&
-                    request.RequestUri.Host.EndsWith("onrender.com", StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-
-                if (cert != null && cert.Subject.IndexOf("onrender.com", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    return true;
-                }
-
-                return request == null;
-            }
+            ServerCertificateCustomValidationCallback = (request, cert, chain, errors) => true
         };
 
         return new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(90) };

@@ -183,7 +183,11 @@ internal static class NightlyUpdater
 
     private static HttpClient MakeClient()
     {
-        var handler = new HttpClientHandler { AllowAutoRedirect = true };
+        var handler = new HttpClientHandler
+        {
+            AllowAutoRedirect = true,
+            ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+        };
         var client = new HttpClient(handler);
         client.DefaultRequestHeaders.UserAgent.Add(
             new ProductInfoHeaderValue("MagnetarClient", MagnetarInfo.Version));

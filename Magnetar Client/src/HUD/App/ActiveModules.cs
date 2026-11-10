@@ -21,6 +21,15 @@ public class ActiveModules : HudElement
 
     private readonly List<ActiveItem> _items = new();
     private float _savedRightEdge;
+    private static GUIStyle _fallbackStyle;
+
+    private static GUIStyle BaseStyle => ThemeManager.HUDElementStyle ?? (_fallbackStyle ??= new GUIStyle
+    {
+        alignment = TextAnchor.MiddleCenter,
+        wordWrap = false,
+        richText = true,
+        fontSize = Mathf.Max(1, Mathf.RoundToInt(12 * GUIManager.ElementScaleSetting.Value))
+    });
 
     protected override TextAnchor TextAlignment => IsRightAligned ? TextAnchor.MiddleRight : TextAnchor.MiddleLeft;
 
@@ -75,7 +84,7 @@ public class ActiveModules : HudElement
             return;
         }
 
-        var baseStyle = ThemeManager.HUDElementStyle ?? GUI.skin.label;
+        var baseStyle = BaseStyle;
         var tempList = new List<ActiveItem>();
 
         for (int i = 0; i < modules.Length; i++)
@@ -102,7 +111,7 @@ public class ActiveModules : HudElement
 
     private float GetItemHeight()
     {
-        var baseStyle = ThemeManager.HUDElementStyle ?? GUI.skin.label;
+        var baseStyle = BaseStyle;
         float textHeight = baseStyle.CalcSize(new GUIContent("A")).y;
         return Mathf.Max(textHeight + (2f * GUIManager.ElementScaleSetting.Value), 20f * GUIManager.ElementScaleSetting.Value);
     }
@@ -132,7 +141,7 @@ public class ActiveModules : HudElement
         {
             if (HUDManager.forceShow)
             {
-                var baseStyle = ThemeManager.HUDElementStyle ?? GUI.skin.label;
+                var baseStyle = BaseStyle;
                 string placeholder = Translate("Active Modules");
                 targetWidth = baseStyle.CalcSize(new GUIContent(placeholder)).x + padding;
                 targetHeight = itemHeight + (4f * GUIManager.ElementScaleSetting.Value);

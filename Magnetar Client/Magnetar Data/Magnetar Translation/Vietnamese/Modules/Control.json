@@ -1,6 +1,6 @@
 {
     "Name": "Điều Khiển Cây",
-    "Description": "Cho phép bạn tự do điều khiển bất kỳ cây trồng nào bằng các phím WASD.\nNhấn <color=yellow>Phím Điều Khiển</color> để bắt đầu điều khiển cây tại vị trí con trỏ chuột.\nNhấn <color=yellow>Phím Điều Khiển</color> một lần nữa để hủy quyền kiểm soát.",
+    "Description": "Cho phép bạn tự do điều khiển bất kỳ cây trồng nào bằng các phím WASD. Nhấn <color=yellow>Phím Điều Khiển</color> để bắt đầu điều khiển cây tại vị trí con trỏ chuột. Nhấn <color=yellow>Phím Điều Khiển</color> một lần nữa để hủy quyền kiểm soát.",
     "Search Hints": "điều khiển cây phím wasd di chuyển cây lái cây di chuyển bằng phím",
     "settings": {
         "General": "Cài Đặt Chung",

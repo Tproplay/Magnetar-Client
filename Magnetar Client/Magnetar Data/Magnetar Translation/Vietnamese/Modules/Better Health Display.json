@@ -1,6 +1,6 @@
 {
     "Name": "Hiển Thị Máu Tối Ưu",
-    "Description": "Chuyển đổi văn bản hiển thị lượng máu (HP) dài dòng thành dạng rút gọn rõ ràng hơn",
+    "Description": "Chuyển đổi văn bản hiển thị lượng máu dài dòng thành dạng rút gọn rõ ràng hơn",
     "Search Hints": "hiển thị máu thanh máu hiện hp hiển thị hp rút gọn hp hp ngắn rõ ràng dạng máu giao diện máu nhìn rõ máu thanh hp tối ưu thanh máu",
     "settings": {
         "General": "Cài Đặt Chung",

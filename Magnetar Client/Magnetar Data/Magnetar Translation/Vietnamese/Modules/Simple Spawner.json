@@ -1,5 +1,5 @@
 {
-    "Name": "Triệu Hồi Đơn Giản (Simple Spawner)",
+    "Name": "Triệu Hồi Đơn Giản",
     "Description": "Cho phép triệu hồi nhanh các thực thể cây, zombie, vật phẩm lên sân cỏ.",
     "Search Hints": "triệu hồi sinh quái sinh cây tạo zombie tạo cây spawner spawn zombie spawn plant",
     "settings": {
@@ -26,7 +26,7 @@
         "Spawn Zomboss 2 Pot": "Tạo Chậu Zomboss 2",
         "Spawn Hypno Zomboss 1 Pot": "Tạo Chậu Zomboss 1 Thôi Miên",
         "Spawn Hypno Zomboss 2 Pot": "Tạo Chậu Zomboss 2 Thôi Miên",
-        "Pets": "Thú Cưng (Pets)",
+        "Pets": "Thú Cưng",
         "Spawn Pet Gargantuar": "Tạo Thú Cưng Khổng Lồ",
         "Spawn Pet Football": "Tạo Thú Cưng Cầu Thủ",
         "Spawn Pet Drown": "Tạo Thú Cưng Chết Đuối",

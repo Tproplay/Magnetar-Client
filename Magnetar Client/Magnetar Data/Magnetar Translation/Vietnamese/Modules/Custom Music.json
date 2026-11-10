@@ -1,5 +1,5 @@
 {
-    "Name": "Nhạc Tùy Chỉnh (Custom Music)",
+    "Name": "Nhạc Tùy Chỉnh",
     "Description": "Thay thế nhạc nền trong game bằng các bản nhạc tùy chỉnh của riêng bạn.",
     "Search Hints": "nhạc tùy chỉnh đổi nhạc nền thêm nhạc đổi bài hát âm nhạc game",
     "settings": {
@@ -39,10 +39,10 @@
         "Audio File (Ogg, MP3, WAV)": "Tệp Âm Thanh (Ogg, MP3, WAV)",
         "Select Audio": "Chọn Tệp Âm Thanh",
         "Select": "Chọn",
-        "Pitch": "Cao Độ (Pitch)",
+        "Pitch": "Cao Độ",
         "Volume Multiplier": "Hệ Số Âm Lượng",
         "Mode": "Chế Độ Phát",
-        "Loop": "Lặp Lại (Loop)",
+        "Loop": "Lặp Lại",
         "Replace Tracks": "Thay Thế Bản Nhạc",
         "Day Lawn": "Sân Cỏ Ban Ngày",
         "Night Lawn": "Sân Cỏ Ban Đêm",
@@ -63,7 +63,7 @@
         "Brainiac Maniac": "Nhạc Trùm Dr. Zomboss",
         "Loonboon": "Nhạc Bowling Loonboon",
         "Moongrains": "Nhạc Moongrains",
-        "Vasebreaker": "Nhạc Đập Bình (Vasebreaker)",
-        "Zen Garden": "Vườn Zen (Zen Garden)"
+        "Vasebreaker": "Nhạc Đập Bình",
+        "Zen Garden": "Vườn Zen"
     }
 }

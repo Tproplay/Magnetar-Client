@@ -1,9 +1,9 @@
 {
-    "Name": "Hack Các Đợt Tấn Công (Wave)",
+    "Name": "Hack Đợt Zombie",
     "Description": "Cho phép bạn thay đổi logic xuất hiện của các đợt Zombie.",
     "Search Hints": "hack wave chỉnh đợt zombie đợt quái wave editor tạm dừng wave",
     "settings": {
-        "Cooldown": "Thời Gian Hồi (Cooldown)",
+        "Cooldown": "Thời Gian Hồi",
         "Custom Wave Cooldown": "Hồi Chiêu Đợt Tấn Công Tùy Chỉnh",
         "Wave Cooldown": "Thời Gian Chờ Giữa Các Đợt",
         "Freeze Wave Timer": "Đóng Băng Thời Gian Đợt Tấn Công",

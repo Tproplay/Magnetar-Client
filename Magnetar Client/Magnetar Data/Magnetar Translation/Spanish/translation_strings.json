@@ -66,5 +66,12 @@
   "Ultimate Meteorite (skin)": "Ultimate Meteorite (skin)",
   "+ Add Section": "+ Añadir sección",
   "Click": "Click",
-  "Add": "Añadir"
+  "Add": "Añadir",
+  "Clear All": "Limpiar todo",
+  "Exit Layout": "Salir del diseño",
+  "| Tap: Recipe | Hold: Usages": "| Tocar: Receta | Mantener: Usos",
+  "This entity is not used as an ingredient in any fusion.": "Esta entidad no se utiliza como ingrediente en ninguna fusión.",
+  "Loading data...": "Cargando datos...",
+  "Max Sections Reached": "Límite de secciones alcanzado",
+  "found": "encontrados"
 }

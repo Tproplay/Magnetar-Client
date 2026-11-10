@@ -1,5 +1,5 @@
 {
-    "Name": "Robot Trợ Lý (Assist Bot)",
+    "Name": "Robot Trợ Lý",
     "Description": "Sử dụng Machine Learning để gợi ý chiến thuật và lựa chọn tốt nhất cho ván game của bạn.",
     "Search Hints": "bot trợ lý tự chơi bot tự động gợi ý chiến thuật ai tự chơi trợ lý thông minh",
     "settings": {

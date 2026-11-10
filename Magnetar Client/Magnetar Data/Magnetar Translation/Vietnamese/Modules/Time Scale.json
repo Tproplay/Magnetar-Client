@@ -1,10 +1,10 @@
 {
-    "Name": "Tốc Độ Thời Gian (Tốc Độ Game)",
+    "Name": "Tốc Độ Thời Gian",
     "Description": "Thay đổi tỷ lệ thời gian hệ thống (Tăng tốc/Tua nhanh hoặc làm chậm game).",
     "Search Hints": "tốc độ game tua nhanh game làm chậm game quay chậm tăng tốc độ game nhân tốc độ điều khiển thời gian tua thời gian",
     "settings": {
         "General": "Cài Đặt Chung",
-        "Time Scale (Engine)": "Tỷ Lệ Thời Gian (Engine)",
+        "Time Scale (Engine)": "Tỷ Lệ Thời Gian Hệ Thống",
         "Buttons": "Các Nút Bấm",
         "Extra": "Mở Rộng",
         "Reset on double click": "Đặt lại khi nhấp đúp",

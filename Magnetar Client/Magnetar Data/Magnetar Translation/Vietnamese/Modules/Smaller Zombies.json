@@ -1,6 +1,6 @@
 {
-    "Name": "Thu Nhỏ Zombie (Smaller Zombies)",
-    "Description": "Thay đổi kích thước của zombie đã chọn.\nLưu ý: Thay đổi kích thước cũng sẽ ảnh hưởng đến tốc độ di chuyển của zombie.",
+    "Name": "Thu Nhỏ Zombie",
+    "Description": "Thay đổi kích thước của zombie đã chọn. Lưu ý: Thay đổi kích thước cũng sẽ ảnh hưởng đến tốc độ di chuyển của zombie.",
     "Search Hints": "",
     "settings": {
         "General": "Cài Đặt Chung",

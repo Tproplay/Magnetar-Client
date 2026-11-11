@@ -93,6 +93,14 @@ public static partial class Translator
                     catch { }
                 }
             }
+
+            if (setting is StyleSetting style)
+            {
+                if (style.ChildSettings != null && style.ChildSettings.Count > 0)
+                {
+                    ExtractSettingNames(style.ChildSettings, onFoundName, onlySavable);
+                }
+            }
         }
     }
 

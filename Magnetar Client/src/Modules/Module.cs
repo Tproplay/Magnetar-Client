@@ -124,6 +124,11 @@ public abstract class Module
     public virtual void OnSettingClosed() { }
 
     /// <summary>
+    /// Runs once when the module's settings are restored from persistent profile storage.
+    /// </summary>
+    public virtual void OnSettingsRestored() { }
+
+    /// <summary>
     /// Runs every frame regardless of whether the module is active or not.
     /// </summary>
     public virtual void OnUpdate()

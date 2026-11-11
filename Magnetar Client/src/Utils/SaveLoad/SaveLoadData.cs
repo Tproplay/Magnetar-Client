@@ -153,6 +153,21 @@ public static class SaveLoadData
         if (setting is IntSetting i) return i.Value;
         if (setting is Vector2Setting v2) return new float[] { v2.Value.x, v2.Value.y };
         if (setting is Vector3Setting v3) return new float[] { v3.Value.x, v3.Value.y, v3.Value.z };
+        if (setting is StyleSetting style)
+        {
+            var dict = new Dictionary<string, object>();
+            dict["IsExpanded"] = style.IsExpanded;
+            foreach (var child in style.ChildSettings)
+            {
+                if (child == null || string.IsNullOrEmpty(child.Name)) continue;
+                object childVal = SerializeSettingValue(child);
+                if (childVal != null)
+                {
+                    dict[child.SaveKey] = childVal;
+                }
+            }
+            return dict;
+        }
         if (setting is SectionSetting sec)
         {
             var secList = new List<Dictionary<string, object>>();
@@ -224,6 +239,28 @@ public static class SaveLoadData
                 string jsonStr = JsonConvert.SerializeObject(rawValue);
                 float[] arr = JsonConvert.DeserializeObject<float[]>(jsonStr);
                 if (arr != null && arr.Length >= 3) v3.Value = new Vector3(arr[0], arr[1], arr[2]);
+            }
+            else if (setting is StyleSetting style)
+            {
+                string jsonStr = JsonConvert.SerializeObject(rawValue);
+                var dict = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonStr);
+                if (dict != null)
+                {
+                    if (dict.TryGetValue("IsExpanded", out object expVal))
+                    {
+                        style.IsExpanded = Convert.ToBoolean(expVal);
+                    }
+                    foreach (var child in style.ChildSettings)
+                    {
+                        if (child == null || string.IsNullOrEmpty(child.Name)) continue;
+                        if (dict.TryGetValue(child.SaveKey, out object cVal) ||
+                            dict.TryGetValue(child.Name, out cVal))
+                        {
+                            RestoreSettingValue(child, cVal);
+                        }
+                    }
+                    style.MarkDirty();
+                }
             }
             else if (setting is SectionSetting sec)
             {

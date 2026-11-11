@@ -207,6 +207,8 @@ public class ModuleSaveHandler : ISaveHandler
             }
         }
 
+        mod.OnSettingsRestored();
+
         if (mod.Active != modData.Active)
         {
             if (modData.Active && VanillaMode.instance != null && VanillaMode.instance.Active && !VanillaMode.instance.IsAllowed(mod))

@@ -364,6 +364,15 @@ internal static class SettingsWindowDrawer
                 if (setting == null || string.IsNullOrEmpty(setting.Name)) continue;
                 float w = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(Translate(setting.Name))).x;
                 if (w > maxNameWidth) maxNameWidth = w;
+                if (setting is StyleSetting styleSet)
+                {
+                    foreach (var child in styleSet.ChildSettings)
+                    {
+                        if (child == null || string.IsNullOrEmpty(child.Name)) continue;
+                        float cw = ThemeManager.SettingLabelStyle.CalcSize(new GUIContent(Translate(child.Name))).x;
+                        if (cw > maxNameWidth) maxNameWidth = cw;
+                    }
+                }
             }
         }
 
@@ -430,6 +439,16 @@ internal static class SettingsWindowDrawer
                         {
                             BindMultiSelectRouting(nestedMulti);
                         }
+                    }
+                }
+            }
+            else if (setting is StyleSetting styleSet)
+            {
+                foreach (var child in styleSet.ChildSettings)
+                {
+                    if (child is BaseMultiSelectSetting nestedMulti)
+                    {
+                        BindMultiSelectRouting(nestedMulti);
                     }
                 }
             }

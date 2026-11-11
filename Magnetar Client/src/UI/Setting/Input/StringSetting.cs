@@ -62,6 +62,11 @@ public class StringSetting : Setting
     }
 
     /// <summary>
+    /// Gets the string value with escape sequences such as \n converted to actual newline characters.
+    /// </summary>
+    public string FormattedValue => Value != null ? Value.Replace("\\n", "\n") : "";
+
+    /// <summary>
     /// Sets the value directly without invoking events or checking <see cref="Setting.IsDisabled"/>.
     /// </summary>
     /// <param name="val">The new string value to set.</param>

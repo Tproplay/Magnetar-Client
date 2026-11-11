@@ -111,6 +111,77 @@ public static partial class DrawSetting
         return System.Text.RegularExpressions.Regex.Replace(input, @"\{[^}\r\n]*(?:\}|$)", match => $"<color={colorHex}>{match.Value}</color>");
     }
 
+    private static readonly System.Text.RegularExpressions.Regex BracketRegex =
+        new(@"\{[^}\r\n]*(?:\}|$)", System.Text.RegularExpressions.RegexOptions.Compiled);
+
+    private static GUIStyle _bracketTextStyle;
+    private static GUIStyle BracketTextStyle
+    {
+        get
+        {
+            if (_bracketTextStyle == null)
+            {
+                _bracketTextStyle = new GUIStyle
+                {
+                    richText = false,
+                    wordWrap = false,
+                    clipping = TextClipping.Clip
+                };
+            }
+            _bracketTextStyle.normal.textColor = ThemeManager.RichTextColor;
+            _bracketTextStyle.font = ThemeManager.TextStyle.font;
+            _bracketTextStyle.fontSize = ThemeManager.TextStyle.fontSize;
+            _bracketTextStyle.alignment = ThemeManager.TextStyle.alignment;
+            return _bracketTextStyle;
+        }
+    }
+
+    private static void DrawTextWithBrackets(float originX, float height, string text)
+    {
+        if (string.IsNullOrEmpty(text)) return;
+
+        if (!text.Contains('{'))
+        {
+            GUI.Label(new Rect(originX, 0, 2000, height), text, ThemeManager.TextStyle);
+            return;
+        }
+
+        var matches = BracketRegex.Matches(text);
+        if (matches.Count == 0)
+        {
+            GUI.Label(new Rect(originX, 0, 2000, height), text, ThemeManager.TextStyle);
+            return;
+        }
+
+        int lastIndex = 0;
+        for (int m = 0; m < matches.Count; m++)
+        {
+            var match = matches[m];
+            if (match.Index > lastIndex)
+            {
+                string normalSegment = text.Substring(lastIndex, match.Index - lastIndex);
+                float normalX = originX + ThemeManager.TextStyle.CalcSize(new GUIContent(text.Substring(0, lastIndex))).x;
+                float normalW = ThemeManager.TextStyle.CalcSize(new GUIContent(normalSegment)).x + 20f;
+                GUI.Label(new Rect(normalX, 0, normalW, height), normalSegment, ThemeManager.TextStyle);
+            }
+
+            string bracketSegment = match.Value;
+            float bracketX = originX + ThemeManager.TextStyle.CalcSize(new GUIContent(text.Substring(0, match.Index))).x;
+            float bracketW = ThemeManager.TextStyle.CalcSize(new GUIContent(bracketSegment)).x + 20f;
+            GUI.Label(new Rect(bracketX, 0, bracketW, height), bracketSegment, BracketTextStyle);
+
+            lastIndex = match.Index + match.Length;
+        }
+
+        if (lastIndex < text.Length)
+        {
+            string remainingSegment = text.Substring(lastIndex);
+            float remainingX = originX + ThemeManager.TextStyle.CalcSize(new GUIContent(text.Substring(0, lastIndex))).x;
+            float remainingW = ThemeManager.TextStyle.CalcSize(new GUIContent(remainingSegment)).x + 20f;
+            GUI.Label(new Rect(remainingX, 0, remainingW, height), remainingSegment, ThemeManager.TextStyle);
+        }
+    }
+
     /// <summary>
     /// Draws and handles an interactive manual text field supporting text editing, selection, undo/redo, and optional autocomplete.
     /// </summary>
@@ -153,7 +224,7 @@ public static partial class DrawSetting
             }
             else
             {
-                GUI.Label(new Rect(5, 0, 2000, rect.height), FormatBracketRichText(text), ThemeManager.TextRichStyle);
+                DrawTextWithBrackets(5, rect.height, text);
             }
             GUI.EndGroup();
             return text;
@@ -584,6 +655,7 @@ public static partial class DrawSetting
                     string paste = GUIUtility.systemCopyBuffer;
                     if (!string.IsNullOrEmpty(paste))
                     {
+                        paste = paste.Replace("\r\n", "\\n").Replace("\r", "\\n").Replace("\n", "\\n");
                         SaveState();
                         if (hasSelection) DeleteSelection();
                         text = text.Insert(cursorIndex, paste);
@@ -647,12 +719,23 @@ public static partial class DrawSetting
                     else if (cursorIndex < text.Length) { SaveState(); text = text.Remove(cursorIndex, 1); }
                     e.Use();
                 }
-                else if (k == KeyCode.Return)
+                else if (k == KeyCode.Return || k == KeyCode.KeypadEnter)
                 {
-                    ActiveTextFieldId = -1;
-                    if (ReferenceEquals(ActiveTextSetting, ownerSetting))
+                    if (shift)
                     {
-                        ActiveTextSetting = null;
+                        SaveState();
+                        if (hasSelection) DeleteSelection();
+                        text = text.Insert(cursorIndex, "\\n");
+                        cursorIndex += 2;
+                        selectIndex = cursorIndex;
+                    }
+                    else
+                    {
+                        ActiveTextFieldId = -1;
+                        if (ReferenceEquals(ActiveTextSetting, ownerSetting))
+                        {
+                            ActiveTextSetting = null;
+                        }
                     }
                     e.Use();
                 }
@@ -712,7 +795,7 @@ public static partial class DrawSetting
                 GUI.Box(selRect, "", ThemeManager.TextHighlightedStyle);
             }
 
-            GUI.Label(new Rect(5 - scrollOffset, 0, 2000, rect.height), FormatBracketRichText(text), ThemeManager.TextRichStyle);
+            DrawTextWithBrackets(5 - scrollOffset, rect.height, text);
 
             if (ActiveTextFieldId == controlId && (int)(Time.realtimeSinceStartup * 2) % 2 == 0)
             {

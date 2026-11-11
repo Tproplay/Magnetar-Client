@@ -3,6 +3,7 @@
 ## Changelogs
 
 - chenged "Titanium" to "Prismatic" in `Gods Evolved Hack`
+- New Module: `CustomPlantData`
 
 ## Bugfixes
 

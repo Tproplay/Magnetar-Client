@@ -3,6 +3,12 @@ using System.IO;
 using UnityEngine;
 using static Magnetar_Client.Utils.Magnetar_Logger;
 
+#if MELONLOADER || RELEASE_MELON
+using Il2CppTMPro;
+#elif BEPINEX || RELEASE_BEPINEX
+using TMPro;
+#endif
+
 #if BEPINEX || RELEASE_BEPINEX || ANDROID
 using Il2CppInterop.Runtime;
 #endif
@@ -11,7 +17,59 @@ namespace Magnetar_Client.UI;
 
 public static partial class ResourceManager
 {
-    private static Font DefaultFont;
+    private static Font _defaultFont;
+    private static TMP_FontAsset _defaultFontAsset;
+    private static bool _fontInitialized;
+
+    /// <summary>
+    /// The default client font loaded from the Magnetar UI AssetBundle or Resources.
+    /// </summary>
+    public static Font DefaultFont
+    {
+        get
+        {
+            if (!_fontInitialized)
+            {
+                InitFont();
+            }
+            return _defaultFont;
+        }
+        internal set
+        {
+            _defaultFont = value;
+            _fontInitialized = value != null;
+        }
+    }
+
+    /// <summary>
+    /// TextMeshPro font asset generated from <see cref="DefaultFont"/>.
+    /// </summary>
+    public static TMP_FontAsset DefaultFontAsset
+    {
+        get
+        {
+            if (_defaultFontAsset != null) return _defaultFontAsset;
+
+            Font font = DefaultFont;
+            if (font != null)
+            {
+                try
+                {
+                    _defaultFontAsset = TMP_FontAsset.CreateFontAsset(font);
+                    if (_defaultFontAsset != null)
+                    {
+                        _defaultFontAsset.hideFlags = HideFlags.DontSave;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    GUILogger.Error($"Failed creating TMP_FontAsset from DefaultFont: {ex.Message}");
+                }
+            }
+
+            return _defaultFontAsset;
+        }
+    }
 
     static Font LoadFont(string assetName = "Magnetar_font")
     {
@@ -72,27 +130,27 @@ public static partial class ResourceManager
 
     internal static void InitFont()
     {
-        if (GUI.skin != null && DefaultFont != null && GUI.skin.font == DefaultFont) return;
-
-        DefaultFont = LoadFont("Magnetar_font");
-
-        if (DefaultFont != null)
+        if (!_fontInitialized)
         {
-            if (GUI.skin != null)
+            _fontInitialized = true;
+            _defaultFont = LoadFont("Magnetar_font");
+
+            if (_defaultFont == null)
             {
-                GUI.skin.font = DefaultFont;
-                GUI.skin.box.font = DefaultFont;
-                GUI.skin.label.font = DefaultFont;
-                GUI.skin.button.font = DefaultFont;
-                GUI.skin.textField.font = DefaultFont;
-                GUI.skin.textArea.font = DefaultFont;
-                GUI.skin.toggle.font = DefaultFont;
-                GUI.skin.window.font = DefaultFont;
+                GUILogger.Warning("Custom font not found in Resources directory.");
             }
         }
-        else
+
+        if (GUI.skin != null && _defaultFont != null && GUI.skin.font != _defaultFont)
         {
-            GUILogger.Warning("Custom font not found in Resources directory.");
+            GUI.skin.font = _defaultFont;
+            GUI.skin.box.font = _defaultFont;
+            GUI.skin.label.font = _defaultFont;
+            GUI.skin.button.font = _defaultFont;
+            GUI.skin.textField.font = _defaultFont;
+            GUI.skin.textArea.font = _defaultFont;
+            GUI.skin.toggle.font = _defaultFont;
+            GUI.skin.window.font = _defaultFont;
         }
     }
 }

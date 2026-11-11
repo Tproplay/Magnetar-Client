@@ -704,7 +704,7 @@ public class CustomKeybind : Module
         [HarmonyPrefix]
         public static bool InputGetKeyDown(KeyCode key, ref bool __result)
         {
-            if (isResolvingKeyDown) return true;
+            if (isResolvingKeyDown || ClientConfig.InGUI) return true;
 
             // Block vanilla GameAPP raw keys so HandleApplicationShortcuts handles them
             if (GameAPPBlockKeys)

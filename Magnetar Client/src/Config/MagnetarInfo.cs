@@ -3,7 +3,7 @@ namespace Magnetar_Client;
 public static class MagnetarInfo
 {
     public const string ModName = "Magnetar Client";
-    public const string Version = "4.1.0";
+    public const string Version = "4.1.1";
     public const string SupportedGameVersion = "4.1";
 #if NIGHTLY
     public const int BuildNumber = 1;

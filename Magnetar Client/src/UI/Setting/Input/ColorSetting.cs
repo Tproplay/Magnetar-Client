@@ -13,6 +13,20 @@ public class ColorSetting : Setting
     private Color _value;
     private string _textBuffer;
 
+    private static GUIStyle _swatchFillStyle;
+    private static GUIStyle SwatchFillStyle
+    {
+        get
+        {
+            if (_swatchFillStyle == null || _swatchFillStyle.normal.background == null)
+            {
+                _swatchFillStyle = new GUIStyle();
+                _swatchFillStyle.normal.background = ThemeData.GetTex(Color.white);
+            }
+            return _swatchFillStyle;
+        }
+    }
+
     /// <summary>
     /// The default color restored when <see cref="Reset"/> is executed.
     /// </summary>
@@ -157,7 +171,19 @@ public class ColorSetting : Setting
             // 2. Draw Color Swatch Box (left of text field)
             GUI.Box(swatchRect, "", ThemeManager.SettingOff);
             Rect innerSwatch = new(swatchRect.x + 2f, swatchRect.y + 2f, swatchRect.width - 4f, swatchRect.height - 4f);
-            GUI.DrawTexture(innerSwatch, ThemeData.GetTex(_value));
+            Color prevGuiColor = GUI.color;
+            Color prevBgColor = GUI.backgroundColor;
+            try
+            {
+                GUI.backgroundColor = Color.white;
+                GUI.color = new Color(_value.r, _value.g, _value.b, prevGuiColor.a * _value.a);
+                GUI.Box(innerSwatch, "", SwatchFillStyle);
+            }
+            finally
+            {
+                GUI.color = prevGuiColor;
+                GUI.backgroundColor = prevBgColor;
+            }
 
             // 3. Draw Hex Text Field
             if (DrawSetting.ActiveTextFieldId != inputRect.GetHashCode())

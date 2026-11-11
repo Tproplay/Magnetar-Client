@@ -7,6 +7,7 @@ using Magnetar_Client.Api;
 using Magnetar_Client.NEF;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.Utils;
+using UnityEngine;
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -105,6 +106,18 @@ public class CustomRecipes : Module
         }
     }
 
+    private sealed class FurnaceConversionEntry
+    {
+        public readonly Plant Plant;
+        public float RemainingTime;
+
+        public FurnaceConversionEntry(Plant plant, float remainingTime)
+        {
+            Plant = plant;
+            RemainingTime = remainingTime;
+        }
+    }
+
     public SectionSetting RecipeSections;
 
     private readonly ConditionalWeakTable<Setting, SectionControls> _controlsByType = new();
@@ -112,6 +125,7 @@ public class CustomRecipes : Module
     private readonly Dictionary<PlantType, List<MixBombRuleEntry>> _mixBombByMiddle = new();
     private readonly Dictionary<PlantType, PlantType> _pineFurnaceRecipes = new();
     private readonly List<NEF.Data.NEFRecipes.CustomRecipe> _registeredNefRecipes = new();
+    private readonly List<FurnaceConversionEntry> _activeFurnaceConversions = new();
 
     public CustomRecipes()
     {
@@ -165,6 +179,9 @@ public class CustomRecipes : Module
                 SyncNefRecipes();
             }
         };
+
+        GameData.Actions.OnBoardDestroyed += ClearTrackedConversions;
+        GameData.Actions.OnBoardDied += ClearTrackedConversions;
     }
 
     private Dictionary<int, string> BuildTypeCustomNames()
@@ -262,6 +279,58 @@ public class CustomRecipes : Module
         _mixBombByMiddle.Clear();
         _pineFurnaceRecipes.Clear();
         ClearNefRecipes();
+    }
+
+    public override void OnUpdate()
+    {
+        if (_activeFurnaceConversions.Count == 0) return;
+
+        if (Board.Instance == null || CreatePlant.Instance == null)
+        {
+            _activeFurnaceConversions.Clear();
+            return;
+        }
+
+        if (GameAPP.theGameStatus != GameStatus.InGame) return;
+
+        float dt = Time.deltaTime;
+        for (int i = _activeFurnaceConversions.Count - 1; i >= 0; i--)
+        {
+            var entry = _activeFurnaceConversions[i];
+            Plant plant = entry.Plant;
+            if (plant == null || plant.thePlantHealth <= 0)
+            {
+                _activeFurnaceConversions.RemoveAt(i);
+                continue;
+            }
+
+            entry.RemainingTime -= dt;
+            if (entry.RemainingTime > 0f) continue;
+
+            int col = plant.thePlantColumn;
+            int row = plant.thePlantRow;
+            _activeFurnaceConversions.RemoveAt(i);
+
+            plant.Die(Plant.DieReason.Default);
+            CreatePlant.Instance.SetPlant(col, row, PlantType.PineFurnace, isFreeSet: true, withEffect: true);
+        }
+    }
+
+    private void ClearTrackedConversions()
+    {
+        _activeFurnaceConversions.Clear();
+    }
+
+    private void TrackFurnaceConversion(Plant spawned, PlantType ingredientType)
+    {
+        if (spawned == null || spawned is AdvancedFurnuce) return;
+
+        var data = PlantDataManager.GetPlantData(ingredientType);
+        int ingredientCost = data != null ? data.cost : 0;
+
+        // Match vanilla PineFurnace/AdvancedFurnuce duration: Max(1, (int)(cost * 0.34f)) ticks * 3s cycle
+        int ticks = Math.Max(1, (int)(ingredientCost * 0.34f));
+        _activeFurnaceConversions.Add(new FurnaceConversionEntry(spawned, ticks * 3f));
     }
 
     private void OnRecipesChanged()
@@ -748,15 +817,64 @@ public class CustomRecipes : Module
         }
     }
 
+    [HarmonyPatch(typeof(CreatePlant), nameof(CreatePlant.SetPlant))]
+    public static class CreatePlantSetPlantPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(PlantType theSeedType, Plant __result)
+        {
+            if (PineFurnaceAttributeEventPatch.PendingResult == PlantType.Nothing || __result == null) return;
+            if (theSeedType == PineFurnaceAttributeEventPatch.PendingResult)
+            {
+                PineFurnaceAttributeEventPatch.CapturedSpawn = __result;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(PineFurnace), "AttributeEvent")]
     public static class PineFurnaceAttributeEventPatch
     {
+        [ThreadStatic]
+        internal static PlantType PendingIngredient = PlantType.Nothing;
+
+        [ThreadStatic]
+        internal static PlantType PendingResult = PlantType.Nothing;
+
+        [ThreadStatic]
+        internal static Plant CapturedSpawn;
+
         [HarmonyPrefix]
-        public static void Prefix(out List<DictionaryBackup<PlantType>> __state)
+        public static void Prefix(PineFurnace __instance, out List<DictionaryBackup<PlantType>> __state)
         {
             __state = null;
-            if (instance == null || !instance.Active) return;
+            PendingIngredient = PlantType.Nothing;
+            PendingResult = PlantType.Nothing;
+            CapturedSpawn = null;
+
+            if (instance == null || !instance.Active || __instance == null) return;
             if (instance._pineFurnaceRecipes.Count == 0 || PineFurnace.mixDic == null) return;
+
+            var tilePlants = Lawnf.Get1x1Plants(__instance.thePlantColumn, __instance.thePlantRow);
+            if (tilePlants != null)
+            {
+                for (int i = 0; i < tilePlants.Count; i++)
+                {
+                    Plant plant = tilePlants[i];
+                    if (plant == null) continue;
+
+                    if (instance._pineFurnaceRecipes.TryGetValue(plant.thePlantType, out PlantType customResult))
+                    {
+                        PendingIngredient = plant.thePlantType;
+                        PendingResult = customResult;
+                        break;
+                    }
+
+                    if (PineFurnace.mixDic.ContainsKey(plant.thePlantType))
+                    {
+                        break;
+                    }
+                }
+            }
 
             var backups = new List<DictionaryBackup<PlantType>>(instance._pineFurnaceRecipes.Count);
             foreach (var kvp in instance._pineFurnaceRecipes)
@@ -775,7 +893,20 @@ public class CustomRecipes : Module
         [HarmonyPostfix]
         public static void Postfix(List<DictionaryBackup<PlantType>> __state)
         {
-            RestoreDictionary(PineFurnace.mixDic, __state);
+            try
+            {
+                RestoreDictionary(PineFurnace.mixDic, __state);
+                if (instance != null && CapturedSpawn != null && PendingIngredient != PlantType.Nothing)
+                {
+                    instance.TrackFurnaceConversion(CapturedSpawn, PendingIngredient);
+                }
+            }
+            finally
+            {
+                PendingIngredient = PlantType.Nothing;
+                PendingResult = PlantType.Nothing;
+                CapturedSpawn = null;
+            }
         }
     }
 }

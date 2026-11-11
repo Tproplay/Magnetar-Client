@@ -94,7 +94,7 @@ public static class NEFData
             Type customCoreType = customizeLib.GetType("CustomizeLib.BepInEx.CustomCore");
             if (customCoreType == null) return;
 
-            Magnetar_Client.Utils.Magnetar_Logger.DebugLogger.Msg("[NEF] Scaping recipies from CustomizeLib");
+            Magnetar_Client.Utils.Magnetar_Logger.DebugLogger.Msg("[NEF] Scaping recipes from CustomizeLib");
 
             var plantNamesProp = customCoreType.GetProperty("CustomPlantNames", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             if (plantNamesProp?.GetValue(null) is System.Collections.IDictionary customPlantNames)

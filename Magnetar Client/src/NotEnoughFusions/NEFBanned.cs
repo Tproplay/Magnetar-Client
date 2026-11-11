@@ -21,7 +21,7 @@ public static class NEFBanned
         // TD Plants
         350,351,352,353,354,355,356,357,358,359,360,361,362,363,364,365,366,367,368,
         
-        // No Recipies
+        // No recipes
         (int)PlantType.HolographicPlant,
 
         // For future version

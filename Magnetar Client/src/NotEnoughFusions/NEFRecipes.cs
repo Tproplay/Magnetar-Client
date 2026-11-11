@@ -126,11 +126,11 @@ public static class NEFRecipes
 
     public static List<CustomRecipe> GetFurnanceRecipes()
     {
-        List<CustomRecipe> recipies = new();
+        List<CustomRecipe> recipes = new();
 
         foreach (var pair in PineFurnace.mixDic)
         {
-            recipies.Add(
+            recipes.Add(
                 new CustomRecipe
                 {
                     Result = RecipeEntity.Plant(pair.Value),
@@ -140,14 +140,14 @@ public static class NEFRecipes
                 );
         }
 
-        recipies.Add(new()
+        recipes.Add(new()
         {
             Result = RecipeEntity.Plant(PlantType.UltimateFurnace),
             ParentA = RecipeEntity.Plant(PlantType.SuperFurnace),
             ParentB = RecipeEntity.Plant(PlantType.ThronsAloes),
         });
 
-        return recipies;
+        return recipes;
 
     }
 

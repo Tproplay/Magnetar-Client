@@ -1,6 +1,13 @@
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.UI.Themes;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+#if MELONLOADER || RELEASE_MELON
+using Il2CppTMPro;
+#elif BEPINEX || RELEASE_BEPINEX
+using TMPro;
+#endif
 
 namespace Magnetar_Client.UI.WindowDrawing;
 
@@ -18,6 +25,34 @@ public static partial class DrawSetting
         || ActiveTextFieldId != -1
         || ActiveDropdownId != -1
         || (ActiveBindSetting != null && ActiveBindSetting.IsBinding);
+
+    /// <summary>
+    /// Returns <see langword="true"/> when a client text field is active, or (when requested)
+    /// when a Unity UI / TextMeshPro input field currently has focus.
+    /// </summary>
+    internal static bool IsTextFieldFocused(bool includeUnityInputFields = false)
+    {
+        if (ActiveTextFieldId != -1) return true;
+        if (!includeUnityInputFields) return false;
+
+        try
+        {
+            EventSystem eventSystem = EventSystem.current;
+            GameObject selected = eventSystem != null ? eventSystem.currentSelectedGameObject : null;
+            if (selected == null) return false;
+
+            InputField uiInput = selected.GetComponent<InputField>();
+            if (uiInput != null && uiInput.isFocused) return true;
+
+            TMP_InputField tmpInput = selected.GetComponent<TMP_InputField>();
+            if (tmpInput != null && tmpInput.isFocused) return true;
+        }
+        catch
+        {
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// Unfocuses all the focused input fields and dropdowns.

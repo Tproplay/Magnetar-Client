@@ -129,10 +129,13 @@ public class Main
         {
             if (!ClientConfig.showgui)
             {
-                ClientConfig.showgui = true;
-                Actions.Invoke_OnMenuOpen();
+                if (!DrawSetting.IsTextFieldFocused(includeUnityInputFields: true))
+                {
+                    ClientConfig.showgui = true;
+                    Actions.Invoke_OnMenuOpen();
+                }
             }
-            else if (ClientConfig.MenuOpenKey != KeyCode.Escape)
+            else if (ClientConfig.MenuOpenKey != KeyCode.Escape && !DrawSetting.IsTextFieldFocused())
             {
                 ClientConfig.showgui = false;
                 DrawSetting.ResetInputBind();

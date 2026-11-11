@@ -560,6 +560,11 @@ public class CooldownDisplay : Module
             formatted = ReplacePlaceholder(formatted, "{Speed}", speed.ToString("0.##", CultureInfo.InvariantCulture));
         }
 
+        if (formatted.IndexOf("\\n", StringComparison.Ordinal) >= 0)
+        {
+            formatted = formatted.Replace("\\n", "\n");
+        }
+
         if (overlay.LastText != formatted)
         {
             overlay.LastText = formatted;

@@ -85,7 +85,12 @@ public class BindSetting : Setting
     public void StartBinding()
     {
         if (IsDisabled) return;
+        if (DrawSetting.ActiveBindSetting != null && !ReferenceEquals(DrawSetting.ActiveBindSetting, this))
+        {
+            DrawSetting.ActiveBindSetting.CancelBinding();
+        }
         IsBinding = true;
+        DrawSetting.ActiveBindSetting = this;
         SafeToCloseManager.RegisterTabGuard(_tabGuard);
         BindKeys.Clear();
     }
@@ -96,7 +101,81 @@ public class BindSetting : Setting
     public void StopBinding()
     {
         IsBinding = false;
+        if (ReferenceEquals(DrawSetting.ActiveBindSetting, this))
+        {
+            DrawSetting.ActiveBindSetting = null;
+        }
         SafeToCloseManager.UnregisterTabGuard(_tabGuard);
+    }
+
+    /// <summary>
+    /// Clears any in-progress key sequence and stops listening for keybind inputs.
+    /// </summary>
+    public void CancelBinding()
+    {
+        BindKeys.Clear();
+        StopBinding();
+    }
+
+    internal void ProcessBindingInput(Event e)
+    {
+        if (!IsBinding || e == null) return;
+
+        // Direct Tab detection (fallback for when IMGUI event is consumed or not dispatched as isKey)
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            if (!BindKeys.Contains(KeyCode.Tab))
+            {
+                BindKeys.Add(KeyCode.Tab);
+            }
+            if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Tab || e.character == '\t'))
+            {
+                e.Use();
+            }
+        }
+
+        if (Input.GetKeyUp(KeyCode.Tab) && BindKeys.Count > 0)
+        {
+            StopBinding();
+            if (e.type == EventType.KeyUp && (e.keyCode == KeyCode.Tab || e.character == '\t'))
+            {
+                e.Use();
+            }
+        }
+
+        if (IsBinding && e.isKey)
+        {
+            KeyCode key = e.keyCode;
+            if (key == KeyCode.None && e.character == '\t')
+            {
+                key = KeyCode.Tab;
+            }
+
+            if (key != KeyCode.None)
+            {
+                if (e.type == EventType.KeyDown)
+                {
+                    if (key == KeyCode.Escape || key == ClientConfig.MenuOpenKey)
+                    {
+                        CancelBinding();
+                        if (key == KeyCode.Escape)
+                        {
+                            DrawSetting.MarkEscapeConsumed();
+                        }
+                    }
+                    else if (!BindKeys.Contains(key))
+                    {
+                        BindKeys.Add(key);
+                    }
+                    e.Use();
+                }
+                else if (e.type == EventType.KeyUp && BindKeys.Count > 0)
+                {
+                    StopBinding();
+                    e.Use();
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -166,10 +245,8 @@ public class BindSetting : Setting
             {
                 if (!IsBinding)
                 {
+                    DrawSetting.ResetInputBind();
                     StartBinding();
-                    DrawSetting.ActiveTextFieldId = -1;
-                    DrawSetting.ActiveTextSetting = null;
-                    DrawSetting.FocusedControlId = -1;
                     GUIUtility.keyboardControl = 0;
                 }
                 else
@@ -178,62 +255,12 @@ public class BindSetting : Setting
                 }
                 e.Use();
             }
-
-            if (IsBinding)
+            else if (IsBinding && isLeftClick && !bindRect.Contains(e.mousePosition) && !resetRect.Contains(e.mousePosition))
             {
-                // Direct Tab detection (fallback for when IMGUI event is consumed or not dispatched as isKey)
-                if (Input.GetKeyDown(KeyCode.Tab))
-                {
-                    if (!BindKeys.Contains(KeyCode.Tab))
-                    {
-                        BindKeys.Add(KeyCode.Tab);
-                    }
-                    if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Tab || e.character == '\t'))
-                    {
-                        e.Use();
-                    }
-                }
-
-                if (Input.GetKeyUp(KeyCode.Tab) && BindKeys.Count > 0)
-                {
-                    StopBinding();
-                    if (e.type == EventType.KeyUp && (e.keyCode == KeyCode.Tab || e.character == '\t'))
-                    {
-                        e.Use();
-                    }
-                }
+                CancelBinding();
             }
 
-            if (IsBinding && e.isKey)
-            {
-                KeyCode key = e.keyCode;
-                if (key == KeyCode.None && e.character == '\t')
-                {
-                    key = KeyCode.Tab;
-                }
-
-                if (key != KeyCode.None)
-                {
-                    if (e.type == EventType.KeyDown)
-                    {
-                        if (key == KeyCode.Escape || key == ClientConfig.MenuOpenKey)
-                        {
-                            BindKeys.Clear();
-                            StopBinding();
-                        }
-                        else if (!BindKeys.Contains(key))
-                        {
-                            BindKeys.Add(key);
-                        }
-                        e.Use();
-                    }
-                    else if (e.type == EventType.KeyUp && BindKeys.Count > 0)
-                    {
-                        StopBinding();
-                        e.Use();
-                    }
-                }
-            }
+            ProcessBindingInput(e);
 
             if (!IsDisabled && DrawResetButton(resetRect))
             {

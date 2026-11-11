@@ -82,7 +82,7 @@ public static class NEFManager
         {
             if (ClientConfig.CurrentTab != TabType.NEF) return false;
 
-            if (DrawSetting.ActiveTextFieldId != -1 || DrawSetting.FocusedControlId != -1 || DrawSetting.ActiveDropdownId != -1)
+            if (DrawSetting.IsFocused)
             {
                 DrawSetting.ResetInputBind();
                 Input.ResetInputAxes();

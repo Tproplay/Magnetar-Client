@@ -16,7 +16,8 @@ public static partial class DrawSetting
            FocusedControlId != -1
         || ActiveSliderId != -1
         || ActiveTextFieldId != -1
-        || ActiveDropdownId != -1;
+        || ActiveDropdownId != -1
+        || (ActiveBindSetting != null && ActiveBindSetting.IsBinding);
 
     /// <summary>
     /// Unfocuses all the focused input fields and dropdowns.
@@ -29,7 +30,40 @@ public static partial class DrawSetting
         ActiveTextFieldId = -1;
         activeNumericSetting = null;
         ActiveTextSetting = null;
+        CancelActiveBind();
     }
+
+    /// <summary>
+    /// Cancels any currently listening <see cref="BindSetting"/> without disturbing other focused controls.
+    /// </summary>
+    public static void CancelActiveBind()
+    {
+        if (ActiveBindSetting != null)
+        {
+            var bindSetting = ActiveBindSetting;
+            ActiveBindSetting = null;
+            bindSetting.CancelBinding();
+        }
+    }
+
+    /// <summary>
+    /// Records that Escape was just consumed by an active setting control in the current frame.
+    /// </summary>
+    internal static void MarkEscapeConsumed()
+    {
+        LastEscapeTime = Time.unscaledTime;
+        LastEscapeFrame = Time.frameCount;
+    }
+
+    internal static bool WasEscapeConsumedRecently =>
+        (Time.frameCount == LastEscapeFrame) || (Time.unscaledTime - LastEscapeTime < 0.15f);
+
+    /// <summary>
+    /// Gets or sets the <see cref="BindSetting"/> currently listening for keyboard input.
+    /// </summary>
+    public static BindSetting ActiveBindSetting { get; set; }
+
+
 
     /// <summary>
     /// Gets or sets the control identifier of the currently focused input control.

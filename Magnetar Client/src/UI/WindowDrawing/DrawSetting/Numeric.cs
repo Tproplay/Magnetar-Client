@@ -170,6 +170,8 @@ public static partial class DrawSetting
         if (e.type == EventType.MouseDown && e.button == 0 && inHitbox)
         {
             GUIUtility.hotControl = sliderControlId;
+            CancelActiveBind();
+            ResetDropdownState();
             ActiveSliderId = sliderControlId;
             activeNumericSetting = setting;
             FocusedControlId = -1;

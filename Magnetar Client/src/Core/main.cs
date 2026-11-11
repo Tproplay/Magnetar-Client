@@ -179,15 +179,11 @@ public class Main
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                // Check if Escape was consumed by an input field in OnGUI this frame
-                bool consumedByTextField = (Time.frameCount == DrawSetting.LastEscapeFrame)
-                                        || (Time.unscaledTime - DrawSetting.LastEscapeTime < 0.15f);
-
-                if (consumedByTextField || DrawSetting.IsFocused)
+                // Check if Escape was consumed by an input field or bind setting in OnGUI this frame
+                if (DrawSetting.WasEscapeConsumedRecently || DrawSetting.IsFocused)
                 {
                     DrawSetting.ResetInputBind();
-                    DrawSetting.LastEscapeTime = Time.unscaledTime;
-                    DrawSetting.LastEscapeFrame = Time.frameCount;
+                    DrawSetting.MarkEscapeConsumed();
                     Input.ResetInputAxes();
                     return;
                 }

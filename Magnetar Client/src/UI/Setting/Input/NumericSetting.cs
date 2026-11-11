@@ -436,6 +436,8 @@ public class IntSetting : Setting
             {
                 GUIUtility.hotControl = sliderControlId;
                 GUIUtility.keyboardControl = 0;
+                DrawSetting.CancelActiveBind();
+                DrawSetting.ResetDropdownState();
                 DrawSetting.ActiveSliderId = sliderControlId;
                 DrawSetting.activeNumericSetting = setting;
                 DrawSetting.FocusedControlId = -1;

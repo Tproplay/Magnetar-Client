@@ -75,7 +75,7 @@ public static class SafeToCloseManager
     public static bool CanClose()
     {
         // Global Guard: Never allow GUI to close if a field is active or just consumed Escape
-        if (DrawSetting.IsFocused || (Time.unscaledTime - DrawSetting.LastEscapeTime < 0.15f))
+        if (DrawSetting.IsFocused || DrawSetting.WasEscapeConsumedRecently)
         {
             return false;
         }
@@ -124,7 +124,7 @@ public static class SafeToCloseManager
     /// </summary>
     public static bool TryInterceptEscape()
     {
-        if (DrawSetting.IsFocused || (Time.unscaledTime - DrawSetting.LastEscapeTime < 0.15f))
+        if (DrawSetting.IsFocused || DrawSetting.WasEscapeConsumedRecently)
         {
             DrawSetting.ResetInputBind();
             return true;

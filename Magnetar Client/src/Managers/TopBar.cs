@@ -126,6 +126,7 @@ public static class TopBar
     {
         if (tab == null || ClientConfig.CurrentTab == tab) return;
 
+        UI.WindowDrawing.DrawSetting.ResetInputBind();
         TabType previousTab = ClientConfig.CurrentTab;
         previousTab?.OnDeselected?.Invoke();
 

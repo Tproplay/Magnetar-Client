@@ -120,6 +120,9 @@ public abstract class BaseSelectSetting : Setting
             }
             else
             {
+                DrawSetting.CancelActiveBind();
+                DrawSetting.ActiveTextFieldId = -1;
+                DrawSetting.ActiveTextSetting = null;
                 DrawSetting.ActiveDropdownId = controlId;
                 DrawSetting.dropdownScrollY = 0f;
                 DrawSetting.dropdownScrollVelocity = 0f;

@@ -507,6 +507,7 @@ internal static class SettingsWindowDrawer
     {
         multiSet.OnWindowOpen = () =>
         {
+            DrawSetting.ResetInputBind();
             MultiSelectWindowDrawer.ActiveMultiSelect = multiSet;
             DrawSetting.manualScrollY = 0f;
             DrawSetting.targetScrollY = 0f;

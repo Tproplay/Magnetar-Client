@@ -33,8 +33,7 @@ GUIManager.S(BaseWindowHeight));
         {
             if (ClientConfig.CurrentTab == TabType.PROFILE)
             {
-                return DrawSetting.ActiveTextFieldId == -1
-                       && DrawSetting.FocusedControlId == -1;
+                return !DrawSetting.IsFocused;
             }
             return true;
         });
@@ -229,15 +228,14 @@ GUIManager.S(BaseWindowHeight));
 
         public bool CanClose()
         {
-            return DrawSetting.ActiveTextFieldId == -1
-                   && DrawSetting.FocusedControlId == -1;
+            return !DrawSetting.IsFocused;
         }
 
         public bool OnEscapePressed()
         {
             if (ClientConfig.CurrentTab != TabType.PROFILE) return false;
 
-            if (DrawSetting.ActiveTextFieldId != -1 || DrawSetting.FocusedControlId != -1)
+            if (DrawSetting.IsFocused)
             {
                 DrawSetting.ResetInputBind();
                 Input.ResetInputAxes();

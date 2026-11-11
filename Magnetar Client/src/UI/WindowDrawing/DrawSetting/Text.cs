@@ -382,6 +382,8 @@ public static partial class DrawSetting
             {
                 if (ActiveTextFieldId != controlId)
                 {
+                    CancelActiveBind();
+                    ResetDropdownState();
                     ActiveTextFieldId = controlId;
                     ActiveTextSetting = ownerSetting;
 #if ANDROID
@@ -661,8 +663,7 @@ public static partial class DrawSetting
                     {
                         ActiveTextSetting = null;
                     }
-                    LastEscapeTime = Time.unscaledTime;
-                    LastEscapeFrame = Time.frameCount;
+                    MarkEscapeConsumed();
                     e.Use();
                 }
                 else if (c != '\0' && !char.IsControl(c))
@@ -751,6 +752,8 @@ public static partial class DrawSetting
                     {
                         string chosen = filteredVars[autocompleteSelectedIndex];
                         ApplyAutocomplete(chosen);
+                        CancelActiveBind();
+                        ResetDropdownState();
                         ActiveTextFieldId = controlId;
                         ActiveTextSetting = ownerSetting;
 

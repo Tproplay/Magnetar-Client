@@ -97,6 +97,9 @@ public static partial class DrawSetting
             }
             else
             {
+                CancelActiveBind();
+                ActiveTextFieldId = -1;
+                ActiveTextSetting = null;
                 ActiveDropdownId = controlId;
                 dropdownScrollY = 0f;
                 dropdownScrollVelocity = 0f;

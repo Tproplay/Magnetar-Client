@@ -7,3 +7,4 @@
 ## Bugfixes
 
 - Escape key didn't worked while `Custom Keybind` module was active
+- Pressing Escape while a Bind Setting was focused triggered the settings window Escape instead of just unfocusing the Bind Setting

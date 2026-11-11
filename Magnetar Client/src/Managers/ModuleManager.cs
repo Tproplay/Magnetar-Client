@@ -194,6 +194,7 @@ public static class ModuleManager
     public static void OpenModuleSettings(Modules.Module mod)
     {
         MobileInputHandler.Reset();
+        if (ActiveSettingsModule != mod) ResetInputBind();
 
         if (ActiveSettingsModule != null && ActiveSettingsModule != mod)
         {
@@ -217,6 +218,7 @@ public static class ModuleManager
             ActiveSettingsModule = null;
         }
 
+        ResetInputBind();
         CurrentWindow = WindowType.Modules;
         AnimationHandler.SwitchView(Group, CurrentWindow.ToString());
     }

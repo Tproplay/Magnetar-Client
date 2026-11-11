@@ -184,6 +184,12 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
     public bool ShowCountInHeader { get; set; } = true;
 
     /// <summary>
+    /// Whether <see cref="Draw"/> passes each section's <see cref="SectionInstance.Title"/> through
+    /// the global translator before rendering. Disable when titles are already localized or dynamic.
+    /// </summary>
+    public bool TranslateTitles { get; set; } = true;
+
+    /// <summary>
     /// Whether to render the section group reset button in the footer controls row.
     /// </summary>
     public bool ShowResetButton { get; set; } = true;
@@ -608,7 +614,8 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
             }
 
             string foldArrow = section.IsExpanded ? "▼ " : "▶ ";
-            string secLabel = foldArrow + Translate(section.Title);
+            string titleText = TranslateTitles ? Translate(section.Title) : section.Title;
+            string secLabel = foldArrow + titleText;
 
             // Sub-header bar box visual
             GUI.Box(secHeaderRect, secLabel, ThemeManager.SectionHeaderStyle);

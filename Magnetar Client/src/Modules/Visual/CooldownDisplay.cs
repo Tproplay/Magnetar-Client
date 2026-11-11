@@ -127,7 +127,7 @@ public class CooldownDisplay : Module
             StyleFeatures.TextColor | StyleFeatures.FontSize | StyleFeatures.Outline,
             new StyleDefaults
             {
-                TextColor = new Color(228f / 255f, 155f / 255f, 38f / 255f, 1f),
+                TextColor = new Color(255f / 255f, 255f / 255f, 38f / 255f, 1f),
                 FontSize = 20f,
                 MinFontSize = 8f,
                 MaxFontSize = 60f,
@@ -148,7 +148,7 @@ public class CooldownDisplay : Module
             StyleFeatures.TextColor | StyleFeatures.FontSize | StyleFeatures.Outline,
             new StyleDefaults
             {
-                TextColor = new Color(228f / 255f, 155f / 255f, 38f / 255f, 1f),
+                TextColor = new Color(255f / 255f, 255f / 255f, 255f / 255f, 1f),
                 FontSize = 12f,
                 MinFontSize = 8f,
                 MaxFontSize = 60f,

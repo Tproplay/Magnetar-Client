@@ -128,7 +128,7 @@ public static partial class DrawSetting
             if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
             {
                 e.Use();
-                onClose?.Invoke();
+                CloseSelectionWindow(onClose);
                 return;
             }
 
@@ -339,6 +339,7 @@ public static partial class DrawSetting
 
         float listWidth = availWidth - scrollbarWidth - GUIManager.S(6f);
         Rect listGroupRect = new(padX, contentStartY, listWidth, viewHeight);
+        bool shouldCloseWindow = false;
         GUI.BeginGroup(listGroupRect);
         {
             Vector2 mousePos = e.mousePosition;
@@ -352,7 +353,7 @@ public static partial class DrawSetting
                 {
                     _isMobileHolding = false;
                 }
-                else if (Time.realtimeSinceStartup - _mobileHoldStartTime >= MobileShiftHoldThreshold)
+                else if (activeMultiSelect.MaxSelection != 1 && Time.realtimeSinceStartup - _mobileHoldStartTime >= MobileShiftHoldThreshold)
                 {
                     _mobileShiftDragActive = true;
                     _isMobileHolding = false;
@@ -478,19 +479,7 @@ public static partial class DrawSetting
                     if (_mobileHoldItemIdx >= 0 && _mobileHoldItemIdx < filteredItems.Count)
                     {
                         object itemKey = filteredItems[_mobileHoldItemIdx].Key;
-
-                        if (activeMultiSelect.MaxSelection == 1)
-                        {
-                            activeMultiSelect.ClearSelections();
-                            activeMultiSelect.SelectRaw(itemKey);
-                        }
-                        else
-                        {
-                            if (activeMultiSelect.IsSelectedRaw(itemKey))
-                                activeMultiSelect.DeselectRaw(itemKey);
-                            else
-                                ToggleWithLimit(activeMultiSelect, itemKey);
-                        }
+                        shouldCloseWindow = HandleSelectionItemClick(activeMultiSelect, itemKey);
 
                         e.Use();
                     }
@@ -618,18 +607,7 @@ public static partial class DrawSetting
                 else if (!_isListSwiping && _clickedItemIdx >= 0 && _clickedItemIdx < filteredItems.Count)
                 {
                     object itemKey = filteredItems[_clickedItemIdx].Key;
-                    bool isCurrentlySelected = activeMultiSelect.IsSelectedRaw(itemKey);
-
-                    if (activeMultiSelect.MaxSelection == 1)
-                    {
-                        activeMultiSelect.ClearSelections();
-                        activeMultiSelect.SelectRaw(itemKey);
-                    }
-                    else
-                    {
-                        if (isCurrentlySelected) activeMultiSelect.DeselectRaw(itemKey);
-                        else ToggleWithLimit(activeMultiSelect, itemKey);
-                    }
+                    shouldCloseWindow = HandleSelectionItemClick(activeMultiSelect, itemKey);
 
                     e.Use();
                 }
@@ -682,6 +660,39 @@ public static partial class DrawSetting
         GUI.Box(new Rect(scrollX + (scrollbarWidth / 2f) - 1f, trackStartY, 2, trackHeight), "", ThemeManager.SeparatorStyle);
         bool shouldHighlight = (ActiveSliderId == sliderId) || (Time.unscaledTime - lastSliderUpdateTime < 1.0f);
         GUI.Box(handleRect, "", shouldHighlight ? ThemeManager.SettingOn : ThemeManager.SettingOff);
+
+        if (shouldCloseWindow)
+        {
+            CloseSelectionWindow(onClose);
+        }
+    }
+
+    private static bool HandleSelectionItemClick(BaseMultiSelectSetting setting, object itemKey)
+    {
+        if (setting.MaxSelection == 1)
+        {
+            setting.ClearSelections();
+            setting.SelectRaw(itemKey);
+            return setting.CloseOnSingleSelect;
+        }
+
+        if (setting.IsSelectedRaw(itemKey))
+        {
+            setting.DeselectRaw(itemKey);
+        }
+        else
+        {
+            ToggleWithLimit(setting, itemKey);
+        }
+
+        return false;
+    }
+
+    private static void CloseSelectionWindow(Action onClose)
+    {
+        ResetInputBind();
+        activeMultiSelect = null;
+        onClose?.Invoke();
     }
 
     private static void ToggleWithLimit(BaseMultiSelectSetting activeMultiSelect, object val)

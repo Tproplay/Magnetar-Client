@@ -79,7 +79,7 @@ public static partial class DrawSetting
             if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
             {
                 e.Use();
-                onClose?.Invoke();
+                CloseSelectionWindow(onClose);
                 return;
             }
 
@@ -238,6 +238,7 @@ public static partial class DrawSetting
         }
 
         Rect gridGroupRect = new(padX, contentStartY, gridWidth, viewHeight);
+        bool shouldCloseWindow = false;
         GUI.BeginGroup(gridGroupRect);
         {
             Vector2 mousePos = e.mousePosition;
@@ -267,7 +268,7 @@ public static partial class DrawSetting
                 {
                     _isMobileHolding = false;
                 }
-                else if (Time.realtimeSinceStartup - _mobileHoldStartTime >= MobileShiftHoldThreshold)
+                else if (entitySelect.MaxSelection != 1 && Time.realtimeSinceStartup - _mobileHoldStartTime >= MobileShiftHoldThreshold)
                 {
                     _mobileShiftDragActive = true;
                     _isMobileHolding = false;
@@ -382,19 +383,7 @@ public static partial class DrawSetting
                     if (_mobileHoldItemIdx >= 0 && _mobileHoldItemIdx < filteredItems.Count)
                     {
                         int itemKey = filteredItems[_mobileHoldItemIdx].Key;
-
-                        if (entitySelect.MaxSelection == 1)
-                        {
-                            entitySelect.ClearSelections();
-                            entitySelect.SelectRaw(itemKey);
-                        }
-                        else
-                        {
-                            if (entitySelect.IsSelected(itemKey))
-                                entitySelect.DeselectRaw(itemKey);
-                            else
-                                ToggleWithLimit(entitySelect, itemKey);
-                        }
+                        shouldCloseWindow = HandleSelectionItemClick(entitySelect, itemKey);
 
                         e.Use();
                     }
@@ -512,18 +501,7 @@ public static partial class DrawSetting
                 else if (!_isListSwiping && _clickedItemIdx >= 0 && _clickedItemIdx < filteredItems.Count)
                 {
                     int itemKey = filteredItems[_clickedItemIdx].Key;
-                    bool isCurrentlySelected = entitySelect.IsSelected(itemKey);
-
-                    if (entitySelect.MaxSelection == 1)
-                    {
-                        entitySelect.ClearSelections();
-                        entitySelect.SelectRaw(itemKey);
-                    }
-                    else
-                    {
-                        if (isCurrentlySelected) entitySelect.DeselectRaw(itemKey);
-                        else ToggleWithLimit(entitySelect, itemKey);
-                    }
+                    shouldCloseWindow = HandleSelectionItemClick(entitySelect, itemKey);
 
                     e.Use();
                 }
@@ -616,5 +594,10 @@ public static partial class DrawSetting
         GUI.Box(new Rect(scrollX + (scrollbarWidth / 2f) - 1f, trackStartY, 2, trackHeight), "", ThemeManager.SeparatorStyle);
         bool shouldHighlight = (ActiveSliderId == sliderId) || (Time.unscaledTime - lastSliderUpdateTime < 1.0f);
         GUI.Box(handleRect, "", shouldHighlight ? ThemeManager.SettingOn : ThemeManager.SettingOff);
+
+        if (shouldCloseWindow)
+        {
+            CloseSelectionWindow(onClose);
+        }
     }
 }

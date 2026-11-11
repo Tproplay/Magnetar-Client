@@ -23,6 +23,12 @@ public abstract class BaseMultiSelectSetting : Setting
     public int MaxSelection = -1;
 
     /// <summary>
+    /// Whether clicking an option automatically closes the selection window when <see cref="MaxSelection"/> is 1.
+    /// Defaults to <c>false</c>.
+    /// </summary>
+    public bool CloseOnSingleSelect { get; set; } = false;
+
+    /// <summary>
     /// Option internal names explicitly forbidden from being selected or rendered in selection views.
     /// </summary>
     public HashSet<string> NameBlacklist = new();

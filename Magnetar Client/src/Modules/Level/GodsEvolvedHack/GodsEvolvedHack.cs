@@ -97,7 +97,7 @@ public partial class GodsEvolvedHack : Module
         QualitySilverWeight = CreateWeightSetting("Silver Quality Weight", Quality.silver, 50).Setting;
         QualityGoldtWeight = CreateWeightSetting("Gold Quality Weight", Quality.gold, 50).Setting;
         QualityDiamondWeight = CreateWeightSetting("Diamond Quality Weight", Quality.diamond, 50).Setting;
-        QualityIridescentWeight = CreateWeightSetting("Titanium Quality Weight", Quality.iridescent, 0).Setting;
+        QualityIridescentWeight = CreateWeightSetting("Prismatic Quality Weight", Quality.iridescent, 0).Setting;
         QualityCurseWeight = CreateWeightSetting("Curse Quality Weight", Quality.curse, 0).Setting;
         QualityRandomWeight = CreateWeightSetting("Random Quality Weight", Quality.random, 0).Setting;
 

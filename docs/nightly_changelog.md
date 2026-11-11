@@ -2,8 +2,8 @@
 
 ## Changelogs
 
-- 
+- chenged "Titanium" to "Prismatic" in `Gods Evolved Hack`
 
 ## Bugfixes
 
-- Escape key didn't worked while Custom Keybind module was active
+- Escape key didn't worked while `Custom Keybind` module was active

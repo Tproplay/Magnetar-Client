@@ -346,8 +346,7 @@ public class CustomKeybind : Module
 
                 if (SlowMode?.BindKeys?.Count > 0 && GetKeyComboDown(SlowMode.BindKeys))
                 {
-                    SlowTrigger slowTrigger = GameAPP.board?.GetComponent<SlowTrigger>();
-                    if (slowTrigger != null) slowTrigger.TriggerSlow();
+                    TriggerSlowMode();
                 }
 
                 if (ShowPlantHP?.BindKeys?.Count > 0 && GetKeyComboDown(ShowPlantHP.BindKeys) && GameData.BoardInstance != null)
@@ -458,6 +457,49 @@ public class CustomKeybind : Module
         }
     }
 
+    private static void TriggerSlowMode()
+    {
+        // 1. Normal levels: InGameUI has SlowTrigger component on InGameUI.Instance.SlowTrigger
+        SlowTrigger slowTrigger = InGameUI.Instance?.SlowTrigger?.GetComponent<SlowTrigger>()
+            ?? InGameUI.Instance?.GetComponentInChildren<SlowTrigger>(true)
+            ?? UnityEngine.Object.FindObjectOfType<SlowTrigger>();
+
+        if (slowTrigger != null)
+        {
+            slowTrigger.TriggerSlow();
+            return;
+        }
+
+        // 2. I-Zombie: IZBottomMenu has InGameBtn (buttonNumber == 3)
+        if (IZBottomMenu.Instance != null)
+        {
+            var btns = IZBottomMenu.Instance.GetComponentsInChildren<InGameBtn>(true);
+            if (btns != null)
+            {
+                for (int i = 0; i < btns.Length; i++)
+                {
+                    if (btns[i] != null && btns[i].buttonNumber == 3)
+                    {
+                        btns[i].SpeedTrigger();
+                        return;
+                    }
+                }
+            }
+        }
+
+        // 3. Fallback: Directly toggle timeScale matching game speed logic
+        float currentTimeScale = Time.timeScale;
+        if (Mathf.Abs(currentTimeScale - 0.2f) > 0.001f)
+        {
+            Time.timeScale = 0.2f;
+        }
+        else
+        {
+            float normalSpeed = GameAPP.config != null ? GameAPP.config.gameSpeed : 1f;
+            Time.timeScale = normalSpeed > 0f ? normalSpeed : 1f;
+        }
+    }
+
     #endregion
 
     #region UI & Tools Patches (Raw Input Handling)
@@ -472,6 +514,21 @@ public class CustomKeybind : Module
             if (instance == null || !instance.Active || RanbyMod || Input.GetMouseButtonDown(0))
                 return true;
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(InGameBtn))]
+    public static class InGameBtnPatch
+    {
+        [HarmonyPatch(nameof(InGameBtn.Update))]
+        [HarmonyPrefix]
+        private static bool UpdatePrefix(InGameBtn __instance)
+        {
+            if (instance == null || !instance.Active || RanbyMod || Input.GetMouseButtonDown(0))
+                return true;
+            if (__instance != null && __instance.buttonNumber == 3)
+                return false;
+            return true;
         }
     }
 

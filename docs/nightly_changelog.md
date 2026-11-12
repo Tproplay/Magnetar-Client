@@ -14,3 +14,4 @@
 - Color tag inside Text fields lead to weird functionality
 - Fixed literal `\n` in format strings not creating line breaks in TextMeshPro
 - Restored colored curly bracket syntax highlighting in text fields without swallowing rich text tags or misaligning cursor navigation
+- Fixed a bug where the Toggle Slow Mode of `Custom Keybind` won't trigger in normal levels

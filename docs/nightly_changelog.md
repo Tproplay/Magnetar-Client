@@ -3,7 +3,7 @@
 ## Changelogs
 
 - changed "Titanium" to "Prismatic" in `Gods Evolved Hack`
-- New Modules: `Custom Plant Data`, `Custom Zombie Data`, `Custom Recipes`, `Cooldown Display`
+- New Modules: `Custom Plant Data`, `Custom Zombie Data`, `Custom Recipes`, `Cooldown Display`, `Scratch-Off Hack`, `Auto Scratch`
 - Added `StyleSetting` to generalize customizable typography, colors, outlines, and alignment for IMGUI and TextMeshPro
 
 ## Bugfixes

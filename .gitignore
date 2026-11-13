@@ -388,3 +388,6 @@ Addons/*/Sessions/
 
 # Packed Builds artifacts
 Builds/
+
+# Graphify output folder
+graphify-out/

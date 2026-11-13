@@ -1,7 +1,7 @@
-using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
-using UnityEngine;
+using Magnetar_Client.Modules.Helpers;
+
 
 
 #if MELONLOADER || RELEASE_MELON
@@ -23,14 +23,15 @@ public class BuffZombies : Module
     public override ModuleCategory Category { get; set; } = ModuleCategory.Zombie;
 
     // Mod Data
-
     public static BuffZombies instance;
 
     public EntitySelectSetting ZombieSelectedSetting;
-
     public FloatSetting HpMultiplierSettig;
 
     public override bool Active { get; set; }
+
+    private float _lastMultiplier = -1f;
+
     public BuffZombies()
     {
         instance = this;
@@ -41,7 +42,6 @@ public class BuffZombies : Module
         {
             CustomNames = TranslateEnum(typeof(ZombieType)),
             Blacklist = Banned.ZombieTypeBanned,
-
         };
 
         ZombieSelectedSetting.SelectAll(setDefault: true);
@@ -50,8 +50,6 @@ public class BuffZombies : Module
 
         AddSettings(ZombieSelectedSetting, HpMultiplierSettig);
         EndCategory();
-
-        GameData.Actions.OnBoardDestroyed += () => originalHpData.Clear();
     }
 
     public override void OnLanguageChanged()
@@ -59,108 +57,39 @@ public class BuffZombies : Module
         ZombieSelectedSetting.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
-    public readonly struct ZombieHpData
+    public override void OnEnable()
     {
-        public readonly long BaseMax;
-        public readonly int Armor1Max;
-        public readonly int Armor2Max;
-
-        public ZombieHpData(long baseMax, int armor1Max, int armor2Max)
-        {
-            BaseMax = baseMax;
-            Armor1Max = armor1Max;
-            Armor2Max = armor2Max;
-        }
+        _lastMultiplier = HpMultiplierSettig.Value;
+        UpdateModifiers();
     }
 
-    public static Dictionary<Zombie, ZombieHpData> originalHpData = new();
-
-    // Mod Logic
     public override void OnUpdateActive()
     {
-        if (GameData.BoardInstanceIsNull) return;
-
-        float multiplier = HpMultiplierSettig.Value;
-
-        foreach (var zombie in GameData.ZombieList)
+        if (HpMultiplierSettig.Value != _lastMultiplier)
         {
-            if (zombie == null) continue;
-
-            // Only buff the zombie if it's selected in the UI
-            if (ZombieSelectedSetting.IsSelected((int)zombie.theZombieType))
-            {
-                if (!originalHpData.ContainsKey(zombie))
-                {
-                    originalHpData[zombie] = new ZombieHpData(
-                        zombie.theMaxHealth,
-                        zombie.theFirstArmorMaxHealth,
-                        zombie.theSecondArmorMaxHealth
-                    );
-
-                    zombie.theMaxHealth = (long)System.Math.Round(zombie.theMaxHealth * multiplier);
-                    zombie.theFirstArmorMaxHealth = Mathf.RoundToInt(zombie.theFirstArmorMaxHealth * multiplier);
-                    zombie.theSecondArmorMaxHealth = Mathf.RoundToInt(zombie.theSecondArmorMaxHealth * multiplier);
-
-                    zombie.theHealth = (long)System.Math.Round(zombie.theHealth * multiplier);
-                    zombie.theFirstArmorHealth = Mathf.RoundToInt(zombie.theFirstArmorHealth * multiplier);
-                    zombie.theSecondArmorHealth = Mathf.RoundToInt(zombie.theSecondArmorHealth * multiplier);
-
-                    zombie.UpdateHealthText();
-                }
-            }
+            _lastMultiplier = HpMultiplierSettig.Value;
+            UpdateModifiers();
         }
     }
 
     public override void OnDisable()
     {
-        foreach (var zombie in GameData.ZombieList)
-        {
-            if (zombie == null) continue;
-
-            if (originalHpData.TryGetValue(zombie, out ZombieHpData origData))
-            {
-                long origMaxHp = origData.BaseMax;
-                long origFirstArmorMax = origData.Armor1Max;
-                long origSecondArmorMax = origData.Armor2Max;
-
-                // 1. Calculate current health ratios (safeguard against divide by zero for unarmored zombies)
-                float hpRatio = zombie.theMaxHealth > 0 ? (float)zombie.theHealth / zombie.theMaxHealth : 0f;
-                float armor1Ratio = zombie.theFirstArmorMaxHealth > 0 ? (float)zombie.theFirstArmorHealth / zombie.theFirstArmorMaxHealth : 0f;
-                float armor2Ratio = zombie.theSecondArmorMaxHealth > 0 ? (float)zombie.theSecondArmorHealth / zombie.theSecondArmorMaxHealth : 0f;
-
-                // 2. Restore Original Max Healths
-                zombie.theMaxHealth = origMaxHp;
-                zombie.theFirstArmorMaxHealth = (int)origFirstArmorMax;
-                zombie.theSecondArmorMaxHealth = (int)origSecondArmorMax;
-
-                // 3. Scale Current Healths down using the preserved ratios
-                zombie.theHealth = Mathf.RoundToInt(origMaxHp * hpRatio);
-                zombie.theFirstArmorHealth = Mathf.RoundToInt(origFirstArmorMax * armor1Ratio);
-                zombie.theSecondArmorHealth = Mathf.RoundToInt(origSecondArmorMax * armor2Ratio);
-            }
-        }
-
-        // Clean up memory
-        originalHpData.Clear();
+        _lastMultiplier = -1f;
+        ZombieStatManager.RemoveModifier(Name, StatType.MaxHealth);
+        ZombieStatManager.RemoveModifier(Name, StatType.Armor1Max);
+        ZombieStatManager.RemoveModifier(Name, StatType.Armor2Max);
     }
 
-    [HarmonyPatch(typeof(Zombie))]
-    public static class ZombieCleanupPatch
+    private void UpdateModifiers()
     {
-        [HarmonyPatch(nameof(Zombie.Die))]
-        [HarmonyPostfix]
-        public static void DiePostfix(Zombie __instance)
-        {
-            if (__instance != null) originalHpData.Remove(__instance);
-        }
+        if (!Active) return;
 
-        [HarmonyPatch(nameof(Zombie.DestoryZombie))]
-        [HarmonyPostfix]
-        public static void DestroyPostfix(Zombie __instance)
-        {
-            if (__instance != null) originalHpData.Remove(__instance);
-        }
+        float multiplier = HpMultiplierSettig.Value;
+        ZombieStatManager.SetModifier(Name, StatType.MaxHealth, ModifierOp.Multiply, multiplier,
+            z => ZombieSelectedSetting.IsSelected((int)z.theZombieType));
+        ZombieStatManager.SetModifier(Name, StatType.Armor1Max, ModifierOp.Multiply, multiplier,
+            z => ZombieSelectedSetting.IsSelected((int)z.theZombieType));
+        ZombieStatManager.SetModifier(Name, StatType.Armor2Max, ModifierOp.Multiply, multiplier,
+            z => ZombieSelectedSetting.IsSelected((int)z.theZombieType));
     }
-
-
 }

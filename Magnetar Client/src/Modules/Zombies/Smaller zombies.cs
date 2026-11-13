@@ -1,7 +1,9 @@
-using HarmonyLib;
-using System.Collections.Generic;
 using Magnetar_Client.UI.Setting;
+using System.Collections.Generic;
 using UnityEngine;
+using Magnetar_Client.Modules.Helpers;
+
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -23,6 +25,8 @@ public class SmallerZombies : Module
     public FloatSetting sizeMultiplier;
     public EntitySelectSetting selectedZombies;
 
+    private float _lastMultiplier = -1f;
+
     public SmallerZombies()
     {
         instance = this;
@@ -39,10 +43,7 @@ public class SmallerZombies : Module
         selectedZombies.SelectAll(setDefault: true);
 
         AddSettings(sizeMultiplier, selectedZombies);
-
         EndCategory();
-
-        GameData.Actions.OnBoardDestroyed += () => originaltheZombieScale.Clear();
     }
 
     public override void OnLanguageChanged()
@@ -50,74 +51,32 @@ public class SmallerZombies : Module
         selectedZombies.CustomNames = TranslateEnum(typeof(ZombieType));
     }
 
-    public static Dictionary<Zombie, Vector3> originaltheZombieScale = new();
+    public override void OnEnable()
+    {
+        _lastMultiplier = sizeMultiplier.Value;
+        UpdateModifier();
+    }
 
     public override void OnUpdateActive()
     {
-        if (GameData.BoardInstanceIsNull) return;
-
-        float currentMultiplier = sizeMultiplier.Value;
-
-        foreach (var zombie in GameData.ZombieList)
+        if (sizeMultiplier.Value != _lastMultiplier)
         {
-            if (zombie == null) continue;
-
-            bool isSelected = selectedZombies.IsSelected((int)zombie.theZombieType);
-            bool hasOriginal = originaltheZombieScale.TryGetValue(zombie, out Vector3 origScale);
-
-            if (isSelected)
-            {
-                if (!hasOriginal)
-                {
-                    origScale = zombie.transform.localScale;
-                    originaltheZombieScale[zombie] = origScale;
-                }
-
-                Vector3 targetScale = origScale * currentMultiplier;
-                if (zombie.transform.localScale != targetScale)
-                {
-                    zombie.transform.localScale = targetScale;
-                }
-            }
-            else if (hasOriginal)
-            {
-                zombie.transform.localScale = origScale;
-                originaltheZombieScale.Remove(zombie);
-            }
+            _lastMultiplier = sizeMultiplier.Value;
+            UpdateModifier();
         }
     }
 
     public override void OnDisable()
     {
-        foreach (var zombie in GameData.ZombieList)
-        {
-            if (zombie == null) continue;
-            if (originaltheZombieScale.TryGetValue(zombie, out Vector3 origScale))
-            {
-                zombie.transform.localScale = origScale;
-            }
-        }
-
-        originaltheZombieScale.Clear();
+        _lastMultiplier = -1f;
+        ZombieStatManager.RemoveModifier(Name, StatType.Scale);
     }
 
-    [HarmonyPatch(typeof(Zombie))]
-    public static class ZombieCleanupPatch
+    private void UpdateModifier()
     {
-        [HarmonyPatch(nameof(Zombie.Die))]
-        [HarmonyPostfix]
-        public static void DiePostfix(Zombie __instance)
-        {
-            if (__instance != null) originaltheZombieScale.Remove(__instance);
-        }
+        if (!Active) return;
 
-        [HarmonyPatch(nameof(Zombie.DestoryZombie))]
-        [HarmonyPostfix]
-        public static void DestroyPostfix(Zombie __instance)
-        {
-            if (__instance != null) originaltheZombieScale.Remove(__instance);
-        }
+        ZombieStatManager.SetModifier(Name, StatType.Scale, ModifierOp.Multiply, sizeMultiplier.Value,
+            z => selectedZombies.IsSelected((int)z.theZombieType));
     }
-
-
 }

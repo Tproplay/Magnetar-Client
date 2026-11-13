@@ -1,6 +1,7 @@
 using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using System.Collections.Generic;
+using Magnetar_Client.Modules.Helpers;
 
 
 
@@ -51,12 +52,12 @@ public class FasterPlants : Module
         AnimationSpeedMultiplierSetting = new FloatSetting("Animation Speed", 0.01f, 50f, 2f, 3);
         ProduceSpeedMultiplierSetting = new FloatSetting("Produce Speed", 0.01f, 50f, 50f, 3);
 
-        AddSettings(PlantsSelectedSetting,AttackIntervalMultiplierSetting,
-            AnimationSpeedMultiplierSetting,ProduceSpeedMultiplierSetting
+        AddSettings(PlantsSelectedSetting, AttackIntervalMultiplierSetting,
+            AnimationSpeedMultiplierSetting, ProduceSpeedMultiplierSetting
         );
         EndCategory();
 
-        CreateCategory("Advanced",false);
+        CreateCategory("Advanced", false);
 
         AdvancedLabel = new("Modifications done here are preferred over Global modifications");
 
@@ -90,13 +91,6 @@ public class FasterPlants : Module
         }
     }
 
-    private readonly Dictionary<Plant, float> originalthePlantAttackInterval = new();
-    private readonly Dictionary<Plant, float> originalAnimationSpeeds = new();
-    private readonly Dictionary<Plant, float> originalthePlantProduceInterval = new();
-
-    /// <summary>
-    /// Priority: Highest-index Section > Lowest-index Section > Global General Settings.
-    /// </summary>
     private bool TryGetPlantMultipliers(int plantId, out float attackMult, out float animMult, out float produceMult)
     {
         var sections = IndividualPlantsSectionSetting.Sections;
@@ -115,7 +109,7 @@ public class FasterPlants : Module
                 return true;
             }
         }
-            
+
         if (PlantsSelectedSetting.IsSelected(plantId))
         {
             attackMult = AttackIntervalMultiplierSetting.Value;
@@ -130,106 +124,53 @@ public class FasterPlants : Module
         return false;
     }
 
-    // Mod Logic
+    public override void OnEnable()
+    {
+        UpdateModifiers();
+    }
+
     public override void OnUpdateActive()
     {
-        if (GameData.BoardInstanceIsNull) return;
-
-        foreach (var plant in GameData.PlantList)
-        {
-            int plantId = (int)plant.thePlantType;
-            bool isTargeted = TryGetPlantMultipliers(plantId, out float attackMult, out float animMult, out float produceMult);
-
-            #region Attack Interval Modification
-            if (isTargeted)
-            {
-                if (!originalthePlantAttackInterval.ContainsKey(plant))
-                {
-                    originalthePlantAttackInterval[plant] = plant.thePlantAttackInterval;
-                }
-
-                float targetAttack = originalthePlantAttackInterval[plant] / attackMult;
-                if (plant.thePlantAttackInterval != targetAttack)
-                {
-                    plant.thePlantAttackInterval = targetAttack;
-                }
-            }
-            else if (originalthePlantAttackInterval.TryGetValue(plant, out float origAtk))
-            {
-                plant.thePlantAttackInterval = origAtk;
-                originalthePlantAttackInterval.Remove(plant);
-            }
-            #endregion
-
-            #region Animation Speed Modification
-            if (isTargeted)
-            {
-                if (!originalAnimationSpeeds.ContainsKey(plant))
-                {
-                    originalAnimationSpeeds[plant] = plant.thePlantSpeed;
-                }
-
-                float targetSpeed = originalAnimationSpeeds[plant] * animMult;
-                if (plant.thePlantSpeed != targetSpeed)
-                {
-                    plant.thePlantSpeed = targetSpeed;
-                }
-            }
-            else if (originalAnimationSpeeds.TryGetValue(plant, out float origSpeed))
-            {
-                plant.thePlantSpeed = origSpeed;
-                originalAnimationSpeeds.Remove(plant);
-            }
-            #endregion
-
-            #region Production Cooldown Modification
-            if (isTargeted)
-            {
-                if (!originalthePlantProduceInterval.ContainsKey(plant))
-                {
-                    originalthePlantProduceInterval[plant] = plant.thePlantProduceInterval;
-                }
-
-                float targetProduce = originalthePlantProduceInterval[plant] / produceMult;
-                if (plant.thePlantProduceInterval != targetProduce)
-                {
-                    plant.thePlantProduceInterval = targetProduce;
-                }
-            }
-            else if (originalthePlantProduceInterval.TryGetValue(plant, out float origProd))
-            {
-                plant.thePlantProduceInterval = origProd;
-                originalthePlantProduceInterval.Remove(plant);
-            }
-            #endregion
-        }
+        UpdateModifiers();
     }
 
     public override void OnDisable()
     {
-        foreach (var plant in GameData.PlantList)
+        PlantStatManager.RemoveModifier(Name, PlantStatType.AttackInterval);
+        PlantStatManager.RemoveModifier(Name, PlantStatType.AnimationSpeed);
+        PlantStatManager.RemoveModifier(Name, PlantStatType.ProduceInterval);
+    }
+
+    private void UpdateModifiers()
+    {
+        if (!Active) return;
+
+        PlantStatManager.SetModifier(Name, PlantStatType.AttackInterval, ModifierOp.Multiply, p =>
         {
-            if (plant == null) continue;
-
-            if (originalthePlantAttackInterval.TryGetValue(plant, out float origAtk))
+            if (TryGetPlantMultipliers((int)p.thePlantType, out float atk, out _, out _))
             {
-                plant.thePlantAttackInterval = origAtk;
+                return atk > 0f ? 1f / atk : 1f;
             }
+            return 1f;
+        });
 
-            if (originalAnimationSpeeds.TryGetValue(plant, out float origSpeed))
+        PlantStatManager.SetModifier(Name, PlantStatType.AnimationSpeed, ModifierOp.Multiply, p =>
+        {
+            if (TryGetPlantMultipliers((int)p.thePlantType, out _, out float anim, out _))
             {
-                plant.thePlantSpeed = origSpeed;
+                return anim;
             }
+            return 1f;
+        });
 
-            if (originalthePlantProduceInterval.TryGetValue(plant, out float origProd))
+        PlantStatManager.SetModifier(Name, PlantStatType.ProduceInterval, ModifierOp.Multiply, p =>
+        {
+            if (TryGetPlantMultipliers((int)p.thePlantType, out _, out _, out float prod))
             {
-                plant.thePlantProduceInterval = origProd;
+                return prod > 0f ? 1f / prod : 1f;
             }
-        }
-
-        originalthePlantAttackInterval.Clear();
-        originalAnimationSpeeds.Clear();
-        originalthePlantProduceInterval.Clear();
+            return 1f;
+        });
     }
 
     [HarmonyPatch(typeof(Plant))]

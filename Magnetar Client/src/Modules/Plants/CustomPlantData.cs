@@ -4,6 +4,9 @@ using System.Linq;
 using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using UnityEngine;
+using Magnetar_Client.Modules.Helpers;
+
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -43,7 +46,7 @@ public class CustomPlantData : Module
     private readonly Dictionary<PlantType, PlantOverrideData> _normalOverrides = new();
     private readonly Dictionary<PlantType, PlantOverrideData> _starboundOverrides = new();
     private readonly Dictionary<(bool IsStarbound, PlantType Type), PlantDataManager.PlantData> _cachedPatchedData = new();
-    private readonly Dictionary<Plant, OriginalPlantStats> _originalPlants = new();
+    private readonly HashSet<PlantType> _activeRegisteredStatTypes = new();
     private readonly Dictionary<CardUI, OriginalCardStats> _originalCards = new();
 
     public readonly struct PlantOverrideData
@@ -79,32 +82,6 @@ public class CustomPlantData : Module
             target.maxHealth = MaxHealth;
             target.cd = Cooldown;
             target.cost = Cost;
-        }
-    }
-
-    private readonly struct OriginalPlantStats
-    {
-        public readonly int AttackDamage;
-        public readonly float AttackInterval;
-        public readonly float ProduceInterval;
-        public readonly int MaxHealth;
-        public readonly int BaselineDamage;
-        public readonly int BaselineMaxHealth;
-
-        public OriginalPlantStats(
-            int attackDamage,
-            float attackInterval,
-            float produceInterval,
-            int maxHealth,
-            int baselineDamage,
-            int baselineMaxHealth)
-        {
-            AttackDamage = attackDamage;
-            AttackInterval = attackInterval;
-            ProduceInterval = produceInterval;
-            MaxHealth = maxHealth;
-            BaselineDamage = baselineDamage;
-            BaselineMaxHealth = baselineMaxHealth;
         }
     }
 
@@ -166,14 +143,12 @@ public class CustomPlantData : Module
 
         EndCategory();
 
-        GameData.OnPlantSpawned += HandlePlantSpawned;
-        GameData.OnPlantDie += HandlePlantDied;
         GameData.Actions.OnBoardDestroyed += ClearTrackedEntities;
         GameData.Actions.OnBoardDied += ClearTrackedEntities;
         GameData.Actions.OnInGameUIDestroyed += ClearTrackedCards;
         GameData.Actions.OnInGameUIInstantiated += _ =>
         {
-            if (Active) SyncLiveEntities();
+            if (Active) SyncCardEntities();
         };
     }
 
@@ -288,13 +263,15 @@ public class CustomPlantData : Module
     public override void OnEnable()
     {
         RebuildOverrideCaches();
-        SyncLiveEntities();
+        SyncPlantStatManagerModifiers();
+        SyncCardEntities();
     }
 
     public override void OnDisable()
     {
         _cachedPatchedData.Clear();
-        RestoreAllLiveEntities();
+        RestorePlantStatManagerModifiers();
+        RestoreCardEntities();
     }
 
     private void OnOverridesChanged()
@@ -302,7 +279,13 @@ public class CustomPlantData : Module
         RebuildOverrideCaches();
         if (Active)
         {
-            SyncLiveEntities();
+            SyncPlantStatManagerModifiers();
+            SyncCardEntities();
+        }
+        else
+        {
+            RestorePlantStatManagerModifiers();
+            RestoreCardEntities();
         }
     }
 
@@ -505,46 +488,8 @@ public class CustomPlantData : Module
         return map.TryGetValue(plantType, out overrideData);
     }
 
-    private void HandlePlantSpawned(Plant plant)
-    {
-        if (!Active || plant == null || plant.gameObject == null) return;
-        if (_originalPlants.ContainsKey(plant)) return;
-        if (!TryGetOverride(plant.thePlantType, out var ov, out _)) return;
-        if (!TryGetBaselinePlantData(plant.thePlantType, out var baseData)) return;
-
-        int origDamage = baseData.attackDamage;
-        if (ov.AttackDamage > 0 && plant.attackDamage != ov.AttackDamage)
-        {
-            origDamage = Mathf.RoundToInt(baseData.attackDamage * (plant.attackDamage / (float)ov.AttackDamage));
-        }
-
-        int origMaxHealth = baseData.maxHealth;
-        if (ov.MaxHealth > 0 && plant.thePlantMaxHealth != ov.MaxHealth)
-        {
-            int scaled = Mathf.RoundToInt(baseData.maxHealth * (plant.thePlantMaxHealth / (float)ov.MaxHealth));
-            origMaxHealth = baseData.maxHealth > 0 ? Mathf.Max(1, scaled) : scaled;
-        }
-
-        _originalPlants[plant] = new OriginalPlantStats(
-            origDamage,
-            baseData.attackInterval,
-            baseData.produceInterval,
-            origMaxHealth,
-            baseData.attackDamage,
-            baseData.maxHealth);
-    }
-
-    private void HandlePlantDied(Plant plant)
-    {
-        if (plant != null)
-        {
-            _originalPlants.Remove(plant);
-        }
-    }
-
     private void ClearTrackedEntities()
     {
-        _originalPlants.Clear();
         _originalCards.Clear();
     }
 
@@ -553,45 +498,68 @@ public class CustomPlantData : Module
         _originalCards.Clear();
     }
 
-    private void SyncLiveEntities()
+    private void SyncPlantStatManagerModifiers()
     {
-        if (GameData.BoardInstanceIsNull) return;
-
-        PruneDestroyedTrackedEntities();
-
-        var plants = GameData.PlantList;
-        if (plants != null)
+        foreach (var type in _activeRegisteredStatTypes)
         {
-            for (int i = 0; i < plants.Count; i++)
-            {
-                Plant plant = plants[i];
-                if (plant == null || plant.gameObject == null) continue;
-
-                if (TryGetOverride(plant.thePlantType, out var ov, out _))
-                {
-                    if (!_originalPlants.TryGetValue(plant, out var orig))
-                    {
-                        TryGetBaselinePlantData(plant.thePlantType, out var baseData);
-                        orig = new OriginalPlantStats(
-                            plant.attackDamage,
-                            plant.thePlantAttackInterval,
-                            plant.thePlantProduceInterval,
-                            plant.thePlantMaxHealth,
-                            baseData?.attackDamage ?? plant.attackDamage,
-                            baseData?.maxHealth ?? plant.thePlantMaxHealth);
-                        _originalPlants[plant] = orig;
-                    }
-
-                    ApplyOverrideToPlant(plant, orig, ov);
-                }
-                else if (_originalPlants.TryGetValue(plant, out var orig))
-                {
-                    RestorePlant(plant, orig);
-                    _originalPlants.Remove(plant);
-                }
-            }
+            string key = "CustomPlantData_" + (int)type;
+            PlantStatManager.RemoveModifier(key, PlantStatType.MaxHealth);
+            PlantStatManager.RemoveModifier(key, PlantStatType.Damage);
+            PlantStatManager.RemoveModifier(key, PlantStatType.AttackInterval);
+            PlantStatManager.RemoveModifier(key, PlantStatType.ProduceInterval);
         }
+        _activeRegisteredStatTypes.Clear();
 
+        if (!Active) return;
+
+        bool isStarbound = GameAPP.theBoardType == LevelType.StarAdvanture;
+        var map = isStarbound ? _starboundOverrides : _normalOverrides;
+
+        foreach (var kvp in map)
+        {
+            PlantType type = kvp.Key;
+            PlantOverrideData ov = kvp.Value;
+            if (!TryGetBaselinePlantData(type, out var baseline)) continue;
+
+            string key = "CustomPlantData_" + (int)type;
+            Func<Plant, bool> filter = p => p.thePlantType == type;
+
+            if (ov.MaxHealth != baseline.maxHealth)
+            {
+                PlantStatManager.SetModifier(key, PlantStatType.MaxHealth, ModifierOp.Add, ov.MaxHealth - baseline.maxHealth, filter);
+            }
+            if (ov.AttackDamage != baseline.attackDamage)
+            {
+                PlantStatManager.SetModifier(key, PlantStatType.Damage, ModifierOp.Add, ov.AttackDamage - baseline.attackDamage, filter);
+            }
+            if (Math.Abs(ov.AttackInterval - baseline.attackInterval) > 0.001f && baseline.attackInterval > 0f)
+            {
+                PlantStatManager.SetModifier(key, PlantStatType.AttackInterval, ModifierOp.Multiply, ov.AttackInterval / baseline.attackInterval, filter);
+            }
+            if (Math.Abs(ov.ProduceInterval - baseline.produceInterval) > 0.001f && baseline.produceInterval > 0f)
+            {
+                PlantStatManager.SetModifier(key, PlantStatType.ProduceInterval, ModifierOp.Multiply, ov.ProduceInterval / baseline.produceInterval, filter);
+            }
+
+            _activeRegisteredStatTypes.Add(type);
+        }
+    }
+
+    private void RestorePlantStatManagerModifiers()
+    {
+        foreach (var type in _activeRegisteredStatTypes)
+        {
+            string key = "CustomPlantData_" + (int)type;
+            PlantStatManager.RemoveModifier(key, PlantStatType.MaxHealth);
+            PlantStatManager.RemoveModifier(key, PlantStatType.Damage);
+            PlantStatManager.RemoveModifier(key, PlantStatType.AttackInterval);
+            PlantStatManager.RemoveModifier(key, PlantStatType.ProduceInterval);
+        }
+        _activeRegisteredStatTypes.Clear();
+    }
+
+    private void SyncCardEntities()
+    {
         if (InGameUI.Instance != null && InGameUI.Instance.Cards != null)
         {
             foreach (CardUI card in InGameUI.Instance.Cards)
@@ -617,16 +585,8 @@ public class CustomPlantData : Module
         }
     }
 
-    private void RestoreAllLiveEntities()
+    private void RestoreCardEntities()
     {
-        foreach (var kvp in _originalPlants)
-        {
-            Plant plant = kvp.Key;
-            if (plant == null || plant.gameObject == null) continue;
-            RestorePlant(plant, kvp.Value);
-        }
-        _originalPlants.Clear();
-
         foreach (var kvp in _originalCards)
         {
             CardUI card = kvp.Key;
@@ -634,119 +594,6 @@ public class CustomPlantData : Module
             RestoreCard(card, kvp.Value);
         }
         _originalCards.Clear();
-    }
-
-    private void PruneDestroyedTrackedEntities()
-    {
-        if (_originalPlants.Count > 0)
-        {
-            List<Plant> deadPlants = null;
-            foreach (var key in _originalPlants.Keys)
-            {
-                if (key == null || key.gameObject == null)
-                {
-                    deadPlants ??= new List<Plant>();
-                    deadPlants.Add(key);
-                }
-            }
-            if (deadPlants != null)
-            {
-                for (int i = 0; i < deadPlants.Count; i++)
-                {
-                    _originalPlants.Remove(deadPlants[i]);
-                }
-            }
-        }
-
-        if (_originalCards.Count > 0)
-        {
-            List<CardUI> deadCards = null;
-            foreach (var key in _originalCards.Keys)
-            {
-                if (key == null || key.gameObject == null)
-                {
-                    deadCards ??= new List<CardUI>();
-                    deadCards.Add(key);
-                }
-            }
-            if (deadCards != null)
-            {
-                for (int i = 0; i < deadCards.Count; i++)
-                {
-                    _originalCards.Remove(deadCards[i]);
-                }
-            }
-        }
-    }
-
-    private static void ApplyOverrideToPlant(Plant plant, OriginalPlantStats orig, PlantOverrideData ov)
-    {
-        int targetDamage = orig.BaselineDamage > 0
-            ? Mathf.RoundToInt(orig.AttackDamage * (ov.AttackDamage / (float)orig.BaselineDamage))
-            : orig.AttackDamage + ov.AttackDamage;
-        plant.attackDamage = targetDamage;
-
-        plant.thePlantAttackInterval = ov.AttackInterval;
-        if (plant.thePlantAttackCountDown > ov.AttackInterval)
-        {
-            plant.thePlantAttackCountDown = ov.AttackInterval;
-        }
-
-        plant.thePlantProduceInterval = ov.ProduceInterval;
-        if (plant.thePlantProduceCountDown > ov.ProduceInterval)
-        {
-            plant.thePlantProduceCountDown = ov.ProduceInterval;
-        }
-
-        int targetMaxHealth = orig.BaselineMaxHealth > 0
-            ? Mathf.Max(ov.MaxHealth > 0 ? 1 : 0, Mathf.RoundToInt(orig.MaxHealth * (ov.MaxHealth / (float)orig.BaselineMaxHealth)))
-            : ov.MaxHealth;
-
-        ApplyPlantMaxHealth(plant, targetMaxHealth);
-        plant.UpdateText();
-    }
-
-    private static void RestorePlant(Plant plant, OriginalPlantStats orig)
-    {
-        plant.attackDamage = orig.AttackDamage;
-        plant.thePlantAttackInterval = orig.AttackInterval;
-        if (plant.thePlantAttackCountDown > orig.AttackInterval)
-        {
-            plant.thePlantAttackCountDown = orig.AttackInterval;
-        }
-
-        plant.thePlantProduceInterval = orig.ProduceInterval;
-        if (plant.thePlantProduceCountDown > orig.ProduceInterval)
-        {
-            plant.thePlantProduceCountDown = orig.ProduceInterval;
-        }
-
-        ApplyPlantMaxHealth(plant, orig.MaxHealth);
-        plant.UpdateText();
-    }
-
-    private static void ApplyPlantMaxHealth(Plant plant, int newMaxHealth)
-    {
-        int prevMax = plant.thePlantMaxHealth;
-        plant.thePlantMaxHealth = newMaxHealth;
-
-        if (plant.thePlantHealth <= 0) return;
-
-        if (newMaxHealth <= 0)
-        {
-            plant.thePlantHealth = 0;
-            return;
-        }
-
-        if (prevMax > 0)
-        {
-            float ratio = (float)plant.thePlantHealth / prevMax;
-            plant.thePlantHealth = Mathf.Max(1, Mathf.RoundToInt(newMaxHealth * ratio));
-        }
-        else
-        {
-            plant.thePlantHealth = newMaxHealth;
-        }
     }
 
     private static void ApplyOverrideToCard(CardUI card, PlantOverrideData ov)

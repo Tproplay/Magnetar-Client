@@ -1,6 +1,7 @@
 using Magnetar_Client.Api;
 using Magnetar_Client.Core.ModuleManager_;
 using Magnetar_Client.Modules;
+using Magnetar_Client.Modules.Helpers;
 using Magnetar_Client.UI;
 using Magnetar_Client.UI.WindowDrawing;
 using Magnetar_Client.Utils;
@@ -81,6 +82,8 @@ public static class ModuleManager
     public static void Init()
     {
         ModuleCategory.Init();
+        ZombieStatManager.Init();
+        PlantStatManager.Init();
 
         #region Register All Internal Modules
         Type[] exportedTypes;

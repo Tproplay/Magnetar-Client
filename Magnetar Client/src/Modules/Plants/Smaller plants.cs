@@ -1,6 +1,9 @@
-using System.Collections.Generic;
 using Magnetar_Client.UI.Setting;
+using System.Collections.Generic;
 using UnityEngine;
+using Magnetar_Client.Modules.Helpers;
+
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -20,7 +23,6 @@ public class SmallerPlants : Module
     public override ModuleCategory Category { get; set; } = ModuleCategory.Plant;
 
     // Mod Data
-
     public static SmallerPlants instance;
 
     public FloatSetting plantSize;
@@ -80,7 +82,6 @@ public class SmallerPlants : Module
     }
 
     // Mod Logic
-
     private bool TryGetPlantMultipliers(int plantId, out float scaleMult)
     {
         var sections = IndividualPlantsSectionSetting.Sections;
@@ -90,7 +91,6 @@ public class SmallerPlants : Module
             if (sec.Find<MultiSelectSetting>("Entities", out var secMulti) && secMulti.IsSelected(plantId))
             {
                 var scale = sec.Find<FloatSetting>("Scale multiplier");
-
                 scaleMult = scale != null ? scale.Value : 1f;
                 return true;
             }
@@ -106,50 +106,26 @@ public class SmallerPlants : Module
         return false;
     }
 
-    Dictionary<Plant, Vector3> originalthePlantScale = new();
+    public override void OnEnable()
+    {
+        UpdateModifiers();
+    }
+
     public override void OnUpdateActive()
     {
-        if (GameData.BoardInstanceIsNull) return;
-
-        foreach (var plant in GameData.PlantList)
-        {
-            int plantId = (int)plant.thePlantType;
-            bool isTargeted = TryGetPlantMultipliers(plantId, out float scaleMult);
-
-            if (isTargeted)
-            {
-                if (!originalthePlantScale.ContainsKey(plant))
-                {
-                    originalthePlantScale[plant] = plant.transform.localScale;
-                }
-
-                Vector3 targetScale = originalthePlantScale[plant] * scaleMult;
-                if (plant.transform.localScale != targetScale)
-                {
-                    plant.transform.localScale = targetScale;
-                }
-            }
-            else if (originalthePlantScale.TryGetValue(plant, out Vector3 origScale))
-            {
-                plant.transform.localScale = origScale;
-                originalthePlantScale.Remove(plant);
-            }
-
-        }
-
+        UpdateModifiers();
     }
 
     public override void OnDisable()
     {
-        foreach (var plant in GameData.PlantList)
-        {
-            if (originalthePlantScale.TryGetValue(plant, out var origScale))
-            {
-                plant.transform.localScale = origScale;
-            }
-        }
-
-        originalthePlantScale.Clear();
+        PlantStatManager.RemoveModifier(Name, PlantStatType.Scale);
     }
 
+    private void UpdateModifiers()
+    {
+        if (!Active) return;
+
+        PlantStatManager.SetModifier(Name, PlantStatType.Scale, ModifierOp.Multiply,
+            p => TryGetPlantMultipliers((int)p.thePlantType, out float m) ? m : 1f);
+    }
 }

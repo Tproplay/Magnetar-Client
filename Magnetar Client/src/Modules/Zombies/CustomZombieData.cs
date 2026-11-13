@@ -5,6 +5,9 @@ using HarmonyLib;
 using Magnetar_Client.UI.Setting;
 using Magnetar_Client.Utils;
 using UnityEngine;
+using Magnetar_Client.Modules.Helpers;
+
+
 
 #if MELONLOADER || RELEASE_MELON
 using Il2Cpp;
@@ -99,25 +102,6 @@ public class CustomZombieData : Module
         }
     }
 
-    private sealed class OriginalZombieStats
-    {
-        public long OrigMaxHealth;
-        public int OrigFirstArmorMax;
-        public int OrigSecondArmorMax;
-        public int OrigAttackDamage;
-        public float OrigArmor;
-        public float OrigUniqueSpeed;
-
-        public long PrevMaxHealth;
-        public int PrevFirstArmorMax;
-        public int PrevSecondArmorMax;
-
-        public double HealthScale = 1.0;
-        public double FirstArmorScale = 1.0;
-        public double SecondArmorScale = 1.0;
-        public double AttackScale = 1.0;
-    }
-
     private sealed class OriginalCardStats
     {
         public int OrigSeedCost;
@@ -143,9 +127,7 @@ public class CustomZombieData : Module
     private struct GetZombieDataCallState
     {
         public bool SwappedToOriginal;
-        public bool TemporarilyRestoredAttack;
         public ZombieType ZombieType;
-        public int BaselineAttack;
         public ZombieOverrideData OverrideData;
     }
 
@@ -197,10 +179,8 @@ public class CustomZombieData : Module
     private readonly Dictionary<ZombieType, ZombieOverrideData> _overrideCache = new();
     private readonly HashSet<ZombieType> _mutatedManagerTypes = new();
 
-    private readonly Dictionary<IntPtr, OriginalZombieStats> _originalZombies = new();
+    private readonly HashSet<ZombieType> _activeRegisteredStatTypes = new();
     private readonly Dictionary<IntPtr, OriginalCardStats> _originalCards = new();
-    private readonly HashSet<IntPtr> _spawnedWithOverride = new();
-    private readonly Dictionary<IntPtr, double> _pendingAttackScales = new();
 
     private bool _isInternalBatchUpdate;
     private int _lastSectionCount;
@@ -229,8 +209,6 @@ public class CustomZombieData : Module
         AddSettings(OverrideLevelDataSetting, ZombieSections);
         EndCategory();
 
-        GameData.OnZombieSpawned += HandleZombieSpawned;
-        GameData.OnZombieDie += HandleZombieDied;
         GameData.Actions.OnBoardDestroyed += ClearLiveCaches;
         GameData.Actions.OnBoardDied += ClearLiveCaches;
     }
@@ -245,9 +223,8 @@ public class CustomZombieData : Module
     public override void OnDisable()
     {
         RestoreManagerDictionary();
-        RestoreAllLiveEntities();
-        _spawnedWithOverride.Clear();
-        _pendingAttackScales.Clear();
+        RestoreZombieStatManagerModifiers();
+        RestoreAllIZECards();
     }
 
     public override void OnSettingOpened()
@@ -637,11 +614,14 @@ public class CustomZombieData : Module
         if (Active)
         {
             SyncManagerDictionary();
-            SyncAllLiveEntities();
+            SyncZombieStatManagerModifiers();
+            SyncAllIZECards();
         }
         else
         {
             RestoreManagerDictionary();
+            RestoreZombieStatManagerModifiers();
+            RestoreAllIZECards();
         }
     }
 
@@ -743,285 +723,100 @@ public class CustomZombieData : Module
 
     #region Live Zombie & IZECard Synchronization
 
-    private void HandleZombieSpawned(Zombie zombie)
-    {
-        if (zombie == null) return;
-
-        CaptureBaselinesIfReady();
-        IntPtr ptr = zombie.Pointer;
-        bool spawnedViaOverride = _spawnedWithOverride.Remove(ptr);
-        double pendingAtkScale = 1.0;
-        bool hasPendingAtkScale = _pendingAttackScales.Remove(ptr, out pendingAtkScale);
-
-        if (_originalZombies.ContainsKey(ptr))
-        {
-            // Already initialized on SetZombie before Start() ran.
-            return;
-        }
-
-        ZombieType type = zombie.theZombieType;
-        if (spawnedViaOverride &&
-            TryGetEffectiveOverride(type, out var spawnOv) &&
-            _originalZombieData.TryGetValue(type, out var baseline))
-        {
-            double hpScale = spawnOv.MaxHealth > 0 ? (double)zombie.theMaxHealth / spawnOv.MaxHealth : 1.0;
-            double firstScale = spawnOv.FirstArmorMaxHealth > 0
-                ? (double)zombie.theFirstArmorMaxHealth / spawnOv.FirstArmorMaxHealth
-                : hpScale;
-            double secondScale = spawnOv.SecondArmorMaxHealth > 0
-                ? (double)zombie.theSecondArmorMaxHealth / spawnOv.SecondArmorMaxHealth
-                : hpScale;
-            double atkScale = hasPendingAtkScale
-                ? pendingAtkScale
-                : (spawnOv.AttackDamage > 0 ? (double)zombie.theAttackDamage / spawnOv.AttackDamage : hpScale);
-
-            var orig = new OriginalZombieStats
-            {
-                OrigMaxHealth = Math.Max(1L, (long)Math.Round(baseline.MaxHealth * hpScale)),
-                OrigFirstArmorMax = Math.Max(0, (int)Math.Round(baseline.FirstArmorMaxHealth * firstScale)),
-                OrigSecondArmorMax = Math.Max(0, (int)Math.Round(baseline.SecondArmorMaxHealth * secondScale)),
-                OrigAttackDamage = Math.Max(0, (int)Math.Round(baseline.AttackDamage * atkScale)),
-                OrigArmor = baseline.Armor,
-                OrigUniqueSpeed = zombie.uniqueSpeed,
-                PrevMaxHealth = Math.Max(1L, zombie.theMaxHealth),
-                PrevFirstArmorMax = Math.Max(0, zombie.theFirstArmorMaxHealth),
-                PrevSecondArmorMax = Math.Max(0, zombie.theSecondArmorMaxHealth),
-                HealthScale = hpScale,
-                FirstArmorScale = firstScale,
-                SecondArmorScale = secondScale,
-                AttackScale = atkScale,
-            };
-
-            _originalZombies[ptr] = orig;
-            zombie.uniqueSpeed = orig.OrigUniqueSpeed * spawnOv.SpeedMultiplier;
-            return;
-        }
-
-        var captured = CaptureLiveZombieBaseline(zombie);
-        _originalZombies[ptr] = captured;
-
-        if (TryGetEffectiveOverride(type, out var activeOv))
-        {
-            ApplyOverrideToZombie(zombie, captured, activeOv);
-        }
-    }
-
-    private OriginalZombieStats CaptureLiveZombieBaseline(Zombie zombie)
-    {
-        ZombieType type = zombie.theZombieType;
-        _originalZombieData.TryGetValue(type, out var baseline);
-
-        double hpScale = baseline != null && baseline.MaxHealth > 0
-            ? (double)zombie.theMaxHealth / baseline.MaxHealth
-            : 1.0;
-        double firstScale = baseline != null && baseline.FirstArmorMaxHealth > 0
-            ? (double)zombie.theFirstArmorMaxHealth / baseline.FirstArmorMaxHealth
-            : hpScale;
-        double secondScale = baseline != null && baseline.SecondArmorMaxHealth > 0
-            ? (double)zombie.theSecondArmorMaxHealth / baseline.SecondArmorMaxHealth
-            : hpScale;
-        double atkScale = baseline != null && baseline.AttackDamage > 0
-            ? (double)zombie.theAttackDamage / baseline.AttackDamage
-            : 1.0;
-
-        return new OriginalZombieStats
-        {
-            OrigMaxHealth = Math.Max(1L, zombie.theMaxHealth),
-            OrigFirstArmorMax = Math.Max(0, zombie.theFirstArmorMaxHealth),
-            OrigSecondArmorMax = Math.Max(0, zombie.theSecondArmorMaxHealth),
-            OrigAttackDamage = Math.Max(0, zombie.theAttackDamage),
-            OrigArmor = zombie.theArmor,
-            OrigUniqueSpeed = zombie.uniqueSpeed,
-            PrevMaxHealth = Math.Max(1L, zombie.theMaxHealth),
-            PrevFirstArmorMax = Math.Max(0, zombie.theFirstArmorMaxHealth),
-            PrevSecondArmorMax = Math.Max(0, zombie.theSecondArmorMaxHealth),
-            HealthScale = hpScale,
-            FirstArmorScale = firstScale,
-            SecondArmorScale = secondScale,
-            AttackScale = atkScale,
-        };
-    }
-
-    private void HandleZombieDied(Zombie zombie)
-    {
-        if (zombie == null) return;
-
-        IntPtr ptr = zombie.Pointer;
-        _originalZombies.Remove(ptr);
-        _spawnedWithOverride.Remove(ptr);
-        _pendingAttackScales.Remove(ptr);
-    }
-
     private void ClearLiveCaches()
     {
-        _originalZombies.Clear();
         _originalCards.Clear();
-        _spawnedWithOverride.Clear();
-        _pendingAttackScales.Clear();
     }
 
-    private void SyncAllLiveEntities()
+    private void SyncZombieStatManagerModifiers()
     {
-        if (GameData.BoardInstanceIsNull) return;
-
-        foreach (Zombie zombie in GameData.ZombieList)
+        // 1. Remove previously registered modifiers
+        foreach (var type in _activeRegisteredStatTypes)
         {
-            if (zombie == null || zombie.gameObject == null || zombie.beforeDying) continue;
+            string key = "CustomZombieData_" + (int)type;
+            ZombieStatManager.RemoveModifier(key, StatType.MaxHealth);
+            ZombieStatManager.RemoveModifier(key, StatType.Armor1Max);
+            ZombieStatManager.RemoveModifier(key, StatType.Armor2Max);
+            ZombieStatManager.RemoveModifier(key, StatType.AttackDamage);
+            ZombieStatManager.RemoveModifier(key, StatType.Speed);
+        }
+        _activeRegisteredStatTypes.Clear();
 
-            IntPtr ptr = zombie.Pointer;
-            if (!_originalZombies.TryGetValue(ptr, out var orig))
+        if (!Active) return;
+
+        // 2. Register active overrides with ZombieStatManager
+        foreach (var kvp in _overrideCache)
+        {
+            ZombieType type = kvp.Key;
+            ZombieOverrideData ov = kvp.Value;
+            if (!_originalZombieData.TryGetValue(type, out var baseline)) continue;
+
+            string key = "CustomZombieData_" + (int)type;
+            Func<Zombie, bool> filter = z => z.theZombieType == type;
+
+            if (ov.MaxHealth != baseline.MaxHealth)
             {
-                orig = CaptureLiveZombieBaseline(zombie);
-                _originalZombies[ptr] = orig;
+                ZombieStatManager.SetModifier(key, StatType.MaxHealth, ModifierOp.Add, ov.MaxHealth - baseline.MaxHealth, filter);
+            }
+            if (ov.FirstArmorMaxHealth != baseline.FirstArmorMaxHealth)
+            {
+                ZombieStatManager.SetModifier(key, StatType.Armor1Max, ModifierOp.Add, ov.FirstArmorMaxHealth - baseline.FirstArmorMaxHealth, filter);
+            }
+            if (ov.SecondArmorMaxHealth != baseline.SecondArmorMaxHealth)
+            {
+                ZombieStatManager.SetModifier(key, StatType.Armor2Max, ModifierOp.Add, ov.SecondArmorMaxHealth - baseline.SecondArmorMaxHealth, filter);
+            }
+            if (ov.AttackDamage != baseline.AttackDamage)
+            {
+                ZombieStatManager.SetModifier(key, StatType.AttackDamage, ModifierOp.Add, ov.AttackDamage - baseline.AttackDamage, filter);
+            }
+            if (Math.Abs(ov.SpeedMultiplier - 1f) > 0.001f)
+            {
+                ZombieStatManager.SetModifier(key, StatType.Speed, ModifierOp.Multiply, ov.SpeedMultiplier, filter);
             }
 
-            if (TryGetEffectiveOverride(zombie.theZombieType, out var ov))
-            {
-                ApplyOverrideToZombie(zombie, orig, ov);
-            }
-            else
-            {
-                RestoreZombie(zombie, orig);
-            }
+            _activeRegisteredStatTypes.Add(type);
         }
 
-        SyncAllIZECards();
-    }
-
-    private void RestoreAllLiveEntities()
-    {
+        // Apply armor damage reduction float
         if (!GameData.BoardInstanceIsNull)
         {
-            foreach (Zombie zombie in GameData.ZombieList)
+            var list = GameData.ZombieList;
+            for (int i = 0; i < list.Count; i++)
             {
-                if (zombie == null || zombie.gameObject == null) continue;
-                if (_originalZombies.TryGetValue(zombie.Pointer, out var orig))
+                var z = list[i];
+                if (z != null && _overrideCache.TryGetValue(z.theZombieType, out var ov))
                 {
-                    RestoreZombie(zombie, orig);
+                    z.theArmor = ov.Armor;
                 }
             }
-
-            RestoreAllIZECards();
         }
     }
 
-    private static void ApplyOverrideToZombie(Zombie zombie, OriginalZombieStats orig, ZombieOverrideData ov)
+    private void RestoreZombieStatManagerModifiers()
     {
-        long targetMaxHp = Math.Max(1L, (long)Math.Round(ov.MaxHealth * orig.HealthScale));
-        int targetArmor1Max = Math.Max(0, (int)Math.Round(ov.FirstArmorMaxHealth * orig.FirstArmorScale));
-        int targetArmor2Max = Math.Max(0, (int)Math.Round(ov.SecondArmorMaxHealth * orig.SecondArmorScale));
-        int targetAttack = Math.Max(0, (int)Math.Round(ov.AttackDamage * orig.AttackScale));
-
-        ApplyHealthAndArmors(zombie, orig, targetMaxHp, targetArmor1Max, targetArmor2Max);
-
-        zombie.theAttackDamage = targetAttack;
-        zombie.theArmor = ov.Armor;
-        zombie.uniqueSpeed = orig.OrigUniqueSpeed * ov.SpeedMultiplier;
-
-        RefreshZombieHealthDisplay(zombie);
-    }
-
-    private static void RestoreZombie(Zombie zombie, OriginalZombieStats orig)
-    {
-        ApplyHealthAndArmors(zombie, orig, orig.OrigMaxHealth, orig.OrigFirstArmorMax, orig.OrigSecondArmorMax);
-
-        zombie.theAttackDamage = orig.OrigAttackDamage;
-        zombie.theArmor = orig.OrigArmor;
-        zombie.uniqueSpeed = orig.OrigUniqueSpeed;
-
-        RefreshZombieHealthDisplay(zombie);
-    }
-
-    private static void ApplyHealthAndArmors(
-        Zombie zombie,
-        OriginalZombieStats orig,
-        long targetMaxHp,
-        int targetArmor1Max,
-        int targetArmor2Max)
-    {
-        long prevMaxHp = orig.PrevMaxHealth > 0 ? orig.PrevMaxHealth : Math.Max(1L, zombie.theMaxHealth);
-        if (zombie.theMaxHealth != targetMaxHp || orig.PrevMaxHealth != targetMaxHp)
+        foreach (var type in _activeRegisteredStatTypes)
         {
-            double hpRatio = prevMaxHp > 0 ? Math.Max(0.0, (double)zombie.theHealth / prevMaxHp) : 1.0;
-            zombie.theMaxHealth = targetMaxHp;
-            if (zombie.theHealth > 0)
+            string key = "CustomZombieData_" + (int)type;
+            ZombieStatManager.RemoveModifier(key, StatType.MaxHealth);
+            ZombieStatManager.RemoveModifier(key, StatType.Armor1Max);
+            ZombieStatManager.RemoveModifier(key, StatType.Armor2Max);
+            ZombieStatManager.RemoveModifier(key, StatType.AttackDamage);
+            ZombieStatManager.RemoveModifier(key, StatType.Speed);
+        }
+        _activeRegisteredStatTypes.Clear();
+
+        if (!GameData.BoardInstanceIsNull)
+        {
+            var list = GameData.ZombieList;
+            for (int i = 0; i < list.Count; i++)
             {
-                zombie.theHealth = Math.Max(1L, (long)Math.Round(targetMaxHp * hpRatio));
+                var z = list[i];
+                if (z != null && _originalZombieData.TryGetValue(z.theZombieType, out var baseline))
+                {
+                    z.theArmor = baseline.Armor;
+                }
             }
-            orig.PrevMaxHealth = targetMaxHp;
-        }
-
-        ApplySingleArmor(
-            ref orig.PrevFirstArmorMax,
-            zombie.theFirstArmor != null,
-            zombie.theFirstArmorMaxHealth,
-            zombie.theFirstArmorHealth,
-            targetArmor1Max,
-            out int newFirstMax,
-            out int newFirstCur);
-        zombie.theFirstArmorMaxHealth = newFirstMax;
-        zombie.theFirstArmorHealth = newFirstCur;
-
-        ApplySingleArmor(
-            ref orig.PrevSecondArmorMax,
-            zombie.theSecondArmor != null,
-            zombie.theSecondArmorMaxHealth,
-            zombie.theSecondArmorHealth,
-            targetArmor2Max,
-            out int newSecondMax,
-            out int newSecondCur);
-        zombie.theSecondArmorMaxHealth = newSecondMax;
-        zombie.theSecondArmorHealth = newSecondCur;
-    }
-
-    private static void ApplySingleArmor(
-        ref int trackedPrevMax,
-        bool hasArmorObject,
-        int currentMax,
-        int currentHealth,
-        int targetMax,
-        out int resultMax,
-        out int resultHealth)
-    {
-        int prevMax = trackedPrevMax > 0 ? trackedPrevMax : currentMax;
-        if (currentMax == targetMax && trackedPrevMax == targetMax)
-        {
-            resultMax = currentMax;
-            resultHealth = currentHealth;
-            return;
-        }
-
-        if (targetMax <= 0)
-        {
-            resultMax = 0;
-            resultHealth = 0;
-        }
-        else if (currentHealth > 0)
-        {
-            double ratio = prevMax > 0 ? Math.Max(0.0, (double)currentHealth / prevMax) : 1.0;
-            resultMax = targetMax;
-            resultHealth = Math.Max(1, (int)Math.Round(targetMax * ratio));
-        }
-        else if (prevMax <= 0 && hasArmorObject)
-        {
-            resultMax = targetMax;
-            resultHealth = targetMax;
-        }
-        else
-        {
-            // Keep broken armor broken instead of restoring it mid-fight.
-            resultMax = targetMax;
-            resultHealth = 0;
-        }
-
-        trackedPrevMax = targetMax;
-    }
-
-    private static void RefreshZombieHealthDisplay(Zombie zombie)
-    {
-        if (zombie != null && zombie.healthText != null)
-        {
-            zombie.UpdateHealthText();
         }
     }
 
@@ -1184,18 +979,6 @@ public class CustomZombieData : Module
                     __state.ZombieType = theZombieType;
                     __state.OverrideData = ov;
                 }
-                return;
-            }
-
-            if (ov.AttackDamage == 0 &&
-                Instance._originalZombieData.TryGetValue(theZombieType, out var origData) &&
-                origData.AttackDamage > 0)
-            {
-                // Temporarily use baseline attack so we can measure runtime difficulty scaling before zeroing it.
-                entry.theAttackDamage = origData.AttackDamage;
-                __state.TemporarilyRestoredAttack = true;
-                __state.ZombieType = theZombieType;
-                __state.BaselineAttack = origData.AttackDamage;
             }
         }
 
@@ -1211,28 +994,6 @@ public class CustomZombieData : Module
                 {
                     __state.OverrideData?.ApplyToData(entry);
                 }
-                return;
-            }
-
-            if (zombie == null || !Instance.Active) return;
-
-            if (__state.TemporarilyRestoredAttack)
-            {
-                if (dict != null && dict.TryGetValue(__state.ZombieType, out var entry) && entry != null)
-                {
-                    entry.theAttackDamage = 0;
-                }
-
-                double atkScale = __state.BaselineAttack > 0
-                    ? (double)zombie.theAttackDamage / __state.BaselineAttack
-                    : 1.0;
-                Instance._pendingAttackScales[zombie.Pointer] = atkScale;
-                zombie.theAttackDamage = 0;
-            }
-
-            if (Instance.TryGetEffectiveOverride(theZombieType, out _))
-            {
-                Instance._spawnedWithOverride.Add(zombie.Pointer);
             }
         }
     }
@@ -1243,8 +1004,10 @@ public class CustomZombieData : Module
         [HarmonyPostfix]
         private static void Postfix(Zombie __result)
         {
-            if (Instance == null || __result == null) return;
-            Instance.HandleZombieSpawned(__result);
+            if (__result != null)
+            {
+                ZombieStatManager.Register(__result);
+            }
         }
     }
 
@@ -1254,23 +1017,9 @@ public class CustomZombieData : Module
         [HarmonyPostfix]
         private static void Postfix(Zombie __instance)
         {
-            if (Instance == null || __instance == null) return;
-
-            if (Instance._originalZombies.TryGetValue(__instance.Pointer, out var orig) &&
-                Instance._originalZombieData.TryGetValue(__instance.theZombieType, out var baseline))
+            if (__instance != null)
             {
-                // SetMindControl pulls attack damage unscaled from ZombieDataManager.GetZombieData.
-                orig.OrigAttackDamage = baseline.AttackDamage;
-                orig.AttackScale = 1.0;
-
-                if (Instance.TryGetEffectiveOverride(__instance.theZombieType, out var ov))
-                {
-                    __instance.theAttackDamage = ov.AttackDamage;
-                }
-                else
-                {
-                    __instance.theAttackDamage = baseline.AttackDamage;
-                }
+                ZombieStatManager.Evaluate(__instance);
             }
         }
     }

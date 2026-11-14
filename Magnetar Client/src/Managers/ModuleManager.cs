@@ -196,6 +196,9 @@ public static class ModuleManager
 
     public static void OpenModuleSettings(Modules.Module mod)
     {
+        if (mod == null) return;
+        if (VanillaMode.instance != null && !VanillaMode.instance.IsAllowed(mod)) return;
+
         MobileInputHandler.Reset();
         if (ActiveSettingsModule != mod) ResetInputBind();
 
@@ -330,7 +333,13 @@ public static class ModuleManager
 
             mod.KeyBind?.Reset();
             mod.HoldMode = mod.defaultHoldMode;
-            if (mod.Active != mod.defaultActive) mod.Toggle();
+            if (mod.Active != mod.defaultActive)
+            {
+                if (VanillaMode.instance == null || VanillaMode.instance.IsAllowed(mod))
+                {
+                    mod.Toggle();
+                }
+            }
 
             if (mod.Settings != null)
             {

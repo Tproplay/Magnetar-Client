@@ -99,6 +99,9 @@ public static class CategoryWindowDrawer
         for (int catIdx = 0; catIdx < allCats.Count; catIdx++)
         {
             var cat = allCats[catIdx];
+            var categoryModules = FilterModulesByCategory(cat);
+            if (categoryModules.Count == 0) continue;
+
             int id = cat.Id;
             Rect syncedPos = WindowPositions[cat];
             if (!Mathf.Approximately(syncedPos.width, ClientConfig.ModuleWindowWidth))
@@ -265,14 +268,23 @@ public static class CategoryWindowDrawer
     }
 
     private static string _lastSearchQuery = null;
+    private static bool _lastVanillaModeActive = false;
     private static readonly Dictionary<ModuleCategory, List<Modules.Module>> _cachedCategoryModules = new();
+
+    public static void InvalidateModuleCache()
+    {
+        _cachedCategoryModules.Clear();
+    }
 
     private static List<Modules.Module> FilterModulesByCategory(ModuleCategory category)
     {
         string currentQuery = SearchWindowDrawer.SearchQuery ?? "";
-        if (currentQuery != _lastSearchQuery)
+        bool isVanilla = VanillaMode.instance != null && VanillaMode.instance.Active;
+
+        if (currentQuery != _lastSearchQuery || isVanilla != _lastVanillaModeActive)
         {
             _lastSearchQuery = currentQuery;
+            _lastVanillaModeActive = isVanilla;
             _cachedCategoryModules.Clear();
         }
 
@@ -287,6 +299,7 @@ public static class CategoryWindowDrawer
         {
             var m = ModuleManager.Modules[i];
             if (m.Category != category) continue;
+            if (isVanilla && !VanillaMode.instance.IsAllowed(m)) continue;
             if (hasSearch)
             {
                 string cleanHints = (m.SearchHints ?? "").Replace(" ", "").ToLower();

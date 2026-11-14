@@ -175,7 +175,7 @@ public static class PathsManager
             }
             catch (Exception ex)
             {
-                AutoSaveLogger.Error($"[ProfileManager] Failed to create config dir '{targetDir}': {ex.Message}");
+                AutoSaveLogger.Error($"[ProfileManager] Failed to create config path '{targetDir}': {ex.Message}");
                 _cachedConfigDir = Application.persistentDataPath;
                 return _cachedConfigDir;
             }
@@ -218,6 +218,22 @@ public static class PathsManager
     /// Game Folder / BepInEx / config / Custom_Setups.json
     /// </remarks>
     public static string SavedSetupPlantPath => Path.Combine(ConfigDir, "Custom_Setups.json");
+
+    /// <summary>
+    /// Melonloader:
+    /// Game Folder / UserData / Chest_Presets
+    /// </summary>
+    /// <remarks>
+    /// BepInEx:
+    /// Game Folder / BepInEx / config / Chest_Presets
+    /// </remarks>
+    public static string ChestPresetsDir => GetChestPresetsDir();
+    private static string GetChestPresetsDir()
+    {
+        string path = Path.Combine(ConfigDir, "Chest Presets");
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+        return path;
+    }
 
     #endregion
 

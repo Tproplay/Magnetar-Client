@@ -93,6 +93,13 @@ public class VanillaMode : Module
 
         SetSaved(DisabledModulesKey, disabledList);
 
+        if (Core.ModuleManager.ActiveSettingsModule != null && !IsAllowed(Core.ModuleManager.ActiveSettingsModule))
+        {
+            Core.ModuleManager.CloseModuleSettings();
+        }
+
+        Core.ModuleManager_.CategoryWindowDrawer.InvalidateModuleCache();
+
         if (HUDElements.VanillaMode.instance != null)
         { 
             HUDElements.VanillaMode.instance.VanillaModeEnabled = Active;
@@ -121,6 +128,8 @@ public class VanillaMode : Module
             SetSaved(DisabledModulesKey, disabledList);
             SaveLoad.Save(force: true);
         }
+
+        Core.ModuleManager_.CategoryWindowDrawer.InvalidateModuleCache();
 
         if (HUDElements.VanillaMode.instance != null)
         {

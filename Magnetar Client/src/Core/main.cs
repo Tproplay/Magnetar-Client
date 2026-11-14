@@ -90,6 +90,7 @@ public class Main
         GUIManager.Init();
         NEFManager.Init();
         ProfileGUI.Init();
+        UI.Setting.GameObjectPickerManager.Init();
 
 
         // 2. Discover and register Addons
@@ -119,6 +120,10 @@ public class Main
     internal void OnUpdate()
     {
         LockUI.BlockKeys = false;
+        if (!ClientConfig.InGUI && !UI.Setting.GameObjectPickerManager.IsPicking && Time.frameCount > UI.Setting.GameObjectPickerManager.PickEndFrame && LockUI.BlockCanvas)
+        {
+            LockUI.BlockCanvas = false;
+        }
 
         UI.GUIHelper.OnUpdate();
         AnimationHandler.UpdateTransition();
@@ -202,6 +207,7 @@ public class Main
                     ClientConfig.showgui = false;
                     SaveLoad.Save();
                     Input.ResetInputAxes();
+                    Actions.Invoke_OnMenuClosed();
                 }
                 DrawSetting.ResetInputBind();
             }

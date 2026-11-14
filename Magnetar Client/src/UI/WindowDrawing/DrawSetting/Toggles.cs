@@ -105,6 +105,7 @@ public static partial class DrawSetting
 
         if (isHovered && e.type == EventType.MouseDown && e.button == 0)
         {
+            Input.ResetInputAxes();
             if (!btnSet.IsDisabled)
             {
                 btnSet.OnClick?.Invoke();

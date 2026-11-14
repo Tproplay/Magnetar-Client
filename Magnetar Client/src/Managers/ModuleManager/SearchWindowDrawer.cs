@@ -77,6 +77,15 @@ public static class SearchWindowDrawer
 
             SearchWindowRect = new Rect(currentX, currentY, searchWidth, searchHeight);
             SearchWindowRect = GUI.Window(999, SearchWindowRect, SearchDelegate, "", ThemeManager.CategoryWindowStyle);
+
+            if (currentEvent != null && SearchWindowRect.Contains(currentEvent.mousePosition))
+            {
+                if (currentEvent.type == EventType.MouseDown || currentEvent.rawType == EventType.MouseDown
+                    || Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2))
+                {
+                    Input.ResetInputAxes();
+                }
+            }
         }
     }
 

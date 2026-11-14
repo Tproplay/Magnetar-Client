@@ -179,6 +179,7 @@ internal static class SettingsWindowDrawer
 
             if (e.type == EventType.MouseDown && e.button == 0 && isHovered)
             {
+                Input.ResetInputAxes();
                 e.Use();
                 ModuleManager.CloseModuleSettings();
                 return;

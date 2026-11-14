@@ -98,6 +98,7 @@ public abstract class Setting
 
         if (GUI.enabled && isHovered && e.type == EventType.MouseDown && e.button == 0)
         {
+            Input.ResetInputAxes();
             e.Use();
             return true;
         }

@@ -622,6 +622,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
 
             if (e.type == EventType.MouseDown && e.button == 0 && secHeaderRect.Contains(e.mousePosition))
             {
+                Input.ResetInputAxes();
                 e.Use();
                 section.IsExpanded = !section.IsExpanded;
             }
@@ -632,6 +633,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
                 GUI.Box(delRect, "—", ThemeManager.SectionRemoveButtonStyle);
                 if (delRect.Contains(e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
                 {
+                    Input.ResetInputAxes();
                     removeIdx = i;
                     e.Use();
                 }
@@ -698,6 +700,7 @@ public class SectionSetting : Setting, IEnumerable<SectionInstance>
             }
             if (canAdd && e.type == EventType.MouseDown && e.button == 0 && addBtnRect.Contains(e.mousePosition))
             {
+                Input.ResetInputAxes();
                 e.Use();
                 AddSection();
             }
